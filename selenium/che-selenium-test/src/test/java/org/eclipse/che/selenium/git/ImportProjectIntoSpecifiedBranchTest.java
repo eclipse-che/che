@@ -10,15 +10,23 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.BRANCHES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
@@ -60,17 +68,27 @@ public class ImportProjectIntoSpecifiedBranchTest {
   @Inject private ImportProjectFromLocation importProject;
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestProjectServiceClient projectServiceClient;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private TestUser testUser;
+  @Inject private TestGitHubRepository gitHubRepository;
 
   @BeforeClass
   public void prepare() throws Exception {
+    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, testUser.getEmail());
+
+    Path sourceProject = Paths.get(getClass().getResource("/projects/Repo_For_Test").toURI());
+    gitHubRepository.addContent(sourceProject);
+
+    gitHubRepository.addRefFromMaster(BRANCH_1);
+
     ide.open(ws);
 
     // authorize application on GitHub
-    menu.runCommand(
+    /*menu.runCommand(
         TestMenuCommandsConstants.Profile.PROFILE_MENU,
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
-    preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
+    preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);*/
   }
 
   @AfterMethod
@@ -81,12 +99,11 @@ public class ImportProjectIntoSpecifiedBranchTest {
   @Test
   public void checkImportProjectInBranchBySshUrl() throws IOException, JsonParseException {
     projectExplorer.waitProjectExplorer();
-    performImportIntoBranch(
-        "git@github.com:" + gitHubUsername + "/Repo_For_Test.git", PROJECT_NAME, BRANCH_1);
+    performImportIntoBranch(gitHubRepository.getHtmlUrl(), PROJECT_NAME, BRANCH_1);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     loader.waitOnClosed();
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
+    menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheListWithCoState(BRANCH_1);
     git.closeBranchesForm();
     projectExplorer.quickExpandWithJavaScript();
@@ -103,7 +120,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     loader.waitOnClosed();
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
+    menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheListWithCoState(BRANCH_2);
     git.closeBranchesForm();
     projectExplorer.quickExpandWithJavaScript();
@@ -126,7 +143,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     loader.waitOnClosed();
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
+    menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheListWithCoState(BRANCH_3);
     git.closeBranchesForm();
     projectExplorer.quickExpandWithJavaScript();
