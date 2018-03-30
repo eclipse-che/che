@@ -171,7 +171,7 @@ public class PullRequestPluginTest {
     pullRequestPanel.enterComment(COMMENT);
     pullRequestPanel.enterTitle(TITLE);
 
-    // commit changes and create pull request
+    // change commit and create pull request
     pullRequestPanel.clickCreatePRBtn();
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(BRANCH_PUSHED_ON_YOUR_ORIGIN);
