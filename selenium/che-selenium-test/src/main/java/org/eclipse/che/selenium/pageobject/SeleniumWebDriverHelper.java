@@ -930,7 +930,7 @@ public class SeleniumWebDriverHelper {
                 });
   }
 
-  /** waits while in a browser appears more the one window */
+  /** Waits while in a browser appears more than one window */
   public void waitOpenedSomeWin() {
     webDriverWaitFactory
         .get(WIDGET_TIMEOUT_SEC)
@@ -943,7 +943,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * switches to the next browser window (this means that if opened 2 windows, and we are in the
+   * Switches to next browser window (this means that if opened 2 windows, and we are in the
    * window 1, we will be switched into the window 2)
    *
    * @param currentWindowHandler
