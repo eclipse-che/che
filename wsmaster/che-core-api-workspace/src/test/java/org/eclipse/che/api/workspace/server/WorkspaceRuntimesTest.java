@@ -106,7 +106,8 @@ public class WorkspaceRuntimesTest {
 
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
-    when(context.getRuntime()).thenReturn(new TestInternalRuntime(context, emptyMap(), false));
+    when(context.getRuntime())
+        .thenReturn(new TestInternalRuntime(context, emptyMap(), WorkspaceStatus.STARTING));
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
     doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
 
@@ -252,13 +253,14 @@ public class WorkspaceRuntimesTest {
 
     final Map<String, Machine> machines;
 
-    TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines, boolean isRunning) {
-      super(context, null, null, isRunning);
+    TestInternalRuntime(
+        RuntimeContext context, Map<String, Machine> machines, WorkspaceStatus status) {
+      super(context, null, null, status);
       this.machines = machines;
     }
 
     TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      this(context, machines, false);
+      this(context, machines, WorkspaceStatus.STARTING);
     }
 
     TestInternalRuntime(RuntimeContext context) {
