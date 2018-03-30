@@ -60,6 +60,12 @@ public class PullRequestPluginWithForkTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
+  //  @Inject private TestGitHubRepository testRepo;
+
+  //  @Inject
+  //  @Named(CheSeleniumSuiteModule.AUXILIARY)
+  //  private TestGitHubRepository testAuxiliaryRepo;
+
   @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;

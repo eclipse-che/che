@@ -46,8 +46,9 @@ public class TestGitHubRepository {
   private final GitHub gitHub;
 
   /**
-   * Creates repository with semi-random name on GitHub under default github user defined.
-   * Waits until repository is really created.
+   * Creates repository with semi-random name on GitHub for certain {@code gitHubUsername}. Waits
+   * until repository is really created.
+   *
    * @param gitHubUsername default github user name
    * @param gitHubPassword default github user password
    * @throws IOException
@@ -79,8 +80,8 @@ public class TestGitHubRepository {
   }
 
   /**
-   * Copies content of directory {@code pathToRootContentDirectory} to the GitHub repository.
-   * It tries to recreate the file ones again in case of FileNotFoundException occurs.
+   * Copies content of directory {@code pathToRootContentDirectory} to the GitHub repository. It
+   * tries to recreate the file ones again in case of FileNotFoundException occurs.
    *
    * @param pathToRootContentDirectory path to the directory with content
    * @throws IOException
@@ -128,6 +129,7 @@ public class TestGitHubRepository {
 
   /**
    * Delete folder with content inside the repository on GitHub.
+   *
    * @param folder folder to delete
    * @param deleteCommitMessage commit message which is used to delete the message
    * @throws IOException
