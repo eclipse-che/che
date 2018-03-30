@@ -208,6 +208,11 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON
               name: che
+        - name: CHE_LOGS_APPENDERS_IMPL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_LOGS_APPENDERS_IMPL
+              name: che
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         livenessProbe:
