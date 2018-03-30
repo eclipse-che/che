@@ -68,7 +68,7 @@ public class CheckFactoryWithUntilPolicyTest {
   public void checkFactoryAcceptingWithUntilPolicy() {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
 
     if (System.currentTimeMillis() > initTime + FACTORY_INACTIVITY_TIME) {
       fail("Factory started longer then additional time and next test steps does not make sense");
@@ -86,7 +86,7 @@ public class CheckFactoryWithUntilPolicyTest {
 
     // second
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
   }
 }
