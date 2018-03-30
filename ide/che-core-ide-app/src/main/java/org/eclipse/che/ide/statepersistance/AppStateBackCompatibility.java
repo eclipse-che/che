@@ -31,10 +31,9 @@ import org.eclipse.che.ide.util.loging.Log;
  */
 @Singleton
 public class AppStateBackCompatibility {
-
-  private JsonFactory jsonFactory;
-  private final PreferencesManager preferencesManager;
   private final AppContext appContext;
+  private final JsonFactory jsonFactory;
+  private final PreferencesManager preferencesManager;
 
   @Inject
   public AppStateBackCompatibility(
@@ -93,8 +92,7 @@ public class AppStateBackCompatibility {
    * preferences
    */
   private Promise<Void> writeToPreferences(JsonObject state) {
-    final String json = state.toJson();
-    preferencesManager.setValue(APP_STATE, json);
+    preferencesManager.setValue(APP_STATE, state.toJson());
     return preferencesManager
         .flushPreferences()
         .catchError(

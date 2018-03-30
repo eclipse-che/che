@@ -39,7 +39,6 @@ public class AppStateManagerTest {
       "{\"projectExplorer\":{\"revealPath\":[\"/spring\"],\"showHiddenFiles\":false}}";
 
   @Mock private FsManager fsManager;
-
   @InjectMocks private AppStateManager appStateManager;
 
   @Test(expectedExceptions = ValidationException.class)

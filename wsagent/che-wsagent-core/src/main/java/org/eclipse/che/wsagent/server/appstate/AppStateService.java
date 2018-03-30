@@ -48,7 +48,8 @@ public class AppStateService {
   @ApiOperation(
     value = "Get saved serialized IDE state of current workspace by user identifier",
     notes =
-        "It is expected that saved IDE state object is valid, so any validations are not performed. Empty string will be returned when IDE state is not found."
+        "It is expected that saved IDE state object is valid, so any validations are not performed. "
+            + "Empty string will be returned when IDE state is not found."
   )
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
