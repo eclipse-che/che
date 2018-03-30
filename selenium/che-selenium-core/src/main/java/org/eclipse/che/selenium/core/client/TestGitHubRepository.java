@@ -23,6 +23,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHFileNotFoundException;
+import org.kohsuke.github.GHRef;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
@@ -85,6 +86,17 @@ public class TestGitHubRepository {
     return repoName;
   }
 
+  /**
+   * Creates reference to branch, tag, ... from master branch.
+   *
+   * @param refName is a name of branch, tag, etc
+   * @throws IOException
+   */
+  public GHRef addRefFromMaster(String refName) throws IOException {
+    GHRef master = ghRepo.getRef("heads/master");
+    return ghRepo.createRef("refs/heads/" + refName, master.getObject().getSha());
+  }
+
   public void addContent(Path pathToRootContentDirectory) throws IOException {
     Files.walk(pathToRootContentDirectory)
         .filter(Files::isRegularFile)
@@ -115,6 +127,34 @@ public class TestGitHubRepository {
     }
   }
 
+  /**
+   * Changes content of the file
+   *
+   * @param pathToFile path to specified file
+   * @param content content to change
+   * @throws IOException
+   */
+  public void changeFileContent(String pathToFile, String content) throws IOException {
+    changeFileContent(pathToFile, content, format("Change file %s", pathToFile));
+  }
+
+  /**
+   * Changes content of the file
+   *
+   * @param pathToFile path to specified file
+   * @param content content to change
+   * @param commitMessage message to commit
+   * @throws IOException
+   */
+  public void changeFileContent(String pathToFile, String content, String commitMessage)
+      throws IOException {
+    ghRepo.getFileContent(String.format("/%s", pathToFile)).update(content, commitMessage);
+  }
+
+  public void deleteFile(String pathToFile) throws IOException {
+    ghRepo.getFileContent(pathToFile).delete("Delete file " + pathToFile);
+  }
+
   public void deleteFolder(Path folder, String deleteCommitMessage) throws IOException {
     for (GHContent ghContent : ghRepo.getDirectoryContent(folder.toString())) {
       ghContent.delete(deleteCommitMessage);
@@ -125,10 +165,6 @@ public class TestGitHubRepository {
   public void delete() throws IOException {
     ghRepo.delete();
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
-  }
-
-  public GHContent getFileContent(String path) throws IOException {
-    return ghRepo.getFileContent(path);
   }
 
   public String getHtmlUrl() {

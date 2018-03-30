@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.FieldNamingPolicy;
@@ -175,6 +176,7 @@ public class DockerConnectorTest {
   private static final byte[] DOCKER_RESPONSE_BYTES = DOCKER_RESPONSE.getBytes();
 
   private static final int CONTAINER_EXIT_CODE = 0;
+  private static final int IMAGE_BUILD_TIMEOUT = 300;
 
   @Mock private DockerConnectorConfiguration dockerConnectorConfiguration;
   @Mock private DockerConnectionFactory dockerConnectionFactory;
@@ -205,13 +207,7 @@ public class DockerConnectorTest {
     when(authConfigs.getConfigs()).thenReturn(new HashMap<>());
     when(dockerApiVersionPathPrefixProvider.get()).thenReturn(API_VERSION_PREFIX);
 
-    dockerConnector =
-        spy(
-            new DockerConnector(
-                dockerConnectorConfiguration,
-                dockerConnectionFactory,
-                authManager,
-                dockerApiVersionPathPrefixProvider));
+    dockerConnector = newConnectorSpy(IMAGE_BUILD_TIMEOUT, dockerApiVersionPathPrefixProvider);
 
     inputStream = spy(new ByteArrayInputStream(ERROR_MESSAGE.getBytes()));
     when(dockerResponse.getInputStream()).thenReturn(inputStream);
@@ -242,13 +238,7 @@ public class DockerConnectorTest {
       throws IOException, JsonParseException {
     String apiVersion = "/v1.18";
     when(dockerApiVersionPathPrefixProvider.get()).thenReturn(apiVersion);
-    dockerConnector =
-        spy(
-            new DockerConnector(
-                dockerConnectorConfiguration,
-                dockerConnectionFactory,
-                authManager,
-                dockerApiVersionPathPrefixProvider));
+    dockerConnector = newConnectorSpy(IMAGE_BUILD_TIMEOUT, dockerApiVersionPathPrefixProvider);
     SystemInfo systemInfo = mock(SystemInfo.class);
     doReturn(systemInfo)
         .when(dockerConnector)
@@ -1341,6 +1331,34 @@ public class DockerConnectorTest {
     verify(dockerResponse).getInputStream();
   }
 
+  @Test(
+    expectedExceptions = DockerException.class,
+    expectedExceptionsMessageRegExp = "Docker image build exceed timeout .* seconds."
+  )
+  public void testThrowsDockerExceptionWhenImageBuildExceedTimeout() throws Exception {
+    dockerConnector = newConnectorSpy(0, dockerApiVersionPathPrefixProvider);
+    final AuthConfigs authConfigs =
+        DtoFactory.newDto(AuthConfigs.class)
+            .withConfigs(ImmutableMap.of("auth", DtoFactory.newDto(AuthConfig.class)));
+
+    final BuildImageParams buildImageParams =
+        BuildImageParams.create(dockerfile).withAuthConfigs(authConfigs);
+    final InputStream slowStream =
+        new InputStream() {
+          @Override
+          public int read() {
+            try {
+              Thread.sleep(373);
+            } catch (Exception ignored) {
+            }
+            return 43;
+          }
+        };
+    doReturn(slowStream).when(dockerResponse).getInputStream();
+
+    dockerConnector.buildImage(buildImageParams, progressMonitor);
+  }
+
   @Test
   public void shouldCallRemoveImageWithParametersObject() throws IOException {
     RemoveImageParams removeImageParams = RemoveImageParams.create(IMAGE);
@@ -2343,5 +2361,16 @@ public class DockerConnectorTest {
             asList(
                 new Volume().withName("volume1"),
                 new Volume().withName("volume2").withDriver("driver1")));
+  }
+
+  private DockerConnector newConnectorSpy(
+      int buildTimeout, DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider) {
+    return spy(
+        new DockerConnector(
+            buildTimeout,
+            dockerConnectorConfiguration,
+            dockerConnectionFactory,
+            authManager,
+            dockerApiVersionPathPrefixProvider));
   }
 }
