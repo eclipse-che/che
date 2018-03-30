@@ -943,8 +943,8 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Switches to next browser window (this means that if opened 2 windows, and we are in the
-   * window 1, we will be switched into the window 2)
+   * Switches to next browser window (this means that if opened 2 windows, and we are in the window
+   * 1, we will be switched into the window 2)
    *
    * @param currentWindowHandler
    */
