@@ -42,10 +42,10 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class RenameTypeTest {
-  private static final Logger LOG = LoggerFactory.getLogger(RenameTypeTest.class);
-  private static final String NAME_OF_PROJECT =
+  private static final Logger LOG                           = LoggerFactory.getLogger(RenameTypeTest.class);
+  private static final String NAME_OF_PROJECT               =
       NameGenerator.generate(RenameTypeTest.class.getSimpleName(), 2);
-  private static final String pathToPackageInChePrefix =
+  private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
       NAME_OF_PROJECT + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
@@ -151,7 +151,7 @@ public class RenameTypeTest {
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {
-    pathToCurrentPackage = pathToPackageInChePrefix + "/" + nameCurrentTest;
+    pathToCurrentPackage = PATH_TO_PACKAGE_IN_CHE_PREFIX + "/" + nameCurrentTest;
 
     URL resourcesInA =
         getClass()
