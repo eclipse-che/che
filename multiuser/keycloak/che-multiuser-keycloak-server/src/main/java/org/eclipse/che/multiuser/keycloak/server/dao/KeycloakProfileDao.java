@@ -51,17 +51,17 @@ public class KeycloakProfileDao implements ProfileDao {
 
   @Override
   public void create(ProfileImpl profile) throws ServerException, ConflictException {
-    // this method intentionally left blank
+    throw new ServerException("Given operation doesn't supported on current configured storage.");
   }
 
   @Override
   public void update(ProfileImpl profile) throws NotFoundException, ServerException {
-    // this method intentionally left blank
+    throw new ServerException("Given operation doesn't supported on current configured storage.");
   }
 
   @Override
   public void remove(String userId) throws ServerException {
-    // this method intentionally left blank
+    throw new ServerException("Given operation doesn't supported on current configured storage.");
   }
 
   @Override
