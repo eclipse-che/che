@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.refactor.types;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -44,10 +43,10 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class RenameTypeTest {
   private static final Logger LOG = LoggerFactory.getLogger(RenameTypeTest.class);
-  private static final String nameOfProject =
-      NameGenerator.generate(RenameTypeTest.class.getName(), 2);
+  private static final String NAME_OF_PROJECT =
+      NameGenerator.generate(RenameTypeTest.class.getSimpleName(), 2);
   private static final String pathToPackageInChePrefix =
-      nameOfProject + "/src" + "/main" + "/java" + "/renametype";
+      NAME_OF_PROJECT + "/src" + "/main" + "/java" + "/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -70,17 +69,17 @@ public class RenameTypeTest {
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
-        nameOfProject,
+        NAME_OF_PROJECT,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
-    projectExplorer.waitVisibleItem(nameOfProject);
+    projectExplorer.waitVisibleItem(NAME_OF_PROJECT);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
   }
 
   @BeforeMethod
-  public void setCurrentFieldForTest(Method method) throws IOException {
+  public void setCurrentFieldForTest(Method method) {
     try {
       setFieldsForTest(method.getName());
     } catch (Exception e) {
