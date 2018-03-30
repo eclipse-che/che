@@ -251,6 +251,7 @@
           <class name="org.eclipse.che.selenium.workspaces.WorkingWithJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkingWithNodeWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
+          <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
           <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
         </classes>
     </test>

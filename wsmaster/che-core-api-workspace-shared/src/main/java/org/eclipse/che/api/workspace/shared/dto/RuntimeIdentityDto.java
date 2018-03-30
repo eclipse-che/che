@@ -28,11 +28,6 @@ public interface RuntimeIdentityDto extends RuntimeIdentity {
   RuntimeIdentityDto withEnvName(String envName);
 
   @Override
-  String getOwnerName();
-
-  RuntimeIdentityDto withOwnerName(String ownerName);
-
-  @Override
   String getOwnerId();
 
   RuntimeIdentityDto withOwnerId(String ownerId);
