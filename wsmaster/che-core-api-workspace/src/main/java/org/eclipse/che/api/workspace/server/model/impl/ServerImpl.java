@@ -25,6 +25,16 @@ public class ServerImpl implements Server {
 
   public ServerImpl() {}
 
+  public ServerImpl(String url, ServerStatus status, Map<String, String> attributes) {
+    this.url = url;
+    this.status = status;
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    } else {
+      this.attributes = new HashMap<>();
+    }
+  }
+
   public ServerImpl(Server server) {
     this.url = server.getUrl();
     this.status = server.getStatus();

@@ -15,6 +15,7 @@ import java.net.URI;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -57,9 +58,18 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
 
   @Override
   public KubernetesInternalRuntime getRuntime() throws InfrastructureException {
-    return runtimeFactory.create(
-        this,
-        namespaceFactory.create(getIdentity().getWorkspaceId()),
-        getEnvironment().getWarnings());
+    KubernetesInternalRuntime<KubernetesRuntimeContext<? extends KubernetesEnvironment>> runtime =
+        runtimeFactory.create(
+            this,
+            // TODO use existing namespace if runtime has status
+            namespaceFactory.create(getIdentity().getWorkspaceId()),
+            getEnvironment().getWarnings());
+
+    if (runtime.getStatus() != WorkspaceStatus.RUNNING
+        || runtime.getStatus() != WorkspaceStatus.STOPPED) {
+      runtime.startServersCheckers();
+    }
+
+    return runtime;
   }
 }

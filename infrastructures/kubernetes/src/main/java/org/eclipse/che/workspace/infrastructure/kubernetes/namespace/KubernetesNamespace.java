@@ -55,6 +55,7 @@ public class KubernetesNamespace {
   private static final String DEFAULT_SERVICE_ACCOUNT_NAME = "default";
 
   private final String workspaceId;
+  private final String name;
 
   private final KubernetesPods pods;
   private final KubernetesServices services;
@@ -64,11 +65,13 @@ public class KubernetesNamespace {
   @VisibleForTesting
   protected KubernetesNamespace(
       String workspaceId,
+      String name,
       KubernetesPods pods,
       KubernetesServices services,
       KubernetesPersistentVolumeClaims pvcs,
       KubernetesIngresses kubernetesIngresses) {
     this.workspaceId = workspaceId;
+    this.name = name;
     this.pods = pods;
     this.services = services;
     this.pvcs = pvcs;
@@ -84,6 +87,7 @@ public class KubernetesNamespace {
       KubernetesClientFactory clientFactory, String name, String workspaceId, boolean doPrepare)
       throws InfrastructureException {
     this.workspaceId = workspaceId;
+    this.name = name;
     this.pods = new KubernetesPods(name, workspaceId, clientFactory);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
@@ -148,6 +152,10 @@ public class KubernetesNamespace {
       throw new InfrastructureException(
           "Error(s) occurs while cleaning up the namespace." + errors.toString());
     }
+  }
+
+  public String getName() {
+    return name;
   }
 
   private void create(String namespaceName, KubernetesClient client)

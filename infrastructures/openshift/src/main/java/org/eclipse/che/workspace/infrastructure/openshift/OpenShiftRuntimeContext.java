@@ -14,10 +14,10 @@ import com.google.inject.assistedinject.Assisted;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
@@ -48,10 +48,19 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
   }
 
   @Override
-  public KubernetesInternalRuntime getRuntime() throws InfrastructureException {
-    return runtimeFactory.create(
-        this,
-        projectFactory.create(getIdentity().getWorkspaceId()),
-        getEnvironment().getWarnings());
+  public OpenShiftInternalRuntime getRuntime() throws InfrastructureException {
+    OpenShiftInternalRuntime runtime =
+        runtimeFactory.create(
+            this,
+            // TODO use existing namespace if runtime has status
+            projectFactory.create(getIdentity().getWorkspaceId()),
+            getEnvironment().getWarnings());
+
+    if (runtime.getStatus() != WorkspaceStatus.RUNNING
+        || runtime.getStatus() != WorkspaceStatus.STOPPED) {
+      runtime.startServersCheckers();
+    }
+
+    return runtime;
   }
 }

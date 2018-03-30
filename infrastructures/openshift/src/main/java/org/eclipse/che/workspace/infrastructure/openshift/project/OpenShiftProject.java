@@ -37,12 +37,13 @@ public class OpenShiftProject extends KubernetesNamespace {
   @VisibleForTesting
   OpenShiftProject(
       String workspaceId,
+      String name,
       KubernetesPods pods,
       KubernetesServices services,
       OpenShiftRoutes routes,
       KubernetesPersistentVolumeClaims pvcs,
       KubernetesIngresses ingresses) {
-    super(workspaceId, pods, services, pvcs, ingresses);
+    super(workspaceId, name, pods, services, pvcs, ingresses);
     this.routes = routes;
   }
 

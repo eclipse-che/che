@@ -18,7 +18,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 /** @author Sergii Leshchenko */
 public interface KubernetesRuntimeFactory {
   KubernetesInternalRuntime<KubernetesRuntimeContext<? extends KubernetesEnvironment>> create(
-      KubernetesRuntimeContext<? extends KubernetesEnvironment> context,
-      KubernetesNamespace namespace,
+      KubernetesRuntimeContext<? extends KubernetesEnvironment> KubernetesRuntimeContext,
+      KubernetesNamespace kubernetesNamespace,
       List<Warning> warnings);
 }

@@ -10,21 +10,19 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
-import com.google.common.collect.ImmutableMap;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 
 /** @author Sergii Leshchenko */
 public class KubernetesMachine implements Machine {
+
   private static final String KUBERNETES_POD_STATUS_RUNNING = "Running";
   // TODO Make timeout configurable
   private static final int EXEC_TIMEOUT_MIN = 5;
@@ -33,34 +31,25 @@ public class KubernetesMachine implements Machine {
   private final String podName;
   private final String containerName;
   private final Map<String, String> attributes;
-  private final Map<String, ServerImpl> ref2Server;
+  private final Map<String, ServerImpl> servers;
+  private final MachineStatus status;
   private final KubernetesNamespace namespace;
-
-  private MachineStatus status;
 
   public KubernetesMachine(
       String machineName,
       String podName,
       String containerName,
-      Map<String, ServerImpl> ref2Server,
-      KubernetesNamespace namespace,
+      Map<String, String> attributes,
+      Map<String, ServerImpl> servers,
       MachineStatus status,
-      Map<String, String> attributes) {
+      KubernetesNamespace kubernetesNamespace) {
     this.machineName = machineName;
     this.podName = podName;
     this.containerName = containerName;
-    if (ref2Server != null) {
-      this.ref2Server = ImmutableMap.copyOf(ref2Server);
-    } else {
-      this.ref2Server = Collections.emptyMap();
-    }
-    if (attributes != null) {
-      this.attributes = ImmutableMap.copyOf(attributes);
-    } else {
-      this.attributes = Collections.emptyMap();
-    }
-    this.namespace = namespace;
+    this.attributes = attributes;
+    this.servers = servers;
     this.status = status;
+    this.namespace = kubernetesNamespace;
   }
 
   public String getName() {
@@ -82,25 +71,12 @@ public class KubernetesMachine implements Machine {
 
   @Override
   public Map<String, ? extends Server> getServers() {
-    return ref2Server;
+    return servers;
   }
 
   @Override
   public MachineStatus getStatus() {
     return status;
-  }
-
-  public void setStatus(MachineStatus status) {
-    this.status = status;
-  }
-
-  public void setServerStatus(String serverRef, ServerStatus status) {
-    ServerImpl server = ref2Server.get(serverRef);
-    if (server == null) {
-      throw new IllegalArgumentException(
-          "Server with provided reference " + serverRef + " is missed");
-    }
-    server.setStatus(status);
   }
 
   /**
@@ -120,15 +96,6 @@ public class KubernetesMachine implements Machine {
 
   public void exec(String... command) throws InfrastructureException {
     namespace.pods().exec(podName, containerName, EXEC_TIMEOUT_MIN, command);
-  }
-
-  public void waitRunning(int timeoutMin) throws InfrastructureException {
-    namespace
-        .pods()
-        .wait(
-            podName,
-            timeoutMin,
-            p -> (KUBERNETES_POD_STATUS_RUNNING.equals(p.getStatus().getPhase())));
   }
 
   /**

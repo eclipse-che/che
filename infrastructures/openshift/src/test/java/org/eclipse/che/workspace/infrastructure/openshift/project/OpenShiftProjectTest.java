@@ -81,7 +81,8 @@ public class OpenShiftProjectTest {
     when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
     when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
 
-    openShiftProject = new OpenShiftProject(WORKSPACE_ID, pods, services, routes, pvcs, ingresses);
+    openShiftProject =
+        new OpenShiftProject(WORKSPACE_ID, PROJECT_NAME, pods, services, routes, pvcs, ingresses);
   }
 
   @Test

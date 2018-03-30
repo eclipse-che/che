@@ -79,7 +79,8 @@ public class KubernetesNamespaceTest {
     when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
     when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
 
-    k8sNamespace = new KubernetesNamespace(WORKSPACE_ID, pods, services, pvcs, ingresses);
+    k8sNamespace =
+        new KubernetesNamespace(WORKSPACE_ID, NAMESPACE, pods, services, pvcs, ingresses);
   }
 
   @Test
