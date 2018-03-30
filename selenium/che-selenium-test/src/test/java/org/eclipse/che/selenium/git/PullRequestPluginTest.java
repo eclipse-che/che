@@ -217,7 +217,7 @@ public class PullRequestPluginTest {
   public void checkFactoryOnGitHub() {
     String currentWindow = seleniumWebDriver.getWindowHandle();
     pullRequestPanel.openPullRequestOnGitHub();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
     checkGitHubUserPage();
     consumeFactoryOnGitHub();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();

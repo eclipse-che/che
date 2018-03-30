@@ -129,7 +129,7 @@ public class WorkingWithJavaMySqlStackTest {
 
     // Run the application
     consoles.clickOnPreviewUrl();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
     checkWebJavaPetclinicAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);

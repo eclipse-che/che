@@ -113,7 +113,7 @@ public class WorkingWithNodeWsTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     consoles.selectProcessInProcessConsoleTreeByName(RUN_PROCESS);
     consoles.clickOnPreviewUrl();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
     checkAngularYeomanAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);

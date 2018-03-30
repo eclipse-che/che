@@ -85,7 +85,7 @@ public class CheckOpenFileFeatureTest {
     dashboardFactories.clickAddOnAddAction();
     dashboardFactories.clickOnOpenFactory();
     String currentWin = seleniumWebDriver.getWindowHandle();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
+    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitItem(PROJECT_NAME);
