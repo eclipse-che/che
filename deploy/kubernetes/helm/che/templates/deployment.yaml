@@ -18,12 +18,17 @@ spec:
     matchLabels:
       app: che
   strategy:
+{{- if .Values.global.multiuser }}
+    type: Rolling
+{{- else }}
     type: Recreate
+{{- end }}
   template:
     metadata:
       labels:
         app: che
     spec:
+      terminationGracePeriodSeconds: 600
       initContainers:
 {{- if .Values.global.multiuser }}
       - name: wait-for-postgres
