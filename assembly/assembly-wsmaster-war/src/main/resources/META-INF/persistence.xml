@@ -65,6 +65,16 @@
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
 
         <class>org.eclipse.che.api.workspace.activity.WorkspaceExpiration</class>
+
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity.Id</class>
+
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesMachineEntity</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesMachineEntity.KubernetesMachineId</class>
+
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesServerEntity</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesServerEntity.KubernetesServerId</class>
+
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
     </persistence-unit>
 </persistence>

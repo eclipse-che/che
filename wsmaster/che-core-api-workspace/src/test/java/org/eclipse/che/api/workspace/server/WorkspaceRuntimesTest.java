@@ -66,7 +66,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** Tests {@link WorkspaceRuntimes}. */
-@Listeners(MockitoTestNGListener.class)
+ @Listeners(MockitoTestNGListener.class)
 public class WorkspaceRuntimesTest {
 
   private static final String TEST_ENVIRONMENT_TYPE = "test";
