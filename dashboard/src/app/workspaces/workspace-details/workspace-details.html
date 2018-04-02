@@ -69,7 +69,7 @@
     </md-tab>
 
     <!-- Agents -->
-    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Agents);">
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Installers);">
       <md-tab-label>
         <span class="che-tab-label-title">Installers</span>
       </md-tab-label>
@@ -152,7 +152,7 @@
     </md-tab>
 
     <!-- SSH Tab -->
-    <md-tab>
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.SSH);">
       <md-tab-label>
         <span class="che-tab-label-title">SSH</span>
       </md-tab-label>
@@ -162,7 +162,7 @@
     </md-tab>
 
     <!-- Tools Tab -->
-    <md-tab>
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Tools);">
       <md-tab-label>
         <span class="che-tab-label-title">Tools</span>
       </md-tab-label>

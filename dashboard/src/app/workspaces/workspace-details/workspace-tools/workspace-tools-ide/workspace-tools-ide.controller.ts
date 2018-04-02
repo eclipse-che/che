@@ -31,7 +31,6 @@ export class WorkspaceToolsIdeController {
   npmRegistry: NpmRegistry;
   lodash: any;
 
-  addPackage: Function;
   packageOrderBy = 'name';
   packages: Array<IPackage>;
   packagesSummary: ISearchResults;
@@ -76,14 +75,14 @@ export class WorkspaceToolsIdeController {
     $scope.$on('$destroy', () => {
       deRegistrationFn();
     });
-
-    this.addPackage = (name: string, location: string) => {
-      this.plugins.push(name + PLUGIN_DESCRIPTION_SEPARATOR + location);
-      this.environmentVariables[THEIA_PLUGINS] = this.plugins.join(PLUGIN_SEPARATOR);
-      this.environmentManager.setEnvVariables(this.machine, this.environmentVariables);
-      this.onChange();
-    };
   }
+
+  addPackage(name: string, location: string): void {
+    this.plugins.push(name + PLUGIN_DESCRIPTION_SEPARATOR + location);
+    this.environmentVariables[THEIA_PLUGINS] = this.plugins.join(PLUGIN_SEPARATOR);
+    this.environmentManager.setEnvVariables(this.machine, this.environmentVariables);
+    this.onChange();
+  };
 
   /**
    * Fetches the list of NPM packages.

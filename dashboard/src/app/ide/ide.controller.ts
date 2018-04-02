@@ -152,14 +152,6 @@ class IdeCtrl {
       return;
     }
 
-    // todo commented for testing purposes - with IDE running inside container - after workspace restart - location changes,
-    // and thus start facing connection issues.
-   /* if (this.ideSvc.openedWorkspace && this.selectedWorkspace.id === this.ideSvc.openedWorkspace.id) {
-      this.ideSvc.displayIDE();
-    } else {
-      this.ideSvc.openIde(this.selectedWorkspace.id);
-    }*/
-
     this.ideSvc.openIde(this.selectedWorkspace.id);
   }
 }
