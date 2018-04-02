@@ -89,7 +89,6 @@ public final class Labels {
     public Serializer runtimeId(RuntimeIdentity runtimeId) {
       labels.put(LABEL_WORKSPACE_ID, runtimeId.getWorkspaceId());
       labels.put(LABEL_WORKSPACE_ENV, runtimeId.getEnvName());
-      labels.put(LABEL_WORKSPACE_OWNER, runtimeId.getOwnerName());
       labels.put(LABEL_WORKSPACE_OWNER_ID, runtimeId.getOwnerId());
       return this;
     }
@@ -161,7 +160,6 @@ public final class Labels {
       return new RuntimeIdentityImpl(
           labels.get(LABEL_WORKSPACE_ID),
           labels.get(LABEL_WORKSPACE_ENV),
-          labels.get(LABEL_WORKSPACE_OWNER),
           labels.get(LABEL_WORKSPACE_OWNER_ID));
     }
 
