@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -45,6 +46,7 @@ public class CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private Git git;
+  @Inject private Events eventsPanel;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -57,24 +59,27 @@ public class CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest {
   @Test
   public void checkoutRemoteBranchToExistingLocalBranchTest() throws Exception {
     // preconditions and import the test repo
-    String PROJECT_NAME = "testRepo";
-    String MASTER_BRANCH = "master";
-    String ORIGIN_MASTER = "origin/master";
-    String GIT_MSG = "Ref master already exists";
+    String projectName = "testRepo";
+    String localBranch = "master";
+    String remoteBranch = "origin/master";
+    String gitMessage = "Ref master already exists";
 
     projectExplorer.waitProjectExplorer();
-    git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, BLANK);
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    git.importJavaApp(testRepo.getHtmlUrl(), projectName, BLANK);
+    projectExplorer.waitAndSelectItem(projectName);
 
     // Open branches form
     menu.runCommand(GIT, BRANCHES);
-    git.waitBranchInTheList(MASTER_BRANCH);
-    git.waitBranchInTheList(ORIGIN_MASTER);
-    git.waitBranchInTheListWithCoState(MASTER_BRANCH);
+    git.waitBranchInTheList(localBranch);
+    git.waitBranchInTheList(remoteBranch);
+    git.waitBranchInTheListWithCoState(localBranch);
 
     // Checkout to the master remote branch.
-    git.selectBranchAndClickCheckoutBtn(ORIGIN_MASTER);
+    git.selectBranchAndClickCheckoutBtn(remoteBranch);
     git.closeBranchesForm();
-    git.waitGitStatusBarWithMess(GIT_MSG);
+    git.waitGitStatusBarWithMess(gitMessage);
+
+    eventsPanel.clickEventLogBtn();
+    eventsPanel.waitExpectedMessage(gitMessage);
   }
 }
