@@ -43,10 +43,9 @@
   <pbcast.GMS print_local_addr="true" join_timeout="3000"
 
     view_bundling="true"/>
-  <UFC max_credits="2M"
-    min_threshold="0.4"/>
   <MFC max_credits="2M"
     min_threshold="0.4"/>
   <FRAG2 frag_size="60K"/>
   <pbcast.STATE_TRANSFER/>
+  <CENTRAL_LOCK />
 </config>

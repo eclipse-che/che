@@ -12,18 +12,18 @@ package org.eclipse.che.multiuser.api.subscription;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.io.Serializable;
-import java.util.Map.Entry;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionContext;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
-import org.jgroups.Channel;
 import org.jgroups.JChannel;
 import org.jgroups.blocks.ReplicatedHashMap;
+import org.jgroups.blocks.locking.LockService;
 import org.slf4j.Logger;
 
 /**
@@ -37,13 +37,16 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
 
   private static final String CHANNEL_NAME = "RemoteSubscriptionChannel";
 
-  private ReplicatedHashMap<CompositeKey, RemoteSubscriptionContext> subscriptions;
+  private ReplicatedHashMap<String, Set<RemoteSubscriptionContext>> subscriptions;
+
+  private final LockService lockService;
 
   @Inject
   public DistributedRemoteSubscriptionStorage(@Named("jgroups.config.file") String confFile)
       throws Exception {
     try {
-      Channel channel = new JChannel(confFile);
+      JChannel channel = new JChannel(confFile);
+      this.lockService = new LockService(channel);
       channel.connect(CHANNEL_NAME);
       subscriptions = new ReplicatedHashMap<>(channel);
       subscriptions.start(5000);
@@ -55,48 +58,36 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
 
   @Override
   public Set<RemoteSubscriptionContext> getByMethod(String method) {
-    return subscriptions
-        .entrySet()
-        .stream()
-        .filter(e -> e.getKey().method.equals(method))
-        .map(Entry::getValue)
-        .collect(Collectors.toSet());
+    return subscriptions.getOrDefault(method, Collections.emptySet());
   }
 
   @Override
   public void addSubscription(String method, RemoteSubscriptionContext remoteSubscriptionContext) {
-    subscriptions.put(
-        new CompositeKey(method, remoteSubscriptionContext.getEndpointId()),
-        remoteSubscriptionContext);
+    Lock lock = lockService.getLock(method);
+    lock.lock();
+    try {
+      Set<RemoteSubscriptionContext> existing =
+          subscriptions.getOrDefault(method, ConcurrentHashMap.newKeySet(1));
+      existing.add(remoteSubscriptionContext);
+      subscriptions.put(method, existing);
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
   public void removeSubscription(String method, String endpointId) {
-    subscriptions.remove(new CompositeKey(method, endpointId));
-  }
-
-  static class CompositeKey implements Serializable {
-
-    private final String method;
-    private final String endpointId;
-
-    CompositeKey(String method, String endpointTd) {
-      this.method = method;
-      this.endpointId = endpointTd;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o != null && o instanceof CompositeKey) {
-        CompositeKey s = (CompositeKey) o;
-        return method.equals(s.method) && endpointId.equals(s.endpointId);
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(method, endpointId);
+    Lock lock = lockService.getLock(method);
+    lock.lock();
+    try {
+      Set<RemoteSubscriptionContext> existing =
+          subscriptions.getOrDefault(method, Collections.emptySet());
+      existing.removeIf(
+          remoteSubscriptionContext ->
+              Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
+      subscriptions.put(method, existing);
+    } finally {
+      lock.unlock();
     }
   }
 }
