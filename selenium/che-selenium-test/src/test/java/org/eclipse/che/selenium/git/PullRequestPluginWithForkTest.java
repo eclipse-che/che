@@ -10,19 +10,28 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
-import static org.slf4j.LoggerFactory.getLogger;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.BRANCH_PUSHED_ON_YOUR_FORK;
+import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.FORK_CREATED;
+import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.NEW_COMMITS_PUSHED;
+import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.PULL_REQUEST_UPDATED;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import org.eclipse.che.api.core.NotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -34,31 +43,18 @@ import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.slf4j.Logger;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 @Test(groups = TestGroup.GITHUB)
 public class PullRequestPluginWithForkTest {
-  private static final Logger LOG = getLogger(PullRequestPluginWithForkTest.class);
-
   private static final String PROJECT_NAME = "pull-request-plugin-fork-test";
-  private static final String PROJECT_URL =
-      "https://github.com/iedexmain1/pull-request-plugin-fork-test.git";
-  private static final String NAME_REPO = PROJECT_NAME;
-  private static final String FORK_NAME_REPO = PROJECT_NAME;
+  private static final String PATH_TO_README_FILE = PROJECT_NAME + "/README.md";
   private static final String PULL_REQUEST_CREATED = "Your pull request has been created.";
   private static final String PUll_REQUEST_UPDATED = "Your pull request has been updated.";
-
-  private final Long time = new Date().getTime();
-  private final String title = "Title-" + time.toString();
-  private final String comment = "Comment-" + time.toString();
-
-  @Inject private TestWorkspace ws;
-  @Inject private Ide ide;
-  @Inject private TestUser productUser;
+  private static final String TITLE = NameGenerator.generate("Title-", 8);
+  private static final String COMMENT = NameGenerator.generate("Comment-", 8);
 
   @Inject(optional = true)
   @Named("github.username")
@@ -68,117 +64,97 @@ public class PullRequestPluginWithForkTest {
   @Named("github.password")
   private String gitHubPassword;
 
-  @Inject(optional = true)
-  @Named("github.auxiliary.username")
-  private String githubUserCloneName;
+  @Inject
+  @Named(CheSeleniumSuiteModule.AUXILIARY)
+  private TestGitHubRepository testAuxiliaryRepo;
 
-  @Inject(optional = true)
-  @Named("github.auxiliary.password")
-  private String githubUserClonePassword;
-
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private ImportProjectFromLocation importWidget;
+  @Inject private Ide ide;
   @Inject private Menu menu;
   @Inject private Loader loader;
-  @Inject private ProjectExplorer explorer;
-  @Inject private CodenvyEditor editor;
-  @Inject private PullRequestPanel pullRequestPanel;
   @Inject private Wizard wizard;
-  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private CodenvyEditor editor;
+  @Inject private TestUser testUser;
   @Inject private Preferences preferences;
+  @Inject private TestWorkspace testWorkspace;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private PullRequestPanel pullRequestPanel;
+  @Inject private ImportProjectFromLocation importWidget;
   @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(ws);
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
+    testAuxiliaryRepo.addContent(entryPath);
+
+    ide.open(testWorkspace);
 
     // add committer info
-    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, testUser.getEmail());
 
     // authorize application on GitHub
-    menu.runCommand(
-        TestMenuCommandsConstants.Profile.PROFILE_MENU,
-        TestMenuCommandsConstants.Profile.PREFERENCES);
+    menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
     preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
-  @AfterClass
-  public void tearDown() throws Exception {
-    try {
-      gitHubClientService.deleteRepo(FORK_NAME_REPO, gitHubUsername, gitHubPassword);
-    } catch (NotFoundException e) {
-      // ignore absent repo to delete
-      LOG.debug("Repo {} is not found.", FORK_NAME_REPO);
-      return;
-    }
-
-    List<String> listPullRequest =
-        gitHubClientService.getNumbersOfOpenedPullRequests(
-            NAME_REPO, githubUserCloneName, githubUserClonePassword);
-
-    if (!listPullRequest.isEmpty()) {
-      gitHubClientService.closePullRequest(
-          NAME_REPO,
-          Collections.max(listPullRequest),
-          githubUserCloneName,
-          githubUserClonePassword);
-    }
-  }
-
   @Test
-  public void createPullRequest() {
-    explorer.waitProjectExplorer();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
-    importWidget.waitMainForm();
-    importWidget.selectGitSourceItem();
-    loader.waitOnClosed();
-    importWidget.typeURi(PROJECT_URL);
-    importWidget.typeProjectName(PROJECT_NAME);
-    importWidget.clickImportBtnWithoutWait();
-    wizard.selectTypeProject(Wizard.TypeProject.BLANK);
-    loader.waitOnClosed();
-    wizard.clickSaveButton();
-    loader.waitOnClosed();
-    wizard.waitCreateProjectWizardFormIsClosed();
-    explorer.waitItem(PROJECT_NAME);
-    explorer.openItemByPath(PROJECT_NAME);
-    explorer.openItemByPath(PROJECT_NAME + "/README.md");
+  public void createPullRequest() throws Exception {
+    String projectUrl = testAuxiliaryRepo.getHtmlUrl() + ".git";
+
+    // import project
+    projectExplorer.waitProjectExplorer();
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
+    importWidget.waitAndTypeImporterAsGitInfo(projectUrl, PROJECT_NAME);
+    configureTypeOfProject();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
 
     // change content
-    editor.waitActive();
-    editor.deleteAllContent();
-    editor.goToCursorPositionVisible(1, 1);
-    editor.typeTextIntoEditor(time.toString());
-    pullRequestPanel.clickPullRequestBtn();
-    pullRequestPanel.enterComment(comment);
-    pullRequestPanel.enterTitle(title);
+    openFileAndChangeContent(PATH_TO_README_FILE, generate("", 12));
 
-    // commit change and create pull request
+    // change commit and create pull request
+    pullRequestPanel.clickPullRequestBtn();
+    pullRequestPanel.enterComment(COMMENT);
+    pullRequestPanel.enterTitle(TITLE);
     pullRequestPanel.clickCreatePRBtn();
     pullRequestPanel.clickOkCommitBtn();
-    pullRequestPanel.waitStatusOk(Status.FORK_CREATED);
-    pullRequestPanel.waitStatusOk(Status.BRANCH_PUSHED_ON_YOUR_FORK);
+    pullRequestPanel.waitStatusOk(FORK_CREATED);
+    pullRequestPanel.waitStatusOk(BRANCH_PUSHED_ON_YOUR_FORK);
     pullRequestPanel.waitMessage(PULL_REQUEST_CREATED);
   }
 
   @Test(priority = 1)
-  void updatePullRequest() {
+  void updatePullRequest() throws Exception {
     editor.closeAllTabs();
     loader.waitOnClosed();
-    explorer.openItemByPath(PROJECT_NAME + "/README.md");
-    editor.waitActive();
-    editor.deleteAllContent();
-    editor.goToCursorPositionVisible(1, 1);
-    editor.typeTextIntoEditor("Update " + time.toString());
+
+    // change content
+    openFileAndChangeContent(PATH_TO_README_FILE, generate("Update ", 12));
+
+    // update PR and check status
     pullRequestPanel.clickUpdatePRBtn();
     pullRequestPanel.clickOkCommitBtn();
-    pullRequestPanel.waitStatusOk(Status.NEW_COMMITS_PUSHED);
-    pullRequestPanel.waitStatusOk(Status.PULL_REQUEST_UPDATED);
+    pullRequestPanel.waitStatusOk(NEW_COMMITS_PUSHED);
+    pullRequestPanel.waitStatusOk(PULL_REQUEST_UPDATED);
     pullRequestPanel.waitMessage(PUll_REQUEST_UPDATED);
     pullRequestPanel.clickPullRequestBtn();
     pullRequestPanel.waitClosePanel();
+  }
+
+  private void openFileAndChangeContent(String filePath, String text) throws Exception {
+    projectExplorer.openItemByPath(filePath);
+    editor.waitActive();
+    testProjectServiceClient.updateFile(testWorkspace.getId(), filePath, text);
+  }
+
+  private void configureTypeOfProject() {
+    wizard.selectTypeProject(BLANK);
+    loader.waitOnClosed();
+    wizard.clickSaveButton();
+    loader.waitOnClosed();
+    wizard.waitCreateProjectWizardFormIsClosed();
   }
 }
