@@ -79,16 +79,11 @@ public class ImportProjectIntoSpecifiedBranchTest {
     Path sourceProject = Paths.get(getClass().getResource("/projects/Repo_For_Test").toURI());
     gitHubRepository.addContent(sourceProject);
 
-    gitHubRepository.addRefFromMaster(BRANCH_1);
+    gitHubRepository.createBranchFromMaster(BRANCH_1);
+    gitHubRepository.createBranchFromMaster(BRANCH_2);
+    gitHubRepository.createBranchFromMaster(BRANCH_3);
 
     ide.open(ws);
-
-    // authorize application on GitHub
-    /*menu.runCommand(
-        TestMenuCommandsConstants.Profile.PROFILE_MENU,
-        TestMenuCommandsConstants.Profile.PREFERENCES);
-    preferences.waitPreferencesForm();
-    preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);*/
   }
 
   @AfterMethod
@@ -115,8 +110,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
   @Test(priority = 1)
   public void checkImportProjectInBranchByHttpsUrl() throws IOException, JsonParseException {
     projectExplorer.waitProjectExplorer();
-    performImportIntoBranch(
-        "https://github.com/" + gitHubUsername + "/Repo_For_Test.git", PROJECT_NAME, BRANCH_2);
+    performImportIntoBranch(gitHubRepository.getHtmlUrl(), PROJECT_NAME, BRANCH_2);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     loader.waitOnClosed();
@@ -187,13 +181,8 @@ public class ImportProjectIntoSpecifiedBranchTest {
     importProject.waitMainForm();
     loader.waitOnClosed();
     importProject.selectGitHubSourceItem();
-    loader.waitOnClosed();
     importProject.waitLoadRepoBtn();
-    importProject.clickLoadRepoBtn();
-    loader.waitOnClosed();
-    importProject.selectItemInAccountList(
-        gitHubClientService.getName(gitHubUsername, gitHubPassword));
-    importProject.selectProjectByName("springProjectWithSeveralBranches");
+    importProject.typeURi(gitHubRepository.getHtmlUrl());
     importProject.typeProjectName(PROJECT_NAME);
     importProject.waitBranchIsNotSelected();
     importProject.clickBranchCheckbox();
