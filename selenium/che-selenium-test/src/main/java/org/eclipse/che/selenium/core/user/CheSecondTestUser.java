@@ -46,8 +46,8 @@ public class CheSecondTestUser implements TestUser {
   }
 
   @Override
-  public String getAuthToken() {
-    return delegate.getAuthToken();
+  public String obtainAuthToken() {
+    return delegate.obtainAuthToken();
   }
 
   @Override

@@ -35,10 +35,9 @@ public class TestProfileServiceClient {
     this.defaultTestUser = defaultTestUser;
   }
 
-  public void setAttributes(Map<String, String> attributes, String authToken) throws Exception {
+  public void setAttributes(Map<String, String> attributes) throws Exception {
     requestFactory
         .fromUrl(apiEndpoint + "profile/attributes")
-        .setAuthorizationHeader(authToken)
         .usePutMethod()
         .setBody(attributes)
         .request();
@@ -50,6 +49,6 @@ public class TestProfileServiceClient {
             "firstName", name,
             "lastName", lastName);
 
-    setAttributes(attributes, defaultTestUser.getAuthToken());
+    setAttributes(attributes);
   }
 }

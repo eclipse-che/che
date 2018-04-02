@@ -36,11 +36,11 @@ public class TestUserImpl implements TestUser {
   private final String password;
   private final String name;
   private final String id;
-  private final String authToken;
   private final String offlineToken;
 
   private final TestUserServiceClient userServiceClient;
   private final TestWorkspaceServiceClient workspaceServiceClient;
+  private TestAuthServiceClient authServiceClient;
 
   /** To instantiate user with specific name, e-mail, password and offline token. */
   @AssistedInject
@@ -53,12 +53,12 @@ public class TestUserImpl implements TestUser {
       @Assisted("password") String password,
       @Assisted("offlineToken") String offlineToken)
       throws Exception {
+    this.authServiceClient = authServiceClient;
     this.userServiceClient = testUserServiceClientFactory.create(name, password, offlineToken);
     this.email = email;
     this.password = password;
     this.name = name;
     this.offlineToken = offlineToken;
-    this.authToken = authServiceClient.login(name, password, offlineToken);
     this.id = userServiceClient.findByEmail(email).getId();
     LOG.info("User name='{}', id='{}' is being used for testing", name, id);
     this.workspaceServiceClient = wsServiceClientFactory.create(email, password, offlineToken);
@@ -75,8 +75,12 @@ public class TestUserImpl implements TestUser {
   }
 
   @Override
-  public String getAuthToken() {
-    return authToken;
+  public String obtainAuthToken() {
+    try {
+      return authServiceClient.login(name, password, offlineToken);
+    } catch (Exception e) {
+      throw new RuntimeException(format("Error of log into the product as user '%s'.", name), e);
+    }
   }
 
   @Override

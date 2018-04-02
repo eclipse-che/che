@@ -42,8 +42,8 @@ public class CheAdminTestUser implements AdminTestUser {
   }
 
   @Override
-  public String getAuthToken() {
-    return delegate.getAuthToken();
+  public String obtainAuthToken() {
+    return delegate.obtainAuthToken();
   }
 
   @Override
