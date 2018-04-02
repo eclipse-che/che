@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
@@ -31,18 +30,14 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest {
 
+  private static final String PROJECT_NAME = "testRepo";
+  private static final String LOCAL_BRANCH = "master";
+  private static final String REMOTE_BRANCH = "origin/master";
+  private static final String GIT_MESSAGE = "Ref master already exists";
+
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
   @Inject private TestGitHubRepository testRepo;
-
-  @Inject(optional = true)
-  @Named("github.username")
-  private String gitHubUsername;
-
-  @Inject(optional = true)
-  @Named("github.password")
-  private String gitHubPassword;
-
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private Git git;
@@ -58,28 +53,22 @@ public class CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest {
 
   @Test
   public void checkoutRemoteBranchToExistingLocalBranchTest() throws Exception {
-    // preconditions and import the test repo
-    String projectName = "testRepo";
-    String localBranch = "master";
-    String remoteBranch = "origin/master";
-    String gitMessage = "Ref master already exists";
-
     projectExplorer.waitProjectExplorer();
-    git.importJavaApp(testRepo.getHtmlUrl(), projectName, BLANK);
-    projectExplorer.waitAndSelectItem(projectName);
+    git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, BLANK);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // Open branches form
     menu.runCommand(GIT, BRANCHES);
-    git.waitBranchInTheList(localBranch);
-    git.waitBranchInTheList(remoteBranch);
-    git.waitBranchInTheListWithCoState(localBranch);
+    git.waitBranchInTheList(LOCAL_BRANCH);
+    git.waitBranchInTheList(REMOTE_BRANCH);
+    git.waitBranchInTheListWithCoState(LOCAL_BRANCH);
 
     // Checkout to the master remote branch.
-    git.selectBranchAndClickCheckoutBtn(remoteBranch);
+    git.selectBranchAndClickCheckoutBtn(REMOTE_BRANCH);
     git.closeBranchesForm();
-    git.waitGitStatusBarWithMess(gitMessage);
+    git.waitGitStatusBarWithMess(GIT_MESSAGE);
 
     eventsPanel.clickEventLogBtn();
-    eventsPanel.waitExpectedMessage(gitMessage);
+    eventsPanel.waitExpectedMessage(GIT_MESSAGE);
   }
 }
