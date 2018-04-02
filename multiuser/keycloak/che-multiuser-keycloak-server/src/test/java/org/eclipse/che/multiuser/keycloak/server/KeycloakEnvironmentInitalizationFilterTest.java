@@ -97,7 +97,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
     when(request.getAttribute("token")).thenReturn(createJwt());
     when(session.getAttribute(eq("che_subject"))).thenReturn(existingSubject);
-    when(userManager.getUserFromJWT(anyString(), anyString(), anyString())).thenReturn(user);
+    when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(user);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
 

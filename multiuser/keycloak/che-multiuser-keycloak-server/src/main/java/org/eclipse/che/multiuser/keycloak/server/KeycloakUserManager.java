@@ -81,7 +81,9 @@ public class KeycloakUserManager extends PersonalAccountUserManager {
    * matches the {@code email} , and update it in DB if necessary.
    *
    * <p>- if user is not found in Che DB by the given {@code id} , then attempt to create one. But
-   * also, it will attempt to get one by {@code email}
+   * also, it will attempt to get one by {@code email}. If such is found, he will be removed. That
+   * way, there will be no conflict with existing user id or email upon recreation. In case of
+   * conflict with user name, it may be prepended randomized symbols
    *
    * @param id - user id from JWT token
    * @param email - user email from JWT token
@@ -89,7 +91,7 @@ public class KeycloakUserManager extends PersonalAccountUserManager {
    * @return user object from Che Database, with all needed actualization operations performed on
    *     him
    */
-  public User getUserFromJWT(String id, String email, String username)
+  public User getOrCreateUser(String id, String email, String username)
       throws ServerException, ConflictException {
     Optional<User> userById = getUserById(id);
     if (!userById.isPresent()) {

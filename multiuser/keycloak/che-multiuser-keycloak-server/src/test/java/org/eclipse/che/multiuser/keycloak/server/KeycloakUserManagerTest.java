@@ -12,13 +12,17 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.AssertJUnit.assertEquals;
 
 import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.notification.EventService;
@@ -68,11 +72,11 @@ public class KeycloakUserManagerTest {
   }
 
   @Test
-  public void shouldReturnUserFromDaoForGivenJWTUserInfo() throws Exception {
+  public void shouldReturnExistingUser() throws Exception {
     UserImpl userImpl = new UserImpl("id", "user@mail.com", "name");
     when(userDao.getById(eq("id"))).thenReturn(userImpl);
 
-    User user = keycloakUserManager.getUserFromJWT("id", "user@mail.com", "name");
+    User user = keycloakUserManager.getOrCreateUser("id", "user@mail.com", "name");
 
     verify(userDao).getById("id");
     assertEquals("id", user.getId());
@@ -81,14 +85,14 @@ public class KeycloakUserManagerTest {
   }
 
   @Test
-  public void shouldReturnUserFromDaoAndUpdateHisEmailFromGivenJWTUserInfo() throws Exception {
+  public void shouldReturnUserAndUpdateHisEmail() throws Exception {
     // given
     ArgumentCaptor<UserImpl> captor = ArgumentCaptor.forClass(UserImpl.class);
     UserImpl userImpl = new UserImpl("id", "user@mail.com", "name");
     when(userDao.getById(eq("id"))).thenReturn(userImpl);
 
     // when
-    User user = keycloakUserManager.getUserFromJWT("id", "new@mail.com", "name");
+    User user = keycloakUserManager.getOrCreateUser("id", "new@mail.com", "name");
 
     // then
     verify(userDao, times(2)).getById("id");
@@ -110,7 +114,7 @@ public class KeycloakUserManagerTest {
     when(userDao.getByEmail(eq("user@mail.com"))).thenThrow(NotFoundException.class);
 
     // when
-    keycloakUserManager.getUserFromJWT("id", "user@mail.com", "name");
+    keycloakUserManager.getOrCreateUser("id", "user@mail.com", "name");
 
     // then
     verify(userDao, times(2)).getById(eq("id"));
@@ -132,7 +136,7 @@ public class KeycloakUserManagerTest {
     when(userDao.getByEmail(eq("user@mail.com"))).thenReturn(oldUserImpl);
 
     // when
-    keycloakUserManager.getUserFromJWT("id", "user@mail.com", "name");
+    keycloakUserManager.getOrCreateUser("id", "user@mail.com", "name");
 
     // then
     verify(userDao, times(2)).getById(eq("id"));
@@ -147,26 +151,34 @@ public class KeycloakUserManagerTest {
   }
 
   @Test
-  public void shoudRecreateUserWithDifferentNameIfHeIsntFoundByIdOrEmail() throws Exception {
+  public void shoudRecreateUserWithDifferentNameIfConflictOccures() throws Exception {
     // given
     UserImpl newUserImpl = new UserImpl("id", "user@mail.com", "name");
-    UserImpl oldUserImpl = new UserImpl("oldId", "user@mail.com", "name");
 
     ArgumentCaptor<UserImpl> captor = ArgumentCaptor.forClass(UserImpl.class);
+    ArgumentCaptor<UserImpl> captor2 = ArgumentCaptor.forClass(UserImpl.class);
     when(userDao.getById(eq("id"))).thenThrow(NotFoundException.class);
-    when(userDao.getByEmail(eq("user@mail.com"))).thenReturn(oldUserImpl);
+    when(userDao.getByEmail(eq("user@mail.com"))).thenThrow(NotFoundException.class);
+    doAnswer(
+            invocation -> {
+              if (((UserImpl) invocation.getArgument(0)).getName().equals("name")) {
+                throw new ConflictException("");
+              }
+              return newUserImpl;
+            })
+        .when(userDao)
+        .create(any());
 
     // when
-    keycloakUserManager.getUserFromJWT("id", "user@mail.com", "name");
+    keycloakUserManager.getOrCreateUser("id", "user@mail.com", "name");
 
     // then
     verify(userDao, times(2)).getById(eq("id"));
     verify(userDao).getByEmail(eq("user@mail.com"));
 
-    verify(userDao).remove(eq(oldUserImpl.getId()));
-    verify(userDao).create((captor.capture()));
+    verify(userDao, atLeastOnce()).create((captor.capture()));
     assertEquals(newUserImpl.getId(), captor.getValue().getId());
     assertEquals(newUserImpl.getEmail(), captor.getValue().getEmail());
-    assertEquals(newUserImpl.getName(), captor.getValue().getName());
+    assertNotEquals(newUserImpl.getName(), captor.getValue().getName());
   }
 }

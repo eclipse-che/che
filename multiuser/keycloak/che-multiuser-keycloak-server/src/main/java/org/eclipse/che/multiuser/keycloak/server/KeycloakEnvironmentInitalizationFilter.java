@@ -77,7 +77,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
       try {
         User user =
-            userManager.getUserFromJWT(
+            userManager.getOrCreateUser(
                 claims.getSubject(),
                 claims.get("email", String.class),
                 claims.get("preferred_username", String.class));
