@@ -18,7 +18,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.BRANCH_PUSHED_ON_YOUR_FORK;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.FORK_CREATED;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.NEW_COMMITS_PUSHED;
-import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.PULL_REQUEST_UPDATED;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 
 import com.google.inject.Inject;
@@ -42,6 +41,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -52,7 +52,7 @@ public class PullRequestPluginWithForkTest {
   private static final String PROJECT_NAME = "pull-request-plugin-fork-test";
   private static final String PATH_TO_README_FILE = PROJECT_NAME + "/README.md";
   private static final String PULL_REQUEST_CREATED = "Your pull request has been created.";
-  private static final String PUll_REQUEST_UPDATED = "Your pull request has been updated.";
+  private static final String PULL_REQUEST_UPDATED = "Your pull request has been updated.";
   private static final String TITLE = NameGenerator.generate("Title-", 8);
   private static final String COMMENT = NameGenerator.generate("Comment-", 8);
 
@@ -72,8 +72,8 @@ public class PullRequestPluginWithForkTest {
   @Inject private Menu menu;
   @Inject private Loader loader;
   @Inject private Wizard wizard;
-  @Inject private CodenvyEditor editor;
   @Inject private TestUser testUser;
+  @Inject private CodenvyEditor editor;
   @Inject private Preferences preferences;
   @Inject private TestWorkspace testWorkspace;
   @Inject private ProjectExplorer projectExplorer;
@@ -138,8 +138,8 @@ public class PullRequestPluginWithForkTest {
     pullRequestPanel.clickUpdatePRBtn();
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(NEW_COMMITS_PUSHED);
-    pullRequestPanel.waitStatusOk(PULL_REQUEST_UPDATED);
-    pullRequestPanel.waitMessage(PUll_REQUEST_UPDATED);
+    pullRequestPanel.waitStatusOk(Status.PULL_REQUEST_UPDATED);
+    pullRequestPanel.waitMessage(PULL_REQUEST_UPDATED);
     pullRequestPanel.clickPullRequestBtn();
     pullRequestPanel.waitClosePanel();
   }
