@@ -8,20 +8,25 @@
 # the following section is for secure registries. when uncommented, a pull secret will be created
 #registry:
 #  host: my-secure-private-registry.com
-#  host: my-secure-private-registry.com
 #  username: myUser
 #  password: myPass
 
 cheImage: eclipse/che-server:nightly
 cheImagePullPolicy: Always
-
-cheKeycloakClientId: "che-public"
 cheKeycloakRealm: "che"
+cheKeycloakClientId: "che-public"
+
 
 global:
-  tlsEnabled: false
+  cheNamespace: ""
   multiuser: false
-  isHostBased: true
-  cheDomain: 192.168.99.100.nip.io
+  ingressDomain: 192.168.99.100.xip.io
   # See --annotations-prefix flag (https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md)
   ingressAnnotationsPrefix: "nginx."
+  # options: default-host, single-host, multi-host
+  serverStrategy: multi-host
+  tls:
+    enabled: false
+    useCertManager: true
+    useStaging: true
+    secretName: che-tls

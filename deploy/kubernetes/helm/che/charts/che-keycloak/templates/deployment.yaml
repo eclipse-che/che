@@ -45,7 +45,21 @@ spec:
           value: admin
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
+        - name: HTTP_PROTOCOL
+{{- if .Values.global.tlsEnabled }}
+          value: "https"
+{{- else }}
+          value: "http"
+{{- end }}
+        - name: KC_HOST
+          value:  "127.0.0.1:8080"
+        - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
+          value: {{ .Values.requireAdminPasswordChange | quote }}
         image: {{ .Values.image }}
+        lifecycle:
+          postStart:
+            exec:
+               command: ["sh", "-c", "status=0 ; while [ $status -ne 200 ]; do status=$(curl -s -o /dev/null -w %{http_code} http://localhost:8080/auth/js/keycloak.js);  echo $status >> /usr/share/message ; sleep 2 ; done; echo success > /usr/share/message1 ; /scripts/keycloak_config.sh" ]
         imagePullPolicy: Always
         name: keycloak
         livenessProbe:
@@ -79,6 +93,7 @@ spec:
         - mountPath: /opt/jboss/keycloak/standalone/log
           name: keycloak-log
       restartPolicy: Always
+      serviceAccountName: che-keycloak
       volumes:
       - name: keycloak-data
         persistentVolumeClaim:
