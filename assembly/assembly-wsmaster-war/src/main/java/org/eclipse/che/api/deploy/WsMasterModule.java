@@ -281,8 +281,7 @@ public class WsMasterModule extends AbstractModule {
       persistenceProperties.put(
           PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, JGROUPS_CONF_FILE);
       bindConstant().annotatedWith(Names.named("jgroups.config.file")).to(JGROUPS_CONF_FILE);
-      bind(RemoteSubscriptionStorage.class)
-          .to(DistributedRemoteSubscriptionStorage.class);
+      bind(RemoteSubscriptionStorage.class).to(DistributedRemoteSubscriptionStorage.class);
     } else {
       bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     }

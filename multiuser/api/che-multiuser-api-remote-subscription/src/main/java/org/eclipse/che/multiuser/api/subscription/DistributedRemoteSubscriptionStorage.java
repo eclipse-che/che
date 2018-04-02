@@ -12,10 +12,11 @@ package org.eclipse.che.multiuser.api.subscription;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.Collections;
+import java.io.Serializable;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionContext;
@@ -36,7 +37,7 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
 
   private static final String CHANNEL_NAME = "RemoteSubscriptionChannel";
 
-  private ReplicatedHashMap<String, Set<RemoteSubscriptionContext>> subscriptions;
+  private ReplicatedHashMap<CompositeKey, RemoteSubscriptionContext> subscriptions;
 
   @Inject
   public DistributedRemoteSubscriptionStorage(@Named("jgroups.config.file") String confFile)
@@ -54,24 +55,48 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
 
   @Override
   public Set<RemoteSubscriptionContext> getByMethod(String method) {
-    return subscriptions.getOrDefault(method, Collections.emptySet());
+    return subscriptions
+        .entrySet()
+        .stream()
+        .filter(e -> e.getKey().method.equals(method))
+        .map(Entry::getValue)
+        .collect(Collectors.toSet());
   }
 
   @Override
   public void addSubscription(String method, RemoteSubscriptionContext remoteSubscriptionContext) {
-    Set<RemoteSubscriptionContext> existing = subscriptions
-        .getOrDefault(method, ConcurrentHashMap.newKeySet(1));
-    existing.add(remoteSubscriptionContext);
-    subscriptions.put(method, existing);
+    subscriptions.put(
+        new CompositeKey(method, remoteSubscriptionContext.getEndpointId()),
+        remoteSubscriptionContext);
   }
 
   @Override
   public void removeSubscription(String method, String endpointId) {
-    Set<RemoteSubscriptionContext> existing = subscriptions
-        .getOrDefault(method, Collections.emptySet());
-    existing.removeIf(
-        remoteSubscriptionContext -> Objects
-            .equals(remoteSubscriptionContext.getEndpointId(), endpointId));
-    subscriptions.put(method, existing);
+    subscriptions.remove(new CompositeKey(method, endpointId));
+  }
+
+  static class CompositeKey implements Serializable {
+
+    private final String method;
+    private final String endpointId;
+
+    CompositeKey(String method, String endpointTd) {
+      this.method = method;
+      this.endpointId = endpointTd;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (o != null && o instanceof CompositeKey) {
+        CompositeKey s = (CompositeKey) o;
+        return method.equals(s.method) && endpointId.equals(s.endpointId);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(method, endpointId);
+    }
   }
 }
