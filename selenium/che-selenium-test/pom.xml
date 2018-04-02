@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>6.3.0-SNAPSHOT</version>
+        <version>6.4.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
@@ -97,10 +97,6 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>github-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -203,6 +199,7 @@
                         <exclude>**/resources/**/new_file</exclude>
                         <exclude>**/resources/**/pom-quick-start-archetype-context</exclude>
                         <exclude>**/resources/**/README.md</exclude>
+                        <exclude>**/resources/**/readme-txt</exclude>
                         <exclude>**/resources/**/replace-all</exclude>
                         <exclude>**/resources/**/replace</exclude>
                         <exclude>**/resources/**/some</exclude>

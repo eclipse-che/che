@@ -188,7 +188,7 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-    install(new org.eclipse.che.plugin.activity.inject.WorkspaceActivityModule());
+    install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
 
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
@@ -293,7 +293,7 @@ public class WsMasterModule extends AbstractModule {
     bind(
         org.eclipse.che.multiuser.permission.installer.InstallerRegistryServicePermissionsFilter
             .class);
-    bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
+    bind(org.eclipse.che.multiuser.permission.workspace.activity.ActivityPermissionsFilter.class);
     bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(
         org.eclipse.che.multiuser.permission.resource.filters.ResourceServicePermissionsFilter

@@ -86,8 +86,7 @@ import org.testng.annotations.Test;
  */
 public class DockerInternalRuntimeTest {
 
-  private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl("ws1", "env1", "usr1", "id1");
+  private static final RuntimeIdentity IDENTITY = new RuntimeIdentityImpl("ws1", "env1", "id1");
   private static final String DEV_MACHINE = "DEV_MACHINE";
   private static final String DB_MACHINE = "DB_MACHINE";
   private static final String SERVER_1 = "serv1";

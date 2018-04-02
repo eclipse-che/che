@@ -527,11 +527,7 @@ public class WorkspaceManagerTest {
   private TestInternalRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
       throws Exception {
     RuntimeIdentity identity =
-        new RuntimeIdentityImpl(
-            workspace.getId(),
-            workspace.getConfig().getDefaultEnv(),
-            workspace.getNamespace(),
-            "id");
+        new RuntimeIdentityImpl(workspace.getId(), workspace.getConfig().getDefaultEnv(), "id");
     //        doAnswer(inv -> {
     //            final WorkspaceImpl ws = (WorkspaceImpl)inv.getArguments()[0];
     //            ws.setStatus(status);
