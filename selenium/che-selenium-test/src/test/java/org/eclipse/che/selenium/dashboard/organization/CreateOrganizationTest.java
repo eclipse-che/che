@@ -18,6 +18,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -43,7 +44,7 @@ public class CreateOrganizationTest {
   private int initialOrgNumber;
 
   @Inject
-  @Named("admin")
+  @Named(CheSeleniumSuiteModule.ADMIN)
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;

@@ -66,6 +66,7 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
 
+  public static final String ADMIN = "admin";
   public static final String AUXILIARY = "auxiliary";
 
   private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
@@ -138,7 +139,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   }
 
   @Provides
-  @Named("admin")
+  @Named(ADMIN)
   public TestOrganizationServiceClient getAdminOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider,
       CheTestAdminHttpJsonRequestFactory requestFactory) {

@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
@@ -40,7 +41,7 @@ public class OrganizationMembersTest {
   @InjectTestOrganization private TestOrganization organization;
 
   @Inject
-  @Named("admin")
+  @Named(CheSeleniumSuiteModule.ADMIN)
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
