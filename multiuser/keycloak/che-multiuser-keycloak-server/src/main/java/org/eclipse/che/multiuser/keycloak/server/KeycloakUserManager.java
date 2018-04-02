@@ -34,6 +34,13 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.multiuser.api.account.personal.PersonalAccountUserManager;
 
+/**
+ * Extension of User Manager, providing utility operations related to Keycloak User management,
+ * and overriding create/remove operations to be compatible with
+ * {@link org.eclipse.che.multiuser.keycloak.server.dao.KeycloakProfileDao}
+ *
+ * @author Mykhailo Kuznietsov
+ */
 public class KeycloakUserManager extends PersonalAccountUserManager {
 
   @Inject
