@@ -70,7 +70,6 @@ import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitializer;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
-import org.eclipse.che.multiuser.api.subscription.DistributedRemoteSubscriptionStorage;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
@@ -86,15 +85,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
-import org.eclipse.persistence.config.CacheCoordinationProtocol;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 /** @author andrew00x */
 @DynaModule
 public class WsMasterModule extends AbstractModule {
-
-  private static final String JGROUPS_CONF_FILE = "jgroups/che-tcp.xml";
 
   @Override
   protected void configure() {
@@ -227,10 +223,7 @@ public class WsMasterModule extends AbstractModule {
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       configureMultiUserMode(persistenceProperties, infrastructure);
     } else {
-      persistenceProperties.put(
-          PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
-          "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
-      configureSingleUserMode();
+      configureSingleUserMode(persistenceProperties);
     }
 
     install(
@@ -249,8 +242,10 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
   }
 
-  private void configureSingleUserMode() {
-
+  private void configureSingleUserMode(Map<String, String> persistenceProperties) {
+    persistenceProperties.put(
+        PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
+        "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
 
@@ -273,19 +268,12 @@ public class WsMasterModule extends AbstractModule {
   private void configureMultiUserMode(
       Map<String, String> persistenceProperties, String infrastructure) {
 
-    // Replication stuff
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-      persistenceProperties.put(
-          PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
-      persistenceProperties.put(
-          PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, JGROUPS_CONF_FILE);
-      bindConstant().annotatedWith(Names.named("jgroups.config.file")).to(JGROUPS_CONF_FILE);
-      bind(RemoteSubscriptionStorage.class).to(DistributedRemoteSubscriptionStorage.class);
+      install(new ReplicationModule(persistenceProperties));
     } else {
       bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     }
-
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
         "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
