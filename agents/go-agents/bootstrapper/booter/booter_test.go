@@ -26,7 +26,6 @@ var (
 	testRuntimeID = RuntimeID{
 		Workspace:   "my-workspace",
 		Environment: "my-env",
-		OwnerName:   "me",
 		OwnerId:     "id",
 	}
 	testMachineName = "my-machine"

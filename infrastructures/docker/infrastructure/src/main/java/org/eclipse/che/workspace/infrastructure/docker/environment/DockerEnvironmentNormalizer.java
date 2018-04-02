@@ -40,11 +40,12 @@ public class DockerEnvironmentNormalizer {
     Map<String, DockerContainerConfig> containers = dockerEnvironment.getContainers();
     for (Map.Entry<String, DockerContainerConfig> containerEntry : containers.entrySet()) {
       DockerContainerConfig containerConfig = containerEntry.getValue();
+
       containerConfig.setContainerName(
           containerNameGenerator.generateContainerName(
               identity.getWorkspaceId(),
               containerConfig.getId(),
-              identity.getOwnerName(),
+              identity.getOwnerId(),
               containerEntry.getKey()));
     }
     normalizeNames(dockerEnvironment);
