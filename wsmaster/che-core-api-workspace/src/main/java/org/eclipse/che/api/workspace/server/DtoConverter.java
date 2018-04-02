@@ -246,7 +246,6 @@ public final class DtoConverter {
     return newDto(RuntimeIdentityDto.class)
         .withWorkspaceId(identity.getWorkspaceId())
         .withEnvName(identity.getEnvName())
-        .withOwnerName(identity.getOwnerName())
         .withOwnerId(identity.getOwnerId());
   }
 

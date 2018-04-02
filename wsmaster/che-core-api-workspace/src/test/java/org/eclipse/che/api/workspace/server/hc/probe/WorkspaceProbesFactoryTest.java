@@ -43,7 +43,7 @@ public class WorkspaceProbesFactoryTest {
   private static final ServerImpl SERVER = new ServerImpl().withUrl("https://localhost:4040/path1");
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "default", "usr1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "default", "id1");
 
   @Mock private MachineTokenProvider tokenProvider;
 
