@@ -1,4 +1,4 @@
-package com.codenvy.example.spring;
+package projects.Repo_For_Test_branch1.src.main.java.helloworld;
 
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;

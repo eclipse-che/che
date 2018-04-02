@@ -12,7 +12,7 @@
 
 -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
-   <bean name="/hello" class="com.codenvy.example.spring.GreetingController"></bean>
+   <bean name="/hello" class="projects.Repo_For_Test_branch1.src.main.java.helloworld.GreetingController"></bean>
    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
       <property name="prefix" value="/WEB-INF/jsp/" />
       <property name="suffix" value=".jsp" />

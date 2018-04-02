@@ -77,11 +77,16 @@ public class ImportProjectIntoSpecifiedBranchTest {
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, testUser.getEmail());
 
     Path sourceProject = Paths.get(getClass().getResource("/projects/Repo_For_Test").toURI());
+    Path sourceBranchProject =
+        Paths.get(getClass().getResource("/projects/Repo_For_Test_branch1").toURI());
+
     gitHubRepository.addContent(sourceProject);
 
     gitHubRepository.createBranchFromMaster(BRANCH_1);
     gitHubRepository.createBranchFromMaster(BRANCH_2);
     gitHubRepository.createBranchFromMaster(BRANCH_3);
+
+    gitHubRepository.addContent(sourceBranchProject, BRANCH_3);
 
     ide.open(ws);
   }
