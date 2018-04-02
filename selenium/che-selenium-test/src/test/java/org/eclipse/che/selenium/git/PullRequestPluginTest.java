@@ -207,7 +207,7 @@ public class PullRequestPluginTest {
 
     // open and check projects page on github
     pullRequestPanel.openPullRequestOnGitHub();
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
     checkGitHubUserPage();
 
     consumeFactoryOnGitHub();
