@@ -22,7 +22,6 @@ import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -32,7 +31,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
@@ -63,10 +61,8 @@ public class ImportProjectIntoSpecifiedBranchTest {
   @Inject private Menu menu;
   @Inject private Git git;
   @Inject private Loader loader;
-  @Inject private Preferences preferences;
   @Inject private Wizard projectWizard;
   @Inject private ImportProjectFromLocation importProject;
-  @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestProjectServiceClient projectServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestUser testUser;
@@ -78,7 +74,10 @@ public class ImportProjectIntoSpecifiedBranchTest {
 
     Path sourceProject = Paths.get(getClass().getResource("/projects/Repo_For_Test").toURI());
     Path sourceBranchProject =
-        Paths.get(getClass().getResource("/projects/Repo_For_Test_branch1").toURI());
+        Paths.get(
+            getClass()
+                .getResource("/projects/Repo_For_Test_branch1/src/main/java/helloworld")
+                .toURI());
 
     gitHubRepository.addContent(sourceProject);
 
@@ -87,7 +86,6 @@ public class ImportProjectIntoSpecifiedBranchTest {
     gitHubRepository.createBranchFromMaster(BRANCH_3);
 
     gitHubRepository.addContent(sourceBranchProject, BRANCH_3);
-
     ide.open(ws);
   }
 
@@ -147,8 +145,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
     git.closeBranchesForm();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/java/helloworld/GreetingController.java");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/GreetingController.java");
   }
 
   private void performImportIntoBranch(String url, String projectName, String branchName)
