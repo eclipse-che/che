@@ -98,9 +98,8 @@ export class NamespaceSelectorSvc {
       this.namespaceLabels = namespaces.map((namespace: che.INamespace) => {
         return namespace.label;
       });
-      return this.fetchNamespaceInfoById(this.namespaceId);
+      return (this.namespaceId) ? this.fetchNamespaceInfoById(this.namespaceId) : this.$q.when(null);
     }).catch((error: any) => {
-      this.$log.error(`Cannot fetch namespaces: ${error}`);
       return this.$q.when(null);
     }).then(() => {
       if (this.namespaceId) {

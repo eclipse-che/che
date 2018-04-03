@@ -82,6 +82,7 @@ import {NoGithubOauthDialogController} from '../create-workspace/project-source-
 import {EditMachineVolumeDialogController} from './workspace-machine-volumes/edit-volume-dialog/edit-volume-dialog.controller';
 import {MachineVolumes} from './workspace-machine-volumes/machine-volumes.directive';
 import {MachineVolumesController} from './workspace-machine-volumes/machine-volumes.controller';
+import {WorkspaceToolsConfig} from './workspace-tools/workspace-tools-config';
 
 
 
@@ -171,6 +172,9 @@ export class WorkspaceDetailsConfig {
     register.controller('MachineAgentsController', MachineAgentsController);
     register.directive('cheMachineAgents', MachineAgents);
 
+    /* tslint:disable */
+    new WorkspaceToolsConfig(register);
+    /* tslint:enable */
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
