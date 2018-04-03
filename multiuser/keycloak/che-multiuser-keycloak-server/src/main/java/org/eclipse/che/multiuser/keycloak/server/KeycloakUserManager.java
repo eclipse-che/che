@@ -99,6 +99,8 @@ public class KeycloakUserManager extends PersonalAccountUserManager {
    * @param username - user name from JWT token
    * @return user object from Che Database, with all needed actualization operations performed on
    *     him
+   * @throws ServerException if this exception during user creation, removal, or retrieval
+   * @throws ConflictException if this exception occurs during user creation or removal
    */
   public User getOrCreateUser(String id, String email, String username)
       throws ServerException, ConflictException {
