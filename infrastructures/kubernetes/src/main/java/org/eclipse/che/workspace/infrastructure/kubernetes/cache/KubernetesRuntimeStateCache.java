@@ -19,27 +19,74 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 
 /**
- * TODO Add docs TODO Add TCK
+ * Caches runtime state.
+ *
+ * <p>TODO Add TCK
  *
  * @author Sergii Leshchenko
  */
 public interface KubernetesRuntimeStateCache {
 
+  /**
+   * Returns runtime identities of cached runtimes.
+   *
+   * @throws InfrastructureException if any exception occurs during entities fetching
+   */
   Set<RuntimeIdentity> getIdentities() throws InfrastructureException;
 
-  boolean initStatus(RuntimeIdentity identity, String namespace, WorkspaceStatus newStatus)
+  /**
+   * Put runtime state into cache.
+   *
+   * @param state state to cache
+   * @return true if state is put, false if state is already cached
+   * @throws InfrastructureException if any exception occurs during entity putting
+   */
+  boolean put(KubernetesRuntimeState state) throws InfrastructureException;
+
+  /**
+   * Updates status of cached runtime.
+   *
+   * @param runtimeId runtime identified
+   * @param newStatus status to update
+   * @throws InfrastructureException if any exception occurs during status updating
+   */
+  void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus)
       throws InfrastructureException;
 
-  void updateStatus(RuntimeIdentity runtimeIdentity, WorkspaceStatus status)
-      throws InfrastructureException;
-
-  void delete(RuntimeIdentity runtimeIdentity) throws InfrastructureException;
-
-  WorkspaceStatus getStatus(RuntimeIdentity identity) throws InfrastructureException;
-
-  Optional<KubernetesRuntimeState> get(RuntimeIdentity identity) throws InfrastructureException;
-
-  boolean replaceStatus(
+  /**
+   * Updates status of cached runtime if previous value matches the specified predicate.
+   *
+   * @param identity runtime identifier
+   * @param predicate predicate to test the previous status
+   * @param newStatus status to update
+   * @return true if status is updated, false if status is not specified because
+   * @throws InfrastructureException if any exception occurs during status updating
+   */
+  boolean updateStatus(
       RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
       throws InfrastructureException;
+
+  /**
+   * Returns status of the runtime with specified identifier.
+   *
+   * @param runtimeId runtime identifier
+   * @throws InfrastructureException if any exception occurs during status fetching
+   */
+  WorkspaceStatus getStatus(RuntimeIdentity runtimeId) throws InfrastructureException;
+
+  /**
+   * Returns optional with state of the runtime with specified identifier.
+   *
+   * @param runtimeId runtime identifier
+   * @throws InfrastructureException if any exception occurs during state fetching
+   */
+  Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId) throws InfrastructureException;
+
+  /**
+   * Removes state of the runtime with specified identifier.
+   *
+   * @param runtimeId runtime identifier
+   * @throws InfrastructureException if any exception occurs during state removing
+   */
+  void remove(RuntimeIdentity runtimeId) throws InfrastructureException;
 }

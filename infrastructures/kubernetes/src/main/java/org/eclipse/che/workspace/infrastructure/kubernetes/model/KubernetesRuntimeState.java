@@ -34,8 +34,12 @@ public class KubernetesRuntimeState {
   public KubernetesRuntimeState() {}
 
   public KubernetesRuntimeState(
-      RuntimeId runtimeRuntimeId, String namespace, WorkspaceStatus status) {
-    this.runtimeRuntimeId = runtimeRuntimeId;
+      RuntimeIdentity runtimeIdentity, String namespace, WorkspaceStatus status) {
+    this.runtimeRuntimeId =
+        new RuntimeId(
+            runtimeIdentity.getWorkspaceId(),
+            runtimeIdentity.getEnvName(),
+            runtimeIdentity.getOwnerId());
     this.namespace = namespace;
     this.status = status;
   }

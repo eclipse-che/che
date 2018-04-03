@@ -19,27 +19,81 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 
 /**
- * TODO Add docs TODO Add TCK
+ * Caches kubernetes machines.
+ *
+ * <p>TODO Add TCK
  *
  * @author Sergii Leshchenko
  */
 public interface KubernetesMachineCache {
 
-  void add(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
+  /**
+   * Put machine state into cache.
+   *
+   * <p>Note that this method MUST NOT be used for machine state updating.
+   *
+   * @param runtimeIdentity runtime identifier
+   * @param machine machine to cache
+   * @throws InfrastructureException if machine with specified runtime id and name is already cached
+   * @throws InfrastructureException if any exception occurs during machine caching
+   */
+  void put(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
       throws InfrastructureException;
 
+  /**
+   * Updates server status.
+   *
+   * @param runtimeIdentity runtime identifier
+   * @param machineName machine name to which the server belong to
+   * @param serverName server name
+   * @param newStatus status to update
+   * @return true if status is update, false if the server already has the same status.
+   * @throws InfrastructureException if any exception occurs during server status updating
+   */
   boolean updateServerStatus(
-      RuntimeIdentity runtimeIdentity, String machineName, String serverRef, ServerStatus status)
+      RuntimeIdentity runtimeIdentity,
+      String machineName,
+      String serverName,
+      ServerStatus newStatus)
       throws InfrastructureException;
 
+  /**
+   * Returns cached server.
+   *
+   * @param runtimeIdentity runtime identifier
+   * @param machineName machine name to which the server belong to
+   * @param serverName server name
+   * @throws InfrastructureException if any exception occurs during server fetching
+   */
   ServerImpl getServer(RuntimeIdentity runtimeIdentity, String machineName, String serverName)
       throws InfrastructureException;
 
-  void updateMachineStatus(RuntimeIdentity runtimeIdentity, String name, MachineStatus status)
+  /**
+   * Updates machine status.
+   *
+   * @param runtimeIdentity runtime identifier
+   * @param machineName machine name to which the server belong to
+   * @param newStatus status to update
+   * @throws InfrastructureException if any exception occurs during machine status updating
+   */
+  void updateMachineStatus(
+      RuntimeIdentity runtimeIdentity, String machineName, MachineStatus newStatus)
       throws InfrastructureException;
 
+  /**
+   * Returns cached machine which belong to the specified runtime id.
+   *
+   * @param runtimeIdentity runtime identifier.
+   * @throws InfrastructureException if any exception occurs during machines fetching
+   */
   Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity)
       throws InfrastructureException;
 
-  void delete(RuntimeIdentity identity) throws InfrastructureException;
+  /**
+   * Returns cached machine which belong to the specified runtime id.
+   *
+   * @param identity runtime identity
+   * @throws InfrastructureException if any exception occurs during machines removing
+   */
+  void remove(RuntimeIdentity identity) throws InfrastructureException;
 }

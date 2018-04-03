@@ -62,6 +62,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEventHandler;
@@ -189,7 +190,7 @@ public class KubernetesInternalRuntime<
   private void removeCachedState() {
     RuntimeIdentity identity = getContext().getIdentity();
     try {
-      runtimeStatuses.delete(identity);
+      runtimeStatuses.remove(identity);
     } catch (InfrastructureException ie) {
       LOG.error(
           "Error occured while removing status of the runtime with id '%s'. Cause: %s",
@@ -197,7 +198,7 @@ public class KubernetesInternalRuntime<
     }
 
     try {
-      machines.delete(identity);
+      machines.remove(identity);
     } catch (InfrastructureException ie) {
       LOG.error(
           "Error occured while removing machines of the runtime with id '%s'. Cause: %s",
@@ -470,7 +471,7 @@ public class KubernetesInternalRuntime<
         String machineName = Names.machineName(toCreate, container);
 
         String workspaceId = getContext().getIdentity().getWorkspaceId();
-        machines.add(
+        machines.put(
             getContext().getIdentity(),
             new KubernetesMachineImpl(
                 workspaceId,
@@ -492,7 +493,7 @@ public class KubernetesInternalRuntime<
 
   @Override
   protected void markStopping() throws InfrastructureException {
-    if (!runtimeStatuses.replaceStatus(
+    if (!runtimeStatuses.updateStatus(
         getContext().getIdentity(), s -> s == WorkspaceStatus.RUNNING, WorkspaceStatus.STOPPING)) {
       throw new StateException("The environment must be running");
     }
@@ -500,8 +501,8 @@ public class KubernetesInternalRuntime<
 
   @Override
   protected void markStopped() throws InfrastructureException {
-    runtimeStatuses.delete(getContext().getIdentity());
-    machines.delete(getContext().getIdentity());
+    runtimeStatuses.remove(getContext().getIdentity());
+    machines.remove(getContext().getIdentity());
   }
 
   @Override
@@ -511,8 +512,9 @@ public class KubernetesInternalRuntime<
 
   @Override
   protected void markStarting() throws InfrastructureException {
-    if (!runtimeStatuses.initStatus(
-        getContext().getIdentity(), namespace.getName(), WorkspaceStatus.STARTING)) {
+    if (!runtimeStatuses.put(
+        new KubernetesRuntimeState(
+            getContext().getIdentity(), namespace.getName(), WorkspaceStatus.STARTING))) {
       throw new StateException("Runtime is already started");
     }
   }
