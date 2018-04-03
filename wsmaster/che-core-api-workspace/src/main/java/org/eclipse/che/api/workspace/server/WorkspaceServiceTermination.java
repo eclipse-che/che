@@ -43,9 +43,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
 
   @Inject
   public WorkspaceServiceTermination(
-      WorkspaceSharedPool sharedPool,
-      WorkspaceRuntimes runtimes,
-      EventService eventService) {
+      WorkspaceSharedPool sharedPool, WorkspaceRuntimes runtimes, EventService eventService) {
     this.sharedPool = sharedPool;
     this.runtimes = runtimes;
     this.eventService = eventService;
@@ -83,7 +81,8 @@ public class WorkspaceServiceTermination implements ServiceTermination {
 
     @Override
     public void onEvent(WorkspaceStatusEvent event) {
-      if (event.getStatus() == WorkspaceStatus.STOPPED || event.getStatus() == WorkspaceStatus.RUNNING) {
+      if (event.getStatus() == WorkspaceStatus.STOPPED
+          || event.getStatus() == WorkspaceStatus.RUNNING) {
         eventService.publish(
             asDto(
                 new SystemServiceItemStoppedEvent(

@@ -67,6 +67,7 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -542,7 +543,9 @@ public class WorkspaceManagerTest {
     doAnswer(
             inv -> {
               workspace.setStatus(status);
-              workspace.setRuntime(runtime);
+              workspace.setRuntime(
+                  new RuntimeImpl(
+                      runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner()));
               return null;
             })
         .when(runtimes)

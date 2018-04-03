@@ -43,6 +43,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -151,7 +152,7 @@ public class WorkspaceRuntimes {
     WorkspaceStatus workspaceStatus = statuses.get(workspace.getId());
     if (workspaceStatus != null) {
       try {
-        workspace.setRuntime(new RuntimeImpl(getRuntime(workspace.getId())));
+        workspace.setRuntime(getRuntime(workspace.getId()));
       } catch (InfrastructureException e) {
         throw new ServerException(
             "Error occured while fetching runtime status. Cause: " + e.getMessage());
@@ -162,7 +163,7 @@ public class WorkspaceRuntimes {
     }
   }
 
-  private InternalRuntime<?> getRuntime(String workspaceId)
+  private InternalRuntime<?> getInternalRuntime(String workspaceId)
       throws InfrastructureException, ServerException {
     InternalRuntime<?> runtime = runtimes.get(workspaceId);
     if (runtime == null) {
@@ -181,6 +182,12 @@ public class WorkspaceRuntimes {
       }
     }
     return runtime;
+  }
+
+  private Runtime getRuntime(String workspaceId) throws ServerException, InfrastructureException {
+    InternalRuntime<?> internalRuntime = getInternalRuntime(workspaceId);
+    return new RuntimeImpl(
+        internalRuntime.getActiveEnv(), internalRuntime.getMachines(), internalRuntime.getOwner());
   }
 
   /**
@@ -390,7 +397,7 @@ public class WorkspaceRuntimes {
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
       try {
-        InternalRuntime<?> runtime = getRuntime(workspaceId);
+        InternalRuntime<?> runtime = getInternalRuntime(workspaceId);
 
         runtime.stop(options);
 
@@ -556,7 +563,9 @@ public class WorkspaceRuntimes {
   }
 
   public Set<String> getInProgress() {
-    return statuses.entrySet().stream()
+    return statuses
+        .entrySet()
+        .stream()
         .filter(e -> e.getValue() == STARTING || e.getValue() == STOPPING)
         .map(Map.Entry::getKey)
         .collect(Collectors.toSet());

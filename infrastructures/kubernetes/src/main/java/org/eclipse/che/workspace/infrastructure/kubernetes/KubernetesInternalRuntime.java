@@ -401,17 +401,9 @@ public class KubernetesInternalRuntime<
   }
 
   @Override
-  public Map<String, ? extends KubernetesMachineImpl> getInternalMachines() {
-    try {
-      return ImmutableMap.copyOf(machines.getMachines(getContext().getIdentity()));
-    } catch (InfrastructureException e) {
-      // TODO Maybe don't extend Runtime by Internal Runtime and
-      // TODO add an ability to throw InfrastructureException when machines retrieving
-      LOG.error(
-          "Error occured while fetching machines of runtime for workspace '%s'. Cause: %s",
-          getContext().getIdentity().getWorkspaceId(), e.getMessage());
-    }
-    return emptyMap();
+  public Map<String, ? extends KubernetesMachineImpl> getInternalMachines()
+      throws InfrastructureException {
+    return ImmutableMap.copyOf(machines.getMachines(getContext().getIdentity()));
   }
 
   @Override

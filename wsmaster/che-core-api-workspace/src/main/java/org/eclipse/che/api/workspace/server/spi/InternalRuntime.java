@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -33,7 +32,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
  *
  * @author gazarenkov
  */
-public abstract class InternalRuntime<T extends RuntimeContext> implements Runtime {
+public abstract class InternalRuntime<T extends RuntimeContext> {
 
   private final T context;
   private final URLRewriter urlRewriter;
@@ -60,23 +59,19 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
     this.status = status;
   }
 
-  @Override
   public String getActiveEnv() {
     return context.getIdentity().getEnvName();
   }
 
-  @Override
   public String getOwner() {
     return context.getIdentity().getOwnerId();
   }
 
-  @Override
   public List<? extends Warning> getWarnings() {
     return warnings;
   }
 
-  @Override
-  public Map<String, ? extends Machine> getMachines() {
+  public Map<String, ? extends Machine> getMachines() throws InfrastructureException {
     return getInternalMachines()
         .entrySet()
         .stream()
@@ -95,7 +90,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
    *
    * <p>Implementation should not return null
    */
-  protected abstract Map<String, ? extends Machine> getInternalMachines();
+  protected abstract Map<String, ? extends Machine> getInternalMachines()
+      throws InfrastructureException;
 
   /**
    * Returns workspace status.
