@@ -40,6 +40,7 @@ import {CheResourcesDistribution} from './che-resources-distribution.factory';
 import {CheTeam} from './che-team.factory';
 import {CheTeamEventsManager} from './che-team-events-manager.factory';
 import {CheInvite} from './che-invite.factory';
+import {NpmRegistry} from './npm-registry.factory';
 
 export class ApiConfig {
 
@@ -74,5 +75,6 @@ export class ApiConfig {
     register.factory('cheTeam', CheTeam);
     register.factory('cheTeamEventsManager', CheTeamEventsManager);
     register.factory('cheInvite', CheInvite);
+    register.factory('npmRegistry', NpmRegistry);
   }
 }
