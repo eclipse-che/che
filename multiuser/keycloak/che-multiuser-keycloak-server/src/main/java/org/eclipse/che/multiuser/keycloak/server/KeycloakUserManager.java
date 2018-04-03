@@ -83,8 +83,7 @@ public class KeycloakUserManager extends PersonalAccountUserManager {
 
   /**
    * Method is used to retrieve user object from Che DB for given user {@code id}, {@code email},
-   * and {@code username}, that would appear in Keycloak JWT token. Various actualization operations
-   * may be performed:
+   * and {@code username}. Various actualization operations may be performed:
    *
    * <p>- if user is found in Che DB by the given {@code id}, then it will check, if it's email,
    * matches the {@code email} , and update it in DB if necessary.
@@ -94,9 +93,9 @@ public class KeycloakUserManager extends PersonalAccountUserManager {
    * way, there will be no conflict with existing user id or email upon recreation. In case of
    * conflict with user name, it may be prepended randomized symbols
    *
-   * @param id - user id from JWT token
-   * @param email - user email from JWT token
-   * @param username - user name from JWT token
+   * @param id - user id from
+   * @param email - user email
+   * @param username - user name
    * @return user object from Che Database, with all needed actualization operations performed on
    *     him
    * @throws ServerException if this exception during user creation, removal, or retrieval
@@ -126,7 +125,10 @@ public class KeycloakUserManager extends PersonalAccountUserManager {
     return actualizeUserEmail(userById.get(), email);
   }
 
-  /** Performs check that emails in JWT and local DB are match, and synchronize them otherwise */
+  /**
+   * Performs check that {@code email} matches with the one in local DB, and synchronize them
+   * otherwise
+   */
   private User actualizeUserEmail(User actualUser, String email) throws ServerException {
     if (actualUser.getEmail().equals(email)) {
       return actualUser;
