@@ -28,7 +28,7 @@ package org.slf4j.helpers;
  *
  * Note:
  * Taken form org.slf4j.helpers.
- * Class doesn't nothing, contains empty methods.
+ * Class does nothing, contains empty methods
  * Adding only for porting slf4j logger to the GWT app
  *
  *
