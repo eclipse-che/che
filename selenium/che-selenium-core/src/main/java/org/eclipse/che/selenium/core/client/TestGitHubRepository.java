@@ -87,12 +87,25 @@ public class TestGitHubRepository {
    * @throws IOException
    */
   public void addContent(Path pathToRootContentDirectory) throws IOException {
+    addContent(pathToRootContentDirectory, null);
+  }
+
+  /**
+   * Copies content of directory {@code pathToRootContentDirectory} to the specified branch in the
+   * GitHub repository. It tries to recreate the file ones again in case of FileNotFoundException
+   * occurs.
+   *
+   * @param pathToRootContentDirectory path to the directory with content
+   * @param branch name of the target branch
+   * @throws IOException
+   */
+  public void addContent(Path pathToRootContentDirectory, String branch) throws IOException {
     Files.walk(pathToRootContentDirectory)
         .filter(Files::isRegularFile)
         .forEach(
             pathToFile -> {
               try {
-                createFile(pathToRootContentDirectory, pathToFile);
+                createFile(pathToRootContentDirectory, pathToFile, branch);
               } catch (IOException e) {
                 throw new UncheckedIOException(e);
               }
@@ -187,19 +200,21 @@ public class TestGitHubRepository {
   }
 
   /**
-   * Creates file in GitHub repository.
+   * Creates file in GitHub repository in the specified {@code branch}.
    *
    * @param pathToRootContentDirectory path to the root directory of file locally
    * @param pathToFile path to file locally
+   * @param branch name of the target branch
    * @throws IOException
    */
-  private void createFile(Path pathToRootContentDirectory, Path pathToFile) throws IOException {
+  private void createFile(Path pathToRootContentDirectory, Path pathToFile, String branch)
+      throws IOException {
     byte[] contentBytes = Files.readAllBytes(pathToFile);
     String relativePath = pathToRootContentDirectory.relativize(pathToFile).toString();
     String commitMessage = String.format("Add file %s", relativePath);
 
     try {
-      ghRepo.createContent(contentBytes, commitMessage, relativePath);
+      ghRepo.createContent(contentBytes, commitMessage, relativePath, branch);
     } catch (GHFileNotFoundException e) {
       // try to create content once again
       LOG.warn(
