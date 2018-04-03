@@ -46,7 +46,6 @@ public class KubernetesNamespaceFactory {
 
   public KubernetesNamespace create(String workspaceId, String namespace)
       throws InfrastructureException {
-    // TODO Maybe don't prepare namespace in this case
-    return new KubernetesNamespace(clientFactory, namespace, workspaceId);
+    return new KubernetesNamespace(clientFactory, namespace, workspaceId, false);
   }
 }

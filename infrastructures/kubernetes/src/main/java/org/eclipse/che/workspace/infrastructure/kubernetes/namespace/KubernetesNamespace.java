@@ -83,7 +83,7 @@ public class KubernetesNamespace {
     this(clientFactory, name, workspaceId, true);
   }
 
-  protected KubernetesNamespace(
+  public KubernetesNamespace(
       KubernetesClientFactory clientFactory, String name, String workspaceId, boolean doPrepare)
       throws InfrastructureException {
     this.workspaceId = workspaceId;

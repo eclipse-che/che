@@ -47,7 +47,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   public OpenShiftProject create(String workspaceId, String projectName)
       throws InfrastructureException {
-    // TODO Maybe don't prepare namespace in this case
-    return new OpenShiftProject(clientFactory, projectName, workspaceId);
+    return new OpenShiftProject(clientFactory, projectName, workspaceId, true);
   }
 }

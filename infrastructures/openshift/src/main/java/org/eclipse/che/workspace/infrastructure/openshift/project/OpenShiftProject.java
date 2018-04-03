@@ -49,9 +49,17 @@ public class OpenShiftProject extends KubernetesNamespace {
 
   public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId)
       throws InfrastructureException {
+    this(clientFactory, name, workspaceId, true);
+  }
+
+  public OpenShiftProject(
+      OpenShiftClientFactory clientFactory, String name, String workspaceId, boolean doPrepare)
+      throws InfrastructureException {
     super(clientFactory, name, workspaceId, false);
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
-    doPrepare(name, clientFactory.create(workspaceId), clientFactory.createOC(workspaceId));
+    if (doPrepare) {
+      doPrepare(name, clientFactory.create(workspaceId), clientFactory.createOC(workspaceId));
+    }
   }
 
   private void doPrepare(String name, KubernetesClient kubeClient, OpenShiftClient osClient)
