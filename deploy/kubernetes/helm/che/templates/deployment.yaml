@@ -19,7 +19,7 @@ spec:
       app: che
   strategy:
 {{- if .Values.global.multiuser }}
-    type: Rolling
+    type: RollingUpdate
 {{- else }}
     type: Recreate
 {{- end }}
