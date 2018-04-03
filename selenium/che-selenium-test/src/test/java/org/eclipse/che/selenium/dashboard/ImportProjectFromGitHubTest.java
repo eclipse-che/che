@@ -105,7 +105,7 @@ public class ImportProjectFromGitHubTest {
 
   private void connectGithubAccount() {
     projectSourcePage.clickOnConnectGithubAccountButton();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(ideWin);
+    seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
     projectSourcePage.waitAuthorizationPageOpened();
     projectSourcePage.typeLogin(gitHubUsername);
@@ -114,7 +114,7 @@ public class ImportProjectFromGitHubTest {
     seleniumWebDriver.switchTo().window(ideWin);
 
     if (!projectSourcePage.isGithubProjectsListDisplayed()) {
-      seleniumWebDriverHelper.switchToNoneCurrentWindow(ideWin);
+      seleniumWebDriverHelper.switchToNextWindow(ideWin);
       projectSourcePage.waitAuthorizeBtn();
       projectSourcePage.clickOnAuthorizeBtn();
       seleniumWebDriver.switchTo().window(ideWin);

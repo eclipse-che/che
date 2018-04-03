@@ -135,7 +135,7 @@ public class AuthorizeOnGithubFromImportTest {
 
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(ideWin);
+    seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
     gitHub.waitAuthorizationPageOpened();
     gitHub.typeLogin(gitHubUsername);

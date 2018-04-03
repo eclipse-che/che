@@ -905,8 +905,8 @@ public class SeleniumWebDriverHelper {
   }
 
   /** Switches to IDE frame and waits for Project Explorer is available. */
-  public void switchToIdeFrameAndWaitAvailability() {
-    switchToIdeFrameAndWaitAvailability(APPLICATION_START_TIMEOUT_SEC);
+  public String switchToIdeFrameAndWaitAvailability() {
+    return switchToIdeFrameAndWaitAvailability(APPLICATION_START_TIMEOUT_SEC);
   }
 
   /**
@@ -914,7 +914,7 @@ public class SeleniumWebDriverHelper {
    *
    * @param timeout waiting time in seconds
    */
-  public void switchToIdeFrameAndWaitAvailability(int timeout) {
+  public String switchToIdeFrameAndWaitAvailability(int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -928,6 +928,8 @@ public class SeleniumWebDriverHelper {
                   seleniumWebDriver.switchTo().parentFrame();
                   return false;
                 });
+
+    return seleniumWebDriver.getWindowHandle();
   }
 
   /** Waits while in a browser appears more than one window */
@@ -946,12 +948,12 @@ public class SeleniumWebDriverHelper {
    * Switches to next browser window (this means that if opened 2 windows, and we are in the window
    * 1, we will be switched into the window 2)
    *
-   * @param currentWindowHandler
+   * @param windowHandlerToSwitchFrom
    */
-  public void switchToNoneCurrentWindow(String currentWindowHandler) {
+  public void switchToNextWindow(String windowHandlerToSwitchFrom) {
     waitOpenedSomeWin();
     for (String handle : seleniumWebDriver.getWindowHandles()) {
-      if (!currentWindowHandler.equals(handle)) {
+      if (!windowHandlerToSwitchFrom.equals(handle)) {
         seleniumWebDriver.switchTo().window(handle);
         break;
       }

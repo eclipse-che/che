@@ -104,8 +104,7 @@ public class WorkingWithJavaMySqlStackTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    currentWindow = seleniumWebDriver.getWindowHandle();
+    currentWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
     projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME, PROJECT_FOLDER);
@@ -129,7 +128,7 @@ public class WorkingWithJavaMySqlStackTest {
 
     // Run the application
     consoles.clickOnPreviewUrl();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     checkWebJavaPetclinicAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);

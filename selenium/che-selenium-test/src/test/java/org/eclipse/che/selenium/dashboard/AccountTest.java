@@ -67,7 +67,7 @@ public class AccountTest {
             .isEquals(dashboardAccount.getCurrentFieldsValue()));
     dashboardAccount.clickOnEditButton();
 
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(parentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(parentWindow);
 
     keycloakAccount.waitAccountPageIsLoaded();
 
@@ -98,7 +98,7 @@ public class AccountTest {
     dashboardAccount.waitPageIsLoaded();
     dashboardAccount.clickOnEditButton();
 
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(parentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(parentWindow);
     keycloakAccount.waitAccountPageIsLoaded();
     keycloakHeaderButtons.clickOnPasswordButton();
     keycloakPasswordPage.waitPasswordPageIsLoaded();

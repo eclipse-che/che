@@ -89,7 +89,7 @@ public class CheckRunCommandFeatureTest {
     dashboardFactories.clickAddOnAddAction();
     dashboardFactories.clickOnOpenFactory();
     String currentWin = seleniumWebDriver.getWindowHandle();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWin);
+    seleniumWebDriverHelper.switchToNextWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitItem(PROJECT_NAME);

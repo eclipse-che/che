@@ -133,7 +133,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     factoryWidget.clickOnCreateBtn();
     factoryWidget.waitTextIntoFactoryField(ideUrlProvider.get().toString());
     factoryWidget.clickOnInvokeBtn();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWin);
+    seleniumWebDriverHelper.switchToNextWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     try {

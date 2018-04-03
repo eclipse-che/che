@@ -123,7 +123,7 @@ public class AuthorizeOnGithubFromPreferencesTest {
     askDialog.waitFormToOpen(25);
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(ideWin);
+    seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
     gitHub.waitAuthorizationPageOpened();
     gitHub.typeLogin(gitHubUsername);

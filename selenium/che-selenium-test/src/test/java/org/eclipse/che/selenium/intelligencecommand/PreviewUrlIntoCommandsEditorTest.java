@@ -92,7 +92,7 @@ public class PreviewUrlIntoCommandsEditorTest {
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     consoles.waitPreviewUrlIsPresent();
     consoles.clickOnPreviewUrl();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     checkPageOpenedByPreviewUrl();
   }
 

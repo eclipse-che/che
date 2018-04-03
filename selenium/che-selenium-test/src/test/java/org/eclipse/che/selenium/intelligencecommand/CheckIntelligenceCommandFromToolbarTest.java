@@ -151,7 +151,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private boolean switchToOpenedWindowAndCheckTextIsPresent(
       String currentWindow, String expectedText) {
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     boolean result = getBodyText().contains(expectedText);
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
@@ -168,7 +168,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private Boolean isPreviewPageAvailable(String currentWindow, String expectedText) {
     consoles.clickOnPreviewUrl();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
     if (getBodyText().contains(expectedText)) {
       seleniumWebDriver.close();

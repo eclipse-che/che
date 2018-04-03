@@ -86,8 +86,7 @@ public class WorkingWithNodeWsTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    currentWindow = seleniumWebDriver.getWindowHandle();
+    currentWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -113,7 +112,7 @@ public class WorkingWithNodeWsTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     consoles.selectProcessInProcessConsoleTreeByName(RUN_PROCESS);
     consoles.clickOnPreviewUrl();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     checkAngularYeomanAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);

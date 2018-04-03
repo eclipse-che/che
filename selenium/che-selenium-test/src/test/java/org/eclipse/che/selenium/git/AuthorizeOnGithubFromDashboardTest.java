@@ -97,7 +97,7 @@ public class AuthorizeOnGithubFromDashboardTest {
     projectSourcePage.clickOnConnectGithubAccountButton();
 
     // login to github
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(ideWin);
+    seleniumWebDriverHelper.switchToNextWindow(ideWin);
     projectSourcePage.waitAuthorizationPageOpened();
     projectSourcePage.typeLogin(gitHubUsername);
     projectSourcePage.typePassword(gitHubPassword);

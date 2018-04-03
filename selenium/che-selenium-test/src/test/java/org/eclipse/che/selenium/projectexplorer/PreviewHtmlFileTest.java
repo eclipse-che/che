@@ -68,7 +68,7 @@ public class PreviewHtmlFileTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/file.html");
     projectExplorer.clickOnItemInContextMenu(PREVIEW);
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     checkWebElementsHtmlFile("//h1[text()='Hello, this is check!']");
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
@@ -85,7 +85,7 @@ public class PreviewHtmlFileTest {
     editor.waitTextIntoEditor(H2_CONTENT);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/file.html");
     projectExplorer.clickOnItemInContextMenu(PREVIEW);
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     checkWebElementsHtmlFile("//h2[@style='color:red' and text()='Test content']");
     seleniumWebDriver.switchTo().window(currentWindow);
     editor.setCursorToLine(19);
@@ -93,7 +93,7 @@ public class PreviewHtmlFileTest {
     editor.typeTextIntoEditor(Keys.ARROW_UP.toString());
     editor.typeTextIntoEditor(BODY_CONTENT);
     editor.waitTextIntoEditor(BODY_CONTENT);
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     loader.waitOnClosed();
     checkWebElementsHtmlFile("//h2[@style='color:red' and text()='Test content']");
     loader.waitOnClosed();

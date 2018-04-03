@@ -91,7 +91,7 @@ public class CreateNamedFactoryFromDashboardTest {
     dashboardFactories.waitJsonFactoryIsNotEmpty();
     dashboard.waitNotificationIsClosed();
     dashboardFactories.clickFactoryIDUrl();
-    seleniumWebDriverHelper.switchToNoneCurrentWindow(currentWin);
+    seleniumWebDriverHelper.switchToNextWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitItem(PROJECT_NAME);
