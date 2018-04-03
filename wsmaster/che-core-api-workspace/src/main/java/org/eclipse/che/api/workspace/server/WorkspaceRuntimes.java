@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -554,12 +555,23 @@ public class WorkspaceRuntimes {
     return ImmutableSet.copyOf(runtimes.keySet());
   }
 
+  public Set<String> getInProgress() {
+    return statuses.entrySet().stream()
+        .filter(e -> e.getValue() == STARTING || e.getValue() == STOPPING)
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toSet());
+  }
+
   /**
    * Returns true if there is at least one workspace running(it's status is different from {@link
    * WorkspaceStatus#STOPPED}), otherwise returns false.
    */
   public boolean isAnyRunning() {
     return !runtimes.isEmpty();
+  }
+
+  public boolean isAnyInProgress() {
+    return statuses.containsValue(STARTING) || statuses.containsValue(STOPPING);
   }
 
   /**

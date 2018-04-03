@@ -13,16 +13,12 @@ package org.eclipse.che.api.workspace.server;
 import static org.eclipse.che.api.system.server.DtoConverter.asDto;
 
 import com.google.common.base.Preconditions;
-import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -30,8 +26,6 @@ import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Terminates workspace service.
@@ -40,23 +34,18 @@ import org.slf4j.LoggerFactory;
  */
 public class WorkspaceServiceTermination implements ServiceTermination {
 
-  private static final Logger LOG = LoggerFactory.getLogger(WorkspaceServiceTermination.class);
-
   /** Delay in MS between runtimes stopped checks. The value is experimental. */
   private static final long DEFAULT_PULL_RUNTIMES_PERIOD_MS = TimeUnit.SECONDS.toMillis(1);
 
-  private final WorkspaceManager manager;
   private final WorkspaceSharedPool sharedPool;
   private final WorkspaceRuntimes runtimes;
   private final EventService eventService;
 
   @Inject
   public WorkspaceServiceTermination(
-      WorkspaceManager manager,
       WorkspaceSharedPool sharedPool,
       WorkspaceRuntimes runtimes,
       EventService eventService) {
-    this.manager = manager;
     this.sharedPool = sharedPool;
     this.runtimes = runtimes;
     this.eventService = eventService;
@@ -74,29 +63,10 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     WorkspaceStoppedEventsPropagator propagator = new WorkspaceStoppedEventsPropagator();
     eventService.subscribe(propagator);
     try {
-      stopRunningAndStartingWorkspacesAsync();
-      waitAllWorkspacesStopped();
+      waitAllWorkspacesRunningOrStopped();
       sharedPool.shutdown();
     } finally {
       eventService.unsubscribe(propagator);
-    }
-  }
-
-  private void stopRunningAndStartingWorkspacesAsync() {
-    for (String workspaceId : runtimes.getRuntimesIds()) {
-      WorkspaceStatus status = runtimes.getStatus(workspaceId);
-      if (status == WorkspaceStatus.RUNNING || status == WorkspaceStatus.STARTING) {
-        try {
-          manager.stopWorkspace(workspaceId, Collections.emptyMap());
-        } catch (ServerException | ConflictException | NotFoundException x) {
-          if (runtimes.hasRuntime(workspaceId)) {
-            LOG.error(
-                "Couldn't get the workspace '{}' while it's running, the occurred error: '{}'",
-                workspaceId,
-                x.getMessage());
-          }
-        }
-      }
     }
   }
 
@@ -107,13 +77,13 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     private final AtomicInteger currentlyStopped;
 
     private WorkspaceStoppedEventsPropagator() {
-      this.totalRunning = runtimes.getRuntimesIds().size();
+      this.totalRunning = runtimes.getInProgress().size();
       this.currentlyStopped = new AtomicInteger(0);
     }
 
     @Override
     public void onEvent(WorkspaceStatusEvent event) {
-      if (event.getStatus() == WorkspaceStatus.STOPPED) {
+      if (event.getStatus() == WorkspaceStatus.STOPPED || event.getStatus() == WorkspaceStatus.RUNNING) {
         eventService.publish(
             asDto(
                 new SystemServiceItemStoppedEvent(
@@ -125,14 +95,14 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     }
   }
 
-  private void waitAllWorkspacesStopped() throws InterruptedException {
+  private void waitAllWorkspacesRunningOrStopped() throws InterruptedException {
     Timer timer = new Timer("RuntimesStoppedTracker", false);
     CountDownLatch latch = new CountDownLatch(1);
     timer.schedule(
         new TimerTask() {
           @Override
           public void run() {
-            if (!runtimes.isAnyRunning()) {
+            if (!runtimes.isAnyInProgress()) {
               timer.cancel();
               latch.countDown();
             }
