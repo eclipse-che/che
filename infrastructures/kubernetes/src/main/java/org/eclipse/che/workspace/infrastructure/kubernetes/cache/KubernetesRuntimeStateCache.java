@@ -10,11 +10,13 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 
 /**
  * TODO Add docs TODO Add TCK
@@ -34,6 +36,8 @@ public interface KubernetesRuntimeStateCache {
   void delete(RuntimeIdentity runtimeIdentity) throws InfrastructureException;
 
   WorkspaceStatus getStatus(RuntimeIdentity identity) throws InfrastructureException;
+
+  Optional<KubernetesRuntimeState> get(RuntimeIdentity identity) throws InfrastructureException;
 
   boolean replaceStatus(
       RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)

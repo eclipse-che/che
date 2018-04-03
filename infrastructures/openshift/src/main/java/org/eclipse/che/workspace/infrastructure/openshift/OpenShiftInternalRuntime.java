@@ -70,11 +70,11 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         probesFactory,
         eventPublisher,
         sharedPool,
+        runtimesStatusesCache,
+        machinesCache,
         context,
         project,
-        warnings,
-        runtimesStatusesCache,
-        machinesCache);
+        warnings);
     this.project = project;
   }
 

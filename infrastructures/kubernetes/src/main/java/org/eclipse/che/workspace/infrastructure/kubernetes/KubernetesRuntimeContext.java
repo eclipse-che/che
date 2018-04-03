@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import com.google.inject.assistedinject.Assisted;
 import java.net.URI;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
@@ -21,7 +22,9 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /** @author Sergii Leshchenko */
@@ -30,12 +33,14 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
   private final KubernetesRuntimeFactory runtimeFactory;
   private final KubernetesNamespaceFactory namespaceFactory;
   private final String websocketOutputEndpoint;
+  private final KubernetesRuntimeStateCache runtimeStatuses;
 
   @Inject
   public KubernetesRuntimeContext(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       KubernetesNamespaceFactory namespaceFactory,
       KubernetesRuntimeFactory runtimeFactory,
+      KubernetesRuntimeStateCache runtimeStatuses,
       @Assisted T kubernetesEnvironment,
       @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure)
@@ -44,6 +49,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
     this.namespaceFactory = namespaceFactory;
     this.runtimeFactory = runtimeFactory;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
+    this.runtimeStatuses = runtimeStatuses;
   }
 
   @Override
@@ -58,18 +64,27 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
 
   @Override
   public KubernetesInternalRuntime getRuntime() throws InfrastructureException {
-    KubernetesInternalRuntime<KubernetesRuntimeContext<? extends KubernetesEnvironment>> runtime =
+    Optional<KubernetesRuntimeState> runtimeStateOpt = runtimeStatuses.get(getIdentity());
+    String workspaceId = getIdentity().getWorkspaceId();
+
+    if (!runtimeStateOpt.isPresent()) {
+      // there is no cached runtime, create a new one
+      return runtimeFactory.create(
+          this, namespaceFactory.create(workspaceId), getEnvironment().getWarnings());
+    }
+
+    // there is cached runtime, restore cached one
+    KubernetesRuntimeState runtimeState = runtimeStateOpt.get();
+    KubernetesInternalRuntime runtime =
         runtimeFactory.create(
             this,
-            // TODO use existing namespace if runtime has status
-            namespaceFactory.create(getIdentity().getWorkspaceId()),
+            namespaceFactory.create(workspaceId, runtimeState.getNamespace()),
             getEnvironment().getWarnings());
 
     if (runtime.getStatus() != WorkspaceStatus.RUNNING
         || runtime.getStatus() != WorkspaceStatus.STOPPED) {
       runtime.startServersCheckers();
     }
-
     return runtime;
   }
 }

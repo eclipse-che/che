@@ -61,6 +61,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.Kubernet
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEventHandler;
@@ -82,6 +83,7 @@ public class KubernetesInternalRuntime<
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesInternalRuntime.class);
 
+  private static final String POD_RUNNING_STATUS = "Running";
   private static final String POD_FAILED_STATUS = "Failed";
 
   private final int workspaceStartTimeout;
@@ -109,11 +111,11 @@ public class KubernetesInternalRuntime<
       WorkspaceProbesFactory probesFactory,
       RuntimeEventsPublisher eventPublisher,
       KubernetesSharedPool sharedPool,
+      KubernetesRuntimeStateCache runtimeStatuses,
+      KubernetesMachineCache machines,
       @Assisted T context,
       @Assisted KubernetesNamespace namespace,
-      @Assisted List<Warning> warnings,
-      KubernetesRuntimeStateCache runtimeStatuses,
-      KubernetesMachineCache machines) {
+      @Assisted List<Warning> warnings) {
     super(context, urlRewriter, warnings);
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
@@ -144,12 +146,10 @@ public class KubernetesInternalRuntime<
       final List<CompletableFuture<?>> toCancelFutures = new CopyOnWriteArrayList<>();
       final EnvironmentContext currentContext = EnvironmentContext.getCurrent();
 
-      for (KubernetesMachine machine : machines.getMachines(context.getIdentity()).values()) {
-        final CompletableFuture<Void> machineRunningFuture = machine.waitRunningAsync();
-        toCancelFutures.add(machineRunningFuture);
+      for (KubernetesMachineImpl machine : machines.getMachines(context.getIdentity()).values()) {
         String machineName = machine.getName();
         final CompletableFuture<Void> machineBootChain =
-            machineRunningFuture
+            waitRunningAsync(toCancelFutures, machine)
                 // since machine running future will be completed from the thread that is not from
                 // kubernetes pool it's needed to explicitly put the executor to not to delay
                 // processing in the external pool.
@@ -267,7 +267,7 @@ public class KubernetesInternalRuntime<
    * start of servers probes.
    */
   private Function<Void, CompletionStage<Void>> checkServers(
-      List<CompletableFuture<?>> toCancelFutures, KubernetesMachine machine) {
+      List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
     return ignored -> {
       // This completable future is used to unity the servers checks and start of probes
       final CompletableFuture<Void> serversAndProbesFuture = new CompletableFuture<>();
@@ -310,7 +310,7 @@ public class KubernetesInternalRuntime<
    * this function will be completed stage.
    */
   private Function<Void, CompletionStage<Void>> bootstrap(
-      List<CompletableFuture<?>> toCancelFutures, KubernetesMachine machine) {
+      List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
     return ignored -> {
       // think about to return copy of machines in environment
       final InternalMachineConfig machineConfig =
@@ -351,6 +351,23 @@ public class KubernetesInternalRuntime<
     };
   }
 
+  /**
+   * Returns the future, which ends when machine is considered as running.
+   *
+   * <p>Note that the resulting future must be explicitly cancelled when its completion no longer
+   * important because of finalization allocated resources.
+   */
+  public CompletableFuture<Void> waitRunningAsync(
+      List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
+    CompletableFuture<Void> waitFuture =
+        namespace
+            .pods()
+            .waitAsync(
+                machine.getPodName(), p -> (POD_RUNNING_STATUS.equals(p.getStatus().getPhase())));
+    toCancelFutures.add(waitFuture);
+    return waitFuture;
+  }
+
   /** Returns instance of {@link Runnable} that propagate machine state. */
   private Runnable publishRunningStatus(String machineName) {
     return () -> {
@@ -383,7 +400,7 @@ public class KubernetesInternalRuntime<
   }
 
   @Override
-  public Map<String, ? extends KubernetesMachine> getInternalMachines() {
+  public Map<String, ? extends KubernetesMachineImpl> getInternalMachines() {
     try {
       return ImmutableMap.copyOf(machines.getMachines(getContext().getIdentity()));
     } catch (InfrastructureException e) {
@@ -452,16 +469,17 @@ public class KubernetesInternalRuntime<
       for (Container container : createdPod.getSpec().getContainers()) {
         String machineName = Names.machineName(toCreate, container);
 
+        String workspaceId = getContext().getIdentity().getWorkspaceId();
         machines.add(
             getContext().getIdentity(),
-            new KubernetesMachine(
+            new KubernetesMachineImpl(
+                workspaceId,
                 machineName,
                 podMetadata.getName(),
                 container.getName(),
-                machineConfigs.get(machineName).getAttributes(),
-                serverResolver.resolve(machineName),
                 MachineStatus.STARTING,
-                namespace));
+                machineConfigs.get(machineName).getAttributes(),
+                serverResolver.resolve(machineName)));
         eventPublisher.sendStartingEvent(machineName, getContext().getIdentity());
       }
     }
@@ -617,9 +635,9 @@ public class KubernetesInternalRuntime<
       final String podName = event.getPodName();
       final String containerName = event.getContainerName();
       try {
-        for (Entry<String, KubernetesMachine> entry :
+        for (Entry<String, KubernetesMachineImpl> entry :
             machines.getMachines(getContext().getIdentity()).entrySet()) {
-          final KubernetesMachine machine = entry.getValue();
+          final KubernetesMachineImpl machine = entry.getValue();
           if (machine.getPodName().equals(podName)
               && machine.getContainerName().equals(containerName)) {
             eventPublisher.sendMachineLogEnvent(

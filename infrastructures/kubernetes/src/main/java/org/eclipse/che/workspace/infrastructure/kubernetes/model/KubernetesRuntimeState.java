@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity;
+package org.eclipse.che.workspace.infrastructure.kubernetes.model;
 
 import java.util.Objects;
 import javax.persistence.Column;
@@ -22,8 +22,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 /** @author Sergii Leshchenko */
 @Entity(name = "KubernetesRuntime")
 @Table(name = "che_k8s_runtime")
-public class KubernetesRuntimeEntity {
-  @EmbeddedId private Id runtimeId;
+public class KubernetesRuntimeState {
+  @EmbeddedId private RuntimeId runtimeRuntimeId;
 
   @Column(name = "namespace")
   private String namespace;
@@ -31,15 +31,16 @@ public class KubernetesRuntimeEntity {
   @Column(name = "status")
   private WorkspaceStatus status;
 
-  public KubernetesRuntimeEntity() {}
+  public KubernetesRuntimeState() {}
 
-  public KubernetesRuntimeEntity(Id runtimeId, String namespace, WorkspaceStatus status) {
-    this.runtimeId = runtimeId;
+  public KubernetesRuntimeState(
+      RuntimeId runtimeRuntimeId, String namespace, WorkspaceStatus status) {
+    this.runtimeRuntimeId = runtimeRuntimeId;
     this.namespace = namespace;
     this.status = status;
   }
 
-  public KubernetesRuntimeEntity(KubernetesRuntimeEntity entity) {
+  public KubernetesRuntimeState(KubernetesRuntimeState entity) {
     this(entity.getRuntimeId(), entity.getNamespace(), entity.getStatus());
   }
 
@@ -47,8 +48,8 @@ public class KubernetesRuntimeEntity {
     return namespace;
   }
 
-  public Id getRuntimeId() {
-    return runtimeId;
+  public RuntimeId getRuntimeId() {
+    return runtimeRuntimeId;
   }
 
   public WorkspaceStatus getStatus() {
@@ -59,35 +60,39 @@ public class KubernetesRuntimeEntity {
     this.status = status;
   }
 
-  public KubernetesRuntimeEntity withStatus(WorkspaceStatus status) {
+  public KubernetesRuntimeState withStatus(WorkspaceStatus status) {
     this.status = status;
     return this;
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) {
+  public boolean equals(Object obj) {
+    if (this == obj) {
       return true;
     }
-    if (!(o instanceof KubernetesRuntimeEntity)) {
+    if (!(obj instanceof KubernetesRuntimeState)) {
       return false;
     }
-    KubernetesRuntimeEntity that = (KubernetesRuntimeEntity) o;
-    return Objects.equals(getRuntimeId(), that.getRuntimeId())
-        && Objects.equals(getNamespace(), that.getNamespace())
-        && getStatus() == that.getStatus();
+    final KubernetesRuntimeState that = (KubernetesRuntimeState) obj;
+    return Objects.equals(runtimeRuntimeId, that.runtimeRuntimeId)
+        && Objects.equals(namespace, that.namespace)
+        && Objects.equals(status, that.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getRuntimeId(), getNamespace(), getStatus());
+    int hash = 7;
+    hash = 31 * hash + Objects.hashCode(runtimeRuntimeId);
+    hash = 31 * hash + Objects.hashCode(namespace);
+    hash = 31 * hash + Objects.hashCode(status);
+    return hash;
   }
 
   @Override
   public String toString() {
-    return "KubernetesRuntimeEntity{"
-        + "runtimeId="
-        + runtimeId
+    return "KubernetesRuntimeState{"
+        + "runtimeRuntimeId="
+        + runtimeRuntimeId
         + ", namespace='"
         + namespace
         + '\''
@@ -96,9 +101,8 @@ public class KubernetesRuntimeEntity {
         + '}';
   }
 
-  /** @author Sergii Leshchenko */
   @Embeddable
-  public static class Id implements RuntimeIdentity {
+  public static class RuntimeId implements RuntimeIdentity {
 
     @Column(name = "workspace_id")
     private String workspaceId;
@@ -109,15 +113,15 @@ public class KubernetesRuntimeEntity {
     @Column(name = "owner_id")
     private String ownerId;
 
-    public Id() {}
+    public RuntimeId() {}
 
-    public Id(String workspaceId, String envName, String ownerId) {
+    public RuntimeId(String workspaceId, String envName, String ownerId) {
       this.workspaceId = workspaceId;
       this.envName = envName;
       this.ownerId = ownerId;
     }
 
-    public Id(RuntimeIdentity identity) {
+    public RuntimeId(RuntimeIdentity identity) {
       this(identity.getWorkspaceId(), identity.getEnvName(), identity.getOwnerId());
     }
 
@@ -126,19 +130,9 @@ public class KubernetesRuntimeEntity {
       return workspaceId;
     }
 
-    public Id setWorkspaceId(String workspaceId) {
-      this.workspaceId = workspaceId;
-      return this;
-    }
-
     @Override
     public String getEnvName() {
       return envName;
-    }
-
-    public Id setEnvName(String envName) {
-      this.envName = envName;
-      return this;
     }
 
     @Override
@@ -146,20 +140,15 @@ public class KubernetesRuntimeEntity {
       return ownerId;
     }
 
-    public Id setOwnerId(String ownerId) {
-      this.ownerId = ownerId;
-      return this;
-    }
-
     @Override
     public boolean equals(Object obj) {
       if (this == obj) {
         return true;
       }
-      if (!(obj instanceof Id)) {
+      if (!(obj instanceof RuntimeId)) {
         return false;
       }
-      final Id that = (Id) obj;
+      final RuntimeId that = (RuntimeId) obj;
       return Objects.equals(workspaceId, that.workspaceId)
           && Objects.equals(envName, that.envName)
           && Objects.equals(ownerId, that.ownerId);
@@ -176,7 +165,7 @@ public class KubernetesRuntimeEntity {
 
     @Override
     public String toString() {
-      return "Id{"
+      return "RuntimeId{"
           + "workspaceId='"
           + workspaceId
           + '\''

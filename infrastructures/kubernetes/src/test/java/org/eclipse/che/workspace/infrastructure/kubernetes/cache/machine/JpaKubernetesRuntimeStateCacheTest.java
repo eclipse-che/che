@@ -21,7 +21,8 @@ import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -33,18 +34,16 @@ public class JpaKubernetesRuntimeStateCacheTest {
 
   @Inject private KubernetesRuntimeStateCache kubernetesRuntimesStates;
 
-  @Inject private TckRepository<KubernetesRuntimeEntity> runtimeRepository;
+  @Inject private TckRepository<KubernetesRuntimeState> runtimeRepository;
 
-  private KubernetesRuntimeEntity[] runtimes;
+  private KubernetesRuntimeState[] runtimes;
 
   @BeforeMethod
   public void setUp() throws TckRepositoryException {
     runtimes =
-        new KubernetesRuntimeEntity[] {
-          new KubernetesRuntimeEntity(
-              new KubernetesRuntimeEntity.Id("ws123", "envName", "ownerId"),
-              "namespace",
-              WorkspaceStatus.RUNNING)
+        new KubernetesRuntimeState[] {
+          new KubernetesRuntimeState(
+              new RuntimeId("ws123", "envName", "ownerId"), "namespace", WorkspaceStatus.RUNNING)
         };
 
     runtimeRepository.createAll(asList(runtimes));

@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
 import com.google.inject.persist.Transactional;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -23,8 +24,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity.Id;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 
 /**
  * JPA based implementation of {@link KubernetesRuntimeStateCache}.
@@ -46,10 +47,10 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     try {
       return managerProvider
           .get()
-          .createQuery("SELECT r FROM KubernetesRuntime r", KubernetesRuntimeEntity.class)
+          .createQuery("SELECT r FROM KubernetesRuntime r", KubernetesRuntimeState.class)
           .getResultList()
           .stream()
-          .map(KubernetesRuntimeEntity::getRuntimeId)
+          .map(KubernetesRuntimeState::getRuntimeId)
           .collect(Collectors.toSet());
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getLocalizedMessage(), x);
@@ -94,8 +95,20 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     try {
       return managerProvider
           .get()
-          .find(KubernetesRuntimeEntity.class, new KubernetesRuntimeEntity.Id(identity))
+          .find(KubernetesRuntimeState.class, new RuntimeId(identity))
           .getStatus();
+    } catch (RuntimeException x) {
+      throw new InfrastructureException(x.getLocalizedMessage(), x);
+    }
+  }
+
+  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  @Override
+  public Optional<KubernetesRuntimeState> get(RuntimeIdentity identity)
+      throws InfrastructureException {
+    try {
+      return Optional.ofNullable(
+          managerProvider.get().find(KubernetesRuntimeState.class, new RuntimeId(identity)));
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getLocalizedMessage(), x);
     }
@@ -119,8 +132,8 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   protected void doDelete(RuntimeIdentity runtimeIdentity) {
     EntityManager em = managerProvider.get();
 
-    KubernetesRuntimeEntity runtime =
-        em.find(KubernetesRuntimeEntity.class, new Id(runtimeIdentity));
+    KubernetesRuntimeState runtime =
+        em.find(KubernetesRuntimeState.class, new RuntimeId(runtimeIdentity));
 
     if (runtime != null) {
       em.remove(runtime);
@@ -131,9 +144,8 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   protected void doUpdateStatus(RuntimeIdentity runtimeIdentity, WorkspaceStatus status) {
     EntityManager entityManager = managerProvider.get();
 
-    KubernetesRuntimeEntity meta =
-        entityManager.find(
-            KubernetesRuntimeEntity.class, new KubernetesRuntimeEntity.Id(runtimeIdentity));
+    KubernetesRuntimeState meta =
+        entityManager.find(KubernetesRuntimeState.class, new RuntimeId(runtimeIdentity));
 
     meta.setStatus(status);
 
@@ -145,13 +157,13 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
       RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
       throws IllegalStateException {
     EntityManager entityManager = managerProvider.get();
-    KubernetesRuntimeEntity kubernetesRuntimeEntity =
-        entityManager.find(KubernetesRuntimeEntity.class, new KubernetesRuntimeEntity.Id(identity));
+    KubernetesRuntimeState kubernetesRuntimeState =
+        entityManager.find(KubernetesRuntimeState.class, new RuntimeId(identity));
 
-    KubernetesRuntimeEntity kubernetesMachineMeta =
-        new KubernetesRuntimeEntity(kubernetesRuntimeEntity).withStatus(newStatus);
+    KubernetesRuntimeState kubernetesMachineMeta =
+        new KubernetesRuntimeState(kubernetesRuntimeState).withStatus(newStatus);
 
-    KubernetesRuntimeEntity old = entityManager.merge(kubernetesMachineMeta);
+    KubernetesRuntimeState old = entityManager.merge(kubernetesMachineMeta);
 
     if (predicate.test(old.getStatus())) {
       throw new IllegalStateException(
@@ -163,8 +175,6 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   protected void doInitStatus(RuntimeIdentity identity, String namespace, WorkspaceStatus status) {
     managerProvider
         .get()
-        .persist(
-            new KubernetesRuntimeEntity(
-                new KubernetesRuntimeEntity.Id(identity), namespace, status));
+        .persist(new KubernetesRuntimeState(new RuntimeId(identity), namespace, status));
   }
 }

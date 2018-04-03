@@ -396,7 +396,7 @@ public class KubernetesInternalRuntimeTest {
     Map<String, LinkedList<MachineStatusEvent>> machine2Events = new HashMap<>();
     List<MachineStatusEvent> machineStatusEvents = captureEvents();
     for (MachineStatusEvent event : machineStatusEvents) {
-      final String machineName = event.getMachineName();
+      final String machineName = event.getName();
       machine2Events.computeIfPresent(
           machineName,
           (mName, events) -> {
@@ -416,7 +416,7 @@ public class KubernetesInternalRuntimeTest {
       final MachineStatusEvent machineStatusEvent = expected[0];
       final MachineStatusEvent[] actual =
           machine2Events
-              .remove(machineStatusEvent.getMachineName())
+              .remove(machineStatusEvent.getName())
               .toArray(new MachineStatusEvent[expected.length]);
       assertEquals(actual, expected);
     }

@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toMap;
 import com.google.inject.persist.Transactional;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -25,14 +25,11 @@ import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesMachine;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesMachineEntity;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesMachineEntity.KubernetesMachineId;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesServerEntity;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesServerEntity.KubernetesServerId;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl.ServerId;
 
 /**
  * JPA based implementation of {@link KubernetesMachineCache}.
@@ -42,13 +39,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 public class JpaKubernetesMachineCache implements KubernetesMachineCache {
 
   private final Provider<EntityManager> managerProvider;
-  private final KubernetesNamespaceFactory namespaceFactory;
 
   @Inject
-  public JpaKubernetesMachineCache(
-      Provider<EntityManager> managerProvider, KubernetesNamespaceFactory namespaceFactory) {
+  public JpaKubernetesMachineCache(Provider<EntityManager> managerProvider) {
     this.managerProvider = managerProvider;
-    this.namespaceFactory = namespaceFactory;
   }
 
   @Override
@@ -61,58 +55,18 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
   }
 
   @Override
-  public Map<String, KubernetesMachine> getMachines(RuntimeIdentity runtimeIdentity)
+  public Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
-    KubernetesNamespace namespace = namespaceFactory.create(runtimeIdentity.getWorkspaceId());
-
     return doGetMachines(runtimeIdentity)
         .stream()
-        .collect(
-            Collectors.toMap(
-                KubernetesMachineEntity::getMachineName,
-                m ->
-                    new KubernetesMachine(
-                        m.getMachineName(),
-                        m.getPodName(),
-                        m.getContainerName(),
-                        m.getAttributes(),
-                        m.getServers()
-                            .stream()
-                            .collect(
-                                toMap(
-                                    KubernetesServerEntity::getName,
-                                    s ->
-                                        new ServerImpl(
-                                            s.getUrl(), s.getStatus(), s.getAttributes()))),
-                        m.getStatus(),
-                        // TODO
-                        namespace)));
+        .collect(toMap(KubernetesMachineImpl::getName, Function.identity()));
   }
 
   @Override
-  public void add(RuntimeIdentity runtimeIdentity, KubernetesMachine machine)
+  public void add(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
       throws InfrastructureException {
     try {
-      doAddMachine(
-          new KubernetesMachineEntity(
-              runtimeIdentity.getWorkspaceId(),
-              machine.getName(),
-              machine.getPodName(),
-              machine.getContainerName(),
-              machine.getStatus(),
-              machine.getAttributes(),
-              machine
-                  .getServers()
-                  .entrySet()
-                  .stream()
-                  .map(
-                      e ->
-                          new KubernetesServerEntity(
-                              runtimeIdentity.getWorkspaceId(),
-                              machine.getName(),
-                              e.getKey(),
-                              e.getValue()))
-                  .collect(Collectors.toList())));
+      doAddMachine(machine);
     } catch (DuplicateKeyException e) {
       // TODO
       throw new InfrastructureException("Machine is already is cache", e);
@@ -150,13 +104,12 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
       RuntimeIdentity runtimeIdentity, String machineName, String serverName)
       throws InfrastructureException {
     try {
-      KubernetesServerEntity s =
+      KubernetesServerImpl s =
           managerProvider
               .get()
               .find(
-                  KubernetesServerEntity.class,
-                  new KubernetesServerId(
-                      runtimeIdentity.getWorkspaceId(), machineName, serverName));
+                  KubernetesServerImpl.class,
+                  new ServerId(runtimeIdentity.getWorkspaceId(), machineName, serverName));
       return new ServerImpl(s.getUrl(), s.getStatus(), s.getAttributes());
     } catch (RuntimeException e) {
       throw new InfrastructureException(e.getMessage(), e);
@@ -167,18 +120,16 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
   protected void doRemove(RuntimeIdentity runtimeIdentity) {
     EntityManager em = managerProvider.get();
 
-    List<KubernetesMachineEntity> machines =
+    List<KubernetesMachineImpl> machines =
         em.createQuery(
                 "SELECT m FROM KubernetesMachine m WHERE m.machineId.workspaceId = :workspaceId",
-                KubernetesMachineEntity.class)
+                KubernetesMachineImpl.class)
             .setParameter("workspaceId", runtimeIdentity.getWorkspaceId())
             .getResultList();
 
-    for (KubernetesMachineEntity m : machines) {
-      KubernetesMachineEntity remove =
-          em.find(
-              KubernetesMachineEntity.class,
-              new KubernetesMachineId(m.getWorkspaceId(), m.getMachineName()));
+    for (KubernetesMachineImpl m : machines) {
+      KubernetesMachineImpl remove =
+          em.find(KubernetesMachineImpl.class, new MachineId(m.getWorkspaceId(), m.getName()));
 
       em.remove(remove);
     }
@@ -187,21 +138,21 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
   }
 
   @Transactional
-  protected void doAddMachine(KubernetesMachineEntity machineMeta) {
+  protected void doAddMachine(KubernetesMachineImpl machineMeta) {
     EntityManager em = managerProvider.get();
     em.persist(machineMeta);
     em.flush();
   }
 
   @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
-  protected List<KubernetesMachineEntity> doGetMachines(RuntimeIdentity runtimeIdentity)
+  protected List<KubernetesMachineImpl> doGetMachines(RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
     try {
       return managerProvider
           .get()
           .createQuery(
               "SELECT m FROM KubernetesMachine m WHERE m.machineId.workspaceId = :workspaceId",
-              KubernetesMachineEntity.class)
+              KubernetesMachineImpl.class)
           .setParameter("workspaceId", runtimeIdentity.getWorkspaceId())
           .getResultList();
     } catch (RuntimeException e) {
@@ -214,9 +165,8 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
       throws InfrastructureException {
     EntityManager entityManager = managerProvider.get();
 
-    KubernetesMachineEntity meta =
-        entityManager.find(
-            KubernetesMachineEntity.class, new KubernetesMachineId(workspaceId, machineName));
+    KubernetesMachineImpl meta =
+        entityManager.find(KubernetesMachineImpl.class, new MachineId(workspaceId, machineName));
 
     if (meta == null) {
       throw new InfrastructureException("Can't update machine status");
@@ -232,10 +182,9 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
       String workspaceId, String machineName, String serverName, ServerStatus status) {
     EntityManager entityManager = managerProvider.get();
 
-    KubernetesServerEntity meta =
+    KubernetesServerImpl meta =
         entityManager.find(
-            KubernetesServerEntity.class,
-            new KubernetesServerId(workspaceId, machineName, serverName));
+            KubernetesServerImpl.class, new ServerId(workspaceId, machineName, serverName));
 
     if (meta.getStatus() != status) {
       meta.setStatus(status);

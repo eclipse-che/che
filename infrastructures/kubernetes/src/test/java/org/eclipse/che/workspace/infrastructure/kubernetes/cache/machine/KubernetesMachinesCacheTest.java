@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.machine;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
@@ -18,20 +19,22 @@ import static org.testng.Assert.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import javax.inject.Inject;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesMachine;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesMachineEntity;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity.Id;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesServerEntity;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -44,50 +47,49 @@ public class KubernetesMachinesCacheTest {
 
   @Inject private JpaKubernetesMachineCache machineCache;
 
-  @Inject private TckRepository<KubernetesRuntimeEntity> runtimesRepository;
-  @Inject private TckRepository<KubernetesMachineEntity> machineRepository;
-  @Inject private TckRepository<KubernetesServerEntity> serverRepository;
+  @Inject private TckRepository<WorkspaceImpl> workspaceTckRepository;
+  @Inject private TckRepository<AccountImpl> accountRepository;
+  @Inject private TckRepository<KubernetesRuntimeState> runtimesRepository;
+  @Inject private TckRepository<KubernetesMachineImpl> machineRepository;
+  @Inject private TckRepository<KubernetesServerImpl> serverRepository;
 
-  private KubernetesMachineEntity[] machines;
-  private KubernetesServerEntity[] servers;
+  private KubernetesMachineImpl[] machines;
+  private KubernetesServerImpl[] servers;
 
   @BeforeMethod
   public void setUp() throws TckRepositoryException {
+    AccountImpl account = new AccountImpl("id", "name", "type");
+    accountRepository.createAll(singletonList(account));
+    workspaceTckRepository.createAll(
+        singletonList(
+            new WorkspaceImpl(
+                "ws123",
+                account,
+                new WorkspaceConfigImpl(
+                    "name", "description", "defEnv", emptyList(), emptyList(), emptyMap()))));
+
     runtimesRepository.createAll(
         singletonList(
-            new KubernetesRuntimeEntity(
-                new Id("ws123", "envname", "ownerId"), "namespace", WorkspaceStatus.STARTING)));
+            new KubernetesRuntimeState(
+                new RuntimeId("ws123", "envname", "ownerId"),
+                "namespace",
+                WorkspaceStatus.STARTING)));
 
     machines =
-        new KubernetesMachineEntity[] {
-          new KubernetesMachineEntity(
+        new KubernetesMachineImpl[] {
+          new KubernetesMachineImpl(
               "ws123",
               "machine1",
               "pod1",
               "c1",
               MachineStatus.STARTING,
               ImmutableMap.of("m.attr", "value"),
-              //                emptyList()
-
-              singletonList(
-                  new KubernetesServerEntity(
-                      "ws123",
-                      "machine1",
-                      "serverName",
-                      "url",
-                      ImmutableMap.of("attr", "value"),
-                      ServerStatus.UNKNOWN)))
+              ImmutableMap.of(
+                  "serverName",
+                  new ServerImpl("url", ServerStatus.UNKNOWN, ImmutableMap.of("attr", "value"))))
         };
 
     machineRepository.createAll(asList(machines));
-
-    //    servers =
-    //        new KubernetesServerEntity[]{
-    //            new KubernetesServerEntity(
-    //                "ws123", "machine1", "serverName2", "url", emptyMap(), ServerStatus.UNKNOWN)
-    //        };
-    //
-    //    serverRepository.createAll(asList(servers));
   }
 
   @AfterMethod
@@ -95,20 +97,22 @@ public class KubernetesMachinesCacheTest {
     serverRepository.removeAll();
     machineRepository.removeAll();
     runtimesRepository.removeAll();
+    workspaceTckRepository.removeAll();
+    accountRepository.removeAll();
   }
 
   @Test
   public void shouldAddMachine() throws Exception {
     machineCache.add(
         new RuntimeIdentityImpl("ws123", "env", "ownerId"),
-        new KubernetesMachine(
+        new KubernetesMachineImpl(
+            "ws123",
             "machine2",
             "pod1",
             "c1",
-            ImmutableMap.of("created", "123123123"),
-            ImmutableMap.of("server2", new ServerImpl("url", ServerStatus.UNKNOWN, emptyMap())),
             MachineStatus.STARTING,
-            null));
+            ImmutableMap.of("created", "123123123"),
+            ImmutableMap.of("server2", new ServerImpl("url", ServerStatus.UNKNOWN, emptyMap()))));
   }
 
   @Test
@@ -117,7 +121,7 @@ public class KubernetesMachinesCacheTest {
     machineCache.updateServerStatus(
         runtimeIdentity, "machine1", "serverName", ServerStatus.RUNNING);
 
-    Map<String, KubernetesMachine> machines = machineCache.getMachines(runtimeIdentity);
+    Map<String, KubernetesMachineImpl> machines = machineCache.getMachines(runtimeIdentity);
 
     assertEquals(machines.size(), 1);
   }

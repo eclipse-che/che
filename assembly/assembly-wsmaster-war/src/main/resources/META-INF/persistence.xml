@@ -66,14 +66,14 @@
 
         <class>org.eclipse.che.api.workspace.activity.WorkspaceExpiration</class>
 
-        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity</class>
-        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesRuntimeEntity.Id</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId</class>
 
-        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesMachineEntity</class>
-        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesMachineEntity.KubernetesMachineId</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId</class>
 
-        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesServerEntity</class>
-        <class>org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity.KubernetesServerEntity.KubernetesServerId</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl.ServerId</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
     </persistence-unit>

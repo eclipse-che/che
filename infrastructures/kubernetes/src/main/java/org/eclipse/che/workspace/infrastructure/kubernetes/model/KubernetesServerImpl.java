@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity;
+package org.eclipse.che.workspace.infrastructure.kubernetes.model;
 
 import java.util.Map;
 import java.util.Objects;
@@ -28,9 +28,9 @@ import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 /** @author Sergii Leshchenko */
 @Entity(name = "KubernetesServer")
 @Table(name = "che_k8s_server")
-public class KubernetesServerEntity {
+public class KubernetesServerImpl implements Server {
 
-  @EmbeddedId private KubernetesServerId serverId;
+  @EmbeddedId private ServerId serverId;
 
   @Column(name = "url")
   private String url;
@@ -51,88 +51,63 @@ public class KubernetesServerEntity {
   @Column(name = "attribute")
   private Map<String, String> attributes;
 
-  public KubernetesServerEntity() {}
+  public KubernetesServerImpl() {}
 
-  public KubernetesServerEntity(
+  public KubernetesServerImpl(
       String workspaceId, String machineName, String serverName, Server server) {
-    this.serverId = new KubernetesServerId(workspaceId, machineName, serverName);
+    this.serverId = new ServerId(workspaceId, machineName, serverName);
     this.url = server.getUrl();
     this.status = server.getStatus();
     this.attributes = server.getAttributes();
   }
 
-  public KubernetesServerEntity(
-      String workspaceId,
-      String machineName,
-      String serverName,
-      String url,
-      Map<String, String> attributes,
-      ServerStatus status) {
-    this.serverId = new KubernetesServerId(workspaceId, machineName, serverName);
-    this.url = url;
-    this.attributes = attributes;
-    this.status = status;
-  }
-
-  public KubernetesServerId getServerId() {
-    return serverId;
-  }
-
-  public KubernetesServerEntity setServerId(KubernetesServerId serverId) {
-    this.serverId = serverId;
-    return this;
-  }
-
+  @Override
   public String getUrl() {
     return url;
   }
 
-  public KubernetesServerEntity setUrl(String url) {
-    this.url = url;
-    return this;
-  }
-
+  @Override
   public ServerStatus getStatus() {
     return status;
   }
 
-  public KubernetesServerEntity setStatus(ServerStatus status) {
+  public void setStatus(ServerStatus status) {
     this.status = status;
-    return this;
   }
 
+  @Override
   public Map<String, String> getAttributes() {
     return attributes;
   }
 
-  public KubernetesServerEntity setAttributes(Map<String, String> attributes) {
-    this.attributes = attributes;
-    return this;
-  }
-
   @Override
-  public boolean equals(Object o) {
-    if (this == o) {
+  public boolean equals(Object obj) {
+    if (this == obj) {
       return true;
     }
-    if (!(o instanceof KubernetesServerEntity)) {
+    if (!(obj instanceof KubernetesServerImpl)) {
       return false;
     }
-    KubernetesServerEntity that = (KubernetesServerEntity) o;
-    return Objects.equals(getServerId(), that.getServerId())
-        && Objects.equals(getUrl(), that.getUrl())
-        && getStatus() == that.getStatus()
-        && Objects.equals(getAttributes(), that.getAttributes());
+    final KubernetesServerImpl that = (KubernetesServerImpl) obj;
+    return Objects.equals(serverId, that.serverId)
+        && Objects.equals(url, that.url)
+        && Objects.equals(status, that.status)
+        && getAttributes().equals(that.getAttributes());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getServerId(), getUrl(), getStatus(), getAttributes());
+    int hash = 7;
+    hash = 31 * hash + Objects.hashCode(serverId);
+    hash = 31 * hash + Objects.hashCode(url);
+    hash = 31 * hash + Objects.hashCode(status);
+    hash = 31 * hash + getAttributes().hashCode();
+    return hash;
   }
 
   @Override
   public String toString() {
-    return "KubernetesServerEntity{"
+    return "KubernetesServerImpl{"
         + "serverId="
         + serverId
         + ", url='"
@@ -145,12 +120,8 @@ public class KubernetesServerEntity {
         + '}';
   }
 
-  public String getName() {
-    return serverId.serverName;
-  }
-
   @Embeddable
-  public static class KubernetesServerId {
+  public static class ServerId {
     @Column(name = "workspace_id")
     private String workspaceId;
 
@@ -160,12 +131,50 @@ public class KubernetesServerEntity {
     @Column(name = "server_name")
     private String serverName;
 
-    public KubernetesServerId() {}
+    public ServerId() {}
 
-    public KubernetesServerId(String workspaceId, String machineName, String serverName) {
+    public ServerId(String workspaceId, String machineName, String serverName) {
       this.workspaceId = workspaceId;
       this.machineName = machineName;
       this.serverName = serverName;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof ServerId)) {
+        return false;
+      }
+      final ServerId that = (ServerId) obj;
+      return Objects.equals(workspaceId, that.workspaceId)
+          && Objects.equals(machineName, that.machineName)
+          && Objects.equals(serverName, that.serverName);
+    }
+
+    @Override
+    public int hashCode() {
+      int hash = 7;
+      hash = 31 * hash + Objects.hashCode(workspaceId);
+      hash = 31 * hash + Objects.hashCode(machineName);
+      hash = 31 * hash + Objects.hashCode(serverName);
+      return hash;
+    }
+
+    @Override
+    public String toString() {
+      return "ServerId{"
+          + "workspaceId='"
+          + workspaceId
+          + '\''
+          + ", machineName='"
+          + machineName
+          + '\''
+          + ", serverName='"
+          + serverName
+          + '\''
+          + '}';
     }
   }
 }

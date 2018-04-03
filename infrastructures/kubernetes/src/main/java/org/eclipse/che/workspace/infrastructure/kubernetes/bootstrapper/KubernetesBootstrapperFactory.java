@@ -14,12 +14,12 @@ import com.google.inject.assistedinject.Assisted;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesMachine;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 
 /** @author Sergii Leshchenko */
 public interface KubernetesBootstrapperFactory {
   KubernetesBootstrapper create(
       @Assisted RuntimeIdentity runtimeIdentity,
       @Assisted List<? extends Installer> agents,
-      @Assisted KubernetesMachine kubernetesMachine);
+      @Assisted KubernetesMachineImpl kubernetesMachine);
 }

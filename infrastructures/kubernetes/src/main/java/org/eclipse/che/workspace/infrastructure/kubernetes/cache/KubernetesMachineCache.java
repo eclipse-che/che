@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesMachine;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 
 /**
  * TODO Add docs TODO Add TCK
@@ -25,7 +25,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesMachine;
  */
 public interface KubernetesMachineCache {
 
-  void add(RuntimeIdentity runtimeIdentity, KubernetesMachine machine)
+  void add(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
       throws InfrastructureException;
 
   boolean updateServerStatus(
@@ -38,7 +38,7 @@ public interface KubernetesMachineCache {
   void updateMachineStatus(RuntimeIdentity runtimeIdentity, String name, MachineStatus status)
       throws InfrastructureException;
 
-  Map<String, KubernetesMachine> getMachines(RuntimeIdentity runtimeIdentity)
+  Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity)
       throws InfrastructureException;
 
   void delete(RuntimeIdentity identity) throws InfrastructureException;

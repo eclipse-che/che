@@ -8,11 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.entity;
+package org.eclipse.che.workspace.infrastructure.kubernetes.model;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -26,13 +26,16 @@ import javax.persistence.JoinColumns;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 
 /** @author Sergii Leshchenko */
 @Entity(name = "KubernetesMachine")
 @Table(name = "che_k8s_machine")
-public class KubernetesMachineEntity {
-  @EmbeddedId private KubernetesMachineId machineId;
+public class KubernetesMachineImpl implements Machine {
+
+  @EmbeddedId private MachineId machineId;
 
   @Column(name = "pod_name")
   private String podName;
@@ -60,31 +63,45 @@ public class KubernetesMachineEntity {
     @JoinColumn(name = "workspace_id", referencedColumnName = "workspace_id"),
     @JoinColumn(name = "machine_name", referencedColumnName = "machine_name")
   })
-  private List<KubernetesServerEntity> servers;
+  @MapKeyColumn(name = "server_name", insertable = false, updatable = false)
+  private Map<String, KubernetesServerImpl> servers;
 
-  public KubernetesMachineEntity() {}
+  public KubernetesMachineImpl() {}
 
-  public KubernetesMachineEntity(
+  public KubernetesMachineImpl(
       String workspaceId,
       String machineName,
       String podName,
       String containerName,
       MachineStatus status,
       Map<String, String> attributes,
-      List<KubernetesServerEntity> servers) {
-    this.machineId = new KubernetesMachineId(workspaceId, machineName);
+      Map<String, ServerImpl> servers) {
+    this.machineId = new MachineId(workspaceId, machineName);
     this.podName = podName;
     this.containerName = containerName;
     this.status = status;
     this.attributes = attributes;
-    this.servers = servers;
+    this.servers =
+        servers
+            .entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    e ->
+                        new KubernetesServerImpl(
+                            workspaceId, machineName, e.getKey(), e.getValue())));
   }
 
   public MachineStatus getStatus() {
     return status;
   }
 
-  public KubernetesMachineId getMachineId() {
+  public void setStatus(MachineStatus status) {
+    this.status = status;
+  }
+
+  public MachineId getMachineId() {
     return machineId;
   }
 
@@ -100,41 +117,50 @@ public class KubernetesMachineEntity {
     return attributes;
   }
 
-  public List<KubernetesServerEntity> getServers() {
+  public Map<String, KubernetesServerImpl> getServers() {
     return servers;
   }
 
+  public String getName() {
+    return machineId.machineName;
+  }
+
+  public String getWorkspaceId() {
+    return machineId.workspaceId;
+  }
+
   @Override
-  public boolean equals(Object o) {
-    if (this == o) {
+  public boolean equals(Object obj) {
+    if (this == obj) {
       return true;
     }
-    if (!(o instanceof KubernetesMachineEntity)) {
+    if (!(obj instanceof KubernetesMachineImpl)) {
       return false;
     }
-    KubernetesMachineEntity that = (KubernetesMachineEntity) o;
-    return Objects.equals(getMachineId(), that.getMachineId())
-        && Objects.equals(getPodName(), that.getPodName())
-        && Objects.equals(getContainerName(), that.getContainerName())
-        && getStatus() == that.getStatus()
-        && Objects.equals(getAttributes(), that.getAttributes())
-        && Objects.equals(getServers(), that.getServers());
+    final KubernetesMachineImpl that = (KubernetesMachineImpl) obj;
+    return Objects.equals(machineId, that.machineId)
+        && Objects.equals(podName, that.podName)
+        && Objects.equals(containerName, that.containerName)
+        && Objects.equals(status, that.status)
+        && getAttributes().equals(that.getAttributes())
+        && getServers().equals(that.getServers());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        getMachineId(),
-        getPodName(),
-        getContainerName(),
-        getStatus(),
-        getAttributes(),
-        getServers());
+    int hash = 7;
+    hash = 31 * hash + Objects.hashCode(machineId);
+    hash = 31 * hash + Objects.hashCode(podName);
+    hash = 31 * hash + Objects.hashCode(containerName);
+    hash = 31 * hash + Objects.hashCode(status);
+    hash = 31 * hash + getAttributes().hashCode();
+    hash = 31 * hash + getServers().hashCode();
+    return hash;
   }
 
   @Override
   public String toString() {
-    return "KubernetesMachineEntity{"
+    return "KubernetesMachineImpl{"
         + "machineId="
         + machineId
         + ", podName='"
@@ -152,31 +178,53 @@ public class KubernetesMachineEntity {
         + '}';
   }
 
-  public String getMachineName() {
-    return machineId.machineName;
-  }
-
-  public void setStatus(MachineStatus status) {
-    this.status = status;
-  }
-
-  public String getWorkspaceId() {
-    return machineId.workspaceId;
-  }
-
   @Embeddable
-  public static class KubernetesMachineId {
+  public static class MachineId {
+
     @Column(name = "workspace_id")
     private String workspaceId;
 
     @Column(name = "machine_name")
     private String machineName;
 
-    public KubernetesMachineId() {}
+    public MachineId() {}
 
-    public KubernetesMachineId(String workspaceId, String machineName) {
+    public MachineId(String workspaceId, String machineName) {
       this.workspaceId = workspaceId;
       this.machineName = machineName;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof MachineId)) {
+        return false;
+      }
+      final MachineId that = (MachineId) obj;
+      return Objects.equals(workspaceId, that.workspaceId)
+          && Objects.equals(machineName, that.machineName);
+    }
+
+    @Override
+    public int hashCode() {
+      int hash = 7;
+      hash = 31 * hash + Objects.hashCode(workspaceId);
+      hash = 31 * hash + Objects.hashCode(machineName);
+      return hash;
+    }
+
+    @Override
+    public String toString() {
+      return "MachineId{"
+          + "workspaceId='"
+          + workspaceId
+          + '\''
+          + ", machineName='"
+          + machineName
+          + '\''
+          + '}';
     }
   }
 }
