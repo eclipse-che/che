@@ -103,7 +103,7 @@ public class KubernetesMachinesCacheTest {
 
   @Test
   public void shouldAddMachine() throws Exception {
-    machineCache.add(
+    machineCache.put(
         new RuntimeIdentityImpl("ws123", "env", "ownerId"),
         new KubernetesMachineImpl(
             "ws123",
@@ -130,7 +130,7 @@ public class KubernetesMachinesCacheTest {
   public void shouldRemoveMachine() throws Exception {
     RuntimeIdentityImpl runtimeId = new RuntimeIdentityImpl("ws123", "env", "ownerId");
 
-    machineCache.delete(runtimeId);
+    machineCache.remove(runtimeId);
 
     assertEquals(machineCache.getMachines(runtimeId).size(), 0);
   }

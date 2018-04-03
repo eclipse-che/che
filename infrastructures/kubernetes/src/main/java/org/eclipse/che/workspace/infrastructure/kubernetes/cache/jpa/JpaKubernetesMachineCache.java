@@ -46,7 +46,7 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
   }
 
   @Override
-  public void delete(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
+  public void remove(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
     try {
       doRemove(runtimeIdentity);
     } catch (RuntimeException e) {
@@ -63,7 +63,7 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
   }
 
   @Override
-  public void add(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
+  public void put(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
       throws InfrastructureException {
     try {
       doAddMachine(machine);
@@ -77,10 +77,10 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
 
   @Override
   public void updateMachineStatus(
-      RuntimeIdentity runtimeIdentity, String machineName, MachineStatus status)
+      RuntimeIdentity runtimeIdentity, String machineName, MachineStatus newStatus)
       throws InfrastructureException {
     try {
-      doUpdateMachineStatus(runtimeIdentity.getWorkspaceId(), machineName, status);
+      doUpdateMachineStatus(runtimeIdentity.getWorkspaceId(), machineName, newStatus);
     } catch (RuntimeException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -88,11 +88,14 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
 
   @Override
   public boolean updateServerStatus(
-      RuntimeIdentity runtimeIdentity, String machineName, String serverName, ServerStatus status)
+      RuntimeIdentity runtimeIdentity,
+      String machineName,
+      String serverName,
+      ServerStatus newStatus)
       throws InfrastructureException {
     try {
       return doUpdateServerStatus(
-          runtimeIdentity.getWorkspaceId(), machineName, serverName, status);
+          runtimeIdentity.getWorkspaceId(), machineName, serverName, newStatus);
     } catch (RuntimeException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }

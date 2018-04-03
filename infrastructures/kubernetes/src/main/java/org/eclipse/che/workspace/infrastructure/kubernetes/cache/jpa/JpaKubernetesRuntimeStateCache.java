@@ -58,10 +58,9 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   }
 
   @Override
-  public boolean initStatus(RuntimeIdentity identity, String namespace, WorkspaceStatus newStatus)
-      throws InfrastructureException {
+  public boolean put(KubernetesRuntimeState runtimeState) throws InfrastructureException {
     try {
-      doInitStatus(identity, namespace, newStatus);
+      doInit(runtimeState);
       return true;
     } catch (DuplicateKeyException | EntityExistsException e) {
       return false;
@@ -71,19 +70,19 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   }
 
   @Override
-  public void updateStatus(RuntimeIdentity runtimeIdentity, WorkspaceStatus status)
+  public void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus)
       throws InfrastructureException {
     try {
-      doUpdateStatus(runtimeIdentity, status);
+      doUpdateStatus(runtimeId, newStatus);
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getLocalizedMessage(), x);
     }
   }
 
   @Override
-  public void delete(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
+  public void remove(RuntimeIdentity runtimeId) throws InfrastructureException {
     try {
-      doDelete(runtimeIdentity);
+      doRemove(runtimeId);
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getLocalizedMessage(), x);
     }
@@ -91,11 +90,11 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
 
   @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
   @Override
-  public WorkspaceStatus getStatus(RuntimeIdentity identity) throws InfrastructureException {
+  public WorkspaceStatus getStatus(RuntimeIdentity runtimeId) throws InfrastructureException {
     try {
       return managerProvider
           .get()
-          .find(KubernetesRuntimeState.class, new RuntimeId(identity))
+          .find(KubernetesRuntimeState.class, new RuntimeId(runtimeId))
           .getStatus();
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getLocalizedMessage(), x);
@@ -104,18 +103,18 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
 
   @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
   @Override
-  public Optional<KubernetesRuntimeState> get(RuntimeIdentity identity)
+  public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId)
       throws InfrastructureException {
     try {
       return Optional.ofNullable(
-          managerProvider.get().find(KubernetesRuntimeState.class, new RuntimeId(identity)));
+          managerProvider.get().find(KubernetesRuntimeState.class, new RuntimeId(runtimeId)));
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getLocalizedMessage(), x);
     }
   }
 
   @Override
-  public boolean replaceStatus(
+  public boolean updateStatus(
       RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
       throws InfrastructureException {
     try {
@@ -129,7 +128,7 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   }
 
   @Transactional
-  protected void doDelete(RuntimeIdentity runtimeIdentity) {
+  protected void doRemove(RuntimeIdentity runtimeIdentity) {
     EntityManager em = managerProvider.get();
 
     KubernetesRuntimeState runtime =
@@ -172,9 +171,9 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   }
 
   @Transactional
-  protected void doInitStatus(RuntimeIdentity identity, String namespace, WorkspaceStatus status) {
-    managerProvider
-        .get()
-        .persist(new KubernetesRuntimeState(new RuntimeId(identity), namespace, status));
+  protected void doInit(KubernetesRuntimeState runtimeState) {
+    EntityManager em = managerProvider.get();
+    em.persist(runtimeState);
+    em.flush();
   }
 }
