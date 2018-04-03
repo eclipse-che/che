@@ -49,6 +49,7 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
       this.lockService = new LockService(channel);
       channel.connect(CHANNEL_NAME);
       subscriptions = new ReplicatedHashMap<>(channel);
+      subscriptions.setBlockingUpdates(true);
       subscriptions.start(5000);
     } catch (Exception e) {
       LOG.error("Unable to create distributed event subscriptions map.", e);
