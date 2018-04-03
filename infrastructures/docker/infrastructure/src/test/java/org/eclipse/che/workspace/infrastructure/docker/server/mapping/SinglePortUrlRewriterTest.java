@@ -52,9 +52,9 @@ public class SinglePortUrlRewriterTest {
         "127.0.0.1",
         "machine1",
         "exec/http",
-        "my.io",
+        "nip.io",
         "http://127.0.0.1:8080/path",
-        "http://exec-http.machine1.ws123.172.12.0.2.my.io:8080/path"
+        "http://exec-http-machine1-ws123.172.12.0.2.nip.io:8080/path"
       },
       // Internal IP, protocol, path param
       {
@@ -65,7 +65,7 @@ public class SinglePortUrlRewriterTest {
         "exec/ws",
         null,
         "tcp://127.0.0.1:8080/path?param",
-        "tcp://exec-ws.machine1.ws123.127.0.0.1.nip.io:8080/path?param"
+        "tcp://exec-ws-machine1-ws123.127.0.0.1.nip.io:8080/path?param"
       },
       // Without machine name
       {
@@ -76,7 +76,7 @@ public class SinglePortUrlRewriterTest {
         "server/some",
         null,
         "tcp://127.0.0.1:8080/path?param",
-        "tcp://server-some.ws123.127.0.0.1.nip.io:8080/path?param"
+        "tcp://server-some-ws123.127.0.0.1.nip.io:8080/path?param"
       },
       // Without server
       {
@@ -87,7 +87,7 @@ public class SinglePortUrlRewriterTest {
         null,
         null,
         "tcp://127.0.0.1:8080/path?param",
-        "tcp://machine1.ws123.127.0.0.1.nip.io:8080/path?param"
+        "tcp://machine1-ws123.127.0.0.1.nip.io:8080/path?param"
       },
     };
   }
