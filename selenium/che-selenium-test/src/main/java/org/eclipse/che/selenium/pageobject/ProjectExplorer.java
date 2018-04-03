@@ -45,6 +45,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -67,6 +68,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -237,7 +239,9 @@ public class ProjectExplorer {
 
   /** wait appearance of the IDE Project Explorer */
   public void waitProjectExplorer() {
-    waitProjectExplorer(EXPECTED_MESS_IN_CONSOLE_SEC);
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+        .until(visibilityOfElementLocated(By.id("gwt-debug-projectTree")));
+    // waitProjectExplorer(EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 
   /**
