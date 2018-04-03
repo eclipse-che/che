@@ -68,8 +68,7 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
     try {
       doAddMachine(machine);
     } catch (DuplicateKeyException e) {
-      // TODO
-      throw new InfrastructureException("Machine is already is cache", e);
+      throw new InfrastructureException("Machine is already in cache", e);
     } catch (RuntimeException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
