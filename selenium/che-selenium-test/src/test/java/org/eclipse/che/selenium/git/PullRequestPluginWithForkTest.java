@@ -52,11 +52,11 @@ public class PullRequestPluginWithForkTest {
 
   @Inject
   @Named("github.auxiliary.username")
-  private String githubUserName;
+  private String githubAuxiliaryUserName;
 
   @Inject
   @Named("github.auxiliary.password")
-  private String githubUserPassword;
+  private String githubAuxiliaryUserPassword;
 
   @Inject private Git git;
   @Inject private Ide ide;
@@ -81,12 +81,13 @@ public class PullRequestPluginWithForkTest {
     ide.open(testWorkspace);
 
     // add committer info
-    testUserPreferencesServiceClient.addGitCommitter(githubUserName, testUser.getEmail());
+    testUserPreferencesServiceClient.addGitCommitter(githubAuxiliaryUserName, testUser.getEmail());
 
     // authorize application on GitHub
     menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
-    preferences.generateAndUploadSshKeyOnGithub(githubUserName, githubUserPassword);
+    preferences.generateAndUploadSshKeyOnGithub(
+        githubAuxiliaryUserName, githubAuxiliaryUserPassword);
   }
 
   @Test
