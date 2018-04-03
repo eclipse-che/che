@@ -10,18 +10,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
-import static java.lang.Integer.parseInt;
-import static java.util.stream.Collectors.toMap;
-
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
@@ -51,59 +45,36 @@ import org.slf4j.LoggerFactory;
  * @author Guy Daich
  */
 public class SingleHostIngressExternalServerExposer
-    implements ExternalServerExposerStrategy<KubernetesEnvironment> {
+    extends AbstractIngressExternalServerExposerStrategy {
 
   public static final String SINGLE_HOST_STRATEGY = "single-host";
   private final Map<String, String> ingressAnnotations;
   private final String cheHost;
-  private static final Logger LOG =
-      LoggerFactory.getLogger(SingleHostIngressExternalServerExposer.class);
 
   @Inject
   public SingleHostIngressExternalServerExposer(
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations,
       @Named("che.host") String cheHost) {
-    if (ingressAnnotations == null) {
-      LOG.warn(
-          "Ingresses annotations are absent. Make sure that workspace ingresses don't need "
-              + "to be configured according to ingress controller.");
-    }
     this.ingressAnnotations = ingressAnnotations;
     this.cheHost = cheHost;
   }
 
   @Override
-  public void exposeExternalServers(
-      KubernetesEnvironment k8sEnv,
+  protected Ingress generateIngress(
       String machineName,
       String serviceName,
-      Map<String, ServicePort> portToServicePort,
-      Map<String, ServerConfig> externalServers) {
-
-    for (ServicePort servicePort : portToServicePort.values()) {
-      int port = servicePort.getTargetPort().getIntVal();
-
-      Map<String, ServerConfig> ingressesServers =
-          externalServers
-              .entrySet()
-              .stream()
-              .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
-              .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-      Ingress ingress =
-          new ExternalServerIngressBuilder()
-              .withHost(cheHost)
-              .withPath(generateExternalServerIngressPath(serviceName, servicePort))
-              .withName(generateExternalServerIngressName(serviceName, servicePort))
-              .withMachineName(machineName)
-              .withServiceName(serviceName)
-              .withAnnotations(ingressAnnotations)
-              .withServicePort(servicePort.getName())
-              .withServers(ingressesServers)
-              .build();
-
-      k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
-    }
+      ServicePort servicePort,
+      Map<String, ServerConfig> ingressesServers) {
+    return new ExternalServerIngressBuilder()
+        .withHost(cheHost)
+        .withPath(generateExternalServerIngressPath(serviceName, servicePort))
+        .withName(generateExternalServerIngressName(serviceName, servicePort))
+        .withMachineName(machineName)
+        .withServiceName(serviceName)
+        .withAnnotations(ingressAnnotations)
+        .withServicePort(servicePort.getName())
+        .withServers(ingressesServers)
+        .build();
   }
 
   private String generateExternalServerIngressName(String serviceName, ServicePort servicePort) {

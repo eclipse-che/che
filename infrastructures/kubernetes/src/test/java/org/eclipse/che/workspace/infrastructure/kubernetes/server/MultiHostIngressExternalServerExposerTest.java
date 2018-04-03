@@ -38,17 +38,16 @@ import org.testng.annotations.Test;
 public class MultiHostIngressExternalServerExposerTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
-  public static final String MACHINE_NAME = "pod/main";
-  public static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
-  public static final String DOMAIN = "che.com";
+  private static final String MACHINE_NAME = "pod/main";
+  private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
+  private static final String DOMAIN = "che.com";
 
   private MultiHostIngressExternalServerExposer externalServerExposer;
   private KubernetesEnvironment kubernetesEnvironment;
-  private Container container;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    container = new ContainerBuilder().withName("main").build();
+    Container container = new ContainerBuilder().withName("main").build();
     Pod pod =
         new PodBuilder()
             .withNewMetadata()

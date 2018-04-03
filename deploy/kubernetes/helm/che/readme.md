@@ -14,6 +14,7 @@
   - Install tiller itself: `helm init --service-account tiller`
 - Ensure that you have an NGINX-based ingress controller. Note: This is the default ingress controller on Minikube. You can start it with `minikube addons enable ingress`
 - DNS discovery should be enabled. Note: It is enabled by default in minikube.
+
 ## Deployment Process
 ### Obtain the Address of your Kubernetes Cluser
 - If your cluster is running on Minikube, simply type `minikube ip` at your terminal
@@ -47,6 +48,8 @@ Only Che will be deployed.
   ```bash
   helm upgrade --install <che-release-name> --namespace <che-namespace> --set global.ingressDomain=<domain> ./
   ```
+* Master: `https://che-<che-namespace>.domain`
+* Workspaces servers: `https://server-host.domain`
   
 ##### Multi User 
 Che, KeyCloak and Postgres will be deployed.
@@ -55,7 +58,11 @@ Che, KeyCloak and Postgres will be deployed.
   helm upgrade --install <che-release-name> --namespace <che-namespace> -f ./values/multi-user.yaml --set global.ingressDomain=<domain> ./
   ```
 
-#### Default Host
+* Master: `https://che-<che-namespace>.domain`
+* Keycloak:  `https://keycloak-<che-namespace>.domain`
+* Workspaces servers: `https://server-host.domain`
+
+##### Default Host
 All Ingress specs are created without a host attribute (defaults to *).
 Path based routing to all components.
 Multi User configuration is enabled. 
@@ -64,11 +71,11 @@ Multi User configuration is enabled.
   helm upgrade --install <che-release-name> --namespace <che-namespace> -f ./values/default-host.yaml --set global.ingressDomain=<domain> ./
   ```
  
-* Master: `http://<minikube-ip>/`
-* Keycloak:  `http://<minikube-ip>/auth/`
-* Workspaces servers: `http://<minikube-ip>/<path-to-server>`
+* Master: `http://<domain>/`
+* Keycloak:  `http://<domain>/auth/`
+* Workspaces servers: `http://<domain>/<path-to-server>`
 
-#### TLS-enabled
+##### TLS-enabled
 Cert-Manager is used to issue LetsEncrypt certificates.
 To avoid rate-limit issues, we use a single hostname for all ingresses.
 Path based routing to all components.
@@ -76,15 +83,16 @@ Multi User configuration is enabled.
 
   ```bash
   helm install --name <cert-manager-release-name> stable/cert-manager
-  helm upgrade --install <che-release-name> --namespace <che-namespace> -f ./values/tls.yaml --set global.ingressDomain=<your-domain> ./
+  helm upgrade --install <che-release-name> --namespace <che-namespace> -f ./values/tls.yaml --set global.ingressDomain=<domain> ./
   ```
 
-* Master: `https://che-<che-namespace>.your-domain/`
-* Keycloak:  `https://che-<che-namespace>.your-domain/auth/`
-* Workspaces servers: `https://<che-namespace>.your-domain/<path-to-server>`
+* Master: `https://che-<che-namespace>.domain/`
+* Keycloak:  `https://che-<che-namespace>.domain/auth/`
+* Workspaces servers: `https://che-<che-namespace>.domain/<path-to-server>`
 
 ## Deleting a Deployment
 You can delete a deployment using the following command:
+
 ``` bash
-helm delete <my-che-installation>
+helm delete <che-release-name>
 ```

@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -16,6 +16,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.Kuberne
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -26,6 +27,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,32 +36,30 @@ import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Test for {@link KubernetesServerExposer}.
+ * Test for KubernetesServerExposer<OpenShiftEnvironment> .
  *
  * @author Sergii Leshchenko
  */
-@Listeners(MockitoTestNGListener.class)
-public class KubernetesServerExposerTest {
+public class OpenShiftServerExposerTest {
 
-  @Mock private ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy;
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final Map<String, String> INTERNAL_SERVER_ATTRIBUTE_MAP =
       singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.TRUE.toString());
 
   private static final Pattern SERVER_PREFIX_REGEX =
       Pattern.compile('^' + SERVER_PREFIX + "[A-z0-9]{" + SERVER_UNIQUE_PART_SIZE + "}-pod-main$");
-  private static final String MACHINE_NAME = "pod/main";
+  public static final String MACHINE_NAME = "pod/main";
 
-  private KubernetesServerExposer<KubernetesEnvironment> serverExposer;
-  private KubernetesEnvironment kubernetesEnvironment;
+  private KubernetesServerExposer<OpenShiftEnvironment> serverExposer;
+  private OpenShiftExternalServerExposer openShiftExternalServerExposer;
+  private OpenShiftEnvironment openShiftEnvironment;
   private Container container;
 
   @BeforeMethod
@@ -75,15 +75,16 @@ public class KubernetesServerExposerTest {
             .endSpec()
             .build();
 
-    kubernetesEnvironment =
-        KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
+    openShiftEnvironment =
+        OpenShiftEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
+    openShiftExternalServerExposer = new OpenShiftExternalServerExposer();
     this.serverExposer =
-        new KubernetesServerExposer<>(
-            externalServerExposerStrategy, MACHINE_NAME, pod, container, kubernetesEnvironment);
+        new KubernetesServerExposer(
+            openShiftExternalServerExposer, MACHINE_NAME, pod, container, openShiftEnvironment);
   }
 
   @Test
-  public void shouldExposeContainerPortAndCreateServiceForServer() {
+  public void shouldExposeContainerPortAndCreateServiceAndRouteForServer() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -103,7 +104,8 @@ public class KubernetesServerExposerTest {
   }
 
   @Test
-  public void shouldExposeContainerPortAndCreateServiceAndForServerWhenTwoServersHasTheSamePort() {
+  public void
+      shouldExposeContainerPortAndCreateServiceAndRouteForServerWhenTwoServersHasTheSamePort() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -118,8 +120,8 @@ public class KubernetesServerExposerTest {
     serverExposer.expose(serversToExpose);
 
     // then
-    assertEquals(kubernetesEnvironment.getServices().size(), 1);
-
+    assertEquals(openShiftEnvironment.getServices().size(), 1);
+    assertEquals(openShiftEnvironment.getRoutes().size(), 1);
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
         "http-server",
@@ -135,7 +137,8 @@ public class KubernetesServerExposerTest {
   }
 
   @Test
-  public void shouldExposeContainerPortsAndCreateServiceForServerWhenTwoServersHasDifferentPorts() {
+  public void
+      shouldExposeContainerPortsAndCreateServiceAndRoutesForServerWhenTwoServersHasDifferentPorts() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -150,8 +153,8 @@ public class KubernetesServerExposerTest {
     serverExposer.expose(serversToExpose);
 
     // then
-    assertEquals(kubernetesEnvironment.getServices().size(), 1);
-
+    assertEquals(openShiftEnvironment.getServices().size(), 1);
+    assertEquals(openShiftEnvironment.getRoutes().size(), 2);
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
         "http-server",
@@ -168,7 +171,7 @@ public class KubernetesServerExposerTest {
 
   @Test
   public void
-      shouldExposeTcpContainerPortsAndCreateServiceAndForServerWhenProtocolIsMissedInPort() {
+      shouldExposeTcpContainerPortsAndCreateServiceAndRouteForServerWhenProtocolIsMissedInPort() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080", "http", "/api", ATTRIBUTES_MAP);
@@ -179,8 +182,8 @@ public class KubernetesServerExposerTest {
     serverExposer.expose(serversToExpose);
 
     // then
-    assertEquals(kubernetesEnvironment.getServices().size(), 1);
-
+    assertEquals(openShiftEnvironment.getServices().size(), 1);
+    assertEquals(openShiftEnvironment.getRoutes().size(), 1);
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
         "http-server",
@@ -312,7 +315,7 @@ public class KubernetesServerExposerTest {
     // ensure that service is created
 
     Service service = null;
-    for (Entry<String, Service> entry : kubernetesEnvironment.getServices().entrySet()) {
+    for (Entry<String, Service> entry : openShiftEnvironment.getServices().entrySet()) {
       if (SERVER_PREFIX_REGEX.matcher(entry.getKey()).matches()) {
         service = entry.getValue();
         break;
@@ -337,6 +340,20 @@ public class KubernetesServerExposerTest {
     Annotations.Deserializer serviceAnnotations =
         Annotations.newDeserializer(service.getMetadata().getAnnotations());
     assertEquals(serviceAnnotations.machineName(), machineName);
+
+    // ensure that required route is created
+    Route route =
+        openShiftEnvironment.getRoutes().get(service.getMetadata().getName() + "-server-" + port);
+    assertEquals(route.getSpec().getTo().getName(), service.getMetadata().getName());
+    assertEquals(route.getSpec().getPort().getTargetPort().getStrVal(), servicePort.getName());
+
+    Annotations.Deserializer routeAnnotations =
+        Annotations.newDeserializer(route.getMetadata().getAnnotations());
+    Map<String, ServerConfigImpl> servers = routeAnnotations.servers();
+    ServerConfig serverConfig = servers.get(serverNameRegex);
+    assertEquals(serverConfig, expected);
+
+    assertEquals(routeAnnotations.machineName(), machineName);
   }
 
   private void assertThatInternalServerIsExposed(
@@ -357,7 +374,7 @@ public class KubernetesServerExposerTest {
     // ensure that service is created
 
     Service service = null;
-    for (Entry<String, Service> entry : kubernetesEnvironment.getServices().entrySet()) {
+    for (Entry<String, Service> entry : openShiftEnvironment.getServices().entrySet()) {
       if (SERVER_PREFIX_REGEX.matcher(entry.getKey()).matches()) {
         service = entry.getValue();
         break;
@@ -386,5 +403,19 @@ public class KubernetesServerExposerTest {
     Map<String, ServerConfigImpl> servers = serviceAnnotations.servers();
     ServerConfig serverConfig = servers.get(serverNameRegex);
     assertEquals(serverConfig, expected);
+
+    // ensure that required route is created
+    Route route =
+        openShiftEnvironment.getRoutes().get(service.getMetadata().getName() + "-server-" + port);
+    assertEquals(route.getSpec().getTo().getName(), service.getMetadata().getName());
+    assertEquals(route.getSpec().getPort().getTargetPort().getStrVal(), servicePort.getName());
+
+    Annotations.Deserializer routeAnnotations =
+        Annotations.newDeserializer(route.getMetadata().getAnnotations());
+    Map<String, ServerConfigImpl> routeServers = routeAnnotations.servers();
+    ServerConfig routeServerConfig = routeServers.get(serverNameRegex);
+    assertNull(routeServerConfig);
+
+    assertEquals(routeAnnotations.machineName(), machineName);
   }
 }

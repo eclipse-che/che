@@ -38,8 +38,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Helps to modify {@link KubernetesEnvironment} to make servers that are configured by {@link
@@ -99,19 +97,17 @@ import org.slf4j.LoggerFactory;
  */
 public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(KubernetesServerExposer.class);
-
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
 
-  protected final ExternalServerExposerStrategy kubernetesExternalServerExposerStrategy;
-  protected final String machineName;
-  protected final Container container;
-  protected final Pod pod;
-  protected final T kubernetesEnvironment;
+  private final ExternalServerExposerStrategy<T> kubernetesExternalServerExposerStrategy;
+  private final String machineName;
+  private final Container container;
+  private final Pod pod;
+  private final T kubernetesEnvironment;
 
   public KubernetesServerExposer(
-      ExternalServerExposerStrategy kubernetesExternalServerExposerStrategy,
+      ExternalServerExposerStrategy<T> kubernetesExternalServerExposerStrategy,
       String machineName,
       Pod pod,
       Container container,
@@ -198,7 +194,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     return exposedPorts;
   }
 
-  protected void exposeExternalServers(
+  private void exposeExternalServers(
       String serviceName,
       Map<String, ServicePort> portToServicePort,
       Map<String, ServerConfig> externalServers) {
@@ -210,7 +206,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   private static class ServiceBuilder {
     private String name;
     private String machineName;
-    private Map<String, String> selector = new HashMap<>();
+    private final Map<String, String> selector = new HashMap<>();
     private List<ServicePort> ports = Collections.emptyList();
     private Map<String, ? extends ServerConfig> serversConfigs = Collections.emptyMap();
 

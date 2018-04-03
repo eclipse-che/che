@@ -38,10 +38,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 @Singleton
 public class ServersConverter implements ConfigurationProvisioner {
 
-  private final ExternalServerExposerStrategy externalServerExposerStrategy;
+  private final ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy;
 
   @Inject
-  public ServersConverter(ExternalServerExposerStrategy externalServerExposerStrategy) {
+  public ServersConverter(
+      ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy) {
     this.externalServerExposerStrategy = externalServerExposerStrategy;
   }
 

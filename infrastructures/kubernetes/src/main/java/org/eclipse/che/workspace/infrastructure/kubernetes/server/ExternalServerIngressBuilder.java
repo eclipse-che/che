@@ -30,11 +30,11 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 
-/** @author Guy Daich */
-
 /**
  * helper class for builder ingresses. Creates an ingress with a single rule, based on hostname,
  * http path. Ingress maps path to a specific service and service port.
+ *
+ * @author Guy Daich
  */
 public class ExternalServerIngressBuilder {
 

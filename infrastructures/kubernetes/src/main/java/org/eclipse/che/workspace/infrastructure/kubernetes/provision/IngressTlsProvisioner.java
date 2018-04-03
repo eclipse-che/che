@@ -16,8 +16,8 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLSBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -35,8 +35,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 public class IngressTlsProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
-  protected final boolean isTlsEnabled;
-  protected final String tlsSecretName;
+  private final boolean isTlsEnabled;
+  private final String tlsSecretName;
 
   @Inject
   public IngressTlsProvisioner(
@@ -63,8 +63,7 @@ public class IngressTlsProvisioner implements ConfigurationProvisioner<Kubernete
   private void enableTLS(Ingress ingress) {
     String host = ingress.getSpec().getRules().get(0).getHost();
 
-    IngressTLSBuilder ingressTLSBuilder =
-        new IngressTLSBuilder().withHosts(host).withSecretName(tlsSecretName);
+    IngressTLSBuilder ingressTLSBuilder = new IngressTLSBuilder().withHosts(host);
 
     // according to ingress tls spec, secret name is optional
     // when working in single-host mode, nginx controller wil reuse the che-master secret
@@ -74,7 +73,7 @@ public class IngressTlsProvisioner implements ConfigurationProvisioner<Kubernete
     }
 
     IngressTLS ingressTLS = ingressTLSBuilder.build();
-    List<IngressTLS> ingressTLSList = new ArrayList<>(Arrays.asList(ingressTLS));
+    List<IngressTLS> ingressTLSList = new ArrayList<>(Collections.singletonList(ingressTLS));
     ingress.getSpec().setTls(ingressTLSList);
   }
 

@@ -29,7 +29,7 @@ public class ExternalServerIngressBuilderTest {
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final ServerConfig SERVER_CONFIG =
       new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
-  Map<String, ServerConfig> SERVERS = ImmutableMap.of("http-server", SERVER_CONFIG);
+  private final Map<String, ServerConfig> SERVERS = ImmutableMap.of("http-server", SERVER_CONFIG);
   private static final Map<String, String> ANNOTATIONS =
       singletonMap("annotation-key", "annotation-value");
   private static final String MACHINE_NAME = "machine";
@@ -37,7 +37,7 @@ public class ExternalServerIngressBuilderTest {
   private static final String SERVICE_NAME = "ServiceName";
   private static final String SERVICE_PORT = "server-port";
 
-  ExternalServerIngressBuilder externalServerIngressBuilder;
+  private ExternalServerIngressBuilder externalServerIngressBuilder;
 
   @BeforeMethod
   public void setUp() throws Exception {

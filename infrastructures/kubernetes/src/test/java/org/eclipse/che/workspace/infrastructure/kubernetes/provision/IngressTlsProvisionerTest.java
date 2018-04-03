@@ -45,6 +45,33 @@ public class IngressTlsProvisionerTest {
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
 
+  private final ServerConfigImpl httpServer =
+      new ServerConfigImpl("8080/tpc", "http", "/api", emptyMap());
+  private final ServerConfigImpl wsServer =
+      new ServerConfigImpl("8080/tpc", "ws", "/ws", emptyMap());
+  private final Map<String, ServerConfig> servers =
+      ImmutableMap.of("http-server", httpServer, "ws-server", wsServer);
+  private final Map<String, String> annotations =
+      singletonMap("annotation-key", "annotation-value");
+  private final String machine = "machine";
+  private final String name = "IngressName";
+  private final String serviceName = "ServiceName";
+  private final String servicePort = "server-port";
+  private final String host = "server-host";
+
+  private final ExternalServerIngressBuilder externalServerIngressBuilder =
+      new ExternalServerIngressBuilder();
+  private final Ingress ingress =
+      externalServerIngressBuilder
+          .withHost(host)
+          .withAnnotations(annotations)
+          .withMachineName(machine)
+          .withName(name)
+          .withServers(servers)
+          .withServiceName(serviceName)
+          .withServicePort(servicePort)
+          .build();
+
   @Test
   public void doNothingWhenTlsDisabled() throws Exception {
     // given
@@ -58,35 +85,11 @@ public class IngressTlsProvisionerTest {
   }
 
   @Test
-  public void provisionTlsForRoutes() throws Exception {
+  public void provisionTlsForRoutesWhenTlsEnabledAndSecretProvided() throws Exception {
     // given
-    IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(true, "");
+    IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(true, "secretname");
 
-    Map<String, String> attributesMap = singletonMap("key", "value");
-    ServerConfigImpl httpServer = new ServerConfigImpl("8080/tpc", "http", "/api", emptyMap());
-    ServerConfigImpl wsServer = new ServerConfigImpl("8080/tpc", "ws", "/ws", emptyMap());
-    Map<String, ServerConfig> servers =
-        ImmutableMap.of("http-server", httpServer, "ws-server", wsServer);
-    Map<String, String> annotations = singletonMap("annotation-key", "annotation-value");
-    String machine = "machine";
-    String name = "IngressName";
-    String serviceName = "ServiceName";
-    String servicePort = "server-port";
-    String host = "server-host";
-
-    final Map<String, Ingress> ingresses = new HashMap<>();
-
-    ExternalServerIngressBuilder externalServerIngressBuilder = new ExternalServerIngressBuilder();
-    Ingress ingress =
-        externalServerIngressBuilder
-            .withHost(host)
-            .withAnnotations(annotations)
-            .withMachineName(machine)
-            .withName(name)
-            .withServers(servers)
-            .withServiceName(serviceName)
-            .withServicePort(servicePort)
-            .build();
+    Map<String, Ingress> ingresses = new HashMap<>();
     ingresses.put("ingress", ingress);
     when(k8sEnv.getIngresses()).thenReturn(ingresses);
 
@@ -97,7 +100,54 @@ public class IngressTlsProvisionerTest {
     assertEquals(ingress.getSpec().getTls().size(), 1);
     assertEquals(ingress.getSpec().getTls().get(0).getHosts().size(), 1);
     assertEquals(ingress.getSpec().getTls().get(0).getHosts().get(0), host);
+    assertEquals(ingress.getSpec().getTls().get(0).getSecretName(), "secretname");
 
+    verifyIngressAndServersTLS();
+  }
+
+  @Test
+  public void provisionTlsForRoutesWhenTlsEnabledAndSecretEmpty() throws Exception {
+    // given
+    IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(true, "");
+
+    Map<String, Ingress> ingresses = new HashMap<>();
+    ingresses.put("ingress", ingress);
+    when(k8sEnv.getIngresses()).thenReturn(ingresses);
+
+    // when
+    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    // then
+    assertEquals(ingress.getSpec().getTls().size(), 1);
+    assertEquals(ingress.getSpec().getTls().get(0).getHosts().size(), 1);
+    assertEquals(ingress.getSpec().getTls().get(0).getHosts().get(0), host);
+    assertEquals(ingress.getSpec().getTls().get(0).getSecretName(), null);
+
+    verifyIngressAndServersTLS();
+  }
+
+  @Test
+  public void provisionTlsForRoutesWhenTlsEnabledAndSecretNull() throws Exception {
+    // given
+    IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(true, null);
+
+    Map<String, Ingress> ingresses = new HashMap<>();
+    ingresses.put("ingress", ingress);
+    when(k8sEnv.getIngresses()).thenReturn(ingresses);
+
+    // when
+    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    // then
+    assertEquals(ingress.getSpec().getTls().size(), 1);
+    assertEquals(ingress.getSpec().getTls().get(0).getHosts().size(), 1);
+    assertEquals(ingress.getSpec().getTls().get(0).getHosts().get(0), host);
+    assertEquals(ingress.getSpec().getTls().get(0).getSecretName(), null);
+
+    verifyIngressAndServersTLS();
+  }
+
+  private void verifyIngressAndServersTLS() {
     Map<String, ServerConfigImpl> ingressServers =
         Annotations.newDeserializer(ingress.getMetadata().getAnnotations()).servers();
     assertEquals(ingressServers.get("http-server").getProtocol(), "https");
