@@ -13,12 +13,10 @@ package org.eclipse.che.selenium.git;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.BRANCH_PUSHED_ON_YOUR_FORK;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.FORK_CREATED;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.NEW_COMMITS_PUSHED;
-import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -28,7 +26,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -43,6 +40,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.eclipse.che.selenium.pageobject.git.Git;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -68,6 +66,7 @@ public class PullRequestPluginWithForkTest {
   @Named(CheSeleniumSuiteModule.AUXILIARY)
   private TestGitHubRepository testAuxiliaryRepo;
 
+  @Inject private Git git;
   @Inject private Ide ide;
   @Inject private Menu menu;
   @Inject private Loader loader;
@@ -79,7 +78,6 @@ public class PullRequestPluginWithForkTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private PullRequestPanel pullRequestPanel;
   @Inject private ImportProjectFromLocation importWidget;
-  @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
@@ -102,17 +100,12 @@ public class PullRequestPluginWithForkTest {
 
   @Test
   public void createPullRequest() throws Exception {
-    String projectUrl = testAuxiliaryRepo.getHtmlUrl() + ".git";
-
     // import project
     projectExplorer.waitProjectExplorer();
-    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
-    importWidget.waitAndTypeImporterAsGitInfo(projectUrl, PROJECT_NAME);
-    configureTypeOfProject();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
+    git.importJavaApp(testAuxiliaryRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change content
+    projectExplorer.openItemByPath(PROJECT_NAME);
     openFileAndChangeContent(PATH_TO_README_FILE, generate("", 12));
 
     // change commit and create pull request
@@ -148,13 +141,5 @@ public class PullRequestPluginWithForkTest {
     projectExplorer.openItemByPath(filePath);
     editor.waitActive();
     testProjectServiceClient.updateFile(testWorkspace.getId(), filePath, text);
-  }
-
-  private void configureTypeOfProject() {
-    wizard.selectTypeProject(BLANK);
-    loader.waitOnClosed();
-    wizard.clickSaveButton();
-    loader.waitOnClosed();
-    wizard.waitCreateProjectWizardFormIsClosed();
   }
 }
