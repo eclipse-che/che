@@ -22,8 +22,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -32,14 +30,12 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
-import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -51,33 +47,28 @@ public class PullRequestPluginWithForkTest {
   private static final String PATH_TO_README_FILE = PROJECT_NAME + "/README.md";
   private static final String PULL_REQUEST_CREATED = "Your pull request has been created.";
   private static final String PULL_REQUEST_UPDATED = "Your pull request has been updated.";
-  private static final String TITLE = NameGenerator.generate("Title-", 8);
-  private static final String COMMENT = NameGenerator.generate("Comment-", 8);
-
-  @Inject(optional = true)
-  @Named("github.username")
-  private String gitHubUsername;
-
-  @Inject(optional = true)
-  @Named("github.password")
-  private String gitHubPassword;
+  private static final String TITLE = generate("Title-", 8);
+  private static final String COMMENT = generate("Comment-", 8);
 
   @Inject
-  @Named(CheSeleniumSuiteModule.AUXILIARY)
-  private TestGitHubRepository testAuxiliaryRepo;
+  @Named("github.auxiliary.username")
+  private String githubUserName;
+
+  @Inject
+  @Named("github.auxiliary.password")
+  private String githubUserPassword;
 
   @Inject private Git git;
   @Inject private Ide ide;
   @Inject private Menu menu;
   @Inject private Loader loader;
-  @Inject private Wizard wizard;
   @Inject private TestUser testUser;
   @Inject private CodenvyEditor editor;
   @Inject private Preferences preferences;
   @Inject private TestWorkspace testWorkspace;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private PullRequestPanel pullRequestPanel;
-  @Inject private ImportProjectFromLocation importWidget;
+  @Inject private TestGitHubRepository testGitHubRepository;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
@@ -85,24 +76,24 @@ public class PullRequestPluginWithForkTest {
   public void setUp() throws Exception {
     Path entryPath =
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
-    testAuxiliaryRepo.addContent(entryPath);
+    testGitHubRepository.addContent(entryPath);
 
     ide.open(testWorkspace);
 
     // add committer info
-    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, testUser.getEmail());
+    testUserPreferencesServiceClient.addGitCommitter(githubUserName, testUser.getEmail());
 
     // authorize application on GitHub
     menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
-    preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
+    preferences.generateAndUploadSshKeyOnGithub(githubUserName, githubUserPassword);
   }
 
   @Test
   public void createPullRequest() throws Exception {
     // import project
     projectExplorer.waitProjectExplorer();
-    git.importJavaApp(testAuxiliaryRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
+    git.importJavaApp(testGitHubRepository.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change content
     projectExplorer.openItemByPath(PROJECT_NAME);
