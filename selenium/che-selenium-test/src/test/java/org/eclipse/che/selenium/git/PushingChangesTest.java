@@ -10,12 +10,12 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.COMMIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -24,13 +24,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.constant.TestGitConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -43,7 +42,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -82,19 +80,19 @@ public class PushingChangesTest {
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private Consoles consoles;
-  @Inject private NotificationsPopupPanel notifications;
-  @Inject private Wizard projectWizard;
-  @Inject private ImportProjectFromLocation importProject;
-  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
+  @Inject private NotificationsPopupPanel          notifications;
+  @Inject private Wizard                           projectWizard;
+  @Inject private ImportProjectFromLocation        importProject;
+  @Inject private TestGitHubKeyUploader            testGitHubKeyUploader;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
-  @Inject private TestGitHubRepository testRepo;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
-
+  @Inject private TestGitHubServiceClient          gitHubClientService;
+  @Inject private TestGitHubRepository             testRepo;
+  @Inject private TestProjectServiceClient         testProjectServiceClient;
+  @Inject private   TestCommandServiceClient         testCommandServiceClient;
   @BeforeClass
   public void prepare() throws Exception {
 
-    String commitMess = String.format("new_content_was_added %s ", System.currentTimeMillis());
+
     testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
@@ -103,6 +101,8 @@ public class PushingChangesTest {
 
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
+    git.importJavaApp(testRepo.getSshUrl(), PROJECT_NAME, BLANK);
+    projectExplorer.waitItem(PROJECT_NAME);
   }
 
   @AfterClass
@@ -110,73 +110,28 @@ public class PushingChangesTest {
     testRepo.delete();
   }
 
-  @Test
+  // @Test
   public void pushChangesTest() throws Exception {
+    String subFolderName = "plain-files";
+    String newFileForPushing = "pushFile.txt";
+    String nameOfHtmlFile = "file.html";
     String newContentForFirstPushing = String.valueOf(System.currentTimeMillis());
-    String pathToHtmlFile = String.format("%s/%s", PROJECT_NAME, "file.html");
-    git.importJavaApp(testRepo.getSshUrl(), PROJECT_NAME, BLANK);
-    projectExplorer.waitItem(PROJECT_NAME);
-    changeFileByProjectServiceClient(pathToHtmlFile, newContentForFirstPushing);
+    String pathToHtmlFile = String.format("%s/%s", PROJECT_NAME, nameOfHtmlFile);
+
+    changeAndCreateNewFileByProjectServiceClient(
+        pathToHtmlFile, newFileForPushing, newContentForFirstPushing);
     git.createNewFileAndPushItToGitHub(PROJECT_NAME, "file.html");
-    git.waitGitStatusBarWithMess(String.format("Successfully pushed to %s",testRepo.getSshUrl()));
+    git.waitGitStatusBarWithMess(String.format("Successfully pushed to %s", testRepo.getSshUrl()));
     consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
     events.clickEventLogBtn();
     loader.waitOnClosed();
     events.waitExpectedMessage(PUSH_MSG);
-    // ----------------------------------
+    assertEquals(testRepo.getFileContent(nameOfHtmlFile), newContentForFirstPushing);
+    assertEquals(
+        testRepo.getFileContent(subFolderName + "/" + newFileForPushing),
+        newContentForFirstPushing);
 
-    // Create new file and push it.
-    git.createNewFileAndPushItToGitHub(PROJECT_NAME, "new.html");
-    consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
-    git.waitGitStatusBarWithMess("Successfully pushed");
-    git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/pushChangesTest.git");
-    events.clickEventLogBtn();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(PUSH_MSG);
-
-    // Change contents index.jsp
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
-    editor.waitActive();
-    editor.typeTextIntoEditor(NEW_CONTENT_JSP);
-    editor.waitTabFileWithSavedStatus("index.jsp");
-    loader.waitOnClosed();
-    editor.closeFileByNameWithSaving("index.jsp");
-    editor.waitWhileFileIsClosed("index.jsp");
-
-    // Edit GreetingController.java
-    projectExplorer.openItemByVisibleNameInExplorer("GreetingController.java");
-    editor.waitActive();
-    editor.typeTextIntoEditor(Keys.DOWN.toString());
-    editor.typeTextIntoEditor(NEW_CONTENT_JAVA);
-    editor.waitTextIntoEditor(NEW_CONTENT_JAVA);
-    editor.waitTabFileWithSavedStatus("GreetingController");
-    loader.waitOnClosed();
-    editor.closeFileByNameWithSaving("GreetingController");
-    editor.waitWhileFileIsClosed("GreetingController");
-
-    // Commit changes
-    projectExplorer.waitAndSelectItemByName("GreetingController.java");
-    menu.runCommand(GIT, COMMIT);
-    git.waitAndRunCommit(COMMIT_MESSAGE);
-    loader.waitOnClosed();
-    git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-
-    // Push changes
-    menu.runCommand(GIT, REMOTES_TOP, PUSH);
-    loader.waitOnClosed();
-    git.waitPushFormToOpen();
-    git.clickPush();
-    git.waitPushFormToClose();
-    consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
-    git.waitGitStatusBarWithMess("Successfully pushed");
-    git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/pushChangesTest.git");
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(PUSH_MSG);
-
-    // Call Push again
+    // Call Push again and check Everything up-to-date message
     menu.runCommand(GIT, REMOTES_TOP, PUSH);
     loader.waitOnClosed();
     git.waitPushFormToOpen();
@@ -187,36 +142,10 @@ public class PushingChangesTest {
     events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
     events.clearAllMessages();
+  }
 
-    // Soft reset
-    gitHubClientService.hardResetHeadToCommit(
-        REPO_NAME, DEFAULT_COMMIT_SSH, gitHubUsername, gitHubPassword);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.RESET);
-    git.waitResetWindowOpen();
-    git.selectCommitResetWindow(3);
-    git.selectSoftReset();
-    git.clickResetBtn();
-    git.waitResetWindowClose();
-
-    // Commit changes and push directly from commit window
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(GIT, COMMIT);
-    git.waitAndRunCommitWithPush(COMMIT_MESSAGE, "origin/master");
-    loader.waitOnClosed();
-    git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.waitExpectedMessage(PUSH_MSG);
-
-    // Amend commit
-    projectExplorer.waitAndSelectItemByName("GreetingController.java");
-    menu.runCommand(GIT, COMMIT);
-    git.waitAndRunAmendCommitMessage(COMMIT_MESSAGE);
-    loader.waitOnClosed();
-    git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-
+  @Test
+  public void forcePushTest() {
     // Force push
     menu.runCommand(GIT, REMOTES_TOP, PUSH);
     loader.waitOnClosed();
@@ -231,8 +160,14 @@ public class PushingChangesTest {
     events.waitExpectedMessage(PUSH_MSG);
   }
 
-  private void changeFileByProjectServiceClient(String pathToItem, String newContent)
-      throws Exception {
+  private void changeAndCreateNewFileByProjectServiceClient(
+      String pathToItem, String newFileForPushing, String newContent) throws Exception {
     testProjectServiceClient.updateFile(ws.getId(), pathToItem, newContent);
+    testProjectServiceClient.createFileInProject(
+        ws.getId(), PROJECT_NAME + "/plain-files/", newFileForPushing, newContent);
+  }
+  private void prerpareHardResetCommand(){
+    String bashCommand = String.format("cd /%s"
+    testCommandServiceClient.createCommand();
   }
 }

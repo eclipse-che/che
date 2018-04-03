@@ -161,6 +161,10 @@ public class TestGitHubRepository {
     }
   }
 
+  public String getFileContent(String pathToFile) throws IOException {
+    return ghRepo.getFileContent(pathToFile).getContent();
+  }
+
   @PreDestroy
   public void delete() throws IOException {
     ghRepo.delete();
