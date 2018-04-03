@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 import java.util.Optional;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
@@ -41,6 +42,7 @@ import org.eclipse.che.multiuser.api.account.personal.PersonalAccountUserManager
  *
  * @author Mykhailo Kuznietsov
  */
+@Singleton
 public class KeycloakUserManager extends PersonalAccountUserManager {
 
   @Inject
