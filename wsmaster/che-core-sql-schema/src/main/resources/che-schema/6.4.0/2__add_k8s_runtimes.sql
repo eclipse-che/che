@@ -64,7 +64,6 @@ CREATE TABLE che_k8s_server (
 ALTER TABLE che_k8s_server ADD CONSTRAINT fk_che_k8s_server_machine FOREIGN KEY (workspace_id, machine_name) REFERENCES che_k8s_machine (workspace_id, machine_name);
 
 CREATE TABLE che_k8s_server_attributes (
-    -- TODO Maybe use generated id instead of workspace_id, machine_name, server_name
     workspace_id    VARCHAR(255),
     machine_name    VARCHAR(255),
     server_name     VARCHAR(255),
