@@ -18,13 +18,15 @@ import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import javax.inject.Named;
+import java.io.IOException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
@@ -63,6 +65,8 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
  * @author Anatolii Bazko
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
+
+  public static final String AUXILIARY = "auxiliary";
 
   private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
   private static final String CHE_INFRASTRUCTURE_VARIABLE = "CHE_INFRASTRUCTURE";
@@ -146,5 +150,14 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   @Provides
   public ActionsFactory getActionFactory() {
     return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
+  }
+
+  @Provides
+  @Named(AUXILIARY)
+  public TestGitHubRepository getTestGitHubRepository(
+      @Named("github.auxiliary.username") String gitHubAuxiliaryUsername,
+      @Named("github.auxiliary.password") String gitHubAuxiliaryPassword)
+      throws IOException, InterruptedException {
+    return new TestGitHubRepository(gitHubAuxiliaryUsername, gitHubAuxiliaryPassword);
   }
 }

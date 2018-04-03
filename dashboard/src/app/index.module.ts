@@ -47,7 +47,7 @@ const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'n
 window.name = 'NG_DEFER_BOOTSTRAP!';
 
 declare const Keycloak: Function;
-function buildKeycloakConfig(keycloakSettings: any) {
+function buildKeycloakConfig(keycloakSettings: any): any {
   const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
   if (!theOidcProvider) {
     return {

@@ -152,11 +152,7 @@ class IdeCtrl {
       return;
     }
 
-    if (this.ideSvc.openedWorkspace && this.selectedWorkspace.id === this.ideSvc.openedWorkspace.id) {
-      this.ideSvc.displayIDE();
-    } else {
-      this.ideSvc.openIde(this.selectedWorkspace.id);
-    }
+    this.ideSvc.openIde(this.selectedWorkspace.id);
   }
 }
 
