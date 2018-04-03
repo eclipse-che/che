@@ -1,0 +1,83 @@
+<md-progress-linear ng-show="workspaceToolsIdeController.isLoading" md-mode="indeterminate"></md-progress-linear>
+<div flex layout="column" md-theme="maincontent-theme" class="packages-page">
+  <che-list-header-additional-parts>
+    <div che-multi-transclude-part="che-list-add-button">
+      <add-package-popover
+        on-add-package="workspaceToolsIdeController.addPackage(name, location)"></add-package-popover>
+    </div>
+    <div che-multi-transclude-part="che-list-search">
+      <che-list-header-search placeholder="Search"
+                              query="workspaceToolsIdeController.packagesFilter.name"
+                              on-change="workspaceToolsIdeController.onSearchChanged(query)"></che-list-header-search>
+    </div>
+  </che-list-header-additional-parts>
+
+  <che-list-header che-hide-header="workspaceToolsIdeController.cheListHelper.visibleItemsNumber === 0">
+    <div flex="100"
+         layout="row"
+         layout-align="start stretch"
+         class="che-list-item-row">
+      <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
+      <div flex layout="row" layout-align="start center" class="che-list-item-details">
+        <che-list-header-column flex="10" layout="column" layout-align="center start"
+                                che-sort-value="workspaceToolsIdeController.packageOrderBy"
+                                che-sort-item="isEnabled"
+                                che-column-title="Use"></che-list-header-column>
+        <che-list-header-column flex="25" layout="column" layout-align="center start"
+                                che-sort-value="workspaceToolsIdeController.packageOrderBy"
+                                che-sort-item="name"
+                                che-column-title="Package"></che-list-header-column>
+        <che-list-header-column flex="15" layout="column" layout-align="center start"
+                                che-column-title="Version"></che-list-header-column>
+        <che-list-header-column flex="50" layout="column" layout-align="center start"
+                                che-column-title="Description"></che-list-header-column>
+      </div>
+    </div>
+  </che-list-header>
+  <!-- Packages list  -->
+  <che-list class="packages-list" flex
+            ng-if="workspaceToolsIdeController.packages && workspaceToolsIdeController.packages.length > 0">
+    <div class="package-item"
+         ng-repeat="package in workspaceToolsIdeController.cheListHelper.getVisibleItems() | orderBy:[workspaceToolsIdeController.packageOrderBy, 'name' ]">
+      <che-list-item flex>
+        <div flex="100"
+             layout="row"
+             layout-align="start stretch"
+             package-item-name="{{package.name}}"
+             package-item-version="{{package.version}}"
+             class="che-list-item-row">
+          <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
+          <div flex layout="row" layout-align="start center">
+            <!-- isEnabled -->
+            <div flex="10">
+              <md-switch ng-model="package.isEnabled"
+                         ng-disabled="workspaceToolsIdeController.isDefaultPackage(package.name)"
+                         ng-change="workspaceToolsIdeController.updatePackage(package)"
+                         aria-label="package"
+                         package-switch="{{package.name}}">
+              </md-switch>
+            </div>
+            <!-- Name -->
+            <div flex="25">
+              <span class="che-list-item-name" package-name="{{package.name}}">{{package.name}}</span>
+            </div>
+            <!-- Version -->
+            <div flex="15">
+              <span class="che-list-item-name" package-version="{{package.version}}">{{package.version}}</span>
+            </div>
+            <!-- Description -->
+            <div flex="50">
+              <span class="che-list-item-secondary" package-description="{{package.description}}">{{package.description}}</span>
+            </div>
+          </div>
+        </div>
+      </che-list-item>
+    </div>
+  </che-list>
+  <div class="che-list-empty">
+    <span ng-show="workspaceToolsIdeController.packages.length > 0 && workspaceToolsIdeController.cheListHelper.visibleItemsNumber === 0">
+      No packages found.
+    </span>
+    <span ng-show="workspaceToolsIdeController.packages.length === 0">There are no packages.</span>
+  </div>
+</div>

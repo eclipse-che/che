@@ -228,7 +228,10 @@ describe(`WorkspaceDetailsController >`, () => {
       })
       .directive('workspaceDetailsSsh', function () {
         return { priority: 100000, terminal: true, restrict: 'E' };
-      });
+      })
+      .directive('workspaceDetailsTools', function () {
+      return { priority: 100000, terminal: true, restrict: 'E' };
+    });
 
     angular.mock.module('workspaceDetailsMock');
   });
