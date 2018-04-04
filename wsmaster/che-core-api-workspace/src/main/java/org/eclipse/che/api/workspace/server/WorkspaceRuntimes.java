@@ -403,6 +403,7 @@ public class WorkspaceRuntimes {
 
         // remove before firing an event to have consistency between state and the event
         runtimes.remove(workspaceId);
+        statuses.remove(workspaceId);
         LOG.info(
             "Workspace '{}/{}' with id '{}' stopped by user '{}'",
             workspace.getNamespace(),
@@ -412,7 +413,9 @@ public class WorkspaceRuntimes {
         publishWorkspaceStatusEvent(workspaceId, STOPPED, STOPPING, null);
       } catch (ServerException | InfrastructureException e) {
         // remove before firing an event to have consistency between state and the event
+
         runtimes.remove(workspaceId);
+        statuses.remove(workspaceId);
         LOG.info(
             "Error occurs on workspace '{}/{}' with id '{}' stopped by user '{}'. Error: {}",
             workspace.getNamespace(),
