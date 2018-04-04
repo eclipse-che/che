@@ -107,6 +107,7 @@ import org.testng.annotations.Test;
  * @author Anton Korneta
  */
 public class KubernetesInternalRuntimeTest {
+  //TODO Fix tests
   /*
   private static final int EXPOSED_PORT_1 = 4401;
   private static final int EXPOSED_PORT_2 = 8081;
