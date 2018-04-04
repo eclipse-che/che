@@ -31,14 +31,36 @@ public enum EventType {
   STOPPING_SERVICE,
 
   /**
+   * Published when system is starting to suspend a service. This is the first event published for a
+   * certain service.
+   *
+   * <pre>
+   *     SUSPENDING_SERVICE -> (0..N)SERVICE_ITEM_SUSPENDED -> SERVICE_SUSPENDED
+   * </pre>
+   */
+  SUSPENDING_SERVICE,
+
+  /**
    * Published after service item is stopped. Events of such type are published between {@link
    * #STOPPING_SERVICE} and {@link #SERVICE_STOPPED} events.
    */
   SERVICE_ITEM_STOPPED,
 
   /**
+   * Published after service item is suspended. Events of such type are published between {@link
+   * #SUSPENDING_SERVICE} and {@link #SERVICE_SUSPENDED} events.
+   */
+  SERVICE_ITEM_SUSPENDED,
+
+  /**
    * Published when shutting down of a service is finished. The last event in the chain for a
    * certain service.
    */
-  SERVICE_STOPPED
+  SERVICE_STOPPED,
+
+  /**
+   * Published when suspending a service is finished. The last event in the chain for a certain
+   * service.
+   */
+  SERVICE_SUSPENDED
 }
