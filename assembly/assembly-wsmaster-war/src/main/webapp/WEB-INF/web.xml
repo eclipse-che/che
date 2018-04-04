@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2017 Codenvy, S.A.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <web-app xmlns="http://java.sun.com/xml/ns/javaee"
@@ -17,28 +17,10 @@
          version="3.0"
          metadata-complete="true">
 
-    <context-param>
-        <param-name>org.everrest.websocket.context</param-name>
-        <param-value>/api</param-value>
-    </context-param>
-    <context-param>
-        <param-name>org.eclipse.che.websocket.endpoint</param-name>
-        <param-value>/ws</param-value>
-    </context-param>
-    <context-param>
-        <param-name>org.eclipse.che.eventbus.endpoint</param-name>
-        <param-value>/eventbus/</param-value>
-    </context-param>
+    <absolute-ordering></absolute-ordering>
 
     <listener>
         <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
-    </listener>
-    <listener>
-        <listener-class>org.eclipse.che.everrest.ServerContainerInitializeListener</listener-class>
-    </listener>
-
-    <listener>
-        <listener-class>org.everrest.websockets.WSConnectionTracker</listener-class>
     </listener>
 
     <filter>
@@ -49,15 +31,10 @@
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    <security-role>
-        <description>the user role</description>
-        <role-name>developer</role-name>
-    </security-role>
 
-    <resource-ref>
-        <res-ref-name>jdbc/che</res-ref-name>
-        <res-type>javax.sql.DataSource</res-type>
-        <res-auth>Container</res-auth>
-    </resource-ref>
+    <resource-env-ref>
+        <resource-env-ref-name>jdbc/che</resource-env-ref-name>
+        <resource-env-ref-type>javax.sql.DataSource</resource-env-ref-type>
+    </resource-env-ref>
 
 </web-app>

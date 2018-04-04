@@ -6,12 +6,21 @@
   "favicon": "favicon.ico",
   "loader": "loader.svg",
   "ideResources": "/_app/",
+  "websocketContext": "/api/websocket",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
   "supportEmail": "wish@codenvy.com",
   "oauthDocs": "Configure OAuth in the che.properties file.",
+  "workspace": {
+    "priorityStacks": ["Java", "Java-MySQL", "Blank"],
+    "defaultStack": "java-mysql"
+  },
   "cli" : {
     "configName" : "che.env",
     "name" : "CHE"
+  },
+  "docs" : {
+    "stack" : "/docs/creating-starting-workspaces.html",
+    "workspace" : "/docs/what-are-workspaces.html"
   }
 }

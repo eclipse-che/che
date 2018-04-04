@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -33,9 +33,12 @@ post_cmd_download() {
 
 cmd_download() {
   FORCE_UPDATE=${1:-"--no-force"}
+  local IMAGES=${IMAGE_LIST}
+  IMAGES+=$'\n'${BOOTSTRAP_IMAGE_LIST}
+  IMAGES+=$'\n'${UTILITY_IMAGE_LIST}
 
   IFS=$'\n'
-  for SINGLE_IMAGE in $IMAGE_LIST; do
+  for SINGLE_IMAGE in $IMAGES; do
     VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
     if [[ $FORCE_UPDATE == "--force" ]] ||
        [[ $FORCE_UPDATE == "--pull" ]]; then

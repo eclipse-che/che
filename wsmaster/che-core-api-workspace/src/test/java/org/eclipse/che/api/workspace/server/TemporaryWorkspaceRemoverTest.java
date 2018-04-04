@@ -1,86 +1,73 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.workspace.server;
 
+import static org.eclipse.che.api.core.Pages.DEFAULT_PAGE_SIZE;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.intThat;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-/**
- * @author Max Shaposhnik (mshaposhnik@codenvy.com)
- */
+/** @author Max Shaposhnik (mshaposhnik@codenvy.com) */
 @Listeners(MockitoTestNGListener.class)
 public class TemporaryWorkspaceRemoverTest {
 
-    static final int COUNT_OF_WORKSPACES = 250;
+  static final int COUNT_OF_WORKSPACES = 150;
 
-    @Mock
-    private WorkspaceDao workspaceDao;
+  @Mock private WorkspaceDao workspaceDao;
 
-    @InjectMocks
-    private TemporaryWorkspaceRemover remover;
+  @InjectMocks private TemporaryWorkspaceRemover remover;
 
-    @Test
-    public void shouldRemoveTemporaryWorkspaces() throws Exception {
-        doNothing().when(workspaceDao).remove(anyString());
-        // As we want to check pagination, we return items 100 when skip count is 0 or 100,
-        // return 50 items when skip count is 200, and return empty list when skip count is 300.
-        doReturn(createEntities(100)).when(workspaceDao).getWorkspaces(eq(true), intThat(new ArgumentMatcher<Integer>() {
-            @Override
-            public boolean matches(Object argument) {
-                return ((int)argument) < 200;
-            }
-        }), anyInt());
-        doReturn(createEntities(50)).when(workspaceDao).getWorkspaces(eq(true), intThat(new ArgumentMatcher<Integer>() {
-            @Override
-            public boolean matches(Object argument) {
-                return ((int)argument) == 200;
-            }
-        }), anyInt());
-        doReturn(Collections.emptyList()).when(workspaceDao).getWorkspaces(eq(true), intThat(new ArgumentMatcher<Integer>() {
-            @Override
-            public boolean matches(Object argument) {
-                return ((int)argument) > COUNT_OF_WORKSPACES;
-            }
-        }), anyInt());
+  @Test
+  public void shouldRemoveTemporaryWorkspaces() throws Exception {
+    when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
+        .thenReturn(
+            new Page<>(
+                createEntities(DEFAULT_PAGE_SIZE), 0, DEFAULT_PAGE_SIZE, COUNT_OF_WORKSPACES))
+        .thenReturn(
+            new Page<>(
+                createEntities(DEFAULT_PAGE_SIZE),
+                DEFAULT_PAGE_SIZE,
+                DEFAULT_PAGE_SIZE,
+                COUNT_OF_WORKSPACES))
+        .thenReturn(
+            new Page<>(
+                createEntities(DEFAULT_PAGE_SIZE),
+                DEFAULT_PAGE_SIZE * 2,
+                DEFAULT_PAGE_SIZE,
+                COUNT_OF_WORKSPACES));
+    remover.removeTemporaryWs();
 
-        remover.removeTemporaryWs();
+    verify(workspaceDao, times(COUNT_OF_WORKSPACES)).remove(anyString());
+  }
 
-        verify(workspaceDao, times(COUNT_OF_WORKSPACES)).remove(anyString());
+  private List<WorkspaceImpl> createEntities(int number) {
+    List<WorkspaceImpl> wsList = new ArrayList<>();
+    for (int i = 0; i < number; i++) {
+      wsList.add(new WorkspaceImpl("id" + i, null, null));
     }
-
-    private List<WorkspaceImpl> createEntities(int number) {
-        List<WorkspaceImpl> wsList = new ArrayList<>();
-        for (int i = 0; i < number; i++) {
-            wsList.add(new WorkspaceImpl("id" + i, null, null));
-        }
-        return  wsList;
-    }
-
+    return wsList;
+  }
 }

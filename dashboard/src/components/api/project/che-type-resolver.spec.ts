@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../che-workspace.factory';
+import {CheWorkspace} from '../workspace/che-workspace.factory';
 import {CheAPIBuilder} from '../builder/che-api-builder.factory';
 import {CheHttpBackend} from '../test/che-http-backend';
 
@@ -17,16 +17,24 @@ import {CheHttpBackend} from '../test/che-http-backend';
  * Test of the CheTypeResolver
  */
 describe('CheTypeResolver', () => {
+  const workspaceId = 'workspaceTest';
+  const agentUrl = 'http://172.17.0.1:33441/api';
+  const agentWsUrl = 'ws://172.17.0.1:33441/wsagent';
+  const runtime = {
+    'links': [{'rel': 'wsagent', 'href': agentUrl}],
+    'machines': {
+      'dev-machine': {
+        'servers': {
+          'wsagent/ws': {'url': agentWsUrl},
+          'wsagent/http': {'url': agentUrl}
+        }
+      }
+    }
+  };
   /**
    * User Factory for the test
    */
   let factory;
-
-  let workspaceId = 'workspaceTest';
-
-  let agentUrl = 'localhost:3232/wsagent/ext';
-
-
   /**
    * API builder.
    */
@@ -59,8 +67,7 @@ describe('CheTypeResolver', () => {
     cheBackend = cheHttpBackend;
     httpBackend = cheHttpBackend.getHttpBackend();
     // setup tests workspace
-    let runtime = {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-    let test_workspace = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+    const test_workspace = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
     cheBackend.addWorkspaces([test_workspace]);
     // setup backend
     cheBackend.setup();
@@ -266,6 +273,7 @@ describe('CheTypeResolver', () => {
           path: '/test-application',
           type: 'blank',
           description: 'A hello world test application.',
+          source: {} as che.IProjectSource,
           attributes: {}
         }
       };

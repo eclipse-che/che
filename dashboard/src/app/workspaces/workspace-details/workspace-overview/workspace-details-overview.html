@@ -1,0 +1,61 @@
+<md-progress-linear ng-show="workspaceDetailsOverviewController.isLoading" md-mode="indeterminate"></md-progress-linear>
+<div class="workspace-overview-tab-content" ng-hide="workspaceDetailsOverviewController.isLoading">
+  <!-- Name -->
+  <che-label-container che-label-name="Workspace name">
+    <che-input-box
+      che-form="workspaceDetailsOverviewController.overviewForm"
+      che-name="name"
+      che-place-holder="Name of the workspace"
+      aria-label="Name of the workspace"
+      ng-model-options="{ allowInvalid: true }"
+      ng-model="workspaceDetailsOverviewController.workspaceDetails.config.name"
+      che-on-change="workspaceDetailsOverviewController.onNameChange()"
+      required
+      ng-minlength="3"
+      ng-maxlength="100"
+      ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+      custom-validator="workspaceDetailsOverviewController.isNameUnique($value)">
+      <che-error-messages che-message-scope="workspace-details-settings" che-message-name="Workspace name">
+        <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+        <div ng-message="maxlength">The name has to be less than 101 characters long.</div>
+        <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+        <div ng-message="customValidator">This workspace name is already used.</div>
+      </che-error-messages>
+    </che-input-box>
+  </che-label-container>
+  <!-- Other workspace details sections -->
+  <che-label-container ng-repeat="section in workspaceDetailsOverviewController.getSections()"
+                       che-label-name="{{section.title}}" che-label-description="{{section.description}}">
+    <div che-compile="section.content"></div>
+  </che-label-container>
+  <!-- Namespace -->
+  <che-label-container che-label-name="{{workspaceDetailsOverviewController.getNamespaceCaption()}}"
+                       ng-if="workspaceDetailsOverviewController.getNamespaces().length > 0 || workspaceDetailsOverviewController.getNamespaceEmptyMessage()">
+    <div
+      ng-if="workspaceDetailsOverviewController.getNamespaces().length === 0 && workspaceDetailsOverviewController.getNamespaceEmptyMessage()"
+      class="empty-namespace-label">
+      <i class="fa-exclamation-triangle fa fa-2x"></i>{{workspaceDetailsOverviewController.getNamespaceEmptyMessage()}}
+    </div>
+    <div ng-if="workspaceDetailsOverviewController.getNamespaceLink()" class="namespace-link">
+      <span id="namespace-name">{{workspaceDetailsOverviewController.getNamespaceLabel(workspaceDetailsOverviewController.namespaceId)}}</span>
+      <div
+        ng-click="workspaceDetailsOverviewController.namespaceOnClick(workspaceDetailsOverviewController.namespaceId)"
+        id="open-namespace-button"
+        class="fa fa-arrow-circle-right"></div>
+    </div>
+  </che-label-container>
+  <!-- Export workspace -->
+  <che-label-container che-label-name="Export">
+    <export-workspace workspace-id="{{workspaceDetailsOverviewController.workspaceDetails.id}}"
+                      workspace-details="workspaceDetailsOverviewController.workspaceDetails"
+                      workspace-export-disabled="false"></export-workspace>
+  </che-label-container>
+  <!-- Delete workspace -->
+  <che-label-container class="workspace-overview-delete-label"
+                       che-label-name="Delete"
+                       che-label-description="This is irreversible. Deleting your workspace will also delete its projects.">
+    <che-button-danger che-button-title="Delete"
+                       ng-disabled="['RUNNING', 'STOPPED','ERROR'].indexOf(workspaceDetailsOverviewController.getWorkspaceStatus()) === -1"
+                       ng-click="workspaceDetailsOverviewController.deleteWorkspace()"></che-button-danger>
+  </che-label-container>
+</div>

@@ -1,21 +1,27 @@
 <!--
 
-    Copyright (c) 2012-2017 Codenvy, S.A.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:tree="urn:import:org.eclipse.che.ide.ui.smartTree"
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='locale' type='org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant'/>
     <ui:with field='coreRes' type='org.eclipse.che.ide.Resources'/>
-    <ui:style>
+
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+        .executionPoint {
+            font-weight: bold;
+        }
+
         .alignLeft {
             float: left;
         }
@@ -33,7 +39,24 @@
             position: absolute;
             right: 6px;
         }
+
+        .marginBottom {
+            margin-bottom: 10px;
+        }
+
+        .placeHolder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        .list {
+            background: textFieldBackgroundColor;
+        }
     </ui:style>
+
     <g:DockLayoutPanel unit="PX" width="100%" height="100%">
         <g:north size="26.0">
             <g:FlowPanel width="100%" height="100%" debugId="debugger-upper-panel">
@@ -45,15 +68,41 @@
         </g:north>
         <g:center>
             <g:SplitLayoutPanel ui:field="splitPanel" width="100%" height="100%">
-                <g:west size="450">
+                <g:west size="350">
                     <g:FlowPanel addStyleNames="{style.emptyBorder}">
                         <g:DockLayoutPanel unit="PX" width="100%" height="100%">
                             <g:north size="20">
                                 <g:Label text="{locale.breakpoints}" addStyleNames="{style.alignLeft}"/>
                             </g:north>
                             <g:center>
-                                <g:ScrollPanel ui:field="breakpointsPanel" addStyleNames="{coreRes.coreCss.simpleListContainer}"
+                                <g:ScrollPanel ui:field="breakpointsPanel" addStyleNames="{style.list} {coreRes.coreCss.simpleListContainer}"
                                                debugId="debugger-breakpointsPanel"/>
+                            </g:center>
+                        </g:DockLayoutPanel>
+                    </g:FlowPanel>
+                </g:west>
+                <g:west size="650">
+                    <g:FlowPanel addStyleNames="{style.emptyBorder}">
+                        <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                            <g:north size="40">
+                                <g:FlowPanel>
+                                    <g:Label ui:field="executionPoint" addStyleNames="{style.executionPoint}" debugId="execution-point"/>
+                                    <g:Label text="{locale.debuggerFramesTitle}" addStyleNames="{style.alignLeft}"/>
+                                </g:FlowPanel>
+                            </g:north>
+                            <g:north size="20">
+                                <g:ListBox addStyleNames="{coreRes.coreCss.simpleListContainer} {style.marginBottom}"
+                                           debugId="debugger-threads-list" width="100%" ui:field="threads"/>
+                            </g:north>
+                            <g:center>
+                                <g:FlowPanel>
+                                    <g:FlowPanel ui:field="threadNotSuspendedPlaceHolder" addStyleNames="{style.placeHolder}"
+                                                 debugId="thread-not-suspended">
+                                        <g:Label text="{locale.debuggerThreadNotSuspend}"/>
+                                    </g:FlowPanel>
+                                    <g:ScrollPanel addStyleNames="{style.list} {coreRes.coreCss.simpleListContainer}"
+                                                   debugId="debugger-frames-list" width="100%" height="100%" ui:field="framesPanel"/>
+                                </g:FlowPanel>
                             </g:center>
                         </g:DockLayoutPanel>
                     </g:FlowPanel>
@@ -64,12 +113,11 @@
                             <g:north size="20">
                                 <g:Label text="{locale.variables}" addStyleNames="{style.alignLeft}"/>
                             </g:north>
-                            <g:north size="20">
-                                <g:Label ui:field="executionPoint"/>
-                            </g:north>
+                            <g:west size="28">
+                                <g:SimplePanel ui:field="watchExpressionPanel" debugId="watch-expression-panel"/>
+                            </g:west>
                             <g:center>
-                                <g:ScrollPanel ui:field="variablesPanel" addStyleNames="{coreRes.coreCss.simpleListContainer}"
-                                               debugId="debugger-variablesPanel"/>
+                                <tree:Tree ui:field="tree" addStyleNames="{style.list} {coreRes.coreCss.simpleListContainer}"/>
                             </g:center>
                         </g:DockLayoutPanel>
                     </g:FlowPanel>

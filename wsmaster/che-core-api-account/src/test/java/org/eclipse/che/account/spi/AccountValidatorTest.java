@@ -1,14 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.account.spi;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.api.core.NotFoundException;
@@ -20,9 +23,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-
 /**
  * Tests of {@link AccountValidator}.
  *
@@ -33,60 +33,68 @@ import static org.mockito.Mockito.doThrow;
 @Listeners(MockitoTestNGListener.class)
 public class AccountValidatorTest {
 
-    @Mock
-    private AccountManager accountManager;
+  @Mock private AccountManager accountManager;
 
-    @InjectMocks
-    private AccountValidator accountValidator;
+  @InjectMocks private AccountValidator accountValidator;
 
-    @Test(dataProvider = "normalizeNames")
-    public void testNormalizeAccountName(String input, String expected) throws Exception {
-        doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
+  @Test(dataProvider = "namesToNormalize")
+  public void testNormalizeAccountName(String input, String expected) throws Exception {
+    doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
 
-        Assert.assertEquals(accountValidator.normalizeAccountName(input, "account"), expected);
-    }
+    Assert.assertEquals(accountValidator.normalizeAccountName(input, "account"), expected);
+  }
 
-    @Test
-    public void testNormalizeAccountNameWhenInputDoesNotContainAnyValidCharacter() throws Exception {
-        doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
+  @Test
+  public void testNormalizeAccountNameWhenInputDoesNotContainAnyValidCharacter() throws Exception {
+    doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
 
-        Assert.assertTrue(accountValidator.normalizeAccountName("#", "name").startsWith("name"));
-    }
+    Assert.assertTrue(accountValidator.normalizeAccountName("#", "name").startsWith("name"));
+  }
 
-    @Test(dataProvider = "validNames")
-    public void testValidUserName(String input, boolean expected) throws Exception {
-        doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
+  @Test(dataProvider = "namesToValidate")
+  public void testValidUserName(String input, boolean expected) throws Exception {
+    doThrow(NotFoundException.class).when(accountManager).getByName(anyString());
 
-        Assert.assertEquals(accountValidator.isValidName(input), expected);
-    }
+    Assert.assertEquals(accountValidator.isValidName(input), expected);
+  }
 
-    @DataProvider(name = "normalizeNames")
-    public Object[][] normalizeNames() {
-        return new Object[][] {{"test", "test"},
-                               {"test123", "test123"},
-                               {"test 123", "test123"},
-                               {"test@gmail.com", "testgmailcom"},
-                               {"TEST", "TEST"},
-                               {"test-", "test"},
-                               {"te-st", "test"},
-                               {"-test", "test"},
-                               {"te_st", "test"},
-                               {"te#st", "test"}
-        };
-    }
+  @DataProvider
+  public Object[][] namesToNormalize() {
+    return new Object[][] {
+      {"test", "test"},
+      {"test123", "test123"},
+      {"test 123", "test123"},
+      {"test@gmail.com", "testgmailcom"},
+      {"TEST", "TEST"},
+      {"test-", "test"},
+      {"-test", "test"},
+      {"te_st", "test"},
+      {"te#st", "test"},
+      {"-test", "test"},
+      {"test-", "test"},
+      {"--test--", "test"},
+      {"t-----e--s-t", "t-e-s-t"}
+    };
+  }
 
-    @DataProvider(name = "validNames")
-    public Object[][] validNames() {
-        return new Object[][] {{"test", true},
-                               {"test123", true},
-                               {"test 123", false},
-                               {"test@gmail.com", false},
-                               {"TEST", true},
-                               {"test-", false},
-                               {"te-st", false},
-                               {"-test", false},
-                               {"te_st", false},
-                               {"te#st", false}
-        };
-    }
+  @DataProvider
+  public Object[][] namesToValidate() {
+    return new Object[][] {
+      {"test", true},
+      {"t-e-s-t", true},
+      {"test123", true},
+      {"TEST", true},
+      {"te-st", true},
+      {"test 123", false},
+      {"test@gmail.com", false},
+      {"test-", false},
+      {"-test", false},
+      {"te_st", false},
+      {"te#st", false},
+      {"-test", false},
+      {"test-", false},
+      {"--test--", false},
+      {"te--st", false}
+    };
+  }
 }

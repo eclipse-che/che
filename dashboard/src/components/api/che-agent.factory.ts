@@ -1,14 +1,18 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+interface IAgentsResource<T> extends ng.resource.IResourceClass<T> {
+  getAgents: any;
+  getAgent: any;
+}
 
 /**
  * This class is handling the agents retrieval
@@ -17,13 +21,18 @@
  */
 export class CheAgent {
 
+  static $inject = ['$resource', '$q'];
+
+  private $resource: ng.resource.IResourceService;
+  private $q: ng.IQService;
+  private agentsMap: Map<string, che.IAgent> = new Map();
+  private agents: che.IAgent[];
+  private remoteAgentAPI: IAgentsResource<any>;
+
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($resource, $q) {
-
-    // keep resource
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService) {
     this.$resource = $resource;
     this.$q = $q;
 
@@ -31,31 +40,32 @@ export class CheAgent {
     this.agents = [];
 
     // remote call
-    this.remoteAgentAPI = this.$resource('/api/agent', {}, {
-      getAgents: { method: 'GET', url: '/api/agent', isArray: true }
+    this.remoteAgentAPI = <IAgentsResource<any>>this.$resource('/api/installer', {}, {
+      getAgents: { method: 'GET', url: '/api/installer', isArray: true },
+      getAgent: {method: 'GET', url: '/api/installer/:id'}
     });
   }
 
   /**
-   * Fetch the agents
+   * Fetch the agents.
    */
-  fetchAgents() {
-    var defer = this.$q.defer();
-    let promise = this.remoteAgentAPI.getAgents().$promise;
+  fetchAgents(): ng.IPromise<che.IAgent[]> {
+    const defer = this.$q.defer();
+    const promise = this.remoteAgentAPI.getAgents().$promise;
 
-    promise.then((agents) => {
+    promise.then((agents: che.IAgent[]) => {
       // reset global list
       this.agents.length = 0;
 
-      agents.forEach((agent) => {
+      agents.forEach((agent: che.IAgent) => {
         this.agents.push(agent);
       });
-      defer.resolve();
-    }, (error) => {
-      if (error.status != 304) {
+      defer.resolve(this.agents);
+    }, (error: any) => {
+      if (error.status !== 304) {
         defer.reject(error);
       } else {
-        defer.resolve();
+        defer.resolve(this.agents);
       }
     });
 
@@ -63,11 +73,44 @@ export class CheAgent {
   }
 
   /**
-   * Gets all agents
-   * @returns {Array}
+   * Returns the list of all agents.
+   *
+   * @returns {che.IAgent[]}
    */
-  getAgents() {
+  getAgents(): che.IAgent[] {
     return this.agents;
   }
 
+  /**
+   * Fetches the info of the agent by id (the latest version will be returned).
+   *
+   * @param {string} agentId agent's id to fetch
+   * @returns {angular.IPromise<che.IAgent>}
+   */
+  fetchAgent(agentId: string): ng.IPromise<che.IAgent> {
+    let defer = this.$q.defer();
+    let promise = this.remoteAgentAPI.getAgent({id: agentId}).$promise;
+    promise.then((agent: any) => {
+      this.agentsMap.set(agentId, agent);
+      defer.resolve(agent);
+    }, (error: any) => {
+      if (error.status !== 304) {
+        defer.reject(error);
+      } else {
+        defer.resolve(this.agentsMap.get(agentId));
+      }
+    });
+
+    return defer.promise;
+  }
+
+  /**
+   * Returns agent by id.
+   *
+   * @param {string} agentId
+   * @returns {che.IAgent}
+   */
+  getAgent(agentId: string): che.IAgent {
+    return this.agentsMap.get(agentId);
+  }
 }

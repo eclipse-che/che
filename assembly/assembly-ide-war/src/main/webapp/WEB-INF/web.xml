@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2017 Codenvy, S.A.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <web-app xmlns="http://java.sun.com/xml/ns/javaee"
@@ -16,16 +16,17 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0"
          metadata-complete="true">
+    <absolute-ordering></absolute-ordering>
 
     <servlet>
         <servlet-name>IDE</servlet-name>
-        <jsp-file>/IDE.jsp</jsp-file>
+        <servlet-class>org.eclipse.che.IDEController</servlet-class>
     </servlet>
 
-    <filter>
-        <filter-name>dashboardFilter</filter-name>
-        <filter-class>org.eclipse.che.DashboardRedirectionFilter</filter-class>
-    </filter>
+    <listener>
+        <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
+    </listener>
+
     <filter>
         <filter-name>cacheDisablingFilter</filter-name>
         <filter-class>org.eclipse.che.filter.CheCacheDisablingFilter</filter-class>
@@ -46,9 +47,13 @@
             <param-value>^.*\.cache\..*$</param-value>
         </init-param>
     </filter>
+    <filter>
+        <filter-name>guiceFilter</filter-name>
+        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+    </filter>
 
     <filter-mapping>
-        <filter-name>dashboardFilter</filter-name>
+        <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <filter-mapping>

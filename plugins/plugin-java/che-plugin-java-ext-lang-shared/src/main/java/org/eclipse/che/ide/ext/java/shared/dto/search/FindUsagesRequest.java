@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.java.shared.dto.search;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -20,30 +20,33 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface FindUsagesRequest {
 
-    /** @return the project path*/
-    String getProjectPath();
+  /** @return the project path */
+  String getProjectPath();
 
-    /**
-     * Set project path
-     * @param projectPath the path of the project
-     */
-    void setProjectPath(String projectPath);
+  /**
+   * Set project path
+   *
+   * @param projectPath the path of the project
+   */
+  void setProjectPath(String projectPath);
 
-    /** @return the path of the file where search invoked */
-    String getFQN();
+  /** @return the path of the file where search invoked */
+  String getFQN();
 
-    /**
-     * Set java class FQN.
-     * @param fqn the FQN where search invoked
-     */
-    void setFQN(String fqn);
+  /**
+   * Set java class FQN.
+   *
+   * @param fqn the FQN where search invoked
+   */
+  void setFQN(String fqn);
 
-    /** @return the offset (cursor position) in file*/
-    int getOffset();
+  /** @return the offset (cursor position) in file */
+  int getOffset();
 
-    /**
-     * Set offset (cursor position)
-     * @param offset the cursor position in file
-     */
-    void setOffset(int offset);
+  /**
+   * Set offset (cursor position)
+   *
+   * @param offset the cursor position in file
+   */
+  void setOffset(int offset);
 }

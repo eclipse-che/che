@@ -1,131 +1,196 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.debug;
 
-import elemental.dom.Element;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.ide.api.editor.gutter.Gutters.BREAKPOINTS_GUTTER;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
+import elemental.dom.Element;
+import elemental.html.DivElement;
+import java.util.ArrayList;
+import java.util.List;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
-import org.eclipse.che.ide.api.editor.gutter.Gutter.LineNumberingChangeCallback;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 import org.eclipse.che.ide.util.dom.Elements;
 
-import static org.eclipse.che.ide.api.editor.gutter.Gutters.BREAKPOINTS_GUTTER;
-
-/**
- * Renderer for breakpoint marks in gutter (on the left margin of the text).
- */
+/** Renderer for breakpoint marks in gutter (on the left margin of the text). */
 public class BreakpointRendererImpl implements BreakpointRenderer {
 
-    /** The resources for breakpoint display. */
-    private final BreakpointResources breakpointResources;
+  /** The resources for breakpoint display. */
+  private final BreakpointResources breakpointResources;
 
-    /** The resources for editor display. */
-    private final EditorResources editorResources;
+  /** The resources for editor display. */
+  private final EditorResources editorResources;
 
-    /** The component responsible for gutter handling. */
-    private final Gutter hasGutter;
+  /** The component responsible for gutter handling. */
+  private final Gutter hasGutter;
 
-    /** The component responsible for line style handling. */
-    private final LineStyler lineStyler;
+  /** The component responsible for line style handling. */
+  private final LineStyler lineStyler;
 
-    /** The document. */
-    private Document document;
+  /** The document. */
+  private Document document;
 
-    private Element activeBreakpointMark;
-    private Element inactiveBreakpointMark;
+  @AssistedInject
+  public BreakpointRendererImpl(
+      final BreakpointResources breakpointResources,
+      final EditorResources editorResources,
+      @Assisted final Gutter hasGutter,
+      @Assisted final LineStyler lineStyler,
+      @Assisted final Document document) {
+    this.breakpointResources = breakpointResources;
+    this.editorResources = editorResources;
+    this.hasGutter = hasGutter;
+    this.lineStyler = lineStyler;
+    this.document = document;
+  }
 
-    @AssistedInject
-    public BreakpointRendererImpl(final BreakpointResources breakpointResources,
-                                  final EditorResources editorResources,
-                                  @Assisted final Gutter hasGutter,
-                                  @Assisted final LineStyler lineStyler,
-                                  @Assisted final Document document) {
-        this.breakpointResources = breakpointResources;
-        this.editorResources = editorResources;
-        this.hasGutter = hasGutter;
-        this.lineStyler = lineStyler;
-        this.document = document;
+  @Override
+  public void addBreakpointMark(int lineNumber) {
+    addBreakpointMark(lineNumber, (file, firstLine, linesAdded, linesRemoved) -> {});
+  }
 
-        breakpointResources.getCss().ensureInjected();
+  @Override
+  public void addBreakpointMark(int lineNumber, LineChangeAction action) {
+    if (hasGutter != null) {
 
-        initBreakpointMarks();
+      Element newElement = createDefaultBreakpointMark(false);
+      Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+      if (existedElement != null) {
+        hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
+      } else {
+        hasGutter.addGutterItem(
+            lineNumber,
+            BREAKPOINTS_GUTTER,
+            newElement,
+            (fromLine, linesRemoved, linesAdded) ->
+                action.onLineChange(document.getFile(), fromLine, linesAdded, linesRemoved));
+      }
+    }
+  }
+
+  @Override
+  public void setBreakpointMark(
+      final Breakpoint breakpoint, final boolean active, final LineChangeAction action) {
+
+    if (hasGutter != null) {
+      int lineNumber = breakpoint.getLocation().getLineNumber() - 1;
+
+      Element newElement = createBreakpointMarks(breakpoint, active);
+      Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+
+      if (existedElement != null) {
+        hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
+      } else {
+        hasGutter.addGutterItem(
+            lineNumber,
+            BREAKPOINTS_GUTTER,
+            newElement,
+            (fromLine, linesRemoved, linesAdded) ->
+                action.onLineChange(document.getFile(), fromLine, linesAdded, linesRemoved));
+      }
+    }
+  }
+
+  @Override
+  public void removeBreakpointMark(final int lineNumber) {
+    if (hasGutter != null) {
+      this.hasGutter.removeGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+    }
+  }
+
+  @Override
+  public void clearBreakpointMarks() {
+    if (hasGutter != null) {
+      this.hasGutter.clearGutter(BREAKPOINTS_GUTTER);
+    }
+  }
+
+  @Override
+  public void setBreakpointActive(int lineNumber, boolean active) {
+    if (hasGutter != null) {
+      Element newElement = createDefaultBreakpointMark(active);
+      Element existedElement = hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+      if (existedElement != null) {
+        hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, newElement);
+      }
+    }
+  }
+
+  @Override
+  public void setLineActive(final int lineNumber, final boolean active) {
+    if (active && this.lineStyler != null) {
+      this.lineStyler.addLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
+    } else {
+      this.lineStyler.removeLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
+    }
+  }
+
+  private Element createBreakpointMarks(Breakpoint breakpoint, boolean active) {
+    BreakpointResources.Css css = breakpointResources.getCss();
+
+    List<String> styles = new ArrayList<>();
+    styles.add(css.breakpoint());
+    if (!breakpoint.isEnabled()) {
+      styles.add(css.disabled());
+    } else if (active) {
+      styles.add(css.active());
+    } else {
+      styles.add(css.inactive());
     }
 
-    @Override
-    public void addBreakpointMark(final int lineNumber) {
-        if (hasGutter != null) {
-            this.hasGutter.addGutterItem(lineNumber, BREAKPOINTS_GUTTER, inactiveBreakpointMark);
-        }
+    BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
+    boolean hasCondition =
+        conf != null
+            && ((conf.isConditionEnabled() && !isNullOrEmpty(conf.getCondition()))
+                || (conf.isHitCountEnabled() && conf.getHitCount() != 0));
+
+    if (hasCondition) {
+      styles.add(css.condition());
     }
 
-    @Override
-    public void addBreakpointMark(final int lineNumber, final LineChangeAction action) {
-        if (hasGutter != null) {
-            this.hasGutter.addGutterItem(lineNumber, BREAKPOINTS_GUTTER, inactiveBreakpointMark, new LineNumberingChangeCallback() {
-                @Override
-                public void onLineNumberingChange(final int fromLine, final int linesRemoved, final int linesAdded) {
-                    action.onLineChange(document.getFile(), fromLine, linesAdded, linesRemoved);
-                }
-            });
-        }
+    StringBuilder title = new StringBuilder();
+    if (conf != null) {
+      if (conf.isConditionEnabled() && !isNullOrEmpty(conf.getCondition())) {
+        title.append("Condition: ").append(conf.getCondition()).append('\n');
+      }
+
+      if (conf.isHitCountEnabled() && conf.getHitCount() != 0) {
+        title.append("Hit count: ").append(conf.getHitCount()).append('\n');
+      }
+
+      if (conf.getSuspendPolicy() != null) {
+        title.append("Suspend: ").append(conf.getSuspendPolicy().toString().toLowerCase());
+      }
     }
 
-    @Override
-    public void removeBreakpointMark(final int lineNumber) {
-        if (hasGutter != null) {
-            this.hasGutter.removeGutterItem(lineNumber, BREAKPOINTS_GUTTER);
-        }
-    }
+    DivElement element = Elements.createDivElement(styles.stream().toArray(String[]::new));
+    element.setTitle(title.toString());
+    return element;
+  }
 
-    @Override
-    public void clearBreakpointMarks() {
-        if (hasGutter != null) {
-            this.hasGutter.clearGutter(BREAKPOINTS_GUTTER);
-        }
-    }
+  private Element createDefaultBreakpointMark(boolean active) {
+    BreakpointResources.Css css = breakpointResources.getCss();
+    return Elements.createDivElement(css.breakpoint(), active ? css.active() : css.inactive());
+  }
 
-    @Override
-    public void setBreakpointActive(final int lineNumber, final boolean active) {
-        if (hasGutter != null) {
-            final Element mark = this.hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
-            if (mark != null) {
-                Element element = active ? activeBreakpointMark : inactiveBreakpointMark;
-                this.hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, element);
-            }
-        }
-    }
-
-    @Override
-    public void setLineActive(final int lineNumber, final boolean active) {
-        if (active && this.lineStyler != null) {
-            this.lineStyler.addLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
-        } else {
-            this.lineStyler.removeLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
-        }
-    }
-
-    private void initBreakpointMarks() {
-        BreakpointResources.Css css = breakpointResources.getCss();
-        activeBreakpointMark = Elements.createDivElement(css.breakpoint(), css.active());
-        inactiveBreakpointMark = Elements.createDivElement(css.breakpoint(), css.inactive());
-    }
-
-    @Override
-    public boolean isReady() {
-        return this.hasGutter != null && this.lineStyler != null;
-    }
+  @Override
+  public boolean isReady() {
+    return this.hasGutter != null && this.lineStyler != null;
+  }
 }

@@ -1,0 +1,32 @@
+<div class="che-footer"
+     layout-gt-sm="row" layout-align-gt-sm="start center"
+     layout-sm="column" layout-align-sm="center start"
+     layout-xs="column" layout-align-xs="center start">
+
+  <div class="che-footer-logo-row"
+       flex
+       flex-order-gt-sm="1" flex-order-sm="2" flex-order-xs="2"
+       layout="row" layout-align="start center">
+    <img class="che-footer-logo" id="footer-logo" ng-if="cheFooterController.logo" ng-src="{{cheFooterController.logo}}" alt="logo">
+    <span class="che-footer-version" id="footer-version" ng-if="cheFooterController.version">{{cheFooterController.version}}</span>
+    <div id="footer-space" flex></div>
+  </div>
+
+  <div class="che-footer-buttons-row"
+       flex-order-gt-sm="2" flex-order-sm="1" flex-order-xs="1"
+       layout="row" layout-align="start center">
+    <ng-transclude id="footer-content"></ng-transclude>
+    <a class="che-footer-button-blue che-footer-button" id="footer-email-wish" ng-if="cheFooterController.supportEmail"
+       ng-href="{{'mailto:' + cheFooterController.supportEmail + cheFooterController.getWishEmailSubject(cheFooterController.productName)}}">Make a wish</a>
+    <a class="che-footer-button-blue che-footer-button" id="footer-email" ng-if="cheFooterController.email"
+       ng-href="{{'mailto:' + cheFooterController.email.address + cheFooterController.getEmailSubject(cheFooterController.email.subject)}}">{{cheFooterController.email.title}}</a>
+    <a class="che-footer-button-blue che-footer-button" id="footer-docs" href="/docs" target="_blank">Docs</a>
+    <a class="che-footer-button-blue che-footer-button" id="footer-support" ng-if="cheFooterController.supportHelpPath && cheFooterController.supportHelpTitle"
+       ng-href="{{cheFooterController.supportHelpPath}}" target="_blank">{{cheFooterController.supportHelpTitle}}</a>
+
+    <a class="che-footer-button-blue che-footer-button" id="footer-diagnostics" ng-href="#/diagnostic">Diagnostics</a>
+
+    <a ng-repeat="link in cheFooterController.links" class="che-footer-button-blue che-footer-button" ng-href="{{link.location}}" target="_blank">{{link.title}}</a>
+  </div>
+
+</div>

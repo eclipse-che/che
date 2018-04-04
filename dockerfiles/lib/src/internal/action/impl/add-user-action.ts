@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 
 // imports
@@ -18,6 +18,7 @@ import {User} from "../../../api/wsmaster/user/user";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Permissions} from "../../../api/wsmaster/permissions/permissions";
+
 /**
  * This class is handling the add of a user and also consider to add user as being admin.
  * @author Florent Benoit
@@ -51,7 +52,7 @@ export class AddUserAction {
 
     constructor(args:Array<string>) {
         ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         this.user = new User(this.authData);
     }
 

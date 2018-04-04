@@ -1,36 +1,35 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
 import {CheWorkspaceBuilder} from './che-workspace-builder';
 import {CheProjectReferenceBuilder} from './che-projectreference-builder';
+import {CheFactoryBuilder} from './che-factory-builder';
 import {CheProjectDetailsBuilder} from './che-projectdetails-builder';
 import {CheProjectTypeBuilder} from './che-projecttype-builder';
 import {CheProjectTemplateBuilder} from './che-projecttemplate-builder';
 import {CheProjectTypeAttributeDescriptorBuilder} from './che-projecttype-attribute-descriptor-builder';
 import {CheProfileBuilder} from './che-profile-builder';
 import {CheStackBuilder} from './che-stack-builder';
+import {CheUserBuilder} from './che-user-builder';
+import {ChePermissionsBuilder} from './che-permissions-builder';
+import {CheOrganizationsBuilder} from './che-organizations-builder';
+import {CheResourceBuilder} from './che-resource-builder';
+import {CheTeamBuilder} from './che-team-builder';
 
 /**
  * This class is providing the entry point for accessing the builders
  * @author Florent Benoit
  */
 export class CheAPIBuilder {
-
-  /**
-   * Default constructor
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-  }
 
   /**
    * The Che Workspace builder
@@ -44,7 +43,7 @@ export class CheAPIBuilder {
    * The Che Profile builder
    * @returns {CheProfileBuilder}
    */
-  getProfileBuilder() {
+  getProfileBuilder(): CheProfileBuilder {
     return new CheProfileBuilder();
   }
 
@@ -95,5 +94,54 @@ export class CheAPIBuilder {
    */
   getStackBuilder() {
     return new CheStackBuilder();
+  }
+
+  /***
+   * The Che Factory builder
+   * @returns {CheFactoryBuilder}
+   */
+  getFactoryBuilder() {
+    return new CheFactoryBuilder();
+  }
+
+  /***
+   * The Che User builder
+   * @returns {CheUserBuilder}
+   */
+  getUserBuilder() {
+    return new CheUserBuilder();
+  }
+
+  /**
+   * The Che Permissions builder
+   * @return {ChePermissionsBuilder}
+   */
+  getPermissionsBuilder() {
+    return new ChePermissionsBuilder();
+  }
+
+  /***
+   * The Che Team builder
+   * @returns {CheTeamBuilder}
+   */
+  getTeamBuilder() {
+    return new CheTeamBuilder();
+  }
+
+  /**
+   * The Che Organizations builder
+   * @return {CheOrganizationsBuilder}
+   */
+  getOrganizationsBuilder() {
+    return new CheOrganizationsBuilder();
+  }
+
+  /**
+   * The Che Resources builder
+   *
+   * @return {CheResourceBuilder}
+   */
+  getResourceBuilder() {
+    return new CheResourceBuilder();
   }
 }

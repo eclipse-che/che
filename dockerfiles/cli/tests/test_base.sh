@@ -14,8 +14,9 @@ export SCRIPTS_DIR="${BATS_BASE_DIR}"/base/scripts/base
 export TESTS_DIR="${BATS_BASE_DIR}"/cli/tests
 export TESTRUN_DIR="${TESTS_DIR}"/testrun
 export CONTAINER_TESTRUN_DIR=/dockerfiles/cli/tests/testrun
-if [ -d "${TESTRUN_DIR}" ]; then
- rm -rf "${TESTRUN_DIR}"
+
+if [ -d "${CONTAINER_TESTRUN_DIR}" ]; then
+ rm -rf "${CONTAINER_TESTRUN_DIR}"
 fi
 mkdir "${TESTRUN_DIR}" -p
 
@@ -56,3 +57,99 @@ get_free_port() {
   echo $port
 }
 
+check_che_state() {
+  local CHE_CONTAINER_NAME="che"
+  local CHE_PORT="8080"
+  local IS_RUNNING="true"
+  for i in "${@}"
+  do
+      case $i in
+         --che-container-name=*)
+             CHE_CONTAINER_NAME="${i#*=}"
+             shift
+         ;;
+         --che-port=*)
+             CHE_PORT="${i#*=}"
+             shift
+         ;;
+         --is-running=*)
+             IS_RUNNING="${i#*=}"
+             shift
+         ;;
+         *)
+              echo "You've passed unknown option"
+              exit 2
+          ;;
+      esac
+  done
+  [[ "$(docker inspect --format='{{.State.Running}}' $CHE_CONTAINER_NAME)" == "$IS_RUNNING" ]]
+  ip_address=$(docker inspect -f {{.NetworkSettings.Networks.bridge.IPAddress}} $CHE_CONTAINER_NAME)
+  curl -fsS http://${ip_address}:$CHE_PORT  > /dev/null
+}
+
+execute_cli_command() {
+  local CHE_CONTAINER_NAME="che"
+  local CHE_DATA_PATH=""
+  local CHE_CLI_COMMAND=""
+  local CHE_CLI_EXTRA_OPTIONS=""
+  local CHE_PORT="8080"
+  local DATA_VOLUME=""
+  local USE_DOCKER_SOCK="true"
+  local MOUNT_SCRIPTS="true"
+
+  for i in "${@}"
+  do
+      case $i in
+         --che-container-name=*)
+             CHE_CONTAINER_NAME="${i#*=}"
+             shift
+         ;;
+         --che-port=*)
+             CHE_PORT="${i#*=}"
+             shift
+         ;;
+         --che-data-path=*)
+             CHE_DATA_PATH="${i#*=}"
+             shift
+         ;;
+         --che-cli-command=*)
+             CHE_CLI_COMMAND="${i#*=}"
+             shift
+         ;;
+         --che-cli-extra-options=*)
+             CHE_CLI_EXTRA_OPTIONS="${i#*=}"
+             shift
+         ;;
+         --che-cli-use-docker-sock=*)
+             USE_DOCKER_SOCK="${i#*=}"
+             shift
+         ;;
+         --che-cli-mount-scripts=*)
+             MOUNT_SCRIPTS="${i#*=}"
+             shift
+         ;;
+         *)
+              echo "You've passed unknown option"
+              exit 2
+          ;;
+      esac
+  done
+
+  if [ ! -z $CHE_DATA_PATH ]; then
+    DATA_VOLUME="-v ${CHE_DATA_PATH}:/data"
+  fi
+  if [ $USE_DOCKER_SOCK == "true" ]; then
+    DOCKER_SOCK_VOLUME="-v /var/run/docker.sock:/var/run/docker.sock"
+  fi
+  if [ $MOUNT_SCRIPTS == "true" ]; then
+    SCRIPTS_VOLUME="-v ${SCRIPTS_DIR}:/scripts/base"
+  fi
+  if [ $CHE_PORT -ne 8080 ]; then
+     CLI_CUSTOM_PORT="-e CHE_PORT=${CHE_PORT}"
+  fi
+  if [ $CHE_CONTAINER_NAME != "che" ]; then
+     CLI_CUSTOM_CHE_CONTAINER_NAME="-e CHE_CONTAINER=${CHE_CONTAINER_NAME}"
+  fi
+
+  docker run --rm ${CLI_CUSTOM_PORT} ${SCRIPTS_VOLUME} ${DOCKER_SOCK_VOLUME} ${DATA_VOLUME} ${CLI_CUSTOM_CHE_CONTAINER_NAME} $CLI_IMAGE ${CHE_CLI_COMMAND} ${CHE_CLI_EXTRA_OPTIONS}
+}

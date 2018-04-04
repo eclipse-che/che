@@ -1,25 +1,36 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.search;
+
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
+import java.util.Collections;
+import java.util.List;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
+import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;
 import org.junit.Before;
@@ -29,13 +40,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Tests for {@link FullTextSearchPresenter}.
  *
@@ -43,176 +47,178 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class FullTextSearchPresenterTest {
-    private final String SEARCHED_TEXT = "to be or not to be";
+  private final String SEARCHED_TEXT = "to be or not to be";
 
-    @Mock
-    private FullTextSearchView                             view;
-    @Mock
-    private FindResultPresenter                            findResultPresenter;
-    @Mock
-    private AppContext                                     appContext;
-    @Mock
-    private Container                                      workspaceRoot;
-    @Mock
-    private Container                                      searchContainer;
-    @Mock
-    private Promise<Optional<Container>>                   optionalContainerPromise;
-    @Captor
-    private ArgumentCaptor<Operation<Optional<Container>>> optionalContainerCaptor;
-    @Mock
-    private Promise<Resource[]>                            searchResultPromise;
-    @Captor
-    private ArgumentCaptor<Operation<Resource[]>>          searchResultCaptor;
-    @Captor
-    private ArgumentCaptor<Operation<PromiseError>>        operationErrorCapture;
-    @Captor
-    private ArgumentCaptor<Operation<Resource[]>>          operationSuccessCapture;
+  @Mock private FullTextSearchView view;
+  @Mock private FindResultPresenter findResultPresenter;
+  @Mock private AppContext appContext;
+  @Mock private Container workspaceRoot;
+  @Mock private Container searchContainer;
+  @Mock private SearchResult searchResult;
+  @Mock private QueryExpression queryExpression;
+  @Mock private Promise<Optional<Container>> optionalContainerPromise;
+  @Captor private ArgumentCaptor<Operation<Optional<Container>>> optionalContainerCaptor;
+  @Mock private Promise<SearchResult> searchResultPromise;
+  @Captor private ArgumentCaptor<Operation<SearchResult>> searchResultCaptor;
+  @Captor private ArgumentCaptor<Operation<PromiseError>> operationErrorCapture;
+  @Captor private ArgumentCaptor<Operation<List<SearchItemReference>>> operationSuccessCapture;
 
-    FullTextSearchPresenter fullTextSearchPresenter;
+  FullTextSearchPresenter fullTextSearchPresenter;
 
-    @Before
-    public void setUp() throws Exception {
-        fullTextSearchPresenter = new FullTextSearchPresenter(view,
-                                                              findResultPresenter,
-                                                              appContext);
-    }
+  @Before
+  public void setUp() throws Exception {
+    fullTextSearchPresenter = new FullTextSearchPresenter(view, findResultPresenter, appContext);
+  }
 
-    @Test
-    public void viewShouldBeShowed() {
-        final Path path = Path.valueOf("/search");
-        fullTextSearchPresenter.showDialog(path);
+  @Test
+  public void viewShouldBeShowed() {
+    final Path path = Path.valueOf("/search");
+    fullTextSearchPresenter.showDialog(path);
 
-        verify(view).showDialog();
-        verify(view).clearInput();
-        verify(view).setPathDirectory(eq(path.toString()));
-    }
+    verify(view).showDialog();
+    verify(view).clearInput();
+    verify(view).setPathDirectory(eq(path.toString()));
+  }
 
-    @Test
-    public void searchShouldBeSuccessfullyFinished() throws Exception {
-        when(view.getPathToSearch()).thenReturn("/search");
-        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
-        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-        when(searchContainer.search(anyString(), anyString())).thenReturn(searchResultPromise);
+  @Test
+  public void searchShouldBeSuccessfullyFinished() throws Exception {
+    when(view.getPathToSearch()).thenReturn("/search");
+    when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+    when(workspaceRoot.getContainer(nullable(Path.class))).thenReturn(optionalContainerPromise);
+    when(searchContainer.search(nullable(QueryExpression.class))).thenReturn(searchResultPromise);
+    when(searchContainer.createSearchQueryExpression(
+            nullable(String.class), nullable(String.class)))
+        .thenReturn(queryExpression);
+    fullTextSearchPresenter.search(SEARCHED_TEXT);
 
-        fullTextSearchPresenter.search(SEARCHED_TEXT);
+    verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
-        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-        optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
+    verify(searchResultPromise).then(searchResultCaptor.capture());
+    searchResultCaptor.getValue().apply(searchResult);
 
-        verify(searchResultPromise).then(searchResultCaptor.capture());
-        searchResultCaptor.getValue().apply(new Resource[0]);
+    verify(view, never()).showErrorMessage(anyString());
+    verify(view).close();
+    verify(findResultPresenter)
+        .handleResponse(eq(searchResult), eq(queryExpression), eq(SEARCHED_TEXT));
+  }
 
-        verify(view, never()).showErrorMessage(anyString());
-        verify(view).close();
-        verify(findResultPresenter).handleResponse(eq(new Resource[0]), eq(SEARCHED_TEXT));
-    }
+  @Test
+  public void searchWholeWordUnSelect() throws Exception {
+    when(view.getPathToSearch()).thenReturn("/search");
+    when(view.isWholeWordsOnly()).thenReturn(false);
+    when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+    when(workspaceRoot.getContainer(nullable(Path.class))).thenReturn(optionalContainerPromise);
+    when(searchContainer.search(nullable(QueryExpression.class))).thenReturn(searchResultPromise);
+    when(searchContainer.createSearchQueryExpression(
+            nullable(String.class), nullable(String.class)))
+        .thenReturn(queryExpression);
 
+    final String search = NameGenerator.generate("test", 10);
+    fullTextSearchPresenter.search(search);
 
-    @Test
-    public void searchWholeWordUnSelect() throws Exception {
-        when(view.getPathToSearch()).thenReturn("/search");
-        when(view.isWholeWordsOnly()).thenReturn(false);
-        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
-        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-        when(searchContainer.search(anyString(), anyString())).thenReturn(searchResultPromise);
+    verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
-        final String search = NameGenerator.generate("test", 10);
-        fullTextSearchPresenter.search(search);
+    verify(searchResultPromise).then(searchResultCaptor.capture());
+    searchResultCaptor.getValue().apply(searchResult);
 
-        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-        optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
+    verify(searchContainer).search(queryExpression);
+    verify(view).isWholeWordsOnly();
+    verify(view, never()).showErrorMessage(nullable(String.class));
+    verify(view).close();
+    verify(findResultPresenter).handleResponse(eq(searchResult), eq(queryExpression), eq(search));
+  }
 
-        verify(searchResultPromise).then(searchResultCaptor.capture());
-        searchResultCaptor.getValue().apply(new Resource[0]);
+  @Test
+  public void searchWholeWordSelect() throws Exception {
+    when(view.getPathToSearch()).thenReturn("/search");
+    when(view.isWholeWordsOnly()).thenReturn(true);
+    when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+    when(workspaceRoot.getContainer(nullable(Path.class))).thenReturn(optionalContainerPromise);
+    when(searchContainer.search(nullable(QueryExpression.class))).thenReturn(searchResultPromise);
+    when(searchContainer.createSearchQueryExpression(
+            nullable(String.class), nullable(String.class)))
+        .thenReturn(queryExpression);
 
-        verify(searchContainer).search(anyString(), eq("*" + search + "*"));
-        verify(view).isWholeWordsOnly();
-        verify(view, never()).showErrorMessage(anyString());
-        verify(view).close();
-        verify(findResultPresenter).handleResponse(eq(new Resource[0]), eq(search));
-    }
+    final String search = NameGenerator.generate("test", 10);
+    fullTextSearchPresenter.search(search);
 
-    @Test
-    public void searchWholeWordSelect() throws Exception {
-        when(view.getPathToSearch()).thenReturn("/search");
-        when(view.isWholeWordsOnly()).thenReturn(true);
-        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
-        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-        when(searchContainer.search(anyString(), anyString())).thenReturn(searchResultPromise);
+    verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
-        final String search = NameGenerator.generate("test", 10);
-        fullTextSearchPresenter.search(search);
+    verify(searchResultPromise).then(searchResultCaptor.capture());
+    searchResultCaptor.getValue().apply(searchResult);
 
-        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-        optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
+    verify(searchContainer).search(queryExpression);
+    verify(view).isWholeWordsOnly();
+    verify(view, never()).showErrorMessage(anyString());
+    verify(view).close();
+    verify(findResultPresenter).handleResponse(eq(searchResult), eq(queryExpression), eq(search));
+  }
 
-        verify(searchResultPromise).then(searchResultCaptor.capture());
-        searchResultCaptor.getValue().apply(new Resource[0]);
+  @Test
+  public void searchHasDoneWithSomeError() throws Exception {
+    when(view.getPathToSearch()).thenReturn("/search");
+    when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+    when(workspaceRoot.getContainer(nullable(Path.class))).thenReturn(optionalContainerPromise);
 
-        verify(searchContainer).search(anyString(), eq(search));
-        verify(view).isWholeWordsOnly();
-        verify(view, never()).showErrorMessage(anyString());
-        verify(view).close();
-        verify(findResultPresenter).handleResponse(eq(new Resource[0]), eq(search));
-    }
+    fullTextSearchPresenter.search(SEARCHED_TEXT);
 
-    @Test
-    public void searchHasDoneWithSomeError() throws Exception {
-        when(view.getPathToSearch()).thenReturn("/search");
-        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
-        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+    verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    optionalContainerCaptor.getValue().apply(Optional.absent());
 
-        fullTextSearchPresenter.search(SEARCHED_TEXT);
+    verify(view).showErrorMessage(anyString());
+    verify(view, never()).close();
+    verify(findResultPresenter, never())
+        .handleResponse(anyObject(), eq(queryExpression), anyString());
+  }
 
-        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-        optionalContainerCaptor.getValue().apply(Optional.<Container>absent());
+  @Test
+  public void onEnterClickedWhenAcceptButtonInFocus() throws Exception {
+    when(view.getSearchText()).thenReturn(SEARCHED_TEXT);
+    when(view.isAcceptButtonInFocus()).thenReturn(true);
 
-        verify(view).showErrorMessage(anyString());
-        verify(view, never()).close();
-        verify(findResultPresenter, never()).handleResponse(any(Resource[].class), anyString());
-    }
+    when(view.getPathToSearch()).thenReturn("/search");
+    when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+    when(workspaceRoot.getContainer(nullable(Path.class))).thenReturn(optionalContainerPromise);
+    when(searchContainer.search(nullable(QueryExpression.class))).thenReturn(searchResultPromise);
+    when(searchContainer.createSearchQueryExpression(
+            nullable(String.class), nullable(String.class)))
+        .thenReturn(queryExpression);
+    List<SearchItemReference> result = Collections.emptyList();
 
-    @Test
-    public void onEnterClickedWhenAcceptButtonInFocus() throws Exception {
-        when(view.getSearchText()).thenReturn(SEARCHED_TEXT);
-        when(view.isAcceptButtonInFocus()).thenReturn(true);
+    fullTextSearchPresenter.onEnterClicked();
 
-        when(view.getPathToSearch()).thenReturn("/search");
-        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
-        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-        when(searchContainer.search(anyString(), anyString())).thenReturn(searchResultPromise);
-        Resource[] result = new Resource[0];
+    verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
-        fullTextSearchPresenter.onEnterClicked();
+    verify(searchResultPromise).then(searchResultCaptor.capture());
+    searchResultCaptor.getValue().apply(searchResult);
 
-        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-        optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
+    verify(view, never()).showErrorMessage(anyString());
+    verify(view).close();
+    verify(findResultPresenter)
+        .handleResponse(eq(searchResult), eq(queryExpression), eq(SEARCHED_TEXT));
+  }
 
-        verify(searchResultPromise).then(searchResultCaptor.capture());
-        searchResultCaptor.getValue().apply(result);
+  @Test
+  public void onEnterClickedWhenCancelButtonInFocus() throws Exception {
+    when(view.isCancelButtonInFocus()).thenReturn(true);
 
-        verify(view, never()).showErrorMessage(anyString());
-        verify(view).close();
-        verify(findResultPresenter).handleResponse(eq(result), eq(SEARCHED_TEXT));
-    }
+    fullTextSearchPresenter.onEnterClicked();
 
-    @Test
-    public void onEnterClickedWhenCancelButtonInFocus() throws Exception {
-        when(view.isCancelButtonInFocus()).thenReturn(true);
+    verify(view).close();
+    verify(view, never()).getSearchText();
+  }
 
-        fullTextSearchPresenter.onEnterClicked();
+  @Test
+  public void onEnterClickedWhenSelectPathButtonInFocus() throws Exception {
+    when(view.isSelectPathButtonInFocus()).thenReturn(true);
 
-        verify(view).close();
-        verify(view, never()).getSearchText();
-    }
+    fullTextSearchPresenter.onEnterClicked();
 
-    @Test
-    public void onEnterClickedWhenSelectPathButtonInFocus() throws Exception {
-        when(view.isSelectPathButtonInFocus()).thenReturn(true);
-
-        fullTextSearchPresenter.onEnterClicked();
-
-        verify(view).showSelectPathDialog();
-        verify(view, never()).getSearchText();
-    }
+    verify(view).showSelectPathDialog();
+    verify(view, never()).getSearchText();
+  }
 }

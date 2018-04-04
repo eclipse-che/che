@@ -1,37 +1,31 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-
-export interface IWorkspaceAttributes {
-  created: number;
-  updated?: number;
-  [propName: string]: string | number;
-}
+import IWorkspaceEnvironment = che.IWorkspaceEnvironment;
 
 /**
  * This class is providing a builder for Workspace
  * @author Florent Benoit
  */
 export class CheWorkspaceBuilder {
-  workspace: che.IWorkspace;
+  private workspace: che.IWorkspace;
 
   constructor() {
     this.workspace = {
-      name: 'test',
       temporary: false,
       config: {
+        environments: {},
         projects: []
       }
     };
-
   }
 
   withName(name: string): CheWorkspaceBuilder {
@@ -44,7 +38,7 @@ export class CheWorkspaceBuilder {
     return this;
   }
 
-  withAttributes(attributes: IWorkspaceAttributes): CheWorkspaceBuilder {
+  withAttributes(attributes: che.IWorkspaceAttributes): CheWorkspaceBuilder {
     this.workspace.attributes = attributes;
     return this;
   }
@@ -56,6 +50,26 @@ export class CheWorkspaceBuilder {
 
   withRuntime(runtime: any): CheWorkspaceBuilder {
     this.workspace.runtime = runtime;
+    return this;
+  }
+
+  withNamespace(namespace: string): CheWorkspaceBuilder {
+    this.workspace.namespace = namespace;
+    return this;
+  }
+
+  withStatus(status: string): CheWorkspaceBuilder {
+    this.workspace.status = status;
+    return this;
+  }
+
+  withDefaultEnvironment(defaultEnv: string): CheWorkspaceBuilder {
+    this.workspace.config.defaultEnv = defaultEnv;
+    return this;
+  }
+
+  withEnvironments(environments: {[envName: string]: IWorkspaceEnvironment}): CheWorkspaceBuilder {
+    this.workspace.config.environments = environments;
     return this;
   }
 

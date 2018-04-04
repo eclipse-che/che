@@ -1,61 +1,52 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
+interface ICheAccordionScope extends ng.IScope {
+  openCondition: boolean;
+}
 
 /**
  * Defines a directive for Accordion component
  * @author Oleksii Kurinnyi
  */
-export class CheAccordion {
+export class CheAccordion implements ng.IDirective {
+
+  static $inject = ['$timeout'];
+
+  restrict = 'E';
+  transclude = true;
+  replace = true;
+  template = '<div ng-transclude class="che-accordion che-accordion-closed"></div>';
+
+  // scope values
+  scope = {
+    openCondition: '=cheOpenCondition'
+  };
+
+  $timeout: ng.ITimeoutService;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($timeout) {
+  constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
-    this.restrict = 'E';
-    this.transclude = true;
-    this.replace = true;
-    this.template = '<div ng-transclude class="che-accordion che-accordion-closed"></div>';
-
-    // scope values
-    this.scope = {
-      openCondition: '=cheOpenCondition'
-    };
   }
 
-  link($scope, element, attr, ctrl) {
-    let currentBodyElement = element.find('.che-accordion-body');
+  link($scope: ICheAccordionScope, $element: ng.IAugmentedJQuery): void {
+    let currentBodyElement = $element.find('.che-accordion-body');
 
-    // automatic switching panes
-    $scope.$watch(() => {
-      return $scope.openCondition;
-    }, (doOpenPane) => {
-      if (!element.siblings().hasClass('che-accordion-dirty')) {
-        openPane(doOpenPane);
-      }
-    });
-
-    // manual switching panes
-    element.bind('click', (event) => {
-      if (angular.element(event.target).parent().hasClass('che-accordion-title')) {
-        element.addClass('che-accordion-dirty');
-        openPane(true);
-      }
-    });
-
-    let openPane = (doOpenPane) => {
-      if (element.hasClass('che-accordion-closed')) {
-        let siblingElements = element.siblings(),
+    let openPane = (doOpenPane: boolean) => {
+      if ($element.hasClass('che-accordion-closed')) {
+        let siblingElements = $element.siblings(),
           panesToClose = [];
 
         // find opened pane and close it
@@ -73,7 +64,7 @@ export class CheAccordion {
 
         this.$timeout(() => {
           // close other panes
-          panesToClose.forEach((pane) => {
+          panesToClose.forEach((pane: ng.IAugmentedJQuery) => {
             pane.addClass('che-accordion-closed');
           });
 
@@ -84,14 +75,31 @@ export class CheAccordion {
             }
 
             // open current pane
-            element.removeClass('che-accordion-closed');
+            $element.removeClass('che-accordion-closed');
           }
-        },10).then(() => {
-          for (let i=0; i<siblingElements.length; i++) {
+        }, 10).then(() => {
+          for (let i = 0; i < siblingElements.length; i++) {
             angular.element(siblingElements[i]).find('.che-accordion-body').removeAttr('style');
           }
         });
       }
-    }
+    };
+
+    // automatic switching panes
+    $scope.$watch(() => {
+      return $scope.openCondition;
+    }, (doOpenPane: boolean) => {
+      if (!$element.siblings().hasClass('che-accordion-dirty')) {
+        openPane(doOpenPane);
+      }
+    });
+
+    // manual switching panes
+    $element.bind('click', (event: JQueryEventObject) => {
+      if (angular.element(event.target).parent().hasClass('che-accordion-title')) {
+        $element.addClass('che-accordion-dirty');
+        openPane(true);
+      }
+    });
   }
 }

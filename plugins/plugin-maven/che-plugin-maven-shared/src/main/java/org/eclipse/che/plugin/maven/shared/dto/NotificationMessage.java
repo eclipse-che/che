@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.maven.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -18,18 +18,18 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Evgen Vidolob
  */
 @DTO
+@Deprecated
 public interface NotificationMessage {
 
-    String getText();
+  String getText();
 
-    void setText(String text);
+  void setText(String text);
 
-    double getPercent();
+  double getPercent();
 
-    void setPercent(double percent);
+  void setPercent(double percent);
 
-    boolean isPercentUndefined();
+  boolean isPercentUndefined();
 
-    void setPercentUndefined(boolean percentUndefined);
-
+  void setPercentUndefined(boolean percentUndefined);
 }

@@ -1,64 +1,69 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.debug.shared.model.impl;
 
+import com.google.common.base.Objects;
+import java.util.List;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 
-/**
- * @author Anatoliy Bazko
- */
+/** @author Anatoliy Bazko */
 public class DebugSessionImpl implements DebugSession {
-    private final DebuggerInfo debuggerInfo;
-    private final String id;
-    private final String type;
+  private final DebuggerInfo debuggerInfo;
+  private final String id;
+  private final String type;
+  private final List<? extends Breakpoint> breakpoints;
 
-    public DebugSessionImpl(DebuggerInfo debuggerInfo, String id, String type) {
-        this.debuggerInfo = debuggerInfo;
-        this.id = id;
-        this.type = type;
-    }
+  public DebugSessionImpl(
+      DebuggerInfo debuggerInfo, String id, String type, List<? extends Breakpoint> breakpoints) {
+    this.debuggerInfo = debuggerInfo;
+    this.id = id;
+    this.type = type;
+    this.breakpoints = breakpoints;
+  }
 
-    @Override
-    public DebuggerInfo getDebuggerInfo() {
-        return debuggerInfo;
-    }
+  @Override
+  public DebuggerInfo getDebuggerInfo() {
+    return debuggerInfo;
+  }
 
-    @Override
-    public String getId() {
-        return id;
-    }
+  @Override
+  public String getId() {
+    return id;
+  }
 
-    @Override
-    public String getType() {
-        return type;
-    }
+  @Override
+  public String getType() {
+    return type;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DebugSessionImpl)) return false;
+  @Override
+  public List<? extends Breakpoint> getBreakpoints() {
+    return breakpoints;
+  }
 
-        DebugSessionImpl that = (DebugSessionImpl)o;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof DebugSessionImpl)) return false;
+    DebugSessionImpl that = (DebugSessionImpl) o;
+    return Objects.equal(debuggerInfo, that.debuggerInfo)
+        && Objects.equal(id, that.id)
+        && Objects.equal(type, that.type)
+        && Objects.equal(breakpoints, that.breakpoints);
+  }
 
-        if (debuggerInfo != null ? !debuggerInfo.equals(that.debuggerInfo) : that.debuggerInfo != null) return false;
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        return !(type != null ? !type.equals(that.type) : that.type != null);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = debuggerInfo != null ? debuggerInfo.hashCode() : 0;
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(debuggerInfo, id, type, breakpoints);
+  }
 }

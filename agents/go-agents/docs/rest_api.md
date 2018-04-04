@@ -13,7 +13,7 @@ _POST /process_
 - `channel`(optional) - the id of the channel which should be subscribed to the process events
 - `types`(optional) - comma separated types works only in couple with specified `channel`, defines
 the events which will be sent by the process to the `channel`. Several values may be specified,
-e.g. `channel=channel-1&types=stderr,stdout`. By default channel will be subscribed to 
+e.g. `channel=channel-1&types=stderr,stdout`. By default channel will be subscribed to
 all the existing types(listed below). Possible type values:
     - `stderr` - output from the process stderr
     - `stdout` - output from the process stdout
@@ -37,7 +37,8 @@ all the existing types(listed below). Possible type values:
     "commandLine": "mvn clean install",
     "type" : "maven",
     "alive": true,
-    "nativePid": 9186
+    "nativePid": 9186,
+    "exitCode" : -1
 }
 ```
 - `200` if successfully started
@@ -64,6 +65,7 @@ _GET /process/{pid}_
     "type" : "maven",
     "alive": false,
     "nativePid": 9186,
+    "exitCode" : 0
 }
 ```
 
@@ -90,6 +92,7 @@ _DELETE /process/{pid}_
     "type" : "maven",
     "alive": true,
     "nativePid": 9186,
+    "exitCode" : -1
 }
 ```
 - `200` if successfully killed
@@ -110,7 +113,7 @@ don't forget to encode this query parameter
 - `till`(optional) - time to get logs till e.g. _2016-07-12T01:49:04.097980475+03:00_ the format is _RFC3339Nano_
 don't forget to encode this query parameter
 - `format`(optional) - the format of the response, default is `json`, possible values are: `text`, `json`
-- `limit`(optional) - the limit of logs in result, the default value is _50_, logs are limited from the 
+- `limit`(optional) - the limit of logs in result, the default value is _50_, logs are limited from the
 latest to the earliest
 - `skip` (optional) - the logs to skip, default value is `0`
 
@@ -151,7 +154,7 @@ Json:
 
 _GET /process_
 
-- `all`(optional) - if `true` then all the processes including _dead_ ones will be returned(respecting paging ofc), 
+- `all`(optional) - if `true` then all the processes including _dead_ ones will be returned(respecting paging ofc),
 otherwise only _alive_ processes will be returnedg
 
 #### Response
@@ -166,13 +169,15 @@ The result of the request _GET /process?all=true_
         "type" : "maven",
         "alive": true,
         "nativePid": 9186,
+        "exitCode" : -1
     },
     {
         "pid": 2,
         "name": "build",
         "commandLine": "printf \"Hello World\"",
         "alive": false,
-        "nativePid": 9588
+        "nativePid": 9588,
+        "exitCode" : 0
     }
 ]
 ```
@@ -186,7 +191,7 @@ The result of the request _GET /process?all=true_
 _POST /process/{pid}/events/{channel}_
 
 - `pid` - the id of the process to subscribe to
-- `channel` - the id of the webscoket channel which is subscriber
+- `channel` - the id of the websocket channel which is subscriber
 - `types`(optional) - the types of the events separated by comma e.g. `?types=stderr,stdout`
 -  `after`(optional) - process logs which appeared after given time will
 be republished to the channel. This method may be useful in the reconnect process
@@ -205,7 +210,7 @@ be republished to the channel. This method may be useful in the reconnect proces
 _DELETE /process/{pid}/events/{channel}_
 
 - `pid` - the id of the process to unsubscribe from
-- `channel` - the id of the webscoket channel which currenly subscribed
+- `channel` - the id of the websocket channel which currenly subscribed
 to the process events
 
 #### Response

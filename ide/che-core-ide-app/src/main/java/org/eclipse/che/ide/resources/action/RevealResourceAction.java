@@ -1,31 +1,41 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.resources.action;
-
-import com.google.common.annotations.Beta;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
-import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
-
-import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.resource.Path.valueOf;
+
+import com.google.common.annotations.Beta;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 /**
  * Scrolls from resource in the context to the stored location in the Project View.
@@ -35,35 +45,88 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Beta
 @Singleton
-public class RevealResourceAction extends AbstractPerspectiveAction {
+public class RevealResourceAction extends AbstractPerspectiveAction
+    implements ActivePartChangedHandler {
 
-    private final AppContext               appContext;
-    private final EventBus eventBus;
+  private static final String PATH = "path";
 
-    @Inject
-    public RevealResourceAction(AppContext appContext,
-                                EventBus eventBus) {
-        super(singletonList(PROJECT_PERSPECTIVE_ID), "Reveal Resource", null, null, null);
-        this.appContext = appContext;
-        this.eventBus = eventBus;
+  private final AppContext appContext;
+  private final EventBus eventBus;
+  private final Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider;
+  private final WorkspaceAgent workspaceAgent;
+  private PartPresenter activePart;
+
+  @Inject
+  public RevealResourceAction(
+      AppContext appContext,
+      EventBus eventBus,
+      CoreLocalizationConstant localizedConstant,
+      Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider,
+      WorkspaceAgent workspaceAgent) {
+    super(
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        localizedConstant.actionRevealResourceText(),
+        localizedConstant.actionRevealResourceDescription());
+    this.appContext = appContext;
+    this.eventBus = eventBus;
+    this.projectExplorerPresenterProvider = projectExplorerPresenterProvider;
+    this.workspaceAgent = workspaceAgent;
+
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  }
+
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    activePart = event.getActivePart();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent event) {
+    if (!(activePart instanceof ProjectExplorerPresenter)) {
+      event.getPresentation().setVisible(false);
+      return;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        final Resource[] resources = appContext.getResources();
+    final Resource[] resources = appContext.getResources();
 
-        event.getPresentation().setVisible(true);
-        event.getPresentation().setEnabled(resources != null && resources.length == 1);
+    event.getPresentation().setVisible(true);
+    event.getPresentation().setEnabled(resources != null && resources.length == 1);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Map<String, String> params = e.getParameters();
+    if (params != null && params.containsKey(PATH)) {
+      String pathToReveal = params.get(PATH);
+      Path path = valueOf(pathToReveal);
+
+      checkState(!path.isEmpty());
+
+      ensureProjectExplorerActive();
+      eventBus.fireEvent(new RevealResourceEvent(path));
+    } else {
+      final Resource[] resources = appContext.getResources();
+
+      checkState(resources != null && resources.length == 1);
+
+      ensureProjectExplorerActive();
+      eventBus.fireEvent(new RevealResourceEvent(resources[0]));
+    }
+  }
+
+  private void ensureProjectExplorerActive() {
+    PartStack navigationPartStack = workspaceAgent.getPartStack(NAVIGATION);
+    PartPresenter activePart = navigationPartStack.getActivePart();
+    ProjectExplorerPresenter projectExplorerPresenter = projectExplorerPresenterProvider.get();
+
+    if (activePart == null) {
+      workspaceAgent.openPart(projectExplorerPresenter, NAVIGATION);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        final Resource[] resources = appContext.getResources();
-
-        checkState(resources != null && resources.length == 1);
-
-        eventBus.fireEvent(new RevealResourceEvent(resources[0]));
+    if (!(activePart instanceof ProjectExplorerPresenter)) {
+      workspaceAgent.setActivePart(projectExplorerPresenter);
     }
+  }
 }

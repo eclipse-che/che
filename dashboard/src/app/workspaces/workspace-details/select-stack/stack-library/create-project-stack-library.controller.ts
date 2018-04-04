@@ -1,14 +1,15 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheStack} from '../../../../../components/api/che-stack.factory';
 
 /**
  * This class is handling the controller for the creating stack library projects
@@ -17,72 +18,65 @@
  */
 export class CreateProjectStackLibraryController {
 
+  static $inject = ['$scope', 'cheStack', 'lodash'];
+
+  private $scope: ng.IScope;
+  private lodash: any;
+  private tabName: string;
+  private selectedStackId: string;
+  private allStackTags: Array<string> = [];
+  private filteredStackIds: Array<string> = [];
+  private stacks: Array<che.IStack> = [];
+
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($scope, cheStack, cheWorkspace, lodash) {
+  constructor($scope: ng.IScope,
+              cheStack: CheStack,
+              lodash: any) {
     this.$scope = $scope;
-    this.cheStack = cheStack;
-    this.cheWorkspace = cheWorkspace;
     this.lodash = lodash;
 
-    this.workspaces = [];
-
-    this.allStackTags = [];
-    this.filteredStackIds = [];
-
-    this.stacks = cheStack.getStacks();
-    if (this.stacks.length) {
-      this.updateData();
+    let stacks = cheStack.getStacks();
+    if (stacks.length) {
+      this.updateData(stacks);
     } else {
       cheStack.fetchStacks().then(() => {
-        this.updateData();
+        this.updateData(stacks);
       });
     }
 
-    $scope.$on('event:library:selectStackId', (event, data) => {
-      this.setStackSelectionById(data)
-    });
-
-    // create array of id of stacks which contain selected tags
-    // to make filtration faster
-    $scope.$on('event:updateFilter', (event, tags) => {
-      this.allStackTags = [];
-      this.filteredStackIds = [];
-
-      if (!tags) {
-        tags = [];
-      }
-      this.stacks.forEach((stack) => {
-        let matches = 0,
-          stackTags = stack.tags.map(tag => tag.toLowerCase());
-        for (let i = 0; i < tags.length; i++) {
-          if (stackTags.indexOf(tags[i].toLowerCase()) > -1) {
-            matches++;
-          }
-        }
-        if (matches === tags.length) {
-          this.filteredStackIds.push(stack.id);
-          this.allStackTags = this.allStackTags.concat(stack.tags);
-        }
-      });
-      this.allStackTags = this.lodash.uniq(this.allStackTags);
-    });
-
-    // set first stack as selected after filtration finished
-    $scope.$watch('filteredStacks && filteredStacks.length', (length) => {
-      if (length) {
-        this.setStackSelectionById($scope.filteredStacks[0].id);
-      }
+    $scope.$on('event:library:selectStackId', (event: ng.IAngularEvent, data: string) => {
+      this.setStackSelectionById(data);
     });
   }
 
   /**
-   * Select stack by Id
-   * @param stackId
+   * Update filtered stack keys depends on tags.
+   * @param tags {Array<string>}
    */
-  setStackSelectionById(stackId) {
+  onTagsChanges(tags?: Array<string>): void {
+    if (!angular.isArray(tags) || !tags.length) {
+      this.filteredStackIds = this.stacks.map((stack: che.IStack) => stack.id);
+      this.setStackSelectionById(this.filteredStackIds[0]);
+      return;
+    }
+    this.filteredStackIds = this.stacks.filter((stack: che.IStack) => {
+      let stackTags = stack.tags.map((tag: string) => tag.toLowerCase());
+      return tags.every((tag: string) => {
+        return stackTags.indexOf(tag.toLowerCase()) !== -1;
+      });
+    }).map((stack: che.IStack) => stack.id);
+    if (this.filteredStackIds.length) {
+      this.setStackSelectionById(this.filteredStackIds[0]);
+    }
+  }
+
+  /**
+   * Select stack by Id
+   * @param stackId {string}
+   */
+  setStackSelectionById(stackId: string): void {
     this.selectedStackId = stackId;
     if (this.selectedStackId) {
       this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stackId: this.selectedStackId});
@@ -91,28 +85,42 @@ export class CreateProjectStackLibraryController {
 
   /**
    * Update stacks' data
+   * @param stacks {Array<che.IStack>}
    */
-  updateData() {
-    this.stacks.forEach((stack) => {
+  updateData(stacks: Array<che.IStack>): void {
+    stacks.forEach((stack: che.IStack) => {
       this.filteredStackIds.push(stack.id);
       this.allStackTags = this.allStackTags.concat(stack.tags);
     });
     this.allStackTags = this.lodash.uniq(this.allStackTags);
+    stacks.sort((stackA: che.IStack, stackB: che.IStack) => {
+      const nameA = stackA.name.toLowerCase();
+      const nameB = stackB.name.toLowerCase();
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+      return 0;
+    });
+    this.stacks = angular.copy(stacks);
+    this.onTagsChanges();
   }
 
   /**
    * Provides tooltip data from a stack
-   * @param stack - the data to analyze
-   * @returns String
+   * @param stack {che.IStack} - the data to analyze
+   * @returns {string}
    */
-  getTooltip(stack) {
+  getTooltip(stack: che.IStack): string {
     // get components and add data from the components
     let text = '';
     if (!stack || !stack.components) {
       return text;
     }
 
-    stack.components.forEach((component) => {
+    stack.components.forEach((component: any) => {
       text += component.name + ':' + component.version + '   ';
     });
     return text;

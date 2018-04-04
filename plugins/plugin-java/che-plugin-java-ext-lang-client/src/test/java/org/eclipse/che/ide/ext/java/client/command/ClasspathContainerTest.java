@@ -1,17 +1,24 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.java.client.command;
 
-import com.google.web.bindery.event.shared.EventBus;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.web.bindery.event.shared.EventBus;
+import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
@@ -21,62 +28,47 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @RunWith(MockitoJUnitRunner.class)
 public class ClasspathContainerTest {
-    private static final String PROJECT_PATH = "/project1";
+  private static final String PROJECT_PATH = "/project1";
 
-    @Mock
-    private ClasspathServiceClient classpathServiceClient;
-    @Mock
-    private EventBus               eventBus;
+  @Mock private ClasspathServiceClient classpathServiceClient;
+  @Mock private EventBus eventBus;
 
-    @Mock
-    private Promise<List<ClasspathEntryDto>> classpathEntries;
+  @Mock private Promise<List<ClasspathEntryDto>> classpathEntries;
 
-    @InjectMocks
-    private ClasspathContainer classpathContainer;
+  @InjectMocks private ClasspathContainer classpathContainer;
 
-    @Before
-    public void setUp() throws Exception {
-        when(classpathServiceClient.getClasspath(anyString())).thenReturn(classpathEntries);
-    }
+  @Before
+  public void setUp() throws Exception {
+    when(classpathServiceClient.getClasspath(anyString())).thenReturn(classpathEntries);
+  }
 
-    @Test
-    public void changedClasspathHandlerShouldBeAdded() throws Exception {
-        verify(eventBus).addHandler(ClasspathChangedEvent.TYPE, classpathContainer);
-    }
+  @Test
+  public void changedClasspathHandlerShouldBeAdded() throws Exception {
+    verify(eventBus).addHandler(ClasspathChangedEvent.TYPE, classpathContainer);
+  }
 
-    @Test
-    public void classpathShouldBeAdded() throws Exception {
-        Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
+  @Test
+  public void classpathShouldBeAdded() throws Exception {
+    Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
-        verify(classpathServiceClient).getClasspath(PROJECT_PATH);
-        assertEquals(classpathEntries, entries);
-    }
+    verify(classpathServiceClient).getClasspath(PROJECT_PATH);
+    assertEquals(classpathEntries, entries);
+  }
 
-    @Test
-    public void classpathAlreadyIncludes() throws Exception {
-        classpathContainer.getClasspathEntries(PROJECT_PATH);
+  @Test
+  public void classpathAlreadyIncludes() throws Exception {
+    classpathContainer.getClasspathEntries(PROJECT_PATH);
 
-        reset(classpathServiceClient);
+    reset(classpathServiceClient);
 
-        Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
+    Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
-        verify(classpathServiceClient, never()).getClasspath(PROJECT_PATH);
-        assertEquals(classpathEntries, entries);
-    }
+    verify(classpathServiceClient, never()).getClasspath(PROJECT_PATH);
+    assertEquals(classpathEntries, entries);
+  }
 }

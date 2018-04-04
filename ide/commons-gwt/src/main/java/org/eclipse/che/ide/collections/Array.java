@@ -19,68 +19,65 @@ import java.util.List;
 
 /**
  * Defines a simple interface for a list/array.
- * <p/>
- * When used with DTOs:
- * <p/>
- * On the client it is safe to cast this to a
- * {@link com.codenvy.ide.collections.js.JsoArray}.
- * <p/>
- * Native to JavaScript "sparse" arrays are not supported.
- * <p/>
- * On the server, this is an instance of
- * {@link com.codenvy.ide.collections.java.JsonArrayListAdapter} which
- * is a wrapper around a List.
+ *
+ * <p>When used with DTOs:
+ *
+ * <p>On the client it is safe to cast this to a {@link com.codenvy.ide.collections.js.JsoArray}.
+ *
+ * <p>Native to JavaScript "sparse" arrays are not supported.
+ *
+ * <p>On the server, this is an instance of {@link
+ * com.codenvy.ide.collections.java.JsonArrayListAdapter} which is a wrapper around a List.
  */
 public interface Array<T> {
 
-    void add(T item);
+  void add(T item);
 
-    void addAll(Array<? extends T> item);
+  void addAll(Array<? extends T> item);
 
-    void clear();
+  void clear();
 
-    boolean contains(T item);
+  boolean contains(T item);
 
-    Array<T> copy();
+  Array<T> copy();
 
-    T get(int index);
+  T get(int index);
 
-    int indexOf(T item);
+  int indexOf(T item);
 
-    boolean isEmpty();
+  boolean isEmpty();
 
-    String join(String separator);
+  String join(String separator);
 
-    T peek();
+  T peek();
 
-    T pop();
+  T pop();
 
-    T remove(int index);
+  T remove(int index);
 
-    Iterable<T> asIterable();
+  Iterable<T> asIterable();
 
-    boolean remove(T item);
+  boolean remove(T item);
 
-    void reverse();
+  void reverse();
 
-    /**
-     * Assigns a new value to the slot with specified index.
-     *
-     * @throws IndexOutOfBoundsException
-     *         if index is not in [0..length) range
-     */
-    void set(int index, T item);
+  /**
+   * Assigns a new value to the slot with specified index.
+   *
+   * @throws IndexOutOfBoundsException if index is not in [0..length) range
+   */
+  void set(int index, T item);
 
-    /** Sorts the array according to the comparator. Mutates the array. */
-    void sort(Comparator<? super T> comparator);
+  /** Sorts the array according to the comparator. Mutates the array. */
+  void sort(Comparator<? super T> comparator);
 
-    int size();
+  int size();
 
-    Array<T> slice(int start, int end);
+  Array<T> slice(int start, int end);
 
-    Array<T> splice(int index, int deleteCount, T value);
+  Array<T> splice(int index, int deleteCount, T value);
 
-    Array<T> splice(int index, int deleteCount);
+  Array<T> splice(int index, int deleteCount);
 
-    List<T> toList();
+  List<T> toList();
 }

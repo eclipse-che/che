@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Copyright (c) 2017 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -87,6 +87,17 @@ check_ip_result() {
 @test "Check isDocker4Mac/Win is true" {
    # GIVEN
    UNAME_R="4.9.4-moby"
+
+   # WHEN
+   run is_docker4MacOrWin
+
+   # THEN
+   assert_success
+}
+
+@test "Check isDocker4Mac/Win is true (new docker releases)" {
+   # GIVEN
+   UNAME_R="4.9.44-linuxkit-aufs"
 
    # WHEN
    run is_docker4MacOrWin

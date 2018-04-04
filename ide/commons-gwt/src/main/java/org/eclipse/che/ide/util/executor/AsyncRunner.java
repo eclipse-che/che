@@ -14,13 +14,11 @@
 
 package org.eclipse.che.ide.util.executor;
 
-import elemental.events.EventListener;
-import elemental.dom.Document.Events;
-import elemental.js.events.JsEvent;
-
-import org.eclipse.che.ide.util.dom.Elements;
 import com.google.gwt.core.client.JavaScriptObject;
-
+import elemental.dom.Document.Events;
+import elemental.events.EventListener;
+import elemental.js.events.JsEvent;
+import org.eclipse.che.ide.util.dom.Elements;
 
 /*
  * TODO: Make a scheduler so there's only one event listener for
@@ -30,72 +28,72 @@ import com.google.gwt.core.client.JavaScriptObject;
 /** An utility class to execute some logic asynchronously as soon as possible. */
 public abstract class AsyncRunner implements Runnable {
 
-    private static final String EVENT_MESSAGE = "message";
+  private static final String EVENT_MESSAGE = "message";
 
-    private static class MessageEvent extends JsEvent implements Events {
-        protected MessageEvent() {
-        }
+  private static class MessageEvent extends JsEvent implements Events {
+    protected MessageEvent() {}
 
-        public final native Object getData() /*-{
+    public final native Object getData() /*-{
             return this.data;
         }-*/;
 
-        public final native JavaScriptObject getSource() /*-{
+    public final native JavaScriptObject getSource() /*-{
             return this.source;
         }-*/;
-    }
+  }
 
-    private static int instanceId = 0;
+  private static int instanceId = 0;
 
-    private final String messageName  =
-            "test" + ":AsyncRunner." + instanceId++;
-    private final String targetOrigin = Elements.getDocument().getLocation().getProtocol() + "//"
-                                        + Elements.getDocument().getLocation().getHost();
+  private final String messageName = "test" + ":AsyncRunner." + instanceId++;
+  private final String targetOrigin =
+      Elements.getDocument().getLocation().getProtocol()
+          + "//"
+          + Elements.getDocument().getLocation().getHost();
 
-    private boolean isCancelled;
-    private boolean isAttached = false;
+  private boolean isCancelled;
+  private boolean isAttached = false;
 
-    private EventListener messageHandler = new EventListener() {
+  private EventListener messageHandler =
+      new EventListener() {
         @Override
         public void handleEvent(elemental.events.Event rawEvent) {
-            MessageEvent event = (MessageEvent)rawEvent;
-            if (!isCancelled && event.getData().equals(messageName)) {
-                detachMessageHandler();
-                event.stopPropagation();
-                run();
-            }
+          MessageEvent event = (MessageEvent) rawEvent;
+          if (!isCancelled && event.getData().equals(messageName)) {
+            detachMessageHandler();
+            event.stopPropagation();
+            run();
+          }
         }
-    };
+      };
 
-    public AsyncRunner() {
+  public AsyncRunner() {}
+
+  public void cancel() {
+    isCancelled = true;
+    detachMessageHandler();
+  }
+
+  public void schedule() {
+    isCancelled = false;
+    attachMessageHandler();
+    scheduleJs();
+  }
+
+  private void attachMessageHandler() {
+    if (!isAttached) {
+      Elements.getWindow().addEventListener(EVENT_MESSAGE, messageHandler, true);
+      isAttached = true;
     }
+  }
 
-    public void cancel() {
-        isCancelled = true;
-        detachMessageHandler();
+  private void detachMessageHandler() {
+    if (isAttached) {
+      Elements.getWindow().removeEventListener(EVENT_MESSAGE, messageHandler, true);
+      isAttached = false;
     }
+  }
 
-    public void schedule() {
-        isCancelled = false;
-        attachMessageHandler();
-        scheduleJs();
-    }
-
-    private void attachMessageHandler() {
-        if (!isAttached) {
-            Elements.getWindow().addEventListener(EVENT_MESSAGE, messageHandler, true);
-            isAttached = true;
-        }
-    }
-
-    private void detachMessageHandler() {
-        if (isAttached) {
-            Elements.getWindow().removeEventListener(EVENT_MESSAGE, messageHandler, true);
-            isAttached = false;
-        }
-    }
-
-    private native void scheduleJs() /*-{
+  private native void scheduleJs() /*-{
         // This is more responsive than setTimeout(0)
         $wnd.postMessage(this.@org.eclipse.che.ide.util.executor.AsyncRunner::messageName, this.
             @org.eclipse.che.ide.util.executor.AsyncRunner::targetOrigin);

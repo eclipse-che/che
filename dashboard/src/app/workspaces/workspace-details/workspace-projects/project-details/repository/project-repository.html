@@ -1,0 +1,44 @@
+<!--
+
+    Copyright (c) 2015-2018 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<div class="project-repositories" ng-if="!projectRepositoryController.isEmptyState">
+
+  <che-label-container che-label-name="Remote SVN Repository"
+                       ng-if="projectRepositoryController.remoteSvnRepository.name"
+                       class="che-label-container-not-last">
+    <div class="repository-desktop" layout="row" flex>
+      <div class="label-name">{{projectRepositoryController.remoteSvnRepository.name}}</div>
+      <che-text-info che-text="projectRepositoryController.remoteSvnRepository.url"
+                     che-href="projectRepositoryController.remoteSvnRepository.url"
+                     che-copy-clipboard="true"></che-text-info>
+    </div>
+  </che-label-container>
+
+  <che-label-container che-label-name="Remote GIT {{projectRepositoryController.remoteGitRepositories.length === 1 ? 'Repository' : 'Repositories'}}"
+                       ng-if="projectRepositoryController.remoteGitRepositories.length > 0"
+                       class="che-label-container-not-last">
+    <div class="repository-desktop" ng-repeat="remoteRepository in projectRepositoryController.remoteGitRepositories"
+         layout="row" flex>
+      <div class="label-name">{{remoteRepository.name}}</div>
+      <che-text-info che-text="remoteRepository.url"
+                     che-href="remoteRepository.url"
+                     che-copy-clipboard="true"></che-text-info>
+    </div>
+  </che-label-container>
+
+  <div layout="row" layout-align="center center" class="empty-repository" ng-if="projectRepositoryController.isEmptyState">
+    <che-empty-state che-value="There are no repositories."
+                     che-prompt="You can add a GIT or SVN repository in the menu."
+                     che-icon-class="fa fa-code-fork"></che-empty-state>
+  </div>
+
+</div>

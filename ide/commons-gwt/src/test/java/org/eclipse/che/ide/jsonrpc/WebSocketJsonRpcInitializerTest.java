@@ -1,26 +1,25 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.jsonrpc;
 
-import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
-import org.eclipse.che.ide.websocket.ng.impl.WebSocketInitializer;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonMap;
+import static org.mockito.Mockito.verify;
+
+import org.eclipse.che.ide.websocket.impl.WebSocketInitializer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Collections;
-
-import static org.mockito.Mockito.verify;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Tests for {@link WebSocketJsonRpcInitializer}
@@ -29,22 +28,20 @@ import static org.mockito.Mockito.verify;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class WebSocketJsonRpcInitializerTest {
-    @Mock
-    private WebSocketInitializer        webSocketInitializer;
-    @InjectMocks
-    private WebSocketJsonRpcInitializer jsonRpcInitializer;
+  @Mock private WebSocketInitializer webSocketInitializer;
+  @InjectMocks private WebSocketJsonRpcInitializer jsonRpcInitializer;
 
-    @Test
-    public void shouldRunInitializeOnInitialize() {
-        jsonRpcInitializer.initialize("id", Collections.singletonMap("url", "url"));
+  @Test
+  public void shouldRunInitializeOnInitialize() {
+    jsonRpcInitializer.initialize("id", singletonMap("url", "url"));
 
-        verify(webSocketInitializer).initialize("id", "url");
-    }
+    verify(webSocketInitializer).initialize("id", "url", emptySet());
+  }
 
-    @Test
-    public void shouldRunTerminateOnTerminate() {
-        jsonRpcInitializer.terminate("id");
+  @Test
+  public void shouldRunTerminateOnTerminate() {
+    jsonRpcInitializer.terminate("id");
 
-        verify(webSocketInitializer).terminate("id");
-    }
+    verify(webSocketInitializer).terminate("id", emptySet());
+  }
 }

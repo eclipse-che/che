@@ -1,24 +1,19 @@
 <!--
 
-    Copyright (c) 2015 Codenvy, S.A.
+    Copyright (c) 2015-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
-<div class="workspaces-status" ng-class="{'workspaces-busy' : workspaceStatusController.workspace.status === 'STARTING'}">
-  <span class="fa fa-play"
-        data-ng-click="workspaceStatusController.startWorkspace()"
-        ng-show="(workspaceStatusController.workspace.status !== 'RUNNING' && workspaceStatusController.workspace.status !== 'STOPPING' && workspaceStatusController.workspace.status !== 'SNAPSHOTTING')"
-        ng-class="{'disabled' : workspaceStatusController.workspace.status === 'STARTING'}"
-        tooltip="Run workspace"></span>
-  <span class="fa fa-stop"
-        data-ng-click="workspaceStatusController.stopWorkspace()"
-        ng-show="(workspaceStatusController.workspace.status === 'RUNNING' || workspaceStatusController.workspace.status === 'STOPPING' || workspaceStatusController.workspace.status === 'SNAPSHOTTING')"
-        ng-class="{'disabled' : workspaceStatusController.workspace.status === 'STOPPING' || workspaceDetailsController.workspace.status === 'SNAPSHOTTING'}"
-        tooltip="Stop workspace"></span>
+<div class="workspace-status"
+     ng-click="workspaceStatusController.changeWorkspaceStatus()"
+     uib-tooltip="{{workspaceStatusController.isShowRun() ? 'Run' : 'Stop'}} workspace"
+     ng-class="{'disabled' : workspaceStatusController.isButtonDisabled()}">
+  <span class="fa"
+        ng-class="{'fa-play' : workspaceStatusController.isShowRun(), 'fa-stop': !workspaceStatusController.isShowRun()}"></span>
 </div>

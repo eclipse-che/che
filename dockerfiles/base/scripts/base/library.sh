@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ convert_posix_to_windows() {
 }
 
 get_boot_url() {
-  echo "$CHE_HOST:$CHE_PORT/api/"
+  echo "$CHE_HOST:$CHE_PORT/api/system/state"
 }
 
 get_display_url() {
@@ -38,7 +38,7 @@ get_display_url() {
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
   fi
 
-  if ! is_docker_for_mac; then
+  if ! is_docker_for_mac && ! is_docker_for_windows; then
     echo "http://${CHE_HOST_LOCAL}:${CHE_PORT}"
   else
     echo "http://localhost:${CHE_PORT}"
@@ -55,7 +55,7 @@ get_debug_display_url() {
     fi
   fi
 
-  if ! is_docker_for_mac; then
+  if ! is_docker_for_mac && ! is_docker_for_windows; then
     echo "http://${CHE_HOST}:${CHE_DEBUG_PORT_LOCAL}"
   else
     echo "http://localhost:${CHE_DEBUG_PORT_LOCAL}"

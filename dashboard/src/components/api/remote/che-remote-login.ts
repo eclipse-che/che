@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -15,13 +15,17 @@
  * @author Florent Benoit
  */
 export class CheRemoteLogin {
+  $resource: ng.resource.IResourceService;
+  url: string;
+  remoteAuthAPI: any;
 
   /**
    * Default constructor using angular $resource and remote URL
    * @param $resource the angular $resource object
    * @param url the remote server URL
    */
-  constructor($resource, url) {
+  constructor($resource: ng.resource.IResourceService,
+              url: string) {
     this.$resource = $resource;
     this.url = url;
     this.remoteAuthAPI = this.$resource('', {}, {
@@ -33,13 +37,13 @@ export class CheRemoteLogin {
    * Authenticate on the remote URL the provided username/password
    * @param login the login on remote URL
    * @param password the password on remote URL
-   * @returns {*|promise|N|n}
+   * @returns {ng.IPromise<any>}
    */
-  authenticate(login, password) {
+  authenticate(login: string, password: string): ng.IPromise<any> {
     let authData = {username: login, password: password};
     let call = this.remoteAuthAPI.auth(authData);
     let promise = call.$promise;
-    return promise.then((result)=> {
+    return promise.then((result: any) => {
       let token = result.value;
       return {'url': this.url, 'token': token};
     });

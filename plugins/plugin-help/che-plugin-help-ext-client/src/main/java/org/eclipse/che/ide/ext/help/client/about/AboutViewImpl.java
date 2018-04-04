@@ -1,22 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.help.client.about;
 
-import org.eclipse.che.ide.api.ProductInfoDataProvider;
-import org.eclipse.che.ide.ext.help.client.AboutResources;
-import org.eclipse.che.ide.ext.help.client.HelpExtensionLocalizationConstant;
-import org.eclipse.che.ide.ui.window.Window;
-import org.vectomatic.dom.svg.ui.SVGImage;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import static java.util.Objects.nonNull;
+
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -25,6 +21,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.api.ProductInfoDataProvider;
+import org.eclipse.che.ide.ext.help.client.AboutResources;
+import org.eclipse.che.ide.ext.help.client.HelpExtensionLocalizationConstant;
+import org.eclipse.che.ide.ui.window.Window;
+import org.vectomatic.dom.svg.ui.SVGImage;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * UI for {@link AboutView}.
@@ -33,88 +35,82 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class AboutViewImpl extends Window implements AboutView {
-    interface AboutViewImplUiBinder extends UiBinder<Widget, AboutViewImpl> {
+  interface AboutViewImplUiBinder extends UiBinder<Widget, AboutViewImpl> {}
+
+  Button btnOk;
+  @UiField Label version;
+  @UiField Label revision;
+  @UiField Label buildTime;
+
+  @UiField(provided = true)
+  AboutLocalizationConstant locale;
+
+  @UiField FlowPanel logoPanel;
+
+  private ActionDelegate delegate;
+
+  @Inject
+  public AboutViewImpl(
+      ProductInfoDataProvider productInfoDataProvider,
+      AboutViewImplUiBinder uiBinder,
+      AboutLocalizationConstant locale,
+      HelpExtensionLocalizationConstant coreLocale,
+      AboutResources aboutResources) {
+    this.locale = locale;
+
+    aboutResources.aboutCss().ensureInjected();
+    String title = locale.aboutControlTitle() + " " + productInfoDataProvider.getName();
+    this.setTitle(title);
+    this.setWidget(uiBinder.createAndBindUi(this));
+    this.ensureDebugId("aboutView-window");
+
+    btnOk =
+        addFooterButton(coreLocale.ok(), "help-about-ok", event -> delegate.onOkClicked(), true);
+
+    final SVGResource logo = productInfoDataProvider.getLogo();
+    if (nonNull(logo)) {
+      logoPanel.add(new SVGImage(logo));
     }
+  }
 
-    Button btnOk;
-    @UiField
-    Label                     version;
-    @UiField
-    Label                     revision;
-    @UiField
-    Label                     buildTime;
-    @UiField(provided = true)
-    AboutLocalizationConstant locale;
-    @UiField
-    FlowPanel                 logoPanel;
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    private ActionDelegate delegate;
+  /** {@inheritDoc} */
+  @Override
+  public void close() {
+    this.hide();
+  }
 
+  /** {@inheritDoc} */
+  @Override
+  public void showDialog() {
+    this.show(btnOk);
+  }
 
-    @Inject
-    public AboutViewImpl(ProductInfoDataProvider productInfoDataProvider,
-                         AboutViewImplUiBinder uiBinder,
-                         AboutLocalizationConstant locale,
-                         HelpExtensionLocalizationConstant coreLocale,
-                         AboutResources aboutResources) {
-        this.locale = locale;
+  @Override
+  public void onEnterPress(NativeEvent evt) {
+    delegate.onOkClicked();
+  }
 
-        aboutResources.aboutCss().ensureInjected();
-        String title = locale.aboutControlTitle() + " " + productInfoDataProvider.getName();
-        this.setTitle(title);
-        this.setWidget(uiBinder.createAndBindUi(this));
-        this.ensureDebugId("aboutView-window");
+  /** {@inheritDoc} */
+  @Override
+  public void setVersion(String version) {
+    this.version.setText(version);
+  }
 
-        btnOk = createButton(coreLocale.ok(), "help-about-ok", new ClickHandler() {
+  /** {@inheritDoc} */
+  @Override
+  public void setRevision(String revision) {
+    this.revision.setText(revision);
+  }
 
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onOkClicked();
-            }
-        });
-        addButtonToFooter(btnOk);
-
-        logoPanel.add(new SVGImage(productInfoDataProvider.getLogo()));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void close() {
-        this.hide();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void showDialog() {
-        this.show(btnOk);
-    }
-
-    @Override
-    protected void onEnterClicked() {
-        delegate.onOkClicked();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setVersion(String version) {
-        this.version.setText(version);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setRevision(String revision) {
-        this.revision.setText(revision);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setTime(String time) {
-        this.buildTime.setText(time);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setTime(String time) {
+    this.buildTime.setText(time);
+  }
 }

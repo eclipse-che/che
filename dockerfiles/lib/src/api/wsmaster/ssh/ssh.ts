@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 
-import {org} from "../../../api/dto/che-dto"
+import {org} from "../../dto/che-dto"
 import {AuthData} from "../auth/auth-data";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
@@ -45,7 +45,7 @@ export class Ssh {
      *         when any other error occurs during ssh pair fetching
      */
     getPair(service: string, name: string):Promise<org.eclipse.che.api.ssh.shared.dto.SshPairDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/ssh/' + service + '/find?name=' + name, 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/ssh/' + service + '/find?name=' + name, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.ssh.shared.dto.SshPairDtoImpl);
         });

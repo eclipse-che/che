@@ -1,92 +1,74 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.git.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /** @author Dmitriy Vyshinskiy */
 @DTO
 public interface Status {
-    boolean isClean();
+  boolean isClean();
 
-    void setClean(boolean isClean);
+  void setClean(boolean isClean);
 
-    StatusFormat getFormat();
+  String getBranchName();
 
-    void setFormat(StatusFormat format);
+  void setBranchName(String branchName);
 
-    String getBranchName();
+  /** New files that are staged in index. */
+  List<String> getAdded();
 
-    void setBranchName(String branchName);
+  void setAdded(List<String> added);
 
-    /**
-     * New files that are staged in index.
-     */
-    List<String> getAdded();
+  /** New files that are not staged in index. */
+  List<String> getUntracked();
 
-    void setAdded(List<String> added);
+  void setUntracked(List<String> untracked);
 
-    /**
-     * New files that are not staged in index.
-     */
-    List<String> getUntracked();
+  /** Modified files that are staged in index. */
+  List<String> getChanged();
 
-    void setUntracked(List<String> untracked);
+  void setChanged(List<String> changed);
 
-    /**
-     * Modified files that are staged in index.
-     */
-    List<String> getChanged();
+  /** Modified files that are not staged in index. */
+  List<String> getModified();
 
-    void setChanged(List<String> changed);
+  void setModified(List<String> modified);
 
-    /**
-     * Modified files that are not staged in index.
-     */
-    List<String> getModified();
+  /** Deleted files that are staged in index. */
+  List<String> getRemoved();
 
-    void setModified(List<String> modified);
+  void setRemoved(List<String> removed);
 
-    /**
-     * Deleted files that are staged in index.
-     */
-    List<String> getRemoved();
+  /** Deleted files that are not staged in index. */
+  List<String> getMissing();
 
-    void setRemoved(List<String> removed);
+  void setMissing(List<String> missing);
 
-    /**
-     * Deleted files that are not staged in index.
-     */
-    List<String> getMissing();
+  /**
+   * Folders that contain only untracked files.
+   *
+   * @see #getUntracked()
+   */
+  List<String> getUntrackedFolders();
 
-    void setMissing(List<String> missing);
+  void setUntrackedFolders(List<String> untrackedFolders);
 
-    /**
-     * Folders that contain only untracked files.
-     * @see #getUntracked()
-     */
-    List<String> getUntrackedFolders();
+  /** Files that have conflicts. */
+  List<String> getConflicting();
 
-    void setUntrackedFolders(List<String> untrackedFolders);
+  void setConflicting(List<String> added);
 
-    /**
-     * Files that have conflicts.
-     */
-    List<String> getConflicting();
+  String getRepositoryState();
 
-    void setConflicting(List<String> added);
-    
-    String getRepositoryState();
-    
-    void setRepositoryState(String repositoryState);
+  void setRepositoryState(String repositoryState);
 }

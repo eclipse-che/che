@@ -1,29 +1,24 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.maven.client.command;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectRelativePathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
 import org.eclipse.che.plugin.maven.client.MavenResources;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Maven command type.
@@ -33,58 +28,47 @@ import java.util.List;
 @Singleton
 public class MavenCommandType implements CommandType {
 
-    private static final String ID               = "mvn";
-    private static final String COMMAND_TEMPLATE = "mvn clean install";
-    private static final String DEF_PORT         = "8080";
+  private static final String ID = "mvn";
+  private static final String COMMAND_TEMPLATE = "mvn clean install -f ${current.project.path}";
 
-    private final CurrentProjectPathMacro         currentProjectPathMacro;
-    private final CurrentProjectRelativePathMacro currentProjectRelativePathMacro;
-    private final List<CommandPage>               pages;
+  private final List<CommandPage> pages;
 
-    @Inject
-    public MavenCommandType(MavenResources resources,
-                            MavenCommandPagePresenter page,
-                            CurrentProjectPathMacro currentProjectPathMacro,
-                            CurrentProjectRelativePathMacro currentProjectRelativePathMacro,
-                            IconRegistry iconRegistry) {
-        this.currentProjectPathMacro = currentProjectPathMacro;
-        this.currentProjectRelativePathMacro = currentProjectRelativePathMacro;
+  @Inject
+  public MavenCommandType(
+      MavenResources resources, MavenCommandPagePresenter page, IconRegistry iconRegistry) {
+    pages = new LinkedList<>();
+    pages.add(page);
 
-        pages = new LinkedList<>();
-        pages.add(page);
+    iconRegistry.registerIcon(new Icon("command.type." + ID, resources.maven()));
+  }
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.maven()));
-    }
+  @Override
+  public String getId() {
+    return ID;
+  }
 
-    @Override
-    public String getId() {
-        return ID;
-    }
+  @Override
+  public String getDisplayName() {
+    return "Maven";
+  }
 
-    @Override
-    public String getDisplayName() {
-        return "Maven";
-    }
+  @Override
+  public String getDescription() {
+    return "Command for executing Maven command line";
+  }
 
-    @Override
-    public String getDescription() {
-        return "Command for executing Maven command line";
-    }
+  @Override
+  public List<CommandPage> getPages() {
+    return pages;
+  }
 
-    @Override
-    public List<CommandPage> getPages() {
-        return pages;
-    }
+  @Override
+  public String getCommandLineTemplate() {
+    return COMMAND_TEMPLATE;
+  }
 
-    @Override
-    public String getCommandLineTemplate() {
-        return COMMAND_TEMPLATE + " -f " + currentProjectPathMacro.getName();
-    }
-
-    @Override
-    public String getPreviewUrlTemplate() {
-        //TODO: hardcode http after switching WS Master to https
-        return "http://" + ServerPortProvider.KEY_TEMPLATE.replace("%", DEF_PORT) + "/" +
-               currentProjectRelativePathMacro.getName();
-    }
+  @Override
+  public String getPreviewUrlTemplate() {
+    return "${server.tomcat8}/${current.project.relpath}";
+  }
 }

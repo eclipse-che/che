@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 import {UUID} from "../../utils/index";
 
@@ -16,62 +16,48 @@ import {UUID} from "../../utils/index";
  */
 export class MessageBuilder {
 
-    method: string;
-    path: string;
-    TYPE: string;
-    message : any;
+  method: string;
+  params: any;
+  message: any;
 
-    constructor(method? : string, path? : string) {
-        this.TYPE = 'x-everrest-websocket-message-type';
-        if (method) {
-            this.method = method;
-        } else {
-            this.method = 'POST';
-        }
-        if (path) {
-            this.path = path;
-        } else {
-            this.path = null;
-        }
-
-
-        this.message = {};
-        // add uuid
-        this.message.uuid = UUID.build();
-
-        this.message.method = this.method;
-        this.message.path = this.path;
-        this.message.headers = [];
-        this.message.body;
+  constructor(method? : string, params? : any) {
+    if (method) {
+      this.method = method;
     }
-
-    subscribe(channel) {
-        var header = {name: this.TYPE, value: 'subscribe-channel'};
-        this.message.headers.push(header);
-        this.message.body = JSON.stringify({channel: channel});
-        return this;
+    if (params) {
+       this.params = params;
+    } else {
+       this.params = {};
     }
+    this.message = {};
+    this.message.jsonrpc = '2.0'
+    this.message.method = this.method;
+    this.message.params = this.params;
+  }
 
-    unsubscribe(channel) {
-        var header = {name:this.TYPE, value: 'unsubscribe-channel'};
-        this.message.headers.push(header);
-        this.message.body = JSON.stringify({channel: channel});
-        return this;
-    }
+  subscribe(channel) {
+    this.message.method = 'subscribe';
+    this.message.params.method = channel;
+    return this;
+  }
 
-    /**
-     * Prepares ping frame for server.
-     *
-     * @returns {MessageBuilder}
-     */
-    ping() {
-        var header = {name:this.TYPE, value: 'ping'};
-        this.message.headers.push(header);
-        return this;
-    }
+  unsubscribe(channel) {
+    this.message.method = 'unSubscribe';
+    this.message.params.method = channel;
+    return this;
+  }
 
-    build() {
-        return this.message;
-    }
+  /**
+   * Prepares ping frame for server.
+   *
+   * @returns {MessageBuilder}
+   */
+  ping() {
+    return this;
+  }
+
+  build() {
+    return this.message;
+  }
 
 }

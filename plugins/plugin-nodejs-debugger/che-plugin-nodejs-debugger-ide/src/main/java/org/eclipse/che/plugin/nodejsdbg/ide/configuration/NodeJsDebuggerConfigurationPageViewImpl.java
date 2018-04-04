@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.nodejsdbg.ide.configuration;
 
 import com.google.gwt.core.client.GWT;
@@ -24,47 +24,47 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Anatolii Bazko
  */
-public class NodeJsDebuggerConfigurationPageViewImpl implements NodeJsDebuggerConfigurationPageView {
+public class NodeJsDebuggerConfigurationPageViewImpl
+    implements NodeJsDebuggerConfigurationPageView {
 
-    private static final NodeJsDebugConfigurationPageViewImplUiBinder UI_BINDER =
-            GWT.create(NodeJsDebugConfigurationPageViewImplUiBinder.class);
+  private static final NodeJsDebugConfigurationPageViewImplUiBinder UI_BINDER =
+      GWT.create(NodeJsDebugConfigurationPageViewImplUiBinder.class);
 
-    private final FlowPanel rootElement;
+  private final FlowPanel rootElement;
 
-    @UiField
-    TextBox scriptPath;
+  @UiField TextBox scriptPath;
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    public NodeJsDebuggerConfigurationPageViewImpl() {
-        rootElement = UI_BINDER.createAndBindUi(this);
-    }
+  public NodeJsDebuggerConfigurationPageViewImpl() {
+    rootElement = UI_BINDER.createAndBindUi(this);
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @Override
-    public Widget asWidget() {
-        return rootElement;
-    }
+  @Override
+  public Widget asWidget() {
+    return rootElement;
+  }
 
-    @Override
-    public String getScriptPath() {
-        return scriptPath.getValue();
-    }
+  @Override
+  public String getScriptPath() {
+    return scriptPath.getValue();
+  }
 
-    @Override
-    public void setScriptPath(String path) {
-        this.scriptPath.setValue(path);
-    }
+  @Override
+  public void setScriptPath(String path) {
+    this.scriptPath.setValue(path);
+  }
 
-    @UiHandler({"scriptPath"})
-    void onScriptPathKeyUp(KeyUpEvent event) {
-        delegate.onScriptPathChanged();
-    }
+  @UiHandler({"scriptPath"})
+  void onScriptPathKeyUp(KeyUpEvent event) {
+    delegate.onScriptPathChanged();
+  }
 
-    interface NodeJsDebugConfigurationPageViewImplUiBinder extends UiBinder<FlowPanel, NodeJsDebuggerConfigurationPageViewImpl> {
-    }
+  interface NodeJsDebugConfigurationPageViewImplUiBinder
+      extends UiBinder<FlowPanel, NodeJsDebuggerConfigurationPageViewImpl> {}
 }

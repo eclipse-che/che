@@ -1,13 +1,13 @@
 <!--
 
-    Copyright (c) 2015 Codenvy, S.A.
+    Copyright (c) 2015-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <div class="workspace-machine-config">
@@ -26,7 +26,7 @@
     </div>
     <div layout="row" layout-align="center center"
          class="config-title-action-edit"
-         tooltip="Edit"
+         uib-tooltip="Edit"
          ng-click="workspaceMachineConfigController.showEditDialog($event)">
       <i class="fa fa-pencil" aria-hidden="true"></i>
     </div>
@@ -47,12 +47,11 @@
                          ng-if="workspaceMachineConfigController.machineConfig.source.image">
       <ng-form flex name="workspaceMachineConfigForm" class="config-machine-source">
         <che-input-box ng-model="workspaceMachineConfigController.newImage"
-                       ng-change="workspaceMachineConfigController.changeSource()"
+                       che-on-change="workspaceMachineConfigController.changeSource($value)"
                        che-name="source"
                        che-place-holder="Image"
                        che-form="workspaceMachineConfigForm"
                        required>
-          <div ng-message="required">An image is required.</div>
         </che-input-box>
       </ng-form>
     </che-label-container>
@@ -82,7 +81,7 @@
     <!-- Agents -->
     <che-label-container che-label-name="Agents">
       <div class="config-params-table">
-         <list-agents agents="workspaceMachineConfigController.machineConfig.agents"
+         <list-agents agents="workspaceMachineConfigController.machineConfig.installers"
                       agents-on-change="workspaceMachineConfigController.updateAgents()"></list-agents>
       </div>
     </che-label-container>

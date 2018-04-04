@@ -1,15 +1,14 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-
 
 /**
  * This class is providing a builder for Stack
@@ -22,82 +21,77 @@ export class CheStackBuilder {
    * Default constructor.
    */
   constructor() {
-    this.stack = <che.IStack>{
-      source: {
-        origin: '',
-        type: '',
-      },
-      components: [],
-      tags: [],
-      workspaceConfig: {}
-    };
+    this.stack = {} as che.IStack;
+    this.stack.components = [];
+    this.stack.tags = [];
+    this.stack.workspaceConfig = {} as che.IWorkspaceConfig;
   }
 
   /**
    * Sets the id of the stack
-   * @param id the id to use
+   * @param {string} id the id to use
    * @returns {CheStackBuilder}
    */
-  withId(id) {
+  withId(id: string): CheStackBuilder {
     this.stack.id = id;
     return this;
   }
 
   /**
    * Sets the name of the stack
-   * @param name the name to use
+   * @param {string} name the name to use
    * @returns {CheStackBuilder}
    */
-  withName(name) {
+  withName(name: string): CheStackBuilder {
     this.stack.name = name;
     return this;
   }
 
   /**
    * Sets the description of the stack
-   * @param description the description to use
+   * @param {string} description the description to use
    * @returns {CheStackBuilder}
    */
-  withDescription(description) {
+  withDescription(description: string): CheStackBuilder {
     this.stack.description = description;
     return this;
   }
 
   /**
    * Sets the tags of the stack
-   * @param tags the tags to use
+   * @param {string[]} tags the tags to use
    * @returns {CheStackBuilder}
    */
-  withTags(tags) {
+  withTags(tags: string[]): CheStackBuilder {
     this.stack.tags = tags;
     return this;
   }
 
   /**
    * Sets the components of the stack
-   * @param components the components to use
+   * @param {any[]} components the components to use
    * @returns {CheStackBuilder}
    */
-  withComponents(components) {
+  withComponents(components: any[]): CheStackBuilder {
     this.stack.components = components;
     return this;
   }
 
   /**
    * Sets the workspace config of the stack
-   * @param workspaceConfig the workspace config to use
+   * @param {che.IWorkspaceConfig} workspaceConfig the workspace config to use
    * @returns {CheStackBuilder}
    */
-  withWorkspaceConfig(workspaceConfig) {
+  withWorkspaceConfig(workspaceConfig: che.IWorkspaceConfig): CheStackBuilder {
     this.stack.workspaceConfig = workspaceConfig;
     return this;
   }
 
   /**
    * Build the stack
-   * @returns {CheStackBuilder.stack|*}
+   * @return {che.IStack}
    */
-  build() {
+  build(): che.IStack {
     return this.stack;
   }
 

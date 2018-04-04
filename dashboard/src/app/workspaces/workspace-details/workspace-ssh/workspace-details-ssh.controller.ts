@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {CheSsh} from '../../../../components/api/che-ssh.factory';
 'use strict';
@@ -20,6 +20,8 @@ import {CheSsh} from '../../../../components/api/che-ssh.factory';
  * @author Florent Benoit
  */
 export class WorkspaceDetailsSshCtrl {
+
+  static $inject = ['$route', 'cheSsh', 'cheWorkspace', 'cheNotification', '$mdDialog', '$log', '$q', '$timeout'];
 
   /**
    * Workspace.
@@ -60,6 +62,10 @@ export class WorkspaceDetailsSshCtrl {
   private workspaceId: string;
 
   private sshKeyPair : any;
+  /**
+   * Loading state of the page.
+   */
+  private isLoading: boolean;
 
   /**
    * True if one machine has ssh agent enabled.
@@ -70,17 +76,24 @@ export class WorkspaceDetailsSshCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($route : ng.route.IRouteService, cheSsh: CheSsh, cheWorkspace: CheWorkspace, cheNotification, $mdDialog : ng.material.IDialogService, $log : ng.ILogService, $q : ng.IQService, $timeout : ng.ITimeoutService) {
+  constructor($route: ng.route.IRouteService,
+              cheSsh: CheSsh,
+              cheWorkspace: CheWorkspace,
+              cheNotification: CheNotification,
+              $mdDialog: ng.material.IDialogService,
+              $log: ng.ILogService,
+              $q: ng.IQService,
+              $timeout : ng.ITimeoutService) {
     this.cheWorkspace = cheWorkspace;
     this.cheSsh = cheSsh;
     this.cheNotification = cheNotification;
     this.$mdDialog = $mdDialog;
     this.$log = $log;
     this.$q = $q;
+    this.$timeout = $timeout;
 
-    this.machineSshAgents = new Array<>();
+    this.machineSshAgents = [];
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
     this.workspaceKey = this.namespace + ':' + this.workspaceName;
@@ -95,18 +108,20 @@ export class WorkspaceDetailsSshCtrl {
     this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     this.workspaceId = this.workspace.id;
 
+    this.isLoading = true;
+
     // get ssh key
     this.cheSsh.fetchKey('workspace', this.workspaceId).finally(() => {
       this.sshKeyPair = this.cheSsh.getKey('workspace', this.workspaceId);
-
+      this.isLoading = false;
     });
 
     let defaultEnv : string = this.workspace.config.defaultEnv;
     let machines : any = this.workspace.config.environments[defaultEnv].machines;
     let machineNames : Array<string> = Object.keys(machines);
     this.machineSshAgents.length = 0;
-    machineNames.forEach((machineName) => {
-      let enabled : boolean = machines[machineName].agents.indexOf('org.eclipse.che.ssh') >= 0;
+    machineNames.forEach((machineName: string) => {
+      let enabled : boolean = machines[machineName].installers.indexOf('org.eclipse.che.ssh') >= 0;
       let machineAgent = {agentEnabled : enabled, name: machineName};
       this.machineSshAgents.push(machineAgent);
       if (enabled) {
@@ -120,16 +135,31 @@ export class WorkspaceDetailsSshCtrl {
    * Remove the default workspace keypair
    */
   removeDefaultKey() {
+    this.isLoading = true;
     this.cheSsh.removeKey('workspace', this.workspaceId).then(
-      () => {this.$timeout( this.updateData(), 3000)}
-    );
+      () => {
+        this.$timeout(() => {
+          this.updateData();
+        }, 3000);
+      }, (error: any) => {
+        this.isLoading = false;
+        this.$log.error('Cannot remove default key: ', error);
+      });
   }
 
   /**
    * Generate a new default workspace keypair
    */
   generateDefaultKey() {
-    this.cheSsh.generateKey('workspace', this.workspaceId).then(() => {this.$timeout( this.updateData(), 3000)});
+    this.isLoading = true;
+    this.cheSsh.generateKey('workspace', this.workspaceId).then(() => {
+      this.$timeout(() => {
+        this.updateData();
+      }, 3000);
+    }, (error: any) => {
+      this.isLoading = false;
+      this.$log.error('Cannot generate default key: ', error);
+    });
   }
 
 

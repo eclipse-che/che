@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -15,10 +15,13 @@ import {CheGit} from './che-git';
 import {CheSvn} from './che-svn';
 import {CheProjectType} from './che-project-type';
 import {CheTypeResolver} from './project/che-type-resolver';
-import {CheWebsocket} from './che-websocket.factory';
+import {CheJsonRpcWsagentApi} from './json-rpc/che-json-rpc-wsagent-api';
+import {WebsocketClient} from './json-rpc/websocket-client';
 
 interface IWorkspaceAgentData {
   path: string;
+  websocket: string;
+  clientId: string;
 }
 
 /**
@@ -34,39 +37,48 @@ export class CheWorkspaceAgent {
   private projectType: CheProjectType;
   private workspaceAgentData: IWorkspaceAgentData;
   private typeResolver: CheTypeResolver;
-
+  private wsagentApi: CheJsonRpcWsagentApi;
 
   /**
    * Default constructor that is using resource
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheWebsocket: CheWebsocket, workspaceAgentData: IWorkspaceAgentData) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, $websocket: any,
+              workspaceAgentData: IWorkspaceAgentData) {
     this.$resource = $resource;
     this.workspaceAgentData = workspaceAgentData;
 
-    this.project = new CheProject($resource, $q, cheWebsocket, this.workspaceAgentData.path);
+    this.project = new CheProject($resource, $q, this.workspaceAgentData.path);
     this.git = new CheGit($resource, this.workspaceAgentData.path);
     this.svn = new CheSvn($resource, this.workspaceAgentData.path);
     this.projectType = new CheProjectType($resource, $q, this.workspaceAgentData.path);
     this.typeResolver = new CheTypeResolver($q, this.project, this.projectType);
+    this.wsagentApi = new CheJsonRpcWsagentApi(new WebsocketClient($websocket, $q));
+    if (this.workspaceAgentData.clientId) {
+      this.wsagentApi.connect(this.workspaceAgentData.websocket, this.workspaceAgentData.clientId);
+    }
   }
 
-  getProject() {
+  getProject(): CheProject {
     return this.project;
   }
 
-  getGit() {
+  getGit(): CheGit {
     return this.git;
   }
 
-  getProjectType() {
+  getProjectType(): CheProjectType {
     return this.projectType;
   }
 
-  getProjectTypeResolver() {
+  getProjectTypeResolver(): CheTypeResolver {
     return this.typeResolver;
   }
 
-  getSvn() {
+  getSvn(): CheSvn {
     return this.svn;
+  }
+
+  getWsAgentApi(): CheJsonRpcWsagentApi {
+    return this.wsagentApi;
   }
 }

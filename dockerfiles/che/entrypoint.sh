@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Codenvy, S.A. - initial API and implementation
+#   Red Hat, Inc.- initial API and implementation
 #
 
 init_global_variables () {
@@ -27,7 +27,6 @@ Variables:
     CHE_SERVER_ACTION                   Another way to set the [COMMAND] to [run | start | stop]
     CHE_PORT                            The port the Che server will listen on
     CHE_IP                              The IP address of the host - must be set if remote clients connecting
-    CHE_LOCAL_CONF_DIR                  If set, will load che.properties from folder
     CHE_BLOCKING_ENTROPY                Starts Tomcat with blocking entropy: -Djava.security.egd=file:/dev/./urandom
     CHE_LAUNCH_DOCKER_REGISTRY          If true, uses Docker registry to save ws snapshots instead of disk
     CHE_REGISTRY_HOST                   Hostname of Docker registry to launch, otherwise 'localhost'
@@ -51,7 +50,7 @@ Variables:
   export CHE_REGISTRY_HOST=${CHE_REGISTRY_HOST:-${DEFAULT_CHE_REGISTRY_HOST}}
 
   DEFAULT_CHE_PORT=8080
-  CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
+  export CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
 
   DEFAULT_CHE_IP=
   CHE_IP=${CHE_IP:-${DEFAULT_CHE_IP}}
@@ -83,8 +82,10 @@ set_environment_variables () {
   ### Set value of derived environment variables.
 
   # CHE_DOCKER_IP is used internally by Che to set its IP address
-  if [[ -n "${CHE_IP}" ]]; then
-    export CHE_DOCKER_IP="${CHE_IP}"
+  if [[ -z "${CHE_DOCKER_IP}" ]]; then
+    if [[ -n "${CHE_IP}" ]]; then
+        export CHE_DOCKER_IP="${CHE_IP}"
+    fi
   fi
 
   # Convert Tomcat environment variables to POSIX format.
@@ -95,11 +96,6 @@ set_environment_variables () {
   # Convert Che environment variables to POSIX format.
   if [[ "${CHE_HOME}" == *":"* ]]; then
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
-  fi
-
-  # Che configuration directory - where che.properties lives
-  if [ -z "${CHE_LOCAL_CONF_DIR}" ]; then
-    export CHE_LOCAL_CONF_DIR="${CHE_HOME}/conf/"
   fi
 
   # Sets the location of the application server and its executables
@@ -203,25 +199,30 @@ launch_docker_registry () {
     fi
 }
 
+perform_database_migration() {
+  CHE_DATA=/data
+  if [ -f ${CHE_DATA}/db/che.mv.db ]; then
+    echo "!!! Detected Che database, that is stored by an old path: ${CHE_DATA}/db/che.mv.db"
+    echo "!!! In case if you want to use it, move it manually to the new path ${CHE_DATA}/storage/db/che.mv.db"
+    echo "!!! It will be moved there automatically, if no database is present by the new path"
+    if [ ! -f ${CHE_DATA}/storage/db/che.mv.db ]; then
+      mkdir -p ${CHE_DATA}/storage/db
+      mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/storage/db/che.mv.db
+      echo "Database has been successfully moved to the new path"
+    fi
+  fi
+}
+
 init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
   export CHE_IP=${CHE_IP}
 
-  if [ -f "/assembly/conf/che.properties" ]; then
+  if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
     echo "Found custom assembly..."
     export CHE_HOME="/assembly"
   else
     echo "Using embedded assembly..."
-    export CHE_HOME=$(echo /home/user/eclipse-che-*)
-  fi
-
-  ### Are we using the included assembly or did user provide their own?
-  if [ ! -f $CHE_HOME/conf/che.properties ]; then
-    echo "!!!"
-    echo "!!! Error: Could not find $CHE_HOME/conf/che.properties."
-    echo "!!! Error: Did you use CHE_ASSEMBLY with a typo?"
-    echo "!!!"
-    exit 1
+    export CHE_HOME=$(echo /home/user/eclipse-che/)
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
@@ -242,30 +243,11 @@ init() {
     sudo chown -R ${CHE_USER} ${CHE_HOME}
     sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
-  ### Are we going to use the embedded che.properties or one provided by user?`
-  ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
-  if [ -f "/conf/che.properties" ]; then
-    echo "Found custom che.properties..."
-    export CHE_LOCAL_CONF_DIR="/conf"
-    if [ "$CHE_USER" != "root" ]; then
-      sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
-    fi
-  else
-    echo "Using embedded che.properties... Copying template to ${CHE_DATA_HOST}/conf."
-    mkdir -p /data/conf
-    cp -rf "${CHE_HOME}/conf/che.properties" /data/conf/che.properties
-    export CHE_LOCAL_CONF_DIR="/data/conf"
-  fi
 
-  # Update the provided che.properties with the location of the /data mounts
-  sed -i "/che.workspace.storage=/c\che.workspace.storage=/data/workspaces" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.database=/c\che.database=/data/storage" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.template.storage=/c\che.template.storage=/data/templates" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.stacks.storage=/c\che.stacks.storage=/data/stacks/stacks.json" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.stacks.images=/c\che.stacks.images=/data/stacks/images" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.workspace.agent.dev=/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
+  [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}/storage
+  [ -z "$CHE_TEMPLATE_STORAGE" ] && export CHE_TEMPLATE_STORAGE=${CHE_DATA}/templates
+
+  perform_database_migration
 
   # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
   HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
@@ -274,28 +256,31 @@ init() {
     export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
   fi
   ### Necessary to allow the container to write projects to the folder
-  export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
-  export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
+  [ -z "$CHE_WORKSPACE_STORAGE__MASTER__PATH" ] && export CHE_WORKSPACE_STORAGE__MASTER__PATH=${CHE_DATA}/workspaces
+  [ -z "$CHE_WORKSPACE_STORAGE" ] && export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
+  [ -z "$CHE_WORKSPACE_STORAGE_CREATE_FOLDERS" ] && export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
 
-  # Move files from /lib to /lib-copy.  This puts files onto the host.
-  rm -rf ${CHE_DATA}/lib/*
-  mkdir -p ${CHE_DATA}/lib  
-  cp -rf ${CHE_HOME}/lib/* "${CHE_DATA}"/lib
+  #Recursively removes the legacy che-data/lib folder with agents inside(will be removed in future versions)
+  rm -rf ${CHE_DATA}/lib
 
-  if [[ ! -f "${CHE_DATA}"/stacks/stacks.json ]];then
-    rm -rf "${CHE_DATA}"/stacks/*
-    mkdir -p "${CHE_DATA}"/stacks
-    cp -rf "${CHE_HOME}"/stacks/* "${CHE_DATA}"/stacks
+  # Cleanup no longer in use stacks folder, accordance to a new loading policy.
+  if [[ -d "${CHE_DATA}"/stacks ]];then
+    rm -rf "${CHE_DATA}"/stacks
   fi
 
-  if [[ ! -f "${CHE_DATA}"/templates/samples.json ]];then
-    rm -rf "${CHE_DATA}"/templates/*
-    mkdir -p "${CHE_DATA}"/templates
-    cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
-  fi
+  # replace samples.json each run to make sure that we are using corrent samples from the assembly.
+  # also it allows users to store their own samples which should not be touched by us.
+  mkdir -p "${CHE_DATA}"/templates
+  rm -rf "${CHE_DATA}"/templates/samples.json
+  cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
 
   # A che property, which names the Docker network used for che + ws to communicate
-  export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=bridge"
+  if [ -z "$CHE_DOCKER_NETWORK" ]; then
+    NETWORK_NAME="bridge"
+  else
+    NETWORK_NAME=$CHE_DOCKER_NETWORK
+  fi
+  export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=$NETWORK_NAME"
 }
 
 get_che_data_from_host() {
@@ -306,14 +291,16 @@ get_che_data_from_host() {
 }
 
 get_che_server_container_id() {
-  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes.
+  # Returning `hostname` doesn't work when running Che on OpenShift/Kubernetes/Docker Cloud.
   # In these cases `hostname` correspond to the pod ID that is different from
   # the container ID
-  hostname
+  echo $(basename "$(head /proc/1/cgroup || hostname)");
 }
 
 is_docker_for_mac_or_windows() {
-  if uname -r | grep -q 'moby'; then
+  if uname -r | grep -q 'linuxkit'; then
+    return 0
+  elif uname -r | grep -q 'moby'; then
     return 0
   else
     return 1

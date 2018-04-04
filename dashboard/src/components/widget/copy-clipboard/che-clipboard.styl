@@ -1,14 +1,24 @@
 .copy-clipboard
   border none
   background none
+  position relative
   display inline-block
+  input
+   position absolute
+   border none
+   height 10px
+   width 10px
+   z-index -1
+   bottom 0
+   right 0
 
 .copy-clipboard-area
-  width 28px
-  height 28px
-  margin-bottom -5px
-  text-align center
+  z-index 1
   border none
-  background none
+  outline none
   cursor pointer
-  position relative
+  min-width 10px
+  min-height 10px
+  padding-left 5px
+  background none
+  text-align center

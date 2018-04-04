@@ -1,14 +1,17 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheStack} from '../api/che-stack.factory';
+import {CheAPIBuilder} from '../api/builder/che-api-builder.factory';
+import {CheHttpBackend} from '../api/test/che-http-backend';
 
 /**
  * Test the stack name uniqueness directive
@@ -16,33 +19,38 @@
  */
 
 describe('unique-stack-name-validator', function() {
-  var $scope, form, $compiler;
+  let $scope, form, $compiler;
 
   /**
    * Stack API
    */
-  var factoryStack;
+  let factoryStack;
 
   /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
 
   beforeEach(angular.mock.module('userDashboard'));
 
 
-  beforeEach(inject(function($compile, $rootScope, cheStack, cheAPIBuilder, cheHttpBackend, $document) {
+  beforeEach(inject(function($compile: ng.ICompileService,
+                             $rootScope: ng.IRootScopeService,
+                             cheStack: CheStack,
+                             cheAPIBuilder: CheAPIBuilder,
+                             cheHttpBackend: CheHttpBackend,
+                             $document: ng.IDocumentService) {
     $scope = $rootScope;
     $compiler = $compile;
     factoryStack = cheStack;
@@ -56,15 +64,15 @@ describe('unique-stack-name-validator', function() {
   describe('Validate Stack Name', function() {
 
     it('stack already exists', function() {
-      let stacks = [];
+      const stacks = [];
       // setup tests objects
-      var idStack1 = 'idStack1';
-      var nameStack1 = 'stack1';
-      var stack1 = apiBuilder.getStackBuilder().withName(nameStack1).withId(idStack1).build();
+      const idStack1 = 'idStack1';
+      const nameStack1 = 'stack1';
+      const stack1 = apiBuilder.getStackBuilder().withName(nameStack1).withId(idStack1).build();
       stacks.push(stack1);
 
-      var idStack2 = 'idStack2';
-      var stack2 = apiBuilder.getStackBuilder().withId(idStack2).build();
+      const idStack2 = 'idStack2';
+      const stack2 = apiBuilder.getStackBuilder().withId(idStack2).build();
       stacks.push(stack2);
 
       // add into backend
@@ -78,7 +86,7 @@ describe('unique-stack-name-validator', function() {
 
       $scope.model = {stackName: null};
 
-      var element = angular.element(
+      let element = angular.element(
         '<form name="form">' +
         '<input ng-model="model.stackName" name="name" unique-stack-name="stack2.name" />' +
         '</form>'
@@ -96,13 +104,13 @@ describe('unique-stack-name-validator', function() {
     it('stack not yet defined', function() {
 
       // setup tests objects
-      var idStack1 = 'idStack1';
-      var nameStack1 = 'stack1';
-      var stack1 = apiBuilder.getStackBuilder().withName(nameStack1).withId(idStack1).build();
+      const idStack1 = 'idStack1';
+      const nameStack1 = 'stack1';
+      const stack1 = apiBuilder.getStackBuilder().withName(nameStack1).withId(idStack1).build();
 
-      var idStack2 = 'idStack2';
-      var nameStack2 = 'stack2';
-      var stack2 = apiBuilder.getStackBuilder().withName('').withId(idStack2).build();
+      const idStack2 = 'idStack2';
+      const nameStack2 = 'stack2';
+      const stack2 = apiBuilder.getStackBuilder().withName('').withId(idStack2).build();
 
       factoryStack.fetchStacks();
 
@@ -117,7 +125,7 @@ describe('unique-stack-name-validator', function() {
 
       $scope.model = { stackName: null };
 
-      var element = angular.element(
+      const element = angular.element(
         '<form name="form">' +
         '<input ng-model="model.stackName" name="name" unique-stack-name="stack2.name" />' +
         '</form>'

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -20,13 +20,13 @@
 
 export class GitHubService {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.app.constant('gitHubApiUrlRoot', 'https://api.github.com')
       .constant('gitHubApiVersionHeader', 'application/vnd.github.moondragon+json')
       .constant('localGitHubToken', 'gitHubToken')
       .constant('gitHubCallbackPage', 'gitHubCallback.html')
       .service('githubOrganizationNameResolver', function () {
-        this.resolve = function (organization) {
+        this.resolve = function (organization: any) {
           if (!organization) {
             return '';
           }
@@ -38,16 +38,16 @@ export class GitHubService {
         '$interval',
         '$window',
         '$location',
-        function ($q, $interval, $window) {
-          var popupWindow = null;
-          var polling = null;
+        function ($q: ng.IQService, $interval: ng.IIntervalService, $window: ng.IWindowService, $log: ng.ILogService) {
+          let popupWindow = null;
+          let polling = null;
 
-          var popup = {};
+          let popup = {} as any;
 
           popup.popupWindow = popupWindow;
 
-          popup.open = function (url, options, config) {
-            var optionsString = popup.stringifyOptions(popup.prepareOptions(options || {}));
+          popup.open = function (url: string, options: any, config: any) {
+            const optionsString = popup.stringifyOptions(popup.prepareOptions(options || {}));
             popupWindow = window.open(url, '_blank', optionsString); // jshint ignore:line
 
             if (popupWindow && popupWindow.focus) {
@@ -58,31 +58,20 @@ export class GitHubService {
           };
 
           popup.pollPopup = function () {
-            var deferred = $q.defer();
+            const deferred = $q.defer();
             polling = $interval(function () {
               try {
                 if (popupWindow.document.title === 'callbackSuccess') {
-                  //var queryParams = popupWindow.location.search.substring(1).replace(/\/$/, '');
-                  //var hashParams = popupWindow.location.hash.substring(1).replace(/\/$/, '');
-                  //var hash = utils.parseQueryString(hashParams);
-                  //var qs = utils.parseQueryString(queryParams);
-
-                  //angular.extend(qs, hash);
-
-                  //if (qs.error) {
-                  //    deferred.reject({ error: qs.error });
-                  //} else {
-                  //    deferred.resolve(qs);
-                  //}
                   deferred.resolve(true);
 
                   popupWindow.close();
                   $interval.cancel(polling);
                 }
               } catch (error) {
+                $log.error(error);
               }
 
-              if (popupWindow.closed) {
+              if (popupWindow && popupWindow.closed) {
                 $interval.cancel(polling);
                 deferred.reject({data: 'Authorization Failed'});
               }
@@ -90,9 +79,9 @@ export class GitHubService {
             return deferred.promise;
           };
 
-          popup.prepareOptions = function (options) {
-            var width = options.width || 500;
-            var height = options.height || 500;
+          popup.prepareOptions = function (options: any) {
+            const width = options.width || 500;
+            const height = options.height || 500;
             return angular.extend({
               width: width,
               height: height,
@@ -101,9 +90,9 @@ export class GitHubService {
             }, options);
           };
 
-          popup.stringifyOptions = function (options) {
-            var parts = [];
-            angular.forEach(options, function (value, key) {
+          popup.stringifyOptions = function (options: any) {
+            const parts = [];
+            angular.forEach(options, function (value: string, key: string) {
               parts.push(key + '=' + value);
             });
             return parts.join(',');
@@ -113,15 +102,15 @@ export class GitHubService {
         }
       ])
       .service('camelutils', function () {
-        this.camelCase = function (name) {
-          return name.replace(/([\:\-\_]+(.))/g, function (_, separator, letter, offset) {
+        this.camelCase = function (name: string) {
+          return name.replace(/([\:\-\_]+(.))/g, function (_: any, separator: string, letter: string, offset: string) {
             return offset ? letter.toUpperCase() : letter;
           });
         };
 
-        this.parseQueryString = function (keyValue) {
-          var obj = {}, key, value;
-          angular.forEach((keyValue || '').split('&'), function (keyValue) {
+        this.parseQueryString = function (keyValue: any) {
+          let obj = {}, key, value;
+          angular.forEach((keyValue || '').split('&'), function (keyValue: any) {
             if (keyValue) {
               value = keyValue.split('=');
               key = decodeURIComponent(value[0]);
@@ -133,14 +122,14 @@ export class GitHubService {
       })
       .factory('gitHubTokenStore', function () {
         return {
-          setToken: function (token) {
+          setToken: function (token: string) {
             localStorage.setItem('gitHubToken', token); // jshint ignore:line
           },
           getToken: function () {
             return localStorage.getItem('gitHubToken'); // jshint ignore:line
           }
         };
-      }).factory('gitHubApiUtils', ['gitHubApiUrlRoot', function (gitHubApiUrlRoot) {
+      }).factory('gitHubApiUtils', ['gitHubApiUrlRoot', function (gitHubApiUrlRoot: string) {
         /**
          * Util function to parse a concatenated GitHub Link header value and return a object with rel value as properties and associated URL
          * as values.
@@ -148,20 +137,17 @@ export class GitHubService {
          * For instance, passing "<https://api.github.com/user/repos?per_page=5&sort=full_name&page=2>; rel="next" \
          *    , <https://api.github.com/user/repos?per_page=5&sort=full_name&page=10>; rel="last"" gives back:
          *   {
-       *     next: 'https://api.github.com/user/repos?per_page=5&sort=full_name&page=2',
-       *     last: 'https://api.github.com/user/repos?per_page=5&sort=full_name&page=10'
-       *   }
+         *     next: 'https://api.github.com/user/repos?per_page=5&sort=full_name&page=2',
+         *     last: 'https://api.github.com/user/repos?per_page=5&sort=full_name&page=10'
+         *   }
          *
          * @param linkHeaderValue the value of the HTTP Link header to parse. {} is returned for null, empty, undefined or unparsable value
          * @returns a map kind object rel_value: URL
          */
-        function parseLinkHeader(linkHeaderValue) {
-          var extractor = new RegExp('(<([^;]+)>;\\s?rel="(\\w+)")', 'g');
-          // Sample Link Header content
-          // "<https://api.github.com/user/repos?per_page=5&sort=full_name&page=2>; rel="next" \
-          //   , <https://api.github.com/user/repos?per_page=5&sort=full_name&page=10>; rel="last""
-          var links = {};
-          var extraction;
+        function parseLinkHeader(linkHeaderValue: string) {
+          const extractor = new RegExp('(<([^;]+)>;\\s?rel="(\\w+)")', 'g');
+          const links = {};
+          let extraction;
           while ((extraction = extractor.exec(linkHeaderValue)) !== null) {
             links[extraction[3]] = extraction[2];
           }
@@ -174,8 +160,8 @@ export class GitHubService {
          * @param url the URL to check
          * @returns true if targeted to GitHub API, false either
          */
-        function isGitHubApiUrl(url) {
-          var checked = url && url.indexOf(gitHubApiUrlRoot) === 0;
+        function isGitHubApiUrl(url: string) {
+          const checked = url && url.indexOf(gitHubApiUrlRoot) === 0;
           return checked;
         }
 
@@ -185,13 +171,13 @@ export class GitHubService {
         };
       }])
       .filter('githubFilterRepositories', function () {
-        return function (repositories, organizationFilter, repositoryNameFilter) {
+        return function (repositories: any[], organizationFilter: any, repositoryNameFilter: string) {
           if (!repositories) {
             return [];
           }
-          var filtered = [];
-          for (var i = 0; i < repositories.length; i++) {
-            var repository = repositories[i];
+          const filtered = [];
+          for (let i = 0; i < repositories.length; i++) {
+            const repository = repositories[i];
             if ((!organizationFilter || repository.owner.login === organizationFilter.login)
               && (!repositoryNameFilter || repository.name.toLocaleLowerCase().indexOf(repositoryNameFilter.toLocaleLowerCase()) >= 0)) {
               filtered.push(repository);
@@ -199,18 +185,18 @@ export class GitHubService {
           }
           return filtered;
         };
-      }).factory('GitHubHeadersInjectorInterceptor', ['$q', 'gitHubTokenStore', 'gitHubApiUtils', function ($q, gitHubTokenStore, gitHubApiUtils) {
+      }).factory('GitHubHeadersInjectorInterceptor', ['$q', 'gitHubTokenStore', 'gitHubApiUtils', function ($q: ng.IQService, gitHubTokenStore: any, gitHubApiUtils: any) {
         /**
          * Inject the token inside config as HTTP request header if the request is targeted to http://api.github.com.
          *
          * @param config the classic request config object
          * @returns the config passed a input param with token injected inside if needed
          */
-        function injectToken(config) {
+        function injectToken(config: any) {
           if (gitHubApiUtils.isGitHubApiUrl(config.url)) {
-            var token = gitHubTokenStore.getToken();
+            const token = gitHubTokenStore.getToken();
             if (token) {
-              config.headers['Authorization'] = 'token ' + token;
+              config.headers.Authorization = 'token ' + token;
             }
           }
           return config;
@@ -219,7 +205,7 @@ export class GitHubService {
         return {
           request: injectToken
         };
-      }]).factory('GitHubUnpaginateInterceptor', ['$q', '$injector', 'gitHubApiUtils', function ($q, $injector, gitHubApiUtils) {
+      }]).factory('GitHubUnpaginateInterceptor', ['$q', '$injector', 'gitHubApiUtils', function ($q: ng.IQService, $injector: ng.auto.IInjectorService, gitHubApiUtils: any) {
         /**
          * Unpaginate GitHub API request when it can. It means:
          * - detect if the url is targeted to http://api.github.com, unless return direct response,
@@ -233,21 +219,21 @@ export class GitHubService {
          * @param response the classic response object
          * @returns a response with unpaginated results in possible
          */
-        function unpaginate(response) {
+        function unpaginate(response: any) {
           if (!gitHubApiUtils.isGitHubApiUrl(response.config.url)) {
             return response;
           }
 
 
-          var nextUrl = gitHubApiUtils.parseLinkHeader(response.headers('link'))['next'];
+          const nextUrl = gitHubApiUtils.parseLinkHeader(response.headers('link')).next;
           if (!nextUrl) {
             return response;
           }
-          var $http = $injector.get('$http');
+          const $http = $injector.get('$http') as ng.IHttpService;
           return $http({
             url: nextUrl,
             method: 'GET',
-            transformResponse: $http.defaults.transformResponse.concat([function (data) {
+            transformResponse: $http.defaults.transformResponse.concat([function (data: any) {
               return response.data.concat(data);
             }])
           });
@@ -256,15 +242,15 @@ export class GitHubService {
         return {
           response: unpaginate
         };
-      }]).factory('GitHubAPIVersionSetterInterceptor', ['$q', 'gitHubApiUtils', 'gitHubApiVersionHeader', function ($q, gitHubApiUtils, gitHubApiVersionHeader) {
+      }]).factory('GitHubAPIVersionSetterInterceptor', ['$q', 'gitHubApiUtils', 'gitHubApiVersionHeader', function ($q: ng.IQService, gitHubApiUtils: any, gitHubApiVersionHeader: any) {
         /**
          * Set the right header to indicate to GitHub API the targeted version.
          *
          * @param config the classic request config object
          */
-        function setGitHubApiVersionHeader(config) {
+        function setGitHubApiVersionHeader(config: any) {
           if (gitHubApiUtils.isGitHubApiUrl(config.url)) {
-            config.headers['Accept'] = gitHubApiVersionHeader;
+            config.headers.Accept = gitHubApiVersionHeader;
           }
           return config;
         }
@@ -272,13 +258,13 @@ export class GitHubService {
         return {
           request: setGitHubApiVersionHeader
         };
-      }]).config(['$httpProvider', function ($httpProvider) {
+      }]).config(['$httpProvider', function ($httpProvider: ng.IHttpProvider) {
         $httpProvider.interceptors.push('GitHubHeadersInjectorInterceptor');
         $httpProvider.interceptors.push('GitHubUnpaginateInterceptor');
         $httpProvider.interceptors.push('GitHubAPIVersionSetterInterceptor');
-      }]).factory('GitHub', ['$resource', function ($resource) {
-        var sort = 'full_name';
-        var per_page = 50;
+      }]).factory('GitHub', ['$resource', function ($resource: ng.resource.IResourceService) {
+        const sort = 'full_name';
+        const per_page = 50;
         return {
           user: function () {
             return $resource('https://api.github.com/user');
@@ -289,7 +275,7 @@ export class GitHubService {
           userRepositories: function () {
             return $resource('https://api.github.com/user/repos', {sort: sort, per_page: per_page});
           },
-          organizationRepositories: function (organizationLogin) {
+          organizationRepositories: function (organizationLogin: any) {
             return $resource('https://api.github.com/orgs/:organizationLogin/repos', {
               organizationLogin: organizationLogin,
               sort: sort,

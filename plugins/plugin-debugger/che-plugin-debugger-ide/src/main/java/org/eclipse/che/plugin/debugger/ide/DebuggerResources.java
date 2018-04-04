@@ -1,72 +1,85 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.debugger.ide;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Vitaly Parfonov */
 public interface DebuggerResources extends ClientBundle {
 
-    @Source("resume.svg")
-    SVGResource resumeExecution();
+  @Source("resume.svg")
+  SVGResource resumeExecution();
 
-    @Source("connect.svg")
-    SVGResource connectButton();
+  @Source("runtocursor.svg")
+  SVGResource runToCursor();
 
-    @Source("disconnect.svg")
-    SVGResource disconnectDebugger();
+  @Source("connect.svg")
+  SVGResource connectButton();
 
-    @Source("stepinto.svg")
-    SVGResource stepInto();
+  @Source("disconnect.svg")
+  SVGResource disconnectDebugger();
 
-    @Source("stepover.svg")
-    SVGResource stepOver();
+  @Source("stepinto.svg")
+  SVGResource stepInto();
 
-    @Source("stepout.svg")
-    SVGResource stepOut();
+  @Source("stepover.svg")
+  SVGResource stepOver();
 
-    @Source("debug.svg")
-    SVGResource debug();
+  @Source("stepout.svg")
+  SVGResource stepOut();
 
-    @Source("edit.svg")
-    SVGResource changeVariableValue();
+  @Source("debug.svg")
+  SVGResource debug();
 
-    @Source("evaluate.svg")
-    SVGResource evaluateExpression();
+  @Source("edit.svg")
+  SVGResource editDebugNode();
 
-    @Source("breakpoint.svg")
-    SVGResource breakpoint();
+  @Source("evaluate.svg")
+  SVGResource evaluateExpression();
 
-    @Source("remove.svg")
-    SVGResource deleteAllBreakpoints();
+  @Source("breakpoint.svg")
+  SVGResource breakpoint();
 
-    @Source("separator.svg")
-    SVGResource separator();
+  @Source("remove.svg")
+  SVGResource deleteAllBreakpoints();
 
-    /** Returns the icon for debug configurations list on central toolbar. */
-    @Source("debug-icon.svg")
-    SVGResource debugIcon();
+  @Source("separator.svg")
+  SVGResource separator();
 
-    /** Returns the CSS resource for the Debugger extension. */
-    @Source({"debugger.css", "org/eclipse/che/ide/api/ui/style.css"})
-    Css getCss();
+  /** Returns the icon for debug configurations list on central toolbar. */
+  @Source("debug-icon.svg")
+  SVGResource debugIcon();
 
-    /** The CssResource interface for the Debugger extension. */
-    interface Css extends CssResource {
+  @Source("add-watch-expression-button.svg")
+  SVGResource addWatchExpressionBtn();
 
-        String selectConfigurationBox();
+  @Source("remove-watch-expression-button.svg")
+  SVGResource removeWatchExpressionBtn();
 
-        String selectConfigurationsBoxIconPanel();
-    }
+  @Source("watch-expression-icon.svg")
+  SVGResource watchExpressionIcon();
+
+  /** Returns the CSS resource for the Debugger extension. */
+  @Source({"debugger.css", "org/eclipse/che/ide/api/ui/style.css"})
+  Css getCss();
+
+  /** The CssResource interface for the Debugger extension. */
+  interface Css extends CssResource {
+
+    String selectConfigurationBox();
+
+    String selectConfigurationsBoxIconPanel();
+
+    String watchExpressionsPanel();
+  }
 }

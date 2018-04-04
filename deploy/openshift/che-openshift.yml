@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+kind: List
+items:
+#CHE_MASTER_PVC
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: che
+    name: claim-che-workspace
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: che
+    name: che
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+      app: che
+    strategy:
+      type: Recreate
+      recreateParams:
+        timeoutSeconds: 10000
+    template:
+      metadata:
+        labels:
+          app: che
+      spec:
+        containers:
+        - env:
+          #CHE_MASTER_CONFIG
+          image: registry.devshift.net/che/che:291ebd9-fabric8-e470151
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+          name: che
+          ports:
+          - containerPort: 8080
+            name: http
+          - containerPort: 8000
+            name: http-debug
+          readinessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 60
+          resources:
+            limits:
+              memory: 1024Mi
+            requests:
+              memory: 256Mi
+          volumeMounts:
+          #CHE_MASTER_VOLUME_MOUNTS
+        serviceAccountName: che
+        volumes:
+        #CHE_MASTER_VOLUMES
+    triggers:
+    - type: ConfigChange

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2017 Codenvy, S.A.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -16,17 +16,19 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.6.0-SNAPSHOT</version>
+        <version>6.4.0-SNAPSHOT</version>
     </parent>
     <artifactId>postgresql-tck</artifactId>
     <packaging>jar</packaging>
     <name>Integration Tests :: PostgreSQL</name>
     <properties>
-        <db.image.name>postgres:9.4</db.image.name>
+        <db.image.name>centos/postgresql-96-centos7</db.image.name>
+        <jdbc.admin.name>postgres</jdbc.admin.name>
+        <jdbc.admin.password>che2</jdbc.admin.password>
         <jdbc.driver>org.postgresql.Driver</jdbc.driver>
-        <jdbc.password>codenvy</jdbc.password>
-        <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/codenvy</jdbc.url>
-        <jdbc.user>codenvy</jdbc.user>
+        <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/che</jdbc.url>
+        <jdbc.user.name>user</jdbc.user.name>
+        <jdbc.user.password>che1</jdbc.user.password>
     </properties>
     <dependencies>
         <dependency>
@@ -60,7 +62,6 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -76,13 +77,13 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
+            <artifactId>che-core-api-installer</artifactId>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
+            <artifactId>che-core-api-installer</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -124,6 +125,17 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace-activity</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace-activity</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace-shared</artifactId>
             <scope>test</scope>
         </dependency>
@@ -149,12 +161,17 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
-            <artifactId>eclipselink</artifactId>
+            <artifactId>javax.persistence</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
+            <artifactId>org.eclipse.persistence.core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -224,8 +241,8 @@
                                     <includeArtifactIds>che-core-api-account,
                                         che-core-api-user,
                                         che-core-api-ssh,
-                                        che-core-api-machine,
-                                        che-core-api-workspace</includeArtifactIds>
+                                        che-core-api-workspace,
+                                        che-core-api-installer</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                     <includeClassifiers>tests</includeClassifiers>
                                 </configuration>
@@ -247,8 +264,8 @@
                             <systemPropertyVariables>
                                 <jdbc.driver>${jdbc.driver}</jdbc.driver>
                                 <jdbc.url>${jdbc.url}</jdbc.url>
-                                <jdbc.user>${jdbc.user}</jdbc.user>
-                                <jdbc.password>${jdbc.password}</jdbc.password>
+                                <jdbc.user>${jdbc.admin.name}</jdbc.user>
+                                <jdbc.password>${jdbc.admin.password}</jdbc.password>
                             </systemPropertyVariables>
                             <includes>
                                 <include>**/tck/**</include>
@@ -285,15 +302,17 @@
                                             <port>jdbc.port:5432</port>
                                         </ports>
                                         <wait>
-                                            <log>database system is ready to accept connections</log>
+                                            <log>server started</log>
                                             <time>60000</time>
                                         </wait>
                                         <restartPolicy>
                                             <name>always</name>
                                         </restartPolicy>
                                         <env>
-                                            <POSTGRES_PASSWORD>${jdbc.password}</POSTGRES_PASSWORD>
-                                            <POSTGRES_USER>${jdbc.user}</POSTGRES_USER>
+                                            <POSTGRESQL_USER>${jdbc.user.name}</POSTGRESQL_USER>
+                                            <POSTGRESQL_PASSWORD>${jdbc.user.password}</POSTGRESQL_PASSWORD>
+                                            <POSTGRESQL_DATABASE>che</POSTGRESQL_DATABASE>
+                                            <POSTGRESQL_ADMIN_PASSWORD>${jdbc.admin.password}</POSTGRESQL_ADMIN_PASSWORD>
                                         </env>
                                     </run>
                                 </image>

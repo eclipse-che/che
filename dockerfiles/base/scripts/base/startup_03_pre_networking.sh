@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -88,6 +88,12 @@ get_image_manifest() {
   # Load images from file
   BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
   IMAGE_LIST=$(cat /version/$1/images)
+  if [ -z "${CHE_SINGLE_PORT:-}" ]; then
+    IMAGE_LIST=$(echo "${IMAGE_LIST}" | sed '/IMAGE_TRAEFIK/d')
+  fi
+  if [ -z "${CHE_MULTIUSER:-}" ]; then
+     IMAGE_LIST=$(echo "${IMAGE_LIST}" | sed '/IMAGE_KEY*/d; /IMAGE_POSTGRES/d')
+  fi
   UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
 
   # set variables
@@ -120,9 +126,11 @@ list_versions(){
 ### define variables for all image name in the given list
 set_variables_images_list() {
   IFS=$'\n'
+  REPLACEMENT='s/\(.*\)=\(.*\)/\1=${\1:-\2}/g'
   for SINGLE_IMAGE in $1; do
-    log "eval $SINGLE_IMAGE"
-    eval $SINGLE_IMAGE
+    INSTRUCTION="$(echo "${SINGLE_IMAGE}" | sed -e "${REPLACEMENT}")"
+    log "eval ${INSTRUCTION}"
+    eval "${INSTRUCTION}"
   done
 
 }
@@ -151,7 +159,9 @@ has_docker_for_windows_client(){
 
 is_docker_for_windows() {
 #  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && has_docker_for_windows_client; then
+  if $(echo ${UNAME_R} | grep -q 'linuxkit') && has_docker_for_windows_client; then
+    return 0
+  elif $(echo ${UNAME_R} | grep -q 'moby') && has_docker_for_windows_client; then
     return 0
   else
     return 1
@@ -160,7 +170,9 @@ is_docker_for_windows() {
 
 is_docker_for_mac() {
 #  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && ! has_docker_for_windows_client; then
+  if $(echo ${UNAME_R} | grep -q 'linuxkit') && ! has_docker_for_windows_client; then
+    return 0
+  elif $(echo ${UNAME_R} | grep -q 'moby') && ! has_docker_for_windows_client; then
     return 0
   else
     return 1

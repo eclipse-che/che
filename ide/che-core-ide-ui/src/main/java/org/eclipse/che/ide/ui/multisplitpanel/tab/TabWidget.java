@@ -1,20 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ui.multisplitpanel.tab;
 
+import static com.google.gwt.dom.client.NativeEvent.BUTTON_LEFT;
+import static com.google.gwt.dom.client.NativeEvent.BUTTON_MIDDLE;
+
+import com.google.common.base.MoreObjects;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -24,12 +27,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
+import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Widget that represents a tab.
@@ -38,92 +40,111 @@ import javax.validation.constraints.NotNull;
  */
 public class TabWidget extends Composite implements Tab {
 
-    private static final TabItemWidgetUiBinder UI_BINDER = GWT.create(TabItemWidgetUiBinder.class);
+  private static final TabItemWidgetUiBinder UI_BINDER = GWT.create(TabItemWidgetUiBinder.class);
 
-    private final String      title;
-    private final SVGResource icon;
+  private final String title;
+  private final SVGResource icon;
 
-    @UiField
-    SimplePanel iconPanel;
+  @UiField SimplePanel iconPanel;
 
-    @UiField
-    Label titleLabel;
+  @UiField Label titleLabel;
 
-    @UiField
-    FlowPanel closeButton;
+  @UiField FlowPanel closeButton;
 
-    @UiField(provided = true)
-    PartStackUIResources resources;
+  @UiField(provided = true)
+  PartStackUIResources resources;
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    @Inject
-    public TabWidget(PartStackUIResources resources, @Assisted String title, @Assisted SVGResource icon, @Assisted boolean closable) {
-        this.resources = resources;
-        this.title = title;
-        this.icon = icon;
+  @Inject
+  public TabWidget(
+      PartStackUIResources resources,
+      @Assisted String title,
+      @Assisted SVGResource icon,
+      @Assisted boolean closable) {
+    this.resources = resources;
+    this.title = title;
+    this.icon = MoreObjects.firstNonNull(icon, emptySVGResource());
 
-        initWidget(UI_BINDER.createAndBindUi(this));
+    initWidget(UI_BINDER.createAndBindUi(this));
 
-        titleLabel.setText(title);
+    titleLabel.setText(title);
 
-        iconPanel.add(new SVGImage(getIcon()));
+    iconPanel.add(new SVGImage(getIcon()));
 
-        addDomHandler(this, ClickEvent.getType());
-        addDomHandler(this, DoubleClickEvent.getType());
+    addDomHandler(this, ClickEvent.getType());
+    addDomHandler(this, DoubleClickEvent.getType());
 
-        if (closable) {
-            closeButton.addDomHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    delegate.onTabClosing(TabWidget.this);
-                }
-            }, ClickEvent.getType());
-        } else {
-            closeButton.setVisible(false);
-        }
+    if (closable) {
+      closeButton.addDomHandler(
+          event -> delegate.onTabClosing(TabWidget.this), ClickEvent.getType());
+    } else {
+      closeButton.setVisible(false);
     }
+  }
 
-    @Override
-    public SVGResource getIcon() {
-        return icon;
+  @Override
+  public SVGResource getIcon() {
+    return icon;
+  }
+
+  @Override
+  public String getTitleText() {
+    return title;
+  }
+
+  @Override
+  public void select() {
+    getElement().setAttribute("focused", "");
+  }
+
+  @Override
+  public void unSelect() {
+    getElement().removeAttribute("focused");
+  }
+
+  @Override
+  public void onClick(@NotNull ClickEvent event) {
+    if (BUTTON_LEFT == event.getNativeButton()) {
+      delegate.onTabClicked(this);
+    } else if (BUTTON_MIDDLE == event.getNativeButton()) {
+      delegate.onTabClosing(this);
     }
+  }
 
-    @Override
-    public String getTitleText() {
-        return title;
-    }
+  @Override
+  public void onDoubleClick(DoubleClickEvent event) {
+    delegate.onTabDoubleClicked(this);
+  }
 
-    @Override
-    public void select() {
-        getElement().setAttribute("focused", "");
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @Override
-    public void unSelect() {
-        getElement().removeAttribute("focused");
-    }
+  interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {}
 
-    @Override
-    public void onClick(@NotNull ClickEvent event) {
-        if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
-            delegate.onTabClicked(this);
-        } else if (NativeEvent.BUTTON_MIDDLE == event.getNativeButton()) {
-            delegate.onTabClosing(this);
-        }
-    }
+  private static SVGResource emptySVGResource() {
+    return new SVGResource() {
+      @Override
+      public OMSVGSVGElement getSvg() {
+        return new OMSVGSVGElement();
+      }
 
-    @Override
-    public void onDoubleClick(DoubleClickEvent event) {
-        delegate.onTabDoubleClicked(this);
-    }
+      @Override
+      public SafeUri getSafeUri() {
+        return null;
+      }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+      @Override
+      public String getUrl() {
+        return null;
+      }
 
-    interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {
-    }
-
+      @Override
+      public String getName() {
+        return null;
+      }
+    };
+  }
 }

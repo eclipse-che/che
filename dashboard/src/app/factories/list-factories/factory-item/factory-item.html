@@ -1,0 +1,53 @@
+<!--
+
+    Copyright (c) 2015-2018 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
+  <div flex="100"
+       id="{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}"
+       layout="row"
+       layout-align="start stretch"
+       class="che-list-item-row">
+    <div layout="row"
+         layout-align="start center"
+         class="che-checkbox-area"
+         ng-if="factoryItemController.isSelectable === true">
+      <che-list-item-checked ng-model="factoryItemController.isSelect"
+                             che-aria-label-checkbox="Factory {{factoryItemController.factory.name}}"
+                             ng-click="factoryItemController.onCheckboxClick()"></che-list-item-checked>
+    </div>
+    <div flex
+         layout-xs="column" layout-gt-xs="row"
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
+         class="che-list-item-details">
+      <div flex-gt-xs="25"
+           class="che-list-item-name"
+           ng-click="factoryItemController.redirectToFactoryDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Factory</span>
+        <span uib-tooltip="Created: {{factoryItemController.factory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
+              class="che-hover" name="factory-name">{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}</span>
+      </div>
+      <div flex-gt-xs="60" ng-click="factoryItemController.redirectToFactoryDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
+        <span class="factory-consumed-value" name="factory-ram-limit">{{factoryItemController.getMemoryLimit()}}</span>
+      </div>
+      <div flex-gt-xs="15">
+        <span class="che-xs-header noselect" name="open-factory" hide-gt-xs>Actions</span>
+        <span class="che-list-actions">
+          <a uib-tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
+            <span class="fa fa-chevron-circle-right factory-action"></span>
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+</che-list-item>

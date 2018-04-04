@@ -1,0 +1,102 @@
+body {
+    background-color: #fff;
+}
+
+header div.container {
+    width: 100%;
+    margin: 0;
+}
+
+#referrer {
+    max-height: 36px;
+    background-color: #fdb940;
+    border-radius: 5px;
+    padding: 5px 15px;
+    margin-top: 5px;
+    margin-right: 10px;
+}
+
+#referrer:hover {
+    background-color: #fca70e;
+}
+
+#content {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#tabs-menu li a, #tabs-menu li a:hover {
+    font-size: 13px;
+    font-family: "Open Sans";
+    color: rgba(0, 0, 0, 0.54);
+    background-color: #fff;
+    padding: 12px 24px;
+}
+
+#tabs-menu li.active a {
+    color: #4a90e2;
+    border-bottom: 5px solid #fdb940;
+}
+
+#tabs-menu li a:active {
+    transition: background-color 0.35s cubic-bezier(0.35, 0, 0.25, 1);
+    background-color: #cce0f6;
+}
+
+#tab-content {
+    border-top: 1px solid #e4e4e4;
+    border-right: none;
+    border-left: none;
+}
+
+#tab-content div > label.control-label {
+    color: #5a5a5a;
+    text-align: left;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.3px;
+    font-family: "Open Sans";
+    padding-top: 10px;
+}
+
+#tab-content div > input {
+    box-shadow: none;
+    border-color: #e4e4e4;
+    border-radius: 2px;
+    font-size: 13px;
+    font-family: "Open Sans";
+    height: 38px;
+    padding: 0 15px;
+}
+
+#tab-content div > input:focus {
+    border-color: #4a90e2;
+}
+
+#tab-content div > button {
+    min-width: 88px;
+    min-height: 36px;
+    border-radius: 2px;
+    border-color: rgba(255, 255, 255, 0.87);
+    box-shadow: none;
+    background-image: none;
+}
+
+#tab-content div > button[value="Save"] {
+    background-color: #46af00;
+    text-transform: uppercase;
+}
+
+#tab-content div > button[value="Save"]:hover {
+    background-color: #3f9d00;
+}
+
+#tab-content div > button[value="Cancel"] {
+    color: #9c9c9c;
+    background-color: #d7d7d7;
+}
+
+#tab-content div > button[value="Cancel"]:hover {
+    background-color: #c9c9c9;
+}

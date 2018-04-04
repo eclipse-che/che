@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ generate_dto() {
   POM_VERSION=$(cat "${DIR}"/dto-pom.xml | grep "^        <version>.*</version>$" | awk -F'[><]' '{print $3}')
   if [ -e "${DIR}/src/api/dto/che-dto.ts" ]; then
     # DTO file exists, Do we have snapshot ?
-    if [ ${POM_VERSION} != *"SNAPSHOT" ]
+    if [[ ${POM_VERSION} != *"SNAPSHOT"* ]]
     then
       if [ ${DIR}/src/api/dto/che-dto.ts -nt ${DIR}/dto-pom.xml ]; then
         echo "Using tagged version and dto file is up-to-date. Not generating it."

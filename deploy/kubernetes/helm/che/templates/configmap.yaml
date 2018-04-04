@@ -1,0 +1,58 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: che
+  name: che
+data:
+  CHE_DOMAIN: {{ .Values.global.cheDomain }}
+  CHE_HOST: {{ template "cheHost" . }}
+  CHE_PORT: "8080"
+{{- if .Values.global.tlsEnabled }}
+  CHE_API: https://{{ template "cheHost" . }}/api
+  CHE_WEBSOCKET_ENDPOINT:  wss://{{ template "cheHost" . }}/api/websocket
+  CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: https://{{ template "cheHost" . }}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+{{ else }}
+  CHE_API: http://{{ template "cheHost" . }}/api
+  CHE_WEBSOCKET_ENDPOINT:  ws://{{ template "cheHost" . }}/api/websocket
+  CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: http://{{ template "cheHost" . }}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+{{- end }}
+  CHE_DEBUG_SERVER: "true"
+  CHE_INFRASTRUCTURE_ACTIVE: kubernetes
+  CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN: "5"
+  CHE_INFRA_KUBERNETES_MASTER__URL: ""
+  CHE_INFRA_KUBERNETES_OAUTH__TOKEN: ""
+  CHE_INFRA_KUBERNETES_PASSWORD: ""
+  CHE_INFRA_KUBERNETES_USERNAME: ""
+{{- if .Values.global.multiuser }}
+  CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
+  CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId }}
+  CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
+{{- end }}
+  CHE_INFRA_KUBERNETES_NAMESPACE: ""
+  CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
+  CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
+  CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "false"
+  CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER: "0"
+  CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "0"
+  CHE_LOCAL_CONF_DIR: /etc/conf
+  CHE_LOGS_DIR: /data/logs
+  CHE_LOG_LEVEL: "INFO"
+  CHE_MULTIUSER: {{ .Values.global.multiuser | quote }}
+  CHE_OAUTH_GITHUB_CLIENTID: ""
+  CHE_OAUTH_GITHUB_CLIENTSECRET: ""
+  CHE_PREDEFINED_STACKS_RELOAD__ON__START: "false"
+  JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
+  CHE_WORKSPACE_AUTO_START: "false"
+{{- if .Values.global.tlsEnabled }}
+  CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"kubernetes.io/ingress.class": "nginx", "kubernetes.io/tls-acme": "true", "{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/rewrite-target": "/","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect": "true","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout": "3600","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout": "3600"}'
+{{- else }}
+  CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"kubernetes.io/ingress.class": "nginx", "{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/rewrite-target": "/","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect": "false","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout": "3600","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout": "3600"}'
+{{- end }}

@@ -1,71 +1,71 @@
-# Copyright (c) 2012-2016 Codenvy, S.A., Red Hat, Inc.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Codenvy, S.A. - initial API and implementation
-#   Mario Loriedo
-#
-# build:
-#   docker build -t eclipse/che-dev .
-#
-# use:
-#   docker run -it --rm --name build-che
-#              -v "$HOME/.m2:/home/user/.m2"
-#              -v "$PWD":/home/user/che-build
-#              -w /home/user/che-build
-#              codenvy/che-dev
-#              mvn -DskipTests=true
-#                  -Dfindbugs.skip=true
-#                  -Dgwt.compiler.localWorkers=2 -T 1C
-#                  -Dskip-validate-sources
-#              clean install
-#
-# For Windows, replace $HOME with maven repo directory.
-# For Windows, replace $PWD with Che source code directory.
-#
+#   Red Hat, Inc.- initial API and implementation
 
-FROM codenvy/debian_jdk8
-ENV NODE_VERSION=0.12.9 \
-    NODE_PATH=/usr/local/lib/node_modules
 
-RUN sudo apt-get update && \
-    sudo apt-get -y install build-essential libssl-dev libkrb5-dev gcc make ruby-full rubygems && \
-    sudo gem install sass compass && \
-    sudo apt-get clean && \
-    sudo apt-get -y autoremove && \
-    sudo apt-get -y clean && \
-    sudo rm -rf /var/lib/apt/lists/* && \
-    set -ex \
-    && for key in \
-      9554F04D7259F04124DE6B476D5A82AC7E37093B \
-      94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-      0034A06D9D9B0064CE8ADF6BF1747F4AD2306D93 \
-      FD3A5288F042B6850C66B31F09FE44734EB7990E \
-      71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-      DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-    ; do \
-      gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-    done && \
-    cd /home/user && curl --insecure -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
-    && curl --insecure -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
-    && gpg --verify SHASUMS256.txt.asc \
-    && grep "node-v$NODE_VERSION-linux-x64.tar.gz\$" SHASUMS256.txt.asc | sha256sum -c - \
-    && sudo tar -xzf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
-    && sudo rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc
+FROM registry.centos.org/che-stacks/centos-stack-base
 
-EXPOSE 3000 5000 9000
-RUN sudo npm install -g npm@latest
-RUN sudo npm install --unsafe-perm -g gulp bower typings
-RUN mkdir ~/gopath && \
-    cd /home/user && wget -q https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz && \
-    sudo tar -xvf go1.6.2.linux-amd64.tar.gz -C /opt/ && \
-    rm go1.6.2.linux-amd64.tar.gz
-ENV GOROOT=/opt/go
-ENV GOPATH=/home/user/gopath
-RUN echo "export PATH=$GOROOT/bin:$PATH" >> ~/.bashrc && \
-    sudo chown -R user:user /opt
-WORKDIR /home/user
-ENV PATH $GOROOT/bin:$PATH
+EXPOSE 4403 8080 8000 9876 22
+
+RUN sudo yum -y update && \
+    sudo yum -y install  \
+           rh-maven35 \
+           plexus-classworlds \
+           rh-nodejs6 \
+           gcc-c++ \
+           gcc \
+           glibc-devel \
+           bzip2 \
+           make \
+           golang \
+    sudo yum clean all && \
+    cat /opt/rh/rh-maven35/enable >> /home/user/.bashrc  && \
+    cat /opt/rh/rh-nodejs6/enable >> /home/user/.bashrc && \
+    sudo ln -s /opt/rh/rh-nodejs6/root/usr/bin/node /usr/local/bin/nodejs
+
+ENV TOMCAT_VERSION=8.5.23
+
+RUN mkdir $HOME/.m2 && \
+   wget -O  /home/user/tomcat8.zip "http://maven.codenvycorp.com/content/groups/public/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.0.0-M1/che-tomcat8-slf4j-logback-6.0.0-M1.zip" ;\
+   unzip   /home/user/tomcat8.zip -d /home/user/tomcat8;\
+   rm /home/user/tomcat8.zip;\
+   mkdir /home/user/tomcat8/webapps;\
+   sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/tomcat8/conf/server.xml; \
+   sed -i 's/<Context>/<Context reloadable=\"true\">/g' /home/user/tomcat8/conf/context.xml; \
+   echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
+
+USER user
+
+ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
+ PYTHONPATH=/opt/rh/rh-nodejs6/root/usr/lib/python2.7/site-packages${PYTHONPATH:+:${PYTHONPATH}} \
+ MANPATH=/opt/rh/rh-nodejs6/root/usr/share/man:$MANPATH \
+ TOMCAT_HOME=/home/user/tomcat8 \
+ TERM=xterm  \
+ M2_HOME=/opt/rh/rh-maven35/root/usr/share/maven \
+ GOPATH=$HOME/go \
+ NODEJS_VERSION=6 \
+ NPM_RUN=start \
+ NPM_CONFIG_PREFIX=$HOME/.npm-global
+
+ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bin:/opt/rh/rh-nodejs6/root/usr/bin:/usr/local/go/bin:$PATH
+
+RUN mkdir /home/user/traefik ;\
+    wget -O /home/user/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.4.3/traefik_linux-amd64"; \
+    chmod +x /home/user/traefik/traefik
+COPY traefik.toml /home/user/traefik/
+ADD entrypoint.sh /home/user/entrypoint.sh
+RUN sudo mkdir /var/run/sshd && \
+    sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
+    sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
+    sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N '' && \
+    npm install -g typescript@2.5.3 typescript-language-server@0.1.4 && \
+    sudo chgrp -R 0 ~ && \
+    sudo chmod -R g+rwX ~
+WORKDIR /projects
+ENTRYPOINT ["/home/user/entrypoint.sh"]
+CMD tail -f /dev/null

@@ -1,25 +1,38 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
+interface IInputBoxScope extends ng.IScope {
+  valueModel: string;
+  inputName: string;
+  labelName?: string;
+  labelDescription?: string;
+  placeHolder?: string;
+  pattern?: string;
+  myForm: ng.IFormController;
+  onChange?: Function;
+  isReadonly?: boolean;
+}
 
 /**
  * Defines a directive for creating input that are working either on desktop or on mobile devices.
  * It will change upon width of the screen
  * @author Ann Shumilova
+ * @author Oleksii Orel
  */
-export class CheInputBox implements ng.IDirective {
-
+export class CheInputBox {
   restrict = 'E';
   replace = true;
   transclude = true;
+  templateUrl: string = 'components/widget/input/che-input-box.html';
 
   // we require ngModel as we want to use it inside our directive
   require = ['ngModel'];
@@ -27,181 +40,68 @@ export class CheInputBox implements ng.IDirective {
   // scope values
   scope = {
     valueModel: '=ngModel',
-    inputName: '@cheName',
+    inputName: '@?cheName',
     labelName: '@?cheLabelName',
-    placeHolder: '@chePlaceHolder',
-    pattern: '@chePattern',
+    labelDescription: '@?cheLabelDescription',
+    placeHolder: '@?chePlaceHolder',
     myForm: '=cheForm',
-    isChanged: '&ngChange',
-    readonly: '=cheReadonly',
-    disabled: '=cheDisabled'
+    onChange: '&?cheOnChange',
+    isReadonly: '=?cheReadonly'
   };
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-  }
 
+  compile(element: ng.IAugmentedJQuery, attrs: ng.IAttributes): ng.IDirectivePrePost {
+    const avoidAttrs = ['ng-model'];
+    const avoidStartWithAttrs: Array<string> = ['$', 'che-'];
 
-  /**
-   * Template for the current toolbar
-   * @param element
-   * @param attrs
-   * @returns {string} the template
-   */
-  template(element, attrs) {
-    let inputName = attrs.cheName;
-    let labelName = attrs.cheLabelName || '';
-    let placeHolder = attrs.chePlaceHolder;
-    let pattern = attrs.chePattern;
-    let isMandatory = angular.isDefined(attrs.required) ? true : false;
-
-    let template = '<div class="che-input-box">'
-      + '<md-input-container hide-gt-xs ng-class="{\'che-input-box-mobile-no-label\': !labelName}">'
-      + '<label ng-if="labelName">' + labelName + '</label>'
-      + '<input type="text" name="' + inputName + '"';
-    if (attrs.chePattern) {
-      template = template + ' pattern="' + pattern + '"';
-    }
-    if (attrs.cheReadonly) {
-      template = template + ' ng-readonly="readonly"';
-    }
-    if (attrs.cheDisabled) {
-      template = template + ' ng-disabled="disabled"';
-    }
-
-    template = template + ' ng-trim="false" data-ng-model="valueModel" >'
-      + '<!-- display error messages for the form -->'
-      + '<div ng-messages="myForm.' + inputName + '.$error"></div>'
-      + '</md-input-container>'
-      + ''
-      + '<div class="che-input-box-desktop" hide-xs layout="column">'
-      + '<div layout="row" layout-align="start start">'
-      + '<label flex="15" class="che-input-box-desktop-label" ng-if="labelName">' + labelName + ': </label>'
-      + ''
-      + '<div layout="column" class="che-input-box-desktop-value-column" flex="{{labelName ? 85 : \'none\'}}">'
-      + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + inputName + '" style="{{labelName ? \'width: 100%\' : \'\'}}"';
-    if (attrs.chePattern) {
-      template = template + ' pattern="' + pattern + '"';
-    }
-    if (attrs.cheReadonly) {
-      template = template + ' ng-readonly="readonly"';
-    }
-    if (attrs.cheDisabled) {
-      template = template + ' ng-disabled="disabled"';
-    }
-    template = template + ' data-ng-model="valueModel">';
-    if (isMandatory) {
-      template += '<span class="che-input-asterisk">*</span>';
-    }
-
-    if (attrs.cheWidth === 'auto') {
-      template = template + '<div class="che-input-box-desktop-hidden-text">{{valueModel ? valueModel : placeHolder}}</div>';
-    }
-
-    template = template + '<!-- display error messages for the form -->'
-      + '<div ng-messages="myForm.desk' + inputName + '.$error" ng-transclude></div>'
-      + '</div>'
-      + '</div>'
-      + '</div>'
-      + '</div>';
-
-    return template;
-  }
-
-
-  compile(element, attrs) {
-
-    var keys = Object.keys(attrs);
-
+    const keys = Object.keys(attrs.$attr);
     // search the input field
-    var inputElement = element.find('input');
-
-    var tabIndex;
-
-    keys.forEach((key) => {
-
-      // don't reapply internal properties
-      if (key.indexOf('$') === 0) {
+    const inputJqEl = element.find('input');
+    let tabIndex;
+    keys.forEach((key: string) => {
+      const attr = attrs.$attr[key];
+      if (!attr) {
         return;
       }
-      // don't reapply internal element properties
-      if (key.indexOf('che') === 0) {
+      if (avoidStartWithAttrs.find((avoidStartWithAttr: string) => {
+          return attr.indexOf(avoidStartWithAttr) === 0;
+        })) {
         return;
       }
-      // avoid model
-      if ('ngModel' === key) {
+      if (avoidAttrs.indexOf(attr) !== -1) {
         return;
       }
-      // don't reapply ngChange
-      if ('ngChange' === key) {
-        return;
-      }
-      var value = attrs[key];
-
+      let value = attrs[key];
       // remember tabindex
-      if (key === 'tabindex') {
+      if (attr === 'tabindex') {
         tabIndex = value;
       }
-
-      // handle empty values as boolean
-      if (value === '') {
-        value = 'true';
-      }
-
       // set the value of the attribute
-      inputElement.attr(attrs.$attr[key], value);
-
-
-      //add also the material version of max length (only one the first input which is the md-input)
-      if ('ngMaxlength' === key) {
-        inputElement.eq(0).attr('md-maxlength', value);
-      }
-
-      element.removeAttr(attrs.$attr[key]);
-
+      inputJqEl.attr(attr, value);
+      // add also the material version of max length (only one the first input which is the md-input)
+      element.removeAttr(attr);
     });
-
-
-    // The focusable element is the input, remove tabIndex from top-level element
+    // the focusable element is the input, remove tabIndex from top-level element
     element.attr('tabindex', -1);
-    // The default value for tabindex on the input is 0 (meaning: set 0 if no value was set)
+    // the default value for tabindex on the input is 0 (meaning: set 0 if no value was set)
     if (!tabIndex) {
-      inputElement.attr('tabindex', 0);
+      inputJqEl.attr('tabindex', 0);
     }
+
+    return;
   }
 
   /**
    * Keep reference to the model controller
    */
-  link($scope, element, attr) {
-    $scope.$watch(function () {
-      return element.is(':visible');
-    }, function () {
-      //Since there are two inputs (for mobile and desktop versions) - add id attr only for visible one:
-      if (attr.id) {
-        element.find('input:hidden').removeAttr('id');
-        element.find('input:visible').attr('id', attr.id);
-      }
-    });
-
-    $scope.$watch('myForm.desk' + $scope.inputName + '.$pristine', (isPristine) => {
-      if (isPristine) {
-        element.addClass('desktop-pristine');
-      } else {
-        element.removeClass('desktop-pristine');
-      }
-    });
-
-    if (!attr.ngChange) {
-      return;
+  link($scope: IInputBoxScope, element: ng.IRootElementService, attrs: ng.IAttributes) {
+    const inputJqEl = element.find('input');
+    const required = 'required';
+    if (angular.isDefined($scope.placeHolder)) {
+      inputJqEl.attr('placeholder', attrs.$attr[required] === required ? $scope.placeHolder + ' *' : $scope.placeHolder);
     }
-    //for ngChange attribute only
-    $scope.$watch('valueModel', () => {
-      $scope.isChanged();
-    });
-
+    if (!angular.isFunction($scope.onChange)) {
+      inputJqEl.removeAttr('ng-change');
+    }
   }
 }

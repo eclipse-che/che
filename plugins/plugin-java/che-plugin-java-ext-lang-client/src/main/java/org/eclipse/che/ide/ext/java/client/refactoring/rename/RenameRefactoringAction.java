@@ -1,29 +1,34 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
+import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.COMPILATION_UNIT;
+import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.PACKAGE;
+
 import com.google.common.base.Optional;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.List;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -35,10 +40,8 @@ import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-
-import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.COMPILATION_UNIT;
-import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.PACKAGE;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Action for launch rename refactoring of java files
@@ -48,144 +51,191 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class RenameRefactoringAction extends AbstractPerspectiveAction implements ActivePartChangedHandler {
+public class RenameRefactoringAction extends AbstractPerspectiveAction
+    implements ActivePartChangedHandler {
 
-    private final EditorAgent           editorAgent;
-    private final RenamePresenter       renamePresenter;
-    private final JavaRefactoringRename javaRefactoringRename;
-    private final AppContext            appContext;
-    private final FileTypeRegistry      fileTypeRegistry;
+  private final EditorAgent editorAgent;
+  private final RenamePresenter renamePresenter;
+  private final JavaLocalizationConstant locale;
+  private final JavaRefactoringRename javaRefactoringRename;
+  private final AppContext appContext;
+  private final FileTypeRegistry fileTypeRegistry;
+  private final DialogFactory dialogFactory;
 
-    private boolean editorInFocus;
+  private boolean editorInFocus;
 
-    @Inject
-    public RenameRefactoringAction(EditorAgent editorAgent,
-                                   RenamePresenter renamePresenter,
-                                   EventBus eventBus,
-                                   JavaLocalizationConstant locale,
-                                   JavaRefactoringRename javaRefactoringRename,
-                                   AppContext appContext,
-                                   FileTypeRegistry fileTypeRegistry) {
-        super(null, locale.renameRefactoringActionName(), locale.renameRefactoringActionDescription());
-        this.editorAgent = editorAgent;
-        this.renamePresenter = renamePresenter;
-        this.javaRefactoringRename = javaRefactoringRename;
-        this.appContext = appContext;
-        this.fileTypeRegistry = fileTypeRegistry;
-        this.editorInFocus = false;
+  @Inject
+  public RenameRefactoringAction(
+      EditorAgent editorAgent,
+      RenamePresenter renamePresenter,
+      EventBus eventBus,
+      JavaLocalizationConstant locale,
+      JavaRefactoringRename javaRefactoringRename,
+      AppContext appContext,
+      FileTypeRegistry fileTypeRegistry,
+      DialogFactory dialogFactory) {
+    super(null, locale.renameRefactoringActionName(), locale.renameRefactoringActionDescription());
+    this.editorAgent = editorAgent;
+    this.renamePresenter = renamePresenter;
+    this.locale = locale;
+    this.javaRefactoringRename = javaRefactoringRename;
+    this.appContext = appContext;
+    this.fileTypeRegistry = fileTypeRegistry;
+    this.dialogFactory = dialogFactory;
+    this.editorInFocus = false;
 
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    List<EditorPartPresenter> dirtyEditors = editorAgent.getDirtyEditors();
+    if (dirtyEditors.isEmpty()) {
+      performAction();
+      return;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent event) {
+    AsyncCallback<Void> savingOperationCallback =
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            Log.error(getClass(), caught);
+          }
 
-        if (editorInFocus) {
-            final EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-            if (editorPart == null || !(editorPart instanceof TextEditor)) {
-                return;
-            }
+          @Override
+          public void onSuccess(Void result) {
+            performAction();
+          }
+        };
 
-            javaRefactoringRename.refactor((TextEditor)editorPart);
-        } else {
-            final Resource[] resources = appContext.getResources();
+    dialogFactory
+        .createConfirmDialog(
+            locale.unsavedDataDialogTitle(),
+            locale.unsavedDataDialogPromptSaveChanges(),
+            () -> editorAgent.saveAll(savingOperationCallback),
+            null)
+        .show();
+  }
 
-            if (resources == null || resources.length > 1) {
-                return;
-            }
+  private void performAction() {
+    if (editorInFocus) {
+      final EditorPartPresenter editorPart = editorAgent.getActiveEditor();
+      if (editorPart == null || !(editorPart instanceof TextEditor)) {
+        return;
+      }
 
-            final Resource resource = resources[0];
+      javaRefactoringRename.refactor((TextEditor) editorPart);
+    } else {
+      final Resource[] resources = appContext.getResources();
 
-            final Optional<Project> project = resource.getRelatedProject();
+      if (resources == null || resources.length > 1) {
+        return;
+      }
 
-            if (!JavaUtil.isJavaProject(project.get())) {
-                return;
-            }
+      final Resource resource = resources[0];
 
-            final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+      final Optional<Project> project = resource.getRelatedProject();
 
-            if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
-                return;
-            }
+      if (!JavaUtil.isJavaProject(project.get())) {
+        return;
+      }
 
-            RefactoredItemType renamedItemType = null;
+      final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
 
-            if (resource.getResourceType() == FILE && isJavaFile((File)resource)) {
-                renamedItemType = COMPILATION_UNIT;
-            } else if (resource instanceof Container) {
-                renamedItemType = PACKAGE;
-            }
+      if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
+        return;
+      }
 
-            if (renamedItemType == null) {
-                return;
-            }
+      RefactoredItemType renamedItemType = null;
 
-            renamePresenter.show(RefactorInfo.of(renamedItemType, resources));
+      if (resource.getResourceType() == FILE && isJavaFile((File) resource)) {
+        renamedItemType = COMPILATION_UNIT;
+      } else if (resource instanceof Container) {
+        renamedItemType = PACKAGE;
+      }
+
+      if (renamedItemType == null) {
+        return;
+      }
+
+      renamePresenter.show(RefactorInfo.of(renamedItemType, resources));
+    }
+  }
+
+  @Override
+  public void updateInPerspective(ActionEvent event) {
+    event.getPresentation().setVisible(true);
+
+    if (editorInFocus) {
+      final EditorPartPresenter editorPart = editorAgent.getActiveEditor();
+      if (editorPart == null || !(editorPart instanceof TextEditor)) {
+        event.getPresentation().setEnabledAndVisible(false);
+        return;
+      }
+
+      final VirtualFile file = editorPart.getEditorInput().getFile();
+
+      if (file instanceof File) {
+        final Optional<Project> project = ((File) file).getRelatedProject();
+
+        if (!project.isPresent()) {
+          event.getPresentation().setEnabledAndVisible(false);
+          return;
         }
+
+        event
+            .getPresentation()
+            .setEnabledAndVisible(JavaUtil.isJavaProject(project.get()) && isJavaFile(file));
+      } else {
+        event.getPresentation().setEnabledAndVisible(isJavaFile(file));
+      }
+
+    } else {
+      final Resource[] resources = appContext.getResources();
+
+      if (resources == null || resources.length != 1) {
+        event.getPresentation().setEnabledAndVisible(false);
+        return;
+      }
+
+      final Resource resource = resources[0];
+
+      final Optional<Project> project = resource.getRelatedProject();
+
+      if (!project.isPresent()) {
+        event.getPresentation().setEnabledAndVisible(false);
+        return;
+      }
+
+      final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+
+      if (resource.getResourceType() == FILE) {
+        event
+            .getPresentation()
+            .setEnabledAndVisible(
+                JavaUtil.isJavaProject(project.get())
+                    && srcFolder.isPresent()
+                    && isJavaFile((File) resource));
+      } else if (resource instanceof Container) {
+        event
+            .getPresentation()
+            .setEnabledAndVisible(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
+      }
+    }
+  }
+
+  protected boolean isJavaFile(VirtualFile file) {
+    String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
+
+    if (fileExtension == null) {
+      return false;
     }
 
-    @Override
-    public void updateInPerspective(ActionEvent event) {
-        event.getPresentation().setVisible(true);
+    return fileExtension.equals("java") || fileExtension.equals("class");
+  }
 
-        if (editorInFocus) {
-            final EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-            if (editorPart == null || !(editorPart instanceof TextEditor)) {
-                event.getPresentation().setEnabled(false);
-                return;
-            }
-
-            final VirtualFile file = editorPart.getEditorInput().getFile();
-
-            if (file instanceof File) {
-                final Optional<Project> project = ((File)file).getRelatedProject();
-
-                if (!project.isPresent()) {
-                    event.getPresentation().setEnabled(false);
-                    return;
-                }
-
-                event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && isJavaFile(file));
-            } else {
-                event.getPresentation().setEnabled(isJavaFile(file));
-            }
-
-        } else {
-            final Resource[] resources = appContext.getResources();
-
-            if (resources == null || resources.length > 1) {
-                event.getPresentation().setEnabled(false);
-                return;
-            }
-
-            final Resource resource = resources[0];
-
-            final Optional<Project> project = resource.getRelatedProject();
-
-            if (!project.isPresent()) {
-                event.getPresentation().setEnabled(false);
-                return;
-            }
-
-            final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
-
-            if (resource.getResourceType() == FILE) {
-                event.getPresentation()
-                     .setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent() && isJavaFile((File)resource));
-            } else if (resource instanceof Container) {
-                event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
-            }
-        }
-    }
-
-    protected boolean isJavaFile(VirtualFile file) {
-        String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
-
-        return fileExtension.equals("java") || fileExtension.equals("class");
-    }
-
-    @Override
-    public void onActivePartChanged(ActivePartChangedEvent event) {
-        editorInFocus = event.getActivePart() instanceof EditorPartPresenter;
-    }
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    editorInFocus = event.getActivePart() instanceof EditorPartPresenter;
+  }
 }

@@ -1,0 +1,85 @@
+<che-toolbar che-title="New Workspace"
+             class="create-workspace-toolbar">
+  <che-button-dropdown button-style="che-button-save-flat"
+                       button-disabled="createWorkspaceController.isCreateButtonDisabled()"
+                       main-action-config="createWorkspaceController.headerCreateButtonConfig.mainAction"
+                       other-actions-config="createWorkspaceController.headerCreateButtonConfig.otherActions"
+                       class="create-workspace-header-button"></che-button-dropdown>
+</che-toolbar>
+
+<md-progress-linear md-mode="indeterminate"
+                    class="create-workspace-progress"
+                    ng-hide="createWorkspaceController.hideLoader"></md-progress-linear>
+
+<md-content md-scroll-y flex
+            md-theme="default"
+            class="create-workspace-content">
+  <div ng-class="{'create-workspace-content-hidden': !createWorkspaceController.hideLoader}">
+
+    <!-- Name -->
+    <che-label-container che-label-name="Name"
+                         che-label-description="Define a name for your workspace.">
+      <ng-form flex layout="column"
+               name="workspaceNameForm"
+               class="create-workspace-name-form">
+        <che-input-box ng-init="createWorkspaceController.registerForm('name', workspaceNameForm)"
+                       che-form="workspaceNameForm"
+                       che-name="workspaceName"
+                       id="workspace-name-input"
+                       che-place-holder="Name of the workspace"
+                       aria-label="Name of the workspace"
+                       ng-model="createWorkspaceController.workspaceName"
+                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: false }"
+                       required
+                       custom-validator="createWorkspaceController.isNameUnique($value)"
+                       ng-minlength="3"
+                       ng-maxlength="100"
+                       ng-pattern="/^[a-z\d][a-z\d-.]+[a-z\d]$/i">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc. and should start and end only with digits, latin letters or underscores.</div>
+          <div ng-message="maxlength">The name has to be less than 100 characters long.</div>
+          <div ng-message="customValidator">This workspace name is already used.</div>
+        </che-input-box>
+      </ng-form>
+    </che-label-container>
+
+    <!-- Namespace -->
+    <che-label-container che-label-name="{{createWorkspaceController.getNamespaceCaption()}}"
+                         ng-if="createWorkspaceController.getNamespaces().length > 0 || createWorkspaceController.getNamespaceEmptyMessage()">
+      <namespace-selector
+        on-namespace-change="createWorkspaceController.onNamespaceChanged(namespaceId)"></namespace-selector>
+    </che-label-container>
+
+    <!-- Select Stack -->
+    <che-label-container che-label-name="Select Stack"
+                         che-label-description="Choose your workspace runtime environment used to build and run your projects.">
+      <stack-selector on-stack-select="createWorkspaceController.onStackSelected(stackId)"></stack-selector>
+    </che-label-container>
+
+    <!-- RAM Settings-->
+    <che-label-container che-label-name="Ram"
+                         che-label-description="Allocate the workspace machine(s) memory.">
+      <ng-form name="ramSettingsForm">
+        <ram-settings ng-init="createWorkspaceController.registerForm('ramSettings', ramSettingsForm)"
+                      machines="createWorkspaceController.stackMachines"
+                      environment-manager="createWorkspaceController.environmentManager"
+                      on-ram-change="createWorkspaceController.onRamChanged(name, memoryLimitBytes)"></ram-settings>
+      </ng-form>
+    </che-label-container>
+
+    <!-- Project source selector -->
+    <che-label-container che-label-name="Projects">
+      <project-source-selector></project-source-selector>
+    </che-label-container>
+
+    <che-label-container>
+      <che-button-save-flat class="create-workspace-footer-button"
+                            name="saveButton"
+                            che-button-title="Create"
+                            ng-click="createWorkspaceController.createWorkspaceAndShowDialog($event)"
+                            ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
+    </che-label-container>
+
+  </div>
+</md-content>

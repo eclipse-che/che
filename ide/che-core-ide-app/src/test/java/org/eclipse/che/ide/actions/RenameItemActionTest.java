@@ -1,134 +1,150 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.actions;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
+import java.util.HashSet;
+import java.util.Set;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
+import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.project.ProjectServiceClient;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class RenameItemActionTest {
-    @InjectMocks
-    private RenameItemAction action;
+  @InjectMocks private RenameItemAction action;
 
-    @Mock
-    private Resources                resources;
-    @Mock
-    private CoreLocalizationConstant localization;
-    @Mock
-    private DtoFactory               dtoFactory;
-    @Mock
-    private DialogFactory            dialogFactory;
-    @Mock
-    private ProjectServiceClient     projectServiceClient;
-    @Mock
-    private EditorAgent              editorAgent;
-    @Mock
-    private NotificationManager      notificationManager;
-    @Mock
-    private AppContext               appContext;
-    @Mock
-    private RenamingSupport          renamingSupportValidator;
+  @Mock private Resources resources;
+  @Mock private CoreLocalizationConstant localization;
+  @Mock private DtoFactory dtoFactory;
+  @Mock private DialogFactory dialogFactory;
+  @Mock private ProjectServiceClient projectServiceClient;
+  @Mock private EditorAgent editorAgent;
+  @Mock private NotificationManager notificationManager;
+  @Mock private AppContext appContext;
+  @Mock private RenamingSupport renamingSupportValidator;
 
-    @Mock
-    private Resource     resource;
-    @Mock
-    private ActionEvent  event;
-    @Mock
-    private Presentation presentation;
+  @Mock private Resource resource;
+  @Mock private ActionEvent event;
+  @Mock private Presentation presentation;
 
-    private Resource[]           selectedResources = new Resource[1];
-    private Set<RenamingSupport> renamingSupport   = new HashSet<>();
+  @Mock private WorkspaceAgent workspaceAgent;
+  @Mock private PartPresenter partPresenter;
 
-    @Before
-    public void setUp() throws Exception {
-        selectedResources[0] = resource;
+  private Resource[] selectedResources = new Resource[1];
+  private Set<RenamingSupport> renamingSupport = new HashSet<>();
 
-        when(appContext.getResources()).thenReturn(selectedResources);
-        when(event.getPresentation()).thenReturn(presentation);
-    }
+  @Before
+  public void setUp() throws Exception {
+    selectedResources[0] = resource;
 
-    @Test
-    public void actionShouldBeDisabledIfSelectedResourceIsNull() throws Exception {
-        when(appContext.getResources()).thenReturn(null);
+    when(appContext.getResources()).thenReturn(selectedResources);
+    when(event.getPresentation()).thenReturn(presentation);
+    when(workspaceAgent.getActivePart()).thenReturn(partPresenter);
+  }
 
-        action.updateInPerspective(event);
+  @Test
+  public void actionShouldBeDisabledIfSelectedResourceIsNull() throws Exception {
+    when(appContext.getResources()).thenReturn(null);
 
-        verify(presentation).setVisible(true);
-        verify(presentation).setEnabled(false);
-    }
+    action.updateInPerspective(event);
 
-    @Test
-    public void actionShouldBeDisabledIfMultiselectionIs() throws Exception {
-        selectedResources = new Resource[2];
-        selectedResources[0] = resource;
-        selectedResources[1] = resource;
+    verify(presentation).setVisible(true);
+    verify(presentation).setEnabled(false);
+  }
 
-        when(appContext.getResources()).thenReturn(selectedResources);
+  @Test
+  public void actionShouldBeDisabledIfMultiselectionIs() throws Exception {
+    selectedResources = new Resource[2];
+    selectedResources[0] = resource;
+    selectedResources[1] = resource;
 
-        action.updateInPerspective(event);
+    when(appContext.getResources()).thenReturn(selectedResources);
 
-        verify(presentation).setVisible(true);
-        verify(presentation).setEnabled(false);
-    }
+    action.updateInPerspective(event);
 
-    @Test
-    public void actionShouldBeDisabledIfSomeRenameValidatorForbidsRenameOperation() throws Exception {
-        renamingSupport.add(renamingSupportValidator);
-        when(renamingSupportValidator.isRenameAllowed((Resource)anyObject())).thenReturn(false);
+    verify(presentation).setVisible(true);
+    verify(presentation).setEnabled(false);
+  }
 
-        action =
-                new RenameItemAction(resources, localization, renamingSupport, editorAgent, notificationManager, dialogFactory, appContext);
-        action.updateInPerspective(event);
+  @Test
+  public void actionShouldBeDisabledIfSomeRenameValidatorForbidsRenameOperation() throws Exception {
+    renamingSupport.add(renamingSupportValidator);
+    when(renamingSupportValidator.isRenameAllowed((Resource) anyObject())).thenReturn(false);
 
-        verify(presentation).setVisible(true);
-        verify(presentation).setEnabled(false);
-    }
+    action =
+        new RenameItemAction(
+            resources,
+            localization,
+            renamingSupport,
+            editorAgent,
+            notificationManager,
+            dialogFactory,
+            appContext,
+            workspaceAgent);
+    action.updateInPerspective(event);
 
-    @Test
-    public void actionShouldBeEnabled() throws Exception {
-        renamingSupport.add(renamingSupportValidator);
-        when(renamingSupportValidator.isRenameAllowed((Resource)anyObject())).thenReturn(true);
+    verify(presentation).setVisible(true);
+    verify(presentation).setEnabled(false);
+  }
 
-        action =
-                new RenameItemAction(resources, localization, renamingSupport, editorAgent, notificationManager, dialogFactory, appContext);
-        action.updateInPerspective(event);
+  @Test
+  public void actionShouldBeEnabled() throws Exception {
+    renamingSupport.add(renamingSupportValidator);
+    when(renamingSupportValidator.isRenameAllowed((Resource) anyObject())).thenReturn(true);
 
-        verify(presentation).setVisible(true);
-        verify(presentation).setEnabled(true);
-    }
+    action =
+        new RenameItemAction(
+            resources,
+            localization,
+            renamingSupport,
+            editorAgent,
+            notificationManager,
+            dialogFactory,
+            appContext,
+            workspaceAgent);
+    action.updateInPerspective(event);
+
+    verify(presentation).setVisible(true);
+    verify(presentation).setEnabled(true);
+  }
+
+  @Test
+  public void actionShouldBeDisabledIfEditorActive() {
+    when(workspaceAgent.getActivePart()).thenReturn(mock(EditorPartPresenter.class));
+
+    action.updateInPerspective(event);
+
+    verify(presentation).setEnabledAndVisible(false);
+  }
 }

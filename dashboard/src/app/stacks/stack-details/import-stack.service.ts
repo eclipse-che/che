@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {StackValidationService} from './stack-validation.service';
@@ -17,18 +17,19 @@ import {StackValidationService} from './stack-validation.service';
  * @author Oleksii Orel
  */
 export class ImportStackService {
-  private stackValidationService: StackValidationService;
-  private stack: che.IStack | {};
 
+  static $inject = ['stackValidationService'];
+
+  private stackValidationService: StackValidationService;
+  private stack: che.IStack;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(stackValidationService: StackValidationService) {
     this.stackValidationService = stackValidationService;
 
-    this.stack = {};
+    this.stack = {} as che.IStack;
   }
 
   /**
@@ -36,7 +37,7 @@ export class ImportStackService {
    *
    * @param stack {che.IStack}
    */
-  setStack(stack: che.IStack | {}): void {
+  setStack(stack: che.IStack): void {
     this.stack = stack;
   }
 
@@ -45,7 +46,7 @@ export class ImportStackService {
    *
    * @returns {che.IStack}
    */
-  getStack(): che.IStack | {} {
+  getStack(): che.IStack {
     return this.stack;
   }
 

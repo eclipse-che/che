@@ -9,8 +9,6 @@ target/
 bin/
 test-output/
 maven-eclipse.xml
-instance/
-config/
 
 # Idea #
 ##################
@@ -18,6 +16,8 @@ config/
 *.ipr
 *.iws
 .idea/
+
+.vscode/
 
 # Compiled source #
 ###################
@@ -64,9 +64,15 @@ Thumbs.db
 #############
 .che
 dockerfiles/che/eclipse-che.tar.gz
+dockerfiles/che/eclipse-che/
 .unison*
 docs/_site
 docs/.sass-cache
 docs/.jekyll-metadata
 docs/assets/imgs
 !assembly/assembly-main/src/assembly/bin/
+
+# NodeJs modules #
+##################
+plugins/plugin-terminal-ui/node_modules/
+plugins/plugin-terminal-ui/build/

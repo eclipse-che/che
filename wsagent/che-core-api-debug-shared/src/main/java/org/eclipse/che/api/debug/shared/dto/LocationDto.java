@@ -1,42 +1,52 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.debug.shared.dto;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.dto.shared.DTO;
 
-/** @author andrew00x */
+/** @author Anatolii Bazko */
 @DTO
 public interface LocationDto extends Location {
-    void setTarget(String target);
+  void setTarget(String target);
 
-    LocationDto withTarget(String target);
+  LocationDto withTarget(String target);
 
-    void setLineNumber(int lineNumber);
+  void setLineNumber(int lineNumber);
 
-    LocationDto withLineNumber(int lineNumber);
+  LocationDto withLineNumber(int lineNumber);
 
-    void setExternalResource(boolean externalResource);
+  void setExternalResource(boolean externalResource);
 
-    void setResourcePath(String resourcePath);
+  LocationDto withExternalResource(boolean externalResource);
 
-    LocationDto withResourcePath(String resourcePath);
+  void setExternalResourceId(int externalResourceId);
 
-    LocationDto withExternalResource(boolean externalResource);
+  LocationDto withExternalResourceId(int externalResourceId);
 
-    void setExternalResourceId(int externalResourceId);
+  void setResourceProjectPath(String resourceProjectPath);
 
-    LocationDto withExternalResourceId(int externalResourceId);
+  LocationDto withResourceProjectPath(String resourceProjectPath);
 
-    void setResourceProjectPath(String resourceProjectPath);
+  @Override
+  MethodDto getMethod();
 
-    LocationDto withResourceProjectPath(String resourceProjectPath);
+  void setMethod(MethodDto method);
+
+  LocationDto withMethod(MethodDto method);
+
+  @Override
+  long getThreadId();
+
+  void setThreadId(long threadId);
+
+  LocationDto withThreadId(long threadId);
 }

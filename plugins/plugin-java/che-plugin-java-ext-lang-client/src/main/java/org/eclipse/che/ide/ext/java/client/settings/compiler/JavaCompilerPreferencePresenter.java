@@ -1,39 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.java.client.settings.compiler;
 
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
-import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
-import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import static java.util.Arrays.asList;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPARING_IDENTICAL_VALUES;
@@ -55,139 +33,192 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.UNUSED_PRIVATE_MEMBER;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.USAGE_OF_RAW_TYPE;
 
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
+import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
+
 /**
  * The class contains business logic which allow control changing of compiler's properties.
  *
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePresenter implements PropertyWidget.ActionDelegate,
-                                                                                                WsAgentStateHandler {
-    public static final String CATEGORY = "Java Compiler";
+public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePresenter
+    implements PropertyWidget.ActionDelegate, WorkspaceRunningEvent.Handler {
+  public static final String CATEGORY = "Java Compiler";
 
-    private final ErrorWarningsView             view;
-    private final PropertyWidgetFactory         propertyFactory;
-    private final PreferencesManager            preferencesManager;
-    private final Provider<NotificationManager> notificationManagerProvider;
-    private final JavaLocalizationConstant      locale;
+  private final ErrorWarningsView view;
+  private final PropertyWidgetFactory propertyFactory;
+  private final PreferencesManager preferencesManager;
+  private final Provider<NotificationManager> notificationManagerProvider;
+  private final JavaLocalizationConstant locale;
 
-    private final List<PropertyWidget> widgets;
+  private List<ErrorWarningsOptions> options;
+  private Map<String, PropertyWidget> widgets;
 
-    @Inject
-    public JavaCompilerPreferencePresenter(JavaLocalizationConstant locale,
-                                           ErrorWarningsView view,
-                                           PropertyWidgetFactory propertyFactory,
-                                           @JavaCompilerPreferenceManager PreferencesManager preferencesManager,
-                                           Provider<NotificationManager> notificationManagerProvider,
-                                           EventBus eventBus) {
-        super(locale.compilerSetup(), CATEGORY);
+  @Inject
+  public JavaCompilerPreferencePresenter(
+      JavaLocalizationConstant locale,
+      ErrorWarningsView view,
+      PropertyWidgetFactory propertyFactory,
+      @JavaCompilerPreferenceManager PreferencesManager preferencesManager,
+      Provider<NotificationManager> notificationManagerProvider) {
+    super(locale.compilerSetup(), CATEGORY);
 
-        this.view = view;
-        this.propertyFactory = propertyFactory;
-        this.preferencesManager = preferencesManager;
-        this.notificationManagerProvider = notificationManagerProvider;
-        this.locale = locale;
+    this.view = view;
+    this.propertyFactory = propertyFactory;
+    this.preferencesManager = preferencesManager;
+    this.notificationManagerProvider = notificationManagerProvider;
+    this.locale = locale;
+    this.widgets = new HashMap<>();
 
-        this.widgets = new ArrayList<>();
+    fillUpOptions();
+  }
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+  @Inject
+  private void initialize(AppContext appContext, EventBus eventBus) {
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
+
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      updateErrorWarningsPanel();
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isDirty() {
-        for (PropertyWidget widget : widgets) {
-            String propertyName = widget.getOptionId().toString();
-            String changedValue = widget.getSelectedValue();
+  /** {@inheritDoc} */
+  @Override
+  public boolean isDirty() {
+    for (PropertyWidget widget : widgets.values()) {
+      String propertyName = widget.getOptionId().toString();
+      String changedValue = widget.getSelectedValue();
 
-            if (!changedValue.equals(preferencesManager.getValue(propertyName))) {
-                return true;
-            }
-        }
-        return false;
+      if (!changedValue.equals(preferencesManager.getValue(propertyName))) {
+        return true;
+      }
     }
+    return false;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void storeChanges() {
-        for (PropertyWidget widget : widgets) {
-            String propertyName = widget.getOptionId().toString();
-            String selectedValue = widget.getSelectedValue();
+  /** {@inheritDoc} */
+  @Override
+  public void storeChanges() {
+    widgets
+        .values()
+        .forEach(
+            widget -> {
+              String propertyName = widget.getOptionId().toString();
+              String selectedValue = widget.getSelectedValue();
 
-            if (!selectedValue.equals(preferencesManager.getValue(propertyName))) {
+              if (!selectedValue.equals(preferencesManager.getValue(propertyName))) {
                 preferencesManager.setValue(propertyName, selectedValue);
-            }
-        }
-    }
+              }
+            });
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void revertChanges() {
-        for (PropertyWidget widget : widgets) {
-            String propertyId = widget.getOptionId().toString();
-            String previousValue = preferencesManager.getValue(propertyId);
+  /** {@inheritDoc} */
+  @Override
+  public void revertChanges() {
+    widgets
+        .values()
+        .forEach(
+            widget -> {
+              String propertyId = widget.getOptionId().toString();
+              String previousValue = preferencesManager.getValue(propertyId);
 
-            if (!widget.getSelectedValue().equals(previousValue)) {
+              if (!widget.getSelectedValue().equals(previousValue)) {
                 widget.selectPropertyValue(previousValue);
-            }
-        }
+              }
+            });
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onPropertyChanged() {
+    delegate.onDirtyChanged();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void go(AcceptsOneWidget container) {
+    container.setWidget(view);
+  }
+
+  @Override
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
+    updateErrorWarningsPanel();
+  }
+
+  private void updateErrorWarningsPanel() {
+    preferencesManager
+        .loadPreferences()
+        .then(
+            properties -> {
+              options.forEach(this::provideWidget);
+            })
+        .catchError(
+            error -> {
+              notificationManagerProvider
+                  .get()
+                  .notify(
+                      locale.unableToLoadJavaCompilerErrorsWarningsSettings(), FAIL, FLOAT_MODE);
+            });
+  }
+
+  /** Creates a new widget when widget does not exist for given option, updates widget otherwise */
+  private void provideWidget(@NotNull ErrorWarningsOptions option) {
+    String optionId = option.toString();
+    String value = preferencesManager.getValue(optionId);
+
+    if (widgets.containsKey(optionId)) {
+      PropertyWidget widget = widgets.get(optionId);
+      widget.selectPropertyValue(value);
+      return;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onPropertyChanged() {
-        delegate.onDirtyChanged();
-    }
+    PropertyWidget widget = propertyFactory.create(option);
 
-    /** {@inheritDoc} */
-    @Override
-    public void go(AcceptsOneWidget container) {
-        container.setWidget(view);
-    }
+    widget.selectPropertyValue(value);
 
-    private void addErrorWarningsPanel() {
-        preferencesManager.loadPreferences().then(new Operation<Map<String, String>>() {
-            @Override
-            public void apply(Map<String, String> properties) throws OperationException {
-                List<ErrorWarningsOptions> options =
-                        asList(COMPILER_UNUSED_LOCAL, COMPILER_UNUSED_IMPORT, DEAD_CODE, METHOD_WITH_CONSTRUCTOR_NAME,
-                               UNNECESSARY_ELSE_STATEMENT, COMPARING_IDENTICAL_VALUES, NO_EFFECT_ASSIGNMENT, MISSING_SERIAL_VERSION_UID,
-                               TYPE_PARAMETER_HIDE_ANOTHER_TYPE, FIELD_HIDES_ANOTHER_VARIABLE, MISSING_DEFAULT_CASE, UNUSED_PRIVATE_MEMBER,
-                               UNCHECKED_TYPE_OPERATION, USAGE_OF_RAW_TYPE, MISSING_OVERRIDE_ANNOTATION, NULL_POINTER_ACCESS,
-                               POTENTIAL_NULL_POINTER_ACCESS, REDUNDANT_NULL_CHECK);
-                for (ErrorWarningsOptions option : options) {
-                    createAndAddWidget(option);
-                }
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManagerProvider.get().notify(locale.unableToLoadJavaCompilerErrorsWarningsSettings(), FAIL, FLOAT_MODE);
-            }
-        });
-    }
+    widget.setDelegate(JavaCompilerPreferencePresenter.this);
 
-    private void createAndAddWidget(@NotNull ErrorWarningsOptions option) {
-        PropertyWidget widget = propertyFactory.create(option);
+    widgets.put(optionId, widget);
 
-        String value = preferencesManager.getValue(option.toString());
-        widget.selectPropertyValue(value);
+    view.addProperty(widget);
+  }
 
-        widget.setDelegate(JavaCompilerPreferencePresenter.this);
-
-        widgets.add(widget);
-
-        view.addProperty(widget);
-    }
-
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        addErrorWarningsPanel();
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
-        //do nothing
-    }
+  private void fillUpOptions() {
+    options =
+        asList(
+            COMPILER_UNUSED_LOCAL,
+            COMPILER_UNUSED_IMPORT,
+            DEAD_CODE,
+            METHOD_WITH_CONSTRUCTOR_NAME,
+            UNNECESSARY_ELSE_STATEMENT,
+            COMPARING_IDENTICAL_VALUES,
+            NO_EFFECT_ASSIGNMENT,
+            MISSING_SERIAL_VERSION_UID,
+            TYPE_PARAMETER_HIDE_ANOTHER_TYPE,
+            FIELD_HIDES_ANOTHER_VARIABLE,
+            MISSING_DEFAULT_CASE,
+            UNUSED_PRIVATE_MEMBER,
+            UNCHECKED_TYPE_OPERATION,
+            USAGE_OF_RAW_TYPE,
+            MISSING_OVERRIDE_ANNOTATION,
+            NULL_POINTER_ACCESS,
+            POTENTIAL_NULL_POINTER_ACCESS,
+            REDUNDANT_NULL_CHECK);
+  }
 }
-

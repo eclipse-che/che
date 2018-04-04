@@ -14,16 +14,16 @@
 package org.eclipse.che.dto.shared;
 
 /**
- * Tag interface for DTOs that are serialized to compact
- * (non human readable) JSON.
- * <p/>
- * <p>Compact JSON has array as a root element. As a consequence GSON library
- * throws an exception when you try do deserialize JSON containing compact
- * object as a root. Deserialize using {@link com.google.gson.JsonElement} in
- * such cases.
- * <p/>
- * <p>Note: try to eliminate enums and boolean fields in DTO to get better
- * serialized form density.
+ * Tag interface for DTOs that are serialized to compact (non human readable) JSON.
+ *
+ * <p>
+ *
+ * <p>Compact JSON has array as a root element. As a consequence GSON library throws an exception
+ * when you try do deserialize JSON containing compact object as a root. Deserialize using {@link
+ * com.google.gson.JsonElement} in such cases.
+ *
+ * <p>
+ *
+ * <p>Note: try to eliminate enums and boolean fields in DTO to get better serialized form density.
  */
-public interface CompactJsonDto {
-}
+public interface CompactJsonDto {}

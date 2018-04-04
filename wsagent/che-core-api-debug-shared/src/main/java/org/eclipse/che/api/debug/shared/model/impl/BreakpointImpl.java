@@ -1,68 +1,92 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.debug.shared.model.impl;
 
+import com.google.common.base.Objects;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.Location;
 
-/**
- * @author Anatoliy Bazko
- */
+/** @author Anatoliy Bazko */
 public class BreakpointImpl implements Breakpoint {
-    private final Location location;
-    private final boolean  enabled;
-    private final String   condition;
+  private final Location location;
+  private boolean enabled;
+  private BreakpointConfiguration breakpointConfiguration;
 
-    public BreakpointImpl(Location location, boolean enabled, String condition) {
-        this.location = location;
-        this.enabled = enabled;
-        this.condition = condition;
-    }
+  public BreakpointImpl(
+      Location location, boolean enabled, BreakpointConfiguration breakpointConfiguration) {
+    this.location = location;
+    this.enabled = enabled;
+    this.breakpointConfiguration =
+        breakpointConfiguration == null
+            ? new BreakpointConfigurationImpl()
+            : breakpointConfiguration;
+  }
 
-    public BreakpointImpl(Location location) {
-        this(location, false, null);
-    }
+  public BreakpointImpl(Location location) {
+    this(location, true, new BreakpointConfigurationImpl());
+  }
 
-    @Override
-    public Location getLocation() {
-        return location;
-    }
+  public BreakpointImpl(Breakpoint breakpoint) {
+    this(breakpoint.getLocation(), breakpoint.isEnabled(), breakpoint.getBreakpointConfiguration());
+  }
 
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
+  @Override
+  public Location getLocation() {
+    return location;
+  }
 
-    @Override
-    public String getCondition() {
-        return condition;
-    }
+  @Override
+  public boolean isEnabled() {
+    return enabled;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BreakpointImpl)) return false;
+  @Override
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
 
-        BreakpointImpl that = (BreakpointImpl)o;
+  @Override
+  public BreakpointConfiguration getBreakpointConfiguration() {
+    return breakpointConfiguration;
+  }
 
-        if (enabled != that.enabled) return false;
-        if (location != null ? !location.equals(that.location) : that.location != null) return false;
-        return !(condition != null ? !condition.equals(that.condition) : that.condition != null);
-    }
+  public void setBreakpointConfiguration(BreakpointConfiguration breakpointConfiguration) {
+    this.breakpointConfiguration = breakpointConfiguration;
+  }
 
-    @Override
-    public int hashCode() {
-        int result = location != null ? location.hashCode() : 0;
-        result = 31 * result + (enabled ? 1 : 0);
-        result = 31 * result + (condition != null ? condition.hashCode() : 0);
-        return result;
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof BreakpointImpl)) return false;
+    BreakpointImpl that = (BreakpointImpl) o;
+    return enabled == that.enabled
+        && Objects.equal(location, that.location)
+        && Objects.equal(breakpointConfiguration, that.breakpointConfiguration);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(location, enabled, breakpointConfiguration);
+  }
+
+  @Override
+  public String toString() {
+    return "BreakpointImpl{"
+        + "location="
+        + location
+        + ", enabled="
+        + enabled
+        + ", breakpointConfiguration="
+        + breakpointConfiguration
+        + '}';
+  }
 }

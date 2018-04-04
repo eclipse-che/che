@@ -1,9 +1,8 @@
 <che-popup title="Export Workspace" on-close="exportWorkspaceDialogController.hide()">
   <div class="export-workspace-dialog">
-      <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex">
+      <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex" md-no-ink-bar>
         <md-tab>
           <md-tab-label>
-            <md-icon md-font-icon="fa fa-download" class="che-tab-label-icon"></md-icon>
             <span class="che-tab-label-title">As a File</span>
           </md-tab-label>
           <md-tab-body>
@@ -26,7 +25,6 @@
         </md-tab>
         <md-tab>
           <md-tab-label>
-            <md-icon md-font-icon="fa fa-cloud-upload" class="che-tab-label-icon"></md-icon>
             <span class="che-tab-label-title">To Private Cloud</span>
           </md-tab-label>
           <md-tab-body>

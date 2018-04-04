@@ -28,16 +28,12 @@
                 "version": "8.0.24"
             }
         ],
-        "source": {
-            "type": "image",
-            "origin": "codenvy/ubuntu_jdk8"
-        },
         "workspaceConfig": {
             "environments": {
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -111,16 +107,12 @@
                 "version": "---"
             }
         ],
-        "source": {
-            "type": "image",
-            "origin": "codenvy/node"
-        },
         "workspaceConfig": {
             "environments": {
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -191,16 +183,12 @@
                 "version": "---"
             }
         ],
-        "source": {
-            "type": "image",
-            "origin": "codenvy/node"
-        },
         "workspaceConfig": {
             "environments": {
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -271,16 +259,12 @@
                 "version": "---"
             }
         ],
-        "source": {
-            "type": "image",
-            "origin": "codenvy/node"
-        },
         "workspaceConfig": {
             "environments": {
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
@@ -351,16 +335,12 @@
                 "version": "---"
             }
         ],
-        "source": {
-            "type": "image",
-            "origin": "codenvy/node"
-        },
         "workspaceConfig": {
             "environments": {
                 "default" : {
                     "machines": {
                         "devmachine": {
-                            "agents": [
+                            "installers": [
                                 "org.eclipse.che.ws-agent"
                             ]
                         }

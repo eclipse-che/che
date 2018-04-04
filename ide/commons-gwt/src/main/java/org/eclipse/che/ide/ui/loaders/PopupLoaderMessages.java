@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ui.loaders;
 
 import com.google.gwt.i18n.client.Messages;
@@ -19,43 +19,42 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface PopupLoaderMessages extends Messages {
 
-    @Key("startingWorkspaceRuntime.title")
-    String startingWorkspaceRuntime();
+  @Key("startingWorkspaceRuntime.title")
+  String startingWorkspaceRuntime();
 
-    @Key("startingWorkspaceRuntime.description")
-    String startingWorkspaceRuntimeDescription();
+  @Key("startingWorkspaceRuntime.description")
+  String startingWorkspaceRuntimeDescription();
 
-    @Key("startingWorkspaceAgent.title")
-    String startingWorkspaceAgent();
+  @Key("startingWorkspaceAgent.title")
+  String startingWorkspaceAgent();
 
-    @Key("startingWorkspaceAgent.description")
-    String startingWorkspaceAgentDescription();
+  @Key("startingWorkspaceAgent.description")
+  String startingWorkspaceAgentDescription();
 
-    @Key("stoppingWorkspace.title")
-    String stoppingWorkspace();
+  @Key("stoppingWorkspace.title")
+  String stoppingWorkspace();
 
-    @Key("stoppingWorkspace.description")
-    String stoppingWorkspaceDescription();
+  @Key("stoppingWorkspace.description")
+  String stoppingWorkspaceDescription();
 
-    @Key("creatingProject.title")
-    String creatingProject();
+  @Key("creatingProject.title")
+  String creatingProject();
 
-    @Key("creatingProject.description")
-    String creatingProjectDescription();
+  @Key("creatingProject.description")
+  String creatingProjectDescription();
 
-    @Key("snapshottingWorkspace.title")
-    String snapshottingWorkspace();
+  @Key("workspaceStopped.title")
+  String workspaceStopped();
 
-    @Key("snapshottingWorkspace.description")
-    String snapshottingWorkspaceDescription();
+  @Key("wsAgentStopped.title")
+  String wsAgentStopped();
 
-    @Key("workspaceStopped.title")
-    String workspaceStopped();
+  @Key("workspaceStopped.description")
+  String workspaceStoppedDescription();
 
-    @Key("workspaceStopped.description")
-    String workspaceStoppedDescription();
+  @Key("wsAgentStopped.description")
+  String wsAgentStoppedDescription();
 
-    @Key("downloadOutputs")
-    String downloadOutputs();
-
+  @Key("downloadOutputs")
+  String downloadOutputs();
 }

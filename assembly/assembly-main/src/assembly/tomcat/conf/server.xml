@@ -46,14 +46,6 @@
               description="User database that can be updated and saved"
               factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
               pathname="conf/tomcat-users.xml" /-->
-
-      <Resource name="che" auth="Container"
-                type="javax.sql.DataSource"
-                driverClassName="org.h2.Driver"
-                url="jdbc:h2:che"
-                username="" password=""
-                maxTotal="8"
-                maxIdle="4"/>
   </GlobalNamingResources>
 
   <!-- A "Service" is a collection of one or more "Connectors" that share
@@ -151,11 +143,7 @@
          <Valve className="org.apache.catalina.valves.RemoteIpValve" protocolHeader="X-Forwarded-Proto"
                  internalProxies="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"/>
 
-          <!-- Access log processes all example.
-               Documentation at: /docs/config/valve.html
-               Note: The pattern used is equivalent to using pattern="common" -->
-        <Valve className="ch.qos.logback.access.tomcat.LogbackValve" quiet="true"
-               filename="${catalina.home}/conf/logback-access-localhost.xml" />
+        <Valve className="ch.qos.logback.access.tomcat.LogbackValve" quiet="true" />
 
       </Host>
     </Engine>

@@ -1,0 +1,74 @@
+.workspace-overview-tab-content
+  margin-top 30px
+  .che-label-container:not(:first-child)
+    padding 10px 0
+  .che-label-container:first-child
+    height 55px
+    padding 0
+  div.che-label-container
+    border-bottom none
+
+  .che-input-box .che-input-area
+    max-width 450px
+
+  .che-label-container .che-label-container-label-name
+    color $label-secondary-color
+    font-weight 700 !important
+
+  .timeout-info-value
+    line-height 36px
+    margin-right 15px
+
+  .workspace-overview-description
+    color $disabled-color
+
+  che-button-primary-flat
+    button
+      background-color $che-button-gray-color !important
+      border-color $che-button-gray-color
+      box-shadow none !important
+      span
+        color $white-color
+      &:hover
+        background-color $che-button-gray-color !important
+        che-brightness(80%)
+
+  button
+    padding-left 15px
+    padding-right 15px
+    min-width inherit
+    margin 0 30px 0 0
+
+  .workspace-status-indicator .fa-circle
+    font-size 19px
+
+  che-filter-selector
+    line-height 33px
+
+  .namespace-link
+    line-height 30px
+    span
+      float left
+      line-height inherit
+    div
+      cursor pointer
+      font-size 22px
+      margin-left 10px
+      line-height inherit
+      outline none !important
+      color $che-button-gray-color
+
+  span.workspace-status-text
+    color lighten($che-ide-background-color, 40%) !important
+    margin-bottom 4px
+    margin-left 10px
+
+  .workspace-restart-message
+    color $disabled-color
+    margin-top 15px
+
+  .workspace-overview-delete-label label
+    color $che-delete-label-color
+
+  .che-label-container-content .workspace-overview-action-buttons
+    margin-top 20px

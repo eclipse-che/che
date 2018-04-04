@@ -1,52 +1,62 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from '../api/che-api.factory';
+
+interface IUniqueProjectNameValidatorAttributes extends ng.IAttributes {
+  uniqueProjectName: Array<che.IProject>;
+}
 
 /**
  * Defines a directive for checking if the project name is not already taken
  * @author Florent Benoit
  */
-export class UniqueProjectNameValidator {
+export class UniqueProjectNameValidator implements ng.IDirective {
+
+  static $inject = ['cheAPI', '$q'];
+
+  restrict = 'A';
+  require = 'ngModel';
+
+  cheAPI: CheAPI;
+  $q: ng.IQService;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor (cheAPI, $q) {
+  constructor (cheAPI: CheAPI, $q: ng.IQService) {
     this.cheAPI = cheAPI;
     this.$q = $q;
-    this.restrict='A';
-    this.require = 'ngModel';
   }
 
   /**
    * Check that the GIT URL is compliant
    */
-  link($scope, element, attributes, ngModel) {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attributes: ng.IAttributes, $ngModelCtrl: ng.INgModelController) {
 
     // validate only input element
-    if ('input' === element[0].localName) {
+    if ('input' === $element[0].localName) {
 
-      ngModel.$asyncValidators.uniqueProjectName = (modelValue) => {
+      ($ngModelCtrl.$asyncValidators as any).uniqueProjectName = (modelValue: string) => {
 
         // create promise
-        var deferred = this.$q.defer();
+        const deferred = this.$q.defer();
 
         // parent scope ?
-        var scopingTest = $scope.$parent;
+        let scopingTest = $scope.$parent;
         if (!scopingTest) {
           scopingTest = $scope;
         }
 
-        var workspaceProjects = scopingTest.$eval(attributes.uniqueProjectName);
+        const workspaceProjects = scopingTest.$eval(($attributes as any).uniqueProjectName);
 
         // found a selected workspace ?
         if (workspaceProjects) {

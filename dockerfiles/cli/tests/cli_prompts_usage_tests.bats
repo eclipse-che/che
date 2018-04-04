@@ -17,12 +17,11 @@ source /dockerfiles/cli/tests/test_base.sh
   prompt_substring="-v /var/run/docker.sock:/var/run/docker.sock"
 
   #WHEN
-  run docker run --rm $CLI_IMAGE start
+  run execute_cli_command --che-cli-mount-scripts=false --che-cli-use-docker-sock=false --che-cli-command=start
 
   #THEN
   assert_failure
   assert_output --partial ${prompt_substring}
-
 }
 
 @test "test CLI prompt to provide directory for user data" {
@@ -30,7 +29,7 @@ source /dockerfiles/cli/tests/test_base.sh
   prompt_substring="-v <YOUR_LOCAL_PATH>:/data"
 
   #WHEN
-  run docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE start
+  run execute_cli_command --che-cli-command=start
 
   #THEN
   assert_failure
@@ -42,10 +41,8 @@ source /dockerfiles/cli/tests/test_base.sh
   expected_output="USAGE:"
 
   #WHEN
-  result=$(docker run --rm -v "${SCRIPTS_DIR}":/scripts/base -v /var/run/docker.sock:/var/run/docker.sock $CLI_IMAGE || true)
+  result=$(execute_cli_command || true)
 
   #THEN
   [[ $result == *${expected_output}* ]]
 }
-
-

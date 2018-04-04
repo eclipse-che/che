@@ -1,58 +1,72 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
+import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
+
+interface IRemoteWorkspaceResource<T> extends ng.resource.IResourceClass<T> {
+  create: any;
+  startWorkspace: any;
+  getMachineToken: any;
+  getDetails: any;
+}
 
 /**
  * This class is handling the call to remote API
  * @author Florent Benoit
  */
 export class CheRemoteWorkspace {
+  private $resource: ng.resource.IResourceService;
+  private $q: ng.IQService;
+  private remoteWorkspaceAPI: IRemoteWorkspaceResource<any>;
+  private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
+  private authData: any;
+  private cheJsonRpcApi: CheJsonRpcApi;
 
   /**
    * Default constructor that is using resource
    */
-  constructor($resource, $q, cheWebsocket, authData) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi, authData: any) {
     this.$resource = $resource;
     this.$q = $q;
-    this.cheWebsocket = cheWebsocket;
+    this.cheJsonRpcApi = cheJsonRpcApi;
     this.authData = authData;
 
     // remote call
-    this.remoteWorkspaceAPI = this.$resource('', {}, {
+    this.remoteWorkspaceAPI = <IRemoteWorkspaceResource<any>>this.$resource('', {}, {
         getDetails: {method: 'GET', url: authData.url + '/api/workspace/:workspaceId?token=' + authData.token},
         getMachineToken: {method: 'GET', url: authData.url + '/api/machine/token/:workspaceId?token=' + authData.token},
-        create: {method: 'POST', url: authData.url + '/api/workspace?account=:accountId&token=' + authData.token},
+        create: {method: 'POST', url: authData.url + '/api/workspace?token=' + authData.token},
         startWorkspace: {method: 'POST', url : authData.url + '/api/workspace/:workspaceId/runtime?environment=:envName&token=' + authData.token}
       }
     );
   }
 
-  createWorkspaceFromConfig(accountId, workspaceConfig) {
-    return this.remoteWorkspaceAPI.create({accountId : accountId}, workspaceConfig).$promise;
+  createWorkspaceFromConfig(workspaceConfig: any): ng.IPromise<any> {
+    return this.remoteWorkspaceAPI.create(workspaceConfig).$promise;
   }
-
 
   /**
    * Provides machine token for given workspace
    * @param workspaceId the ID of the workspace
    * @returns {*}
-     */
-  getMachineToken(workspaceId) {
+   */
+  getMachineToken(workspaceId: string): ng.IPromise<any> {
     let deferred = this.$q.defer();
     let deferredPromise = deferred.promise;
 
     let promise = this.remoteWorkspaceAPI.getMachineToken({workspaceId: workspaceId}, {}).$promise;
-    promise.then((workspace) => {
+    promise.then((workspace: any) => {
       deferred.resolve(workspace);
-    }, (error) => {
+    }, (error: any) => {
       deferred.reject(error);
     });
 
@@ -65,29 +79,23 @@ export class CheRemoteWorkspace {
    * @param envName the name of the environment
    * @returns {*} promise
    */
-  startWorkspace(remoteWsURL, workspaceId, envName) {
-
+  startWorkspace(remoteWsURL: string, workspaceId: string, envName: string): ng.IPromise<any> {
     let deferred = this.$q.defer();
     let deferredPromise = deferred.promise;
-
-    let bus = this.cheWebsocket.getRemoteBus(remoteWsURL);
-    // subscribe to workspace events
-    bus.subscribe('workspace:' + workspaceId, (message) => {
-      if (message.eventType === 'RUNNING' && message.workspaceId === workspaceId) {
+    this.cheJsonRpcMasterApi = this.cheJsonRpcApi.getJsonRpcMasterApi(remoteWsURL);
+    this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
+      if (message.status === 'RUNNING' && message.workspaceId === workspaceId) {
         let promise = this.remoteWorkspaceAPI.getDetails({workspaceId: workspaceId}, {}).$promise;
-        promise.then((workspace) => {
+        promise.then((workspace: any) => {
           deferred.resolve(workspace);
-        }, (error) => {
+        }, (error: any) => {
           deferred.reject(error);
         });
       }
     });
 
-    let promise = this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName : envName}, {}).$promise;
+    this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName : envName}, {}).$promise;
 
     return deferredPromise;
   }
-
-
-
 }

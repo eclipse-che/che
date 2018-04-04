@@ -1,13 +1,13 @@
 <!--
 
-    Copyright (c) 2015 Codenvy, S.A.
+    Copyright (c) 2015-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <ng-form flex layout="column" name="stackForm">
@@ -34,16 +34,32 @@
                    che-place-holder="Name of the stack"
                    ng-model="stackController.stackName"
                    custom-validator="stackController.isUniqueName($value)"
-                   ng-change="stackController.updateStackName(stackForm.$valid)"
+                   ng-change="stackController.updateStackName($value)"
                    required
                    ng-maxlength="128"
                    ng-pattern="/^[A-Za-z0-9_\s\-\.\+]+$/">
           <div ng-message="required">A name is required.</div>
-          <div ng-message="pattern">The name should not contain special characters like dollar, etc.
-          </div>
+          <div ng-message="pattern">The name should not contain special characters like dollar, etc.</div>
           <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="customValidator">This stack name is already used.</div>
+        </che-input>
+      </div>
+    </che-label-container>
+    <!-- Description -->
+    <che-label-container che-label-name="Description">
+      <div layout="column" class="stack-details-input">
+        <che-input che-form="stackForm"
+                   che-name="description"
+                   aria-label="Description of the stack"
+                   che-place-holder="Description of the stack"
+                   ng-change="stackController.updateStackDescription()"
+                   ng-model="stackController.stackDescription"
+                   ng-maxlength="128"
+                   ng-pattern="/^[A-Za-z0-9_\s\-\.\,\(\)\+]+$/">
+          <div ng-message="pattern">The description should not contain special characters like dollar, etc.</div>
+          <div ng-message="maxlength">The description has to be less than 128 characters long.</div>
+          <div ng-message="md-maxlength">The description has to be less than 128 characters long.</div>
         </che-input>
       </div>
     </che-label-container>
@@ -69,14 +85,14 @@
       <div layout="column">
         <che-toggle ng-model="stackController.stack.scope" ng-change="stackController.updateJsonFromStack()"
                     md-theme="default">
-          <che-toggle-button che-title="Ready-to-go" che-value="{{stackController.GENERAL_SCOPE}}"></che-toggle-button>
-          <che-toggle-button che-title="Advanced" che-value="{{stackController.ADVANCED_SCOPE}}"></che-toggle-button>
+          <che-toggle-button che-title="Ready-to-go" che-value="stackController.GENERAL_SCOPE"></che-toggle-button>
+          <che-toggle-button che-title="Advanced" che-value="stackController.ADVANCED_SCOPE"></che-toggle-button>
         </che-toggle>
       </div>
     </che-label-container>
     <!-- Components -->
     <che-label-container che-label-name="Components"
-                         che-label-description="Components are listed in the stack's description for users.">
+                         che-label-description="Components are listed in the stack\'s description for users.">
       <list-components components-on-change="stackController.updateJsonFromStack()"
                        components="stackController.stack.components"></list-components>
     </che-label-container>
@@ -114,7 +130,7 @@
                         ng-change="stackController.updateStackFromJson()"
                         aria-label="Stack configuration editor">
       </textarea>
-          <a target="_blank" ng-href="https://www.eclipse.org/che/docs/workspace/stacks/index.html">Docs: Stack Structure</a>
+          <a target="_blank" ng-href="{{branding.docs.stack}}">Docs: Stack Structure</a>
         </div>
       </che-show-area>
     </che-label-container>

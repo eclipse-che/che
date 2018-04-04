@@ -1,20 +1,20 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 @external .gwt-SplitLayoutPanel-HDragger, .gwt-SplitLayoutPanel-VDragger, .hsplitter, .hsplitter, .gwt-DialogBox, .gwt-Button, .gwt-PushButton, gwt-PushButton-up, gwt-PushButton-up-hovering, gwt-PushButton-up-disabled, gwt-PushButton-down,.gwt-PushButton-down-hovering,.gwt-PushButton-down-disabled, gwt-ToggleButton, gwt-ToggleButton-up, gwt-ToggleButton-up-hovering, gwt-ToggleButton-up-disabled, gwt-ToggleButton-down, .gwt-ToggleButton-down-hovering, .gwt-ToggleButton-down-disabled, .gwt-TextBox, .inputError, .gwt-TextArea, .gwt-ListBox, .gwt-PopupPanel, .gwt-Label;
 
 @eval inputSelectionBackground org.eclipse.che.ide.api.theme.Style.theme.inputSelectionBackground();
 
 /* Global styles and external GWT styles. */
 
-body, td {
+body, td, th {
     font-size: 13px;
     font-family: mainFontFamily;
     color: mainFontColor;
@@ -99,6 +99,13 @@ input::selection {
     font-size: 14px;
     font-weight: normal;
     color: checkBoxIconColor;
+}
+
+.gwt-CheckBox input:indeterminate + label::before {
+    content: "\2714";
+    font-size: 14px;
+    font-weight: normal;
+    color: checkBoxIndeterminateIconColor;
 }
 
 .gwt-CheckBox input[disabled] + label {
@@ -252,6 +259,7 @@ input::selection {
     background: buttonBackground;
     border: 1px solid buttonBorderColor;
     color: buttonFontColor;
+    border-radius: 0px;
 }
 
 .gwt-Button:hover, button:hover {
@@ -441,6 +449,10 @@ a {
 
 }
 
+div[name="linkWithEditor"][activated="true"]  i {
+    color: blueIconColor;
+}
+
 .gwt-PopupPanel {
     color: mainFontColor;
     border: 1px solid tabBorderColor;
@@ -516,6 +528,24 @@ a {
 
 .gwt-SuggestBoxPopup .item-selected {
     background-color: keyboardSelectionBackgroundColor;
+}
+
+.gwt-DisclosurePanel .header td {
+    color: mainFontColor;
+    font-size: 11px;
+    font-weight: bold;
+    font-family: textFieldFontFamily;
+}
+
+.gwt-DisclosurePanel .header td img {
+    width: 12px;
+    height: 12px;
+    margin-top: 5px;
+}
+
+.gwt-DisclosurePanel .content {
+    margin-left: 24px;
+    border: none;
 }
 
 .editorFullScreen {
@@ -728,10 +758,6 @@ a {
     border-radius: 3px;
 }
 
-.tagsPanel {
-    width: 393px;
-}
-
 /********************************************************************************************
  *
  * Styled scroll bars
@@ -778,4 +804,27 @@ a {
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: scrollbarHoverBackgroundColor;
+}
+
+.found-highlight {
+    color: completionPopupItemHighlightTextColor;
+}
+
+.found-item {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -10px;
+    font-size: 1em;
+    padding-left: 2px;
+    padding-left: 4px;
+}
+
+.search-match {
+    background: findResultsBackground;
+    border-radius: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
+    color: findResultsTextColor;
+    text-shadow: none;
 }

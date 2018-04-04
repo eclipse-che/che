@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -31,18 +31,28 @@ cli_init() {
     return 2;
   fi
 
-  CLI_ENV=$(docker inspect --format='{{.Config.Env}}' $(get_this_container_id))
-  CLI_ENV=${CLI_ENV#*[}
-  CLI_ENV=${CLI_ENV%*]}
-  IFS=' ' read -r -a CLI_ENV_ARRAY <<< "$CLI_ENV"
+  CLI_ENV_ARRAY_LENGTH=$(docker inspect --format='{{json .Config.Env}}' $(get_this_container_id) | jq '. | length')
+  CLI_ENV_ARRAY=()
+  # fill an array
+  che_cli_env_arr_index="0"
+  while [ $che_cli_env_arr_index -lt $CLI_ENV_ARRAY_LENGTH ]; do
+      CLI_ENV_ARRAY[$che_cli_env_arr_index]=$(docker inspect --format='{{json .Config.Env}}' $(get_this_container_id) | jq -r .[$che_cli_env_arr_index])
+      che_cli_env_arr_index=$[$che_cli_env_arr_index+1]
+  done
 
-  if is_initialized; then 
+  CHE_HOST_PROTOCOL="http"
+  if is_initialized; then
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
     CHE_HOST_ENV=$(get_value_of_var_from_env ${CHE_PRODUCT_NAME}_HOST)
     if [[ "${CHE_HOST_ENV}" != "" ]] && 
        [[ "${CHE_HOST_ENV}" != "${CHE_HOST_LOCAL}" ]]; then
       warning "cli" "'${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_ENV}' from command line overriding '${CHE_PRODUCT_NAME}_HOST=${CHE_HOST_LOCAL}' from ${CHE_ENVIRONMENT_FILE}"
       CHE_HOST=$CHE_HOST_ENV
+    fi
+
+    CHE_HOST_PROTOCOL_ENV=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST_PROTOCOL)
+    if [[ "${CHE_HOST_PROTOCOL_ENV}" != "" ]]; then
+      CHE_HOST_PROTOCOL=${CHE_HOST_PROTOCOL_ENV}
     fi
 
     if [[ "${CHE_HOST_ENV}" = "" ]] && 
@@ -86,9 +96,10 @@ cli_verify_nightly() {
       update_image $CHE_IMAGE_FULLNAME
 
       local NEW_DIGEST=$(docker images -q --no-trunc --digests ${CHE_IMAGE_FULLNAME})
-
       if [[ "${CURRENT_DIGEST}" != "${NEW_DIGEST}" ]]; then
+        # Per CODENVY-1773 - removes orphaned nightly image
         warning "Pulled new 'nightly' image - please rerun CLI"
+        docker rmi -f $(docker images --filter "dangling=true" -q $CHE_IMAGE_NAME) 2>/dev/null
         return 2;
       fi
     fi 
@@ -280,8 +291,8 @@ compare_versions() {
     TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
     TAG=${TAG//\"}
 
-    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ]; then
-      if less_than $BASE_VERSION $TAG; then
+    if [ "$TAG" != "nightly" ] && [ "$TAG" != "latest" ] && [ "$TAG" != "${BASE_VERSION}" ]; then
+      if version_lt $BASE_VERSION $TAG; then
         RETURN_VERSION=$TAG
         break;
       fi
@@ -372,7 +383,7 @@ get_value_of_var_from_env_file() {
 
 # Returns the value of variable from environment array.
 get_value_of_var_from_env() {
-  for element in "${CLI_ENV_ARRAY[@]}" 
+  for element in "${CLI_ENV_ARRAY[@]}"
   do
     var1=$(echo $element | cut -f1 -d=)
     var2=$(echo $element | cut -f2 -d=)

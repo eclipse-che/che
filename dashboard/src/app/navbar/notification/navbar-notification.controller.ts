@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {ApplicationNotifications} from '../../../components/notification/application-notifications.factory';
@@ -18,15 +18,16 @@ import {ApplicationNotifications} from '../../../components/notification/applica
  */
 export class NavbarNotificationController {
 
+  static $inject = ['applicationNotifications', '$scope'];
+
   private applicationNotifications: ApplicationNotifications;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(applicationNotifications: ApplicationNotifications, $scope: ng.IScope) {
     this.applicationNotifications = applicationNotifications;
-    $scope.$on("$mdMenuClose", () => {
+    $scope.$on('$mdMenuClose', () => {
       this.removeReadNotifications();
     });
   }
@@ -53,7 +54,7 @@ export class NavbarNotificationController {
    */
   removeReadNotifications(): void {
     let notificationsToRemove = [];
-    let notifications = this.applicationNotifications.getNotifications()
+    let notifications = this.applicationNotifications.getNotifications();
     notifications.forEach((notification: any) => {
       if (notification.removeOnRead) {
         notificationsToRemove.push(notification);

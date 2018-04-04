@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018-2018 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-assembly-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
+        <version>6.4.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>assembly-workspace-loader-war</artifactId>
+    <packaging>war</packaging>
+    <name>Che Workspace Loader :: War Packaging</name>
+    <description>Packages Che Workspace Loader application as a Java web app</description>
+    <inceptionYear>2018</inceptionYear>
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.workspace.loader</groupId>
+            <artifactId>che-workspace-loader</artifactId>
+            <type>zip</type>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <overlays>
+                        <overlay>
+                            <groupId>org.eclipse.che.workspace.loader</groupId>
+                            <artifactId>che-workspace-loader</artifactId>
+                            <type>zip</type>
+                        </overlay>
+                    </overlays>
+                    <packagingExcludes>/webapp/</packagingExcludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredUnusedDeclaredDependencies>
+                                <!-- dependency is required just to overlay it's content -->
+                                <dep>org.eclipse.che.workspace.loader:che-workspace-loader</dep>
+                            </ignoredUnusedDeclaredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

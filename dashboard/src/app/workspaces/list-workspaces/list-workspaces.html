@@ -1,32 +1,33 @@
 <!--
 
-    Copyright (c) 2015 Codenvy, S.A.
+    Copyright (c) 2015-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <che-toolbar che-title="Workspaces" border-none></che-toolbar>
-<che-description che-link-title="Learn more." che-link="/docs/workspace/admin-intro/index.html">A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.</che-description>
+<che-description che-link-title="Learn more." che-link="{{branding.docs.workspace}}">A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.</che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme">
-  <md-progress-linear md-mode="indeterminate" class="workspaces-list-progress"
-                      ng-show="listWorkspacesCtrl.isInfoLoading"></md-progress-linear>
+  <md-progress-linear md-mode="indeterminate" class="progress-line"
+                      ng-show="listWorkspacesCtrl.isInfoLoading || listWorkspacesCtrl.isRequestPending"></md-progress-linear>
   <md-content flex class="workspace-list-content" ng-hide="listWorkspacesCtrl.isInfoLoading">
     <che-list-header che-input-placeholder="Search"
                      che-search-model="listWorkspacesCtrl.workspaceFilter.config.name"
+                     che-on-search-change="listWorkspacesCtrl.onSearchChanged(str)"
                      che-hide-search="listWorkspacesCtrl.userWorkspaces.length === 0"
                      che-add-button-title="Add Workspace"
-                     che-add-button-href="#/create-workspace"
+                     che-add-button-href="{{listWorkspacesCtrl.workspaceCreationLink}}"
                      che-delete-button-title="Delete"
                      che-on-delete="listWorkspacesCtrl.deleteSelectedWorkspaces()"
                      che-filter-values="listWorkspacesCtrl.namespaceLabels"
                      che-on-filter-changed="listWorkspacesCtrl.onFilterChanged"
-                     che-hide-delete="listWorkspacesCtrl.isNoSelected"
-                     che-hide-header="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch).length === 0">
+                     che-hide-delete="listWorkspacesCtrl.cheListHelper.isNoItemSelected"
+                     che-hide-header="listWorkspacesCtrl.cheListHelper.visibleItemsNumber === 0">
       <div flex="100"
            layout="row"
            layout-align="start stretch"
@@ -37,8 +38,8 @@
           <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox"
                          aria-label="Workspace list"
-                         ng-checked="listWorkspacesCtrl.isBulkChecked"
-                         ng-click="listWorkspacesCtrl.changeBulkSelection()"></md-checkbox>
+                         ng-checked="listWorkspacesCtrl.cheListHelper.areAllItemsSelected === true"
+                         ng-click="listWorkspacesCtrl.cheListHelper.changeBulkSelection()"></md-checkbox>
           </div>
         </div>
         <div flex hide-xs layout-gt-xs="row"
@@ -65,17 +66,18 @@
         </div>
       </div>
     </che-list-header>
-    <che-list ng-show="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch).length > 0">
+    <che-list ng-show="listWorkspacesCtrl.cheListHelper.visibleItemsNumber > 0">
       <che-workspace-item
-              ng-repeat="workspace in listWorkspacesCtrl.userWorkspaces | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'config.name'] | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch"
-              ng-model="listWorkspacesCtrl.workspacesSelectedStatus[workspace.id]"
+              ng-repeat="workspace in listWorkspacesCtrl.cheListHelper.getVisibleItems() | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'config.name']"
+              ng-model="listWorkspacesCtrl.cheListHelper.itemsSelectionStatus[workspace.id]"
+              is-request-pending="listWorkspacesCtrl.isRequestPending"
               che-selectable="true"
               che-display-labels="false"
-              che-on-checkbox-click="listWorkspacesCtrl.updateSelectedStatus()"
+              che-on-checkbox-click="listWorkspacesCtrl.cheListHelper.updateBulkSelectionStatus()"
               che-workspace-item="workspace"></che-workspace-item>
     </che-list>
     <div class="che-list-empty">
-        <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && (listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter | filter:listWorkspacesCtrl.namespaceFilter:listWorkspacesCtrl.isExactMatch).length === 0">
+        <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && listWorkspacesCtrl.cheListHelper.visibleItemsNumber === 0">
           No workspaces found.
         </span>
       <span ng-show="listWorkspacesCtrl.userWorkspaces.length === 0">There are no workspaces.</span>

@@ -1,18 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.java.client.command;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.LinkedList;
+import java.util.List;
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.icon.Icon;
@@ -22,10 +23,7 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.ClasspathMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.OutputDirMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.SourcepathMacro;
-import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
-
-import java.util.LinkedList;
-import java.util.List;
+import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 /**
  * Java command type.
@@ -35,68 +33,76 @@ import java.util.List;
 @Singleton
 public class JavaCommandType implements CommandType {
 
-    private static final String ID = "java";
+  private static final String ID = "java";
 
-    private final CurrentProjectPathMacro  currentProjectPathMacro;
-    private final SourcepathMacro          sourcepathMacro;
-    private final OutputDirMacro           outputDirMacro;
-    private final ClasspathMacro           classpathMacro;
-    private final JavaLocalizationConstant localizationConstants;
-    private final List<CommandPage>        pages;
+  private final CurrentProjectPathMacro currentProjectPathMacro;
+  private final SourcepathMacro sourcepathMacro;
+  private final OutputDirMacro outputDirMacro;
+  private final ClasspathMacro classpathMacro;
+  private final JavaLocalizationConstant localizationConstants;
+  private final List<CommandPage> pages;
 
-    @Inject
-    public JavaCommandType(JavaResources resources,
-                           JavaCommandPagePresenter page,
-                           CurrentProjectPathMacro currentProjectPathMacro,
-                           SourcepathMacro sourcepathMacro,
-                           OutputDirMacro outputDirMacro,
-                           ClasspathMacro classpathMacro,
-                           IconRegistry iconRegistry,
-                           JavaLocalizationConstant localizationConstants) {
-        this.currentProjectPathMacro = currentProjectPathMacro;
-        this.sourcepathMacro = sourcepathMacro;
-        this.outputDirMacro = outputDirMacro;
-        this.classpathMacro = classpathMacro;
-        this.localizationConstants = localizationConstants;
-        pages = new LinkedList<>();
-        pages.add(page);
+  @Inject
+  public JavaCommandType(
+      JavaResources resources,
+      JavaCommandPagePresenter page,
+      CurrentProjectPathMacro currentProjectPathMacro,
+      SourcepathMacro sourcepathMacro,
+      OutputDirMacro outputDirMacro,
+      ClasspathMacro classpathMacro,
+      IconRegistry iconRegistry,
+      JavaLocalizationConstant localizationConstants) {
+    this.currentProjectPathMacro = currentProjectPathMacro;
+    this.sourcepathMacro = sourcepathMacro;
+    this.outputDirMacro = outputDirMacro;
+    this.classpathMacro = classpathMacro;
+    this.localizationConstants = localizationConstants;
+    pages = new LinkedList<>();
+    pages.add(page);
 
-        iconRegistry.registerIcon(new Icon(ID + ".commands.category.icon", resources.javaCategoryIcon()));
-    }
+    iconRegistry.registerIcon(new Icon("command.type." + ID, resources.javaCategoryIcon()));
+  }
 
-    @Override
-    public String getId() {
-        return ID;
-    }
+  @Override
+  public String getId() {
+    return ID;
+  }
 
-    @Override
-    public String getDisplayName() {
-        return "Java";
-    }
+  @Override
+  public String getDisplayName() {
+    return "Java";
+  }
 
-    @Override
-    public String getDescription() {
-        return localizationConstants.commandLineDescription();
-    }
+  @Override
+  public String getDescription() {
+    return localizationConstants.commandLineDescription();
+  }
 
-    @Override
-    public List<CommandPage> getPages() {
-        return pages;
-    }
+  @Override
+  public List<CommandPage> getPages() {
+    return pages;
+  }
 
-    @Override
-    public String getCommandLineTemplate() {
-        return "cd " + currentProjectPathMacro.getName() +
-               " && javac -classpath " + classpathMacro.getName() +
-               " -sourcepath " + sourcepathMacro.getName() +
-               " -d " + outputDirMacro.getName() +
-               " src/Main.java" +
-               " && java -classpath " + classpathMacro.getName() + outputDirMacro.getName() +
-               " Main";
-    }
+  @Override
+  public String getCommandLineTemplate() {
 
-    @Override
-    public String getPreviewUrlTemplate() {
-        return "";
-    }
+    return "cd "
+        + currentProjectPathMacro.getName()
+        + "\njavac -classpath "
+        + classpathMacro.getName()
+        + " -sourcepath "
+        + sourcepathMacro.getName()
+        + " -d "
+        + outputDirMacro.getName()
+        + " src/Main.java"
+        + "\njava -classpath "
+        + classpathMacro.getName()
+        + outputDirMacro.getName()
+        + " Main";
+  }
+
+  @Override
+  public String getPreviewUrlTemplate() {
+    return "";
+  }
 }

@@ -1,18 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ui.smartTree;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -21,42 +20,48 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Vlad Zhukovskiy
  */
 public interface TreeStyles extends ClientBundle {
-    interface CSS extends CssResource {
-        String noFocusOutline();
+  interface TreeStylesCSS extends CssResource {
+    String noFocusOutline();
 
-        String rootContainer();
+    String rootContainer();
 
-        String nodeContainer();
+    String nodeContainer();
 
-        String jointContainer();
+    String jointContainer();
 
-        String iconContainer();
+    String iconContainer();
 
-        String presentableTextContainer();
+    String presentableTextContainer();
 
-        String infoTextContainer();
+    String infoTextContainer();
 
-        String descendantsContainer();
+    String vcsHeadContainer();
 
-        String selected();
+    String descendantsContainer();
 
-        String hover();
+    String selected();
 
-        String joint();
+    String hover();
 
-        String dragOver();
+    String joint();
 
-        String tree();
+    String dragOver();
 
-        String loading();
-    }
+    String tree();
 
-    @Source("TreeStyles.css")
-    CSS styles();
+    String contentTree();
 
-    @Source("iconCollapsed.svg")
-    SVGResource iconCollapsed();
+    String loading();
 
-    @Source("iconExpanded.svg")
-    SVGResource iconExpanded();
+    String searchMatch();
+  }
+
+  @Source("TreeStyles.css")
+  TreeStylesCSS treeStylesCss();
+
+  @Source("iconCollapsed.svg")
+  SVGResource iconCollapsed();
+
+  @Source("iconExpanded.svg")
+  SVGResource iconExpanded();
 }

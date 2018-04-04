@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 // imports
 import {org} from "../../../api/dto/che-dto"
@@ -49,7 +49,7 @@ export class WorkspaceSshAction {
     workspace : Workspace;
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();
@@ -71,8 +71,6 @@ export class WorkspaceSshAction {
 
             let foundWorkspaceDTO : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
-            let foundConfigMachineDTO;
-
             // then, search workspace
             return this.workspace.searchWorkspace(this.workspaceName).then((workspaceDto) => {
 
@@ -84,12 +82,12 @@ export class WorkspaceSshAction {
                 // Check ssh agent is there
                 let defaultEnv:string = workspaceDto.getConfig().getDefaultEnv();
 
-                let machineConfig : org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get(this.machineName);
+                let machineConfig : org.eclipse.che.api.workspace.shared.dto.MachineConfigDto = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get(this.machineName);
                 if (!machineConfig) {
                     throw new Error("Unable to find a machine named " + this.machineName + " in the workspace '" + this.workspaceName)
                 }
 
-                let agents:Array<string> = machineConfig.getAgents();
+                let agents:Array<string> = machineConfig.getInstallers();
 
                 if (agents.indexOf('org.eclipse.che.ssh') === -1) {
                     return Promise.reject("The SSH agent (org.eclipse.che.ssh) has been disabled for this workspace.")
@@ -104,22 +102,21 @@ export class WorkspaceSshAction {
                 return ssh.getPair("workspace", foundWorkspaceDTO.getId());
             }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
 
-                let machines : Array<org.eclipse.che.api.machine.shared.dto.MachineDto> = foundWorkspaceDTO.getRuntime().getMachines();
-                let runtime: org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto = this.getSelectedMachine(machines).getRuntime();
-                let user : string = runtime.getProperties().get("config.user");
-                if (user === "") {
-                    // user is root if not defined
-                    user = "root";
-                }
-                let address: Array<string> = runtime.getServers().get("22/tcp").getProperties().getInternalAddress().split(":");
+                let machines : Map<String, org.eclipse.che.api.workspace.shared.dto.MachineDto> = foundWorkspaceDTO.getRuntime().getMachines();
+                let runtime: org.eclipse.che.api.workspace.shared.dto.MachineDto = machines.get(this.machineName);
+                let user : string = "root";
+
+                let sshAgentServer = runtime.getServers().get("ssh");
+
+                let address: Array<string> = sshAgentServer.getUrl().replace("/", "").split(":");
                 let ip:string = address[0];
                 let port:string = address[1];
-                var spawn = require('child_process').spawn;
+                let spawn = require('child_process').spawn;
 
                 let username:string = user + "@" + ip;
                 let cmd : string = "$(cat >>/tmp/ssh.key <<EOF\n" +  sshPairDto.getPrivateKey() + "\nEOF\n) && chmod 600 /tmp/ssh.key && ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " + username + " -p " + port + " -i" + " /tmp/ssh.key";
                 Log.getLogger().debug('command is', cmd);
-                var p = spawn("docker", ["run", "-ti", "codenvy/alpine_jdk8", "bash", "-c" , cmd], {
+                let p = spawn("docker", ["run", "-ti", "codenvy/alpine_jdk8", "bash", "-c", cmd], {
                     stdio: 'inherit'
                 });
 
@@ -135,14 +132,6 @@ export class WorkspaceSshAction {
         });
     }
 
-    private getSelectedMachine(machines : Array<org.eclipse.che.api.machine.shared.dto.MachineDto>) : org.eclipse.che.api.machine.shared.dto.MachineDto {
-        for(let i : number=0; i<machines.length; i++) {
-            if (machines[i].getConfig().getName() === this.machineName) {
-              return machines[i];
-            }
-        }
-        throw new Error("Unable to find a machine named " + this.machineName + " in the workspace '" + this.workspaceName);
-    }
 
 
 }

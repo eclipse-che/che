@@ -1,14 +1,17 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from './workspace/che-workspace.factory';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 /**
  * Test of the CheProjectType
@@ -16,30 +19,24 @@
 describe('CheProjectType', function(){
 
   /**
-   * Project Type Factory for the test
-   */
-  var factory;
-
-  /**
    * Workspace for the test
    */
-  var workspace;
+  let workspace;
 
   /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
-
+  let cheBackend;
 
   /**
    *  setup module
@@ -49,7 +46,9 @@ describe('CheProjectType', function(){
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function(cheWorkspace, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function(cheWorkspace: CheWorkspace,
+                             cheAPIBuilder: CheAPIBuilder,
+                             cheHttpBackend: CheHttpBackend) {
     workspace = cheWorkspace;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
@@ -68,67 +67,74 @@ describe('CheProjectType', function(){
   /**
    * Check that we're able to fetch project types
    */
-  it('Fetch project types', function() {
+  it('Fetch project types', () => {
+    // setup tests objects
+    const attributeLanguageJava = apiBuilder.getProjectTypeAttributeDescriptorBuilder().withValues(['java']).withRequired(true).withDescription('language').withName('language').build();
+    const mavenType = apiBuilder.getProjectTypeBuilder().withId('maven').withDisplayname('Maven project').withAttributeDescriptors([attributeLanguageJava]).build();
+    const antType = apiBuilder.getProjectTypeBuilder().withId('ant').withDisplayname('Ant project').withAttributeDescriptors([attributeLanguageJava]).build();
+    const workspaceId = 'florentWorkspace';
+    const agentUrl = 'http://172.17.0.1:33441/api';
+    const agentWsUrl = 'ws://172.17.0.1:33441/wsagent';
+    const runtime = {
+      'links': [{'rel': 'wsagent', 'href': agentUrl}],
+      'machines': {
+        'dev-machine': {
+          'servers': {
+            'wsagent/ws': {'url': agentWsUrl},
+            'wsagent/http': {'url': agentUrl}
+          }
+        }
+      }
+    };
+    const workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 
-      // setup tests objects
-      var attributeLanguageJava = apiBuilder.getProjectTypeAttributeDescriptorBuilder().withValues(['java']).withRequired(true).withDescription('language').withName('language').build();
-      var mavenType = apiBuilder.getProjectTypeBuilder().withId('maven').withDisplayname('Maven project').withAttributeDescriptors([attributeLanguageJava]).build();
-      var antType = apiBuilder.getProjectTypeBuilder().withId('ant').withDisplayname('Ant project').withAttributeDescriptors([attributeLanguageJava]).build();
-      let workspaceId = 'florentWorkspace';
-      let agentUrl = 'localhost:3232/wsagent/ext';
+    cheBackend.addWorkspaces([workspace1]);
 
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+    // providing request
+    // add workspaces on Http backend
+    cheBackend.addProjectTypes(workspaceId, [mavenType, antType]);
 
-      cheBackend.addWorkspaces([workspace1]);
+    // setup backend
+    cheBackend.setup();
 
-      // providing request
-      // add workspaces on Http backend
-      cheBackend.addProjectTypes(workspaceId, [mavenType, antType]);
+    // fetch runtime
+    workspace.fetchWorkspaceDetails(workspaceId);
+    httpBackend.expectGET('/api/workspace/' + workspaceId);
 
-      // setup backend
-      cheBackend.setup();
+    // flush command
+    httpBackend.flush();
 
-      //fetch runtime
-      workspace.fetchWorkspaceDetails(workspaceId);
-      httpBackend.expectGET('/api/workspace/' + workspaceId);
+    const factory = workspace.getWorkspaceAgent(workspaceId).getProjectType();
 
-      // flush command
-      httpBackend.flush();
+    // no types now on factory
+    expect(factory.getAllProjectTypes().length).toEqual(0);
 
-      var factory = workspace.getWorkspaceAgent(workspaceId).getProjectType();
+    // fetch types
+    factory.fetchTypes();
 
-      // no types now on factory
-      expect(factory.getAllProjectTypes().length).toEqual(0);
+    // expecting a GET
+    httpBackend.expectGET(agentUrl + '/project-type');
 
-      // fetch types
-      factory.fetchTypes();
+    // flush command
+    httpBackend.flush();
 
-      // expecting a GET
-      httpBackend.expectGET(agentUrl + '/project-type');
+    expect(factory.getAllProjectTypes().length).toEqual(2);
 
-      // flush command
-      httpBackend.flush();
+    // now, check types
+    const projectTypes = factory.getAllProjectTypes();
+    // check we have 2 PT
+    expect(projectTypes.length).toEqual(2);
 
-      expect(factory.getAllProjectTypes().length).toEqual(2);
+    const typesIds = factory.getProjectTypesIDs();
+    expect(typesIds.size).toEqual(2);
 
-      // now, check types
-      var projectTypes = factory.getAllProjectTypes();
-      // check we have 2 PT
-      expect(projectTypes.length).toEqual(2);
+    const firstType = typesIds.get('maven');
 
-      var typesIds = factory.getProjectTypesIDs();
-      expect(typesIds.size).toEqual(2);
+    expect(firstType.id).toEqual(mavenType.id);
+    expect(firstType.displayName).toEqual(mavenType.displayName);
 
-      var firstType = typesIds.get('maven');
-
-      expect(firstType.id).toEqual(mavenType.id);
-      expect(firstType.displayName).toEqual(mavenType.displayName);
-
-      var secondType = typesIds.get('ant');
-      expect(secondType.id).toEqual(antType.id);
-      expect(secondType.displayName).toEqual(antType.displayName);
-
-    }
-  );
+    const secondType = typesIds.get('ant');
+    expect(secondType.id).toEqual(antType.id);
+    expect(secondType.displayName).toEqual(antType.displayName);
+  });
 });

@@ -1,37 +1,28 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.testing.ide.view.navigation.factory;
 
-import org.eclipse.che.api.testing.shared.TestResult;
-import org.eclipse.che.plugin.testing.ide.view.navigation.TestClassNavigation;
-import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultClassNode;
-import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultGroupNode;
-import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultMethodNode;
-
-import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.plugin.testing.ide.model.TestRootState;
+import org.eclipse.che.plugin.testing.ide.model.TestState;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestRootNode;
+import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestStateNode;
 
 /**
  * Factory for providing test navigation tree nodes.
- * 
+ *
  * @author Mirage Abeysekara
  */
 public interface TestResultNodeFactory {
 
-    TestResultGroupNode getTestResultGroupNode(TestResult result);
+  TestStateNode create(TestState testState);
 
-    TestResultClassNode getTestResultClassNodeNode(String className);
-
-    TestResultMethodNode getTestResultMethodNodeNode(@Assisted("methodName") String methodName,
-                                                     @Assisted("stackTrace") String stackTrace,
-                                                     @Assisted("message") String message,
-                                                     int lineNumber,
-                                                     TestClassNavigation navigationHandler);
+  TestRootNode create(TestRootState testRootState);
 }

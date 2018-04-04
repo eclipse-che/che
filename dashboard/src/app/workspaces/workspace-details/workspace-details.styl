@@ -1,6 +1,28 @@
+.workspace-details-toolbar
+  .workspace-status
+    display inline
+    font-size 19px
+    margin-left 20px
+    .fa-circle
+      text-shadow none
+  span.workspace-status-text
+    color $menu-bg-color !important
+    position relative
+    bottom 2px
+    font-size 13px
+  che-button-default a
+    background-color #00c183 !important
+
+  workspace-warnings
+    float right
+    margin-left 20px
+
+  .toolbar-info
+    display flex
+
 .workspace-details-content
   md-tab-content
-    padding 0 14px
+    padding 0
 
   .config-import .config-editor
     margin-top 7px
@@ -19,8 +41,8 @@
     .workspace-status-indicator .fa-circle
       font-size 19px
 
-    .namespace-button button
-      margin 0 10px 10px 0
+    che-filter-selector
+      line-height 33px;
 
     span.workspace-status-text
       color lighten($che-ide-background-color, 40%) !important
@@ -41,3 +63,20 @@
 
       .workspace-details-action-buttons
         margin-top 20px
+
+  .che-list-add-button
+    button
+      padding-left 40px !important
+      text-align right
+      span
+        font-size 12px
+        font-weight bold
+        text-transform none
+        &:before
+          position absolute
+          display inline
+          font-size 35px
+          font-weight 100
+          content "+"
+          bottom 1px
+          left 10px

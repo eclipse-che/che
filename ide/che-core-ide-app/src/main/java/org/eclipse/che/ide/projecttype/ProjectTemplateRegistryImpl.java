@@ -1,55 +1,85 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.projecttype;
 
-import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
-import javax.validation.constraints.NotNull;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.util.loging.Log;
 
-/**
- * Implementation for {@link ProjectTemplateRegistry}.
- *
- * @author Artem Zatsarynnyi
- */
+@Singleton
 public class ProjectTemplateRegistryImpl implements ProjectTemplateRegistry {
-    private final Map<String, List<ProjectTemplateDescriptor>> templateDescriptors;
 
-    public ProjectTemplateRegistryImpl() {
-        templateDescriptors = new HashMap<>();
-    }
+  private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
+  private final AsyncRequestFactory asyncRequestFactory;
+  private final AppContext appContext;
 
-    @Override
-    public void register(@NotNull ProjectTemplateDescriptor descriptor) {
-        final String projectTypeId = descriptor.getProjectType();
-        List<ProjectTemplateDescriptor> templates = templateDescriptors.get(projectTypeId);
-        if (templates == null) {
-            templates = new ArrayList<>();
-            templates.add(descriptor);
-            templateDescriptors.put(projectTypeId, templates);
-        }
-        templates.add(descriptor);
-    }
+  private final Map<String, List<ProjectTemplateDescriptor>> templateDescriptors;
 
-    @NotNull
-    @Override
-    public List<ProjectTemplateDescriptor> getTemplateDescriptors(@NotNull String projectTypeId) {
-        List<ProjectTemplateDescriptor> templateDescriptors = this.templateDescriptors.get(projectTypeId);
-        if (templateDescriptors != null) {
-            return templateDescriptors;
-        }
-        return new ArrayList<>();
-    }
+  @Inject
+  ProjectTemplateRegistryImpl(
+      DtoUnmarshallerFactory dtoUnmarshallerFactory,
+      AsyncRequestFactory asyncRequestFactory,
+      AppContext appContext) {
+    this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+    this.asyncRequestFactory = asyncRequestFactory;
+    this.appContext = appContext;
+
+    templateDescriptors = new HashMap<>();
+  }
+
+  @Override
+  public List<ProjectTemplateDescriptor> getTemplates(String projectTypeId) {
+    return templateDescriptors.getOrDefault(projectTypeId, new ArrayList<>());
+  }
+
+  @Inject
+  private void registerAllTemplates() {
+    fetchTemplates()
+        .then(
+            templateDescriptors -> {
+              templateDescriptors.forEach(this::register);
+            })
+        .catchError(
+            error -> {
+              Log.error(
+                  ProjectTemplateRegistryImpl.this.getClass(),
+                  "Can't load project templates: " + error.getCause());
+            });
+  }
+
+  private void register(ProjectTemplateDescriptor descriptor) {
+    templateDescriptors
+        .computeIfAbsent(descriptor.getProjectType(), key -> new ArrayList<>())
+        .add(descriptor);
+  }
+
+  private Promise<List<ProjectTemplateDescriptor>> fetchTemplates() {
+    final String baseUrl = appContext.getMasterApiEndpoint() + "/project-template/all";
+
+    return asyncRequestFactory
+        .createGetRequest(baseUrl)
+        .header(ACCEPT, APPLICATION_JSON)
+        .send(dtoUnmarshallerFactory.newListUnmarshaller(ProjectTemplateDescriptor.class));
+  }
 }

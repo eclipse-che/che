@@ -1,84 +1,60 @@
-che-button-dropdown .md-button.md-accent.md-raised.md-hue-2
-  che-border-radius(2px)
-  box-shadow-simple()
-  font-size 1.6em
-  font-weight bold
-  width 100%
-  line-height 34px
-  height 30px
-  padding-right 8px
-  margin 0
-  transform none
+.che-button-dropdown
+  position relative
+  min-width 110px
 
-che-button-dropdown
-  height 36px
+  button.che-button,
+  .fa-caret-down
+    margin 0 !important
+    min-height 40px
+    float left
 
-che-button-dropdown div
-  outline none
+  .split-button
+    button.md-accent.md-raised.md-button
+      min-width 72px
+      border-right 1px solid $white-color
+      border-top-right-radius 0 !important
+      border-bottom-right-radius 0 !important
 
-.che-button-dropdown-separator
-  border-left solid 1px $background-color
-  margin-right 5px
+  .dropdown-toggle
+    button
+      padding 0
+      &.md-accent.md-raised.md-button
+        padding 0
+        min-width 38px
+        border-top-left-radius 0 !important
+        border-bottom-left-radius 0 !important
+      md-icon
+        width 100%
+        &:before
+          font-size 15px
+      .fa-caret-down:before
+        position relative
+        top 2px
+    button[disabled] md-icon:before
+      color #9F9F9F !important
+    button:not([disabled]) md-icon:before
+      color $white-color !important
 
-che-button-dropdown .che-button-dropdown-elements
-  z-index 1
-  left 0
-  position absolute
-  margin-top -6px
-  width 100%
-  color $label-info-color
-  padding 0 10px
-
-che-button-dropdown .che-button-dropdown-elements ul
-  list-style none
-  padding 0
-
-che-button-dropdown .che-button-dropdown-elements ul li
-  che-border-radius(2px)
-  background-color white
-  display list-item
-
-che-button-dropdown .che-button-dropdown-elements ul li:hover .che-button-click-area
-  background $hover-on-list-color
-
-che-button-dropdown .che-button-dropdown-elements ul li:last-of-type .che-button-click-area
-  border none
-
-che-button-dropdown .che-button-dropdown-elements ul li .che-button-click-area
-  che-border-radius(2px)
-  border-bottom hidden
-  display block
-  padding 10px
-  text-transform uppercase
-  text-decoration none
-  color $label-info-color
-  border-bottom 1px solid $default-border-color
-  box-shadow inset 0 1px 0 rgba(255, 255, 255, 1)
-  cursor pointer
-
-che-button-dropdown .che-button-click-area,
-che-button-dropdown .che-button-click-area:hover,
-che-button-dropdown .che-button-click-area:focus
-  color $background-color
-  text-decoration none
-  font-size 0.8em
-  padding 0
-  outline none
-
-.che-button-dropdown i
-  display inline
-  margin-right 10px
-  font-size 0.8em
-
-.che-button-dropdown-icon
-  color $background-color
-  margin -12px 3px 0
-  font-size 32px
-  outline none
-
-.che-button-dropdown[disabled]
-  background-color $default-border-color !important
-  opacity 0.8
-
-.che-button-dropdown:not([disabled]):hover
-  che-brightness(90%)
+  .area-dropdown
+    background $white-color
+    color $label-secondary-color
+    border-radius 2px
+    left inherit
+    top 42px
+    right 0
+    li
+      outline none
+      cursor pointer
+    li.selected-item
+      background alpha($mouse-gray-color, 0.75)
+      &:hover
+        che-brightness(95%)
+    li:not(.selected-item):hover
+      background alpha($mouse-gray-color, 0.4)
+    span, a
+      display inline-block
+      white-space nowrap
+      line-height 20px
+      padding 0 10px
+      font-size 12px
+      width 100%

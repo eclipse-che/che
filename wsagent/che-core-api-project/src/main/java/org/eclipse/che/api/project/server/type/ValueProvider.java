@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.project.server.type;
 
 import java.util.List;
@@ -20,19 +20,18 @@ import java.util.List;
  */
 public interface ValueProvider {
 
-    /** Gets values. */
-    List<String> getValues(String attributeName) throws ValueStorageException;
+  /** Gets values. */
+  List<String> getValues(String attributeName) throws ValueStorageException;
 
-    /**
-     * Sets values
-     * @param attributeName - name
-     * @param values - values
-     * @throws ValueStorageException
-     */
-    void setValues(String attributeName, List<String> values) throws ValueStorageException;
+  /**
+   * Sets values
+   *
+   * @param attributeName - name
+   * @param values - values
+   * @throws ValueStorageException
+   */
+  void setValues(String attributeName, List<String> values) throws ValueStorageException;
 
-    /**
-     * @return whether this Value Provider intended to initialize values
-     */
-    boolean isSettable();
+  /** @return whether this Value Provider intended to initialize values */
+  boolean isSettable();
 }

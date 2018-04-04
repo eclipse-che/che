@@ -1,21 +1,22 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.editor.preferences;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
-
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
+import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesPresenter;
 import org.eclipse.che.ide.editor.preferences.editorproperties.propertiessection.EditorPropertiesSectionPresenter;
+import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditPropertiesSection;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPreferenceSectionFactory;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPropertiesSection;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.LanguageToolsPropertiesSection;
@@ -34,25 +35,34 @@ import org.eclipse.che.ide.editor.preferences.keymaps.KeymapsPreferenceViewImpl;
  */
 public class EditorPreferencesModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class).addBinding().to(EditorPreferencePresenter.class);
+  @Override
+  protected void configure() {
+    GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class)
+        .addBinding()
+        .to(EditorPreferencePresenter.class);
 
-        bind(EditorPreferenceView.class).to(EditorPreferenceViewImpl.class);
-        bind(KeymapsPreferenceView.class).to(KeymapsPreferenceViewImpl.class);
-        bind(KeyMapsPreferencePresenter.class);
+    bind(EditorPreferenceView.class).to(EditorPreferenceViewImpl.class);
+    bind(KeymapsPreferenceView.class).to(KeymapsPreferenceViewImpl.class);
+    bind(KeyMapsPreferencePresenter.class);
 
-        install(new GinFactoryModuleBuilder()
-                        .implement(EditorPreferenceSection.class, EditorPropertiesSectionPresenter.class)
-                        .build(EditorPreferenceSectionFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(EditorPreferenceSection.class, EditorPropertiesSectionPresenter.class)
+            .build(EditorPreferenceSectionFactory.class));
 
-        GinMultibinder<EditorPropertiesSection> editorPropertiesSectionBinder =
-                GinMultibinder.newSetBinder(binder(), EditorPropertiesSection.class);
+    GinMultibinder<EditorPreferenceSection> editorPreferenceSectionsBinder =
+        GinMultibinder.newSetBinder(binder(), EditorPreferenceSection.class);
+    editorPreferenceSectionsBinder.addBinding().to(KeyMapsPreferencePresenter.class);
+    editorPreferenceSectionsBinder.addBinding().to(EditorPropertiesPresenter.class);
 
-        editorPropertiesSectionBinder.addBinding().to(TabsPropertiesSection.class);
-        editorPropertiesSectionBinder.addBinding().to(LanguageToolsPropertiesSection.class);
-        editorPropertiesSectionBinder.addBinding().to(TypingPropertiesSection.class);
-        editorPropertiesSectionBinder.addBinding().to(WhiteSpacesPropertiesSection.class);
-        editorPropertiesSectionBinder.addBinding().to(RulersPropertiesSection.class);
-    }
+    GinMultibinder<EditorPropertiesSection> editorPropertiesSectionBinder =
+        GinMultibinder.newSetBinder(binder(), EditorPropertiesSection.class);
+
+    editorPropertiesSectionBinder.addBinding().to(TabsPropertiesSection.class);
+    editorPropertiesSectionBinder.addBinding().to(EditPropertiesSection.class);
+    editorPropertiesSectionBinder.addBinding().to(LanguageToolsPropertiesSection.class);
+    editorPropertiesSectionBinder.addBinding().to(TypingPropertiesSection.class);
+    editorPropertiesSectionBinder.addBinding().to(WhiteSpacesPropertiesSection.class);
+    editorPropertiesSectionBinder.addBinding().to(RulersPropertiesSection.class);
+  }
 }

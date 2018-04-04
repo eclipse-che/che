@@ -1,25 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.system.server;
 
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.core.util.WebsocketLineConsumer;
-import org.eclipse.che.api.system.shared.event.SystemEvent;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.slf4j.LoggerFactory;
-
+import com.google.common.annotations.VisibleForTesting;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
+import org.eclipse.che.api.system.shared.event.SystemEvent;
 
 /**
  * Broadcasts system status events to the websocket channel.
@@ -27,31 +23,21 @@ import javax.inject.Singleton;
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemEvent> {
+public class SystemEventsWebsocketBroadcaster {
 
-    public static final String SYSTEM_STATE_CHANNEL_NAME = "system:state";
+  public static final String SYSTEM_STATE_METHOD_NAME = "system/state";
 
-    private final LineConsumer messageConsumer;
+  private final RemoteSubscriptionManager remoteSubscriptionManager;
 
-    public SystemEventsWebsocketBroadcaster() {
-        this(new WebsocketLineConsumer(SYSTEM_STATE_CHANNEL_NAME));
-    }
+  @Inject
+  public SystemEventsWebsocketBroadcaster(RemoteSubscriptionManager remoteSubscriptionManager) {
+    this.remoteSubscriptionManager = remoteSubscriptionManager;
+  }
 
-    public SystemEventsWebsocketBroadcaster(WebsocketLineConsumer messageConsumer) {
-        this.messageConsumer = messageConsumer;
-    }
-
-    @Inject
-    public void subscribe(EventService eventService) {
-        eventService.subscribe(this);
-    }
-
-    @Override
-    public void onEvent(SystemEvent event) {
-        try {
-            messageConsumer.writeLine(DtoFactory.getInstance().toJson(DtoConverter.asDto(event)));
-        } catch (Exception x) {
-            LoggerFactory.getLogger(getClass()).error(x.getMessage(), x);
-        }
-    }
+  @PostConstruct
+  @VisibleForTesting
+  void subscribe() {
+    remoteSubscriptionManager.register(
+        SYSTEM_STATE_METHOD_NAME, SystemEvent.class, (systemEvent, stringStringMap) -> true);
+  }
 }

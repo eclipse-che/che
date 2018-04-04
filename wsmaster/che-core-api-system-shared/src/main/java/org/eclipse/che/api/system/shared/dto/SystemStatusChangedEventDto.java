@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.system.shared.dto;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
@@ -24,17 +24,17 @@ import org.eclipse.che.dto.shared.DTO;
 @EventOrigin("system")
 public interface SystemStatusChangedEventDto extends SystemEventDto {
 
-    /** Returns new status of the system. */
-    SystemStatus getStatus();
+  /** Returns new status of the system. */
+  SystemStatus getStatus();
 
-    void setStatus(SystemStatus status);
+  void setStatus(SystemStatus status);
 
-    SystemStatusChangedEventDto withStatus(SystemStatus status);
+  SystemStatusChangedEventDto withStatus(SystemStatus status);
 
-    /** Returns the previous status of the system. */
-    SystemStatus getPrevStatus();
+  /** Returns the previous status of the system. */
+  SystemStatus getPrevStatus();
 
-    void setPrevStatus(SystemStatus prevStatus);
+  void setPrevStatus(SystemStatus prevStatus);
 
-    SystemStatusChangedEventDto withPrevStatus(SystemStatus prevStatus);
+  SystemStatusChangedEventDto withPrevStatus(SystemStatus prevStatus);
 }

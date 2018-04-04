@@ -1,10 +1,12 @@
 .che-footer
-  height 30px
   box-sizing content-box
   background-color $white-color
   border-top 1px solid $list-separator-color
   padding 0 10px
-  min-height 30px
+
+  & > div
+    height 30px
+    min-height 30px
 
 .che-footer-logo
   height 24px
@@ -18,10 +20,14 @@
   height 18px
   color $white-color
   border-radius 2px
+  white-space nowrap
 
 .che-footer a
   text-decoration none
   color $white-color
+
+.che-footer-buttons-row a:first-of-type
+  margin-left 0
 
 .che-footer-button-yellow
   background-color $che-logo-yellow-color
@@ -83,7 +89,8 @@
 
 .che-footer-version
   color $stroke-color
-  margin 0px 10px
+  margin 0 10px
+  white-space nowrap
 
 .che-footer-version:before
   content "-"

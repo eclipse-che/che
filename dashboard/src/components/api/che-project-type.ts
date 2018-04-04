@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -16,11 +16,18 @@
  * @author Florent Benoit
  */
 export class CheProjectType {
+  private $q: ng.IQService;
+  private $resource: ng.resource.IResourceService;
+  private typesIds: Map<string, any>;
+  private workspaceTypes: any[];
+  private remoteProjectTypeAPI: any;
 
   /**
    * Default constructor that is using resource
    */
-  constructor ($resource, $q, wsagentPath) {
+  constructor ($resource: ng.resource.IResourceService,
+               $q: ng.IQService,
+               wsagentPath: string) {
     this.$q = $q;
     this.$resource = $resource;
 
@@ -36,20 +43,22 @@ export class CheProjectType {
 
   /**
    * Fetch the project types
+   *
+   * @returns {angular.IPromise<any>}
    */
-  fetchTypes() {
-    var defer = this.$q.defer();
-    let promise = this.remoteProjectTypeAPI.query().$promise;
-    let updatedPromise = promise.then((projectTypes) => {
+  fetchTypes(): ng.IPromise<any> {
+    const defer = this.$q.defer();
+    const promise = this.remoteProjectTypeAPI.query().$promise;
+    promise.then((projectTypes: any[]) => {
 
       // reset global list
       this.workspaceTypes = projectTypes;
 
-      projectTypes.forEach((projectType) => {
+      projectTypes.forEach((projectType: any) => {
         this.typesIds.set(projectType.id, projectType);
       });
       defer.resolve();
-    }, (error) => {
+    }, (error: any) => {
       if (error.status !== 304) {
         defer.reject(error);
       } else {
@@ -64,15 +73,15 @@ export class CheProjectType {
    * Gets all project types
    * @returns {Array}
    */
-  getAllProjectTypes() {
+  getAllProjectTypes(): any[] {
     return this.workspaceTypes;
   }
 
   /**
    * The types per category
-   * @returns {CheProjectType.typesPerCategory|*}
+   * @returns {Map<string, any>}
    */
-  getProjectTypesIDs() {
+  getProjectTypesIDs(): Map<string, any> {
     return this.typesIds;
   }
 

@@ -1,18 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.git.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Request to remove files.
@@ -21,23 +20,23 @@ import java.util.List;
  */
 @DTO
 public interface RmRequest {
-    /** @return files to remove */
-    List<String> getItems();
-    
-    void setItems(List<String> items);
-    
-    RmRequest withItems(List<String> items);
+  /** @return files to remove */
+  List<String> getItems();
 
-    /** @return is RmRequest represents remove from index only */
-    boolean isCached();
-    
-    void setCached(boolean isCached);
-    
-    RmRequest withCached(boolean cached);
+  void setItems(List<String> items);
 
-    boolean isRecursively();
+  RmRequest withItems(List<String> items);
 
-    void setRecursively(boolean isRecursively);
+  /** @return is RmRequest represents remove from index only */
+  boolean isCached();
 
-    RmRequest withRecursively(boolean isRecursively);
+  void setCached(boolean isCached);
+
+  RmRequest withCached(boolean cached);
+
+  boolean isRecursively();
+
+  void setRecursively(boolean isRecursively);
+
+  RmRequest withRecursively(boolean isRecursively);
 }

@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.api.constraints;
 
 /**
@@ -17,24 +17,14 @@ package org.eclipse.che.ide.api.constraints;
  * @version $Id:
  */
 public enum Anchor {
-    /**
-     * Anchor type that specifies the action to be the first in the list at the
-     * moment of addition.
-     */
-    FIRST,
-    /**
-     * Anchor type that specifies the action to be the last in the list at the
-     * moment of addition.
-     */
-    LAST,
-    /**
-     * Anchor type that specifies the action to be placed before the relative
-     * action.
-     */
-    BEFORE,
-    /**
-     * Anchor type that specifies the action to be placed after the relative
-     * action.
-     */
-    AFTER
+  /**
+   * Anchor type that specifies the action to be the first in the list at the moment of addition.
+   */
+  FIRST,
+  /** Anchor type that specifies the action to be the last in the list at the moment of addition. */
+  LAST,
+  /** Anchor type that specifies the action to be placed before the relative action. */
+  BEFORE,
+  /** Anchor type that specifies the action to be placed after the relative action. */
+  AFTER
 }

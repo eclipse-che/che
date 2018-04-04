@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -24,53 +24,35 @@ import org.eclipse.che.dto.shared.DTO;
 @EventOrigin("workspace")
 @DTO
 public interface WorkspaceStatusEvent {
+  WorkspaceStatus getStatus();
 
-    /** Defines event type for workspace status event changes. */
-    enum EventType {
-        STARTING, RUNNING, STOPPING, STOPPED, ERROR, SNAPSHOT_CREATING, SNAPSHOT_CREATED, SNAPSHOT_CREATION_ERROR
-    }
+  void setStatus(WorkspaceStatus status);
 
-    /**
-     * Returns the type of this event.
-     */
-    EventType getEventType();
+  WorkspaceStatusEvent withStatus(WorkspaceStatus status);
 
-    void setEventType(EventType eventType);
+  /**
+   * Returns previous workspace status.
+   *
+   * @see WorkspaceStatus for more information about certain values
+   */
+  WorkspaceStatus getPrevStatus();
 
-    WorkspaceStatusEvent withEventType(EventType eventType);
+  void setPrevStatus(WorkspaceStatus status);
 
-    WorkspaceStatus getStatus();
+  WorkspaceStatusEvent withPrevStatus(WorkspaceStatus status);
 
-    void setStatus(WorkspaceStatus status);
+  /** The id of the workspace to which this event belongs to . */
+  String getWorkspaceId();
 
-    WorkspaceStatusEvent withStatus(WorkspaceStatus status);
+  void setWorkspaceId(String machineId);
 
-    /**
-     * Returns previous workspace status.
-     *
-     * @see WorkspaceStatus for more information about certain values
-     */
-    WorkspaceStatus getPrevStatus();
+  WorkspaceStatusEvent withWorkspaceId(String machineId);
 
-    void setPrevStatus(WorkspaceStatus status);
+  /** Returns an error message value. */
+  @Nullable
+  String getError();
 
-    WorkspaceStatusEvent withPrevStatus(WorkspaceStatus status);
+  void setError(String error);
 
-    /** The id of the workspace to which this event belongs to . */
-    String getWorkspaceId();
-
-    void setWorkspaceId(String machineId);
-
-    WorkspaceStatusEvent withWorkspaceId(String machineId);
-
-    /**
-     * Returns an error message value if and only if the type of this event is
-     * either {@link EventType#ERROR} or {@link EventType#SNAPSHOT_CREATION_ERROR}.
-     */
-    @Nullable
-    String getError();
-
-    void setError(String error);
-
-    WorkspaceStatusEvent withError(String error);
+  WorkspaceStatusEvent withError(String error);
 }

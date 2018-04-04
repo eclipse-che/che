@@ -1,78 +1,58 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
-
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Nikolay Zamosenchuk */
 public interface PartStackUIResources extends ClientBundle {
 
-    interface PartStackCss extends CssResource {
+  interface PartStackCss extends CssResource {
 
-        @ClassName("ide-PartStack-Tab")
-        String idePartStackTab();
+    @ClassName("ide-PartStack-Tab-Line-Warning")
+    String lineWarning();
 
-        @ClassName("ide-Base-Part-Toolbar")
-        String ideBasePartToolbar();
+    @ClassName("ide-PartStack-Tab-Line-Error")
+    String lineError();
 
-        @ClassName("ide-PartStack-Content")
-        String idePartStackContent();
+    String listItemPanel();
+  }
 
-        @ClassName("ide-Base-Part-Title-Label")
-        String ideBasePartTitleLabel();
+  @Source({"partstack.css", "org/eclipse/che/ide/api/ui/style.css"})
+  PartStackCss partStackCss();
 
-        @ClassName("ide-PartStack-Tab-Line-Warning")
-        String lineWarning();
+  @Source("collapse-expand-icon.svg")
+  SVGResource collapseExpandIcon();
 
-        @ClassName("ide-PartStack-Tab-Line-Error")
-        String lineError();
+  @Source("arrow-bottom.svg")
+  SVGResource arrowBottom();
 
-        @ClassName("leftTabs")
-        String leftTabs();
+  @Source("erase.svg")
+  SVGResource erase();
 
-        @ClassName("rightTabs")
-        String rightTabs();
+  @Source("close-icon.svg")
+  SVGResource closeIcon();
 
-        @ClassName("bottomTabs")
-        String bottomTabs();
+  @Source("maximize-part.svg")
+  SVGResource maximizePart();
 
-        @ClassName("selectedRightOrLeftTab")
-        String selectedRightOrLeftTab();
+  @MimeType("image/svg+xml")
+  @Source("tabLineError.svg")
+  DataResource tabLineError();
 
-        @ClassName("selectedBottomTab")
-        String selectedBottomTab();
-
-        String listItemPanel();
-    }
-
-    @Source({"partstack.css", "org/eclipse/che/ide/api/ui/style.css"})
-    PartStackCss partStackCss();
-
-    @Source("collapse-expand-icon.svg")
-    SVGResource collapseExpandIcon();
-
-    @Source("arrow-bottom.svg")
-    SVGResource arrowBottom();
-
-    @Source("erase.svg")
-    SVGResource erase();
-
-    @Source("close-icon.svg")
-    SVGResource closeIcon();
-
-    @Source("maximize-part.svg")
-    SVGResource maximizePart();
-
+  @MimeType("image/svg+xml")
+  @Source("tabLineWarning.svg")
+  DataResource tabLineWarning();
 }

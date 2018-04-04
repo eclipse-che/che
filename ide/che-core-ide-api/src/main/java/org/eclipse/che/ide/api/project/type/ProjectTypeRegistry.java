@@ -1,33 +1,24 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.api.project.type;
 
+import java.util.List;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-
-/**
- * @author Vitaly Parfonov
- * @author Artem Zatsarynnyi
- */
+/** Registry of project types. */
 public interface ProjectTypeRegistry {
 
-    @Nullable
-    ProjectTypeDto getProjectType(@NotNull String id);
+  List<ProjectTypeDto> getProjectTypes();
 
-    List<ProjectTypeDto> getProjectTypes();
-
-    void register(ProjectTypeDto projectType);
-
-    void registerAll(List<ProjectTypeDto> projectTypesList);
+  @Nullable
+  ProjectTypeDto getProjectType(String id);
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -32,16 +32,25 @@ describe('ComposeEnvironmentManager', () => {
           'another-machine': {
             'attributes': {'memoryLimitBytes': '2147483648'},
             'servers': {},
-            'agents': []
+            'volumes': {},
+            'installers': []
           },
-          'db': {'attributes': {}, 'servers': {}, 'agents': []},
+          'db': {
+            'attributes': {},
+            'servers': {},
+            'volumes': {},
+            'installers': []
+          },
           'dev-machine': {
             'attributes': {'memoryLimitBytes': '5368709120'},
             'servers': {
-              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http'},
-              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http'}
+              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http', 'path': ''},
+              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
             },
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'volumes': {
+              'volume1': {'path': '/some/path'}
+            },
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         },
         'recipe': {
@@ -90,16 +99,21 @@ describe('ComposeEnvironmentManager', () => {
           'another-machine': {
             'attributes': {'memoryLimitBytes': '2147483648'},
             'servers': {},
-            'agents': []
+            'volumes': {},
+            'installers': []
           },
-          'db': {'attributes': {}, 'servers': {}, 'agents': []},
+          'db': {'attributes': {}, 'servers': {}, 'volumes': {}, 'installers': []},
           'dev-machine': {
             'attributes': {'memoryLimitBytes': '5368709120'},
             'servers': {
-              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http'},
-              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http'}
+              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http', 'path': ''},
+              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
             },
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'volumes': {
+              'vol1': {'path': '/some/path'},
+              'm22': {'path': '/home/user/.m2/repository'}
+            },
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         },
         'recipe': {
@@ -135,7 +149,7 @@ describe('ComposeEnvironmentManager', () => {
 
       // machine's attributes are more preferable than recipe to get memory limit
       let expectedMemoryLimit = environment.machines[testMachine.name].attributes.memoryLimitBytes;
-      expect(memoryLimit).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
     });
 
     it('from recipe', () => {
@@ -181,7 +195,8 @@ describe('ComposeEnvironmentManager', () => {
         'machines': {
           'dev-machine': {
             'servers': {},
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
+            'volumes': {},
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
             'attributes': {'memoryLimitBytes': '2147483648'}
           }
         },
@@ -205,7 +220,7 @@ describe('ComposeEnvironmentManager', () => {
       let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
       let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
-      expect(memoryLimit).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
     });
 
   });

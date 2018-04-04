@@ -1,14 +1,18 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
+interface ICheSelectAttributes extends ng.IAttributes {
+  cheName: string;
+}
 
 /**
  * Defines a directive for creating select that are working either on desktop or on mobile devices.
@@ -26,7 +30,6 @@ export class CheSelect {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     // scope values
@@ -40,13 +43,13 @@ export class CheSelect {
     };
   }
 
-  template(element: ng.IAugmentedJQuery, attrs: any): string {
+  template($element: ng.IAugmentedJQuery, $attrs: ICheSelectAttributes): string {
     return `<div class="che-select desktop-untouched">
       <!-- Mobile version -->
       <md-input-container class="che-select-mobile" hide-gt-xs>
         <label ng-if="labelName">{{value ? labelName : placeHolder}}</label>
         <md-select ng-model="value"
-                   name="${attrs.cheName}"
+                   name="${$attrs.cheName}"
                    md-container-class="che-custom-dropdown"
                    placeholder="{{placeHolder}}">
           <md-option ng-value="optionValue.id ? optionValue.id : optionValue.name"
@@ -54,7 +57,7 @@ export class CheSelect {
           </md-option>
         </md-select>
         <!-- display error messages for the form -->
-        <div ng-messages="myForm.${attrs.cheName}.$error"></div>
+        <div ng-messages="myForm.${$attrs.cheName}.$error"></div>
       </md-input-container>
 
       <!-- Desktop version -->
@@ -64,7 +67,7 @@ export class CheSelect {
 
           <div layout="column" class="che-select-container" flex="{{labelName ? 85 : 'none'}}">
             <md-select ng-model="value"
-                       name="desk${attrs.cheName}"
+                       name="desk${$attrs.cheName}"
                        md-container-class="che-custom-dropdown"
                        placeholder="{{placeHolder}}">
               <md-option ng-value="optionValue.id ? optionValue.id : optionValue.name"
@@ -72,18 +75,18 @@ export class CheSelect {
               </md-option>
             </md-select>
             <!-- display error messages for the form -->
-            <div ng-messages="myForm.desk${attrs.cheName}.$error" ng-transclude></div>
+            <div ng-messages="myForm.desk${$attrs.cheName}.$error" ng-transclude></div>
           </div>
         </div>
       </div>
     </div>`;
   }
 
-  compile(element: ng.IAugmentedJQuery, attrs: any): void {
-    let keys = Object.keys(attrs);
+  compile($element: ng.IAugmentedJQuery, $attrs: ICheSelectAttributes): void {
+    let keys = Object.keys($attrs);
 
     // search the select field
-    let selectElements = element.find('md-select');
+    let selectElements = $element.find('md-select');
 
     keys.forEach((key: string) => {
       // don't reapply internal properties
@@ -104,13 +107,13 @@ export class CheSelect {
       }
 
       // set the value of the attribute
-      selectElements.attr(attrs.$attr[key], attrs[key] !== '' ? attrs[key] : 'true');
-      element.removeAttr(attrs.$attr[key]);
+      selectElements.attr($attrs.$attr[key], $attrs[key] !== '' ? $attrs[key] : 'true');
+      $element.removeAttr($attrs.$attr[key]);
     });
   }
 
-  link($scope, $element, attrs) {
-    let deregistrationFn = $scope.$watch('myForm.desk' + attrs.cheName + '.$touched', (isTouched) => {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheSelectAttributes) {
+    let deregistrationFn = $scope.$watch('myForm.desk' + $attrs.cheName + '.$touched', (isTouched: boolean) => {
       if (isTouched) {
         $element.removeClass('desktop-untouched');
         $element.addClass('desktop-touched');

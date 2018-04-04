@@ -1,19 +1,18 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
 import {Register} from '../components/utils/register';
-
+import {FactoryConfig} from './factories/factories-config';
 import {ComponentsConfig} from '../components/components-config';
-
 import {AdminsConfig} from './admin/admin-config';
 import {AdministrationConfig} from './administration/administration-config';
 import {DiagnosticsConfig} from './diagnostics/diagnostics-config';
@@ -25,56 +24,148 @@ import {DashboardConfig} from './dashboard/dashboard-config';
 // switch to a config
 import {IdeConfig} from './ide/ide-config';
 import {NavbarConfig} from './navbar/navbar-config';
-import {ProjectsConfig} from './projects/projects-config';
 import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
-import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
-import {DocsConfig} from './documentation/docs-config';
-
+import {DemoComponentsController} from './demo-components/demo-components.controller';
+import {CheBranding} from '../components/branding/che-branding.factory';
+import {ChePreferences} from '../components/api/che-preferences.factory';
+import {RoutingRedirect} from '../components/routing/routing-redirect.factory';
+import IdeIFrameSvc from './ide/ide-iframe/ide-iframe.service';
+import {CheIdeFetcher} from '../components/ide-fetcher/che-ide-fetcher.service';
+import {RouteHistory} from '../components/routing/route-history.service';
+import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
+import {OrganizationsConfig} from './organizations/organizations-config';
+import {TeamsConfig} from './teams/teams-config';
+import {ProfileConfig} from './profile/profile-config';
 
 // init module
-let initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
+const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
   'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
-  'ngDropdowns', 'ngLodash', 'angularCharts', 'ngClipboard', 'uuid4', 'angularFileUpload']);
+  'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
 
+window.name = 'NG_DEFER_BOOTSTRAP!';
+
+declare const Keycloak: Function;
+function buildKeycloakConfig(keycloakSettings: any): any {
+  const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
+  if (!theOidcProvider) {
+    return {
+      url: keycloakSettings['che.keycloak.auth_server_url'],
+      realm: keycloakSettings['che.keycloak.realm'],
+      clientId: keycloakSettings['che.keycloak.client_id']
+    };
+  } else {
+    return {
+      oidcProvider: theOidcProvider,
+      clientId: keycloakSettings['che.keycloak.client_id']
+    };
+  }
+}
+interface IResolveFn<T> {
+  (value: T | PromiseLike<T>): Promise<T>;
+}
+interface IRejectFn<T> {
+  (reason: any): Promise<T>;
+}
+function keycloakLoad(keycloakSettings: any) {
+  return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = keycloakSettings['che.keycloak.js_adapter_url'];
+    script.addEventListener('load', resolve);
+    script.addEventListener('error', () => reject('Error loading script.'));
+    script.addEventListener('abort', () => reject('Script loading aborted.'));
+    document.head.appendChild(script);
+  });
+}
+function keycloakInit(keycloakConfig: any, theUseNonce: boolean) {
+  return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+    const keycloak = Keycloak(keycloakConfig);
+    keycloak.init({
+      onLoad: 'login-required', checkLoginIframe: false, useNonce: theUseNonce
+    }).success(() => {
+      resolve(keycloak);
+    }).error((error: any) => {
+      reject(error);
+    });
+  });
+}
+
+const keycloakAuth = {
+  isPresent: false,
+  keycloak: null,
+  config: null
+};
+initModule.constant('keycloakAuth', keycloakAuth);
+
+angular.element(document).ready(() => {
+  const promise = new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+    angular.element.get('/api/keycloak/settings').then(resolve, reject);
+  });
+  promise.then((keycloakSettings: any) => {
+    keycloakAuth.config = buildKeycloakConfig(keycloakSettings);
+
+    // load Keycloak
+    return keycloakLoad(keycloakSettings).then(() => {
+      // init Keycloak
+      var useNonce: boolean;
+      if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
+        useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
+      }
+      return keycloakInit(keycloakAuth.config, useNonce);
+    }).then((keycloak: any) => {
+      keycloakAuth.isPresent = true;
+      keycloakAuth.keycloak = keycloak;
+      /* tslint:disable */
+      window['_keycloak'] = keycloak;
+      /* tslint:enable */
+    });
+  }).catch((error: any) => {
+    console.error('Keycloak initialization failed with error: ', error);
+  }).then(() => {
+    (angular as any).resumeBootstrap();
+  });
+});
 
 // add a global resolve flag on all routes (user needs to be resolved first)
-initModule.config(['$routeProvider', ($routeProvider) => {
-  $routeProvider.accessWhen = (path, route) => {
-    route.resolve || (route.resolve = {});
-    route.resolve.app = ['cheBranding', '$q', 'chePreferences', (cheBranding, $q, chePreferences) => {
-      let deferred = $q.defer();
+initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
+  $routeProvider.accessWhen = (path: string, route: che.route.IRoute) => {
+    if (angular.isUndefined(route.resolve)) {
+      route.resolve = {};
+    }
+    (route.resolve as any).app = ['cheBranding', '$q', 'chePreferences', (cheBranding: CheBranding, $q: ng.IQService, chePreferences: ChePreferences) => {
+      const deferred = $q.defer();
       if (chePreferences.getPreferences()) {
         deferred.resolve();
       } else {
         chePreferences.fetchPreferences().then(() => {
           deferred.resolve();
-        }, (error) => {
+        }, (error: any) => {
           deferred.reject(error);
         });
       }
-
       return deferred.promise;
     }];
 
     return $routeProvider.when(path, route);
   };
 
-  $routeProvider.accessOtherWise = (route) => {
-    route.resolve || (route.resolve = {});
-    route.resolve.app = ['$q', 'chePreferences', ($q, chePreferences) => {
-      let deferred = $q.defer();
+  $routeProvider.accessOtherWise = (route: che.route.IRoute) => {
+    if (angular.isUndefined(route.resolve)) {
+      route.resolve = {};
+    }
+    (route.resolve as any).app = ['$q', 'chePreferences', ($q: ng.IQService, chePreferences: ChePreferences) => {
+      const deferred = $q.defer();
       if (chePreferences.getPreferences()) {
         deferred.resolve();
       } else {
         chePreferences.fetchPreferences().then(() => {
           deferred.resolve();
-        }, (error) => {
+        }, (error: any) => {
           deferred.reject(error);
         });
       }
-
       return deferred.promise;
     }];
     return $routeProvider.otherwise(route);
@@ -83,45 +174,40 @@ initModule.config(['$routeProvider', ($routeProvider) => {
 
 }]);
 
-var DEV = false;
-
+const DEV = false;
 
 // configs
-initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipProvider) => {
+initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
       title: 'Demo Components',
       templateUrl: 'app/demo-components/demo-components.html',
-      controller: 'DemoComponentsCtrl',
-      controllerAs: 'demoComponentsCtrl'
+      controller: 'DemoComponentsController',
+      controllerAs: 'demoComponentsController',
+      reloadOnSearch: false
     });
   }
 
   $routeProvider.accessOtherWise({
     redirectTo: '/workspaces'
   });
-  // add .swf path location using ngClipProvider
-  let ngClipProviderPath = DEV ? 'bower_components/zeroclipboard/dist/ZeroClipboard.swf' : 'assets/zeroclipboard/ZeroClipboard.swf';
-  ngClipProvider.setPath(ngClipProviderPath);
 }]);
-
 
 /**
  * Setup route redirect module
  */
 initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope, $location, $routeParams, routingRedirect, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory, cheUIElementsInjectorService, workspaceDetailsService) => {
+  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
 
-    workspaceDetailsService.addPage('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
-    workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
-
     // here only to create instances of these components
+    /* tslint:disable */
     cheIdeFetcher;
     routeHistory;
+    /* tslint:enable */
 
     $rootScope.$on('$viewContentLoaded', () => {
       cheUIElementsInjectorService.injectAll();
@@ -137,20 +223,23 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
       }, 1000);
     });
 
-    $rootScope.$on('$routeChangeStart', (event, next)=> {
+    $rootScope.$on('$routeChangeStart', (event: any, next: any) => {
       if (DEV) {
         console.log('$routeChangeStart event with route', next);
       }
     });
 
-
-    $rootScope.$on('$routeChangeSuccess', (event, next) => {
-      if (next.$$route.title && angular.isFunction(next.$$route.title)) {
-        $rootScope.currentPage = next.$$route.title($routeParams);
+    $rootScope.$on('$routeChangeSuccess', (event: ng.IAngularEvent, next: ng.route.IRoute) => {
+      const route = (<any>next).$$route;
+      if (angular.isFunction(route.title)) {
+        $rootScope.currentPage = route.title($routeParams);
       } else {
-        $rootScope.currentPage = next.$$route.title || 'Dashboard';
+        $rootScope.currentPage = route.title || 'Dashboard';
       }
-
+      const originalPath: string = route.originalPath;
+      if (originalPath && originalPath.indexOf('/ide/') === -1) {
+        $rootScope.showIDE = false;
+      }
       // when a route is about to change, notify the routing redirect node
       if (next.resolve) {
         if (DEV) {
@@ -163,53 +252,14 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     $rootScope.$on('$routeChangeError', () => {
       $location.path('/');
     });
-  }]);
+  }
+]);
 
+initModule.config(['$mdThemingProvider', 'jsonColors', ($mdThemingProvider: ng.material.IThemingProvider, jsonColors: any) => {
 
-// add interceptors
-initModule.factory('ETagInterceptor', ($window, $cookies, $q) => {
-
-  var etagMap = {};
-
-  return {
-    request: (config) => {
-      // add IfNoneMatch request on the che api if there is an existing eTag
-      if ('GET' === config.method) {
-        if (config.url.indexOf('/api') === 0) {
-          let eTagURI = etagMap[config.url];
-          if (eTagURI) {
-            config.headers = config.headers || {};
-            angular.extend(config.headers, {'If-None-Match': eTagURI});
-          }
-        }
-      }
-      return config || $q.when(config);
-    },
-    response: (response) => {
-
-      // if response is ok, keep ETag
-      if ('GET' === response.config.method) {
-        if (response.status === 200) {
-          var responseEtag = response.headers().etag;
-          if (responseEtag) {
-            if (response.config.url.indexOf('/api') === 0) {
-
-              etagMap[response.config.url] = responseEtag;
-            }
-          }
-        }
-
-      }
-      return response || $q.when(response);
-    }
-  };
-});
-
-initModule.config(($mdThemingProvider, jsonColors) => {
-
-  var cheColors = angular.fromJson(jsonColors);
-  var getColor = (key) => {
-    var color = cheColors[key];
+  const cheColors = angular.fromJson(jsonColors);
+  const getColor = (key: string) => {
+    let color = cheColors[key];
     if (!color) {
       // return a flashy red color if color is undefined
       console.log('error, the color' + key + 'is undefined');
@@ -222,38 +272,37 @@ initModule.config(($mdThemingProvider, jsonColors) => {
 
   };
 
-
-  var cheMap = $mdThemingProvider.extendPalette('indigo', {
+  const cheMap = $mdThemingProvider.extendPalette('indigo', {
     '500': getColor('$dark-menu-color'),
     '300': 'D0D0D0'
   });
   $mdThemingProvider.definePalette('che', cheMap);
 
-  var cheDangerMap = $mdThemingProvider.extendPalette('red', {});
+  const cheDangerMap = $mdThemingProvider.extendPalette('red', {});
   $mdThemingProvider.definePalette('cheDanger', cheDangerMap);
 
-  var cheWarningMap = $mdThemingProvider.extendPalette('orange', {
+  const cheWarningMap = $mdThemingProvider.extendPalette('orange', {
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheWarning', cheWarningMap);
 
-  var cheGreenMap = $mdThemingProvider.extendPalette('green', {
+  const cheGreenMap = $mdThemingProvider.extendPalette('green', {
     'A100': '#46AF00',
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheGreen', cheGreenMap);
 
-  var cheDefaultMap = $mdThemingProvider.extendPalette('blue', {
+  const cheDefaultMap = $mdThemingProvider.extendPalette('blue', {
     'A400': getColor('$che-medium-blue-color')
   });
   $mdThemingProvider.definePalette('cheDefault', cheDefaultMap);
 
-  var cheNoticeMap = $mdThemingProvider.extendPalette('blue', {
+  const cheNoticeMap = $mdThemingProvider.extendPalette('blue', {
     'A400': getColor('$mouse-gray-color')
   });
   $mdThemingProvider.definePalette('cheNotice', cheNoticeMap);
 
-  var cheAccentMap = $mdThemingProvider.extendPalette('blue', {
+  const cheAccentMap = $mdThemingProvider.extendPalette('blue', {
     '700': getColor('$che-medium-blue-color'),
     'A400': getColor('$che-medium-blue-color'),
     'A200': getColor('$che-medium-blue-color'),
@@ -261,28 +310,26 @@ initModule.config(($mdThemingProvider, jsonColors) => {
   });
   $mdThemingProvider.definePalette('cheAccent', cheAccentMap);
 
-
-  var cheNavyPalette = $mdThemingProvider.extendPalette('purple', {
+  const cheNavyPalette = $mdThemingProvider.extendPalette('purple', {
     '500': getColor('$che-navy-color'),
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheNavyPalette', cheNavyPalette);
 
-
-  var toolbarPrimaryPalette = $mdThemingProvider.extendPalette('purple', {
+  const toolbarPrimaryPalette = $mdThemingProvider.extendPalette('purple', {
     '500': getColor('$che-white-color'),
     'contrastDefaultColor': 'dark'
   });
   $mdThemingProvider.definePalette('toolbarPrimaryPalette', toolbarPrimaryPalette);
 
-  var toolbarAccentPalette = $mdThemingProvider.extendPalette('purple', {
+  const toolbarAccentPalette = $mdThemingProvider.extendPalette('purple', {
     'A200': 'EF6C00',
     '700': 'E65100',
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('toolbarAccentPalette', toolbarAccentPalette);
 
-  var cheGreyPalette = $mdThemingProvider.extendPalette('grey', {
+  const cheGreyPalette = $mdThemingProvider.extendPalette('grey', {
     'A100': 'efefef',
     'contrastDefaultColor': 'light'
   });
@@ -348,24 +395,19 @@ initModule.config(($mdThemingProvider, jsonColors) => {
   $mdThemingProvider.theme('maincontent-theme')
     .primaryPalette('che')
     .accentPalette('cheAccent');
-});
+}]);
 
 initModule.constant('userDashboardConfig', {
   developmentMode: DEV
 });
 
-initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
-  // add the ETag interceptor for Che API
-  $httpProvider.interceptors.push('ETagInterceptor');
-}]);
-
-
-var instanceRegister = new Register(initModule);
+const instanceRegister = new Register(initModule);
 
 if (DEV) {
-  instanceRegister.controller('DemoComponentsCtrl', DemoComponentsCtrl);
+  instanceRegister.controller('DemoComponentsController', DemoComponentsController);
 }
 
+/* tslint:disable */
 new ProxySettingsConfig(instanceRegister);
 new CheColorsConfig(instanceRegister);
 new CheOutputColorsConfig(instanceRegister);
@@ -378,8 +420,11 @@ new IdeConfig(instanceRegister);
 new DiagnosticsConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
-new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
-new DocsConfig(instanceRegister);
+new FactoryConfig(instanceRegister);
+new OrganizationsConfig(instanceRegister);
+new TeamsConfig(instanceRegister);
+new ProfileConfig(instanceRegister);
+/* tslint:enable */

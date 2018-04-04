@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
@@ -24,10 +24,13 @@ export interface IMachinesListItem extends che.IWorkspaceRuntimeMachine {
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceMachineConfigController {
+
+  static $inject = ['$mdDialog', '$q', '$scope', '$timeout', 'lodash', 'confirmDialogService'];
+
   $mdDialog: ng.material.IDialogService;
   $q: ng.IQService;
   $timeout: ng.ITimeoutService;
-  lodash: _.LoDashStatic;
+  lodash: any;
 
   timeoutPromise;
 
@@ -50,9 +53,13 @@ export class WorkspaceMachineConfigController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService, $q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, lodash: _.LoDashStatic, confirmDialogService: ConfirmDialogService) {
+  constructor($mdDialog: ng.material.IDialogService,
+              $q: ng.IQService,
+              $scope: ng.IScope,
+              $timeout: ng.ITimeoutService,
+              lodash: any,
+              confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -82,7 +89,7 @@ export class WorkspaceMachineConfigController {
       isDev: this.environmentManager.isDev(this.machine),
       memoryLimitBytes: this.environmentManager.getMemoryLimit(this.machine),
       servers: this.environmentManager.getServers(this.machine),
-      agents: this.environmentManager.getAgents(this.machine),
+      installers: this.environmentManager.getAgents(this.machine),
       canEditEnvVariables: this.environmentManager.canEditEnvVariables(this.machine),
       envVariables: this.environmentManager.getEnvVariables(this.machine)
     };
@@ -145,7 +152,7 @@ export class WorkspaceMachineConfigController {
    * @returns {Promise}
    */
   updateAgents(): ng.IPromise<any> {
-    this.environmentManager.setAgents(this.machine, this.machineConfig.agents);
+    this.environmentManager.setAgents(this.machine, this.machineConfig.installers);
     return this.doUpdateConfig();
   }
 
@@ -233,7 +240,6 @@ export class WorkspaceMachineConfigController {
    * @param {MouseEvent} $event
    * @returns {ng.IPromise<any>}
    */
-  // todo
   showDeleteDevMachineDialog($event: MouseEvent): ng.IPromise<any> {
     return this.$mdDialog.show({
       targetEvent: $event,
@@ -253,9 +259,10 @@ export class WorkspaceMachineConfigController {
 
   /**
    * Change machine's source image
+   * @param {string} newImage
    */
-  changeSource(): void {
-    this.environmentManager.setSource(this.machine, this.newImage);
+  changeSource(newImage: string): void {
+    this.environmentManager.setSource(this.machine, newImage);
     this.doUpdateConfig();
   }
 

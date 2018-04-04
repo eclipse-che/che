@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheWebsocket} from '../../../components/api/che-websocket.factory';
@@ -18,31 +18,32 @@ import {DiagnosticCallback} from '../diagnostic-callback';
  */
 export class DiagnosticsWebsocketWsMaster {
 
+  static $inject = ['cheWebsocket', '$timeout'];
+
   /**
    * Websocket handling.
    */
-  private cheWebsocket : CheWebsocket;
+  private cheWebsocket: CheWebsocket;
 
   /**
    * Timeout handling.
    */
-  private $timeout : ng.ITimeoutService;
+  private $timeout: ng.ITimeoutService;
 
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
-  constructor (cheWebsocket: CheWebsocket, $timeout : ng.ITimeoutService) {
+  constructor(cheWebsocket: CheWebsocket, $timeout: ng.ITimeoutService) {
     this.cheWebsocket = cheWebsocket;
     this.$timeout = $timeout;
   }
 
   /**
    * Start the diagnostic and report all progress through the callback
-   * @param diagnosticCallback
-   * @returns {IPromise} when test is finished
+   * @param {DiagnosticCallback} diagnosticCallback
+   * @returns {ng.IPromise<any>} when test is finished
    */
-  start(diagnosticCallback : DiagnosticCallback) : ng.IPromise {
+  start(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
 
     try {
       // define callback
@@ -62,11 +63,10 @@ export class DiagnosticsWebsocketWsMaster {
       // send the message
       diagnosticCallback.getMessageBus().ping();
 
-    } catch (error : any) {
+    } catch (error) {
       diagnosticCallback.error('Unable to connect with websocket to ' + this.cheWebsocket.wsUrl + ': ' + error);
     }
     return diagnosticCallback.getPromise();
   }
-
 
 }

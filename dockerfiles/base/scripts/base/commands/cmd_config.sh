@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -78,8 +78,6 @@ cmd_config() {
 
   fi
 
-  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
-
   # Run the docker configurator
   if ! skip_config; then
     generate_configuration_with_puppet
@@ -121,6 +119,8 @@ cmd_config() {
 
 # Runs puppet image to generate che configuration
 generate_configuration_with_puppet() {
+  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
+
   if is_docker_for_windows; then
     CHE_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/$CHE_MINI_PRODUCT_NAME.env")
   else
@@ -160,14 +160,16 @@ generate_configuration_with_puppet() {
     fi
   fi
 
-  for element in "${CLI_ENV_ARRAY[@]}" 
+  for element in "${CLI_ENV_ARRAY[@]}"
   do
     var1=$(echo $element | cut -f1 -d=)
     var2=$(echo $element | cut -f2 -d=)
 
     if [[ $var1 == CHE_* ]] ||
+       [[ $var1 == IMAGE_* ]]  ||
+       [[ $var1 == *_IMAGE_* ]]  ||
        [[ $var1 == ${CHE_PRODUCT_NAME}_* ]]; then
-      WRITE_PARAMETERS+=" -e \"$var1=$var2\""
+      WRITE_PARAMETERS+=" -e $var1='$var2'"
     fi
   done
 

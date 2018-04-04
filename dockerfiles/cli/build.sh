@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -14,10 +14,10 @@ init --name:cli "$@"
 IMAGE_ALIASES="${ORGANIZATION}/${PREFIX}"
 
 if [[ ! -f "${base_dir}/version/$TAG/images" ]]; then
-	mkdir -p ${base_dir}/version/$TAG/
+    mkdir -p ${base_dir}/version/$TAG/
+    cat ${base_dir}/images.template | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${base_dir}/version/$TAG/images
 fi
 
-cat ${base_dir}/images.template | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${base_dir}/version/$TAG/images
 
 build
 

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 // imports
 import {Parameter} from "../../../spi/decorator/parameter";
@@ -17,7 +17,6 @@ import {CreateWorkspaceConfig} from "../../../api/wsmaster/workspace/workspace";
 import {Log} from "../../../spi/log/log";
 import {I18n} from "../../../spi/i18n/i18n";
 import {Message} from "../../../spi/decorator/message";
-import {org} from "../../../api/dto/che-dto";
 
 /**
  * This class is managing a post-check operation by creating a workspace, starting it and displaying the log data.
@@ -51,9 +50,9 @@ export class PostFlightCheckTest {
         if (updatedArgs.length > 0) {
             url = updatedArgs[0];
         }
-        this.authData = AuthData.parse(url, this.username, this.password);
+        this.authData = new AuthData(url, this.username, this.password);
         if (this.portNumber) {
-            this.authData.port = this.portNumber;
+            this.authData.getMasterLocation().setPort(this.portNumber);
         }
         this.workspace = new Workspace(this.authData);
     }

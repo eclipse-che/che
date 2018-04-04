@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -32,7 +32,6 @@ RUN apk --update add openssh \
 
 COPY manifests /etc/puppet/manifests
 COPY modules /etc/puppet/modules
-COPY docs /files/docs
 COPY entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

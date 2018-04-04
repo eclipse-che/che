@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -73,7 +73,9 @@ cmd_init() {
     warning "($CHE_MINI_PRODUCT_NAME init): 'nightly' installations cannot be upgraded to non-nightly versions"
   fi
 
-  cmd_lifecycle download $FORCE_UPDATE
+  if ! skip_pull; then
+      cmd_lifecycle download $FORCE_UPDATE
+  fi
 
   if require_license; then
     if [[ "${AUTO_ACCEPT_LICENSE}" = "false" ]]; then
@@ -154,8 +156,8 @@ cmd_init_reinit_pre_action() {
   fi
   if [[ ! ${HTTP_PROXY} = "" ]] ||
      [[ ! ${HTTPS_PROXY} = "" ]]; then
-    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_NO_PROXY=.*|${CHE_PRODUCT_NAME}_NO_PROXY=${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=.*|${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=che-host,${NO_PROXY},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_NO_PROXY=.*|${CHE_PRODUCT_NAME}_NO_PROXY=${NO_PROXY:-localhost},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=.*|${CHE_PRODUCT_NAME}_WORKSPACE_NO__PROXY=che-host,${NO_PROXY:-localhost},${CHE_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
   fi
 }
 

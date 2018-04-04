@@ -1,92 +1,84 @@
-.che-input-box .che-input-box-desktop [ng-message],
-.che-input-box .che-input-box-desktop [ng-show]
-  color $error-color
+.che-input-box > div
+  min-height 70px
+  .che-input-box-desktop
+    display flex
+    margin 0
+    [ng-message], [ng-show]
+      color $error-color
 
-.che-input-box-desktop input
-  border 1px solid $default-border-color
-  padding 10px
-  border-radius 2px
+    input, label, .che-input-area, .che-input-asterisk
+      position relative
+      line-height 36px
 
-.che-input-box-desktop input:focus
-  border-color $primary-color
+    label.che-input-box-desktop-label
+      color $primary-color
+      white-space nowrap
+      padding-right 10px
+      overflow hidden
+      text-overflow ellipsis
+      margin 1px 0
 
-.che-input-box-desktop input.ng-invalid:focus
-  border-color $error-color
 
-.che-input-box-desktop input.ng-pristine.ng-untouched.ng-invalid
-  border-color $default-border-color
-
-.che-input-box-desktop
-  margin-top 5px
-  margin-bottom 5px
-
-.che-input-box input:focus
-  outline none
-
-.che-input-box md-input-container
-  width 100%
-
-.che-input-box md-input-container,
-.che-input-box md-input-container label,
-.che-input-box md-input-container input
-  padding-left 0
-  margin-bottom 0
-
-.che-input-box md-input-container.che-input-box-mobile-no-label
-  margin-top 0
-
-label.che-input-box-desktop-label
-  margin-bottom 0
-
-.che-input-box
-  .che-input-box-desktop-value-column
-    position relative
-    width 100%
-    max-width 400px
-    height 60px
-
-    textarea
-      min-width 200px
-      padding-right 30px
+    .che-input-box-desktop-value-column
+      position relative
+      display inline-block
+      width 100%
+      min-height 36px
 
     input
-      min-width 200px
-      padding-right 30px
+      width 100%
+      outline none
+      box-shadow none
       overflow hidden
       text-overflow ellipsis
       white-space nowrap
-      background-color inherit
+      background-color $che-white-color
+      border 1px solid $default-border-color
+      padding 0 20px 0 15px !important
+      border-radius 2px
+
+      &:focus
+        border-color $primary-color
+
+      &:focus:not(.ng-invalid) + .che-input-asterisk, &[type=number]:not(.ng-invalid):hover + .che-input-asterisk
+        display none
+
+      &[required].ng-invalid
+        &:focus::-webkit-input-placeholder, &.ng-dirty::-webkit-input-placeholder
+          color $error-color
+        &:focus::-moz-placeholder, &.ng-dirty::-moz-placeholder
+          color $error-color
+
+      &[readonly]
+        box-shadow none
+        background-color inherit
+
+      &[readonly] + .che-input-asterisk
+        display none
+
+      &[disabled], &[disabled] + .che-input-asterisk
+        color $disabled-color
+
+      &.ng-invalid:focus, &.ng-invalid.ng-dirty
+        border-color $error-color !important
+
+      &.ng-invalid + .che-input-asterisk
+        color $error-color
+
+      &:not(.ng-invalid) + .che-input-asterisk
+        color $secondary-color
+
+      &.ng-pristine.ng-untouched.ng-invalid
+        border-color $default-border-color
 
     .che-input-asterisk
       position absolute
+      padding 0
       top 0
-      right 4px
-      color $error-color
-      font-size 17px
-      line-height 48px
+      right 10px
+      font-size 12px
 
-    .che-input-box-desktop-hidden-text
-      min-width 170px
-      overflow hidden
-      margin-right 30px
-      height 0
-
-  .che-input-box-icon, .che-input-box-icon-xs
-    position absolute
-    top 2px
-    right -7px
-    bottom initial
-    left initial
-    color $primary-color
-  .che-input-box-icon-xs
-    top 13px
-
-  input[disabled], input[disabled] + .che-input-box-icon
+  .label-description
     color $disabled-color
-
-  input[readonly]
-    box-shadow none
-    background-color inherit
-
-  input[readonly] + .che-input-box-icon
-    display none
+    font-size 10px
+    padding 5px 20px 0 0

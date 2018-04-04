@@ -1,102 +1,103 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.github.ide;
 
 import com.google.gwt.i18n.client.Messages;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public interface GitHubLocalizationConstant extends Messages {
-    // MESSAGES
-    @Key("authorization.failed")
-    String authorizationFailed();
+  // MESSAGES
+  @Key("authorization.failed")
+  String authorizationFailed();
 
-    @Key("authorization.request.rejected")
-    String authorizationRequestRejected();
+  @Key("authorization.request.rejected")
+  String authorizationRequestRejected();
 
-    @Key("importProject.message.startWithWhiteSpace")
-    String importProjectMessageStartWithWhiteSpace();
+  @Key("importProject.message.startWithWhiteSpace")
+  String importProjectMessageStartWithWhiteSpace();
 
-    @Key("importProject.message.nameRepoIncorrect")
-    String importProjectMessageNameRepoIncorrect();
+  @Key("importProject.message.nameRepoIncorrect")
+  String importProjectMessageNameRepoIncorrect();
 
-    @Key("importProject.message.protocolIncorrect")
-    String importProjectMessageProtocolIncorrect();
+  @Key("importProject.message.protocolIncorrect")
+  String importProjectMessageProtocolIncorrect();
 
-    @Key("importProject.message.hostIncorrect")
-    String importProjectMessageHostIncorrect();
+  @Key("importProject.message.hostIncorrect")
+  String importProjectMessageHostIncorrect();
 
-    /*
-     * ImportFromGitHub
-     */
-    @Key("import.github.account")
-    String importFromGithubAccount();
+  /*
+   * ImportFromGitHub
+   */
+  @Key("import.github.account")
+  String importFromGithubAccount();
 
-    //Authorization
-    @Key("authorization.dialog.title")
-    String authorizationDialogTitle();
+  // Authorization
+  @Key("authorization.dialog.title")
+  String authorizationDialogTitle();
 
-    @Key("authorization.dialog.text")
-    String authorizationDialogText(String productName);
+  @Key("authorization.dialog.text")
+  String authorizationDialogText(String productName);
 
-    @Key("authorization.message.unableCreateSshKey")
-    String authMessageUnableCreateSshKey();
+  @Key("authorization.message.unableCreateSshKey")
+  String authMessageUnableCreateSshKey();
 
-    @Key("authorization.generateKeyLabel")
-    String authGenerateKeyLabel();
+  @Key("authorization.generateKeyLabel")
+  String authGenerateKeyLabel();
 
-    @Key("authorization.message.keyUploadSuccess")
-    String authMessageKeyUploadSuccess();
+  @Key("authorization.message.keyUploadSuccess")
+  String authMessageKeyUploadSuccess();
 
-    /*
-     * SamplesListGrid
-     */
-    @Key("samplesListGrid.column.name")
-    String samplesListRepositoryColumn();
+  @Key("message.sshKey.generation.promt")
+  String messageSshKeyGenerationPromt();
 
-    @Key("samplesListGrid.column.description")
-    String samplesListDescriptionColumn();
+  /*
+   * SamplesListGrid
+   */
+  @Key("samplesListGrid.column.name")
+  String samplesListRepositoryColumn();
 
-    //GithubImporterPage
-    @Key("view.import.githubImporterPage.projectUrl")
-    String githubImporterPageProjectUrl();
+  @Key("samplesListGrid.column.description")
+  String samplesListDescriptionColumn();
 
-    @Key("view.import.githubImporterPage.recursive")
-    String githubImporterPageRecursive();
+  // GithubImporterPage
+  @Key("view.import.githubImporterPage.projectUrl")
+  String githubImporterPageProjectUrl();
 
-    @Key("view.import.githubImporterPage.projectInfo")
-    String githubImporterPageProjectInfo();
+  @Key("view.import.githubImporterPage.recursive")
+  String githubImporterPageRecursive();
 
-    @Key("view.import.githubImporterPage.projectName")
-    String githubImporterPageProjectName();
+  @Key("view.import.githubImporterPage.projectInfo")
+  String githubImporterPageProjectInfo();
 
-    @Key("view.import.githubImporterPageProjectNamePrompt")
-    String githubImporterPageProjectNamePrompt();
+  @Key("view.import.githubImporterPage.projectName")
+  String githubImporterPageProjectName();
 
-    @Key("view.import.githubImporterPage.projectDescription")
-    String githubImporterPageProjectDescription();
+  @Key("view.import.githubImporterPageProjectNamePrompt")
+  String githubImporterPageProjectNamePrompt();
 
-    @Key("view.import.githubImporterPage.projectDescriptionPrompt")
-    String githubImporterPageProjectDescriptionPrompt();
+  @Key("view.import.githubImporterPage.projectDescription")
+  String githubImporterPageProjectDescription();
 
-    @Key("view.import.githubImporterPage.keepDirectory")
-    String githubImporterPageKeepDirectory();
+  @Key("view.import.githubImporterPage.projectDescriptionPrompt")
+  String githubImporterPageProjectDescriptionPrompt();
 
-    @Key("view.import.githubImporterPage.keepDirectoryField")
-    String githubImporterPageKeepDirectoryField();
+  @Key("view.import.githubImporterPage.keepDirectory")
+  String githubImporterPageKeepDirectory();
 
-    @Key("view.import.githubImporterPage.branchField")
-    String githubImporterPageBranchField();
+  @Key("view.import.githubImporterPage.keepDirectoryField")
+  String githubImporterPageKeepDirectoryField();
 
-    @Key("view.import.githubImporterPage.branch")
-    String githubImporterPageBranch();
+  @Key("view.import.githubImporterPage.branchField")
+  String githubImporterPageBranchField();
+
+  @Key("view.import.githubImporterPage.branch")
+  String githubImporterPageBranch();
 }

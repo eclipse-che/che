@@ -1,10 +1,9 @@
 <div>
   <md-tabs md-dynamic-height md-no-ink-bar="true"
-           md-stretch-tabs="auto"
+           md-stretch-tabs="auto" md-no-ink-bar
            md-selected="workspaceSelectStackCtrl.selectedTabIndex">
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('ready-to-go')">
       <md-tab-label>
-        <md-icon md-font-icon="fa-magic" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Ready-to-go Stacks</span>
       </md-tab-label>
       <md-tab-body>
@@ -13,7 +12,6 @@
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-library')">
       <md-tab-label>
-        <md-icon md-font-icon="fa-sliders" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Stack library</span>
       </md-tab-label>
       <md-tab-body>
@@ -22,7 +20,6 @@
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-import')">
       <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_input_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Stack import</span>
       </md-tab-label>
       <md-tab-body>
@@ -34,7 +31,6 @@
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-authoring')">
       <md-tab-label>
-        <md-icon md-font-icon="fa fa-pencil-square-o" class="che-tab-label-icon tab-fa-icon"></md-icon>
         <span class="che-tab-label-title">Stack authoring</span>
       </md-tab-label>
       <md-tab-body>

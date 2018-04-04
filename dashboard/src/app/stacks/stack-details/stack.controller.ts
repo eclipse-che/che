@@ -1,18 +1,18 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheStack} from '../../../components/api/che-stack.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {CheUIElementsInjectorService} from '../../../components/injector/che-ui-elements-injector.service';
-import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+import {CheUIElementsInjectorService} from '../../../components/service/injector/che-ui-elements-injector.service';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {ImportStackService} from './import-stack.service';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
@@ -25,7 +25,11 @@ const STACK_TEST_POPUP_ID: string = 'stackTestPopup';
  * @author Oleksii Orel
  */
 export class StackController {
-  GENERAL_SCOPE: string = 'general';
+
+  static $inject = ['$q', '$timeout', '$route', '$location', '$log', '$filter', 'cheStack', 'cheWorkspace', '$mdDialog', 'cheNotification',
+   '$document', 'cheUIElementsInjectorService', '$scope', '$window', 'importStackService', 'confirmDialogService'];
+
+   GENERAL_SCOPE: string = 'general';
   ADVANCED_SCOPE: string = 'advanced';
   $q: ng.IQService;
   $log: ng.ILogService;
@@ -50,6 +54,7 @@ export class StackController {
   stackId: string;
   tmpWorkspaceId: string;
   stackName: string;
+  stackDescription: string;
   stackJson: string;
   invalidStack: string;
   stackTags: Array<string>;
@@ -62,9 +67,11 @@ export class StackController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService, confirmDialogService: ConfirmDialogService) {
+  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService,
+    $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService,
+     cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService,
+     $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService, confirmDialogService: ConfirmDialogService) {
     this.$q = $q;
     this.$timeout = $timeout;
     this.$location = $location;
@@ -136,13 +143,20 @@ export class StackController {
    */
   updateData(): void {
     if (this.isCreation) {
-      this.stack = this.getNewStackTemplate();
-      this.stackTags = angular.copy(this.stack.tags);
-      this.stackName = angular.copy(this.stack.name);
+      let stack = this.isImport ? this.importStackService.getStack() : this.cheStack.getStackTemplate();
+      this._updateInputVariables(stack);
     } else {
       this.stackId = (this.$route as any).current.params.stackId;
       this.fetchStack();
     }
+  }
+
+  _updateInputVariables(stack: che.IStack) {
+    const {tags, name, description} = angular.copy(stack);
+    this.stackTags = tags ? tags : [];
+    this.stackName = name ? name : '';
+    this.stackDescription = description;
+    this.stack = stack;
   }
 
   /**
@@ -167,28 +181,8 @@ export class StackController {
     if (this.isCreation) {
       this.$location.path('/stacks');
     }
-    this.stack = angular.copy(this.copyStack);
-    this.stackName = angular.copy(this.stack.name);
-
-    if (this.stack.tags && this.stack.tags.isArray) {
-      this.stackTags = angular.copy(this.stack.tags);
-    } else {
-      this.stackTags = [];
-    }
-
-    this.stackTags = this.stack.tags ? angular.copy(this.stack.tags) : [];
+    this._updateInputVariables(this.copyStack);
     this.updateJsonFromStack();
-  }
-
-  /**
-   * Returns template for the new stack.
-   *
-   * @returns {che.IStack} new stack template
-   */
-  getNewStackTemplate(): che.IStack {
-    let stack: che.IStack = this.isImport ? this.importStackService.getStack() : this.cheStack.getStackTemplate();
-    this.stackName = stack.name;
-    return stack;
   }
 
   /**
@@ -209,15 +203,9 @@ export class StackController {
       this.loading = false;
       this.prepareStackData();
     }, (error: any) => {
-      if (error.status === 304) {
-        this.loading = false;
-        this.stack = this.cheStack.getStackById(this.stackId);
-        this.prepareStackData();
-      } else {
-        this.$log.error(error);
-        this.loading = false;
-        this.invalidStack = error.statusText + error.status;
-      }
+      this.$log.error(error);
+      this.loading = false;
+      this.invalidStack = `${error.statusText} ${error.status}`;
     });
   }
 
@@ -247,14 +235,18 @@ export class StackController {
   }
 
   /**
-   * Updates stack name info.
-   * @param isFormValid {Boolean} true if form is valid
+   * Updates stack name.
    */
-  updateStackName(isFormValid: boolean): void {
-    if (isFormValid === false) {
-      return;
-    }
-    this.stack.name = this.stackName;
+  updateStackName(name: string): void {
+    this.stack.name = name;
+    this.updateJsonFromStack();
+  }
+
+  /**
+   * Updates stack description.
+   */
+  updateStackDescription(): void {
+    this.stack.description = this.stackDescription;
     this.updateJsonFromStack();
   }
 
@@ -262,9 +254,6 @@ export class StackController {
    * Updates stack tags info.
    */
   updateStackTags(): void {
-    if (!this.stack.tags) {
-      this.stack.tags = [];
-    }
     this.stack.tags = angular.copy(this.stackTags);
     this.updateJsonFromStack();
   }
@@ -281,7 +270,7 @@ export class StackController {
    * Update stack from stack's editor json.
    */
   updateStackFromJson(): void {
-    let stack: any;
+    let stack: che.IStack;
     try {
       stack = angular.fromJson(this.stackJson);
     } catch (e) {
@@ -290,9 +279,7 @@ export class StackController {
     }
     this.isStackChange = !angular.equals(stack, this.copyStack);
     if (this.isStackChange) {
-      this.stack = stack;
-      this.stackTags = !stack.tags ? [] : angular.copy(stack.tags);
-      this.stackName = !stack.name ? '' : angular.copy(stack.name);
+      this._updateInputVariables(stack);
     }
   }
 
@@ -300,13 +287,8 @@ export class StackController {
    * Prepare data to be displayed.
    */
   prepareStackData(): void {
-    if (!this.stack.tags) {
-      this.stack.tags = [];
-    }
-    this.stackTags = angular.copy(this.stack.tags);
-
     delete this.stack.links;
-    this.stackName = angular.copy(this.stack.name);
+    this._updateInputVariables(this.stack);
     this.copyStack = angular.copy(this.stack);
     this.updateJsonFromStack();
   }
@@ -320,11 +302,14 @@ export class StackController {
       this.createStack();
       return;
     }
-    this.cheStack.updateStack(this.stack.id, this.stackJson).then((stack: any) => {
-      this.cheNotification.showInfo('Stack is successfully updated.');
-      this.isLoading = false;
-      this.stack = stack;
-      this.prepareStackData();
+    const stack = angular.fromJson(this.stackJson);
+    this.cheStack.updateStack(this.stack.id, stack).then(() => {
+      this.cheStack.fetchStacks().finally(() => {
+        this.cheNotification.showInfo('Stack has been successfully updated.');
+        this.isLoading = false;
+        this.stack = this.cheStack.getStackById(this.stackId);
+        this.prepareStackData();
+      });
     }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
@@ -338,7 +323,8 @@ export class StackController {
    * Creates new stack.
    */
   createStack(): void {
-    this.cheStack.createStack(this.stackJson).then((stack: any) => {
+    const stack = angular.fromJson(this.stackJson);
+    this.cheStack.createStack(stack).then((stack: any) => {
       this.stack = stack;
       this.isLoading = false;
       this.cheStack.fetchStacks();
@@ -398,11 +384,11 @@ export class StackController {
   /**
    * Update projects sequentially by iterating on the number of the projects.
    * @param workspaceId{string} - the ID of the workspace to use for adding commands
-   * @param projects{Array<any>} - the array to follow
+   * @param projects{Array<IProjectTemplate>} - the array to follow
    * @param index{number} - the index of the array of commands
    * @param deferred{ng.IDeferred<any>}
    */
-  updateProjects(workspaceId: string, projects: Array<che.IProject>, index: number, deferred: ng.IDeferred<any>): void {
+  updateProjects(workspaceId: string, projects: Array<che.IProjectTemplate>, index: number, deferred: ng.IDeferred<any>): void {
     if (index < projects.length) {
       let project = projects[index];
       let projectTypeResolverService = this.cheWorkspace.getWorkspaceAgent(workspaceId).getProjectTypeResolver();
@@ -424,12 +410,12 @@ export class StackController {
   /**
    * Add projects.
    * @param workspaceId{string} - the ID of the workspace to use for adding projects
-   * @param projects{Array<che.IProject>} - the adding projects
+   * @param projects{Array<che.IProjectTemplate>} - the adding projects
    * @param deferred{ng.IDeferred<any>}
    *
    * @returns {ng.IPromise<any>}
    */
-  addProjects(workspaceId: string, projects: Array<che.IProject>, deferred: ng.IDeferred<any>): void {
+  addProjects(workspaceId: string, projects: Array<che.IProjectTemplate>, deferred: ng.IDeferred<any>): void {
     if (projects && projects.length) {
       let workspaceAgent = this.cheWorkspace.getWorkspaceAgent(workspaceId);
       workspaceAgent.getProject().createProjects(projects).then(() => {
@@ -445,9 +431,9 @@ export class StackController {
   /**
    * Show popup for stack's testing
    * @param stack {che.IStack}
-   * @param projects {Array<che.IProject>}
+   * @param projects {Array<che.IProjectTemplate>}
    */
-  showStackTestPopup(stack: che.IStack, projects: Array<che.IProject>): void {
+  showStackTestPopup(stack: che.IStack, projects: Array<che.IProjectTemplate>): void {
     this.showIDE = false;
     stack.workspaceConfig.projects = [];
     let deferred = this.$q.defer();
@@ -467,13 +453,7 @@ export class StackController {
         this.$log.error(error);
       });
       this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
-      let tmpWorkspaceIdeUrl = '';
-      angular.forEach(workspace.links, (link: any) => {
-        if (link.rel === 'ide url') {
-          tmpWorkspaceIdeUrl = link.href;
-          return;
-        }
-      });
+      let tmpWorkspaceIdeUrl = workspace.links.ide;
       if (!tmpWorkspaceIdeUrl) {
         this.cheNotification.showError('Testing stack failed.');
         return;
@@ -481,8 +461,6 @@ export class StackController {
       let bodyEl = this.$document.find('body');
       let testPopupEl: string = '<che-modal-popup id="' + STACK_TEST_POPUP_ID + '" ' +
         'title="Testing Stack: ' + stack.name + '" on-close="stackController.closeStackTestPopup()">' +
-        '<div ng-hide="stackController.showIDE" class="main-page-loader">' +
-        '<div class="ide-page-loader-content"><img ng-src="{{branding.loaderURL}}"></div></div>' +
         '<iframe ng-show="stackController.showIDE" class="ide-page-frame" ' +
         'src="' + tmpWorkspaceIdeUrl.toString() + '"></iframe></che-modal-popup>';
       this.cheUIElementsInjectorService.injectAdditionalElement(bodyEl, testPopupEl, this.$scope);
@@ -503,7 +481,7 @@ export class StackController {
    */
   closeStackTestPopup(): void {
     if (this.tmpWorkspaceId) {
-      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId, false);
+      this.cheWorkspace.stopWorkspace(this.tmpWorkspaceId);
       this.tmpWorkspaceId = '';
     }
     this.cheUIElementsInjectorService.deleteElementById(STACK_TEST_POPUP_ID);

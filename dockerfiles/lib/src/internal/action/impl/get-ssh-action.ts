@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 // imports
 import {org} from "../../../api/dto/che-dto"
@@ -17,6 +17,7 @@ import {Workspace} from "../../../api/wsmaster/workspace/workspace";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Ssh} from "../../../api/wsmaster/ssh/ssh";
+
 /**
  * This class is handling the retrieval of default private ssh key of a workspace, login name and port to use
  * @author Florent Benoit
@@ -47,7 +48,7 @@ export class GetSshDataAction {
     workspace : Workspace;
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();
@@ -68,7 +69,7 @@ export class GetSshDataAction {
 
                 // Check ssh agent is there
                 let defaultEnv:string = workspaceDto.getConfig().getDefaultEnv();
-                let agents:Array<string> = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get("dev-machine").getAgents();
+                let agents:Array<string> = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get("dev-machine").getInstallers();
 
                 if (agents.indexOf('org.eclipse.che.ssh') === -1) {
                     return Promise.reject("The SSH agent (org.eclipse.che.ssh) has been disabled for this workspace.")
@@ -76,22 +77,21 @@ export class GetSshDataAction {
 
                 foundWorkspaceDTO = workspaceDto;
 
-            }).then((workspaceDto) => {
+            }).then(() => {
 
                 // need to get ssh key for the workspace
                 let ssh:Ssh = new Ssh(this.authData);
                 return ssh.getPair("workspace", foundWorkspaceDTO.getId());
             }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
 
-                let runtime : org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto = foundWorkspaceDTO.getRuntime().getDevMachine().getRuntime();
-                let user : string = runtime.getProperties().get("config.user");
-                if (user === "") {
-                    // user is root if not defined
-                    user = "root";
-                }
-                let address: Array<string> = runtime.getServers().get("22/tcp").getProperties().getInternalAddress().split(":");
-                let ip:string = address[0];
-                let port:string = address[1];
+                let runtime : org.eclipse.che.api.workspace.shared.dto.RuntimeDto = foundWorkspaceDTO.getRuntime();
+                let user : string = "root";
+                let machines = foundWorkspaceDTO.getRuntime().getMachines();
+                let sshAgentServer = machines.get("dev-machine").getServers().get("ssh");
+
+                let address: Array<string> = sshAgentServer.getUrl().replace("/", "").split(":");
+                let ip:string = address[1];
+                let port:string = address[2];
 
                 Log.getLogger().direct("SSH_IP=" + ip);
                 Log.getLogger().direct("SSH_PORT=" + port);

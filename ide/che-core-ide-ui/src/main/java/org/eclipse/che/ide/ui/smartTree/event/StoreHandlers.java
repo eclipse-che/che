@@ -1,17 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ui.smartTree.event;
 
 import com.google.gwt.event.shared.HandlerRegistration;
-
 import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent.HasStoreAddHandlers;
 import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent.StoreAddHandler;
 import org.eclipse.che.ide.ui.smartTree.event.StoreClearEvent.HasStoreClearHandler;
@@ -27,19 +26,34 @@ import org.eclipse.che.ide.ui.smartTree.event.StoreSortEvent.StoreSortHandler;
 import org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.HasStoreUpdateHandlers;
 import org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.StoreUpdateHandler;
 
-
 /**
- * Aggregating handler interface for {@link StoreAddHandler}, {@link org.eclipse.che.ide.ui.smartTree.event.StoreRemoveEvent.StoreRemoveHandler}, {@link org.eclipse.che.ide.ui.smartTree.event.StoreClearEvent.StoreClearHandler},
- * {@link org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.StoreUpdateHandler}, {@link org.eclipse.che.ide.ui.smartTree.event.StoreDataChangeEvent.StoreDataChangeHandler}, {@link org.eclipse.che.ide.ui.smartTree.event.StoreRecordChangeEvent.StoreRecordChangeHandler}, {@link org.eclipse.che.ide.ui.smartTree.event.StoreSortEvent.StoreSortHandler}.
+ * Aggregating handler interface for {@link StoreAddHandler}, {@link
+ * org.eclipse.che.ide.ui.smartTree.event.StoreRemoveEvent.StoreRemoveHandler}, {@link
+ * org.eclipse.che.ide.ui.smartTree.event.StoreClearEvent.StoreClearHandler}, {@link
+ * org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.StoreUpdateHandler}, {@link
+ * org.eclipse.che.ide.ui.smartTree.event.StoreDataChangeEvent.StoreDataChangeHandler}, {@link
+ * org.eclipse.che.ide.ui.smartTree.event.StoreRecordChangeEvent.StoreRecordChangeHandler}, {@link
+ * org.eclipse.che.ide.ui.smartTree.event.StoreSortEvent.StoreSortHandler}.
  *
  * @author Vlad Zhukovskiy
  */
-public interface StoreHandlers extends StoreAddHandler, StoreRemoveHandler, StoreClearHandler, StoreUpdateHandler, StoreDataChangeHandler,
-                                       StoreRecordChangeHandler, StoreSortHandler {
+public interface StoreHandlers
+    extends StoreAddHandler,
+        StoreRemoveHandler,
+        StoreClearHandler,
+        StoreUpdateHandler,
+        StoreDataChangeHandler,
+        StoreRecordChangeHandler,
+        StoreSortHandler {
 
-    public interface HasStoreHandlers extends HasStoreAddHandlers, HasStoreRemoveHandler, HasStoreUpdateHandlers,
-                                              HasStoreRecordChangeHandlers, HasStoreClearHandler, HasStoreDataChangeHandlers,
-                                              HasStoreSortHandler {
-        HandlerRegistration addStoreHandlers(StoreHandlers handlers);
-    }
+  public interface HasStoreHandlers
+      extends HasStoreAddHandlers,
+          HasStoreRemoveHandler,
+          HasStoreUpdateHandlers,
+          HasStoreRecordChangeHandlers,
+          HasStoreClearHandler,
+          HasStoreDataChangeHandlers,
+          HasStoreSortHandler {
+    HandlerRegistration addStoreHandlers(StoreHandlers handlers);
+  }
 }

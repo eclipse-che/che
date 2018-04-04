@@ -17,12 +17,13 @@ package org.eclipse.che.ide.util.executor;
 /** Mimics {@code java.util.concurrent.Executor} (which isn't available in GWT). */
 public interface Executor {
 
-    public final static Executor SYNC_EXECUTOR = new Executor() {
+  public static final Executor SYNC_EXECUTOR =
+      new Executor() {
         @Override
         public void execute(Runnable command) {
-            command.run();
+          command.run();
         }
-    };
+      };
 
-    void execute(Runnable command);
+  void execute(Runnable command);
 }

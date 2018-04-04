@@ -1,0 +1,61 @@
+<!--
+
+    Copyright (c) 2015-2018 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<div class="load-factory-main-container">
+  <div flex class="ide-loader" layout-align="center center" layout="column">
+    <div class="load-factory-content">
+      <che-loader layout="column" layout-aling="center center">
+        <!--crane and terminals-->
+        <div layout="row" class="che-loader-animation-panel main-page" flex>
+          <div layout="column"
+               hide-xs hide-sm
+               layout-align="end-start">
+            <che-loader-crane che-all-steps="loadFactoryController.getLoadingSteps()"
+                              che-exclude-steps="[loadFactoryController.getLoadingSteps().length-1]"
+                              che-step="{{loadFactoryController.getCurrentProgressStep()}}"
+                              che-switch-on-iteration="true">
+            </che-loader-crane>
+          </div>
+          <div layout="column"
+               layout-align="center center"
+               flex="auto">
+            <che-steps-container class="load-factory-working-log"
+                                 che-all-steps="loadFactoryController.getLoadingSteps()"
+                                 che-current-step="loadFactoryController.getCurrentProgressStep()"></che-steps-container>
+          </div>
+        </div>
+        <!--bottom bar-->
+        <div class="che-loader-bottom-bar" flex="none">
+          <div layout="row" layout-align="center stretch" class="main-page load-factory-bottom-bar">
+            <div flex="50" layout="column" layout-align="end start" class="load-factory-bottom-bar-left">
+              <che-link ng-click="loadFactoryController.backToDashboard()" che-link-text="&larr; Back to Dashboard"
+                        class="load-factory-back-link"></che-link>
+            </div>
+            <div flex="50" layout="column" layout-align="end end" class="load-factory-bottom-bar-right">
+              <div class="load-factory-retry-block"
+                   layout="column" layout-align="start end">
+                <che-button-danger che-button-title="{{loadFactoryController.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
+                                   ng-click="loadFactoryController.resetLoadFactoryInProgress()"
+                                   ng-show="loadFactoryController.getLoadingSteps()[loadFactoryController.getCurrentProgressStep()].hasError"></che-button-danger>
+                <che-link class="load-factory-download-link"
+                          ng-click="loadFactoryController.downloadLogs()"
+                          che-link-text="Problem? download logs"></che-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </che-loader>
+    </div>
+
+    <div class="load-factory-logo logo-color-white" ng-include="branding.logoURL"></div>
+  </div>
+</div>

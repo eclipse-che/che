@@ -1,4 +1,5 @@
 $che-stack-library-selecter-color = $label-info-color
+$che-stack-library-selecter-bg-color = #EEE
 
 .che-stack-library-selecter
   height 110px
@@ -16,7 +17,7 @@ $che-stack-library-selecter-color = $label-info-color
   color $che-stack-library-selecter-color
 
   &:hover
-    background-color #EEE
+    background-color $che-stack-library-selecter-bg-color
 
 
 .che-stack-library-selecter md-card-content
@@ -42,8 +43,8 @@ $che-stack-library-selecter-color = $label-info-color
   margin-left auto
   margin-right auto
   margin-top 16px
-  margin-bottom 0px
-  padding 0px
+  margin-bottom 0
+  padding 0
   height 74px
   width 74px
 
@@ -54,7 +55,7 @@ $che-stack-library-selecter-color = $label-info-color
 
   &:hover
     color $primary-color
-    background-color #EEE
+    background-color $che-stack-library-selecter-bg-color
 
 .che-stack-library-selecter-active:hover .title
   background-color $primary-color
@@ -90,8 +91,36 @@ che-stack-library-selecter
 .che-stack-library-selecter-extra-text
   cursor pointer
   margin-right 7px
-  margin-bottom 2px
+  margin-bottom 7px
+  line-height 5px
 
-.che-stack-library-selecter-text
+.che-stack-library-selecter-descr
   font-size 12px
   padding-left 10px
+  padding-right 20px
+  text-align justify
+  position relative
+
+  $line-height = 16px
+  $text-height = 3 * $line-height
+
+  overflow hidden
+  height $text-height !important
+  min-height $text-height !important
+  max-height $text-height !important
+  line-height $line-height
+  box-sizing content-box
+
+  .che-stack-library-selecter-descr-ellipsis
+    position absolute
+    bottom 0
+    right 20px
+    width 25px
+    display none
+    text-align right
+
+    background-size 100% 100%
+    background linear-gradient(to right, rgba(255, 255, 255, 0), $background-color 50%, $background-color)
+
+.che-stack-library-selecter:hover .che-stack-library-selecter-descr-ellipsis
+  background linear-gradient(to right, rgba(255, 255, 255, 0), $che-stack-library-selecter-bg-color 50%, $che-stack-library-selecter-bg-color)

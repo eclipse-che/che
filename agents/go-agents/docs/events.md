@@ -15,7 +15,8 @@ The first event in the channel, published when client successfully connected to 
   "method": "connected",
   "params": {
     "time": "2016-09-24T16:40:05.098478609+03:00",
-    "channel": "channel-1",
+    "channel": "tunnel-1",
+    "tunnel": "tunnel-1",
     "text": "Hello!"
   }
 }
@@ -92,7 +93,8 @@ it appears only once for one process
     "pid": 1,
     "nativePid": 22164,
     "name": "print",
-    "commandLine": "printf \"\n1\n2\n3\""
+    "commandLine": "printf \"\n1\n2\n3\"",
+    "exitCode" : 0
   }
 }
 ```

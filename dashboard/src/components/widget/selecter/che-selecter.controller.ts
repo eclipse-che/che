@@ -1,14 +1,15 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {ICheSelecterScope} from './che-selecter.directive';
 
 /**
  * This class is handling the controller for the selecter
@@ -16,21 +17,26 @@
  */
 export class CheSelecterCtrl {
 
+  static $inject = ['$scope'];
+
+  $scope: ICheSelecterScope;
+
+  globalSelecterName: string;
+  selectedValuesByKey: Map<string, any>;
+
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($scope) {
+  constructor($scope: ICheSelecterScope) {
     this.$scope = $scope;
     this.globalSelecterName = 'unknown';
     this.selectedValuesByKey = new Map();
   }
 
-
   /**
    * perform sharing state in an upper scope as it may be shared
    */
-  select(globalSelecterName, name) {
+  select(globalSelecterName: string, name: string): void {
     this.globalSelecterName = globalSelecterName;
     this.$scope.$parent.$parent[globalSelecterName + '.selecterSelected'] = name;
 
@@ -49,21 +55,19 @@ export class CheSelecterCtrl {
 
   /**
    * Sets the default type for the given category
-   * @param category the category to use
-   * @param types the available types
+   * @param {string} key
+   * @param values
    */
-  initType(key, values) {
+  initType(key: string, values: any): void {
     // set with first value
     this.selectedValuesByKey.set(key, values[0].id);
-
   }
 
   /**
    * Event when select operation is called
-   * @param category the key of t
-   * @param values
+   * @param {string} key
    */
-  onChangeType(key) {
+  onChangeType(key: string): void {
 
     // look at the model and define the value
     if (this.$scope.valueModel) {

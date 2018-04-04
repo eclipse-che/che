@@ -1,0 +1,53 @@
+# Global Owners
+* @vparfonov
+
+# dashboard
+dashboard/** @ashumilova @benoitf
+
+# dockerfiles
+dockerfiles/** @riuvshin @benoitf
+
+# ide
+ide/che-core-ide-stacks/** @ashumilova
+
+# agents
+agents/** @tolusha
+agents/go-agents/** @garagatyi
+
+# assembly
+assembly/** @riuvshin @skabashnyuk
+
+# core
+core/** @skabashnyuk
+
+# workspace runtime infrastructure implementations
+infrastructures/** @garagatyi
+
+# plugins
+plugins/plugin*debugger/** @tolusha
+plugins/plugin-gdb/** @tolusha
+plugins/plugin-docker/** @garagatyi
+plugins/plugin-java/** @evidolob
+plugins/plugin-languageserver/** @evidolob @dkuleshov
+plugins/plugin-maven/** @evidolob
+plugins/plugin-orion/** @azatsarynnyy
+plugins/plugin-testing*/** @evidolob
+plugins/plugin-traefik/** @benoitf
+
+# wsmaster
+wsmaster/** @skabashnyuk
+wsmaster/che-core-api-workspace*/** @garagatyi
+
+# wsagent
+wsagent/activity/** @skabashnyuk
+wsagent/agent/** @tolusha
+wsagent/che-core-api-debug*/** @tolusha
+wsagent/che-core-api-languageserver*/** @evidolob @dkuleshov
+wsagent/che-core-api-testing*/** @evidolob
+wsagent/che-wsagent-core/** @skabashnyuk
+wsagent/wsagent-local/** @skabashnyuk
+wsagent/che-core-api-project/src/main/java/org/eclipse/che/api/search/server/** @skabashnyuk
+wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabashnyuk
+
+# deploy
+deploy/** @riuvshin @l0rd @garagatyi @eivantsov @sleshchenko

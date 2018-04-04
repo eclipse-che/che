@@ -1,0 +1,149 @@
+<div class="organization-progress-line">
+  <md-progress-linear md-mode="indeterminate"
+                      ng-show="listOrganizationWorkspacesController.isLoading"></md-progress-linear>
+</div>
+<md-content flex class="workspace-list-content" ng-hide="listOrganizationWorkspacesController.isLoading">
+  <che-list-header che-input-placeholder="Search"
+                   che-search-model="listOrganizationWorkspacesController.workspaceFilter.config.name"
+                   che-on-search-change="listOrganizationWorkspacesController.onSearchChanged(str)"
+                   che-hide-search="listOrganizationWorkspacesController.workspaces.length === 0"
+                   che-add-button-title="Add Workspace"
+                   che-add-button-href="#/create-workspace?namespace={{listOrganizationWorkspacesController.organization.qualifiedName}}"
+                   che-delete-button-title="Delete"
+                   che-on-delete="listOrganizationWorkspacesController.deleteSelectedWorkspaces()"
+                   che-hide-delete="listOrganizationWorkspacesController.cheListHelper.isNoItemSelected"
+                   che-hide-header="!listOrganizationWorkspacesController.workspaces || listOrganizationWorkspacesController.cheListHelper.visibleItemsNumber === 0">
+    <div flex="100"
+         layout="row"
+         layout-align="start stretch"
+         class="che-list-item-row">
+      <div layout="column" layout-gt-xs="row"
+           layout-align="start center"
+           class="che-checkbox-area">
+        <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
+          <md-checkbox class="che-list-item-checkbox"
+                       aria-label="Workspace list"
+                       ng-checked="listOrganizationWorkspacesController.cheListHelper.areAllItemsSelected"
+                       ng-click="listOrganizationWorkspacesController.cheListHelper.changeBulkSelection()"></md-checkbox>
+        </div>
+      </div>
+      <div flex hide-xs layout-gt-xs="row"
+           layout-align="start center"
+           class="che-list-item-details">
+        <che-list-header-column flex-gt-xs="25"
+                                che-sort-value='listOrganizationWorkspacesController.workspaceOrderBy'
+                                che-sort-item='config.name'
+                                che-column-title='Name'></che-list-header-column>
+        <che-list-header-column flex-gt-xs="15"
+                                che-sort-value='listOrganizationWorkspacesController.workspaceOrderBy'
+                                che-sort-item='config.environments[0].machineConfigs[0].limits.ram'
+                                che-column-title='RAM'></che-list-header-column>
+        <che-list-header-column flex-gt-xs="15"
+                                che-sort-value='listOrganizationWorkspacesController.workspaceOrderBy'
+                                che-sort-item='config.projects'
+                                che-column-title='Projects'></che-list-header-column>
+        <che-list-header-column flex-gt-xs="30"
+                                che-sort-value='listOrganizationWorkspacesController.workspaceOrderBy'
+                                che-sort-item='attributes.stackId'
+                                che-column-title='Stack'></che-list-header-column>
+        <che-list-header-column flex-gt-xs="15"
+                                che-column-title='Actions'></che-list-header-column>
+      </div>
+    </div>
+  </che-list-header>
+  <che-list ng-show="listOrganizationWorkspacesController.cheListHelper.visibleItemsNumber > 0">
+    <che-list-item
+      ng-repeat="workspace in listOrganizationWorkspacesController.cheListHelper.getVisibleItems() | orderBy:[listOrganizationWorkspacesController.workspaceOrderBy, 'config.name']"
+      flex ng-mouseover="hover=true" ng-mouseout="hover=false">
+      <div flex="100"
+           id="ws-name-{{workspace.config.name}}"
+           data-ws-status="{{workspace.status}}"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <che-list-item-checked
+            ng-model="listOrganizationWorkspacesController.cheListHelper.itemsSelectionStatus[workspace.id]"
+            ng-show="('RUNNING' === workspace.status || 'STOPPED' === workspace.status)"
+            che-aria-label-checkbox="Workspace {{workspace.config.name}}"
+            ng-click="listOrganizationWorkspacesController.cheListHelper.updateBulkSelectionStatus()"></che-list-item-checked>
+        </div>
+        <div flex
+             layout-xs="column" layout-gt-xs="row"
+             layout-align-gt-xs="start center"
+             layout-align-xs="start start"
+             class="che-list-item-details">
+          <!-- Name -->
+          <div flex-gt-xs="25"
+               layout="row"
+               class="workspace-item-name">
+            <span class="che-xs-header noselect" hide-gt-xs>Name</span>
+            <div layout="row" flex>
+              <workspace-status-indicator flex="none" che-status="workspace.status"></workspace-status-indicator>
+              <div class="workspace-name-clip" id="ws-full-name-{{workspace.namespace}}/{{workspace.config.name}}">
+            <span
+              uib-tooltip="{{'RUNNING' === workspace.status ? 'Running' : 'Last modified: ' + (workspace.attributes.updated | amTimeAgo)}}"
+              class="che-hover">
+              <che-clip-the-middle>{{workspace.namespace}}/{{workspace.config.name}}</che-clip-the-middle>
+            </span>
+              </div>
+            </div>
+            <i class="fa fa-clock-o workspace-item-temp" ng-if="workspace.temporary"></i>
+          </div>
+          <!-- RAM -->
+          <div flex-gt-xs="15"
+               class="che-list-item-name workspace-item-ram">
+            <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
+            <span class="workspace-consumed-value" name="workspace-ram-value">{{listOrganizationWorkspacesController.getMemoryLimit(workspace)}}</span>
+          </div>
+          <!-- Projects -->
+          <div flex-gt-xs="15"
+               class="che-list-item-name workspace-item-projects">
+            <span class="che-xs-header noselect" hide-gt-xs>Projects</span>
+            <span class="che-hover" name="workspace-projects-value">{{workspace.config.projects.length}}</span>
+          </div>
+          <!-- Stack ID -->
+          <div flex-gt-xs="30"
+               class="che-list-item-name workspace-item-stack">
+            <span class="che-xs-header noselect" hide-gt-xs>Stack</span>
+            <span class="che-hover" name="workspace-stacks-name">{{workspace.attributes.stackId}}</span>
+          </div>
+          <!-- Actions -->
+          <div flex-gt-xs="15"
+               class="workspace-item-actions">
+            <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+            <div class="che-list-actions" ng-if="listOrganizationWorkspacesController.isOwnWorkspace(workspace.id)"
+                 ng-if="listOrganizationWorkspacesController.isSupported(workspace) === true">
+              <a href="#/workspace/{{workspace.namespace}}/{{workspace.config.name}}?tab=Config"
+                 name="configure-workspace-button"
+                 uib-tooltip="Configure workspace">
+                <span class="fa fa-cog"></span>
+              </a>
+              <span ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Projects');"
+                    uib-tooltip="Add project">
+                 <span class="fa fa-plus-square-o" name="add-project-button"></span>
+              </span>
+            </div>
+            <div class="che-list-item-secondary workspace-item-not-supported"
+                 ng-if="listOrganizationWorkspacesController.isSupported(workspace) === false">
+              <div>
+                <span>Not supported</span>
+                <span class="che-list-actions"><i class="fa fa-question-circle"
+                                                  uib-tooltip="Current infrastructure doesn't support this workspace recipe type."></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </che-list-item>
+
+  </che-list>
+  <div class="che-list-empty">
+    <span ng-show="listOrganizationWorkspacesController.workspaces.length > 0 && listOrganizationWorkspacesController.cheListHelper.visibleItemsNumber === 0">
+          No workspaces found.
+    </span>
+    <span ng-show="!listOrganizationWorkspacesController.workspaces || listOrganizationWorkspacesController.workspaces.length === 0">There are no workspaces.</span>
+  </div>
+</md-content>

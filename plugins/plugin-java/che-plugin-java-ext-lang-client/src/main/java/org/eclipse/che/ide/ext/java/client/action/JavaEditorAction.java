@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.java.client.action;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -25,34 +25,36 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public abstract class JavaEditorAction extends ProjectAction {
 
-    private final FileTypeRegistry fileTypeRegistry;
-    protected     EditorAgent      editorAgent;
+  private final FileTypeRegistry fileTypeRegistry;
+  protected EditorAgent editorAgent;
 
-    public JavaEditorAction(String text,
-                            String description,
-                            SVGResource svgIcon,
-                            EditorAgent editorAgent,
-                            FileTypeRegistry fileTypeRegistry) {
-        super(text, description, svgIcon);
-        this.editorAgent = editorAgent;
-        this.fileTypeRegistry = fileTypeRegistry;
-    }
+  public JavaEditorAction(
+      String text,
+      String description,
+      SVGResource svgIcon,
+      EditorAgent editorAgent,
+      FileTypeRegistry fileTypeRegistry) {
+    super(text, description, svgIcon);
+    this.editorAgent = editorAgent;
+    this.fileTypeRegistry = fileTypeRegistry;
+  }
 
-    public JavaEditorAction(String text, String description, EditorAgent editorAgent, FileTypeRegistry fileTypeRegistry) {
-        this(text, description, null, editorAgent, fileTypeRegistry);
-    }
+  public JavaEditorAction(
+      String text, String description, EditorAgent editorAgent, FileTypeRegistry fileTypeRegistry) {
+    this(text, description, null, editorAgent, fileTypeRegistry);
+  }
 
-    @Override
-    protected void updateProjectAction(ActionEvent e) {
-        if (editorAgent.getActiveEditor() != null) {
-            EditorInput input = editorAgent.getActiveEditor().getEditorInput();
-            VirtualFile file = input.getFile();
-            final String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
-            if ("java".equals(fileExtension) || "class".equals(fileExtension)) {
-                e.getPresentation().setEnabledAndVisible(true);
-                return;
-            }
-        }
-        e.getPresentation().setEnabledAndVisible(false);
+  @Override
+  protected void updateProjectAction(ActionEvent e) {
+    if (editorAgent.getActiveEditor() != null) {
+      EditorInput input = editorAgent.getActiveEditor().getEditorInput();
+      VirtualFile file = input.getFile();
+      final String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
+      if ("java".equals(fileExtension) || "class".equals(fileExtension)) {
+        e.getPresentation().setEnabledAndVisible(true);
+        return;
+      }
     }
+    e.getPresentation().setEnabledAndVisible(false);
+  }
 }

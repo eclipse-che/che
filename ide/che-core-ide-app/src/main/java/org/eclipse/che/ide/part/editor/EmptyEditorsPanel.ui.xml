@@ -1,13 +1,13 @@
 <!--
 
-    Copyright (c) 2012-2017 Codenvy, S.A.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
@@ -16,18 +16,25 @@
     <ui:style type='org.eclipse.che.ide.part.editor.EmptyEditorsPanel.Css'>
         @eval lineColor org.eclipse.che.ide.api.theme.Style.theme.iconColor();
         @eval fontColor org.eclipse.che.ide.api.theme.Style.getMainFontColor();
-        .center{
+        @eval logoFill org.eclipse.che.ide.api.theme.Style.getLogoFill();
+
+        .center {
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0.2;
             margin-bottom: 50px;
         }
+
+        .center g {
+            fill: logoFill;
+        }
+
         .parent {
             position: relative;
             width: 100%;
             height: 100%;
         }
+
         .child {
             position: absolute;
             top: 50%;
@@ -35,30 +42,32 @@
             transform: translate(-50%, -50%);
             width: 215px;
         }
+
         .list {
             padding-left: 26px;
             margin: 0;
             margin-top: 5px;
         }
 
-        .listElement{
+        .listElement {
             font-size: 10px;
             margin-bottom: 3px;
         }
 
-        .title{
+        .title {
             padding-left: 8px;
             border-bottom: 1px solid lineColor;
             font-size: 13px;
             width: 138px;
         }
 
-        .hotKey{
+        .hotKey {
             border: 1px solid fontColor;
             color: fontColor;
             border-radius: 2px;
-            margin-left: 50px;
+            margin-left: 30px;
         }
+
         .actionLabel {
             display: inline-block;
             width: 77px;

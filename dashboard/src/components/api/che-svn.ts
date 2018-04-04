@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -16,11 +16,17 @@
  */
 export class CheSvn {
 
+  static $inject = ['$resource', 'wsagentPath'];
+
+  private $resource: ng.resource.IResourceService;
+  private remoteUrlMap: Map<string, any>;
+  private remoteSvnAPI: any;
+
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($resource, wsagentPath) {
+  constructor($resource: ng.resource.IResourceService,
+              wsagentPath: string) {
 
     // keep resource
     this.$resource = $resource;
@@ -35,20 +41,22 @@ export class CheSvn {
 
   /**
    * Ask for loading repository svn url for the given project
-   * @param workspaceId
-   * @param projectPath
+   *
+   * @param {string} workspaceId
+   * @param {string} projectPath
+   * @returns {angular.IPromise<any>}
    */
-  fetchRemoteUrl(workspaceId, projectPath) {
-    var data = {children: false, revision: 'HEAD', projectPath: projectPath, target: '.'};
+  fetchRemoteUrl(workspaceId: string, projectPath: string): ng.IPromise<any> {
+    const data = {children: false, revision: 'HEAD', projectPath: projectPath, target: '.'};
 
     let promise = this.remoteSvnAPI.getRemoteUrl({
       workspaceId: workspaceId
     }, data).$promise;
 
     // check if it was OK or not
-    let parsedResultPromise = promise.then((svnInfo) => {
-      if(svnInfo.items){
-        svnInfo.items.forEach((item) => {
+    let parsedResultPromise = promise.then((svnInfo: any) => {
+      if (svnInfo.items) {
+        svnInfo.items.forEach((item: any) => {
           this.remoteUrlMap.set(workspaceId + projectPath, {
             name: item.path,
             url: item.uRL
@@ -60,7 +68,7 @@ export class CheSvn {
     return parsedResultPromise;
   }
 
-  getRemoteUrlByKey(workspaceId, projectPath) {
+  getRemoteUrlByKey(workspaceId: string, projectPath: string): any {
     return this.remoteUrlMap.get(workspaceId + projectPath);
   }
 

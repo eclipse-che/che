@@ -1,16 +1,16 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * @ngdoc controller
@@ -19,53 +19,101 @@ import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
  * @author Oleksii Orel
  */
 export class WorkspaceStatusController {
-  cheNotification: CheNotification;
-  cheWorkspace: CheWorkspace;
 
-  isLoading: boolean;
-  workspace: che.IWorkspace;
+  static $inject = ['$rootScope', 'cheWorkspace', 'cheNotification'];
+
+  /**
+   * Root scope service.
+   */
+  private $rootScope: ng.IRootScopeService;
+  private cheNotification: CheNotification;
+  private cheWorkspace: CheWorkspace;
+
+  private isRequestPending: boolean;
+  private workspaceId: string;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor(cheNotification: CheNotification, cheWorkspace: CheWorkspace) {
-    this.cheNotification = cheNotification;
+  constructor($rootScope: ng.IRootScopeService, cheWorkspace: CheWorkspace, cheNotification: CheNotification) {
+    this.$rootScope = $rootScope;
     this.cheWorkspace = cheWorkspace;
-
-    this.isLoading = false;
+    this.cheNotification = cheNotification;
   }
 
-  startWorkspace(): void {
-    if (this.isLoading || !this.workspace || !this.workspace.config || !(this.workspace.status === 'STOPPED' || this.workspace.status === 'ERROR')) {
+  /**
+   * Change workspace status.
+   */
+  changeWorkspaceStatus(): void {
+    if (this.isRequestPending || !this.workspaceId) {
+      return;
+    }
+    const workspace = this.cheWorkspace.getWorkspaceById(this.workspaceId);
+    if (!workspace || !workspace.config) {
       return;
     }
 
-    this.isLoading = true;
-    let promise = this.cheWorkspace.startWorkspace(this.workspace.id, this.workspace.config.defaultEnv);
+    const status = this.getWorkspaceStatus();
+    const isRunButton = status !== WorkspaceStatus.RUNNING && status !== WorkspaceStatus.STOPPING && status !== WorkspaceStatus.STARTING;
+    const environment = workspace.config.defaultEnv;
 
-    promise.then(() => {
-      this.isLoading = false;
-    }, (error: any) => {
-      this.isLoading = false;
-      this.cheNotification.showError(error.data.message ? error.data.message : 'Run workspace error.');
+    if (isRunButton) {
+      this.updateRecentWorkspace(this.workspaceId);
+    }
+    this.isRequestPending = true;
+    this.cheWorkspace.fetchStatusChange(this.workspaceId, 'ERROR').then((data: any) => {
+      this.cheNotification.showError(data.error);
+    });
+
+    const promise = isRunButton ? this.cheWorkspace.startWorkspace(this.workspaceId, environment) : this.cheWorkspace.stopWorkspace(this.workspaceId);
+    promise.catch((error: any) => {
+      this.cheNotification.showError(`${isRunButton ? 'Run' : 'Stop'} workspace error.`, error);
+    }).finally(() => {
+      this.isRequestPending = false;
     });
   }
 
-  stopWorkspace(): void {
-    if (this.isLoading || !this.workspace || this.workspace.status !== 'RUNNING') {
-      return;
+  /**
+   * Returns status of button.
+   *
+   * @returns {boolean} <code>true</code> if button disabled
+   */
+  isButtonDisabled(): boolean {
+    const status = this.getWorkspaceStatus();
+    return this.isRequestPending || status === WorkspaceStatus.STOPPING;
+  }
+
+  /**
+   * Returns current status of workspace
+   * @returns {number}
+   */
+  getWorkspaceStatus(): number {
+    const workspace = this.cheWorkspace.getWorkspaceById(this.workspaceId);
+    if (!workspace || !workspace.status) {
+      return -1;
     }
 
-    this.isLoading = true;
-    let promise = this.cheWorkspace.stopWorkspace(this.workspace.id);
+    return WorkspaceStatus[workspace.status];
+  }
 
-    promise.then(() => {
-      this.isLoading = false;
-    }, (error: any) => {
-      this.isLoading = false;
-      this.cheNotification.showError(error.data.message ? error.data.message : 'Stop workspace error.');
-    });
+  /**
+   * Is show run button.
+   *
+   * @returns {boolean}
+   */
+  isShowRun(): boolean {
+    const status = this.getWorkspaceStatus();
+    return status !== WorkspaceStatus.RUNNING && status !== WorkspaceStatus.STOPPING && status !== WorkspaceStatus.STARTING;
+  }
+
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param {string} workspaceId
+   */
+  updateRecentWorkspace(workspaceId: string): void {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 
 }

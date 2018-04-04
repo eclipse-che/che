@@ -1,9 +1,17 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
+
+
+set -e
+set -u
+
+IMAGE_ALIASES=${IMAGE_ALIASES:-}
+ERROR=${ERROR:-}
+DIR=${DIR:-}
 
 skip_tests() {
   if [ $SKIP_TESTS = "true" ]; then
@@ -30,6 +38,8 @@ init() {
   NAME="che"
   ARGS=""
   OPTIONS=""
+  DOCKERFILE=""
+  BUILD_ARG=""
 
   while [ $# -gt 0 ]; do
     case $1 in
@@ -57,6 +67,12 @@ init() {
       --skip-tests)
         SKIP_TESTS=true
         shift ;;
+      --dockerfile:*)
+        DOCKERFILE="${1#*:}"
+        shift ;;
+      --build-arg:*)
+        BUILD_ARG="--build-arg ${1#*:}"
+        shift ;;
       --*)
         printf "${RED}Unknown parameter: $1${NC}\n"; exit 2 ;;
       *)
@@ -68,11 +84,43 @@ init() {
 }
 
 build() {
-  DIR=$(cd "$(dirname "$0")"; pwd)
+
+  # Compute directory
+  if [ -z $DIR ]; then
+      DIR=$(cd "$(dirname "$0")"; pwd)
+  fi
+
+  # If Dockerfile is empty, build all Dockerfiles
+  if [ -z ${DOCKERFILE} ]; then
+    DOCKERFILES_TO_BUILD="$(ls ${DIR}/Dockerfile*)"
+    ORIGINAL_TAG=${TAG}
+    # Build image for each Dockerfile
+    for dockerfile in ${DOCKERFILES_TO_BUILD}; do
+       dockerfile=$(basename $dockerfile)
+       # extract TAG from Dockerfile
+       if [ ${dockerfile} != "Dockerfile" ]; then
+         TAG=${ORIGINAL_TAG}-$(echo ${dockerfile} | sed -e "s/^Dockerfile.//")
+       fi
+       IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
+       DOCKERFILE=${dockerfile}
+       build_image
+    done
+
+    # restore variables
+    TAG=${ORIGINAL_TAG}
+    IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
+  else
+    # else if specified, build only the one specified
+    build_image
+  fi
+
+}
+
+build_image() {
   printf "${BOLD}Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG${NC}\n"
   # Replace macros in Dockerfiles
-  cat ${DIR}/Dockerfile | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
-  cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} .
+  cat ${DIR}/${DOCKERFILE} | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
+  cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} ${BUILD_ARG} .
   rm ${DIR}/.Dockerfile
   if [ $? -eq 0 ]; then
     printf "Build of ${BLUE}${IMAGE_NAME} ${GREEN}[OK]${NC}\n"

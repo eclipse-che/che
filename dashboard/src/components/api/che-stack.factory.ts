@@ -1,14 +1,22 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
+interface IRemoteStackAPI<T> extends ng.resource.IResourceClass<T> {
+  getStacks(): ng.resource.IResource<T>;
+  getStack(data: {stackId: string}): ng.resource.IResource<T>;
+  updateStack(data: {stackId: string}, stack: che.IStack): ng.resource.IResource<T>;
+  createStack(data: Object, stack: che.IStack): ng.resource.IResource<T>;
+  deleteStack(data: {stackId: string}): ng.resource.IResource<T>;
+}
 
 /**
  * This class is handling the stacks retrieval
@@ -17,27 +25,27 @@
  * @author Ann Shumilova
  */
 export class CheStack {
+
+  static $inject = ['$resource', '$q'];
+
   $resource: ng.resource.IResourceService;
-  stacksById: {[stackId: string]: {stack: any}};
+  stacksById: { [stackId: string]: che.IStack };
   stacks: Array<any>;
   usedStackNames: Array<string>;
-  remoteStackAPI: ng.resource.IResourceClass<ng.resource.IResource<any>>;
-  remoteStackAPI: {
-    getStacks: Function,
-    getStack: Function,
-    updateStack: Function,
-    createStack: Function,
-    deleteStack: Function
-  };
+  remoteStackAPI: IRemoteStackAPI<any>;
+  /**
+   * Angular promise service.
+   */
+  private $q: ng.IQService;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($resource) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService) {
 
     // keep resource
     this.$resource = $resource;
+    this.$q = $q;
 
     // stacks per id
     this.stacksById = {};
@@ -49,8 +57,8 @@ export class CheStack {
     this.usedStackNames = [];
 
     // remote call
-    this.remoteStackAPI = this.$resource('/api/stack', {}, {
-      getStacks: {method: 'GET', url: '/api/stack?maxItems=50', isArray: true}, //TODO 50 items is temp solution while paging is not added
+    this.remoteStackAPI = <IRemoteStackAPI<any>>this.$resource('/api/stack', {}, {
+      getStacks: {method: 'GET', url: '/api/stack?maxItems=50', isArray: true}, // todo: 50 items is temp solution while paging is not added
       getStack: {method: 'GET', url: '/api/stack/:stackId'},
       updateStack: {method: 'PUT', url: '/api/stack/:stackId'},
       createStack: {method: 'POST', url: '/api/stack'},
@@ -60,10 +68,10 @@ export class CheStack {
 
   /**
    * Gets stack template
-   * @returns {stack}
+   * @returns {che.IStack}
    */
   getStackTemplate(): che.IStack {
-    let stack = {
+    const stack = <che.IStack>{
       'name': 'New Stack',
       'description': 'New Java Stack',
       'scope': 'general',
@@ -77,8 +85,8 @@ export class CheStack {
           'default': {
             'machines': {
               'dev-machine': {
-                'agents': [
-                  'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'
+                'installers': [
+                  'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'
                 ],
                 'servers': {},
                 'attributes': {
@@ -87,7 +95,7 @@ export class CheStack {
               }
             },
             'recipe': {
-              'content': 'services:\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n',
+              'content': 'services:\n dev-machine:\n  image: eclipse/ubuntu_jdk8\n',
               'contentType': 'application/x-yaml',
               'type': 'compose'
             }
@@ -95,27 +103,26 @@ export class CheStack {
         },
         'name': 'default',
         'defaultEnv': 'default',
-        'description': null,
         'commands': []
       }
     };
 
-    if (!this.isUniqueName(stack.name)) {
-      stack.name += ' ';
-      for (let pos: number = 1; pos < 1000; pos++) {
-        if (this.isUniqueName(stack.name + pos.toString())) {
-          stack.name += pos.toString();
-          break;
-        }
-      }
-    }
+    let stackName = stack.name;
+    let counter = 1;
+    do {
+      /* tslint:disable */
+      stackName = stack.name + '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4));
+      /* tslint:enable */
+      counter++;
+    } while (!this.isUniqueName(stackName) && counter < 1000);
+    stack.name = stackName;
 
     return stack;
   }
 
   /**
    * Check if the stack's name is unique.
-   * @param name: string
+   * @param name {string}
    * @returns {boolean}
    */
   isUniqueName(name: string): boolean {
@@ -124,24 +131,30 @@ export class CheStack {
 
   /**
    * Fetch the stacks
-   * @returns {$promise: ng.IPromise}
+   * @returns {ng.IPromise<any>}
    */
-  fetchStacks(): ng.IPromise {
-    let promise: ng.IPromise = this.remoteStackAPI.getStacks().$promise;
-    let updatedPromise = promise.then((stacks) => {
+  fetchStacks(): ng.IPromise<any> {
+    let promise = this.remoteStackAPI.getStacks().$promise;
+    let updatedPromise = promise.then((stacks: Array<che.IStack>) => {
       // reset global stacks list
       this.stacks.length = 0;
-      for (let member: any in this.stacksById) {
-        delete this.stacksById[member];
-      }
+      Object.keys(this.stacksById).forEach((stacksId: string) => {
+        delete this.stacksById[stacksId];
+      });
       // reset global stack names list
       this.usedStackNames.length = 0;
-      stacks.forEach((stack: any) => {
+      stacks.forEach((stack: che.IStack) => {
         this.usedStackNames.push(stack.name);
         // add element on the list
         this.stacksById[stack.id] = stack;
         this.stacks.push(stack);
       });
+      return this.$q.when(this.stacks);
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.$q.when(this.stacks);
+      }
+      return this.$q.reject(error);
     });
 
     return updatedPromise;
@@ -149,57 +162,55 @@ export class CheStack {
 
   /**
    * Gets all stacks
-   * @returns {Array}
+   * @returns {Array<che.IStack>}
    */
-  getStacks(): Array {
+  getStacks(): Array<che.IStack> {
     return this.stacks;
   }
 
   /**
    * The stacks per id
-   * @param id: string
-   * @returns {any}
+   * @param id {string}
+   * @returns {che.IStack}
    */
-  getStackById(id: string): any {
+  getStackById(id: string): che.IStack {
     return this.stacksById[id];
   }
 
   /**
    * Creates new stack.
-   * @param stack: any - data for new stack
-   * @returns {$promise: ng.IPromise}
+   * @param stack {che.IStack} - data for new stack
+   * @returns {ng.IPromise<any>}
    */
-  createStack(stack: any): ng.IPromise {
+  createStack(stack: che.IStack): ng.IPromise<any> {
     return this.remoteStackAPI.createStack({}, stack).$promise;
   }
 
   /**
    * Fetch pointed stack.
-   * @param stackId: string - stack's id
-   * @returns {$promise: ng.IPromise}
+   * @param stackId {string} - stack's id
+   * @returns {ng.IPromise<any>}
    */
-  fetchStack(stackId: string): ng.IPromise {
+  fetchStack(stackId: string): ng.IPromise<any> {
     return this.remoteStackAPI.getStack({stackId: stackId}).$promise;
   }
 
   /**
    * Update pointed stack.
-   * @param stackId: string - stack's id
-   * @param stack: any - data for new stack
-   * @returns {$promise: ng.IPromise}
+   * @param stackId {string} - stack's id
+   * @param stack {che.IStack} - data for new stack
+   * @returns {ng.IPromise<any>}
    */
-  updateStack(stackId: string, stack: any): ng.IPromise {
+  updateStack(stackId: string, stack: che.IStack): ng.IPromise<any> {
     return this.remoteStackAPI.updateStack({stackId: stackId}, stack).$promise;
   }
 
   /**
    * Delete pointed stack.
-   * @param stackId: string - stack's id
-   * @returns {$promise: ng.IPromise}
+   * @param stackId {string} - stack's id
+   * @returns {ng.IPromise<any>}
    */
-  deleteStack(stackId: string): ng.IPromise {
+  deleteStack(stackId: string): ng.IPromise<any> {
     return this.remoteStackAPI.deleteStack({stackId: stackId}).$promise;
   }
 }
-
-

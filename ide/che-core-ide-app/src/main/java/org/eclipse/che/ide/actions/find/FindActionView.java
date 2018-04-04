@@ -1,46 +1,42 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.actions.find;
 
+import java.util.Map;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.mvp.View;
 
-import java.util.Map;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public interface FindActionView extends View<FindActionView.ActionDelegate> {
 
-    void focusOnInput();
+  void focusOnInput();
 
-    void show();
+  void show();
 
-    void hide();
+  void hide();
 
-    String getName();
+  String getName();
 
-    void showActions(Map<Action, String> actions);
+  void showActions(Map<Action, String> actions);
 
-    void hideActions();
+  void hideActions();
 
-    boolean getCheckBoxState();
+  boolean getCheckBoxState();
 
-    interface ActionDelegate {
+  interface ActionDelegate {
 
-        void nameChanged(String name, boolean checkBoxState);
+    void nameChanged(String name, boolean checkBoxState);
 
-        void onClose();
+    void onClose();
 
-        void onActionSelected(Action action);
-    }
-
+    void onActionSelected(Action action);
+  }
 }

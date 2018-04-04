@@ -16,40 +16,37 @@ package org.eclipse.che.ide.util.loging;
 
 import com.google.gwt.core.client.GWT;
 
-
 /**
- * Simple Logging class that logs to the browser's console
- * So long as generating the parameters to pass to the logging methods is free
- * of side effects, all Logging code should compile out of your application if
- * logging is disabled.
+ * Simple Logging class that logs to the browser's console So long as generating the parameters to
+ * pass to the logging methods is free of side effects, all Logging code should compile out of your
+ * application if logging is disabled.
  */
 public class Log {
 
-    private static final Logger delegate;
+  private static final Logger delegate;
 
-    static {
-        LogConfig.setLogLevel(LogConfig.LogLevel.INFO);
-        delegate = GWT.isClient() ? new BrowserLogger() : new DummyLogger();
-    }
+  static {
+    LogConfig.setLogLevel(LogConfig.LogLevel.INFO);
+    delegate = GWT.isClient() ? new BrowserLogger() : new DummyLogger();
+  }
 
-    public static void debug(Class<?> clazz, Object... args) {
-        delegate.debug(clazz, args);
-    }
+  public static void debug(Class<?> clazz, Object... args) {
+    delegate.debug(clazz, args);
+  }
 
-    public static void error(Class<?> clazz, Object... args) {
-        delegate.error(clazz, args);
-    }
+  public static void error(Class<?> clazz, Object... args) {
+    delegate.error(clazz, args);
+  }
 
-    public static void info(Class<?> clazz, Object... args) {
-        delegate.info(clazz, args);
-    }
+  public static void info(Class<?> clazz, Object... args) {
+    delegate.info(clazz, args);
+  }
 
-    public static void warn(Class<?> clazz, Object... args) {
-        delegate.warn(clazz, args);
-    }
+  public static void warn(Class<?> clazz, Object... args) {
+    delegate.warn(clazz, args);
+  }
 
-    public static boolean isLoggingEnabled() {
-        return delegate.isLoggingEnabled();
-    }
-
+  public static boolean isLoggingEnabled() {
+    return delegate.isLoggingEnabled();
+  }
 }

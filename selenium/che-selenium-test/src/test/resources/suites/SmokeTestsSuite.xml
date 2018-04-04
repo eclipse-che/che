@@ -1,0 +1,54 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Smoke selenium tests"
+       verbose="10"
+       parallel="classes"
+       thread-count="4">
+    <test name="all">
+        <classes>
+            <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
+            <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
+            <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
+            <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.EditorValidationTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.InheritClassTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.QuickFixAndCodeAssistantFeaturesTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.OpenDeclarationTest"/>
+            <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
+            <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
+            <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.FileStructureBaseOperationTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.NavigateToFileTest"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0093Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0114Test"/>
+            <class name="org.eclipse.che.selenium.refactor.fields.RenamePrivateFieldSmokeTest"/>
+            <class name="org.eclipse.che.selenium.refactor.methods.RenamePrivateMethodTest"/>
+            <class name="org.eclipse.che.selenium.refactor.move.FailMoveItemTest"/>
+            <class name="org.eclipse.che.selenium.refactor.packages.RenamePackageSmokeTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.GenericsTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.TestAnnotationsTest"/>
+            <class name="org.eclipse.che.selenium.intelligencecommand.CheckIntelligenceCommandFromToolbarTest"/>
+            <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckRefreshProjectTreeTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewJavaFilesFromContextMenuTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.ShowFileReferenceTest"/>
+            <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
+            <class name="org.eclipse.che.selenium.mavenplugin.CheckMavenPluginTest"/>
+        </classes>
+    </test>
+</suite>

@@ -1,13 +1,13 @@
 <!--
 
-    Copyright (c) 2012-2017 Codenvy, S.A.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
@@ -15,20 +15,36 @@
     <ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
     <ui:with field="styles" type="org.eclipse.che.ide.projecttype.wizard.categoriespage.CategoriesPageViewImpl.Style"/>
 
-    <ui:style>
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
         .rootDirPanel {
             width: literal("calc(100% - 12px)");
             margin-right: 6px;
         }
 
-        .selectPathButton {
+        .panel {
             position: relative;
+        }
+
+        .pathLabel {
+            position: absolute;
+            left: 0px;
             top: 32px;
-            right: -334px;
-            min-width: 10px;
-            padding: 0px 6px 0px 6px;
-            line-height: 0px;
-            margin: 0px 0px 0px 0px;
+            width: 373px;
+            line-height: 22px;
+            border: 1px solid textFieldBorderColor;
+            height: 22px;
+            box-sizing: border-box;
+            padding: 0 5px 0 5px;
+        }
+
+        .selectPathButton {
+            position: absolute;
+            right: 0px;
+            top: 31px;
+            height: 24px;
+            width: 22px;
+            min-width: 22px;
+            padding: 0px;
         }
     </ui:style>
 
@@ -41,10 +57,10 @@
                             <g:Label ui:field="projectType"
                                      addStyleNames="{styles.labelTitle}"/>
                         </g:FlowPanel>
-                        <g:FlowPanel height="65px" addStyleNames="{styles.namePanel}">
+                        <g:FlowPanel height="65px" addStyleNames="{styles.namePanel} {style.panel}">
                             <g:Label text="Parent:"
                                      addStyleNames="{styles.labelPosition}"/>
-                            <g:Label ui:field="parentPath" addStyleNames="{styles.inputFieldPosition}"/>
+                            <g:Label ui:field="parentPath" addStyleNames="{styles.inputFieldPosition} {style.pathLabel}"/>
                             <g:Button ui:field="selectPath" text="…" addStyleNames="{style.selectPathButton}"/>
                         </g:FlowPanel>
 
@@ -58,7 +74,7 @@
                         <g:FlowPanel height="85px" addStyleNames="{styles.namePanel}">
                             <g:Label text="{locale.createProjectFromTemplateDescription}"
                                      addStyleNames="{styles.labelPosition}"/>
-                            <g:TextArea height="42px" ui:field="projectDescription"
+                            <g:TextArea height="40px" ui:field="projectDescription"
                                         addStyleNames="{styles.inputFieldPosition}"
                                         debugId="file-newProject-projectDescription" tabIndex="2"/>
                         </g:FlowPanel>

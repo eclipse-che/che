@@ -1,6 +1,7 @@
 node default {
   ##################################################################################################
   $che_ip = getValue("CHE_HOST", "localhost")
+  $che_protocol = getValue("CHE_HOST_PROTOCOL","http")
   $che_port = getValue("CHE_PORT", "8080")
   $che_instance = getValue("CHE_INSTANCE","/tmp/che")
   $che_config = getValue("CHE_CONFIG","/path/to/che/che/puppet/sources")
@@ -12,7 +13,9 @@ node default {
   $docker_ip = getValue("CHE_DOCKER_IP","172.17.0.1")
   $docker_host = getValue("DOCKER_HOST","tcp://localhost:2375")
   $che_user = getValue("CHE_USER","root")
-  $che_server_xmx = getValue("CHE_SERVER_XMX","2048")
+  $che_server_url = getValue("CHE_SERVER_URL", "${che_protocol}://${che_ip}:${che_port}")
+  $che_master_container_ram = getValue("CHE_MASTER_CONTAINER_RAM", "750m")
+  $che_docker_ip_external = getValue("CHE_DOCKER_IP_EXTERNAL","")
 
   ###############################
   # Http proxy configuration
@@ -32,18 +35,39 @@ node default {
   # please leave this as it is if you don't need no_proxy configuration
   $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
 
+  ###############################
+  # Single port configuration
+  #
+  $che_single_port = getValue("CHE_SINGLE_PORT","false")
+  $che_single_port_wildcard_domain_host = getValue("CHE_SINGLEPORT_WILDCARD__DOMAIN_HOST","nip.io")
+  $che_single_port_wildcard_domain_ipless = getValue("CHE_SINGLEPORT_WILDCARD__DOMAIN_IPLESS","false")
+
+  ###############################
+  # Che multiuser
+  #
+  $che_multiuser = getValue("CHE_MULTIUSER","false")
+
   ################################
   # DNS resolver configuration
   $dns_resolvers = getValue("CHE_DNS_RESOLVERS","")
 
   ###############################
   # Workspace configuration
-  #
-  $workspace_java_options = getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
 
   $che_jmx_enabled = getValue("CHE_JMX_ENABLED", "false")
   $che_jmx_username = getValue("CHE_JMX_USERNAME", "admin")
   $che_jmx_password = getValue("CHE_JMX_PASSWORD", "Che")
+
+  $che_pg_host = getValue("CHE_POSTGRES_HOST", "postgres")
+  $che_pg_port = getValue("CHE_POSTGRES_PORT", "5432")
+  $che_pg_username = getValue("CHE_POSTGRES_USERNAME", "pgche")
+  $che_pg_password = getValue("CHE_POSTGRES_PASSWORD", "pgchepassword")
+  $che_pg_database = getValue("CHE_POSTGRES_DATABASE", "dbche")
+
+  $system_super_privileged_mode=getValue("SYSTEM_SUPER__PRIVILEGED__MODE", "false")
+
+  $che_keycloak_admin_require_update_password=getValue("CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD", "true")
+
   ###############################
   # Include base module
   include base

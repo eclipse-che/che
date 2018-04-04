@@ -1,0 +1,213 @@
+<che-toolbar che-title="{{organizationDetailsController.organizationName}}"
+             che-breadcrumb-title="{{organizationDetailsController.getBackButtonLink().title}}"
+             che-breadcrumb-href="{{organizationDetailsController.getBackButtonLink().link}}"
+             ng-if="organizationDetailsController.organization">
+  <div class="save-button-placeholder">
+    <che-button-save-flat ng-show="organizationDetailsController.isSaveButtonVisible()"
+                          ng-disabled="organizationDetailsController.isSaveButtonDisabled()"
+                          che-button-title="Save" name="saveButton"
+                          ng-click="organizationDetailsController.updateOrganization()"></che-button-save-flat>
+  </div>
+</che-toolbar>
+
+<md-content md-scroll-y flex md-theme="default"
+            ng-if="organizationDetailsController.organization">
+  <md-tabs md-dynamic-height
+           md-disable-animation
+           md-stretch-tabs="auto"
+           md-selected="organizationDetailsController.selectedTabIndex"
+           md-center-tabs="false"
+           md-no-ink-bar>
+
+    <!-- Settings Tab -->
+    <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Settings);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Settings</span>
+      </md-tab-label>
+      <md-tab-body>
+        <div class="organization-progress-line">
+          <md-progress-linear md-mode="indeterminate"
+                              ng-show="organizationDetailsController.isLoading"></md-progress-linear>
+        </div>
+        <div flex layout="column" class="organization-details-content">
+          <ng-form name="organizationDetailsController.organizationForm">
+            <!-- Name -->
+            <che-label-container che-label-name="Name">
+              <che-input-box che-form="organizationDetailsController.organizationForm"
+                             che-name="name"
+                             aria-label="Name of the organization"
+                             che-place-holder="Name of the organization"
+                             ng-model="organizationDetailsController.newName"
+                             che-readonly="!organizationDetailsController.isUserAllowedTo(organizationDetailsController.UPDATE)"
+                             custom-validator="organizationDetailsController.isUniqueName($value)"
+                             required
+                             ng-maxlength="20"
+                             ng-pattern="/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i">
+                <div ng-message="pattern">The name can contain alphanumeric characters or single '-' inside.
+                </div>
+                <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+                <div ng-message="md-maxlength">The name has to be less than 20 characters long.</div>
+                <div ng-message="customValidator">This organization name is already used.</div>
+              </che-input-box>
+
+            </che-label-container>
+            <div ng-if="!organizationDetailsController.isRootOrganization()">
+              <!-- Workspace cap -->
+              <che-label-container che-label-name="Workspace Cap"
+                                   che-label-description="Maximum number of workspaces for the organization.">
+                <che-input-box che-name="workspaceCap" che-form="organizationDetailsController.organizationForm"
+                               aria-label="workspace cap"
+                               che-place-holder="Total number of workspaces has not been limited."
+                               ng-model="organizationDetailsController.limits.workspaceCap"
+                               che-readonly="!organizationDetailsController.canChangeResourceLimits()"
+                               type="number"
+                               che-type-number
+                               min="0"
+                               max="1000">
+                  <div ng-message="min">A workspace cap should be greater than 0.</div>
+                </che-input-box>
+              </che-label-container>
+
+              <!-- Running workspace cap -->
+              <che-label-container che-label-name="Running Workspace Cap"
+                                   che-label-description="Maximum number of running workspaces for each organization.">
+                <che-input-box che-name="runtimeCap" che-form="organizationDetailsController.organizationForm"
+                               aria-label="runtime cap"
+                               che-place-holder="Number of running workspaces has not been limited."
+                               ng-model="organizationDetailsController.limits.runtimeCap"
+                               che-readonly="!organizationDetailsController.canChangeResourceLimits()"
+                               type="number"
+                               che-type-number
+                               min="0"
+                               max="1000">
+                  <div ng-message="min">A running workspace cap should be greater than 0.</div>
+                </che-input-box>
+              </che-label-container>
+              <!-- Workspace RAM cap -->
+              <che-label-container che-label-name="Workspace RAM Cap" class="organization-ram-cap"
+                                   che-label-description="Maximum RAM organization workspaces can use.">
+                <che-input-box che-name="workspaceRamCap" che-form="organizationDetailsController.organizationForm"
+                               aria-label="runtime cap"
+                               che-place-holder="Workspace RAM has not been limited."
+                               ng-model="organizationDetailsController.limits.ramCap"
+                               che-readonly="!organizationDetailsController.canChangeResourceLimits()"
+                               type="number"
+                               che-type-number
+                               min="0"
+                               max="1000">
+                  <div ng-message="min">A workspace RAM cap should be greater than 0.</div>
+                </che-input-box>
+              </che-label-container>
+            </div>
+            <div ng-if="organizationDetailsController.isRootOrganization()">
+              <!-- Workspace total resources -->
+              <che-label-container che-label-name="Workspace Cap"
+                                   che-label-description="Maximum number of workspaces for the organization.">
+                <che-input-box che-name="workspaceCap" che-form="organizationDetailsController.organizationForm"
+                               aria-label="workspace cap"
+                               che-place-holder="Total number of workspaces has not been limited."
+                               ng-model="organizationDetailsController.totalResources.workspaceCap"
+                               che-readonly="!organizationDetailsController.canChangeResourceLimits()"
+                               type="number"
+                               che-type-number
+                               min="0"
+                               max="1000">
+                  <div ng-message="min">A workspace cap should be greater than 0.</div>
+                </che-input-box>
+              </che-label-container>
+
+              <!-- Running workspace cap -->
+              <che-label-container che-label-name="Running Workspace Cap"
+                                   che-label-description="Maximum number of running workspaces for each organization.">
+                <che-input-box che-name="runtimeCap" che-form="organizationDetailsController.organizationForm"
+                               aria-label="runtime cap"
+                               che-place-holder="Number of running workspaces has not been limited."
+                               ng-model="organizationDetailsController.totalResources.runtimeCap"
+                               che-readonly="!organizationDetailsController.canChangeResourceLimits()"
+                               type="number"
+                               che-type-number
+                               min="0"
+                               max="1000">
+                  <div ng-message="min">A running workspace cap should be greater than 0.</div>
+                </che-input-box>
+              </che-label-container>
+              <!-- Workspace RAM cap -->
+              <che-label-container che-label-name="Workspace RAM Cap" class="organization-ram-cap"
+                                   che-label-description="Maximum RAM organization workspaces can use.">
+                <che-input-box che-name="workspaceRamCap" che-form="organizationDetailsController.organizationForm"
+                               aria-label="runtime cap"
+                               che-place-holder="Workspace RAM has not been limited."
+                               ng-model="organizationDetailsController.totalResources.ramCap"
+                               che-readonly="!organizationDetailsController.canChangeResourceLimits()"
+                               type="number"
+                               che-type-number
+                               min="0"
+                               max="1000">
+                  <div ng-message="min">A workspace RAM cap should be greater than 0.</div>
+                </che-input-box>
+              </che-label-container>
+            </div>
+            <che-label-container class="organization-details-delete-label"
+                                 ng-if="organizationDetailsController.isUserAllowedTo(organizationDetailsController.DELETE)"
+                                 che-label-name="Delete Organization"
+                                 che-label-description="This is irreversible. Deleting your organization will also destroy organization workspaces and stacks.">
+              <che-button-danger che-button-title="Delete"
+                                 ng-click="organizationDetailsController.deleteOrganization(t)"></che-button-danger>
+            </che-label-container>
+          </ng-form>
+        </div>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Members Tab -->
+    <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Members);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Members</span>
+      </md-tab-label>
+      <md-tab-body>
+        <list-organization-members
+          ng-if="organizationDetailsController.organization && organizationDetailsController.organization.id"
+          organization="organizationDetailsController.organization"
+          parent-organization-members="organizationDetailsController.parentOrganizationMembers"
+          editable="organizationDetailsController.isUserAllowedTo(organizationDetailsController.SET_PERMISSIONS)"></list-organization-members>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Sub Organizations Tab -->
+    <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Organization);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Sub-Organizations</span>
+      </md-tab-label>
+      <md-tab-body>
+        <div class="organization-progress-line">
+          <md-progress-linear md-mode="indeterminate"
+                              ng-show="organizationDetailsController.isLoading"></md-progress-linear>
+        </div>
+        <list-organizations is-loading="organizationsController.isInfoLoading"
+                            on-update="organizationDetailsController.fetchSubOrganizations()"
+                            organizations="organizationDetailsController.getSubOrganizations()"></list-organizations>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Workspaces Tab -->
+    <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Workspaces);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Workspaces</span>
+      </md-tab-label>
+      <md-tab-body>
+        <list-organization-workspaces
+          ng-if="organizationDetailsController.organization"
+          organization="organizationDetailsController.organization"></list-organization-workspaces>
+      </md-tab-body>
+    </md-tab>
+
+  </md-tabs>
+</md-content>
+
+<organization-not-found ng-if="!organizationDetailsController.organization"
+                        organization-name="organizationDetailsController.organizationName"></organization-not-found>
+
+<workspace-edit-mode-overlay ng-if="organizationDetailsController.isSaveButtonVisible()"
+                             workspace-edit-disable-save-button="organizationDetailsController.isSaveButtonDisabled()"
+                             workspace-edit-mode-on-save="organizationDetailsController.updateOrganization()"
+                             workspace-edit-mode-on-cancel="organizationDetailsController.cancelChanges()"></workspace-edit-mode-overlay>

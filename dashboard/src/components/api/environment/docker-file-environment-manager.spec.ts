@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -29,12 +29,13 @@ describe('If recipe has content', () => {
         'dev-machine': {
           'attributes': {'memoryLimitBytes': '2147483648'},
           'servers': {},
-          'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+          'volumes': {},
+          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
         }
       },
       'recipe': {
         'type': 'dockerfile',
-        'content': 'FROM codenvy/ubuntu_jdk8\nENV myName=\"John Doe\" myDog=Rex\\ The\\ Dog \\\n    myCat=fluffy',
+        'content': 'FROM codenvy/ubuntu_jdk8\nENV myName="John Doe" myDog=Rex\\ The\\ Dog \\\n    myCat=fluffy',
         'contentType': 'text/x-dockerfile'
       }
     };
@@ -61,7 +62,7 @@ describe('If recipe has content', () => {
       let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
       let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
-      expect(memoryLimit).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
     });
 
     it('should return source', () => {
@@ -106,7 +107,8 @@ describe('If recipe has location', () => {
       'machines': {
         'dev-machine': {
           'servers': {},
-          'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
+          'volumes': {},
+          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
           'attributes': {'memoryLimitBytes': '2147483648'}
         }
       },
@@ -122,10 +124,10 @@ describe('If recipe has location', () => {
 
   describe('DockerFileEnvironmentManager', () => {
 
-    it('cannot edit environment variables', () => {
+    it('can edit environment variables always true', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
 
-      expect(canEditEnvVariables).toBe(false);
+      expect(canEditEnvVariables).toBe(true);
     });
 
     it('should return servers', () => {
@@ -139,7 +141,7 @@ describe('If recipe has location', () => {
       let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
       let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
-      expect(memoryLimit).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
     });
 
     it('cannot return the source', () => {

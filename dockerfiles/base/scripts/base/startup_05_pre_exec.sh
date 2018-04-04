@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ cli_parse () {
 
   case $1 in
     init|config|start|stop|restart|backup|restore|info|offline|destroy|download|\
-    rmi|upgrade|version|ssh|sync|action|test|compile|dir|help)
+    rmi|upgrade|version|ssh|sync|action|test|compile|dir|help|archetype)
     ;;
   *)
     error "You passed an unknown command: $1"

@@ -1,31 +1,31 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.maven.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Contains changes in project model, after updating maven projects
+ *
  * @author Evgen Vidolob
  */
 @DTO
-public interface ProjectsUpdateMessage {
+public interface ProjectsUpdateMessage extends MavenOutputEventDto {
 
-    List<String> getUpdatedProjects();
+  List<String> getUpdatedProjects();
 
-    void setUpdatedProjects(List<String> updatedProjects);
+  void setUpdatedProjects(List<String> updatedProjects);
 
-    List<String> getDeletedProjects();
+  List<String> getDeletedProjects();
 
-    void setDeletedProjects(List<String> deletedProjects);
+  void setDeletedProjects(List<String> deletedProjects);
 }

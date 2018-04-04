@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 
 // imports
@@ -39,9 +39,9 @@ export class CreateStartWorkspaceAction {
     workspace: Workspace;
 
     constructor(args:Array<string>) {
-        let updatedArgs = ArgumentProcessor.inject(this, args);
+        ArgumentProcessor.inject(this, args);
 
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         this.workspace = new Workspace(this.authData);
     }
 
@@ -58,13 +58,7 @@ export class CreateStartWorkspaceAction {
                     Log.getLogger().info('Starting workspace runtime');
                     return this.workspace.startWorkspace(workspaceDto.getId(), !this.isQuiet);
                 }).then((workspaceDto) => {
-                    var ideUrl: string;
-                    workspaceDto.getLinks().forEach((link) => {
-                        if ('ide url' === link.getRel()) {
-                            ideUrl = link.getHref();
-                        }
-                    });
-
+                    let ideUrl: string = workspaceDto.getLinks().get("ide");
                     Log.getLogger().info(ideUrl);
                 });
 

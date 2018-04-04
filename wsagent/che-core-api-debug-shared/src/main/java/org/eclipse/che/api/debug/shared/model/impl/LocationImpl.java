@@ -1,118 +1,144 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.debug.shared.model.impl;
 
+import static com.google.common.base.Objects.equal;
+
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Method;
 
-import java.util.Objects;
-
-/**
- * @author Anatoliy Bazko
- */
+/** @author Anatoliy Bazko */
 public class LocationImpl implements Location {
-    private final String  target;
-    private final int     lineNumber;
-    private final String  resourcePath;
-    private final boolean externalResource;
-    private final int     externalResourceId;
-    private final String  resourceProjectPath;
+  private final String target;
+  private final int lineNumber;
+  private final boolean externalResource;
+  private final int externalResourceId;
+  private final String resourceProjectPath;
+  private final Method method;
+  private final long threadId;
 
-    public LocationImpl(String target,
-                        int lineNumber,
-                        String resourcePath,
-                        boolean externalResource,
-                        int externalResourceId,
-                        String resourceProjectPath) {
-        this.target = target;
-        this.lineNumber = lineNumber;
-        this.resourcePath = resourcePath;
-        this.externalResource = externalResource;
-        this.externalResourceId = externalResourceId;
-        this.resourceProjectPath = resourceProjectPath;
-    }
+  public LocationImpl(
+      String target,
+      int lineNumber,
+      boolean externalResource,
+      int externalResourceId,
+      String resourceProjectPath,
+      Method method,
+      long threadId) {
+    this.target = target;
+    this.lineNumber = lineNumber;
+    this.externalResource = externalResource;
+    this.externalResourceId = externalResourceId;
+    this.resourceProjectPath = resourceProjectPath;
+    this.method = method;
+    this.threadId = threadId;
+  }
 
-    public LocationImpl(String target, int lineNumber) {
-        this(target, lineNumber, null, false, 0, null);
-    }
+  public LocationImpl(
+      String target,
+      int lineNumber,
+      boolean externalResource,
+      int externalResourceId,
+      String resourceProjectPath) {
+    this(target, lineNumber, externalResource, externalResourceId, resourceProjectPath, null, -1);
+  }
 
-    public LocationImpl(String target) {
-        this(target, 0, null, false, 0, null);
-    }
+  public LocationImpl(String target, int lineNumber, String resourceProjectPath) {
+    this(target, lineNumber, false, 0, resourceProjectPath, null, -1);
+  }
 
-    @Override
-    public String getTarget() {
-        return target;
-    }
+  public LocationImpl(String target, int lineNumber) {
+    this(target, lineNumber, false, 0, null, null, -1);
+  }
 
-    @Override
-    public int getLineNumber() {
-        return lineNumber;
-    }
+  @Override
+  public String getTarget() {
+    return target;
+  }
 
-    @Override
-    public String getResourcePath() {
-        return resourcePath;
-    }
+  @Override
+  public int getLineNumber() {
+    return lineNumber;
+  }
 
-    @Override
-    public boolean isExternalResource() {
-        return externalResource;
-    }
+  @Override
+  public boolean isExternalResource() {
+    return externalResource;
+  }
 
-    @Override
-    public int getExternalResourceId() {
-        return externalResourceId;
-    }
+  @Override
+  public int getExternalResourceId() {
+    return externalResourceId;
+  }
 
-    @Override
-    public String getResourceProjectPath() {
-        return resourceProjectPath;
-    }
+  @Override
+  public String getResourceProjectPath() {
+    return resourceProjectPath;
+  }
 
+  @Override
+  public Method getMethod() {
+    return method;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof LocationImpl)) return false;
+  @Override
+  public long getThreadId() {
+    return threadId;
+  }
 
-        LocationImpl location = (LocationImpl)o;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof LocationImpl)) return false;
+    LocationImpl location = (LocationImpl) o;
+    return lineNumber == location.lineNumber
+        && externalResource == location.externalResource
+        && externalResourceId == location.externalResourceId
+        && threadId == location.threadId
+        && equal(target, location.target)
+        && equal(resourceProjectPath, location.resourceProjectPath)
+        && equal(method, location.method);
+  }
 
-        return lineNumber == location.lineNumber &&
-               externalResourceId == location.externalResourceId &&
-               externalResource == location.externalResource &&
-               Objects.equals(resourcePath ,location.resourcePath) &&
-               Objects.equals(resourceProjectPath, location.resourceProjectPath) &&
-               !(target != null ? !target.equals(location.target) : location.target != null);
-    }
+  @Override
+  public int hashCode() {
+    return com.google.common.base.Objects.hashCode(
+        target,
+        lineNumber,
+        externalResource,
+        externalResourceId,
+        resourceProjectPath,
+        method,
+        threadId);
+  }
 
-    @Override
-    public int hashCode() {
-        int result = target != null ? target.hashCode() : 0;
-        result = 31 * result + lineNumber;
-        result = 31 * result + externalResourceId;
-        result = 31 * result + Objects.hashCode(resourcePath);
-        result = 31 * result + (externalResource ? 1 : 0);
-        result = 31 * result + Objects.hashCode(resourceProjectPath);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "LocationImpl{" +
-               "target='" + target + '\'' +
-               ", lineNumber=" + lineNumber +
-               ", resourcePath='" + resourcePath + '\'' +
-               ", externalResource=" + externalResource +
-               ", externalResourceId=" + externalResourceId +
-               ", resourceProjectPath='" + resourceProjectPath + '\'' +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "LocationImpl{"
+        + "target='"
+        + target
+        + '\''
+        + ", lineNumber="
+        + lineNumber
+        + ", externalResource="
+        + externalResource
+        + ", externalResourceId="
+        + externalResourceId
+        + ", resourceProjectPath='"
+        + resourceProjectPath
+        + '\''
+        + ", method="
+        + method
+        + ", threadId="
+        + threadId
+        + '}';
+  }
 }

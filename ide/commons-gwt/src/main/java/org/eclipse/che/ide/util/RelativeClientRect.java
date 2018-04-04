@@ -19,49 +19,50 @@ import elemental.html.ClientRect;
 /** A {@link ClientRect} which is relative to a given point. */
 public class RelativeClientRect implements ClientRect {
 
-    public static ClientRect relativeToRect(ClientRect relativeParent, ClientRect rect) {
-        return new RelativeClientRect((int)relativeParent.getLeft(), (int)relativeParent.getTop(), rect);
-    }
+  public static ClientRect relativeToRect(ClientRect relativeParent, ClientRect rect) {
+    return new RelativeClientRect(
+        (int) relativeParent.getLeft(), (int) relativeParent.getTop(), rect);
+  }
 
-    private final ClientRect rect;
+  private final ClientRect rect;
 
-    private final int offsetLeft;
+  private final int offsetLeft;
 
-    private final int offsetTop;
+  private final int offsetTop;
 
-    public RelativeClientRect(int offsetLeft, int offsetTop, ClientRect rect) {
-        this.offsetLeft = offsetLeft;
-        this.offsetTop = offsetTop;
-        this.rect = rect;
-    }
+  public RelativeClientRect(int offsetLeft, int offsetTop, ClientRect rect) {
+    this.offsetLeft = offsetLeft;
+    this.offsetTop = offsetTop;
+    this.rect = rect;
+  }
 
-    @Override
-    public float getBottom() {
-        return rect.getBottom() - offsetTop;
-    }
+  @Override
+  public float getBottom() {
+    return rect.getBottom() - offsetTop;
+  }
 
-    @Override
-    public float getHeight() {
-        return rect.getHeight();
-    }
+  @Override
+  public float getHeight() {
+    return rect.getHeight();
+  }
 
-    @Override
-    public float getLeft() {
-        return rect.getLeft() - offsetLeft;
-    }
+  @Override
+  public float getLeft() {
+    return rect.getLeft() - offsetLeft;
+  }
 
-    @Override
-    public float getRight() {
-        return rect.getRight() - offsetLeft;
-    }
+  @Override
+  public float getRight() {
+    return rect.getRight() - offsetLeft;
+  }
 
-    @Override
-    public float getTop() {
-        return rect.getTop() - offsetTop;
-    }
+  @Override
+  public float getTop() {
+    return rect.getTop() - offsetTop;
+  }
 
-    @Override
-    public float getWidth() {
-        return rect.getWidth();
-    }
+  @Override
+  public float getWidth() {
+    return rect.getWidth();
+  }
 }

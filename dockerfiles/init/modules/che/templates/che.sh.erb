@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# Copyright (c) 2012-2017 Codenvy, S.A.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Codenvy, S.A. - initial API and implementation
+#   Red Hat, Inc.- initial API and implementation
 #
 
 set -e
@@ -146,11 +146,6 @@ set_environment_variables () {
     echo "!!! Isn't Windows fun?  Long live William Shatner."
     echo "!!!"
     return 1
-  fi
-
-  # Che configuration directory - where che.properties lives
-  if [ -z "${CHE_LOCAL_CONF_DIR}" ]; then
-    export CHE_LOCAL_CONF_DIR="${CHE_HOME}/conf/"
   fi
 
   # Sets the location of the application server and its executables

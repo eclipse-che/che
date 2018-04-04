@@ -1,14 +1,17 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from './workspace/che-workspace.factory';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 /**
  * Test of the CheGit
@@ -18,19 +21,19 @@ describe('CheGit', function () {
   /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
-  var workspace;
+  let workspace;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
   /**
    *  setup module
@@ -40,7 +43,9 @@ describe('CheGit', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheWorkspace, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function (cheWorkspace: CheWorkspace,
+                              cheAPIBuilder: CheAPIBuilder,
+                              cheHttpBackend: CheHttpBackend) {
     workspace = cheWorkspace;
     cheBackend = cheHttpBackend;
     apiBuilder = cheAPIBuilder;
@@ -58,106 +63,125 @@ describe('CheGit', function () {
   /**
    * Check that we're able to fetch local git url
    */
-  it('Fetch local git url', function () {
-      // setup tests objects
-      var agentUrl = 'localhost:3232/wsagent/ext';
-      var workspaceId = 'workspace123test';
-      var projectPath = '/testProject';
-      var localUrl = 'https://eclipse.org/che/git/f1/' + workspaceId + projectPath;
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+  it('Fetch local git url', () => {
+    // setup tests objects
+    const agentUrl = 'http://172.17.0.1:33441/api';
+    const workspaceId = 'workspace123test';
+    const projectPath = '/testProject';
+    const localUrl = 'https://eclipse.org/che/git/f1/' + workspaceId + projectPath;
+    const agentWsUrl = 'ws://172.17.0.1:33441/wsagent';
+    const runtime = {
+      'links': [{'rel': 'wsagent', 'href': agentUrl}],
+      'machines': {
+        'dev-machine': {
+          'servers': {
+            'wsagent/ws': {'url': agentWsUrl},
+            'wsagent/http': {'url': agentUrl}
+          }
+        }
+      }
+    };
+    cheBackend.addWorkspaces([apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build()]);
 
-      cheBackend.addWorkspaces([workspace1]);
+    // providing request
+    // add test localUrl on Http backend
+    cheBackend.addLocalGitUrl(workspaceId, encodeURIComponent(projectPath), localUrl);
 
-      // providing request
-      // add test localUrl on Http backend
-      cheBackend.addLocalGitUrl(workspaceId, encodeURIComponent(projectPath), localUrl);
+    // setup backend
+    cheBackend.setup();
 
-      // setup backend
-      cheBackend.setup();
-
-      workspace.fetchWorkspaceDetails(workspaceId);
-      httpBackend.expectGET('/api/workspace/' + workspaceId);
+    workspace.fetchWorkspaceDetails(workspaceId);
+    httpBackend.expectGET('/api/workspace/' + workspaceId);
 
 
-      // flush command
-      httpBackend.flush();
+    // flush command
+    httpBackend.flush();
 
-      var factory = workspace.getWorkspaceAgent(workspaceId).getGit();
+    const factory = workspace.getWorkspaceAgent(workspaceId).getGit();
 
-      cheBackend.getLocalGitUrl(workspaceId, encodeURIComponent(projectPath));
+    cheBackend.getLocalGitUrl(workspaceId, encodeURIComponent(projectPath));
 
-      // fetch localUrl
-      factory.fetchLocalUrl(projectPath);
+    // fetch localUrl
+    factory.fetchLocalUrl(projectPath);
 
-      // expecting GETs
-      httpBackend.expectGET(agentUrl + '/git/read-only-url?projectPath=' + encodeURIComponent(projectPath));
+    // expecting GETs
+    httpBackend.expectGET(agentUrl + '/git/read-only-url?projectPath=' + encodeURIComponent(projectPath));
 
-      // flush command
-      httpBackend.flush();
+    // flush command
+    httpBackend.flush();
 
-      // now, check url
-      var url = factory.getLocalUrlByKey(projectPath);
+    // now, check url
+    const url = factory.getLocalUrlByKey(projectPath);
 
-      // check local url
-      expect(localUrl).toEqual(url);
-    }
-  );
+    // check local url
+    expect(localUrl).toEqual(url);
+  });
 
   /**
    * Check that we're able to fetch remote git urls
    */
   it('Fetch remote git urls', function () {
-      // setup tests objects
-      var agentUrl = 'localhost:3232/wsagent/ext';
-      var workspaceId = 'workspace123test';
-      var projectPath = '/testProject';
-      var remoteArray = [{
-        'url': 'https://github.com/test1',
-        'name': 'test3'
-      }, {
-        'url': 'https://github.com/test2',
-        'name': 'test1'
-      }, {
-        'url': 'https://github.com/test3',
-        'name': 'test2'
-      }];
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
-      cheBackend.addWorkspaces([workspace1]);
+    // setup tests objects
+    const agentUrl = 'http://172.17.0.1:33441/api';
+    const workspaceId = 'workspace123test';
+    const projectPath = '/testProject';
+    const remoteArray = [{
+      'url': 'https://github.com/test1',
+      'name': 'test3'
+    }, {
+      'url': 'https://github.com/test2',
+      'name': 'test1'
+    }, {
+      'url': 'https://github.com/test3',
+      'name': 'test2'
+    }];
+    const agentWsUrl = 'ws://172.17.0.1:33441/wsagent';
+    const runtime = {
+      'links': [{'rel': 'wsagent', 'href': agentUrl}],
+      'machines': {
+        'dev-machine': {
+          'servers': {
+            'wsagent/ws': {'url': agentWsUrl},
+            'wsagent/http': {'url': agentUrl}
+          }
+        }
+      }
+    };
 
-      // add test remote array with urls on Http backend
-      cheBackend.addRemoteGitUrlArray(workspaceId, encodeURIComponent(projectPath), remoteArray);
+    const workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+    cheBackend.addWorkspaces([workspace1]);
 
-      // setup backend
-      cheBackend.setup();
+    // add test remote array with urls on Http backend
+    cheBackend.addRemoteGitUrlArray(workspaceId, encodeURIComponent(projectPath), remoteArray);
 
-      workspace.fetchWorkspaceDetails(workspaceId);
-      httpBackend.expectGET('/api/workspace/' + workspaceId);
+    // setup backend
+    cheBackend.setup();
 
-      // flush command
-      httpBackend.flush();
+    workspace.fetchWorkspaceDetails(workspaceId);
+    httpBackend.expectGET('/api/workspace/' + workspaceId);
 
-      var factory = workspace.getWorkspaceAgent(workspaceId).getGit();
+    // flush command
+    httpBackend.flush();
 
-      cheBackend.getRemoteGitUrlArray(workspaceId, encodeURIComponent(projectPath));
+    const factory = workspace.getWorkspaceAgent(workspaceId).getGit();
 
-      // fetch localUrl
-      factory.fetchRemoteUrlArray(projectPath);
+    cheBackend.getRemoteGitUrlArray(workspaceId, encodeURIComponent(projectPath));
 
-      // expecting POSTs
-      httpBackend.expectPOST(agentUrl + '/git/remote-list?projectPath=' + encodeURIComponent(projectPath));
+    // fetch localUrl
+    factory.fetchRemoteUrlArray(projectPath);
 
-      // flush command
-      httpBackend.flush();
+    // expecting POSTs
+    httpBackend.expectPOST(agentUrl + '/git/remote-list?projectPath=' + encodeURIComponent(projectPath));
 
-      // now, check url
-      var urlArray = factory.getRemoteUrlArrayByKey(projectPath);
+    // flush command
+    httpBackend.flush();
 
-      // check
-      expect(remoteArray.join()).toEqual(urlArray.join());
-    }
-  );
+    // now, check url
+    const urlArray = factory.getRemoteUrlArrayByKey(projectPath);
+
+    // check
+    expect(remoteArray.join()).toEqual(urlArray.join());
+  });
 
 
 });

@@ -1,12 +1,11 @@
-# Copyright (c) 2012-2016 Codenvy, S.A., Red Hat, Inc
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Mario Loriedo
-#   Codenvy S.A
+#   Red Hat, Inc. - initial API and implementation
 #
 # To build it, run in the repository root:
 #  `docker build -t eclipse/che-server .`
@@ -20,7 +19,7 @@
 #             -v /home/user/che/storage:/home/user/che/storage \
 #             codenvy/che-server
 #           
-FROM openjdk:8u111-jre-alpine
+FROM openjdk:8u131-jre-alpine
 
 ENV LANG=C.UTF-8 \
     DOCKER_VERSION=1.6.0 \
@@ -36,5 +35,9 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/reposit
 
 EXPOSE 8000 8080
 COPY entrypoint.sh /entrypoint.sh
+COPY open-jdk-source-file-location /open-jdk-source-file-location
 ENTRYPOINT ["/entrypoint.sh"]
-ADD eclipse-che.tar.gz /home/user/
+RUN mkdir /logs /data && \
+    chmod 0777 /logs /data
+ADD eclipse-che /home/user/eclipse-che
+RUN find /home/user -type d -exec chmod 777 {} \;

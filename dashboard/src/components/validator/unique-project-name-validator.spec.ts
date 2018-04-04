@@ -1,14 +1,17 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from '../api/workspace/che-workspace.factory';
+import {CheAPIBuilder} from '../api/builder/che-api-builder.factory';
+import {CheHttpBackend} from '../api/test/che-http-backend';
 
 /**
  * Test the git URL
@@ -16,33 +19,37 @@
  */
 
 describe('unique-project-name-validator', function() {
-  var $scope, form, $compiler;
+  let $scope, form, $compiler;
 
   /**
    * Project API
    */
-  var workspace;
+  let workspace;
 
   /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
 
   beforeEach(angular.mock.module('userDashboard'));
 
 
-  beforeEach(inject(function($compile, $rootScope, cheWorkspace, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function($compile: ng.ICompileService,
+                             $rootScope: ng.IRootScopeService,
+                             cheWorkspace: CheWorkspace,
+                             cheAPIBuilder: CheAPIBuilder,
+                             cheHttpBackend: CheHttpBackend) {
     $scope = $rootScope;
     $compiler = $compile;
     workspace = cheWorkspace;
@@ -57,9 +64,9 @@ describe('unique-project-name-validator', function() {
     it('projectAlready exists', function() {
 
       // setup tests objects
-      var idWorkspace1 = 'idOfMyWorkspace1';
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withName('testWorkspace1').withId(idWorkspace1).build();
-      var wksp1Project1 = apiBuilder.getProjectReferenceBuilder().withName('project-wk1-1').build();
+      let idWorkspace1 = 'idOfMyWorkspace1';
+      let workspace1 = apiBuilder.getWorkspaceBuilder().withName('testWorkspace1').withId(idWorkspace1).build();
+      let wksp1Project1 = apiBuilder.getProjectReferenceBuilder().withName('project-wk1-1').build();
 
 
       // add into backend
@@ -80,7 +87,7 @@ describe('unique-project-name-validator', function() {
         }
       };
 
-      var element = angular.element(
+      let element = angular.element(
         '<form name="form">' +
         '<input ng-model="model.name" name="name" unique-project-name="model.getWorkspaceProjects()" />' +
         '</form>'
@@ -100,9 +107,9 @@ describe('unique-project-name-validator', function() {
     it('project not yet defined', function() {
 
       // setup tests objects
-      var idWorkspace1 = 'idOfMyWorkspace1';
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withName('testWorkspace1').withId(idWorkspace1).build();
-      var wksp1Project1 = apiBuilder.getProjectReferenceBuilder().withName('project-wk1-1').build();
+      let idWorkspace1 = 'idOfMyWorkspace1';
+      let workspace1 = apiBuilder.getWorkspaceBuilder().withName('testWorkspace1').withId(idWorkspace1).build();
+      let wksp1Project1 = apiBuilder.getProjectReferenceBuilder().withName('project-wk1-1').build();
 
 
       // add into backend
@@ -124,7 +131,7 @@ describe('unique-project-name-validator', function() {
         }
       };
 
-      var element = angular.element(
+      let element = angular.element(
         '<form name="form">' +
         '<input ng-model="model.name" name="name" unique-project-name="model.getWorkspaceProjects()" />' +
         '</form>'

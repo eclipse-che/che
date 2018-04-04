@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 // imports
 import {org} from "../../api/dto/che-dto"
@@ -37,6 +37,7 @@ import {SSHGenerator} from "../../spi/docker/ssh-generator";
 import {CheFileStructWorkspaceProject} from "./chefile-struct/che-file-struct";
 import {StringUtils} from "../../utils/string-utils";
 import {ExecAgentServiceClientImpl} from "../../api/exec-agent/exec-agent-service-client";
+import {JsonRpcBus} from "../../spi/websocket/json-rpc-bus";
 
 /**
  * Entrypoint for the Chefile handling in a directory.
@@ -69,6 +70,17 @@ export class CheDir {
   currentFolder: string = this.path.resolve('./');
   folderName: any;
   cheFile : any;
+
+  /**
+   * Alternate path to the Chefile file with .Chefile
+   */
+  dotCheFile: string;
+
+  /**
+   * Alternate path to the Chefile file with .chefile
+   */
+  dotCheFileLowercase: string;
+
   dotCheFolder : any;
   workspacesFolder : any;
   cliFolder : any;
@@ -100,6 +112,8 @@ export class CheDir {
     this.currentFolder = this.path.resolve(args[0]);
     this.folderName = this.path.basename(this.currentFolder);
     this.cheFile = this.path.resolve(this.currentFolder, 'Chefile');
+    this.dotCheFile = this.path.resolve(this.currentFolder, '.Chefile');
+    this.dotCheFileLowercase = this.path.resolve(this.currentFolder, '.chefile');
     this.dotCheFolder = this.path.resolve(this.currentFolder, '.che');
     this.dotCheIdFile = this.path.resolve(this.dotCheFolder, 'id');
     this.dotCheSshPrivateKeyFile = this.path.resolve(this.dotCheFolder, 'ssh-key.private');
@@ -197,12 +211,16 @@ export class CheDir {
 
   parse() {
 
-    try {
-      this.fs.statSync(this.cheFile);
-      // we have a file
-    } catch (e) {
+    let cheFiles : Array<any> = this.findCheFiles();
+
+    if (cheFiles.length === 0) {
       Log.getLogger().debug('No chefile defined, use default settings');
       return;
+    } else if (cheFiles.length >= 2) {
+      throw new Error('Error while parsing the Chefile as it was found at ' + JSON.stringify(cheFiles) + '. Only one file at a time is allowed.');
+    } else {
+      this.cheFile = cheFiles[0];
+      Log.getLogger().debug('Parsing chefile with name ', this.cheFile);
     }
 
     // load the chefile script if defined
@@ -260,7 +278,7 @@ export class CheDir {
     Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
     Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
 
-    this.authData.port = this.chefileStruct.server.port;
+    this.authData.getMasterLocation().setPort(this.chefileStruct.server.port);
 
   }
 
@@ -366,6 +384,52 @@ export class CheDir {
 
   }
 
+  /**
+   * Checks if the given file is existing or not
+   * @param filename the  path to check
+   * @returns {boolean} true if it exists
+   */
+  fileExistsCaseSensitive(filename) : boolean {
+    var dir = this.path.dirname(filename);
+    if (dir === '/' || dir === '.') {
+      return true;
+    }
+    var filenames = this.fs.readdirSync(dir);
+    if (filenames.indexOf(this.path.basename(filename)) === -1) {
+      return false;
+    }
+    return this.fileExistsCaseSensitive(dir);
+  }
+
+  /**
+   * Search all the chefiles with the corresponding pattern : Chefile, .Chefile, .chefile
+   * @returns {Array<any>} containing all references found
+   */
+  findCheFiles() : Array<any> {
+
+    let foundCheFiles : Array<any> = new Array<any>();
+
+    // Try with Chefile
+    if (this.fileExistsCaseSensitive(this.cheFile)) {
+      Log.getLogger().debug('Chefile is present at ', this.cheFile);
+      foundCheFiles.push(this.cheFile);
+    }
+
+    // Try with .Chefile
+    if (this.fileExistsCaseSensitive(this.dotCheFile)) {
+      Log.getLogger().debug('The alternate file .Chefile is present at ', this.dotCheFile);
+      foundCheFiles.push(this.dotCheFile);
+    }
+
+    // Try with .chefile
+    if (this.fileExistsCaseSensitive(this.dotCheFileLowercase)) {
+      this.fs.statSync(this.dotCheFileLowercase);
+      Log.getLogger().debug('The alternate file .chefile is present at ', this.dotCheFileLowercase);
+      foundCheFiles.push(this.dotCheFileLowercase);
+    }
+    return foundCheFiles;
+  }
+
 
   init() : Promise<any> {
     return this.isInitialized().then((isInitialized) => {
@@ -373,18 +437,17 @@ export class CheDir {
         Log.getLogger().warn('Che already initialized');
       } else {
         // needs to create folders
+        Log.getLogger().info('Adding', this.dotCheFolder, 'directory');
         this.initCheFolders();
 
+        let cheFiles: Array<any> = this.findCheFiles();
+
         // write a default chefile if there is none
-        try {
-          this.fs.statSync(this.cheFile);
-          Log.getLogger().debug('Chefile is present at ', this.cheFile);
-        } catch (e) {
+        if (cheFiles.length === 0) {
           // write default
           Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
           this.writeDefaultChefile();
         }
-        Log.getLogger().info('Adding', this.dotCheFolder, 'directory');
         return true;
       }
 
@@ -418,12 +481,7 @@ export class CheDir {
         }
 
         // search IDE url link
-        let ideUrl : string = 'N/A';
-        workspaceDto.getLinks().forEach((link) => {
-          if ('ide url' === link.getRel()) {
-            ideUrl = link.getHref();
-          }
-        });
+        let ideUrl : string = workspaceDto.getLinks().get("ide");
         Log.getLogger().info(this.i18n.get('status.workspace.name', this.chefileStructWorkspace.name));
         Log.getLogger().info(this.i18n.get('status.workspace.url', ideUrl));
         Log.getLogger().info(this.i18n.get('status.instance.id', this.instanceId));
@@ -631,7 +689,7 @@ export class CheDir {
     let promises : Array<Promise<any>> = new Array<Promise<any>>();
     Log.getLogger().info(this.i18n.get('up.updating-project'));
 
-    var projectAPI:Project = new Project(workspaceDto);
+    var projectAPI:Project = new Project(workspaceDto, this.authData);
 
     this.chefileStructWorkspace.projects.forEach(project => {
       // no location, use inner project
@@ -674,7 +732,10 @@ export class CheDir {
 
   rsyncProject(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) : Promise<any> {
     var spawn = require('child_process').spawn;
-    let port: string = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers()["22/tcp"].getAddress().split(":")[1];
+
+    let machines = workspaceDto.getRuntime().getMachines();
+    let sshAgentServer = machines.get("dev-machine").getServers().get("ssh");
+    let port: string = sshAgentServer.getUrl().replace("/", "").split(":")[2];
     let username : string = "user@" + this.chefileStruct.server.ip;
 
 
@@ -717,18 +778,15 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
     // ok we have the public key, now storing it
     // get dev machine
-    let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
-
-
-    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4411/tcp");
+    let machines : Map<string,org.eclipse.che.api.workspace.shared.dto.MachineDto> = workspaceDto.getRuntime().getMachines();
+    let machine : org.eclipse.che.api.workspace.shared.dto.MachineDto = machines.get("dev-machine");
+    let execAgentServer : org.eclipse.che.api.workspace.shared.dto.ServerDto = machine.getServers().get("exec-agent/ws");
     let execAgentURI = execAgentServer.getUrl();
     if (execAgentURI.includes("localhost")) {
-      execAgentURI = execAgentServer.getProperties().getInternalUrl();
+        execAgentURI = execAgentURI.replace("localhost", RemoteIp.ip)
     }
-    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
-    execAgentAuthData.token = this.authData.getToken();
 
-    let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
+    let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
     let uuid:string = UUID.build();
 
@@ -738,7 +796,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     customCommand.type = 'custom';
     
    // store in workspace the public key
-   return execAgentServiceClient.executeCommand(workspaceDto, machineId, customCommand, uuid, false);
+   return execAgentServiceClient.executeCommand(customCommand, uuid, false);
  
 }
 
@@ -770,13 +828,15 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
         // Check ssh agent is there
         let defaultEnv : string = workspaceDto.getConfig().getDefaultEnv();
-        let agents : Array<string> = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get("dev-machine").getAgents();
+        let agents : Array<string> = workspaceDto.getConfig().getEnvironments().get(defaultEnv).getMachines().get("dev-machine").getInstallers();
 
         if (agents.indexOf('org.eclipse.che.ssh') === - 1) {
           return Promise.reject("The SSH agent (org.eclipse.che.ssh) has been disabled for this workspace.")
         }
 
-        let port: string = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("22/tcp").getAddress().split(":")[1];
+        let machines = workspaceDto.getRuntime().getMachines();
+        let sshAgentServer = machines.get("dev-machine").getServers().get("ssh");
+        let port: string = sshAgentServer.getUrl().replace("/", "").split(":")[2];
         var spawn = require('child_process').spawn;
 
         let username : string = "user@" + this.chefileStruct.server.ip;
@@ -839,22 +899,18 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
 
   executeCommandsFromCurrentWorkspace(workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) : Promise<any> {
-    // get dev machine
-    let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
-
 
     let promises : Array<Promise<any>> = new Array<Promise<any>>();
     let workspaceCommands : Array<any> = workspaceDto.getConfig().getCommands();
 
-    // get terminal URI
-    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4411/tcp");
+    // get exec-agent URI
+    let machines = workspaceDto.getRuntime().getMachines();
+    let execAgentServer = machines.get("dev-machine").getServers().get("exec-agent/ws");
     let execAgentURI = execAgentServer.getUrl();
     if (execAgentURI.includes("localhost")) {
-      execAgentURI = execAgentServer.getProperties().getInternalUrl();
+        execAgentURI = execAgentURI.replace("localhost", RemoteIp.ip)
     }
-    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
-    execAgentAuthData.token = this.authData.getToken();
-    let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
+    let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
     if (this.chefileStructWorkspace.postload.actions && this.chefileStructWorkspace.postload.actions.length > 0) {
       Log.getLogger().info(this.i18n.get("executeCommandsFromCurrentWorkspace.executing"));
@@ -872,7 +928,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
             customCommand.type = workspaceCommand.type;
             customCommand.attributes = workspaceCommand.attributes;
             Log.getLogger().debug('Executing post-loading workspace command \'' + postLoadingCommand.command + '\'.');
-            promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
+            promises.push(execAgentServiceClientImpl.executeCommand(customCommand, uuid, false));
           }
         });
       } else if (postLoadingCommand.script) {
@@ -880,7 +936,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         customCommand.commandLine = postLoadingCommand.script;
         customCommand.name = 'custom postloading command';
         Log.getLogger().debug('Executing post-loading script \'' + postLoadingCommand.script + '\'.');
-        promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
+        promises.push(execAgentServiceClientImpl.executeCommand(customCommand, uuid, false));
       }
 
 
@@ -1056,22 +1112,22 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
 
   checkCheIsNotRunning() : Promise <boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return false;
     }, (error) => {
-      // find error when connecting so probaly not running
+      // find error when connecting so probably not running
       return true;
     });
   }
 
 
   checkCheIsRunning() : Promise<boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return true;
     }, (error) => {
-      // find error when connecting so probaly not running
+      // find error when connecting so probably not running
       return false;
     });
   }

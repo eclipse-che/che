@@ -1,14 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.maven.client.comunnication.progressor;
+
+import static com.google.gwt.dom.client.Style.Unit.PCT;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -18,11 +20,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.eclipse.che.ide.ui.window.Window;
-
-import static com.google.gwt.dom.client.Style.Unit.PCT;
+import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 
 /**
  * Implementation of {@link ResolveDependencyView}.
@@ -31,46 +30,45 @@ import static com.google.gwt.dom.client.Style.Unit.PCT;
  */
 @Singleton
 public class ResolveDependencyViewImpl extends Window implements ResolveDependencyView {
-    interface ResolveDependencyViewImplUIBinder extends UiBinder<Widget, ResolveDependencyViewImpl> {
+  interface ResolveDependencyViewImplUIBinder extends UiBinder<Widget, ResolveDependencyViewImpl> {}
 
-    }
+  private static ResolveDependencyViewImplUIBinder uiBinder =
+      GWT.create(ResolveDependencyViewImplUIBinder.class);
 
-    private static ResolveDependencyViewImplUIBinder uiBinder = GWT.create(ResolveDependencyViewImplUIBinder.class);
+  @UiField SimplePanel progressContainer;
+  @UiField SimplePanel progress;
+  @UiField Label operationLabel;
 
-    @UiField
-    SimplePanel progressContainer;
-    @UiField
-    SimplePanel progress;
-    @UiField
-    Label       operationLabel;
+  private ActionDelegate delegate;
 
-    private ActionDelegate delegate;
+  @Inject
+  public ResolveDependencyViewImpl(MavenLocalizationConstant locale) {
+    setTitle(locale.windowLoaderTitle());
+    setWidget(uiBinder.createAndBindUi(this));
+  }
 
-    @Inject
-    public ResolveDependencyViewImpl(MavenLocalizationConstant locale) {
-        setTitle(locale.windowLoaderTitle());
-        setWidget(uiBinder.createAndBindUi(this));
+  @Override
+  public void showDialog() {
+    super.show();
+  }
 
-        super.getFooter().setVisible(false);
-    }
+  @Override
+  public void close() {
+    hide();
+  }
 
-    @Override
-    public void show() {
-        super.show();
-    }
+  @Override
+  public void setOperationLabel(String text) {
+    operationLabel.setText(text);
+  }
 
-    @Override
-    public void setOperationLabel(String text) {
-        operationLabel.setText(text);
-    }
+  @Override
+  public void updateProgressBar(int percent) {
+    progress.getElement().getStyle().setWidth(percent, PCT);
+  }
 
-    @Override
-    public void updateProgressBar(int percent) {
-        progress.getElement().getStyle().setWidth(percent, PCT);
-    }
-
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 }

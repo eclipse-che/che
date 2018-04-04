@@ -1,18 +1,22 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheAPI} from '../../../../components/api/che-api.factory';
-import {CheNotification} from '../../../../components/notification/che-notification.factory';
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {StackSelectorSvc} from '../../create-workspace/stack-selector/stack-selector.service';
+import {RandomSvc} from '../../../../components/utils/random.service';
+import {WorkspaceDetailsProjectsService} from './workspace-details-projects.service';
+import {WorkspaceDetailsService} from '../workspace-details.service';
+import {CreateWorkspaceSvc} from '../../create-workspace/create-workspace.service';
+import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * @ngdoc controller
@@ -20,209 +24,222 @@ import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
  * @description This class is handling the controller for details of workspace : section projects
  * @author Ann Shumilova
  * @author Oleksii Orel
+ * @author Oleksii Kurinnyi
  */
 export class WorkspaceDetailsProjectsCtrl {
 
-  namespace: string;
-  workspaceId: string;
-  workspaceKey: string;
-  workspaceName: string;
-  projectFilter: any;
-  profileCreationDate: any;
-  projectsSelectedStatus: any;
-  isNoSelected: boolean;
-  isAllSelected: boolean;
-  isBulkChecked: boolean;
-  workspace: che.IWorkspace;
-  projects: Array<che.IProject>;
+  static $inject = ['cheAPI', '$mdDialog', 'confirmDialogService', '$scope', 'cheListHelperFactory', 'stackSelectorSvc', 'randomSvc', 'createWorkspaceSvc', 'workspaceDetailsService', 'workspaceDetailsProjectsService'];
 
-  private $q: ng.IQService;
-  private $log: ng.ILogService;
-  private cheWorkspace: CheWorkspace;
-  private cheNotification: CheNotification;
+  /**
+   * Material design Dialog service.
+   */
   private $mdDialog: ng.material.IDialogService;
+  /**
+   * Confirm dialog service.
+   */
   private confirmDialogService: ConfirmDialogService;
+  /**
+   * List helper.
+   */
+  private cheListHelper: che.widget.ICheListHelper;
+  /**
+   * Stack selector service.
+   */
+  private stackSelectorSvc: StackSelectorSvc;
+  /**
+   * Generator for random strings.
+   */
+  private randomSvc: RandomSvc;
+  /**
+   * Service for Project's tab on Workspace Details page.
+   */
+  private workspaceDetailsProjectsService: WorkspaceDetailsProjectsService;
+  /**
+   * Workspace creation service.
+   */
+  private createWorkspaceSvc: CreateWorkspaceSvc;
+  /**
+   * Workspace details service.
+   */
+  private workspaceDetailsService: WorkspaceDetailsService;
+
+  private projectFilter: any;
+  private profileCreationDate: any;
+  /**
+   * Current workspace.
+   */
+  private workspaceDetails: che.IWorkspace;
+  /**
+   * Callback which is called on new templates added.
+   * Provided by parent controller.
+   */
+  private projectsOnChange: () => void;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($route: ng.route.IRouteService, cheAPI: CheAPI, cheNotification: CheNotification, $mdDialog: ng.material.IDialogService, $log: ng.ILogService, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
-    this.cheWorkspace = cheAPI.getWorkspace();
-    this.cheNotification = cheNotification;
+  constructor(cheAPI: CheAPI,
+              $mdDialog: ng.material.IDialogService,
+              confirmDialogService: ConfirmDialogService,
+              $scope: ng.IScope,
+              cheListHelperFactory: che.widget.ICheListHelperFactory,
+              stackSelectorSvc: StackSelectorSvc,
+              randomSvc: RandomSvc,
+              createWorkspaceSvc: CreateWorkspaceSvc,
+              workspaceDetailsService: WorkspaceDetailsService,
+              workspaceDetailsProjectsService: WorkspaceDetailsProjectsService) {
     this.$mdDialog = $mdDialog;
-    this.$log = $log;
-    this.$q = $q;
     this.confirmDialogService = confirmDialogService;
+    this.stackSelectorSvc = stackSelectorSvc;
+    this.randomSvc = randomSvc;
+    this.workspaceDetailsProjectsService = workspaceDetailsProjectsService;
+    this.createWorkspaceSvc = createWorkspaceSvc;
+    this.workspaceDetailsService = workspaceDetailsService;
 
-    this.namespace = $route.current.params.namespace;
-    this.workspaceName = $route.current.params.workspaceName;
-    this.workspaceKey = this.namespace + '/' + this.workspaceName;
+    const helperId = 'workspace-details-projects';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
-    let preferences = cheAPI.getPreferences().getPreferences();
-
+    const preferences = cheAPI.getPreferences().getPreferences();
     this.profileCreationDate = preferences['che:created'];
+
     this.projectFilter = {name: ''};
-    this.projectsSelectedStatus = {};
-    this.isNoSelected = true;
-    this.isAllSelected = false;
-    this.isBulkChecked = false;
 
-    let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
-    promise.then(() => {
-      this.updateProjectsData();
-    }, (error: any) => {
-      if (error.status === 304) {
-        this.updateProjectsData();
+    const workspaceEditWatcher = $scope.$on('edit-workspace-details', (event: ng.IAngularEvent, data: {status: string}) => {
+      if (data.status === 'saved' || data.status === 'cancelled') {
+        this.workspaceDetailsProjectsService.clearProjectTemplates();
+        this.workspaceDetailsProjectsService.clearProjectNamesToDelete();
       }
     });
-  }
 
-  updateProjectsData(): void {
-    this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
-    this.projects = [];
+    this.updateProjectsData(this.workspaceDetails);
+    const action = this.updateProjectsData.bind(this);
+    workspaceDetailsService.subscribeOnWorkspaceChange(action);
 
-    // filter only root projects (do not show sub-projects of multi-project item):
-    this.workspace.config.projects.forEach((project: any) => {
-      let path = project.path.replace('/', '');
-      if (path === project.name) {
-        this.projects.push(project);
-      }
-    });
-    this.workspaceId = this.workspace.id;
-  }
+    $scope.$on('$destroy', () => {
+      workspaceDetailsService.unsubscribeOnWorkspaceChange(action);
+      this.workspaceDetailsProjectsService.clearProjectTemplates();
 
-  /**
-   * Check all projects in list
-   */
-  selectAllProjects(): void {
-    this.projects.forEach((project: che.IProject) => {
-      this.projectsSelectedStatus[project.name] = true;
+      // unregister watcher
+      workspaceEditWatcher();
     });
   }
 
   /**
-   * Uncheck all projects in list
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter projects names
    */
-  deselectAllProjects(): void {
-    this.projects.forEach((project: che.IProject) => {
-      this.projectsSelectedStatus[project.name] = false;
-    });
+  onSearchChanged(str: string): void {
+    this.projectFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.projectFilter);
   }
 
   /**
-   * Change bulk selection value
+   * Creates list of existing projects and not imported ones.
+   *
+   * @param {che.IWorkspace} workspaceDetails
    */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllProjects();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllProjects();
-      this.isBulkChecked = true;
+  updateProjectsData(workspaceDetails: che.IWorkspace): void {
+    if (!workspaceDetails) {
+      return;
     }
-    this.updateSelectedStatus();
+    this.workspaceDetails = workspaceDetails;
+    this.stackSelectorSvc.setStackId(this.workspaceDetails.attributes.stackId);
+    this.cheListHelper.setList(this.workspaceDetails.config.projects, 'name');
   }
 
   /**
-   * Update project selected status
+   * Returns <code>true</code> if project is not imported yet.
+   *
+   * @param {string} projectName
+   * @return {boolean}
    */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
+  isNewProject(projectName: string): boolean {
+    return this.workspaceDetailsProjectsService.isNewProject(projectName);
+  }
 
-    this.projects.forEach((project: che.IProject) => {
-      if (this.projectsSelectedStatus[project.name]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
+  /**
+   * Adds selected template(s) to the list.
+   *
+   * @param {Array<che.IProjectTemplate>} projectTemplates
+   */
+  projectTemplateOnAdd(projectTemplates: Array<che.IProjectTemplate>): void {
+    if (!projectTemplates || projectTemplates.length === 0) {
       return;
     }
 
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
+    projectTemplates.forEach((projectTemplate: che.IProjectTemplate) => {
+      const origName = projectTemplate.name;
+
+      if (this.isProjectNameUnique(origName) === false) {
+        // update name, displayName and path
+        const newName = this.getUniqueName(origName);
+        projectTemplate.name = newName;
+        projectTemplate.displayName = newName;
+        projectTemplate.path = '/' +  newName.replace(/[^\w-_]/g, '_');
+      }
+
+      if (!projectTemplate.type && projectTemplate.projectType) {
+        projectTemplate.type = projectTemplate.projectType;
+      }
+
+      this.workspaceDetailsProjectsService.addProjectTemplate(projectTemplate);
+      this.workspaceDetails.config.projects.push(projectTemplate);
+    });
+
+    this.createWorkspaceSvc.addProjectCommands(this.workspaceDetails.config, projectTemplates);
+    this.projectsOnChange();
+  }
+
+  /**
+   * Returns <code>true</code> if project name is unique.
+   *
+   * @param {string} name the project name
+   * @return {boolean}
+   */
+  isProjectNameUnique(name: string): boolean {
+    return this.workspaceDetails.config.projects.every((project: che.IProject) => {
+      return project.name !== name;
+    });
+  }
+
+  /**
+   * Adds increment or random string to the name
+   *
+   * @param {string} name
+   */
+  getUniqueName(name: string): string {
+    const limit = 100;
+    for (let i = 1; i < limit + 1; i++) {
+      const newName = name + '-' + i;
+      if (this.isProjectNameUnique(newName)) {
+        return newName;
+      }
     }
+
+    return this.randomSvc.getRandString({prefix: name + '-'});
   }
 
   /**
    * Delete all selected projects
    */
   deleteSelectedProjects(): void {
-    let projectsSelectedStatusKeys = Object.keys(this.projectsSelectedStatus);
-    let checkedProjectsKeys = [];
+    const selectedProjects = this.cheListHelper.getSelectedItems(),
+          selectedProjectsNames = selectedProjects.map((project: che.IProject) => {
+            return project.name;
+          });
 
-    if (!projectsSelectedStatusKeys.length) {
-      this.cheNotification.showError('No such projects.');
-      return;
-    }
-
-    projectsSelectedStatusKeys.forEach((key: string) => {
-      if (this.projectsSelectedStatus[key] === true) {
-        checkedProjectsKeys.push(key);
-      }
-    });
-
-    let queueLength = checkedProjectsKeys.length;
-    if (!queueLength) {
-      this.cheNotification.showError('No such project.');
-      return;
-    }
-
-    let confirmationPromise = this.showDeleteProjectsConfirmation(queueLength);
-    confirmationPromise.then(() => {
-      let numberToDelete = queueLength;
-      let isError = false;
-      let deleteProjectPromises = [];
-      let currentProjectName;
-
-      let workspaceAgent = this.cheWorkspace.getWorkspaceAgent(this.workspace.id);
-
-      if (!workspaceAgent) {
-        this.cheNotification.showError('Workspace isn\'t run. Cannot delete any project.');
-        return;
-      }
-      let projectService = workspaceAgent.getProject();
-
-      checkedProjectsKeys.forEach((projectName: string) => {
-        currentProjectName = projectName;
-        this.projectsSelectedStatus[projectName] = false;
-
-        let promise = projectService.remove(projectName);
-        promise.then(() => {
-          queueLength--;
-        }, (error: any) => {
-          isError = true;
-          this.$log.error('Cannot delete project: ', error);
-        });
-        deleteProjectPromises.push(promise);
+    this.showDeleteProjectsConfirmation(selectedProjects.length).then(() => {
+      this.workspaceDetails.config.projects = this.workspaceDetails.config.projects.filter((project: che.IProject) => {
+        return selectedProjectsNames.indexOf(project.name) === -1;
       });
 
-      this.$q.all(deleteProjectPromises).finally(() => {
-        this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey).then(() => {
-          this.updateProjectsData();
-          this.updateSelectedStatus();
-        }, (error: any) => {
-          if (error.status === 304) {
-            this.updateProjectsData();
-          } else {
-            this.$log.error(error);
-          }
-        });
-        if (isError) {
-          this.cheNotification.showError('Delete failed.');
-        } else {
-          if (numberToDelete === 1) {
-            this.cheNotification.showInfo(currentProjectName + ' has been removed.');
-          } else {
-            this.cheNotification.showInfo('Selected projects have been removed.');
-          }
-        }
-      });
+      this.workspaceDetailsProjectsService.addProjectNamesToDelete(selectedProjectsNames);
+
+      this.projectsOnChange();
     });
   }
 
@@ -241,4 +258,9 @@ export class WorkspaceDetailsProjectsCtrl {
 
     return this.confirmDialogService.showConfirmDialog('Remove projects', content, 'Delete');
   }
+
+  workspaceIsRunning(): boolean {
+    return this.workspaceDetailsService.getWorkspaceStatus(this.workspaceDetails.id) === WorkspaceStatus[WorkspaceStatus.RUNNING];
+  }
+
 }

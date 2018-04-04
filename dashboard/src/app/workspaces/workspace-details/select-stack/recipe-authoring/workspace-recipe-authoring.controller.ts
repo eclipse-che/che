@@ -1,14 +1,20 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {ComposeParser} from '../../../../../components/api/environment/compose-parser';
+import {DockerfileParser} from '../../../../../components/api/environment/docker-file-parser';
+import {CheBranding} from '../../../../../components/branding/che-branding.factory';
+
+const DOCKERFILE = 'dockerfile';
+const COMPOSE = 'compose';
 
 /**
  * @ngdoc controller
@@ -18,7 +24,14 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceRecipeAuthoringController {
+
+  static $inject = ['$scope', '$timeout', 'cheBranding'];
+
   $timeout: ng.ITimeoutService;
+
+  composeParser: ComposeParser;
+  dockerfileParser: DockerfileParser;
+  recipeValidationError: string;
 
   editingTimeoutPromise: ng.IPromise<any>;
 
@@ -26,6 +39,7 @@ export class WorkspaceRecipeAuthoringController {
   recipeScript: string;
   recipeFormatCopy: string;
   recipeScriptCopy: string;
+  stackDocsUrl: string;
   recipeChange: Function;
 
   editorOptions: {
@@ -38,10 +52,12 @@ export class WorkspaceRecipeAuthoringController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService) {
+  constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, cheBranding: CheBranding) {
     this.$timeout = $timeout;
+    this.composeParser = new ComposeParser();
+    this.dockerfileParser = new DockerfileParser();
+    this.stackDocsUrl = cheBranding.getDocs().stack;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -57,7 +73,7 @@ export class WorkspaceRecipeAuthoringController {
       this.recipeScriptCopy = this.recipeScript;
     });
     $scope.$watch(() => { return this.recipeFormat; }, () => {
-      this.recipeFormatCopy = this.recipeFormat || 'compose';
+      this.recipeFormatCopy = this.recipeFormat || COMPOSE;
     });
 
     this.onRecipeChange();
@@ -81,24 +97,51 @@ export class WorkspaceRecipeAuthoringController {
 
     this.editingTimeoutPromise = this.$timeout(() => {
       this.detectFormat(content);
+      this.validateRecipe(content);
     }, 100);
   }
 
   detectFormat(content: string): void {
     // compose format detection:
     if (content.match(/^services:\n/m)) {
-      this.recipeFormatCopy = 'compose';
+      this.recipeFormatCopy = COMPOSE;
       this.editorOptions.mode = 'text/x-yaml';
     }
 
     // docker file format detection
     if (content.match(/^FROM\s+\w+/m)) {
-      this.recipeFormatCopy = 'dockerfile';
+      this.recipeFormatCopy = DOCKERFILE;
       this.editorOptions.mode = 'text/x-dockerfile';
     }
   }
 
-  onRecipeChange() {
+  validateRecipe(content: string): void {
+    this.recipeValidationError = '';
+
+    if (!content) {
+      return;
+    }
+
+    try {
+      if (this.recipeFormatCopy === DOCKERFILE) {
+        this.dockerfileParser.parse(content);
+      } else if (this.recipeFormatCopy === COMPOSE) {
+        this.composeParser.parse(content);
+      }
+    } catch (e) {
+      this.recipeValidationError = e.message;
+    }
+  }
+
+  /**
+   * Returns validation state of the recipe.
+   * @returns {boolean}
+   */
+  isRecipeValid(): boolean {
+    return angular.isUndefined(this.recipeValidationError) || this.recipeValidationError.length === 0;
+  }
+
+  onRecipeChange(): void {
     this.$timeout(() => {
       this.detectFormat(this.recipeScriptCopy);
       this.recipeChange({

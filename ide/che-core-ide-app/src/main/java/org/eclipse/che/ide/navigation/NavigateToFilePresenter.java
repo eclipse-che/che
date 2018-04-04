@@ -1,46 +1,33 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.navigation;
 
-import com.google.common.base.Optional;
-import com.google.gwt.http.client.URL;
+import static java.util.Collections.emptyList;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
+
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.api.project.shared.dto.ItemReference;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.Message;
-import org.eclipse.che.ide.websocket.MessageBuilder;
-import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
-import org.eclipse.che.ide.websocket.rest.Unmarshallable;
-
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-
-import static com.google.gwt.http.client.RequestBuilder.GET;
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
+import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
+import org.eclipse.che.api.project.shared.dto.SearchResultDto;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Presenter for file navigation (find file by name and open it).
@@ -50,89 +37,101 @@ import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate, WsAgentStateHandler {
+public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate {
 
-    private final MessageBusProvider     messageBusProvider;
-    private final EventBus               eventBus;
-    private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
-    private final NavigateToFileView     view;
-    private final AppContext             appContext;
+  private static final int TYPING_PERIOD_DELAY_MS = 400;
+  private static final Comparator<SearchResultDto> SEARCH_COMPARATOR =
+      (o1, o2) -> {
+        String ext1 = getFileExtension(o1.getItemReference().getName());
+        String ext2 = getFileExtension(o2.getItemReference().getName());
+        return ext1.compareToIgnoreCase(ext2);
+      };
 
-    private String     SEARCH_URL;
-    private MessageBus wsMessageBus;
+  private final EditorAgent editorAgent;
+  private final RequestTransmitter requestTransmitter;
+  private final DtoFactory dtoFactory;
+  private final NavigateToFileView view;
+  private final AppContext appContext;
 
-    @Inject
-    public NavigateToFilePresenter(NavigateToFileView view,
-                                   EventBus eventBus,
-                                   DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                                   MessageBusProvider messageBusProvider,
-                                   AppContext appContext) {
-        this.view = view;
-        this.appContext = appContext;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.messageBusProvider = messageBusProvider;
-        this.eventBus = eventBus;
+  private Timer timer;
 
-        this.view.setDelegate(this);
+  @Inject
+  public NavigateToFilePresenter(
+      NavigateToFileView view,
+      AppContext appContext,
+      EditorAgent editorAgent,
+      RequestTransmitter requestTransmitter,
+      DtoFactory dtoFactory) {
+    this.view = view;
+    this.appContext = appContext;
+    this.editorAgent = editorAgent;
+    this.requestTransmitter = requestTransmitter;
+    this.dtoFactory = dtoFactory;
+    this.view.setDelegate(this);
+  }
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
-    }
+  /** Show dialog with view for navigation. */
+  public void showDialog() {
+    view.showPopup();
+  }
 
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        wsMessageBus = messageBusProvider.getMachineMessageBus();
-        SEARCH_URL = "/project/search";
-    }
+  @Override
+  public void onFileSelected(Path path) {
+    view.hidePopup();
 
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
-    }
-
-    /** Show dialog with view for navigation. */
-    public void showDialog() {
-        view.showPopup();
-    }
-
-    @Override
-    public void onFileSelected(Path path) {
-        view.hidePopup();
-
-        appContext.getWorkspaceRoot().getFile(path).then(new Operation<Optional<File>>() {
-            @Override
-            public void apply(Optional<File> optFile) throws OperationException {
-                if (optFile.isPresent()) {
-                    eventBus.fireEvent(FileEvent.createOpenFileEvent(optFile.get()));
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onFileNameChanged(String fileName) {
-        if (fileName.isEmpty()) {
-            view.showItems(new ArrayList<ItemReference>());
-            return;
-        }
-
-        // add '*' to allow search files by first letters
-        final String url = SEARCH_URL + "/?name=" + URL.encodePathSegment(fileName + "*");
-        final Message message = new MessageBuilder(GET, url).header(ACCEPT, APPLICATION_JSON).build();
-        final Unmarshallable<List<ItemReference>> unmarshaller = dtoUnmarshallerFactory.newWSListUnmarshaller(ItemReference.class);
-        try {
-            wsMessageBus.send(message, new RequestCallback<List<ItemReference>>(unmarshaller) {
-                @Override
-                protected void onSuccess(List<ItemReference> result) {
-                    view.showItems(result);
-                }
-
-                @Override
-                protected void onFailure(Throwable exception) {
-                    Log.error(getClass(), exception);
-                }
+    appContext
+        .getWorkspaceRoot()
+        .getFile(path)
+        .then(
+            optFile -> {
+              if (optFile.isPresent()) {
+                editorAgent.openEditor(optFile.get());
+              }
             });
-        } catch (WebSocketException e) {
-            Log.error(getClass(), e);
-        }
+  }
+
+  @Override
+  public void onFileNameChanged(final String fileName) {
+    if (fileName.isEmpty()) {
+      view.showItems(emptyList());
+      return;
     }
 
+    ProjectSearchRequestDto requestParams =
+        dtoFactory.createDto(ProjectSearchRequestDto.class).withPath("").withName(fileName + "*");
+    if (timer != null) {
+      timer.cancel();
+    }
+
+    timer =
+        new Timer() {
+          @Override
+          public void run() {
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName("project/search")
+                .paramsAsDto(requestParams)
+                .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
+                .onSuccess(
+                    response -> {
+                      // Check that the file name from request corresponds to the actual file name
+                      // from the view.
+                      if (fileName.equals(view.getFileName())) {
+                        prepareResults(response);
+                      }
+                    })
+                .onFailure(error -> Log.error(getClass(), error.getMessage()))
+                .onTimeout(
+                    () -> Log.error(getClass(), "Project search request failed due timeout"));
+          }
+        };
+    timer.schedule(TYPING_PERIOD_DELAY_MS);
+  }
+
+  private void prepareResults(ProjectSearchResponseDto response) {
+    List<SearchResultDto> results = response.getItemReferences();
+    results.sort(SEARCH_COMPARATOR);
+    view.showItems(results);
+  }
 }

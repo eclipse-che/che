@@ -1,0 +1,253 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: che
+  name: che
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: che
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: che
+    spec:
+      initContainers:
+{{- if .Values.global.multiuser }}
+      - name: wait-for-postgres
+        image: alpine:3.5
+        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+{{- end }}
+{{- if not .Values.global.multiuser }}
+      - name: fmp-volume-permission
+        image: busybox
+        command: ["chmod", "777", "/data"]
+        volumeMounts: [{
+              "mountPath": "/data",
+              "name": "che-data-volume"
+        }]
+{{- end }}
+      containers:
+      - env:
+        - name: CHE_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_DOMAIN
+              name: che
+        - name: CHE_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_HOST
+              name: che
+        - name: CHE_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_PORT
+              name: che
+        - name: CHE_API
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_API
+              name: che
+        - name: CHE_WEBSOCKET_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WEBSOCKET_ENDPOINT
+              name: che
+        - name: CHE_DEBUG_SERVER
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_DEBUG_SERVER
+              name: che
+        - name: CHE_INFRASTRUCTURE_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRASTRUCTURE_ACTIVE
+              name: che
+        - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
+              name: che
+        - name: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
+              name: che
+        - name: CHE_INFRA_KUBERNETES_MASTER__URL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_MASTER__URL
+              name: che
+        - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
+              name: che
+        - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_PVC_STRATEGY
+              name: che
+        - name: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
+              name: che
+        - name: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER
+              name: che
+        - name: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP
+              name: che
+        - name: JAVA_OPTS
+          valueFrom:
+            configMapKeyRef:
+              key: JAVA_OPTS
+              name: che
+        - name: CHE_INFRA_KUBERNETES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_PASSWORD
+              name: che
+        - name: CHE_INFRA_KUBERNETES_TRUST__CERTS
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_TRUST__CERTS
+              name: che
+        - name: CHE_INFRA_KUBERNETES_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_USERNAME
+              name: che
+{{- if .Values.global.multiuser }}
+        - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_AUTH__SERVER__URL
+              name: che
+        - name: CHE_KEYCLOAK_CLIENT__ID
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_CLIENT__ID
+              name: che
+        - name: CHE_KEYCLOAK_REALM
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_REALM
+              name: che
+{{- end }}
+        - name: CHE_INFRA_KUBERNETES_NAMESPACE
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_NAMESPACE
+              name: che
+        - name: CHE_LOCAL_CONF_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_LOCAL_CONF_DIR
+              name: che
+        - name: CHE_LOGS_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_LOGS_DIR
+              name: che
+        - name: CHE_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_LOG_LEVEL
+              name: che
+        - name: CHE_MULTIUSER
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_MULTIUSER
+              name: che
+        - name: CHE_OAUTH_GITHUB_CLIENTID
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_OAUTH_GITHUB_CLIENTID
+              name: che
+        - name: CHE_OAUTH_GITHUB_CLIENTSECRET
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_OAUTH_GITHUB_CLIENTSECRET
+              name: che
+        - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_PREDEFINED_STACKS_RELOAD__ON__START
+              name: che
+        - name: CHE_WORKSPACE_AUTO_START
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_AUTO_START
+              name: che
+        - name: CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON
+              name: che
+        image: {{ .Values.cheImage }}
+        imagePullPolicy: {{ .Values.cheImagePullPolicy }}
+        livenessProbe:
+          httpGet:
+            path: /api/system/state
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 120
+          timeoutSeconds: 10
+        name: che
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8000
+          name: http-debug
+        readinessProbe:
+          httpGet:
+            path: /api/system/state
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          timeoutSeconds: 60
+        resources:
+          limits:
+            memory: 600Mi
+          requests:
+            memory: 256Mi
+{{- if not .Values.global.multiuser }}
+        volumeMounts:
+        - mountPath: /data
+          name: che-data-volume
+      volumes:
+      - name: che-data-volume
+        persistentVolumeClaim:
+          claimName: che-data-volume
+{{- end }}
+{{- if .Values.registry }}
+{{- if and .Values.registry.password .Values.registry.username }}
+      imagePullSecrets:
+        - name: registry-pull-secret
+{{- end }}
+{{- end }}
+      serviceAccountName: che

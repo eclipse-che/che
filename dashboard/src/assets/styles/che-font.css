@@ -48,42 +48,46 @@
 	content: "\E007";
 }
 
-.cheico-type-aspnet:before {
+.cheico-stacks:before {
 	content: "\E008";
 }
 
-.cheico-type-cpp:before {
+.cheico-type-aspnet:before {
 	content: "\E009";
 }
 
-.cheico-type-go:before {
+.cheico-type-cpp:before {
 	content: "\E00A";
 }
 
-.cheico-type-java:before {
+.cheico-type-go:before {
 	content: "\E00B";
 }
 
-.cheico-type-javascript:before {
+.cheico-type-java:before {
 	content: "\E00C";
 }
 
-.cheico-type-node:before {
+.cheico-type-javascript:before {
 	content: "\E00D";
 }
 
-.cheico-type-php:before {
+.cheico-type-node:before {
 	content: "\E00E";
 }
 
-.cheico-type-python:before {
+.cheico-type-php:before {
 	content: "\E00F";
 }
 
-.cheico-type-ruby:before {
+.cheico-type-python:before {
 	content: "\E010";
 }
 
-.cheico-workspace:before {
+.cheico-type-ruby:before {
 	content: "\E011";
+}
+
+.cheico-workspace:before {
+	content: "\E012";
 }

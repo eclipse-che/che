@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 
 import {Log} from "../log/log";
@@ -18,33 +18,33 @@ import {MessageBusSubscriber} from "./messagebus-subscriber";
  */
 export class ResolveSubscribePromiseSubscriber implements MessageBusSubscriber {
 
-    resolve : any;
-    reject : any;
-    promise: Promise<string>;
-    channel : string;
+  resolve : any;
+  reject : any;
+  promise: Promise<string>;
+  channel : string;
 
-    constructor(channel : string) {
-        this.channel = channel;
-        this.promise = new Promise<string>((resolve, reject) => {
-            this.resolve = resolve;
-            this.reject = reject;
-        });
+  constructor(channel : string) {
+    this.channel = channel;
+    this.promise = new Promise<string>((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
+
+  handleMessage(message: any) {
+    if (this.channel === message.channel) {
+      this.resolve();
+    } else if ('ERROR' === message.eventType) {
+      try {
+        let stringify: any = JSON.stringify(message);
+        this.reject('Error when getting subscribe channel ' + stringify);
+      } catch (error) {
+        this.reject('Error when getting subscribe channel' + message.toString());
+      }
+    } else {
+      this.reject('Error when getting subscribe channel ' + message.toString());
     }
 
-    handleMessage(message: any) {
-        if (this.channel === message.channel) {
-            this.resolve();
-        } else if ('ERROR' === message.eventType) {
-            try {
-                let stringify: any = JSON.stringify(message);
-                this.reject('Error when getting subscribe channel ' + stringify);
-            } catch (error) {
-                this.reject('Error when getting subscribe channel' + message.toString());
-            }
-        } else {
-            this.reject('Error when getting subscribe channel ' + message.toString());
-        }
-
-    }
+  }
 
 }

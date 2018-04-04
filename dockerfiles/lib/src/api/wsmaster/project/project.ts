@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016-2016 Codenvy, S.A.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc.- initial API and implementation
  */
 import {org} from "../../../api/dto/che-dto"
 import {AuthData} from "../auth/auth-data";
@@ -14,17 +14,15 @@ import {Log} from "../../../spi/log/log";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
+import {Url} from "url";
+import {ServerLocation} from "../../../utils/server-location";
+import {RemoteIp} from "../../../spi/docker/remoteip";
 
 /**
  * Project class allowing to manage a project like updating project-type.
  * @author Florent Benoit
  */
 export class Project {
-
-    /**
-     * The HTTP library used to call REST API.
-     */
-    http: any;
 
     /**
      * Authentication data
@@ -41,32 +39,34 @@ export class Project {
      */
     wsAgentPath : string;
 
-    constructor(workspaceDTO: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) {
+    /**
+     * Object that describes location of ws-agent server
+     */
+    wsAgentServer: ServerLocation;
+
+    constructor(workspaceDTO: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto, authData : AuthData) {
         this.workspaceDTO = workspaceDTO;
+        this.authData = authData;
 
         // search the workspace agent link
-        let servers : Map<string, org.eclipse.che.api.machine.shared.dto.ServerDto> = this.workspaceDTO.getRuntime().getDevMachine().getRuntime().getServers();
+        let machines : Map<string, org.eclipse.che.api.workspace.shared.dto.MachineDto> = this.workspaceDTO.getRuntime().getMachines();
 
-        var hrefWsAgent;
-        for (let server of servers.values()) {
-            if (server.getRef() === 'wsagent') {
-                hrefWsAgent = server.getProperties().getInternalUrl();
-            }
+        var hrefWsAgent : string;
+        for (let machine of machines.values()) {
+                hrefWsAgent = machine.getServers().get("wsagent/http").getUrl();
         }
 
         if (!hrefWsAgent) {
             throw new Error('unable to find the workspace agent link from workspace :' + workspaceDTO.getConfig().getName() + " with JSON " + workspaceDTO.toJson());
         }
-        var urlObject : any = require('url').parse(hrefWsAgent);
 
-        this.authData = AuthData.parse(urlObject);
-        if (this.authData.isSecured()) {
-            this.http = require('https');
-        } else {
-            this.http = require('http');
+        if (hrefWsAgent.includes("localhost")) {
+            hrefWsAgent = hrefWsAgent.replace("localhost", RemoteIp.ip)
         }
 
-        this.wsAgentPath = urlObject.path;
+        this.wsAgentServer = ServerLocation.parse(hrefWsAgent);
+
+        this.wsAgentPath = require('url').parse(hrefWsAgent).path;
     }
 
     /**
@@ -74,7 +74,7 @@ export class Project {
      */
     getProject(projectName) : Promise<org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto> {
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentPath + '/project/' + projectName, 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentServer, this.wsAgentPath + '/project/' + projectName, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.ProjectConfigDtoImpl);
         });
@@ -101,7 +101,7 @@ export class Project {
     /**
      */
     estimateType(projectName, projectType) : Promise<org.eclipse.che.api.project.shared.dto.SourceEstimation> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentPath + '/project/estimate/' + projectName + '?type=' + projectType, 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentServer, this.wsAgentPath + '/project/estimate/' + projectName + '?type=' + projectType, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.project.shared.dto.SourceEstimationImpl);
         });
@@ -116,7 +116,7 @@ export class Project {
      */
     update(projectName: string, projectDto: org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto): Promise<org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto> {
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentPath + '/project/' + projectName, 200).setMethod("PUT").setBody(projectDto);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentServer, this.wsAgentPath + '/project/' + projectName, 200).setMethod("PUT").setBody(projectDto);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.ProjectConfigDtoImpl);
         });
@@ -131,7 +131,7 @@ export class Project {
      */
     importProject(projectName: string, sourceStorageDto : org.eclipse.che.api.workspace.shared.dto.SourceStorageDto) : Promise<void> {
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentPath + '/project/import/' + projectName, 204).setMethod("POST").setBody(sourceStorageDto);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.wsAgentServer, this.wsAgentPath + '/project/import/' + projectName, 204).setMethod("POST").setBody(sourceStorageDto);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return;
         });

@@ -1,14 +1,17 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheProjectTemplate} from './che-project-template.factory';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 /**
  * Test of the CheProjectTemplate
@@ -18,22 +21,22 @@ describe('CheProjectTemplate', function(){
   /**
    * Project Template Factory for the test
    */
-  var factory;
+  let factory;
 
   /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
   /**
    *  setup module
@@ -43,7 +46,9 @@ describe('CheProjectTemplate', function(){
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function(cheProjectTemplate, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function(cheProjectTemplate: CheProjectTemplate,
+                             cheAPIBuilder: CheAPIBuilder,
+                             cheHttpBackend: CheHttpBackend) {
     factory = cheProjectTemplate;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;

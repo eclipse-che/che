@@ -1,0 +1,40 @@
+<div class="project-source-selector" id="project-source-selector">
+
+  <!-- Toggle buttons -->
+  <div class="che-template-checker">
+    <toggle-single-button class="add-import-project-toggle-button"
+                          id="{{projectSourceSelectorController.actionType[projectSourceSelectorController.actionType.ADD_PROJECT]}}"
+                          che-title="Add or Import Project"
+                          che-multiline-title
+                          che-font-icon="material-design icon-ic_add_24px"
+                          che-on-change="projectSourceSelectorController.updateData({buttonState: state, actionType: projectSourceSelectorController.actionType.ADD_PROJECT})"
+                          che-state="projectSourceSelectorController.buttonState['ADD_PROJECT']"></toggle-single-button>
+    <toggle-single-button class="edit-project-toggle-button"
+                          ng-repeat="projectTemplate in projectSourceSelectorController.projectTemplates"
+                          id="{{projectTemplate.name}}"
+                          che-title="{{projectTemplate.name}}"
+                          che-font-icon="chefont cheico-project"
+                          che-on-change="projectSourceSelectorController.updateData({buttonState: state, actionType: projectSourceSelectorController.actionType.EDIT_PROJECT, template: projectTemplate})"
+                          che-state="projectSourceSelectorController.buttonState[projectTemplate.name]"
+                          uib-tooltip="{{projectTemplate.name}}"></toggle-single-button>
+  </div>
+
+  <!-- Popover content -->
+  <div class="project-source-selector-popover popover right"
+       ng-show="projectSourceSelectorController.activeActionType">
+    <div class="arrow"></div>
+
+    <div ng-if="projectSourceSelectorController.activeActionType === projectSourceSelectorController.actionType.ADD_PROJECT">
+      <add-import-project is-project-name-unique="projectSourceSelectorController.isProjectNameUnique(name)"
+                          project-on-add="projectSourceSelectorController.projectTemplateOnAdd(templates)"></add-import-project>
+    </div>
+
+    <div ng-if="projectSourceSelectorController.activeActionType === projectSourceSelectorController.actionType.EDIT_PROJECT">
+      <edit-project project-names="projectSourceSelectorController.getProjectTemplateNames()"
+                    project-template="projectSourceSelectorController.selectedProjectTemplate"
+                    project-on-edit="projectSourceSelectorController.projectTemplateOnEdit(template)"
+                    project-on-remove="projectSourceSelectorController.projectTemplateOnRemove()"></edit-project>
+    </div>
+  </div>
+
+</div>

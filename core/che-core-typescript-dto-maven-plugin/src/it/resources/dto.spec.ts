@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 import {org} from './dto';
 
@@ -23,11 +23,12 @@ class DTOBuilder {
     static MY_SIMPLE_ID : number = 2503;
     static MY_SIMPLE_BOOLEAN : boolean = true;
     static MY_SIMPLE_DOUBLE : number = 19.79;
+    static MY_SIMPLE_FLOAT : number = 3.14;
 
 
     static buildSimpleDto() : org.eclipse.che.plugin.typescript.dto.MySimpleDTO {
         let mySimpleDTO : org.eclipse.che.plugin.typescript.dto.MySimpleDTO = new org.eclipse.che.plugin.typescript.dto.MySimpleDTOImpl();
-        mySimpleDTO.withId(DTOBuilder.MY_SIMPLE_ID).withBoolean(DTOBuilder.MY_SIMPLE_BOOLEAN).withDouble(DTOBuilder.MY_SIMPLE_DOUBLE);
+        mySimpleDTO.withId(DTOBuilder.MY_SIMPLE_ID).withBoolean(DTOBuilder.MY_SIMPLE_BOOLEAN).withDouble(DTOBuilder.MY_SIMPLE_DOUBLE).withFloat(DTOBuilder.MY_SIMPLE_FLOAT);
         return mySimpleDTO;
     }
 
@@ -55,6 +56,7 @@ describe("DTO serialization tests", () => {
         expect(myCustomDTO.getId()).to.eql(DTOBuilder.MY_SIMPLE_ID);
         expect(myCustomDTO.getBoolean()).to.eql(DTOBuilder.MY_SIMPLE_BOOLEAN);
         expect(myCustomDTO.getDouble()).to.eql(DTOBuilder.MY_SIMPLE_DOUBLE);
+        expect(myCustomDTO.getFloat()).to.eql(DTOBuilder.MY_SIMPLE_FLOAT);
 
     });
 

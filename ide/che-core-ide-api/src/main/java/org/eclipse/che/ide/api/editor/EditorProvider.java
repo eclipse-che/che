@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.api.editor;
 
 /**
@@ -16,20 +16,16 @@ package org.eclipse.che.ide.api.editor;
  * @author Evgen Vidolob
  */
 public interface EditorProvider {
-    /**
-     * @return the id of this editor
-     */
-    String getId();
+  /** @return the id of this editor */
+  String getId();
 
-    /**
-     * @return the description of this editor
-     */
-    String getDescription();
+  /** @return the description of this editor */
+  String getDescription();
 
-    /**
-     * Every call this method should return new instance.
-     *
-     * @return new instance of {@link EditorPartPresenter}
-     */
-    EditorPartPresenter getEditor();
+  /**
+   * Every call this method should return new instance.
+   *
+   * @return new instance of {@link EditorPartPresenter}
+   */
+  EditorPartPresenter getEditor();
 }

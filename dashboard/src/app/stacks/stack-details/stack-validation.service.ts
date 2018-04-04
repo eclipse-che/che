@@ -1,18 +1,17 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheRecipeTypes} from '../../../components/api/recipe/che-recipe-types';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 
-const COMPOSE = 'compose';
-const DOCKERFILE = 'dockerfile';
-const DOCKERIMAGE = 'dockerimage';
 
 /**
  * This class is handling the data for stack validation
@@ -20,6 +19,16 @@ const DOCKERIMAGE = 'dockerimage';
  * @author Oleksii Orel
  */
 export class StackValidationService {
+  static $inject = ['cheWorkspace'];
+
+  private cheWorkspace: CheWorkspace;
+
+  /**
+   * Default constructor that is using resource
+   */
+  constructor(cheWorkspace: CheWorkspace) {
+    this.cheWorkspace = cheWorkspace;
+  }
 
   /**
    * Return result of recipe validation.
@@ -28,7 +37,7 @@ export class StackValidationService {
    */
   getStackValidation(stack: che.IStack | {}): che.IValidation {
     let mandatoryKeys: Array<string> = ['name', 'workspaceConfig'];
-    let additionalKeys: Array<string> = ['description', 'projects', 'tags', 'creator', 'scope', 'components', 'source'];
+    let additionalKeys: Array<string> = ['description', 'projects', 'tags', 'creator', 'scope', 'components'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -146,7 +155,7 @@ export class StackValidationService {
     let devMachines: string[] = [];
     keys.forEach((key: string) => {
       let machine: che.IEnvironmentMachine = environment.machines[key];
-      if (machine.agents && machine.agents.indexOf(wsAgent) > -1) {
+      if (machine.installers && machine.installers.indexOf(wsAgent) > -1) {
         devMachines.push(key);
       }
     });
@@ -175,7 +184,7 @@ export class StackValidationService {
    */
   getMachineValidation(machine: che.IEnvironmentMachine): che.IValidation {
     let mandatoryKeys: Array<string> = ['attributes'];
-    let additionalKeys: Array<string> = ['agents', 'servers', 'source'];
+    let additionalKeys: Array<string> = ['installers', 'servers', 'volumes', 'source', 'env'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -238,51 +247,48 @@ export class StackValidationService {
       errors.push('The recipe should have one of \'location\' or \'content\'.');
     }
 
-    if (DOCKERFILE === recipe.type) {
-      if (angular.isDefined(recipe.location) && !recipe.location) {
+    if (CheRecipeTypes.DOCKERFILE === recipe.type) {
+      if (angular.isDefined(recipe.content) && !recipe.content) {
         isValid = false;
-        errors.push('Unknown recipe location.');
-      }
-      if (angular.isDefined(recipe.content)) {
-        if (!recipe.content) {
-          isValid = false;
-          errors.push('Unknown recipe content.');
-        } else if (!/^FROM\s+\w+/m.test(recipe.content)) {
-          isValid = false;
-          errors.push('The dockerfile is invalid.');
-        }
+        errors.push('Unknown recipe content.');
       }
       if (!recipe.contentType) {
         errors.push('Unknown recipe contentType.');
       }
-    } else if (COMPOSE === recipe.type) {
+    } else if (CheRecipeTypes.COMPOSE === recipe.type) {
       if (angular.isDefined(recipe.location) && !recipe.location) {
         isValid = false;
         errors.push('Unknown recipe location.');
       }
-      if (angular.isDefined(recipe.content)) {
-        if (!recipe.content) {
-          isValid = false;
-          errors.push('Unknown recipe content.');
-        } else if (!/^services:\n/m.test(recipe.content)) {
-          isValid = false;
-          errors.push('The composefile is invalid.');
-        }
+      if (!recipe.contentType) {
+        errors.push('Unknown recipe contentType.');
+      }
+    } else if (CheRecipeTypes.DOCKERIMAGE === recipe.type) {
+      if (!recipe.content) {
+        isValid = false;
+        errors.push('Unknown recipe content.');
+      } else if (recipe.content.length > 256) {
+        isValid = false;
+        errors.push('Content length is invalid.');
+      }
+    } else if (CheRecipeTypes.OPENSHIFT === recipe.type) {
+      if (angular.isDefined(recipe.location) && !recipe.location) {
+        isValid = false;
+        errors.push('Unknown recipe location.');
       }
       if (!recipe.contentType) {
         errors.push('Unknown recipe contentType.');
       }
-    } else if (DOCKERIMAGE === recipe.type) {
-      if (!recipe.location) {
-        isValid = false;
-        errors.push('Unknown recipe location.');
-      } else if (recipe.location.length > 256) {
-        isValid = false;
-        errors.push('Location length is invalid.');
-      }
-    } else {
+    } else if (this.cheWorkspace.getSupportedRecipeTypes().indexOf(recipe.type) === -1) {
       isValid = false;
       errors.push('Unknown recipe type.');
+    }
+
+    if (angular.isDefined(recipe.content)) {
+      if (!recipe.content) {
+        isValid = false;
+        errors.push('Unknown recipe content.');
+      }
     }
 
     return {isValid: isValid, errors: errors};

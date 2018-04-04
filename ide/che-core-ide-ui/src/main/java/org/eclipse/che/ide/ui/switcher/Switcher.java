@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ui.switcher;
 
 import com.google.gwt.core.client.GWT;
@@ -24,94 +24,88 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.SimpleCheckBox;
 
 /**
- * UI element with two states boolean states: "ON" - true, "OFF" - false.
- * User switches the state by click.
+ * UI element with two states boolean states: "ON" - true, "OFF" - false. User switches the state by
+ * click.
  *
  * @author Ann Shumilova
  */
 public class Switcher extends Composite implements HasValue<Boolean> {
-    private static final Resources resources = GWT.create(Resources.class);
 
-    static {
-        resources.switcherCSS().ensureInjected();
+  private static final Resources RESOURCES = GWT.create(Resources.class);
+
+  SimpleCheckBox checkbox;
+
+  public Switcher() {
+    FlowPanel mainPanel = new FlowPanel();
+    mainPanel.setStyleName(RESOURCES.switcherCSS().onoffswitch());
+
+    final String elementId = DOM.createUniqueId();
+
+    checkbox = new SimpleCheckBox();
+    checkbox.getElement().setId(elementId);
+    checkbox.setName("onoffswitch");
+    checkbox.setStyleName(RESOURCES.switcherCSS().onoffswitchCheckbox());
+    mainPanel.add(checkbox);
+
+    Element label = DOM.createLabel();
+    label.setClassName(RESOURCES.switcherCSS().onoffswitchLabel());
+    label.setAttribute("for", elementId);
+
+    Element inner = DOM.createDiv();
+    inner.setClassName(RESOURCES.switcherCSS().onoffswitchInner());
+    label.appendChild(inner);
+
+    Element sw = DOM.createDiv();
+    sw.setClassName(RESOURCES.switcherCSS().onoffswitchSwitch());
+    label.appendChild(sw);
+
+    mainPanel.getElement().appendChild(label);
+
+    initWidget(mainPanel);
+  }
+
+  @Override
+  public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
+    return checkbox.addValueChangeHandler(handler);
+  }
+
+  @Override
+  public Boolean getValue() {
+    return checkbox.getValue();
+  }
+
+  @Override
+  public void setValue(Boolean value) {
+    checkbox.setValue(value);
+  }
+
+  @Override
+  public void setValue(Boolean value, boolean fireEvents) {
+    checkbox.setValue(value);
+
+    if (fireEvents) {
+      ValueChangeEvent.fire(this, value);
     }
+  }
 
-    SimpleCheckBox checkbox;
+  public interface Resources extends ClientBundle {
+    @Source({"switcher.css", "org/eclipse/che/ide/api/ui/style.css"})
+    SwitcherCSS switcherCSS();
 
-    public interface Resources extends ClientBundle {
-        public interface SwitcherCSS extends CssResource {
-            String onoffswitchInner();
+    interface SwitcherCSS extends CssResource {
+      String onoffswitchInner();
 
-            String onoffswitch();
+      String onoffswitch();
 
-            String onoffswitchSwitch();
+      String onoffswitchSwitch();
 
-            String onoffswitchLabel();
+      String onoffswitchLabel();
 
-            String onoffswitchCheckbox();
-
-        }
-
-        @Source({"switcher.css", "org/eclipse/che/ide/api/ui/style.css"})
-        SwitcherCSS switcherCSS();
+      String onoffswitchCheckbox();
     }
+  }
 
-
-    public Switcher() {
-        FlowPanel mainPanel = new FlowPanel();
-        mainPanel.setStyleName(resources.switcherCSS().onoffswitch());
-
-        checkbox = new SimpleCheckBox();
-        checkbox.getElement().setId("switcher");
-        checkbox.setName("onoffswitch");
-        checkbox.setStyleName(resources.switcherCSS().onoffswitchCheckbox());
-        mainPanel.add(checkbox);
-
-        Element label = DOM.createLabel();
-        label.setClassName(resources.switcherCSS().onoffswitchLabel());
-        label.setAttribute("for", "switcher");
-
-        Element inner = DOM.createDiv();
-        inner.setClassName(resources.switcherCSS().onoffswitchInner());
-        label.appendChild(inner);
-
-        Element sw = DOM.createDiv();
-        sw.setClassName(resources.switcherCSS().onoffswitchSwitch());
-        label.appendChild(sw);
-
-        mainPanel.getElement().appendChild(label);
-
-        initWidget(mainPanel);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
-        return checkbox.addValueChangeHandler(handler);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public Boolean getValue() {
-        return checkbox.getValue();
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void setValue(Boolean value) {
-        checkbox.setValue(value);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void setValue(Boolean value, boolean fireEvents) {
-        checkbox.setValue(value);
-        if (fireEvents) {
-            ValueChangeEvent.fire(this, value);
-        }
-    }
-
+  static {
+    RESOURCES.switcherCSS().ensureInjected();
+  }
 }

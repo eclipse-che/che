@@ -1,29 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.util.storage;
 
-import com.google.inject.Singleton;
-
+import com.google.inject.ImplementedBy;
 import org.eclipse.che.commons.annotation.Nullable;
 
-
-/**
- * @author Anatoliy Bazko
- */
-@Singleton
+/** @author Anatoliy Bazko */
+@ImplementedBy(BrowserLocalStorageProviderImpl.class)
 public interface LocalStorageProvider {
-    
-    /**
-     * Returns {@link LocalStorage} if it is supported or null otherwise.
-     */
-    @Nullable
-    LocalStorage get();
+
+  /** Returns {@link LocalStorage} if it is supported or null otherwise. */
+  @Nullable
+  LocalStorage get();
 }

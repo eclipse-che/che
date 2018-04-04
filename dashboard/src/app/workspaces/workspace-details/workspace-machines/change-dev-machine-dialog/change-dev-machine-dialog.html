@@ -1,0 +1,22 @@
+<che-popup title="{{changeDevMachineDialogController.popupTitle}}" on-close="changeDevMachineDialogController.cancel()">
+  <div layout="column" flex
+       class="change-dev-machine-dialog">
+    <p>Dev-machine is mandatory in your workspace environment.</p>
+    <p>{{changeDevMachineDialogController.message}}</p>
+    <ng-form flex layout="column" name="changeDevMachineForm">
+      <md-radio-group ng-model="changeDevMachineDialogController.newDevMachine">
+        <md-radio-button ng-repeat="machine in changeDevMachineDialogController.getMachinesList()"
+                         value="{{machine.name}}">{{machine.name | uppercase}}
+        </md-radio-button>
+      </md-radio-group>
+    </ng-form>
+    <div layout="row" layout-align="end center">
+      <che-button-primary ng-if="changeDevMachineDialogController.machinesList.length > 1"
+                          che-button-title="{{changeDevMachineDialogController.okButtonTitle}}"
+                          ng-disabled="changeDevMachineForm.$invalid || !changeDevMachineDialogController.newDevMachine"
+                          ng-click="changeDevMachineDialogController.onDevChange()"></che-button-primary>
+      <che-button-cancel-flat che-button-title="Cancel"
+                              ng-click="changeDevMachineDialogController.cancel()"></che-button-cancel-flat>
+    </div>
+  </div>
+</che-popup>

@@ -1,15 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.account.spi.tck;
 
+import static java.util.Arrays.asList;
+import static org.testng.Assert.assertEquals;
+
+import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
@@ -23,11 +27,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-
-import static java.util.Arrays.asList;
-import static org.testng.Assert.assertEquals;
-
 /**
  * Tests {@link AccountDao} contract.
  *
@@ -36,127 +35,135 @@ import static org.testng.Assert.assertEquals;
 @Listeners(TckListener.class)
 @Test(suiteName = AccountDaoTest.SUITE_NAME)
 public class AccountDaoTest {
-    public static final String SUITE_NAME = "AccountDaoTck";
+  public static final String SUITE_NAME = "AccountDaoTck";
 
-    private AccountImpl[] accounts;
+  private AccountImpl[] accounts;
 
-    @Inject
-    private AccountDao accountDao;
+  @Inject private AccountDao accountDao;
 
-    @Inject
-    private TckRepository<AccountImpl> accountRepo;
+  @Inject private TckRepository<AccountImpl> accountRepo;
 
-    @BeforeMethod
-    private void setUp() throws TckRepositoryException {
-        accounts = new AccountImpl[2];
+  @BeforeMethod
+  private void setUp() throws TckRepositoryException {
+    accounts = new AccountImpl[2];
 
-        accounts[0] = new AccountImpl(NameGenerator.generate("account", 10), "test1", "test");
-        accounts[1] = new AccountImpl(NameGenerator.generate("account", 10), "test2", "test");
+    accounts[0] = new AccountImpl(NameGenerator.generate("account", 10), "test1", "test");
+    accounts[1] = new AccountImpl(NameGenerator.generate("account", 10), "test2", "test");
 
-        accountRepo.createAll(asList(accounts));
-    }
+    accountRepo.createAll(asList(accounts));
+  }
 
-    @AfterMethod
-    private void cleanup() throws TckRepositoryException {
-        accountRepo.removeAll();
-    }
+  @AfterMethod
+  private void cleanup() throws TckRepositoryException {
+    accountRepo.removeAll();
+  }
 
-    @Test(dependsOnMethods = "shouldGetAccountById")
-    public void shouldCreateAccount() throws Exception {
-        AccountImpl toCreate = new AccountImpl("account123", "test123", "test");
+  @Test(dependsOnMethods = "shouldGetAccountById")
+  public void shouldCreateAccount() throws Exception {
+    AccountImpl toCreate = new AccountImpl("account123", "test123", "test");
 
-        accountDao.create(toCreate);
+    accountDao.create(toCreate);
 
-        assertEquals(toCreate, accountDao.getById(toCreate.getId()));
-    }
+    assertEquals(toCreate, accountDao.getById(toCreate.getId()));
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnCreatingNullAccount() throws Exception {
-        accountDao.create(null);
-    }
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNpeOnCreatingNullAccount() throws Exception {
+    accountDao.create(null);
+  }
 
-    @Test(dependsOnMethods = "shouldGetAccountById")
-    public void shouldUpdateAccount() throws Exception {
-        AccountImpl account = accounts[0];
-        account.setName("newName");
-        account.setType("newType");
+  @Test(dependsOnMethods = "shouldGetAccountById")
+  public void shouldUpdateAccount() throws Exception {
+    AccountImpl account = accounts[0];
+    account.setName("newName");
+    account.setType("newType");
 
-        accountDao.update(account);
+    accountDao.update(account);
 
-        assertEquals(account, accountDao.getById(account.getId()));
-    }
+    assertEquals(account, accountDao.getById(account.getId()));
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnUpdatingNullAccount() throws Exception {
-        accountDao.update(null);
-    }
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNpeOnUpdatingNullAccount() throws Exception {
+    accountDao.update(null);
+  }
 
-    @Test(expectedExceptions = ConflictException.class)
-    public void shouldThrowConflictExceptionWhenUpdatingAccountWithExistingName() throws Exception {
-        AccountImpl account = accounts[0];
-        account.setName(accounts[1].getName());
+  @Test(expectedExceptions = ConflictException.class)
+  public void shouldThrowConflictExceptionWhenUpdatingAccountWithExistingName() throws Exception {
+    AccountImpl account = accounts[0];
+    account.setName(accounts[1].getName());
 
-        accountDao.update(account);
-    }
+    accountDao.update(account);
+  }
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingAccount() throws Exception {
-        AccountImpl account = accounts[0];
-        account.setId("nonExisting");
+  @Test(expectedExceptions = ConflictException.class)
+  public void shouldThrowConflictExceptionWhenCreatingAccountWithExistingName() throws Exception {
+    AccountImpl account =
+        new AccountImpl(NameGenerator.generate("account", 5), accounts[0].getName(), "test");
 
-        accountDao.update(account);
-    }
+    accountDao.create(account);
+  }
 
-    @Test
-    public void shouldGetAccountById() throws Exception {
-        final AccountImpl account = accounts[0];
+  @Test(expectedExceptions = NotFoundException.class)
+  public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingAccount() throws Exception {
+    AccountImpl account = accounts[0];
+    account.setId("nonExisting");
 
-        final AccountImpl found = accountDao.getById(account.getId());
+    accountDao.update(account);
+  }
 
-        assertEquals(account, found);
-    }
+  @Test
+  public void shouldGetAccountById() throws Exception {
+    final AccountImpl account = accounts[0];
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionOnGettingNonExistingAccountById() throws Exception {
-        accountDao.getById("non-existing-account");
-    }
+    final AccountImpl found = accountDao.getById(account.getId());
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnGettingAccountByNullId() throws Exception {
-        accountDao.getById(null);
-    }
+    assertEquals(account, found);
+  }
 
-    @Test
-    public void shouldGetAccountByName() throws Exception {
-        final AccountImpl account = accounts[0];
+  @Test(expectedExceptions = NotFoundException.class)
+  public void shouldThrowNotFoundExceptionOnGettingNonExistingAccountById() throws Exception {
+    accountDao.getById("non-existing-account");
+  }
 
-        final AccountImpl found = accountDao.getByName(account.getName());
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNpeOnGettingAccountByNullId() throws Exception {
+    accountDao.getById(null);
+  }
 
-        assertEquals(account, found);
-    }
+  @Test
+  public void shouldGetAccountByName() throws Exception {
+    final AccountImpl account = accounts[0];
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionOnGettingNonExistingAccountByName() throws Exception {
-        accountDao.getByName("non-existing-account");
-    }
+    final AccountImpl found = accountDao.getByName(account.getName());
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnGettingAccountByNullName() throws Exception {
-        accountDao.getByName(null);
-    }
+    assertEquals(account, found);
+  }
 
-    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingAccountById",
-          expectedExceptions = NotFoundException.class)
-    public void shouldRemoveAccount() throws Exception {
-        String toRemove = accounts[0].getId();
+  @Test(expectedExceptions = NotFoundException.class)
+  public void shouldThrowNotFoundExceptionOnGettingNonExistingAccountByName() throws Exception {
+    accountDao.getByName("non-existing-account");
+  }
 
-        accountDao.remove(toRemove);
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNpeOnGettingAccountByNullName() throws Exception {
+    accountDao.getByName(null);
+  }
 
-        accountDao.getById(toRemove);
-    }
+  @Test(
+    dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingAccountById",
+    expectedExceptions = NotFoundException.class
+  )
+  public void shouldRemoveAccount() throws Exception {
+    String toRemove = accounts[0].getId();
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeOnRemovingAccountByNullId() throws Exception {
-        accountDao.remove(null);
-    }
+    accountDao.remove(toRemove);
+
+    accountDao.getById(toRemove);
+  }
+
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNpeOnRemovingAccountByNullId() throws Exception {
+    accountDao.remove(null);
+  }
 }

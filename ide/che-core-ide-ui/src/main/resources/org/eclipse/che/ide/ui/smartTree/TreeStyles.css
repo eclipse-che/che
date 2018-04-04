@@ -1,13 +1,14 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@external .selected;
 @eval projectExplorerJointContainerFill org.eclipse.che.ide.api.theme.Style.theme.projectExplorerJointContainerFill();
 @eval projectExplorerJointContainerShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerJointContainerShadow();
 @eval projectExplorerPresentableTextShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerPresentableTextShadow();
@@ -16,6 +17,8 @@
 @eval projectExplorerSelectedRowBorder org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBorder();
 @eval projectExplorerHoverRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBackground();
 @eval projectExplorerHoverRowBorder org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBorder();
+@eval projectExplorerVcsHead org.eclipse.che.ide.api.theme.Style.theme.projectExplorerVcsHead();
+@eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
 
 
 .noFocusOutline {
@@ -46,9 +49,10 @@
     vertical-align: middle;
     display: inline-block;
     margin-top: -10px;
-    font-size: 1em;
     padding-left: 2px;
     text-shadow: projectExplorerPresentableTextShadow;
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
 }
 
 .infoTextContainer {
@@ -62,6 +66,19 @@
     text-shadow: projectExplorerInfoTextShadow;
 }
 
+.vcsHeadContainer {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -10px;
+    font-style: italic;
+    padding-left: 2px;
+    text-shadow: projectExplorerPresentableTextShadow;
+    color: projectExplorerVcsHead;
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
+}
+
 .nodeContainer {
     white-space: nowrap;
     height: 20px;
@@ -73,13 +90,6 @@
 
 .selected {
     background-color: projectExplorerSelectedRowBackground !important;
-    /* Set default text color to selected item */
-    color: projectExplorerJointContainerFill !important;
-}
-
-/* Set default text color to nested elements of selected item */
-.selected * {
-    color: projectExplorerJointContainerFill !important;
 }
 
 .hover {
@@ -113,11 +123,17 @@
 }
 
 .tree {
-    display: inline-block;
-    min-width: 100%;
     font-size: 0.85em;
     outline: none;
     overflow-y: auto;
+    padding-bottom: 2px;
+}
+
+.contentTree {
+  min-width: 100%;
+  position: absolute;
+  overflow: hidden;
+  left: 0;
 }
 
 .tree:focus {
@@ -131,6 +147,14 @@
     rgba(255, 255, 255, 0.05) 50%,
     rgba(255, 255, 255, .05) 75%, transparent 75%, transparent);
     -webkit-animation: animate-stripes 1s linear infinite;
+}
+
+.searchMatch {
+    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    color: findResultsTextColor;
+    border-radius: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
 }
 
 @-webkit-keyframes animate-stripes {

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -356,6 +356,10 @@ init_check_docker_networking() {
      [[ ! ${HTTPS_PROXY} = "" ]] ||
      [[ ! ${NO_PROXY} = "" ]]; then
      info "Proxy: HTTP_PROXY=${HTTP_PROXY}, HTTPS_PROXY=${HTTPS_PROXY}, NO_PROXY=${NO_PROXY}"
+     if [[ ${NO_PROXY} = "" ]]; then
+     warning "Potential networking issue discovered!"
+     warning "We have identified that http and https proxies are set but no_proxy is not. This may cause fatal networking errors. Set no_proxy for your Docker daemon!"
+     fi
   fi
 
   export http_proxy=$HTTP_PROXY
@@ -395,6 +399,14 @@ init_check_user() {
   fi
 }
 
+# Extract groups of the docker run command
+init_check_groups() {
+  DOCKER_CHE_GROUPS=$(docker inspect --format='{{.HostConfig.GroupAdd}}' $(get_this_container_id) | cut -d '[' -f 2 | cut -d ']' -f 1 | xargs)
+  if [[ "${DOCKER_CHE_GROUPS}" != "" ]]; then
+    CHE_USER_GROUPS=${DOCKER_CHE_GROUPS}
+  fi
+}
+
 init_check_mounts() {
   DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
   INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
@@ -405,7 +417,7 @@ init_check_mounts() {
   UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
   CHEDIR_MOUNT=$(get_container_folder ":/chedir")
   DOCKER_MOUNT=$(get_container_folder ":/var/run/docker.sock")
-
+ 
   if [[ "${DATA_MOUNT}" = "not set" ]]; then
     info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
     info ""

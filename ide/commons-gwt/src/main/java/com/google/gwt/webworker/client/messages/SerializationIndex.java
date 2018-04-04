@@ -21,11 +21,13 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation for specifying the index of field in serialized form.
- * <p/>
+ *
+ * <p>
+ *
  * <p>Index must be a positive integer.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SerializationIndex {
-    int value();
+  int value();
 }

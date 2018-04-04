@@ -1,14 +1,19 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
+interface ICheLearmMoreTemplateScope extends ng.IScope {
+  compileScope: any;
+  template: string;
+}
 
 /**
  * @ngdoc directive
@@ -22,34 +27,37 @@
  *
  * @author Florent Benoit
  */
-export class CheLearnMoreTemplate {
+export class CheLearnMoreTemplate implements ng.IDirective {
+
+  static $inject = ['$compile', '$mdUtil'];
+
+  $compile: ng.ICompileService;
+  $mdUtil: any;
+
+  restrict = 'A';
+
+  require = '^cheLearnMore';
+
+  scope = {
+    template: '=cheLearnMoreTemplate',
+    compileScope: '=cheScope'
+  };
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor ($compile, $mdUtil) {
-    this.$compile= $compile;
+  constructor ($compile: ng.ICompileService, $mdUtil: any) {
+    this.$compile = $compile;
     this.$mdUtil = $mdUtil;
-    this.restrict='A';
-
-   this.require = '^cheLearnMore';
-
-    this.scope = {
-      template:     '=cheLearnMoreTemplate',
-      compileScope: '=cheScope'
-    };
   }
-
-
-
 
   /**
    * Defines id of the controller and apply some initial settings
    */
-  link(scope, element) {
-    var compileScope = scope.compileScope;
-    element.html(scope.template);
-    this.$compile(element.contents())(compileScope);
+  link($scope: ICheLearmMoreTemplateScope, $element: ng.IAugmentedJQuery) {
+    const compileScope = $scope.compileScope;
+    $element.html($scope.template);
+    this.$compile($element.contents())(compileScope);
   }
+
 }

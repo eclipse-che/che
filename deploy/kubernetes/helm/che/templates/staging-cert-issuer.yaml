@@ -1,0 +1,24 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+# {{- if .Values.global.tlsEnabled }}
+# apiVersion: certmanager.k8s.io/v1alpha1
+# kind: Issuer
+# metadata:
+#   name: letsencrypt-staging
+# spec:
+#   acme:
+#     # The ACME server URL
+#     server: https://acme-staging.api.letsencrypt.org/directory
+#     # Email address used for ACME registration
+#     email: user@example.com
+#     # Name of a secret used to store the ACME account private key
+#     privateKeySecretRef:
+#       name: letsencrypt-staging
+#     # Enable the HTTP-01 challenge provider
+#     http01: {}
+# {{- end }}
