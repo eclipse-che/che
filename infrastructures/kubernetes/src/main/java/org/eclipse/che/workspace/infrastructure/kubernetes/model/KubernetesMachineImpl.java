@@ -194,6 +194,14 @@ public class KubernetesMachineImpl implements Machine {
       this.machineName = machineName;
     }
 
+    public String getWorkspaceId() {
+      return workspaceId;
+    }
+
+    public String getMachineName() {
+      return machineName;
+    }
+
     @Override
     public boolean equals(Object obj) {
       if (this == obj) {

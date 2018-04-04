@@ -178,7 +178,6 @@ public class KubernetesInternalRuntime<
         namespace.cleanUp();
       } catch (InfrastructureException ignored) {
       }
-      removeCachedState();
 
       if (interrupted) {
         throw new InfrastructureException("Kubernetes environment start was interrupted");
@@ -413,7 +412,6 @@ public class KubernetesInternalRuntime<
     RuntimeIdentity identity = getContext().getIdentity();
     probeScheduler.cancel(identity.getWorkspaceId());
     namespace.cleanUp();
-    removeCachedState();
   }
 
   @Override

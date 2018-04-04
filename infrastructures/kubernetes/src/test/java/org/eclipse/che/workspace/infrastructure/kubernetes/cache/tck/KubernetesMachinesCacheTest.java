@@ -8,77 +8,72 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.cache.machine;
+package org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.*;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/** @author Sergii Leshchenko */
+/**
+ * Tests {@link KubernetesMachineCache} contract.
+ *
+ * @author Sergii Leshchenko
+ */
 @Listeners(TckListener.class)
-@Test(suiteName = "K8sRuntimeTest2")
+@Test(suiteName = KubernetesMachinesCacheTest.SUITE_NAME)
 public class KubernetesMachinesCacheTest {
 
-  @Inject private JpaKubernetesMachineCache machineCache;
+  public static final String SUITE_NAME = "KubernetesMachineCacheTck";
 
   @Inject private TckRepository<WorkspaceImpl> workspaceTckRepository;
   @Inject private TckRepository<AccountImpl> accountRepository;
   @Inject private TckRepository<KubernetesRuntimeState> runtimesRepository;
-  @Inject private TckRepository<KubernetesMachineImpl> machineRepository;
-  @Inject private TckRepository<KubernetesServerImpl> serverRepository;
 
+  @Inject private TckRepository<KubernetesMachineImpl> machineRepository;
+
+  @Inject private KubernetesMachineCache machineCache;
+
+  private KubernetesRuntimeState[] runtimeStates;
   private KubernetesMachineImpl[] machines;
-  private KubernetesServerImpl[] servers;
 
   @BeforeMethod
   public void setUp() throws TckRepositoryException {
-    AccountImpl account = new AccountImpl("id", "name", "type");
-    accountRepository.createAll(singletonList(account));
-    workspaceTckRepository.createAll(
-        singletonList(
-            new WorkspaceImpl(
-                "ws123",
-                account,
-                new WorkspaceConfigImpl(
-                    "name", "description", "defEnv", emptyList(), emptyList(), emptyMap()))));
+    WorkspaceImpl[] workspaces = new WorkspaceImpl[] {createWorkspace()};
 
-    runtimesRepository.createAll(
-        singletonList(
-            new KubernetesRuntimeState(
-                new RuntimeId("ws123", "envname", "ownerId"),
-                "namespace",
-                WorkspaceStatus.STARTING)));
+    AccountImpl[] accounts = new AccountImpl[] {workspaces[0].getAccount()};
+
+    runtimeStates = new KubernetesRuntimeState[] {createRuntimeState(workspaces[0])};
+
+    accountRepository.createAll(asList(accounts));
+    workspaceTckRepository.createAll(asList(workspaces));
+    runtimesRepository.createAll(asList(runtimeStates));
 
     machines =
         new KubernetesMachineImpl[] {
           new KubernetesMachineImpl(
-              "ws123",
+              workspaces[0].getId(),
               "machine1",
               "pod1",
               "c1",
@@ -94,12 +89,14 @@ public class KubernetesMachinesCacheTest {
 
   @AfterMethod
   public void removeEntities() throws TckRepositoryException {
-    serverRepository.removeAll();
     machineRepository.removeAll();
+
     runtimesRepository.removeAll();
     workspaceTckRepository.removeAll();
     accountRepository.removeAll();
   }
+
+  // TODO Cover all methods
 
   @Test
   public void shouldAddMachine() throws Exception {
@@ -117,21 +114,26 @@ public class KubernetesMachinesCacheTest {
 
   @Test
   public void shouldGetMachines() throws Exception {
-    RuntimeIdentityImpl runtimeIdentity = new RuntimeIdentityImpl("ws123", "env", "ownerId");
-    machineCache.updateServerStatus(
-        runtimeIdentity, "machine1", "serverName", ServerStatus.RUNNING);
+    // given
+    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
 
-    Map<String, KubernetesMachineImpl> machines = machineCache.getMachines(runtimeIdentity);
+    // when
+    machineCache.updateServerStatus(runtimeId, "machine1", "serverName", ServerStatus.RUNNING);
 
+    // then
+    Map<String, KubernetesMachineImpl> machines = machineCache.getMachines(runtimeId);
     assertEquals(machines.size(), 1);
   }
 
   @Test
   public void shouldRemoveMachine() throws Exception {
-    RuntimeIdentityImpl runtimeId = new RuntimeIdentityImpl("ws123", "env", "ownerId");
+    // given
+    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
 
+    // when
     machineCache.remove(runtimeId);
 
+    // then
     assertEquals(machineCache.getMachines(runtimeId).size(), 0);
   }
 }

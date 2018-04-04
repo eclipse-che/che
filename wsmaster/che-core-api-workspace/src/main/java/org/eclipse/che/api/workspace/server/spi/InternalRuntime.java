@@ -116,8 +116,13 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    */
   public void start(Map<String, String> startOptions) throws InfrastructureException {
     markStarting();
-    internalStart(startOptions);
-    markRunning();
+    try {
+      internalStart(startOptions);
+      markRunning();
+    } catch (InfrastructureException e) {
+      markStopped();
+      throw e;
+    }
   }
 
   /**

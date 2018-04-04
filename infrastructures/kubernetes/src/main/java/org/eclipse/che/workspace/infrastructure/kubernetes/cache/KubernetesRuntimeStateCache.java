@@ -21,8 +21,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRunti
 /**
  * Caches runtime state.
  *
- * <p>TODO Add TCK
- *
  * @author Sergii Leshchenko
  */
 public interface KubernetesRuntimeStateCache {

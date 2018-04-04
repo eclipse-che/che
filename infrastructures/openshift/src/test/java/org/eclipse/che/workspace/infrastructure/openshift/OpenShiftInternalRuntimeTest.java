@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
-/*
+
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -65,6 +65,8 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -79,15 +81,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-*/
+
 /**
  * Tests {@link OpenShiftInternalRuntime}.
  *
  * @author Anton Korneta
  */
 public class OpenShiftInternalRuntimeTest {
-  //TODO Fix tests
-  /*
   private static final int EXPOSED_PORT_1 = 4401;
   private static final int EXPOSED_PORT_2 = 8081;
   private static final int INTERNAL_PORT = 4411;
@@ -120,6 +120,8 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
+  @Mock private KubernetesRuntimeStateCache runtimeStateCache;
+  @Mock private KubernetesMachineCache machinesCache;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -143,6 +145,8 @@ public class OpenShiftInternalRuntimeTest {
             workspaceProbesFactory,
             new RuntimeEventsPublisher(eventService),
             mock(KubernetesSharedPool.class),
+            runtimeStateCache,
+            machinesCache,
             context,
             project,
             emptyList());
@@ -153,7 +157,7 @@ public class OpenShiftInternalRuntimeTest {
     when(project.services()).thenReturn(services);
     when(project.routes()).thenReturn(routes);
     when(project.pods()).thenReturn(pods);
-    when(bootstrapperFactory.create(any(), anyList(), any())).thenReturn(bootstrapper);
+    when(bootstrapperFactory.create(any(), anyList(), any(), any())).thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
@@ -291,5 +295,4 @@ public class OpenShiftInternalRuntimeTest {
   private static IntOrString intOrString(int port) {
     return new IntOrStringBuilder().withIntVal(port).withStrVal(String.valueOf(port)).build();
   }
-  */
 }

@@ -8,9 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.cache.machine;
-
-import static org.mockito.Mockito.mock;
+package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
@@ -34,15 +32,14 @@ import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl.ServerId;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.h2.Driver;
 
 /** @author Sergii Leshchenko */
@@ -77,23 +74,19 @@ public class JpaTckModule extends TckModule {
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());
 
-    bind(new TypeLiteral<TckRepository<KubernetesRuntimeState>>() {})
-        .toInstance(new JpaTckRepository<>(KubernetesRuntimeState.class));
-
     bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
-
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
 
+    bind(new TypeLiteral<TckRepository<KubernetesRuntimeState>>() {})
+        .toInstance(new JpaTckRepository<>(KubernetesRuntimeState.class));
+
     bind(new TypeLiteral<TckRepository<KubernetesMachineImpl>>() {})
         .toInstance(new JpaTckRepository<>(KubernetesMachineImpl.class));
-    bind(KubernetesNamespaceFactory.class).toInstance(mock(KubernetesNamespaceFactory.class));
 
     bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
-
-    bind(new TypeLiteral<TckRepository<KubernetesServerImpl>>() {})
-        .toInstance(new JpaTckRepository<>(KubernetesServerImpl.class));
+    bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
 
     bind(SchemaInitializer.class)
         .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
