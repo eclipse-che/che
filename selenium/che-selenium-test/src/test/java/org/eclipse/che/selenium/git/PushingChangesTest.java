@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
@@ -42,6 +43,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -53,13 +55,9 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class PushingChangesTest {
   private static final String PROJECT_NAME = NameGenerator.generate("PushingChangesTest-", 4);
-  private static final String DEFAULT_COMMIT_SSH = "f99b08d23946ac4dc2749650e67875b4672e339c";
-  private static final String COMMIT_MESSAGE = "edited and removed";
-  private static final String REPO_NAME = "pushChangesTest";
-  private static final String NEW_CONTENT_JSP = "<!-- JSP change -->";
-  private static final String NEW_CONTENT_JAVA = "/* Java change */";
+  private static final String NAME_OF_HARD_RESET_COMMAND = "hardReset";
+  private static final String PROJECT_FOLDER_NAME = "plain-files";
   private static final String PUSH_MSG = "Pushed to origin";
-  private static final String PUSH_NOTHING = "Everything up-to-date";
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -80,25 +78,25 @@ public class PushingChangesTest {
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private Consoles consoles;
-  @Inject private NotificationsPopupPanel          notifications;
-  @Inject private Wizard                           projectWizard;
-  @Inject private ImportProjectFromLocation        importProject;
-  @Inject private TestGitHubKeyUploader            testGitHubKeyUploader;
+  @Inject private NotificationsPopupPanel notifications;
+  @Inject private Wizard projectWizard;
+  @Inject private ImportProjectFromLocation importProject;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient          gitHubClientService;
-  @Inject private TestGitHubRepository             testRepo;
-  @Inject private TestProjectServiceClient         testProjectServiceClient;
-  @Inject private   TestCommandServiceClient         testCommandServiceClient;
+  @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private TestGitHubRepository testRepo;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
+  @Inject private CommandsPalette commandsPalette;
+
   @BeforeClass
-  public void prepare() throws Exception {
-
-
+  public void setUp() throws Exception {
     testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     Path entryPath = Paths.get(getClass().getResource("/projects/git-pull-test").getPath());
     testRepo.addContent(entryPath);
-
+    prerpareAmendCommitCommandByRestApi();
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
     git.importJavaApp(testRepo.getSshUrl(), PROJECT_NAME, BLANK);
@@ -110,15 +108,14 @@ public class PushingChangesTest {
     testRepo.delete();
   }
 
-  // @Test
+  @Test
   public void pushChangesTest() throws Exception {
-    String subFolderName = "plain-files";
     String newFileForPushing = "pushFile.txt";
     String nameOfHtmlFile = "file.html";
     String newContentForFirstPushing = String.valueOf(System.currentTimeMillis());
     String pathToHtmlFile = String.format("%s/%s", PROJECT_NAME, nameOfHtmlFile);
 
-    changeAndCreateNewFileByProjectServiceClient(
+    doChangesInTheProjectFileByProjectServiceClient(
         pathToHtmlFile, newFileForPushing, newContentForFirstPushing);
     git.createNewFileAndPushItToGitHub(PROJECT_NAME, "file.html");
     git.waitGitStatusBarWithMess(String.format("Successfully pushed to %s", testRepo.getSshUrl()));
@@ -128,46 +125,59 @@ public class PushingChangesTest {
     events.waitExpectedMessage(PUSH_MSG);
     assertEquals(testRepo.getFileContent(nameOfHtmlFile), newContentForFirstPushing);
     assertEquals(
-        testRepo.getFileContent(subFolderName + "/" + newFileForPushing),
+        testRepo.getFileContent(PROJECT_FOLDER_NAME + "/" + newFileForPushing),
         newContentForFirstPushing);
-
-    // Call Push again and check Everything up-to-date message
-    menu.runCommand(GIT, REMOTES_TOP, PUSH);
-    loader.waitOnClosed();
-    git.waitPushFormToOpen();
-    git.clickPush();
-    git.waitPushFormToClose();
-    notifications.waitExpectedMessageOnProgressPanelAndClosed(PUSH_NOTHING);
-    git.waitGitStatusBarWithMess(PUSH_NOTHING);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(PUSH_MSG);
-    events.clearAllMessages();
   }
 
   @Test
-  public void forcePushTest() {
-    // Force push
+  public void forcePushTest() throws Exception {
+    String expectedMessageAfterGitConflict =
+        "failed to push 'master -> master' to '%s'. Try to merge remote changes using pull, and then push again.";
+    String contentForCheckingForcePushing = "check force pushing";
+    String pathToFileWitChanging =
+        String.format("%s/%s/%s", PROJECT_NAME, PROJECT_FOLDER_NAME, "README.md");
+
+    // do conflict with changing file and amend commit
+    testProjectServiceClient.updateFile(
+        ws.getId(), pathToFileWitChanging, contentForCheckingForcePushing);
+    launchAmendCommitCommand();
+    pushChanges(false);
+    git.waitGitStatusBarWithMess(
+            String.format(expectedMessageAfterGitConflict, testRepo.getSshUrl()));
+
+    // Make force push and check changes on gitHub side
+    pushChanges(true);
+    git.waitGitStatusBarWithMess(String.format("Successfully pushed to %s", testRepo.getSshUrl()));
+    assertEquals(testRepo.getFileContent(PROJECT_FOLDER_NAME+ "/README.md"), contentForCheckingForcePushing);
+  }
+
+  private void pushChanges(boolean withForce) {
     menu.runCommand(GIT, REMOTES_TOP, PUSH);
     loader.waitOnClosed();
     git.waitPushFormToOpen();
-    git.selectForcePushCheckBox();
+    if (withForce) {
+      git.selectForcePushCheckBox();
+    }
     git.clickPush();
     git.waitPushFormToClose();
-    consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
-    git.waitGitStatusBarWithMess("Successfully pushed");
-    git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/pushChangesTest.git");
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(PUSH_MSG);
   }
 
-  private void changeAndCreateNewFileByProjectServiceClient(
+  private void doChangesInTheProjectFileByProjectServiceClient(
       String pathToItem, String newFileForPushing, String newContent) throws Exception {
     testProjectServiceClient.updateFile(ws.getId(), pathToItem, newContent);
     testProjectServiceClient.createFileInProject(
         ws.getId(), PROJECT_NAME + "/plain-files/", newFileForPushing, newContent);
   }
-  private void prerpareHardResetCommand(){
-    String bashCommand = String.format("cd /%s"
-    testCommandServiceClient.createCommand();
+
+  private void prerpareAmendCommitCommandByRestApi() throws Exception {
+    String bashCommand =
+        String.format("cd /projects/%s && git commit --all --no-edit --amend", PROJECT_NAME);
+    testCommandServiceClient.createCommand(
+        bashCommand, NAME_OF_HARD_RESET_COMMAND, CUSTOM, ws.getId());
+  }
+
+  private void launchAmendCommitCommand() {
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick(NAME_OF_HARD_RESET_COMMAND);
   }
 }

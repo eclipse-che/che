@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHContent;
@@ -177,5 +178,9 @@ public class TestGitHubRepository {
 
   public String getSshUrl() {
     return ghRepo.getSshUrl();
+  }
+
+  public List<GHContent> getDirectoryContent(String path) throws IOException {
+    return ghRepo.getDirectoryContent(path);
   }
 }
