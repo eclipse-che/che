@@ -75,4 +75,3 @@ CREATE INDEX index_che_k8s_server_attr_ws_id_machine_name ON che_k8s_server_attr
 --constraints
 ALTER TABLE che_k8s_server_attributes ADD CONSTRAINT fk_che_k8s_server_attributes_machine FOREIGN KEY (workspace_id, machine_name, server_name) REFERENCES che_k8s_server (workspace_id, machine_name, server_name);
 --------------------------------------------------------------------------------
-
