@@ -89,7 +89,7 @@ export class WorkspaceEnvironmentsController {
       onLoad: (editor: any) => {
         $timeout(() => {
           editor.refresh();
-        }, 1000);
+        }, 500);
       }
     };
 
@@ -194,44 +194,6 @@ export class WorkspaceEnvironmentsController {
   }
 
   /**
-   * Add 'ws-agent' to list of agents of specified machine and remove it from lists of agents of other machines.
-   *
-   * @param machineName
-   * @returns {ng.IPromise<any>}
-   */
-  changeMachineDev(machineName: string): ng.IPromise<any> {
-    if (!machineName) {
-      return this.$q.reject('Machine name is not defined.');
-    }
-
-    // remove ws-agent from machine which is the dev machine now
-    this.machines.forEach((machine: any) => {
-      if (this.environmentManager.isDev(machine)) {
-        this.environmentManager.setDev(machine, false);
-      }
-    });
-
-    let machine = this.machines.find((machine: any) => {
-      return machine.name === machineName;
-    });
-    if (!machine) {
-      return this.$q.reject('Machine is not found.');
-    }
-
-    // add ws-agent to current machine agents list
-    this.environmentManager.setDev(machine, true);
-
-    let newEnvironment = this.environmentManager.getEnvironment(this.environment, this.machines);
-    this.workspaceConfig.environments[this.environmentName] = newEnvironment;
-    this.environment = newEnvironment;
-
-    this.doUpdateEnvironments();
-    this.init();
-
-    return this.$q.when();
-  }
-
-  /**
    * Callback which is called in order to update environment config
    *
    * @returns {ng.IPromise<any>}
@@ -303,12 +265,6 @@ export class WorkspaceEnvironmentsController {
           environmentManager.setMemoryLimit(machine, DEFAULT_WORKSPACE_RAM);
         }
       });
-
-      // if recipe contains only one machine
-      // then this is the dev machine
-      if (machines.length === 1) {
-        environmentManager.setDev(machines[0], true);
-      }
 
       this.workspaceConfig.environments[this.environmentName] = environmentManager.getEnvironment(environment, machines);
     }

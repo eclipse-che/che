@@ -55,7 +55,6 @@ import {ListAgents} from './environments/list-agents/list-agents.directive';
 import {WorkspaceMachinesController} from './workspace-machines/workspace-machines.controller';
 import {WorkspaceMachines} from './workspace-machines/workspace-machines.directive';
 import {WorkspaceMachineItem} from './workspace-machines/machine-item/workspace-machine-item.directive';
-import {ChangeDevMachineDialogController} from './workspace-machines/change-dev-machine-dialog/change-dev-machine-dialog.controller';
 import {EditMachineDialogController} from './workspace-machines/edit-machine-dialog/edit-machine-dialog.controller';
 import {CheWorkspaceStatusButton} from './status-button/workspace-status-button.directive';
 import {WorkspaceDetailsOverviewController} from './workspace-overview/workspace-details-overview.controller';
@@ -153,7 +152,6 @@ export class WorkspaceDetailsConfig {
     register.controller('WorkspaceMachinesController', WorkspaceMachinesController);
     register.directive('workspaceMachines', WorkspaceMachines);
     register.directive('workspaceMachineItem', WorkspaceMachineItem);
-    register.controller('ChangeDevMachineDialogController', ChangeDevMachineDialogController);
     register.controller('EditMachineDialogController', EditMachineDialogController);
     register.directive('workspaceStatusButton', CheWorkspaceStatusButton);
     register.controller('WorkspaceDetailsOverviewController', WorkspaceDetailsOverviewController);

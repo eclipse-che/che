@@ -99,10 +99,6 @@ export class WorkspaceMachinesController {
    */
   private onChange: Function;
   /**
-   * Callback which is called when change DEV machine.
-   */
-  private onDevChange: (machineName: string) => ng.IPromise<any>;
-  /**
    * Environment recipe service.
    */
   private cheRecipeService: CheRecipeService;
@@ -123,12 +119,6 @@ export class WorkspaceMachinesController {
 
     this.absUrl = $location.absUrl().split('?')[0];
     this.cheListHelper = cheListHelperFactory.getHelper(MACHINE_LIST_HELPER_ID);
-
-    this.onDevChange = (machineName: string) => {
-      return this.changeDevMachine(machineName).catch((error: string) => {
-        $log.error(error);
-      });
-    };
 
     this.updateData(this.workspaceDetails);
     const action = this.updateData.bind(this);
@@ -177,7 +167,7 @@ export class WorkspaceMachinesController {
       this.machinesList = [];
     } else {
       this.machinesList = this.machines.map((machine: IEnvironmentManagerMachine) => {
-        const source: any = this.environmentManager.getSource(machine);
+        const source: {image?: string} = this.environmentManager.getSource(machine);
         const memoryLimitBytes = this.environmentManager.getMemoryLimit(machine);
         const memoryLimitGBytes = memoryLimitBytes === -1 ? 0 : this.getNumber(this.$filter('changeMemoryUnit')(memoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]));
         return <machine>{
@@ -206,53 +196,6 @@ export class WorkspaceMachinesController {
       this.onChange();
     }
   }
-
-  /**
-   * Changes DEV machine by name.
-   *
-   * @param machineName {string}
-   * @returns {IPromise<any>}
-   */
-  changeDevMachine(machineName: string): ng.IPromise<any> {
-    const deferred = this.$q.defer();
-
-    if (!machineName) {
-      deferred.reject('Machine name is not defined.');
-    } else {
-      let machine = this.machines.find((machine: any) => {
-        return machine.name === machineName;
-      });
-      if (!machine) {
-        deferred.reject('Machine is not found.');
-      } else {
-        if (!this.environmentManager.isDev(machine)) {
-          // remove ws-agent from machine which is the dev machine now
-          this.machines.forEach((machine: IEnvironmentManagerMachine) => {
-            if (this.environmentManager.isDev(machine)) {
-              this.environmentManager.setDev(machine, false);
-            }
-          });
-          // add ws-agent to current machine agents list
-          this.environmentManager.setDev(machine, true);
-          const environment = this.environmentManager.getEnvironment(this.environment, this.machines);
-          this.updateEnvironment(environment);
-          deferred.resolve();
-        } else {
-          // return ws-agent to current machine
-          this.cheListHelper.getVisibleItems().find((machine: machine) => {
-            return machine.name === machineName;
-          }).isDev = true;
-          this.changeDevMachineDialog(machine).then(() => {
-            deferred.resolve();
-          }, () => {
-            deferred.reject('Machine is not select.');
-          });
-        }
-      }
-    }
-
-    return deferred.promise;
-  };
 
   /**
    * Show confirmation popup before delete
@@ -324,44 +267,10 @@ export class WorkspaceMachinesController {
 
   /**
    * Shows confirmation popup before machine to delete.
-   * @param machine {IEnvironmentManagerMachine}
-   * @param popupTitle {string}
-   * @param okButtonTitle {string}
-   * @returns {angular.IPromise<any>}
-   */
-  changeDevMachineDialog(machine: IEnvironmentManagerMachine, popupTitle?: string, okButtonTitle?: string): ng.IPromise<any> {
-    return this.$mdDialog.show({
-      controller: 'ChangeDevMachineDialogController',
-      controllerAs: 'changeDevMachineDialogController',
-      bindToController: true,
-      clickOutsideToClose: true,
-      locals: {
-        popupTitle: popupTitle,
-        okButtonTitle: okButtonTitle,
-        currentDevMachineName: machine.name,
-        machinesList: this.machines,
-        changeDevMachine: this.onDevChange
-      },
-      templateUrl: 'app/workspaces/workspace-details/workspace-machines/change-dev-machine-dialog/change-dev-machine-dialog.html'
-    });
-  }
-
-  /**
-   * Shows confirmation popup before machine to delete.
    * @param name {string}
    */
   deleteMachine(name: string): void {
-    const machine: IEnvironmentManagerMachine = this.machines.find((machine: IEnvironmentManagerMachine) => {
-      return machine && machine.name === name;
-    });
-    let promise: ng.IPromise<any>;
-    if (!this.environmentManager.isDev(machine)) {
-      promise = this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', 'Delete');
-    } else {
-      promise = this.changeDevMachineDialog(machine, 'Remove machine', 'Delete');
-    }
-
-    promise.then(() => {
+    this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', 'Delete').then(() => {
       this.machineOnDelete(name);
     });
   }
