@@ -492,8 +492,8 @@ public class KubernetesInternalRuntime<
 
   @Override
   protected void markStopped() throws InfrastructureException {
-    runtimeStatuses.remove(getContext().getIdentity());
     machines.remove(getContext().getIdentity());
+    runtimeStatuses.remove(getContext().getIdentity());
   }
 
   @Override
