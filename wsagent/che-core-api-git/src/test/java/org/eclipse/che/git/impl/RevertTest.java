@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.git.impl;
 
-import static org.eclipse.che.git.impl.GitTestUtil.*;
+import static org.eclipse.che.git.impl.GitTestUtil.addFile;
+import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
