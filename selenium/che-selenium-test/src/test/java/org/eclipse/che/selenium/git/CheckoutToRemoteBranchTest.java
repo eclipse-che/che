@@ -64,10 +64,6 @@ public class CheckoutToRemoteBranchTest {
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
-  @Named("github.password")
-  private String gitHubPassword;;
-
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
@@ -87,8 +83,8 @@ public class CheckoutToRemoteBranchTest {
 
     ide.open(ws);
 
-    // create other branch in the test repo
-    testRepo.addRefFromMaster(SECOND_BRANCH);
+    // create another branch in the test repo
+    testRepo.createBranchFromMaster(SECOND_BRANCH);
   }
 
   @Test

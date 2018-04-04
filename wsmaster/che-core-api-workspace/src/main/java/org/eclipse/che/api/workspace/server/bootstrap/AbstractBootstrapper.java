@@ -137,7 +137,10 @@ public abstract class AbstractBootstrapper {
     try {
       doBootstrapAsync(installerEndpoint, outputEndpoint);
     } catch (InfrastructureException ex) {
-      finishEventFuture.completeExceptionally(ex);
+      finishEventFuture.completeExceptionally(
+          new InfrastructureException(
+              "Bootstrapping of machine " + machineName + " failed. Cause: " + ex.getMessage(),
+              ex));
     }
     return bootstrapFuture;
   }

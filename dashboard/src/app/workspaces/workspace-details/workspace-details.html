@@ -68,8 +68,8 @@
       </md-tab-body>
     </md-tab>
 
-    <!-- Agents -->
-    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Agents);">
+    <!-- Installers tab -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Installers);">
       <md-tab-label>
         <span class="che-tab-label-title">Installers</span>
       </md-tab-label>
@@ -152,12 +152,30 @@
     </md-tab>
 
     <!-- SSH Tab -->
-    <md-tab>
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.SSH);">
       <md-tab-label>
         <span class="che-tab-label-title">SSH</span>
       </md-tab-label>
       <md-tab-body>
         <workspace-details-ssh></workspace-details-ssh>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Tools Tab -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Tools);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Tools</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Configuration"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.checkEditMode(true)"
+                              filter="workspaceDetailsController.toolsFilter">
+          <workspace-details-tools selected-machine="machine"
+                                   on-change="onChange()"
+                                   environment-manager="environmentManager">
+          </workspace-details-tools>
+        </che-machine-selector>
       </md-tab-body>
     </md-tab>
 

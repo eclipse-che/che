@@ -10,7 +10,7 @@
  */
 'use strict';
 
-interface ICheFormatOutputAttributes extends ng.IAttributes {
+interface ICheFormatOutputScope extends ng.IScope {
   ngModel: string;
 }
 
@@ -23,9 +23,12 @@ export class CheFormatOutput implements ng.IDirective {
   static $inject = ['jsonOutputColors', '$compile'];
 
   restrict = 'A';
-
+  require = ['ngModel'];
   outputColors: any;
   $compile: ng.ICompileService;
+  scope = {
+    ngModel: '='
+  };
 
   /**
    * Default constructor that is using resource
@@ -39,8 +42,10 @@ export class CheFormatOutput implements ng.IDirective {
   /**
    * Keep reference to the model controller
    */
-  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheFormatOutputAttributes): void {
-    $scope.$watch(() => { return $attrs.ngModel; }, (value: string) => {
+  link($scope: ICheFormatOutputScope, $element: ng.IAugmentedJQuery): void {
+    $scope.$watch(() => {
+        return $scope.ngModel;
+      }, (value: string) => {
       if (!value || value.length === 0) {
         return;
       }
