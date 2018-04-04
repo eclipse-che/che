@@ -1,0 +1,6 @@
+[submodule "Repo_For_Test"]
+	path = Repo_For_Test
+	url = https://github.com/idexmai/Repo_For_Test.git
+[submodule "testRepo"]
+	path = testRepo
+	url = https://github.com/idexmai/testRepo.git
