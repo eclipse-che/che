@@ -49,7 +49,7 @@ public class RuntimeConsistencyCheckerTest {
   }
 
   @DataProvider
-  private static Object[][] inconsistentRuntimesProvider() throws Exception{
+  private static Object[][] inconsistentRuntimesProvider() throws Exception {
     return new Object[][] {
       {environment("a", "b"), runtime("a")},
       {environment("a", "b"), runtime("a", "c")},

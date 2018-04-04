@@ -68,14 +68,14 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
       @Assisted RuntimeIdentity runtimeIdentity,
       @Assisted List<? extends Installer> installers,
       @Assisted KubernetesMachineImpl kubernetesMachine,
+      @Assisted KubernetesNamespace namespace,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.kubernetes.bootstrapper.binary_url") String bootstrapperBinaryUrl,
       @Named("che.infra.kubernetes.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
       @Named("che.infra.kubernetes.bootstrapper.server_check_period_sec")
           int serverCheckPeriodSeconds,
       @Named("che.workspace.logs.root_dir") String logsRootPath,
-      EventService eventService,
-      KubernetesNamespace namespace) {
+      EventService eventService) {
     super(
         kubernetesMachine.getName(),
         runtimeIdentity,
