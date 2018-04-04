@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -51,12 +52,16 @@ public class PullRequestPluginWithForkTest {
   private static final String COMMENT = generate("Comment-", 8);
 
   @Inject
-  @Named("github.auxiliary.username")
-  private String githubAuxiliaryUserName;
+  @Named("github.username")
+  private String githubUserName;
 
   @Inject
-  @Named("github.auxiliary.password")
-  private String githubAuxiliaryUserPassword;
+  @Named("github.password")
+  private String githubUserPassword;
+
+  @Inject
+  @Named(CheSeleniumSuiteModule.AUXILIARY)
+  private TestGitHubRepository testAuxiliaryRepo;
 
   @Inject private Git git;
   @Inject private Ide ide;
@@ -68,7 +73,6 @@ public class PullRequestPluginWithForkTest {
   @Inject private TestWorkspace testWorkspace;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private PullRequestPanel pullRequestPanel;
-  @Inject private TestGitHubRepository testGitHubRepository;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
@@ -76,25 +80,24 @@ public class PullRequestPluginWithForkTest {
   public void setUp() throws Exception {
     Path entryPath =
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
-    testGitHubRepository.addContent(entryPath);
+    testAuxiliaryRepo.addContent(entryPath);
 
     ide.open(testWorkspace);
 
     // add committer info
-    testUserPreferencesServiceClient.addGitCommitter(githubAuxiliaryUserName, testUser.getEmail());
+    testUserPreferencesServiceClient.addGitCommitter(githubUserName, testUser.getEmail());
 
     // authorize application on GitHub
     menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
-    preferences.generateAndUploadSshKeyOnGithub(
-        githubAuxiliaryUserName, githubAuxiliaryUserPassword);
+    preferences.generateAndUploadSshKeyOnGithub(githubUserName, githubUserPassword);
   }
 
   @Test
   public void createPullRequest() throws Exception {
     // import project
     projectExplorer.waitProjectExplorer();
-    git.importJavaApp(testGitHubRepository.getHtmlUrl(), PROJECT_NAME, MAVEN);
+    git.importJavaApp(testAuxiliaryRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change content
     projectExplorer.openItemByPath(PROJECT_NAME);
