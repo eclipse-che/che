@@ -151,10 +151,9 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     entityManager.flush();
   }
 
-  @Transactional(rollbackOn = IllegalStateException.class)
+  @Transactional
   protected void doReplaceStatus(
-      RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
-      throws IllegalStateException {
+      RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus) {
     EntityManager entityManager = managerProvider.get();
     KubernetesRuntimeState kubernetesRuntimeState =
         entityManager.find(KubernetesRuntimeState.class, new RuntimeId(identity));
