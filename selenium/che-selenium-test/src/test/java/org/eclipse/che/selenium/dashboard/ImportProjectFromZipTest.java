@@ -15,19 +15,15 @@ import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.So
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -39,13 +35,9 @@ public class ImportProjectFromZipTest {
   private static final String PROJECT_NAME = "master";
 
   @Inject private Dashboard dashboard;
-  @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private Loader loader;
   @Inject private ProjectExplorer explorer;
-  @Inject private NavigationBar navigationBar;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;

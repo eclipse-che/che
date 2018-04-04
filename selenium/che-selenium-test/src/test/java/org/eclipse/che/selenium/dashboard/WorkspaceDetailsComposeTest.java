@@ -19,7 +19,6 @@ import static org.testng.Assert.assertTrue;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -27,7 +26,6 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -35,7 +33,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceMachines;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -52,19 +49,16 @@ public class WorkspaceDetailsComposeTest {
           "MYSQL_USER", "petclinic");
 
   @Inject private TestUser testUser;
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private NewWorkspace newWorkspace;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Consoles consoles;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceMachines workspaceMachines;
   @Inject private WorkspaceEnvVariables workspaceEnvVariables;
-  @Inject private MachineTerminal terminal;
   @Inject private Ide ide;
 
   @BeforeClass

@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PR
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -47,7 +46,6 @@ public class CreateWorkspaceOnDashboardTest {
 
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
