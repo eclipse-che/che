@@ -86,7 +86,7 @@ oc new-app -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io 
 		-p WS_PROTOCOL=wss \
 		-p TLS=true; \
 oc set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume; \
-oc apply -f https
+oc apply -f https/che-route-tls.yaml
 ```
 
 ## Deploy multi user Che with bundled Keycloak and Postgres (http)
