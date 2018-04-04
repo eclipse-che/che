@@ -14,8 +14,10 @@ import com.google.inject.AbstractModule;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
+import org.eclipse.che.multiuser.api.account.personal.PersonalAccountUserManager;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakConfigurationService;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakTokenValidator;
+import org.eclipse.che.multiuser.keycloak.server.KeycloakUserManager;
 import org.eclipse.che.multiuser.keycloak.server.dao.KeycloakProfileDao;
 import org.eclipse.che.multiuser.keycloak.server.oauth2.KeycloakOAuthAuthenticationService;
 
@@ -30,5 +32,6 @@ public class KeycloakModule extends AbstractModule {
     bind(KeycloakOAuthAuthenticationService.class);
 
     bind(ProfileDao.class).to(KeycloakProfileDao.class);
+    bind(PersonalAccountUserManager.class).to(KeycloakUserManager.class);
   }
 }

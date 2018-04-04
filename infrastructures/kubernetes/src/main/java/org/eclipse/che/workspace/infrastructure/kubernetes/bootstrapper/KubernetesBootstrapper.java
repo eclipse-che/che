@@ -10,18 +10,26 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper;
 
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.assistedinject.Assisted;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.bootstrap.AbstractBootstrapper;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +57,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   private final String bootstrapperBinaryUrl;
   private final String bootstrapperLogsFolder;
   private final String bootstrapperLogsFile;
+  private final EventService eventService;
 
   @Inject
   public KubernetesBootstrapper(
@@ -75,6 +84,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     this.installerTimeoutSeconds = installerTimeoutSeconds;
     this.kubernetesMachine = kubernetesMachine;
     this.bootstrapperLogsFolder = logsRootPath + "/bootstrapper";
+    this.eventService = eventService;
     this.bootstrapperLogsFile = bootstrapperLogsFolder + "/bootstrapper.log";
   }
 
@@ -116,33 +126,47 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   }
 
   private void injectBootstrapper() throws InfrastructureException {
-    String machineName = kubernetesMachine.getName();
+    final String mName = kubernetesMachine.getName();
+    final RuntimeIdentityDto runtimeIdentityDto = DtoConverter.asDto(runtimeIdentity);
+    final BiConsumer<String, String> outputConsumer =
+        (stream, text) ->
+            eventService.publish(
+                DtoFactory.newDto(MachineLogEvent.class)
+                    .withRuntimeId(runtimeIdentityDto)
+                    .withStream(stream)
+                    .withText(text)
+                    .withTime(ZonedDateTime.now().format(ISO_OFFSET_DATE_TIME))
+                    .withMachineName(mName));
+    LOG.debug("Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, mName);
 
-    LOG.debug(
-        "Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, machineName);
-    kubernetesMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
-    LOG.debug("Bootstrapping {}:{}. Downloading bootstrapper binary", runtimeIdentity, machineName);
+    kubernetesMachine.exec(outputConsumer, "mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
+    LOG.debug("Bootstrapping {}:{}. Downloading bootstrapper binary", runtimeIdentity, mName);
+
     kubernetesMachine.exec(
-        "curl", "-o", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE, bootstrapperBinaryUrl);
-    kubernetesMachine.exec("chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
+        outputConsumer,
+        "curl",
+        "-sSo",
+        BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE,
+        bootstrapperBinaryUrl);
+    kubernetesMachine.exec(outputConsumer, "chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
-    LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, machineName);
+    LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, mName);
 
     kubernetesMachine.exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE);
 
-    List<String> contentsToContatenate = new ArrayList<String>();
-    contentsToContatenate.add("[");
+    List<String> contentsToConcatenate = new ArrayList<>();
+    contentsToConcatenate.add("[");
     boolean firstOne = true;
     for (Installer installer : installers) {
       if (firstOne) {
         firstOne = false;
       } else {
-        contentsToContatenate.add(",");
+        contentsToConcatenate.add(",");
       }
-      contentsToContatenate.add(GSON.toJson(installer));
+      contentsToConcatenate.add(GSON.toJson(installer));
     }
-    contentsToContatenate.add("]");
-    for (String content : contentsToContatenate) {
+    contentsToConcatenate.add("]");
+    for (String content : contentsToConcatenate) {
       kubernetesMachine.exec(
           "sh",
           "-c",

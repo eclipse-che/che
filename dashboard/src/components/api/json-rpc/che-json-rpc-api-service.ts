@@ -59,7 +59,7 @@ export class CheJsonRpcApiClient {
    * @param params params (optional)
    */
   unsubscribe(event: string, notification: string, handler: Function, params?: any): void {
-    this.jsonRpcClient.removeNotificationHandler(event, handler);
+    this.jsonRpcClient.removeNotificationHandler(notification, handler);
     this.jsonRpcClient.notify(event);
   }
 

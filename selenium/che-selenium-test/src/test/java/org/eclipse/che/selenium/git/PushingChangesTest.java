@@ -143,12 +143,14 @@ public class PushingChangesTest {
     launchAmendCommitCommand();
     pushChanges(false);
     git.waitGitStatusBarWithMess(
-            String.format(expectedMessageAfterGitConflict, testRepo.getSshUrl()));
+        String.format(expectedMessageAfterGitConflict, testRepo.getSshUrl()));
 
     // Make force push and check changes on gitHub side
     pushChanges(true);
     git.waitGitStatusBarWithMess(String.format("Successfully pushed to %s", testRepo.getSshUrl()));
-    assertEquals(testRepo.getFileContent(PROJECT_FOLDER_NAME+ "/README.md"), contentForCheckingForcePushing);
+    assertEquals(
+        testRepo.getFileContent(PROJECT_FOLDER_NAME + "/README.md"),
+        contentForCheckingForcePushing);
   }
 
   private void pushChanges(boolean withForce) {

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
@@ -24,9 +25,11 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -35,9 +38,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -69,6 +74,10 @@ public class KubernetesPods {
   public static final int POD_REMOVAL_TIMEOUT_MIN = 5;
 
   private static final String POD_OBJECT_KIND = "Pod";
+  // error stream data initial capacity
+  public static final int ERROR_BUFF_INITIAL_CAP = 2048;
+  public static final String STDOUT = "stdout";
+  public static final String STDERR = "stderr";
 
   private final String namespace;
   private final KubernetesClientFactory clientFactory;
@@ -359,6 +368,57 @@ public class KubernetesPods {
           ex.getMessage());
     }
     containerEventsHandlers.clear();
+  }
+
+  /**
+   * Executes command in specified container.
+   *
+   * @param podName pod name where command will be executed
+   * @param containerName container name where command will be executed
+   * @param timeoutMin timeout to wait until process will be done
+   * @param command command to execute
+   * @param outputConsumer command output biconsumer, that is accepts stream type and message
+   * @throws InfrastructureException when specified timeout is reached
+   * @throws InfrastructureException when {@link Thread} is interrupted while command executing
+   * @throws InfrastructureException when command error stream is not empty
+   * @throws InfrastructureException when any other exception occurs
+   */
+  public void exec(
+      String podName,
+      String containerName,
+      int timeoutMin,
+      String[] command,
+      BiConsumer<String, String> outputConsumer)
+      throws InfrastructureException {
+    final ExecWatchdog watchdog = new ExecWatchdog();
+    final ByteArrayOutputStream errStream = new ByteArrayOutputStream(ERROR_BUFF_INITIAL_CAP);
+    try (ExecWatch watch =
+        clientFactory
+            .create(workspaceId)
+            .pods()
+            .inNamespace(namespace)
+            .withName(podName)
+            .inContainer(containerName)
+            .writingError(errStream)
+            .usingListener(watchdog)
+            .exec(encode(command))) {
+      try {
+        watchdog.wait(timeoutMin, TimeUnit.MINUTES);
+        final byte[] error = errStream.toByteArray();
+        if (error.length > 0) {
+          final String cmd = Arrays.stream(command).collect(Collectors.joining(" ", "", "\n"));
+          final String err = new String(error, UTF_8);
+          outputConsumer.accept(STDOUT, cmd);
+          outputConsumer.accept(STDERR, err);
+          throw new InfrastructureException(err);
+        }
+      } catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+        throw new InfrastructureException(ex.getMessage(), ex);
+      }
+    } catch (KubernetesClientException ex) {
+      throw new KubernetesInfrastructureException(ex);
+    }
   }
 
   /**
