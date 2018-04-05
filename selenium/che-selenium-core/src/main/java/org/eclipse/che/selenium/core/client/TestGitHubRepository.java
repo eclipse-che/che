@@ -226,17 +226,18 @@ public class TestGitHubRepository {
     }
   }
 
-  private GHTreeBuilder createTree() {
+  private GHTreeBuilder createTree() throws IOException {
     return ghRepo.createTree();
   }
 
-  public void createSubmodule() {
+  public void createSubmodule() throws IOException {
     createTree()
         .entry(
             "rails",
+            "100644",
             null,
             null,
-            null,
-            "[submodule \"rails\"]\n\tpath = rails\n\turl = https://github.com/rails/rails");
+            "[submodule \"rails\"]path = rails url = https://github.com/rails/rails")
+        .create();
   }
 }

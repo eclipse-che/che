@@ -160,9 +160,12 @@ public class AuthorizeOnGithubFromImportTest {
         testRepo.addContent(entryPath);
     */
     // ------------------------------------------------------
+    Path entryPath1 = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+    testRepo3.addContent(entryPath1);
 
     testRepo3.createSubmodule();
 
+    ///////////////////////////////////////
     ide.open(ws);
     String ideWin = seleniumWebDriver.getWindowHandle();
 
