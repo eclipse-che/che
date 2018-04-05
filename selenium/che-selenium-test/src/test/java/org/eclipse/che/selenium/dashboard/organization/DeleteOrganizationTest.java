@@ -10,17 +10,17 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.ADMIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -45,7 +45,7 @@ public class DeleteOrganizationTest {
   private TestOrganization childOrg;
 
   @Inject
-  @Named(CheSeleniumSuiteModule.ADMIN)
+  @Named(ADMIN)
   private TestOrganizationServiceClient adminTestOrganizationServiceClient;
 
   @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
@@ -55,7 +55,7 @@ public class DeleteOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
 
   @BeforeClass
   public void setUp() throws Exception {

@@ -16,7 +16,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.user.CheSecondTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.Account;
@@ -35,7 +35,9 @@ public class AccountTest {
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
-  @Inject private CheSecondTestUser secondTestUser;
+
+  @Inject private TestUser auxiliaryTestUser;
+
   @Inject private KeycloakAccountPage keycloakAccount;
   @Inject private KeycloakPasswordPage keycloakPasswordPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -46,12 +48,12 @@ public class AccountTest {
   public void setup() {
     changedFields =
         new Account(
-            secondTestUser.getName(),
-            format("%s@testmail.ua", secondTestUser.getName()),
+            auxiliaryTestUser.getName(),
+            format("%s@testmail.ua", auxiliaryTestUser.getName()),
             "UserFirstName",
             "UserLastName");
 
-    dashboard.open(secondTestUser.getName(), secondTestUser.getPassword());
+    dashboard.open(auxiliaryTestUser.getName(), auxiliaryTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.clickOnUsernameButton();
     dashboard.clickOnAccountItem();
@@ -110,7 +112,7 @@ public class AccountTest {
     keycloakPasswordPage.clickOnSavePasswordButton();
 
     keycloakPasswordPage.waitTextInErrorAlert("Invalid existing password.");
-    keycloakPasswordPage.setPasswordFieldValue(secondTestUser.getPassword());
+    keycloakPasswordPage.setPasswordFieldValue(auxiliaryTestUser.getPassword());
     keycloakPasswordPage.setNewPasswordFieldValue("changedPassword");
     keycloakPasswordPage.setNewPasswordConfirmationFieldValue("changedPassword");
     keycloakPasswordPage.clickOnSavePasswordButton();
@@ -122,7 +124,7 @@ public class AccountTest {
     dashboard.clickOnUsernameButton();
     dashboard.clickOnLogoutItem();
 
-    dashboard.open(secondTestUser.getName(), "changedPassword");
+    dashboard.open(auxiliaryTestUser.getName(), "changedPassword");
 
     dashboard.waitDashboardToolbarTitle();
   }

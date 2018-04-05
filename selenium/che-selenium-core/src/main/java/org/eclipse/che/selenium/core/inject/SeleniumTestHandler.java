@@ -50,8 +50,8 @@ import org.eclipse.che.selenium.core.constant.TestBrowser;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
-import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -134,7 +134,7 @@ public abstract class SeleniumTestHandler
   @Named("sys.excludedGroups")
   private String excludedGroups;
 
-  @Inject private TestUser defaultTestUser;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
@@ -539,7 +539,11 @@ public abstract class SeleniumTestHandler
     }
 
     if (defaultTestUser != null) {
-      defaultTestUser.cleanUp();
+      try {
+        defaultTestUser.cleanUp();
+      } catch (IOException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
     }
 
     isCleanUpCompleted.set(true);

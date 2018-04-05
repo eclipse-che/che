@@ -48,9 +48,10 @@ import org.eclipse.che.selenium.core.requestfactory.CheTestAdminHttpJsonRequestF
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
-import org.eclipse.che.selenium.core.user.CheDefaultTestUser;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.SingleUserCheDefaultTestUserProvider;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
+import org.eclipse.che.selenium.core.user.TestUserProvider;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -79,8 +80,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     TestConfiguration config = new SeleniumTestConfiguration();
     config.getMap().forEach((key, value) -> bindConstant().annotatedWith(named(key)).to(value));
 
-    bind(TestUser.class).to(CheDefaultTestUser.class);
-
+    bind(TestUserProvider.class).to(SingleUserCheDefaultTestUserProvider.class);
     bind(TestUserServiceClient.class).to(CheTestUserServiceClient.class);
 
     bind(HttpJsonRequestFactory.class).to(TestUserHttpJsonRequestFactory.class);
@@ -130,7 +130,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   @Provides
   public TestWorkspace getWorkspace(
       TestWorkspaceProvider workspaceProvider,
-      TestUser testUser,
+      DefaultTestUser testUser,
       @Named("workspace.default_memory_gb") int defaultMemoryGb)
       throws Exception {
     TestWorkspace ws = workspaceProvider.createWorkspace(testUser, defaultMemoryGb, DEFAULT);

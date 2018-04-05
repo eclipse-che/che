@@ -17,12 +17,12 @@ import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.openqa.selenium.WebDriver;
 
 /** @author Anatolii Bazko */
 public class TestFactory {
-  private final TestUser owner;
+  private final DefaultTestUser owner;
   private final FactoryDto factoryDto;
   private final TestDashboardUrlProvider dashboardUrl;
   private final TestFactoryServiceClient testFactoryServiceClient;
@@ -33,7 +33,7 @@ public class TestFactory {
 
   public TestFactory(
       String factoryUrl,
-      TestUser owner,
+      DefaultTestUser owner,
       FactoryDto factoryDto,
       TestDashboardUrlProvider dashboardUrl,
       TestFactoryServiceClient factoryServiceClient,

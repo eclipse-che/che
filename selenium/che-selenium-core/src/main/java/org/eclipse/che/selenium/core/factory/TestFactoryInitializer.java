@@ -40,13 +40,13 @@ import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /** @author Anatolii Bazko */
 @Singleton
 public class TestFactoryInitializer {
 
-  @Inject private TestUser defaultUser;
+  @Inject private DefaultTestUser defaultUser;
   @Inject private TestIdeUrlProvider ideUrlProvider;
   @Inject private TestDashboardUrlProvider dashboardUrlProvider;
   @Inject private TestApiEndpointUrlProvider apiEndpointProvider;

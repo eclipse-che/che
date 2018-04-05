@@ -10,9 +10,16 @@
  */
 package org.eclipse.che.selenium.core.user;
 
+import com.google.inject.Provider;
+import java.io.IOException;
+
 /**
- * Represents admin user in a test environment.
+ * Test user provider.
  *
  * @author Dmytro Nochevnov
  */
-public interface AdminTestUser extends TestUser {}
+public interface TestUserProvider<T extends TestUser> extends Provider<T> {
+
+  /** Deletes user. */
+  void delete(T testUser) throws IOException;
+}

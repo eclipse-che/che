@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.ADMIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
@@ -18,7 +19,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
@@ -46,11 +46,13 @@ public class DeleteOrganizationByBulkTest {
   @InjectTestOrganization private TestOrganization org2;
 
   @Inject
-  @Named(CheSeleniumSuiteModule.ADMIN)
+  @Named(ADMIN)
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
+
   @Inject private AdminTestUser adminTestUser;
+
   @Inject private NavigationBar navigationBar;
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;

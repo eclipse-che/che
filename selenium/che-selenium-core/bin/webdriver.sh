@@ -909,7 +909,7 @@ prepareTestUsersForMultiuserChe() {
     export CHE_ADMIN_OFFLINE__TOKEN=${CHE_ADMIN_OFFLINE__TOKEN}
 
     export CHE_TESTUSER_OFFLINE__TOKEN=${CHE_TESTUSER_OFFLINE__TOKEN}
-    export CHE_SECOND_TESTUSER_OFFLINE__TOKEN=${CHE_SECOND_TESTUSER_OFFLINE__TOKEN}
+    export CHE_AUXILIARY_TESTUSER_OFFLINE__TOKEN=${CHE_AUXILIARY_TESTUSER_OFFLINE__TOKEN}
 
     if [[ -n ${CHE_TESTUSER_EMAIL+x} ]] && [[ -n ${CHE_TESTUSER_PASSWORD+x} ]]; then
         return
@@ -933,20 +933,20 @@ prepareTestUsersForMultiuserChe() {
            CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
 
-        # create second test user
+        # create auxiliary test user
         time=$(date +%s)
-        export CHE_SECOND_TESTUSER_NAME=${CHE_SECOND_TESTUSER_NAME:-user${time}}
-        export CHE_SECOND_TESTUSER_EMAIL=${CHE_SECOND_TESTUSER_EMAIL:-${CHE_SECOND_TESTUSER_NAME}@1.com}
-        export CHE_SECOND_TESTUSER_PASSWORD=${CHE_SECOND_TESTUSER_PASSWORD:-${time}}
-        echo "[TEST] Creating second test user with name '$CHE_SECOND_TESTUSER_NAME'..."
-        NEW_SECOND_USER_ID=$(createUser ${CHE_SECOND_TESTUSER_NAME} ${CHE_SECOND_TESTUSER_EMAIL} ${CHE_SECOND_TESTUSER_PASSWORD})
-        if [[ -z ${NEW_SECOND_USER_ID} ]]; then
+        export CHE_AUXILIARY_TESTUSER_NAME=${CHE_AUXILIARY_TESTUSER_NAME:-user${time}}
+        export CHE_AUXILIARY_TESTUSER_EMAIL=${CHE_AUXILIARY_TESTUSER_EMAIL:-${CHE_AUXILIARY_TESTUSER_NAME}@1.com}
+        export CHE_AUXILIARY_TESTUSER_PASSWORD=${CHE_AUXILIARY_TESTUSER_PASSWORD:-${time}}
+        echo "[TEST] Creating second test user with name '$CHE_AUXILIARY_TESTUSER_NAME'..."
+        NEW_AUXILIARY_USER_ID=$(createUser ${CHE_AUXILIARY_TESTUSER_NAME} ${CHE_AUXILIARY_TESTUSER_EMAIL} ${CHE_AUXILIARY_TESTUSER_PASSWORD})
+        if [[ -z ${NEW_AUXILIARY_USER_ID} ]]; then
            # set test user credentials to be equal to admin ones in case of problem with creation of user
            echo -e "${RED}[WARN] There is a problem with creation of second test user in Keycloak server: '${response}'.${NO_COLOUR}"
            echo -e "Admin user will be used as a second test user."
-           CHE_SECOND_TESTUSER_NAME=${CHE_ADMIN_NAME}
-           CHE_SECOND_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
-           CHE_SECOND_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
+           CHE_AUXILIARY_TESTUSER_NAME=${CHE_ADMIN_NAME}
+           CHE_AUXILIARY_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
+           CHE_AUXILIARY_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
 
         # add role "read-token" of client "broker" to admin user

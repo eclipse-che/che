@@ -18,7 +18,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * To instantiate {@link TestUser} in test classes with none default parameters.
+ * To instantiate {@link DefaultTestUser} in test classes with none default parameters.
  *
  * @author Anatolii Bazko
  */

@@ -11,8 +11,8 @@
 package org.eclipse.che.selenium.core.user;
 
 /**
- * Represents admin user in a test environment.
+ * Represents default test user in a test environment.
  *
  * @author Dmytro Nochevnov
  */
-public interface AdminTestUser extends TestUser {}
+public interface DefaultTestUser extends TestUser {}

@@ -14,12 +14,11 @@ import static java.lang.String.format;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import java.io.IOException;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nochevnov
  * @author Anton Korneta
  */
-public class TestUserImpl implements TestUser {
+public class TestUserImpl implements DefaultTestUser, AdminTestUser {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestUserImpl.class);
 
@@ -39,21 +38,22 @@ public class TestUserImpl implements TestUser {
   private final String offlineToken;
 
   private final TestUserServiceClient userServiceClient;
-  private final TestWorkspaceServiceClient workspaceServiceClient;
-  private TestAuthServiceClient authServiceClient;
+  private final TestAuthServiceClient authServiceClient;
+  private final TestUserProvider testUserProvider;
 
   /** To instantiate user with specific name, e-mail, password and offline token. */
   @AssistedInject
   public TestUserImpl(
       TestUserServiceClientFactory testUserServiceClientFactory,
       TestAuthServiceClient authServiceClient,
-      TestWorkspaceServiceClientFactory wsServiceClientFactory,
+      @Assisted TestUserProvider testUserProvider,
       @Assisted("name") String name,
       @Assisted("email") String email,
       @Assisted("password") String password,
       @Assisted("offlineToken") String offlineToken)
       throws Exception {
     this.authServiceClient = authServiceClient;
+    this.testUserProvider = testUserProvider;
     this.userServiceClient = testUserServiceClientFactory.create(name, password, offlineToken);
     this.email = email;
     this.password = password;
@@ -61,7 +61,6 @@ public class TestUserImpl implements TestUser {
     this.offlineToken = offlineToken;
     this.id = userServiceClient.findByEmail(email).getId();
     LOG.info("User name='{}', id='{}' is being used for testing", name, id);
-    this.workspaceServiceClient = wsServiceClientFactory.create(email, password, offlineToken);
   }
 
   @Override
@@ -100,7 +99,9 @@ public class TestUserImpl implements TestUser {
 
   @Override
   @PreDestroy
-  public void cleanUp() {}
+  public void cleanUp() throws IOException {
+    testUserProvider.delete(this);
+  }
 
   @Override
   public String toString() {

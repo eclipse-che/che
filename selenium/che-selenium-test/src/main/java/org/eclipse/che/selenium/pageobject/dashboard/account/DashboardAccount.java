@@ -19,7 +19,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAcc
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.selenium.core.user.CheSecondTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 
@@ -27,13 +27,13 @@ import org.openqa.selenium.By;
 @Singleton
 public class DashboardAccount {
 
-  private final CheSecondTestUser cheSecondTestUser;
+  private final TestUser auxiliaryTestUser;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   public DashboardAccount(
-      CheSecondTestUser cheSecondTestUser, SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.cheSecondTestUser = cheSecondTestUser;
+      TestUser auxiliaryTestUser, SeleniumWebDriverHelper seleniumWebDriverHelper) {
+    this.auxiliaryTestUser = auxiliaryTestUser;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
   }
 
@@ -49,8 +49,8 @@ public class DashboardAccount {
   public Account getDefaultFieldsValue() {
     Account account = new Account();
 
-    account.setEmail(cheSecondTestUser.getEmail());
-    account.setLogin(cheSecondTestUser.getName());
+    account.setEmail(auxiliaryTestUser.getEmail());
+    account.setLogin(auxiliaryTestUser.getName());
     account.setFirstName("");
     account.setLastName("");
 

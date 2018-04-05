@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.ADMIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.ACTIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM;
@@ -24,12 +25,11 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.ArrayList;
-import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
@@ -47,7 +47,7 @@ public class AdminOfParentOrganizationTest {
   private int initialOrgCount;
 
   @Inject
-  @Named(CheSeleniumSuiteModule.ADMIN)
+  @Named(ADMIN)
   private TestOrganizationServiceClient adminTestOrganizationServiceClient;
 
   @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
@@ -56,7 +56,7 @@ public class AdminOfParentOrganizationTest {
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private CheMultiuserAdminDashboard dashboard;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
 
   @InjectTestOrganization(prefix = "parentOrg")
   private TestOrganization parentOrg;

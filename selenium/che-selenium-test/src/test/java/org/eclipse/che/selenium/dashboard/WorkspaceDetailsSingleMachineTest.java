@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -73,7 +73,7 @@ public class WorkspaceDetailsSingleMachineTest {
 
   private String workspaceName;
 
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
   @Inject private Loader loader;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
