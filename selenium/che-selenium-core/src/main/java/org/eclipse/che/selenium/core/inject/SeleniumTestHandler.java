@@ -156,7 +156,7 @@ public abstract class SeleniumTestHandler
 
   private void revokeGithubOauthToken() {
     // do not revoke if github tests are not being executed
-    if (excludedGroups == null || excludedGroups.contains(TestGroup.GITHUB)) {
+    if (excludedGroups != null && excludedGroups.contains(TestGroup.GITHUB)) {
       return;
     }
 
