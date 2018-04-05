@@ -144,16 +144,25 @@ public class WorkspaceRuntimes {
    *
    * @param workspace the workspace to inject runtime into
    */
-  public void injectRuntime(WorkspaceImpl workspace) {
+  public void injectRuntime(WorkspaceImpl workspace) throws ServerException {
     RuntimeState runtimeState = runtimes.get(workspace.getId());
     if (runtimeState != null) {
-      workspace.setRuntime(new RuntimeImpl(runtimeState.runtime));
+      try {
+        workspace.setRuntime(asRuntime(runtimeState));
+      } catch (InfrastructureException e) {
+        throw new ServerException(
+            "Error occurred while runtime state inspection. " + e.getMessage());
+      }
       workspace.setStatus(runtimeState.status);
     } else {
       workspace.setStatus(STOPPED);
     }
   }
 
+  private RuntimeImpl asRuntime(RuntimeState runtimeState) throws InfrastructureException {
+    InternalRuntime<?> runtime = runtimeState.runtime;
+    return new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner());
+  }
   /**
    * Gets workspace status by its identifier.
    *

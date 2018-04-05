@@ -29,17 +29,22 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Implementation of concrete Runtime
+ * Implementation of concrete Runtime.
  *
  * @author gazarenkov
  */
-public abstract class InternalRuntime<T extends RuntimeContext> implements Runtime {
+public abstract class InternalRuntime<T extends RuntimeContext> {
 
   private final T context;
   private final URLRewriter urlRewriter;
   private final List<Warning> warnings;
   protected WorkspaceStatus status;
 
+  /**
+   * @param context prepared context for runtime starting
+   * @param urlRewriter url rewriter
+   * @param warnings warning that occurred while context preparing
+   */
   public InternalRuntime(T context, URLRewriter urlRewriter, List<Warning> warnings) {
     this.context = context;
     this.urlRewriter = urlRewriter;
@@ -49,6 +54,13 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
     }
   }
 
+  /**
+   * @param context prepared context for runtime starting
+   * @param urlRewriter url rewriter
+   * @param warnings warning that occurred while context preparing
+   * @param status status of the runtime, or null if {@link #start(Map)} and {@link #stop(Map)} were
+   *     not invoked yet
+   */
   public InternalRuntime(
       T context,
       URLRewriter urlRewriter,
@@ -63,23 +75,27 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
     this.status = status;
   }
 
-  @Override
+  /** Returns name of the active environment. */
   public String getActiveEnv() {
     return context.getIdentity().getEnvName();
   }
 
-  @Override
+  /** Returns identifier of user who started a runtime. */
   public String getOwner() {
     return context.getIdentity().getOwnerId();
   }
 
-  @Override
+  /** Returns identifier of user who started a runtime. */
   public List<? extends Warning> getWarnings() {
     return warnings;
   }
 
-  @Override
-  public Map<String, ? extends Machine> getMachines() {
+  /**
+   * Returns map of machine name to machine instance entries.
+   *
+   * @throws InfrastructureException when any error occurs
+   */
+  public Map<String, ? extends Machine> getMachines() throws InfrastructureException {
     return getInternalMachines()
         .entrySet()
         .stream()
@@ -96,9 +112,12 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
   /**
    * Returns map of machine name to machine instance entries.
    *
-   * <p>Implementation should not return null
+   * <p>Implementation must not return null
+   *
+   * @throws InfrastructureException when any error occurs
    */
-  protected abstract Map<String, ? extends Machine> getInternalMachines();
+  protected abstract Map<String, ? extends Machine> getInternalMachines()
+      throws InfrastructureException;
 
   /**
    * Returns runtime status.
