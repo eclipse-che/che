@@ -40,7 +40,7 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 

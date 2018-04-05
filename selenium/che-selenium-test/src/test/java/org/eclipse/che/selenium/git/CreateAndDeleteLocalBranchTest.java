@@ -43,7 +43,7 @@ public class CreateAndDeleteLocalBranchTest {
   @Inject private Ide ide;
   @Inject private TestUser user;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 

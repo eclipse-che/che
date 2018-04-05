@@ -42,11 +42,11 @@ public class ImportProjectFromGitHubTest {
   private String projectName;
   private String ideWin;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 
