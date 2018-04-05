@@ -100,7 +100,7 @@ services:
 <% end -%>
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik/traefik.toml:/etc/traefik/traefik.toml'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik:/etc/traefik'
     restart: always
 <% end -%>
 
@@ -168,7 +168,9 @@ services:
     labels:
       traefik.keycloak.frontend.entryPoints: "http"
       traefik.keycloak.port: "8080"
-<% if ! @che_docker_ip_external.empty? -%>
+<% if scope.lookupvar('che::che_single_port') == 'true' and scope.lookupvar('che::che_single_port_wildcard_domain_ipless') == 'true' -%>
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
+<% elsif ! @che_docker_ip_external.empty? -%>
       traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_docker_ip_external') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
 <% else -%>
       traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::docker_ip') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"

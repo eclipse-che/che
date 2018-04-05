@@ -17,7 +17,9 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
+import org.eclipse.che.api.system.shared.event.service.SuspendingSystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
+import org.eclipse.che.api.system.shared.event.service.SystemServiceSuspendedEvent;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -55,6 +57,35 @@ public class SystemTerminatorTest {
     verify(eventService).publish(new SystemServiceStoppedEvent("service1"));
     verify(eventService).publish(new StoppingSystemServiceEvent("service2"));
     verify(eventService).publish(new SystemServiceStoppedEvent("service2"));
+  }
+
+  @Test
+  public void executesSuspendals() throws Exception {
+    terminator.suspendAll();
+
+    verify(termination1).suspend();
+    verify(termination2).suspend();
+    verify(eventService).publish(new SuspendingSystemServiceEvent("service1"));
+    verify(eventService).publish(new SystemServiceSuspendedEvent("service1"));
+    verify(eventService).publish(new SuspendingSystemServiceEvent("service2"));
+    verify(eventService).publish(new SystemServiceSuspendedEvent("service2"));
+  }
+
+  @Test
+  public void executesTermitationsWheSuspendalsNotSupported() throws Exception {
+
+    doThrow(UnsupportedOperationException.class).when(termination1).suspend();
+    terminator.suspendAll();
+
+    verify(termination1).terminate();
+    verify(termination2).suspend();
+
+    verify(eventService).publish(new SuspendingSystemServiceEvent("service1"));
+    verify(eventService).publish(new StoppingSystemServiceEvent("service1"));
+    verify(eventService).publish(new SystemServiceStoppedEvent("service1"));
+    verify(eventService).publish(new SystemServiceSuspendedEvent("service1"));
+    verify(eventService).publish(new SuspendingSystemServiceEvent("service2"));
+    verify(eventService).publish(new SystemServiceSuspendedEvent("service2"));
   }
 
   @Test(

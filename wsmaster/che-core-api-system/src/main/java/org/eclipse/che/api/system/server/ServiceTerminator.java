@@ -14,7 +14,9 @@ import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
+import org.eclipse.che.api.system.shared.event.service.SuspendingSystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
+import org.eclipse.che.api.system.shared.event.service.SystemServiceSuspendedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,16 +46,46 @@ class ServiceTerminator {
   void terminateAll() throws InterruptedException {
     for (ServiceTermination termination : terminations) {
       LOG.info("Shutting down '{}' service", termination.getServiceName());
-      eventService.publish(new StoppingSystemServiceEvent(termination.getServiceName()));
+      doTerminate(termination);
+    }
+  }
+
+  /**
+   * Suspends system services.
+   *
+   * @throws InterruptedException when suspending is interrupted
+   */
+  void suspendAll() throws InterruptedException {
+    for (ServiceTermination termination : terminations) {
+      LOG.info("Suspending down '{}' service", termination.getServiceName());
+      eventService.publish(new SuspendingSystemServiceEvent(termination.getServiceName()));
       try {
-        termination.terminate();
+        termination.suspend();
+      } catch (UnsupportedOperationException e) {
+        LOG.info(
+            "Suspending down '{}' service ins't supported, terminating it",
+            termination.getServiceName());
+        doTerminate(termination);
       } catch (InterruptedException x) {
         LOG.error(
-            "Interrupted while waiting for '{}' service to shutdown", termination.getServiceName());
+            "Interrupted while waiting for '{}' service to suspend", termination.getServiceName());
         throw x;
       }
-      LOG.info("Service '{}' is shut down", termination.getServiceName());
-      eventService.publish(new SystemServiceStoppedEvent(termination.getServiceName()));
+      LOG.info("Service '{}' is suspended", termination.getServiceName());
+      eventService.publish(new SystemServiceSuspendedEvent(termination.getServiceName()));
     }
+  }
+
+  private void doTerminate(ServiceTermination termination) throws InterruptedException {
+    eventService.publish(new StoppingSystemServiceEvent(termination.getServiceName()));
+    try {
+      termination.terminate();
+    } catch (InterruptedException x) {
+      LOG.error(
+          "Interrupted while waiting for '{}' service to shutdown", termination.getServiceName());
+      throw x;
+    }
+    LOG.info("Service '{}' is shut down", termination.getServiceName());
+    eventService.publish(new SystemServiceStoppedEvent(termination.getServiceName()));
   }
 }

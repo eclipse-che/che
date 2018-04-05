@@ -24,13 +24,21 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
+import org.eclipse.che.api.system.shared.event.service.SystemServiceItemSuspendedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 
 /**
- * Terminates workspace service.
+ * Terminates workspace service. In case of full system shutdown or if current infra isn't support
+ * workspaces recovery, it blocks starting new workspaces and stops all that already running. In
+ * case of suspend and recovery support, blocks starting new workspaces and waits until all
+ * workspaces that are currently in a starting/stopping state to finish this process and become
+ * stable running or stopped state.
  *
  * @author Yevhenii Voevodin
+ * @author Max Shaposhnyk
  */
 public class WorkspaceServiceTermination implements ServiceTermination {
 
@@ -39,13 +47,20 @@ public class WorkspaceServiceTermination implements ServiceTermination {
 
   private final WorkspaceSharedPool sharedPool;
   private final WorkspaceRuntimes runtimes;
+  private final RuntimeInfrastructure runtimeInfrastructure;
   private final EventService eventService;
 
   @Inject
   public WorkspaceServiceTermination(
-      WorkspaceSharedPool sharedPool, WorkspaceRuntimes runtimes, EventService eventService) {
+      WorkspaceManager manager,
+      WorkspaceSharedPool sharedPool,
+      WorkspaceRuntimes runtimes,
+      RuntimeInfrastructure runtimeInfrastructure,
+      EventService eventService) {
+    this.manager = manager;
     this.sharedPool = sharedPool;
     this.runtimes = runtimes;
+    this.runtimeInfrastructure = runtimeInfrastructure;
     this.eventService = eventService;
   }
 
@@ -54,6 +69,11 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     return "workspace";
   }
 
+  /**
+   * Blocks starting new workspaces and stops all that already running
+   *
+   * @throws InterruptedException
+   */
   @Override
   public void terminate() throws InterruptedException {
     Preconditions.checkState(runtimes.refuseStart());
@@ -65,6 +85,49 @@ public class WorkspaceServiceTermination implements ServiceTermination {
       sharedPool.shutdown();
     } finally {
       eventService.unsubscribe(propagator);
+    }
+  }
+
+  /**
+   * Blocks starting new workspaces and waits until all workspaces that are currently in a
+   * starting/stopping state to finish this process
+   *
+   * @throws InterruptedException
+   * @throws UnsupportedOperationException
+   */
+  @Override
+  public void suspend() throws InterruptedException, UnsupportedOperationException {
+    Preconditions.checkState(runtimes.refuseStart());
+    try {
+      runtimeInfrastructure.getIdentities();
+    } catch (UnsupportedOperationException | InfrastructureException e) {
+      throw new UnsupportedOperationException("Current infrastructure does not support suspend.");
+    }
+    WorkspaceSuspendedEventsPropagator propagator = new WorkspaceSuspendedEventsPropagator();
+    eventService.subscribe(propagator);
+    try {
+      waitAllWorkspacesRunningOrStopped();
+      sharedPool.shutdown();
+    } finally {
+      eventService.unsubscribe(propagator);
+    }
+  }
+
+  private void stopRunningAndStartingWorkspacesAsync() {
+    for (String workspaceId : runtimes.getRuntimesIds()) {
+      WorkspaceStatus status = runtimes.getStatus(workspaceId);
+      if (status == WorkspaceStatus.RUNNING || status == WorkspaceStatus.STARTING) {
+        try {
+          manager.stopWorkspace(workspaceId, Collections.emptyMap());
+        } catch (ServerException | ConflictException | NotFoundException x) {
+          if (runtimes.hasRuntime(workspaceId)) {
+            LOG.error(
+                "Couldn't get the workspace '{}' while it's running, the occurred error: '{}'",
+                workspaceId,
+                x.getMessage());
+          }
+        }
+      }
     }
   }
 
@@ -92,6 +155,51 @@ public class WorkspaceServiceTermination implements ServiceTermination {
                     totalRunning)));
       }
     }
+  }
+
+  /** Propagates workspace suspended events as {@link SystemServiceItemSuspendedEvent} events. */
+  private class WorkspaceSuspendedEventsPropagator
+      implements EventSubscriber<WorkspaceStatusEvent> {
+
+    private final int totalRunning;
+    private final AtomicInteger currentlyStopped;
+
+    private WorkspaceSuspendedEventsPropagator() {
+      this.totalRunning = runtimes.getInProgress().size();
+      this.currentlyStopped = new AtomicInteger(0);
+    }
+
+    @Override
+    public void onEvent(WorkspaceStatusEvent event) {
+      if (event.getStatus() == WorkspaceStatus.STOPPED
+          || event.getStatus() == WorkspaceStatus.RUNNING) {
+        eventService.publish(
+            asDto(
+                new SystemServiceItemSuspendedEvent(
+                    getServiceName(),
+                    event.getWorkspaceId(),
+                    currentlyStopped.incrementAndGet(),
+                    totalRunning)));
+      }
+    }
+  }
+
+  private void waitAllWorkspacesStopped() throws InterruptedException {
+    Timer timer = new Timer("RuntimesStoppedTracker", false);
+    CountDownLatch latch = new CountDownLatch(1);
+    timer.schedule(
+        new TimerTask() {
+          @Override
+          public void run() {
+            if (!runtimes.isAnyInProgress()) {
+              timer.cancel();
+              latch.countDown();
+            }
+          }
+        },
+        0,
+        DEFAULT_PULL_RUNTIMES_PERIOD_MS);
+    latch.await();
   }
 
   private void waitAllWorkspacesRunningOrStopped() throws InterruptedException {

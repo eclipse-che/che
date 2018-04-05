@@ -15,7 +15,7 @@ import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedE
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
 
 /**
- * Defines an interface for implementing termination process for a certain service.
+ * Defines an interface for implementing termination or suspend process for a certain service.
  *
  * @author Yevhenii Voevodin
  */
@@ -29,6 +29,19 @@ public interface ServiceTermination {
    *     and implementation supports termination it should throw an interrupted exception
    */
   void terminate() throws InterruptedException;
+
+  /**
+   * Suspends a certain service. Means that no more new service entities should be created and/or
+   * executed etc.
+   *
+   * @throws UnsupportedOperationException if this operation is not supported
+   * @throws InterruptedException as suspend is synchronous some of the implementations may need to
+   *     wait for asynchronous jobs to finish their execution, so if suspend is interrupted and
+   *     implementation supports suspending it should throw an interrupted exception
+   */
+  default void suspend() throws InterruptedException, UnsupportedOperationException {
+    throw new UnsupportedOperationException("This operation is not supported.");
+  }
 
   /**
    * Returns the name of the service which is terminated by this termination. The name is used for
