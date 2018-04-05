@@ -658,7 +658,7 @@
     "id": "go-default",
     "creator": "ide",
     "name": "Go",
-    "description": "Default Go Stack with Go 1.6.2",
+    "description": "Default Go Stack with Go 1.8.3",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -671,7 +671,7 @@
       },
       {
         "name": "Go",
-        "version": "1.6.2"
+        "version": "1.8.3"
       }
     ],
     "workspaceConfig": {
