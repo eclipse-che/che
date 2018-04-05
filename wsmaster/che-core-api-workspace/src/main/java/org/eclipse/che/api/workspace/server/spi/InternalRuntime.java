@@ -50,7 +50,10 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
   }
 
   public InternalRuntime(
-      T context, URLRewriter urlRewriter, List<Warning> warnings, @Nullable WorkspaceStatus status) {
+      T context,
+      URLRewriter urlRewriter,
+      List<Warning> warnings,
+      @Nullable WorkspaceStatus status) {
     this.context = context;
     this.urlRewriter = urlRewriter;
     this.warnings = new CopyOnWriteArrayList<>();

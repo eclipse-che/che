@@ -58,7 +58,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-//TODO Adapt tests
+// TODO Adapt tests
 /** @author Alexander Garagatyi */
 public class InternalRuntimeTest {
   private static final long SECOND_IN_MILLISECONDS = 1_000L;
