@@ -97,6 +97,8 @@ public class AuthorizeOnGithubFromImportTest {
   @Inject private TestGitHubRepository testRepo1;
   @Inject private TestGitHubRepository testRepo2;
   @Inject private TestGitHubRepository testRepo3;
+  @Inject private TestGitHubRepository submodule1;
+  @Inject private TestGitHubRepository submodule2;
   @Inject private Git git;
   @Inject private Wizard projectWizard;
   @Inject private CodenvyEditor editor;
@@ -136,8 +138,8 @@ public class AuthorizeOnGithubFromImportTest {
 
   @BeforeClass
   private void initGitRepositories() throws IOException, URISyntaxException {
-    /*Path entryPath1 = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
-    testRepo1.addContent(entryPath1);
+    Path entryPath1 = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+    /*testRepo1.addContent(entryPath1);
 
     Path sourceProject =
         Paths.get(getClass().getResource("/projects/default-spring-project").toURI());
@@ -151,21 +153,16 @@ public class AuthorizeOnGithubFromImportTest {
     testRepo2.createBranchFromMaster(BRANCH_3);
 
     testRepo2.addContent(sourceBranchProject, BRANCH_3);*/
+    String pathToFile = "/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md";
+
+    testRepo3.addContent(entryPath1);
+    testRepo3.createSubmodule(submodule1, "/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md");
+
   }
 
   @Test
   public void checkAuthorizationOnGitHubWhenImportProject() throws Exception {
-    // add repositories and branches
-    /*Path entryPath = Paths.get(getClass().getResource("/projects/ProjectGitSubmodule").getPath());
-        testRepo.addContent(entryPath);
-    */
-    // ------------------------------------------------------
-    Path entryPath1 = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
-    testRepo3.addContent(entryPath1);
 
-    testRepo3.createSubmodule();
-
-    ///////////////////////////////////////
     ide.open(ws);
     String ideWin = seleniumWebDriver.getWindowHandle();
 

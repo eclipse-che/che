@@ -17,11 +17,15 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHContent;
+import org.kohsuke.github.GHContentUpdateResponse;
 import org.kohsuke.github.GHFileNotFoundException;
 import org.kohsuke.github.GHRef;
 import org.kohsuke.github.GHRepository;
@@ -62,6 +66,24 @@ public class TestGitHubRepository {
       throws IOException, InterruptedException {
     gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
     ghRepo = create();
+  }
+
+  public enum TreeElementMode{
+    BLOB("100644"),
+    EXECUTABLE_BLOB("100755"),
+    SUBDIRECTORY("040000"),
+    SUBMODULE("160000"),
+    BLOB_SYMLINK("120000");
+
+    private String mode;
+
+    TreeElementMode(String mode){
+      this.mode = mode;
+    }
+
+    public String get(){
+      return this.mode;
+    }
   }
 
   public String getName() {
@@ -226,18 +248,46 @@ public class TestGitHubRepository {
     }
   }
 
-  private GHTreeBuilder createTree() throws IOException {
-    return ghRepo.createTree();
+  public String getRepoSha() throws IOException {
+    return this.ghRepo.getRef("heads/master").getObject().getSha();
   }
 
-  public void createSubmodule() throws IOException {
-    createTree()
-        .entry(
-            "rails",
-            "100644",
-            null,
-            null,
-            "[submodule \"rails\"]path = rails url = https://github.com/rails/rails")
-        .create();
+  public void createSubmodule(TestGitHubRepository linkedRepository, String pathToFileWithGitSubmodulesFile) throws IOException, URISyntaxException {
+    GHRef referenceToMaster = ghRepo.getRef("heads/master");
+
+    String submoduleSha =
+        ghRepo
+            .createTree()
+            .baseTree(referenceToMaster.getObject().getSha())
+            .entry(
+                "Repo_For_Test",
+                "160000",
+                "commit",
+                linkedRepository.getRepoSha(),
+                null)
+            .create()
+            .getSha();
+
+    GHCommit treeCommit =
+        ghRepo.createCommit().tree(submoduleSha).message("create submodule").create();
+
+    referenceToMaster.updateTo(treeCommit.getSHA1(), true);
+
+    Path pathToFile =
+        Paths.get(
+            getClass()
+                .getResource(
+                    "/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md")
+                .toURI());
+    byte[] contentBytes = Files.readAllBytes(pathToFile);
+
+    GHContentUpdateResponse response =
+        ghRepo.createContent(contentBytes, "add .gitmodules", ".gitmodules");
+
+    int i = 1;
   }
+
+
+
+
 }
