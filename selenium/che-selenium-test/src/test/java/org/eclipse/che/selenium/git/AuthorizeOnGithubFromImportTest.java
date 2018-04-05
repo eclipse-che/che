@@ -159,6 +159,8 @@ public class AuthorizeOnGithubFromImportTest {
     */
     // ------------------------------------------------------
 
+    testRepo3.createSubmodule();
+
     ide.open(ws);
     String ideWin = seleniumWebDriver.getWindowHandle();
 

@@ -25,6 +25,7 @@ import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHFileNotFoundException;
 import org.kohsuke.github.GHRef;
 import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHTreeBuilder;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,5 +224,19 @@ public class TestGitHubRepository {
       sleepQuietly(GITHUB_OPERATION_TIMEOUT_SEC);
       ghRepo.createContent(contentBytes, commitMessage, relativePath);
     }
+  }
+
+  private GHTreeBuilder createTree() {
+    return ghRepo.createTree();
+  }
+
+  public void createSubmodule() {
+    createTree()
+        .entry(
+            "rails",
+            null,
+            null,
+            null,
+            "[submodule \"rails\"]\n\tpath = rails\n\turl = https://github.com/rails/rails");
   }
 }
