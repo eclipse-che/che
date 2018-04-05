@@ -185,7 +185,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         context,
         urlRewriter,
         warnings,
-        running ? WorkspaceStatus.STOPPED : WorkspaceStatus.RUNNING);
+        //TODO null value is not fine here
+        running ? WorkspaceStatus.RUNNING : WorkspaceStatus.STOPPED);
     this.networks = networks;
     this.containerStarter = machineStarter;
     this.eventService = eventService;

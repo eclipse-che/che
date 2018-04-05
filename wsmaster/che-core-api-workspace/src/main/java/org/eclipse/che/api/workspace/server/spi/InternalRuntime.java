@@ -26,6 +26,7 @@ import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Implementation of concrete Runtime
@@ -49,7 +50,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
   }
 
   public InternalRuntime(
-      T context, URLRewriter urlRewriter, List<Warning> warnings, WorkspaceStatus status) {
+      T context, URLRewriter urlRewriter, List<Warning> warnings, @Nullable WorkspaceStatus status) {
     this.context = context;
     this.urlRewriter = urlRewriter;
     this.warnings = new CopyOnWriteArrayList<>();
