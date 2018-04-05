@@ -252,8 +252,7 @@
                                         che-core-api-ssh,
                                         che-core-api-workspace,
                                         che-core-api-installer,
-                                        infrastructure-kubernetes
-                                    </includeArtifactIds>
+                                        infrastructure-kubernetes</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                     <includeClassifiers>tests</includeClassifiers>
                                 </configuration>
