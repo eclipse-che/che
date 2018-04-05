@@ -461,9 +461,11 @@ public class WorkspaceRuntimes {
     }
 
     InternalRuntime runtime;
+    WorkspaceStatus status;
     try {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       runtime = infra.prepare(identity, internalEnv).getRuntime();
+      status = runtime.getStatus();
     } catch (InfrastructureException | ValidationException | NotFoundException x) {
       LOG.error(
           "Couldn't recover runtime '{}:{}'. Error: {}",
@@ -474,7 +476,7 @@ public class WorkspaceRuntimes {
     }
 
     RuntimeState prev =
-        runtimes.putIfAbsent(identity.getWorkspaceId(), new RuntimeState(runtime, RUNNING));
+        runtimes.putIfAbsent(identity.getWorkspaceId(), new RuntimeState(runtime, status));
     if (prev == null) {
       LOG.info(
           "Successfully recovered workspace runtime '{}'",
