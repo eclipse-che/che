@@ -100,23 +100,6 @@ public class WorkspaceActivityManagerTest {
   }
 
   @Test
-  public void shouldUpdateTheWorkspaceExpirationIfItWasPreviouslyActive() throws Exception {
-    //    final String wsId = "testWsId";
-    //    final long activityTime = 1000L;
-    //    final long newActivityTime = 2000L;
-    //    verify(workspaceActivityDao, times(2)).setExpiration(eq(expected));
-    //    boolean wsAlreadyAdded = activeWorkspaces.containsKey(wsId);
-    //    activityManager.update(wsId, activityTime);
-    //
-    //    activityManager.update(wsId, newActivityTime);
-    //    final long workspaceStopTime = activeWorkspaces.get(wsId);
-    //
-    //    assertFalse(wsAlreadyAdded);
-    //    assertFalse(activeWorkspaces.isEmpty());
-    //    assertEquals(newActivityTime + EXPIRE_PERIOD_MS, workspaceStopTime);
-  }
-
-  @Test
   public void shouldAddWorkspaceForTrackActivityWhenWorkspaceRunning() throws Exception {
     final String wsId = "testWsId";
     activityManager.subscribe();
