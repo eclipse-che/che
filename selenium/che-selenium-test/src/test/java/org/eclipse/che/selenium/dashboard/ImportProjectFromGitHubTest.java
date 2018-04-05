@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -57,6 +58,7 @@ public class ImportProjectFromGitHubTest {
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @BeforeClass
@@ -94,7 +96,7 @@ public class ImportProjectFromGitHubTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriver.switchFromDashboardIframeToIde(ELEMENT_TIMEOUT_SEC);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability(ELEMENT_TIMEOUT_SEC);
 
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(projectName);
@@ -103,7 +105,7 @@ public class ImportProjectFromGitHubTest {
 
   private void connectGithubAccount() {
     projectSourcePage.clickOnConnectGithubAccountButton();
-    seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
+    seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
     projectSourcePage.waitAuthorizationPageOpened();
     projectSourcePage.typeLogin(gitHubUsername);
@@ -112,7 +114,7 @@ public class ImportProjectFromGitHubTest {
     seleniumWebDriver.switchTo().window(ideWin);
 
     if (!projectSourcePage.isGithubProjectsListDisplayed()) {
-      seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
+      seleniumWebDriverHelper.switchToNextWindow(ideWin);
       projectSourcePage.waitAuthorizeBtn();
       projectSourcePage.clickOnAuthorizeBtn();
       seleniumWebDriver.switchTo().window(ideWin);

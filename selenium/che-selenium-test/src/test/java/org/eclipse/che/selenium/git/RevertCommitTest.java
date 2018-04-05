@@ -149,12 +149,7 @@ public class RevertCommitTest {
 
     menu.runCommand(GIT, REVERT_COMMIT);
 
-    // TODO delete the message after resolve issue
-    assertEquals(
-        gitRevertCommit.getTopCommitAuthor(),
-        gitHubUsername,
-        "Known issue https://github.com/eclipse/che/issues/9066");
-
+    assertEquals(gitRevertCommit.getTopCommitAuthor(), gitHubUsername);
     assertTrue(gitRevertCommit.getTopCommitComment().contains("Revert \"" + comment + "\""));
 
     gitRevertCommit.clickCancelButton();
