@@ -39,11 +39,11 @@ public class AuthorizeOnGithubFromDashboardTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(AuthorizeOnGithubFromDashboardTest.class);
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 
