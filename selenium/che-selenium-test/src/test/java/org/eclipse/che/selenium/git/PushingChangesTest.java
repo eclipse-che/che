@@ -100,11 +100,6 @@ public class PushingChangesTest {
     projectExplorer.waitItem(PROJECT_NAME);
   }
 
-  @AfterClass
-  public void deleteRepo() throws IOException {
-    testRepo.delete();
-  }
-
   @Test
   public void pushChangesTest() throws Exception {
     String newFileForPushing = "pushFile.txt";
