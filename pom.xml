@@ -1999,32 +1999,4 @@
             </build>
         </profile>
     </profiles>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>fabric8-maven-plugin</artifactId>
-        <version>3.5.28</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>resource</goal>
-              <goal>build</goal>
-            </goals>
-          </execution>
-        </executions>
-      
-        <configuration>
-          <resources>
-            <labels>
-              <all>
-                <space>test2</space>
-              </all>
-            </labels>
-          </resources>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
