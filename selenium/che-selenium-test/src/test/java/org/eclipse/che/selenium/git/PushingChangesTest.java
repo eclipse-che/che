@@ -11,9 +11,6 @@
 package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 import static org.testng.Assert.assertEquals;
@@ -96,7 +93,7 @@ public class PushingChangesTest {
 
     Path entryPath = Paths.get(getClass().getResource("/projects/git-pull-test").getPath());
     testRepo.addContent(entryPath);
-    prerpareAmendCommitCommandByRestApi();
+    prepareAmendCommitCommandByRestApi();
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
     git.importJavaApp(testRepo.getSshUrl(), PROJECT_NAME, BLANK);
@@ -141,28 +138,18 @@ public class PushingChangesTest {
     testProjectServiceClient.updateFile(
         ws.getId(), pathToFileWitChanging, contentForCheckingForcePushing);
     launchAmendCommitCommand();
-    pushChanges(false);
+    git.pushChanges(false);
     git.waitGitStatusBarWithMess(
         String.format(expectedMessageAfterGitConflict, testRepo.getSshUrl()));
 
     // Make force push and check changes on gitHub side
-    pushChanges(true);
+    git.pushChanges(true);
     git.waitGitStatusBarWithMess(String.format("Successfully pushed to %s", testRepo.getSshUrl()));
     assertEquals(
         testRepo.getFileContent(PROJECT_FOLDER_NAME + "/README.md"),
         contentForCheckingForcePushing);
   }
 
-  private void pushChanges(boolean withForce) {
-    menu.runCommand(GIT, REMOTES_TOP, PUSH);
-    loader.waitOnClosed();
-    git.waitPushFormToOpen();
-    if (withForce) {
-      git.selectForcePushCheckBox();
-    }
-    git.clickPush();
-    git.waitPushFormToClose();
-  }
 
   private void doChangesInTheProjectFileByProjectServiceClient(
       String pathToItem, String newFileForPushing, String newContent) throws Exception {
@@ -171,7 +158,7 @@ public class PushingChangesTest {
         ws.getId(), PROJECT_NAME + "/plain-files/", newFileForPushing, newContent);
   }
 
-  private void prerpareAmendCommitCommandByRestApi() throws Exception {
+  private void prepareAmendCommitCommandByRestApi() throws Exception {
     String bashCommand =
         String.format("cd /projects/%s && git commit --all --no-edit --amend", PROJECT_NAME);
     testCommandServiceClient.createCommand(
