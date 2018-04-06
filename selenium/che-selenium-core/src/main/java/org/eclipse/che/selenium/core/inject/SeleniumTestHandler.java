@@ -51,7 +51,6 @@ import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -391,7 +390,6 @@ public abstract class SeleniumTestHandler
   private boolean hasInjectAnnotation(AccessibleObject f) {
     return f.isAnnotationPresent(com.google.inject.Inject.class)
         || f.isAnnotationPresent(javax.inject.Inject.class)
-        || f.isAnnotationPresent(InjectTestUser.class)
         || f.isAnnotationPresent(InjectTestWorkspace.class)
         || f.isAnnotationPresent(InjectTestOrganization.class)
         || f.isAnnotationPresent(InjectPageObject.class);

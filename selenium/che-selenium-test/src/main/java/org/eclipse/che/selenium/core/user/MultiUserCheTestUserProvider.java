@@ -11,38 +11,61 @@
 package org.eclipse.che.selenium.core.user;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Provides auxiliary {@link DefaultTestUser} for the Multi User Eclipse Che which ought to be
- * existed at the start of test execution. All tests share the same auxiliary user.
+ * Provides auxiliary {@link TestUser} for the Multi User Eclipse Che which ought to be existed at
+ * the start of test execution. All tests share the same auxiliary user.
  *
  * @author Dmytro Nochevnov
  */
 @Singleton
 public class MultiUserCheTestUserProvider implements TestUserProvider<TestUser> {
 
-  private final TestUser testUser;
+  private static final Logger LOG = LoggerFactory.getLogger(MultiUserCheTestUserProvider.class);
 
+  private final TestUser testUser;
   private final boolean isNewUser;
+  private final KeycloakAdminConsoleClient keycloakAdminConsoleClient;
 
   @Inject
   public MultiUserCheTestUserProvider(
       TestUserFactory testUserFactory,
-      @Named("che.auxiliary.testuser.name") String name,
-      @Named("che.auxiliary.testuser.email") String email,
-      @Named("che.auxiliary.testuser.password") String password,
-      @Named("che.auxiliary.testuser.offline_token") String offlineToken) {
-    if (name == null || name.trim().isEmpty()) {
+      KeycloakAdminConsoleClient keycloakAdminConsoleClient,
+      MultiUserCheAdminTestUserProvider adminTestUserProvider) {
+    this.keycloakAdminConsoleClient = keycloakAdminConsoleClient;
+    TestUserImpl testUser;
+    Boolean isNewUser;
+    try {
+      testUser = keycloakAdminConsoleClient.createUser(this);
       isNewUser = true;
-      // TODO create new user
-    } else {
+    } catch (IOException e) {
+      LOG.warn(
+          "It's impossible to create test user from tests because of error. "
+              + "Is going to use admin test user as test user.",
+          e);
+
       isNewUser = false;
+
+      AdminTestUser adminTestUser = adminTestUserProvider.get();
+      testUser =
+          testUserFactory.create(
+              adminTestUser.getName(),
+              adminTestUser.getEmail(),
+              adminTestUser.getPassword(),
+              adminTestUser.getOfflineToken(),
+              adminTestUserProvider);
     }
 
-    this.testUser = testUserFactory.create(name, email, password, offlineToken, this);
+    this.testUser = testUser;
+    this.isNewUser = isNewUser;
+
+    LOG.info(
+        "User name='{}', id='{}' is being used for testing", testUser.getName(), testUser.getId());
   }
 
   @Override
@@ -53,7 +76,7 @@ public class MultiUserCheTestUserProvider implements TestUserProvider<TestUser> 
   @Override
   public void delete(TestUser testUser) throws IOException {
     if (isNewUser) {
-      // TODO delete test user
+      keycloakAdminConsoleClient.delete(testUser);
     }
   }
 }

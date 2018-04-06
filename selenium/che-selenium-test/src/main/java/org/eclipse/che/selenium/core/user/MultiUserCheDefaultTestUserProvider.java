@@ -14,46 +14,79 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Provides default {@link DefaultTestUser} for the Multi User Eclipse Che which ought to be existed
- * at the start of test execution. All tests share the same default user.
+ * Provides {@link DefaultTestUser} for the Multi User Eclipse Che which ought to be existed at the
+ * start of test execution. All tests share the same default user.
  *
  * @author Dmytro Nochevnov
  */
 @Singleton
 public class MultiUserCheDefaultTestUserProvider implements TestUserProvider<DefaultTestUser> {
 
-  private final DefaultTestUser testUser;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(MultiUserCheDefaultTestUserProvider.class);
 
+  private final DefaultTestUser defaultTestUser;
   private final boolean isNewUser;
+  private final KeycloakAdminConsoleClient keycloakAdminConsoleClient;
 
   @Inject
   public MultiUserCheDefaultTestUserProvider(
       TestUserFactory testUserFactory,
+      KeycloakAdminConsoleClient keycloakAdminConsoleClient,
+      MultiUserCheAdminTestUserProvider adminTestUserProvider,
       @Named("che.testuser.name") String name,
       @Named("che.testuser.email") String email,
       @Named("che.testuser.password") String password,
       @Named("che.testuser.offline_token") String offlineToken) {
-    if (name == null || name.trim().isEmpty()) {
-      isNewUser = true;
-      // TODO create new user
+    this.keycloakAdminConsoleClient = keycloakAdminConsoleClient;
+    if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+      TestUserImpl testUser;
+      Boolean isNewUser;
+      try {
+        testUser = keycloakAdminConsoleClient.createUser(this);
+        isNewUser = true;
+      } catch (IOException e) {
+        LOG.warn(
+            "Default test user credentials isn't set and it's impossible to create it from tests because of error. "
+                + "Is going to use admin test user as a default test user.",
+            e);
+
+        isNewUser = false;
+
+        AdminTestUser adminTestUser = adminTestUserProvider.get();
+        testUser =
+            testUserFactory.create(
+                adminTestUser.getName(),
+                adminTestUser.getEmail(),
+                adminTestUser.getPassword(),
+                adminTestUser.getOfflineToken(),
+                adminTestUserProvider);
+      }
+
+      this.defaultTestUser = testUser;
+      this.isNewUser = isNewUser;
     } else {
-      isNewUser = false;
+      this.defaultTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+      this.isNewUser = false;
     }
 
-    this.testUser = testUserFactory.create(name, email, password, offlineToken, this);
+    LOG.info("User name='{}', id='{}' is being used by default for testing", name, defaultTestUser);
   }
 
   @Override
   public DefaultTestUser get() {
-    return testUser;
+    return defaultTestUser;
   }
 
   @Override
   public void delete(DefaultTestUser testUser) throws IOException {
     if (isNewUser) {
-      // TODO delete test user
+      keycloakAdminConsoleClient.delete(testUser);
     }
   }
 }

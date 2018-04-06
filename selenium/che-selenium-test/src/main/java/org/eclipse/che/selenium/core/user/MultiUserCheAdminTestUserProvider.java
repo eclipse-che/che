@@ -14,17 +14,22 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Provides admin {@link DefaultTestUser} that ought to be existed at the start of test execution.
- * All tests share the same admin user.
+ * Provides {@link AdminTestUser} that ought to be existed at the start of test execution. All tests
+ * share the same admin user.
  *
  * @author Dmytro Nochevnov
  */
 @Singleton
 public class MultiUserCheAdminTestUserProvider implements TestUserProvider<AdminTestUser> {
 
-  private final AdminTestUser testUser;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(MultiUserCheDefaultTestUserProvider.class);
+
+  private final AdminTestUser adminTestUser;
 
   @Inject
   public MultiUserCheAdminTestUserProvider(
@@ -33,16 +38,17 @@ public class MultiUserCheAdminTestUserProvider implements TestUserProvider<Admin
       @Named("che.admin.email") String email,
       @Named("che.admin.password") String password,
       @Named("che.admin.offline_token") String offlineToken) {
-    if (name == null || name.trim().isEmpty()) {
+    if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
       throw new IllegalStateException("Admin test user credentials are unknown");
     }
 
-    this.testUser = testUserFactory.create(name, email, password, offlineToken, this);
+    this.adminTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+    LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());
   }
 
   @Override
   public AdminTestUser get() {
-    return testUser;
+    return adminTestUser;
   }
 
   @Override

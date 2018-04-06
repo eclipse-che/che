@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static java.lang.String.format;
 import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
@@ -36,7 +35,7 @@ public class AccountTest {
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
 
-  @Inject private TestUser auxiliaryTestUser;
+  @Inject private TestUser testUser;
 
   @Inject private KeycloakAccountPage keycloakAccount;
   @Inject private KeycloakPasswordPage keycloakPasswordPage;
@@ -47,13 +46,9 @@ public class AccountTest {
   @BeforeClass
   public void setup() {
     changedFields =
-        new Account(
-            auxiliaryTestUser.getName(),
-            format("%s@testmail.ua", auxiliaryTestUser.getName()),
-            "UserFirstName",
-            "UserLastName");
+        new Account(testUser.getName(), testUser.getEmail(), "UserFirstName", "UserLastName");
 
-    dashboard.open(auxiliaryTestUser.getName(), auxiliaryTestUser.getPassword());
+    dashboard.open(testUser.getName(), testUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.clickOnUsernameButton();
     dashboard.clickOnAccountItem();
@@ -112,7 +107,7 @@ public class AccountTest {
     keycloakPasswordPage.clickOnSavePasswordButton();
 
     keycloakPasswordPage.waitTextInErrorAlert("Invalid existing password.");
-    keycloakPasswordPage.setPasswordFieldValue(auxiliaryTestUser.getPassword());
+    keycloakPasswordPage.setPasswordFieldValue(testUser.getPassword());
     keycloakPasswordPage.setNewPasswordFieldValue("changedPassword");
     keycloakPasswordPage.setNewPasswordConfirmationFieldValue("changedPassword");
     keycloakPasswordPage.clickOnSavePasswordButton();
@@ -124,7 +119,7 @@ public class AccountTest {
     dashboard.clickOnUsernameButton();
     dashboard.clickOnLogoutItem();
 
-    dashboard.open(auxiliaryTestUser.getName(), "changedPassword");
+    dashboard.open(testUser.getName(), "changedPassword");
 
     dashboard.waitDashboardToolbarTitle();
   }

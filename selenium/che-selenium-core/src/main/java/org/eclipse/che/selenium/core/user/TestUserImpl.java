@@ -60,7 +60,6 @@ public class TestUserImpl implements DefaultTestUser, AdminTestUser {
     this.name = name;
     this.offlineToken = offlineToken;
     this.id = userServiceClient.findByEmail(email).getId();
-    LOG.info("User name='{}', id='{}' is being used for testing", name, id);
   }
 
   @Override

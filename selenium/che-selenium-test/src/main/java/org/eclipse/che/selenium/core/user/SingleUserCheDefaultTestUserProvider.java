@@ -13,21 +13,30 @@ package org.eclipse.che.selenium.core.user;
 import com.google.inject.Inject;
 import java.io.IOException;
 import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Provides default {@link TestUser} for the Single User Eclipse Che which ought to be existed at
- * the start of test execution. All tests share the same default user.
+ * Provides {@link DefaultTestUser} for the Single User Eclipse Che which ought to be existed at the
+ * start of test execution. All tests share the same default user.
  *
  * @author Dmytro Nochevnov
  */
 @Singleton
 public class SingleUserCheDefaultTestUserProvider implements TestUserProvider<DefaultTestUser> {
-
+  private static final Logger LOG =
+      LoggerFactory.getLogger(SingleUserCheDefaultTestUserProvider.class);
   private final DefaultTestUser defaultTestUser;
 
   @Inject
   public SingleUserCheDefaultTestUserProvider(TestUserFactory testUserFactory) {
-    this.defaultTestUser = testUserFactory.create("che", "che@eclipse.org", "secret", "", this);
+    String name = "che";
+    String email = "che@eclipse.org";
+    String password = "secret";
+    String offlineToken = "";
+    this.defaultTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+
+    LOG.info("User name='{}', id='{}' is being used by default", name, defaultTestUser.getId());
   }
 
   @Override

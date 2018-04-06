@@ -69,11 +69,11 @@ public class CheSeleniumSuiteModule extends AbstractModule {
 
   public static final String ADMIN = "admin";
   public static final String AUXILIARY = "auxiliary";
+  public static final String DOCKER_INFRASTRUCTURE = "docker";
+  public static final String OPENSHIFT_INFRASTRUCTURE = "openshift";
 
   private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
   private static final String CHE_INFRASTRUCTURE_VARIABLE = "CHE_INFRASTRUCTURE";
-  private static final String DOCKER_INFRASTRUCTURE = "docker";
-  private static final String OPENSHIFT_INFRASTRUCTURE = "openshift";
 
   @Override
   public void configure() {

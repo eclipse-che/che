@@ -29,8 +29,8 @@ public class CheSeleniumMultiUserModule extends AbstractModule {
   protected void configure() {
     bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
-    bind(TestUser.class).toProvider(MultiUserCheTestUserProvider.class);
-    bind(DefaultTestUser.class).toProvider(MultiUserCheDefaultTestUserProvider.class);
     bind(AdminTestUser.class).toProvider(MultiUserCheAdminTestUserProvider.class);
+    bind(DefaultTestUser.class).toProvider(MultiUserCheDefaultTestUserProvider.class);
+    bind(TestUser.class).toProvider(MultiUserCheTestUserProvider.class);
   }
 }
