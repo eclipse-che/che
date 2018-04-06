@@ -30,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakFederatedIdentitiesPage;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -49,11 +50,11 @@ public class AuthorizeOnGithubFromImportTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 
@@ -67,6 +68,7 @@ public class AuthorizeOnGithubFromImportTest {
   @Inject private ImportProjectFromLocation importProject;
   @Inject private Preferences preferences;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private AskDialog askDialog;
   @Inject private GitHub gitHub;
   @Inject private TestGitHubServiceClient gitHubClientService;
@@ -133,7 +135,7 @@ public class AuthorizeOnGithubFromImportTest {
 
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-    seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
+    seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
     gitHub.waitAuthorizationPageOpened();
     gitHub.typeLogin(gitHubUsername);

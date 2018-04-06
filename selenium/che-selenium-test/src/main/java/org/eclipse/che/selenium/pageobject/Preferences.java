@@ -571,7 +571,7 @@ public class Preferences {
     askDialog.waitFormToOpen(25);
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-    seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
+    webDriverHelper.switchToNextWindow(ideWin);
 
     gitHub.waitAuthorizationPageOpened();
     gitHub.typeLogin(githubUsername);

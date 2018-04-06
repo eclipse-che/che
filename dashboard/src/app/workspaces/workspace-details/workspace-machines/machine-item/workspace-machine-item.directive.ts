@@ -25,14 +25,12 @@
  * @param {Function=} edit-machine  callback
  * @param {Function=} on-ram-change  callback
  * @param {Function=} delete-machine  callback
- * @param {Function=} machine-dev-on-change  callback
  *
  * @usage
  *   <workspace-machine-item  machine="machine"
  *                            che-list-helper="ctrl.cheListHelper"
  *                            edit-machine="ctrl.editMachine(name)"
  *                            delete-machine="ctrl.deleteMachine(name)"
- *                            machine-dev-on-change="ctrl.changeDevMachine(name)"
  *                            on-ram-change="ctrl.onRamChange(name, memoryLimitGBytes)"
  *                            page-url="http://codenvy.com/dashboard/#/workspace/test/wksp"></workspace-machine-item>
  *
@@ -57,7 +55,6 @@ export class WorkspaceMachineItem implements ng.IDirective {
       pageUrl: '@',
       machine: '=',
       onRamChange: '&',
-      machineDevOnChange: '&',
       editMachine: '&',
       deleteMachine: '&',
       cheListHelper: '='

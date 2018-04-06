@@ -223,6 +223,11 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_SERVER__STRATEGY
               name: che
+        - name: CHE_LOGS_APPENDERS_IMPL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_LOGS_APPENDERS_IMPL
+              name: che
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         livenessProbe:
