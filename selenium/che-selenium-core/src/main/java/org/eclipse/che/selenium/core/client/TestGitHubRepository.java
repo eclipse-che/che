@@ -22,14 +22,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.annotation.PreDestroy;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHContent;
-import org.kohsuke.github.GHContentUpdateResponse;
 import org.kohsuke.github.GHFileNotFoundException;
 import org.kohsuke.github.GHRef;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHTreeBuilder;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class TestGitHubRepository {
     ghRepo = create();
   }
 
-  public enum TreeElementMode{
+  public enum TreeElementMode {
     BLOB("100644"),
     EXECUTABLE_BLOB("100755"),
     SUBDIRECTORY("040000"),
@@ -77,12 +76,28 @@ public class TestGitHubRepository {
 
     private String mode;
 
-    TreeElementMode(String mode){
+    TreeElementMode(String mode) {
       this.mode = mode;
     }
 
-    public String get(){
+    public String get() {
       return this.mode;
+    }
+  }
+
+  public enum GitNodeType {
+    BLOB("blob"),
+    TREE("tree"),
+    COMMIT("commit");
+
+    private String nodeType;
+
+    GitNodeType(String nodeType) {
+      this.nodeType = nodeType;
+    }
+
+    public String get() {
+      return this.nodeType;
     }
   }
 
@@ -249,45 +264,74 @@ public class TestGitHubRepository {
   }
 
   public String getRepoSha() throws IOException {
-    return this.ghRepo.getRef("heads/master").getObject().getSha();
+    return getDefaultBranch().getObject().getSha();
   }
 
-  public void createSubmodule(TestGitHubRepository linkedRepository, String pathToFileWithGitSubmodulesFile) throws IOException, URISyntaxException {
-    GHRef referenceToMaster = ghRepo.getRef("heads/master");
+  public GHRef getDefaultBranch() throws IOException {
+    return ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
+  }
 
-    String submoduleSha =
-        ghRepo
-            .createTree()
-            .baseTree(referenceToMaster.getObject().getSha())
-            .entry(
-                "Repo_For_Test",
-                "160000",
-                "commit",
-                linkedRepository.getRepoSha(),
-                null)
-            .create()
-            .getSha();
+  public void createSubmodule(TestGitHubRepository targetRepository, String pathForSubmodule)
+      throws IOException, URISyntaxException {
+    getSubmoduleConfig(targetRepository, pathForSubmodule);
+    String submoduleSha = createTreeWithSubmodule(targetRepository, pathForSubmodule);
 
     GHCommit treeCommit =
-        ghRepo.createCommit().tree(submoduleSha).message("create submodule").create();
+        ghRepo.createCommit().tree(submoduleSha).message("Create submodule").create();
 
-    referenceToMaster.updateTo(treeCommit.getSHA1(), true);
-
-    Path pathToFile =
-        Paths.get(
-            getClass()
-                .getResource(
-                    "/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md")
-                .toURI());
-    byte[] contentBytes = Files.readAllBytes(pathToFile);
-
-    GHContentUpdateResponse response =
-        ghRepo.createContent(contentBytes, "add .gitmodules", ".gitmodules");
-
-    int i = 1;
+    getDefaultBranch().updateTo(treeCommit.getSHA1(), true);
+    createGitModulesFile(targetRepository, pathForSubmodule);
   }
 
+  private boolean isGitmodulesFileExist() throws IOException {
 
+    return 0
+        < ghRepo
+            .getDirectoryContent("")
+            .stream()
+            .filter(item -> item.getName().equals(".gitmodules"))
+            .count();
+  }
 
+  private String createTreeWithSubmodule(
+      TestGitHubRepository targetRepository, String pathForSubmodule) throws IOException {
+    return ghRepo
+        .createTree()
+        .baseTree(this.getRepoSha())
+        .entry(
+            pathForSubmodule,
+            TreeElementMode.SUBMODULE.get(),
+            GitNodeType.COMMIT.get(),
+            targetRepository.getRepoSha(),
+            null)
+        .create()
+        .getSha();
+  }
 
+  private String getSubmoduleConfig(TestGitHubRepository targetRepository, String pathToSubmodule) {
+    String repoName = Paths.get(pathToSubmodule).getFileName().toString();
+    String repoUrl = targetRepository.getHtmlUrl() + ".git";
+    String modulePattern = "[submodule \"%s\"]\n\tpath = %s\n\turl = %s";
+
+    return String.format(modulePattern, repoName, pathToSubmodule, repoUrl);
+  }
+
+  private void createGitModulesFile(TestGitHubRepository targetRepository, String pathForSubmodule)
+      throws IOException {
+    final String gitmodulesFileName = ".gitmodules";
+    String fileAddMessage = "Add " + gitmodulesFileName;
+    String fileUpdateMessage = "Update " + gitmodulesFileName;
+    String submoduleConfig = getSubmoduleConfig(targetRepository, pathForSubmodule);
+
+    if (isGitmodulesFileExist()) {
+      GHContent submoduleFileContent = ghRepo.getFileContent(gitmodulesFileName);
+      String fileContent = IOUtils.toString(submoduleFileContent.read());
+      String newFileContent = fileContent + "\n" + submoduleConfig;
+
+      submoduleFileContent.update(newFileContent, fileUpdateMessage);
+      return;
+    }
+
+    ghRepo.createContent(submoduleConfig, fileAddMessage, gitmodulesFileName);
+  }
 }

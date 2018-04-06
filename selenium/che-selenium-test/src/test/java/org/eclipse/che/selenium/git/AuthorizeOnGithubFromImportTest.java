@@ -153,11 +153,21 @@ public class AuthorizeOnGithubFromImportTest {
     testRepo2.createBranchFromMaster(BRANCH_3);
 
     testRepo2.addContent(sourceBranchProject, BRANCH_3);*/
-    String pathToFile = "/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md";
+
+    String pathToFileWithGitSubmodulesContent =
+        getClass()
+            .getResource("/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md")
+            .getPath();
+
+    Path sourceSubmodule1 = Paths.get(getClass().getResource("/projects/Repo_For_Test").toURI());
+    submodule1.addContent(sourceSubmodule1);
+
+    Path sourceSubmodule2 = Paths.get(getClass().getResource("/projects/testRepo").toURI());
+    submodule2.addContent(sourceSubmodule2);
 
     testRepo3.addContent(entryPath1);
-    testRepo3.createSubmodule(submodule1, "/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md");
-
+    testRepo3.createSubmodule(submodule1, "Repo_For_Test");
+    testRepo3.createSubmodule(submodule2, "testRepo");
   }
 
   @Test
