@@ -158,7 +158,7 @@ parameters:
 - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
   displayName: Require admin password update
   description: Ask for a password update after 1st login by admin user
-  value: true
+  value: "true"
 labels:
   app: keycloak
   template: keycloak
