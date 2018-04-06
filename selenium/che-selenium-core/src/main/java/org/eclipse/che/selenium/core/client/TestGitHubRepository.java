@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.PreDestroy;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -49,6 +51,11 @@ public class TestGitHubRepository {
   private final GHRepository ghRepo;
   private final GitHub gitHub;
 
+  private final String gitHubUsername;
+  private final String gitHubPassword;
+
+  private final List<TestGitHubRepository> submodules = new ArrayList<>();
+
   /**
    * Creates repository with semi-random name on GitHub for certain {@code gitHubUsername}. Waits
    * until repository is really created.
@@ -65,6 +72,9 @@ public class TestGitHubRepository {
       throws IOException, InterruptedException {
     gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
     ghRepo = create();
+
+    this.gitHubUsername = gitHubUsername;
+    this.gitHubPassword = gitHubPassword;
   }
 
   public enum TreeElementMode {
@@ -192,8 +202,14 @@ public class TestGitHubRepository {
   }
 
   @PreDestroy
-  public void delete() throws IOException {
-    ghRepo.delete();
+  public void delete() {
+    try {
+      ghRepo.delete();
+    } catch (IOException e) {
+      throw new RuntimeException(e.getMessage(), e);
+    }
+
+    submodules.forEach(TestGitHubRepository::delete);
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
   }
 
@@ -271,16 +287,25 @@ public class TestGitHubRepository {
     return ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
   }
 
-  public void createSubmodule(TestGitHubRepository targetRepository, String pathForSubmodule)
+  public void addSubmodule(Path pathToRootContentDirectory, String submoduleName)
+      throws IOException, URISyntaxException, InterruptedException {
+
+    TestGitHubRepository submodule = new TestGitHubRepository(gitHubUsername, gitHubPassword);
+    submodule.addContent(pathToRootContentDirectory);
+    createSubmodule(submodule, submoduleName);
+    submodules.add(submodule);
+  }
+
+  private void createSubmodule(TestGitHubRepository pathToRootContentDirectory, String pathForSubmodule)
       throws IOException, URISyntaxException {
-    getSubmoduleConfig(targetRepository, pathForSubmodule);
-    String submoduleSha = createTreeWithSubmodule(targetRepository, pathForSubmodule);
+    getSubmoduleConfig(pathToRootContentDirectory, pathForSubmodule);
+    String submoduleSha = createTreeWithSubmodule(pathToRootContentDirectory, pathForSubmodule);
 
     GHCommit treeCommit =
         ghRepo.createCommit().tree(submoduleSha).message("Create submodule").create();
 
     getDefaultBranch().updateTo(treeCommit.getSHA1(), true);
-    createGitModulesFile(targetRepository, pathForSubmodule);
+    createGitModulesFile(pathToRootContentDirectory, pathForSubmodule);
   }
 
   private boolean isGitmodulesFileExist() throws IOException {

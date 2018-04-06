@@ -97,8 +97,6 @@ public class AuthorizeOnGithubFromImportTest {
   @Inject private TestGitHubRepository testRepo1;
   @Inject private TestGitHubRepository testRepo2;
   @Inject private TestGitHubRepository testRepo3;
-  @Inject private TestGitHubRepository submodule1;
-  @Inject private TestGitHubRepository submodule2;
   @Inject private Git git;
   @Inject private Wizard projectWizard;
   @Inject private CodenvyEditor editor;
@@ -137,8 +135,7 @@ public class AuthorizeOnGithubFromImportTest {
   }
 
   @BeforeClass
-  private void initGitRepositories() throws IOException, URISyntaxException {
-    Path entryPath1 = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+  private void initGitRepositories() throws IOException, URISyntaxException, InterruptedException {
     /*testRepo1.addContent(entryPath1);
 
     Path sourceProject =
@@ -154,20 +151,9 @@ public class AuthorizeOnGithubFromImportTest {
 
     testRepo2.addContent(sourceBranchProject, BRANCH_3);*/
 
-    String pathToFileWithGitSubmodulesContent =
-        getClass()
-            .getResource("/projects/GitSubmoduleForImportRecursiveTest/submodule-file-content.md")
-            .getPath();
-
-    Path sourceSubmodule1 = Paths.get(getClass().getResource("/projects/Repo_For_Test").toURI());
-    submodule1.addContent(sourceSubmodule1);
-
-    Path sourceSubmodule2 = Paths.get(getClass().getResource("/projects/testRepo").toURI());
-    submodule2.addContent(sourceSubmodule2);
-
-    testRepo3.addContent(entryPath1);
-    testRepo3.createSubmodule(submodule1, "Repo_For_Test");
-    testRepo3.createSubmodule(submodule2, "testRepo");
+    testRepo3.addContent(Paths.get(getClass().getResource("/projects/java-multimodule").getPath()));
+    testRepo3.addSubmodule(Paths.get(getClass().getResource("/projects/Repo_For_Test").getPath()), "Repo_For_Test");
+    testRepo3.addSubmodule(Paths.get(getClass().getResource("/projects/testRepo").getPath()), "testRepo");
   }
 
   @Test
