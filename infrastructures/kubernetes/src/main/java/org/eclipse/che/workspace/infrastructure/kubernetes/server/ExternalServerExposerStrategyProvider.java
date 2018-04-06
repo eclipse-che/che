@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.eclipse.che.inject.ConfigurationException;
 
 /**
  * Provides implementation of {@link ExternalServerExposerStrategy} for configured value.
@@ -37,7 +38,7 @@ public class ExternalServerExposerStrategyProvider
     if (externalServerExposerStrategy != null) {
       this.externalServerExposerStrategy = externalServerExposerStrategy;
     } else {
-      throw new IllegalArgumentException(
+      throw new ConfigurationException(
           format("Unsupported Ingress strategy '%s' configured", strategy));
     }
   }
