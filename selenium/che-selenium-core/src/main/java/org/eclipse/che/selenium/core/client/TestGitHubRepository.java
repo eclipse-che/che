@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javax.annotation.PreDestroy;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHFileNotFoundException;
@@ -67,16 +66,40 @@ public class TestGitHubRepository {
     return repoName;
   }
 
+  public String getSha1(String branchName) throws IOException {
+    return ghRepo.getBranch(branchName).getSHA1();
+  }
+
   /**
-   * Creates reference to branch, tag, ... from master branch.
+   * Creates reference to the new branch with {@code branchName} from default branch.
    *
-   * @param refName is a name of branch, tag, etc
+   * @param branchName is a name of new branch
    * @return reference to the new branch
    * @throws IOException
    */
-  public GHRef createBranchFromMaster(String refName) throws IOException {
-    GHRef master = ghRepo.getRef("heads/master");
-    return ghRepo.createRef("refs/heads/" + refName, master.getObject().getSha());
+  public GHRef createBranch(String branchName) throws IOException {
+    GHRef defaultBranch = ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
+    return ghRepo.createRef("refs/heads/" + branchName, defaultBranch.getObject().getSha());
+  }
+
+  /**
+   * Creates reference to the new tag with {@code tagName} from default branch.
+   *
+   * @param tagName is a name of new tag
+   * @return reference to the new tag
+   * @throws IOException
+   */
+  public GHRef createTag(String tagName) throws IOException {
+    GHRef defaultBranch = ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
+    return ghRepo.createRef("refs/tags/" + tagName, defaultBranch.getObject().getSha());
+  }
+
+  public String printDefaultBranch() {
+    return ghRepo.getDefaultBranch();
+  }
+
+  public void setDefaultBranch(String branchName) throws IOException {
+    ghRepo.setDefaultBranch(branchName);
   }
 
   /**
@@ -140,11 +163,11 @@ public class TestGitHubRepository {
     }
   }
 
-  @PreDestroy
+  /*@PreDestroy
   public void delete() throws IOException {
     ghRepo.delete();
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
-  }
+  }*/
 
   public String getHtmlUrl() {
     return ghRepo.getHtmlUrl().toString();
