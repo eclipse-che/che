@@ -14,6 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class MultiUserCheAdminTestUserProvider implements TestUserProvider<AdminTestUser> {
+public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(MultiUserCheDefaultTestUserProvider.class);
@@ -34,6 +36,7 @@ public class MultiUserCheAdminTestUserProvider implements TestUserProvider<Admin
   @Inject
   public MultiUserCheAdminTestUserProvider(
       TestUserFactory testUserFactory,
+      KeycloakAdminConsoleClient keycloakAdminConsoleClient,
       @Named("che.admin.name") String name,
       @Named("che.admin.email") String email,
       @Named("che.admin.password") String password,
@@ -42,7 +45,9 @@ public class MultiUserCheAdminTestUserProvider implements TestUserProvider<Admin
       throw new IllegalStateException("Admin test user credentials are unknown");
     }
 
-    this.adminTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+    adminTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+    keycloakAdminConsoleClient.setupAdmin(adminTestUser);
+
     LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());
   }
 

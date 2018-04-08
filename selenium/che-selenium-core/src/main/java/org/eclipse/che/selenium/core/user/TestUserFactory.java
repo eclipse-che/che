@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.user;
 
 import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 
 /**
  * @author Anton Korneta
@@ -24,5 +25,5 @@ public interface TestUserFactory {
       @Assisted("email") String email,
       @Assisted("password") String password,
       @Assisted("offlineToken") String offlineToken,
-      TestUserProvider testUserProvider);
+      RemovableUserProvider testUserProvider);
 }

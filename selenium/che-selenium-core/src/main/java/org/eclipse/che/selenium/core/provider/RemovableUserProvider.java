@@ -8,17 +8,18 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.user;
+package org.eclipse.che.selenium.core.provider;
 
 import com.google.inject.Provider;
 import java.io.IOException;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /**
- * Test user provider.
+ * Removable user provider.
  *
  * @author Dmytro Nochevnov
  */
-public interface TestUserProvider<T extends TestUser> extends Provider<T> {
+public interface RemovableUserProvider<T extends TestUser> extends Provider<T> {
 
   /** Deletes user. */
   void delete(T testUser) throws IOException;

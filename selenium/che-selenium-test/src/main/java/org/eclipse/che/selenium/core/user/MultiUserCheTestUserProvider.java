@@ -12,19 +12,18 @@ package org.eclipse.che.selenium.core.user;
 
 import com.google.inject.Inject;
 import java.io.IOException;
-import javax.inject.Singleton;
 import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
+import org.eclipse.che.selenium.core.provider.TestUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides auxiliary {@link TestUser} for the Multi User Eclipse Che which ought to be existed at
- * the start of test execution. All tests share the same auxiliary user.
+ * Provides new {@link TestUser} for the Multi User Eclipse Che.
  *
  * @author Dmytro Nochevnov
  */
-@Singleton
-public class MultiUserCheTestUserProvider implements TestUserProvider<TestUser> {
+public class MultiUserCheTestUserProvider implements TestUserProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(MultiUserCheTestUserProvider.class);
 
@@ -36,7 +35,7 @@ public class MultiUserCheTestUserProvider implements TestUserProvider<TestUser> 
   public MultiUserCheTestUserProvider(
       TestUserFactory testUserFactory,
       KeycloakAdminConsoleClient keycloakAdminConsoleClient,
-      MultiUserCheAdminTestUserProvider adminTestUserProvider) {
+      AdminTestUserProvider adminTestUserProvider) {
     this.keycloakAdminConsoleClient = keycloakAdminConsoleClient;
     TestUserImpl testUser;
     Boolean isNewUser;

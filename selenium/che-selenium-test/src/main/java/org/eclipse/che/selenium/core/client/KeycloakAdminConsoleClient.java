@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.core.user.TestUserImpl;
-import org.eclipse.che.selenium.core.user.TestUserProvider;
 import org.eclipse.che.selenium.core.utils.DockerUtil;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
@@ -38,9 +38,10 @@ public class KeycloakAdminConsoleClient {
   private static final Pattern EXTRACT_USER_ID_PATTERN =
       Pattern.compile("^.*Created new user with id '(.*)'.*$", Pattern.DOTALL);
 
+  @Inject private AdminTestUser adminTestUser;
+
   private final DockerUtil dockerUtil;
   private final TestUserFactory testUserFactory;
-  private final AdminTestUser adminTestUser;
   private final ProcessAgent processAgent;
   private final String keycloakContainerId;
 
@@ -48,18 +49,29 @@ public class KeycloakAdminConsoleClient {
   public KeycloakAdminConsoleClient(
       DockerUtil dockerUtil,
       TestUserFactory testUserFactory,
-      AdminTestUser adminTestUser,
       ProcessAgent processAgent,
       @Named("che.infrastructure") String cheInfrastructure)
       throws ProcessAgentException {
     this.dockerUtil = dockerUtil;
     this.testUserFactory = testUserFactory;
-    this.adminTestUser = adminTestUser;
     this.processAgent = processAgent;
-    this.keycloakContainerId = getKeycloakContainerId(cheInfrastructure);
+
+    // obtain id of keycloak docker container
+    switch (cheInfrastructure) {
+      case OPENSHIFT_INFRASTRUCTURE:
+        this.keycloakContainerId =
+            processAgent.execute("echo $(docker ps | grep 'keycloak_keycloak-' | cut -d ' ' -f1)");
+        break;
+
+      case DOCKER_INFRASTRUCTURE:
+      default:
+        this.keycloakContainerId =
+            processAgent.execute("echo $(docker ps | grep che_keycloak | cut -d ' ' -f1)");
+        break;
+    }
   }
 
-  public TestUserImpl createUser(TestUserProvider testUserProvider) throws IOException {
+  public TestUserImpl createUser(RemovableUserProvider testUserProvider) throws IOException {
     if (!dockerUtil.isCheRunLocally()) {
       throw new IOException(
           "It's impossible to create test user because of Che is running on the different host.");
@@ -121,6 +133,25 @@ public class KeycloakAdminConsoleClient {
     return testUserFactory.create(username, email, password, "", testUserProvider);
   }
 
+  /** Adds role "read-token" of client "broker" to admin user */
+  public void setupAdmin(AdminTestUser adminTestUser) {
+    String authPartOfCommand =
+        format(
+            "--no-config --server http://localhost:8080/auth --user %s --password %s --realm master",
+            adminTestUser.getName(), adminTestUser.getPassword());
+
+    String addReadTokenRoleToUserCommand =
+        format(
+            "docker exec -i %s sh -c 'keycloak/bin/kcadm.sh add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1'",
+            keycloakContainerId, adminTestUser.getName(), authPartOfCommand);
+
+    try {
+      processAgent.execute(addReadTokenRoleToUserCommand);
+    } catch (IOException e) {
+      // ignore error of adding role to admin because of it can be added before
+    }
+  }
+
   public void delete(TestUser testUser) throws IOException {
     delete(testUser.getId(), testUser.getName());
   }
@@ -149,17 +180,5 @@ public class KeycloakAdminConsoleClient {
     processAgent.execute(commandToDeleteUser);
 
     LOG.info("Test user with name='{}' has been removed.", username);
-  }
-
-  private String getKeycloakContainerId(String cheInfrastructure) throws ProcessAgentException {
-    switch (cheInfrastructure) {
-      case OPENSHIFT_INFRASTRUCTURE:
-        return processAgent.execute(
-            "echo $(docker ps | grep 'keycloak_keycloak-' | cut -d ' ' -f1)");
-
-      case DOCKER_INFRASTRUCTURE:
-      default:
-        return processAgent.execute("echo $(docker ps | grep che_keycloak | cut -d ' ' -f1)");
-    }
   }
 }

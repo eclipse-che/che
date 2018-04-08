@@ -15,12 +15,12 @@ import org.eclipse.che.selenium.core.client.CheTestMachineServiceClient;
 import org.eclipse.che.selenium.core.client.KeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestMachineServiceClient;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
+import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
+import org.eclipse.che.selenium.core.provider.TestUserProvider;
 import org.eclipse.che.selenium.core.user.MultiUserCheAdminTestUserProvider;
 import org.eclipse.che.selenium.core.user.MultiUserCheDefaultTestUserProvider;
 import org.eclipse.che.selenium.core.user.MultiUserCheTestUserProvider;
-import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Anton Korneta */
 public class CheSeleniumMultiUserModule extends AbstractModule {
@@ -29,8 +29,8 @@ public class CheSeleniumMultiUserModule extends AbstractModule {
   protected void configure() {
     bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
-    bind(AdminTestUser.class).toProvider(MultiUserCheAdminTestUserProvider.class);
-    bind(DefaultTestUser.class).toProvider(MultiUserCheDefaultTestUserProvider.class);
-    bind(TestUser.class).toProvider(MultiUserCheTestUserProvider.class);
+    bind(AdminTestUserProvider.class).to(MultiUserCheAdminTestUserProvider.class);
+    bind(DefaultTestUserProvider.class).to(MultiUserCheDefaultTestUserProvider.class);
+    bind(TestUserProvider.class).to(MultiUserCheTestUserProvider.class);
   }
 }

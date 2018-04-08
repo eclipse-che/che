@@ -15,6 +15,7 @@ import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
 import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class MultiUserCheDefaultTestUserProvider implements TestUserProvider<DefaultTestUser> {
+public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvider {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(MultiUserCheDefaultTestUserProvider.class);

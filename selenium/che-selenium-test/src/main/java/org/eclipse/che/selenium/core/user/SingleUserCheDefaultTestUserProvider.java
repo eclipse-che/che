@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core.user;
 import com.google.inject.Inject;
 import java.io.IOException;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class SingleUserCheDefaultTestUserProvider implements TestUserProvider<DefaultTestUser> {
+public class SingleUserCheDefaultTestUserProvider implements DefaultTestUserProvider {
   private static final Logger LOG =
       LoggerFactory.getLogger(SingleUserCheDefaultTestUserProvider.class);
   private final DefaultTestUser defaultTestUser;

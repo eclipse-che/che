@@ -19,6 +19,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
+import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +40,14 @@ public class TestUserImpl implements DefaultTestUser, AdminTestUser {
 
   private final TestUserServiceClient userServiceClient;
   private final TestAuthServiceClient authServiceClient;
-  private final TestUserProvider testUserProvider;
+  private final RemovableUserProvider testUserProvider;
 
   /** To instantiate user with specific name, e-mail, password and offline token. */
   @AssistedInject
   public TestUserImpl(
       TestUserServiceClientFactory testUserServiceClientFactory,
       TestAuthServiceClient authServiceClient,
-      @Assisted TestUserProvider testUserProvider,
+      @Assisted RemovableUserProvider testUserProvider,
       @Assisted("name") String name,
       @Assisted("email") String email,
       @Assisted("password") String password,
