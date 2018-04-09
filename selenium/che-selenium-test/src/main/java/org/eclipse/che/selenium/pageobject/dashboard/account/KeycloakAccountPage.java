@@ -64,9 +64,12 @@ public class KeycloakAccountPage {
     waitAllBodyFieldsAndButtonsIsVisible();
   }
 
-  public Account getAllFieldsValue() {
-    return new Account(
-        getUserNameValue(), getEmailValue(), getFirstNameValue(), getLastNameValue());
+  public Account getAllFields() {
+    return new Account()
+        .withLogin(getUserNameValue())
+        .withEmail(getEmailValue())
+        .withFirstName(getFirstNameValue())
+        .withLastName(getLastNameValue());
   }
 
   public String getUserNameValue() {

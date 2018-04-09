@@ -10,7 +10,8 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -29,8 +30,8 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.MULTIUSER)
 public class AccountTest {
 
-  private static Account changedFields;
-  private static String parentWindow;
+  private Account changedTestUserAccount;
+  private String parentWindow;
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
@@ -42,11 +43,23 @@ public class AccountTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private KeycloakHeaderButtons keycloakHeaderButtons;
+  private Account initialTestUserAccount;
 
   @BeforeClass
   public void setup() {
-    changedFields =
-        new Account(testUser.getName(), testUser.getEmail(), "UserFirstName", "UserLastName");
+    initialTestUserAccount =
+        new Account()
+            .withLogin(testUser.getName())
+            .withEmail(testUser.getEmail())
+            .withFirstName("")
+            .withLastName("");
+
+    changedTestUserAccount =
+        new Account()
+            .withLogin(testUser.getName())
+            .withEmail(testUser.getEmail())
+            .withFirstName("UserFirstName")
+            .withLastName("UserLastName");
 
     dashboard.open(testUser.getName(), testUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
@@ -58,24 +71,20 @@ public class AccountTest {
 
   public void shouldChangeEmailFirstAndLastName() {
     dashboardAccount.getTitle().equals("Account");
-    assertTrue(
-        dashboardAccount
-            .getDefaultFieldsValue()
-            .isEquals(dashboardAccount.getCurrentFieldsValue()));
+    assertEquals(dashboardAccount.getAllFields(), initialTestUserAccount);
     dashboardAccount.clickOnEditButton();
 
     seleniumWebDriverHelper.switchToNextWindow(parentWindow);
 
     keycloakAccount.waitAccountPageIsLoaded();
 
-    assertTrue(
-        keycloakAccount.getAllFieldsValue().isEquals(dashboardAccount.getDefaultFieldsValue()));
+    assertEquals(keycloakAccount.getAllFields(), initialTestUserAccount);
 
     assertTrue(keycloakAccount.usernameFieldIsDisabled());
 
-    keycloakAccount.setEmailValue(changedFields.getEmail());
-    keycloakAccount.setFirstNameValue(changedFields.getFirstName());
-    keycloakAccount.setLastNameValue(changedFields.getLastName());
+    keycloakAccount.setEmailValue(changedTestUserAccount.getEmail());
+    keycloakAccount.setFirstNameValue(changedTestUserAccount.getFirstName());
+    keycloakAccount.setLastNameValue(changedTestUserAccount.getLastName());
 
     keycloakAccount.clickOnSaveButton();
     keycloakAccount.waitTextInSuccessAlert("Your account has been updated.");
@@ -86,7 +95,7 @@ public class AccountTest {
     seleniumWebDriver.navigate().refresh();
     dashboardAccount.waitPageIsLoaded();
 
-    assertTrue(dashboardAccount.getCurrentFieldsValue().isEquals(changedFields));
+    assertEquals(dashboardAccount.getAllFields(), changedTestUserAccount);
   }
 
   public void shouldChangePasswordAndCheckIt() {
