@@ -47,47 +47,47 @@ public class SinglePortUrlRewriterTest {
     return new Object[][] {
       // External IP
       {
-        new RuntimeIdentityImpl("ws123", null, null, null),
+        new RuntimeIdentityImpl("ws123", null, null),
         "172.12.0.2",
         "127.0.0.1",
         "machine1",
         "exec/http",
-        "my.io",
+        "nip.io",
         "http://127.0.0.1:8080/path",
-        "http://exec-http.machine1.ws123.172.12.0.2.my.io:8080/path"
+        "http://exec-http-machine1-ws123.172.12.0.2.nip.io:8080/path"
       },
       // Internal IP, protocol, path param
       {
-        new RuntimeIdentityImpl("ws123", null, null, null),
+        new RuntimeIdentityImpl("ws123", null, null),
         "127.0.0.1",
         null,
         "machine1",
         "exec/ws",
         null,
         "tcp://127.0.0.1:8080/path?param",
-        "tcp://exec-ws.machine1.ws123.127.0.0.1.nip.io:8080/path?param"
+        "tcp://exec-ws-machine1-ws123.127.0.0.1.nip.io:8080/path?param"
       },
       // Without machine name
       {
-        new RuntimeIdentityImpl("ws123", null, null, null),
+        new RuntimeIdentityImpl("ws123", null, null),
         "127.0.0.1",
         null,
         null,
         "server/some",
         null,
         "tcp://127.0.0.1:8080/path?param",
-        "tcp://server-some.ws123.127.0.0.1.nip.io:8080/path?param"
+        "tcp://server-some-ws123.127.0.0.1.nip.io:8080/path?param"
       },
       // Without server
       {
-        new RuntimeIdentityImpl("ws123", null, null, null),
+        new RuntimeIdentityImpl("ws123", null, null),
         "127.0.0.1",
         null,
         "machine1",
         null,
         null,
         "tcp://127.0.0.1:8080/path?param",
-        "tcp://machine1.ws123.127.0.0.1.nip.io:8080/path?param"
+        "tcp://machine1-ws123.127.0.0.1.nip.io:8080/path?param"
       },
     };
   }
@@ -101,7 +101,6 @@ public class SinglePortUrlRewriterTest {
     Provider<SinglePortHostnameBuilder> provider =
         () -> new SinglePortHostnameBuilder("172.12.0.2", "127.0.0.1", null);
     SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, provider);
-    rewriter.rewriteURL(
-        new RuntimeIdentityImpl("ws123", null, null, null), "machine1", "server", ":");
+    rewriter.rewriteURL(new RuntimeIdentityImpl("ws123", null, null), "machine1", "server", ":");
   }
 }

@@ -15,6 +15,7 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -34,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -44,10 +46,10 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class RenameTypeTest {
   private static final Logger LOG = LoggerFactory.getLogger(RenameTypeTest.class);
-  private static final String nameOfProject =
-      NameGenerator.generate(RenameTypeTest.class.getName(), 2);
-  private static final String pathToPackageInChePrefix =
-      nameOfProject + "/src" + "/main" + "/java" + "/renametype";
+  private static final String NAME_OF_PROJECT =
+      NameGenerator.generate(RenameTypeTest.class.getSimpleName(), 2);
+  private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
+      NAME_OF_PROJECT + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -70,22 +72,18 @@ public class RenameTypeTest {
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
-        nameOfProject,
+        NAME_OF_PROJECT,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
-    projectExplorer.waitVisibleItem(nameOfProject);
+    projectExplorer.waitVisibleItem(NAME_OF_PROJECT);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
   }
 
   @BeforeMethod
-  public void setCurrentFieldForTest(Method method) throws IOException {
-    try {
-      setFieldsForTest(method.getName());
-    } catch (Exception e) {
-      LOG.error(e.getLocalizedMessage(), e);
-    }
+  public void setCurrentFieldForTest(Method method) throws IOException, URISyntaxException {
+    setFieldsForTest(method.getName());
   }
 
   @AfterMethod
@@ -96,7 +94,7 @@ public class RenameTypeTest {
         refactorPanel.clickCancelButtonRefactorForm();
       }
       editor.closeAllTabs();
-    } catch (Exception e) {
+    } catch (WebDriverException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
   }
@@ -151,8 +149,8 @@ public class RenameTypeTest {
     testCase();
   }
 
-  private void setFieldsForTest(String nameCurrentTest) throws Exception {
-    pathToCurrentPackage = pathToPackageInChePrefix + "/" + nameCurrentTest;
+  private void setFieldsForTest(String nameCurrentTest) throws URISyntaxException, IOException {
+    pathToCurrentPackage = PATH_TO_PACKAGE_IN_CHE_PREFIX + "/" + nameCurrentTest;
 
     URL resourcesInA =
         getClass()
@@ -167,7 +165,7 @@ public class RenameTypeTest {
     contentFromOutB = getTextFromFile(resourcesOutA);
   }
 
-  private String getTextFromFile(URL url) throws Exception {
+  private String getTextFromFile(URL url) throws URISyntaxException, IOException {
     String result = "";
     List<String> listWithAllLines =
         Files.readAllLines(Paths.get(url.toURI()), Charset.forName("UTF-8"));

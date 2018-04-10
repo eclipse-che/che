@@ -65,7 +65,7 @@ wait_until_che_is_available() {
     DEPLOYMENT_TIMEOUT_SEC=300
     POLLING_INTERVAL_SEC=5
     end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
+    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
       available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
       progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
       timeout_in=$((end-SECONDS))
@@ -284,6 +284,29 @@ CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 CHE_KEYCLOAK_OSO_ENDPOINT=${CHE_KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT}}
 KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
 
+CHE_MASTER_PVC="\
+- apiVersion: v1\n \
+ kind: PersistentVolumeClaim\n \
+ metadata:\n \
+   labels:\n \
+     app: che\n \
+   name: che-data-volume\n \
+ spec:\n \
+   accessModes:\n \
+   - ReadWriteOnce\n \
+   resources:\n \
+     requests:\n \
+       storage: 1Gi"
+
+CHE_MASTER_VOLUME_MOUNTS="\
+- mountPath: /data\n \
+           name: che-data-volume"
+
+CHE_MASTER_VOLUMES="\
+- name: che-data-volume\n \
+         persistentVolumeClaim:\n \
+           claimName: che-data-volume"
+
 get_che_pod_config() {
 DEFAULT_CHE_DEPLOYMENT_FILE_PATH=${BASE_DIR}/che-openshift.yml
 CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
@@ -292,6 +315,10 @@ CHE_CONFIG_FILE_PATH=${CHE_CONFIG_FILE_PATH:-${DEFAULT_CHE_CONFIG_FILE_PATH}}
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
+    if [[ "${CHE_MULTIUSER}" != "true" ]]; then
+    sed "s|#CHE_MASTER_PVC|$CHE_MASTER_PVC|" | \
+    sed "s|#CHE_MASTER_VOLUME_MOUNTS.*|$CHE_MASTER_VOLUME_MOUNTS|" | \
+    sed "s|#CHE_MASTER_VOLUMES.*|$CHE_MASTER_VOLUMES|";else cat -; fi | \
     inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}"
 }
 
@@ -433,6 +460,7 @@ oc apply -f -
 if [[ "${CHE_MULTIUSER}" == "true" ]] && [[ "${COMMAND}" == "deploy" ]]; then
     if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
         "${BASE_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
+        "${BASE_DIR}"/multi-user/configure_keycloak.sh
     else
         "${BASE_DIR}"/multi-user/deploy_postgres_only.sh
     fi
@@ -535,10 +563,6 @@ fi
 
 if [ "${WAIT_FOR_CHE}" == "true" ]; then
   wait_until_che_is_available
-fi
-
-if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-"${BASE_DIR}"/multi-user/configure_keycloak.sh
 fi
 
 che_route=$(oc get route che -o jsonpath='{.spec.host}')

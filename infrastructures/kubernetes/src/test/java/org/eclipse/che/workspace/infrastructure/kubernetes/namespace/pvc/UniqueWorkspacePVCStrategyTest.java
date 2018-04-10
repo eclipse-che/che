@@ -83,7 +83,7 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String VOLUME_2_NAME = "vol2";
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private KubernetesClientFactory clientFactory;

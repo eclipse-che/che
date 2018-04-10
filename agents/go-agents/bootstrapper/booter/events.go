@@ -79,9 +79,6 @@ type RuntimeID struct {
 	// Environment is a name of environment e.g. "default".
 	Environment string `json:"envName"`
 
-	// OwnerName is the name of user who is runtime owner.
-	OwnerName string `json:"ownerName"`
-	
 	// OwnerId is an identifier of user who is runtime owner.
 	OwnerId string `json:"ownerId"`
 }

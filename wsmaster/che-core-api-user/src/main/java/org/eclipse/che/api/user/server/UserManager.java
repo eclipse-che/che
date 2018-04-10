@@ -55,11 +55,11 @@ public class UserManager {
 
   public static final String PERSONAL_ACCOUNT = "personal";
 
-  private final UserDao userDao;
-  private final ProfileDao profileDao;
-  private final PreferenceDao preferencesDao;
-  private final Set<String> reservedNames;
-  private final EventService eventService;
+  protected final UserDao userDao;
+  protected final ProfileDao profileDao;
+  protected final PreferenceDao preferencesDao;
+  protected final Set<String> reservedNames;
+  protected final EventService eventService;
 
   @Inject
   public UserManager(

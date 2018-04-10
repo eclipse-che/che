@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class WsAgentServerConfigProvisionerTest {
   private static final RuntimeIdentity RUNTIME_IDENTITY =
-      new RuntimeIdentityImpl("wsId", "env", "owner", "id");
+      new RuntimeIdentityImpl("wsId", "env", "id");
   private static final String MACHINE_1_NAME = "machine1";
   private static final String MACHINE_2_NAME = "machine2";
 

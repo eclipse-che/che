@@ -27,6 +27,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     networks:
       - default
       - che-network
@@ -98,7 +100,7 @@ services:
 <% end -%>
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik/traefik.toml:/etc/traefik/traefik.toml'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik:/etc/traefik'
     restart: always
 <% end -%>
 
@@ -166,7 +168,9 @@ services:
     labels:
       traefik.keycloak.frontend.entryPoints: "http"
       traefik.keycloak.port: "8080"
-<% if ! @che_docker_ip_external.empty? -%>
+<% if scope.lookupvar('che::che_single_port') == 'true' and scope.lookupvar('che::che_single_port_wildcard_domain_ipless') == 'true' -%>
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
+<% elsif ! @che_docker_ip_external.empty? -%>
       traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_docker_ip_external') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
 <% else -%>
       traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::docker_ip') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
@@ -179,6 +183,11 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak:/opt/jboss/keycloak/standalone/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs/keycloak:/opt/jboss/keycloak/standalone/log'
     restart: always
+    healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/" ]
+        interval: 10s
+        timeout: 10s
+        retries: 10
 
 networks:
   che-network:

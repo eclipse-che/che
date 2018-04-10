@@ -5,20 +5,26 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-{{- if .Values.global.tlsEnabled }}
+{{- if and .Values.global.tls }}
+{{- if and .Values.global.tls.enabled .Values.global.tls.useCertManager }}
 apiVersion: certmanager.k8s.io/v1alpha1
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: letsencrypt
 spec:
   acme:
     # The ACME server URL
+{{- if .Values.global.tls.useStaging }}
+    server: https://acme-staging.api.letsencrypt.org/directory
+{{- else }}
     server: https://acme-v01.api.letsencrypt.org/directory
+{{- end }}
     # Email address used for ACME registration
-    email: eyal.barlev@sap.com
+    email: user@example.com
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt
     # Enable the HTTP-01 challenge provider
     http01: {}
+{{- end }}
 {{- end }}

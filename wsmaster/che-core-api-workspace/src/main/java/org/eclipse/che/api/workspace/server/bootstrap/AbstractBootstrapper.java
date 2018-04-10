@@ -55,7 +55,6 @@ public abstract class AbstractBootstrapper {
             RuntimeIdentityDto runtimeId = event.getRuntimeId();
             if (event.getMachineName().equals(machineName)
                 && runtimeIdentity.getEnvName().equals(runtimeId.getEnvName())
-                && runtimeIdentity.getOwnerName().equals(runtimeId.getOwnerName())
                 && runtimeIdentity.getWorkspaceId().equals(runtimeId.getWorkspaceId())) {
 
               finishEventFuture.complete(event);
@@ -138,7 +137,10 @@ public abstract class AbstractBootstrapper {
     try {
       doBootstrapAsync(installerEndpoint, outputEndpoint);
     } catch (InfrastructureException ex) {
-      finishEventFuture.completeExceptionally(ex);
+      finishEventFuture.completeExceptionally(
+          new InfrastructureException(
+              "Bootstrapping of machine " + machineName + " failed. Cause: " + ex.getMessage(),
+              ex));
     }
     return bootstrapFuture;
   }

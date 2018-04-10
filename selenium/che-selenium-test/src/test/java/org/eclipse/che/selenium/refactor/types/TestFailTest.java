@@ -40,10 +40,11 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class TestFailTest {
   private static final Logger LOG = LoggerFactory.getLogger(TestEnumerationsTest.class);
-  private static final String nameOfProject =
+  private static final String NAME_OF_PROJECT =
       NameGenerator.generate(TestFailTest.class.getSimpleName(), 3);
-  private static final String pathToPackageInChePrefix =
-      nameOfProject + "/src" + "/main" + "/java" + "/renametype";
+  private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
+      NAME_OF_PROJECT + "/src/main/java/renametype";
+
   private String renameItem = "B.java";
   private String pathToCurrentPackage;
   private Services services;
@@ -69,11 +70,11 @@ public class TestFailTest {
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
-        nameOfProject,
+        NAME_OF_PROJECT,
         ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
-    projectExplorer.waitVisibleItem(nameOfProject);
+    projectExplorer.waitVisibleItem(NAME_OF_PROJECT);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
@@ -83,7 +84,7 @@ public class TestFailTest {
   public void setFieldsForTest(Method method) {
     try {
       String nameCurrentTest = method.getName();
-      pathToCurrentPackage = pathToPackageInChePrefix + "/" + nameCurrentTest;
+      pathToCurrentPackage = PATH_TO_PACKAGE_IN_CHE_PREFIX + "/" + nameCurrentTest;
     } catch (Exception e) {
       LOG.error(e.getLocalizedMessage(), e);
     }

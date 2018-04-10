@@ -12,7 +12,10 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -26,6 +29,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
@@ -503,6 +507,63 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits during {@code timeout} until specified {@code element} contains the defined {@code
+   * expectedText}.
+   *
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should be presented
+   * @param timeout waiting time in seconds
+   */
+  public void waitValuePresence(WebElement element, String expectedText, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> waitVisibility(element).getAttribute("value").contains(expectedText));
+  }
+
+  /**
+   * Waits until specified {@code element} contains the defined {@code expectedText}.
+   *
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should be presented
+   */
+  public void waitValuePresence(WebElement element, String expectedText) {
+    waitValuePresence(element, expectedText, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until {@link WebElement} which defined by {@code elementLocator}
+   * contains the specified {@code expectedText}.
+   *
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
+   *
+   * @param elementLocator locator of the element which should be checked
+   * @param expectedText text which should be present
+   * @param timeout waiting time in seconds
+   */
+  public void waitValuePresence(By elementLocator, String expectedText, int timeout) {
+    waitValuePresence(waitVisibility(elementLocator, timeout), expectedText, timeout);
+  }
+
+  /**
+   * Waits until {@link WebElement} which defined by {@code elementLocator} contains the specified
+   * {@code expectedText}.
+   *
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
+   *
+   * @param elementLocator locator of the element which should be checked
+   * @param expectedText text which should be present
+   */
+  public void waitValuePresence(By elementLocator, String expectedText) {
+    waitValuePresence(elementLocator, expectedText, DEFAULT_TIMEOUT);
+  }
+
+  /**
    * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
    * elementLocator} by {@link WebElement#getText()} is equivalent to provided {@code expectedText}.
    *
@@ -554,6 +615,63 @@ public class SeleniumWebDriverHelper {
    */
   public void waitText(WebElement webElement, String expectedText) {
     waitText(webElement, expectedText, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until specified {@code element} contains the specified {@code
+   * expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should be presented
+   * @param timeout waiting time in seconds
+   */
+  public void waitTextPresence(WebElement element, String expectedText, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> waitVisibility(element).getText().contains(expectedText));
+  }
+
+  /**
+   * Waits until specified {@code element} contains the specified {@code expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should be presented
+   */
+  public void waitTextPresence(WebElement element, String expectedText) {
+    waitTextPresence(element, expectedText, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until {@link WebElement} which defined by {@code elementLocator}
+   * contains the specified {@code expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param elementLocator locator of the element which should be checked
+   * @param expectedText text which should be presented
+   * @param timeout waiting time in seconds
+   */
+  public void waitTextPresence(By elementLocator, String expectedText, int timeout) {
+    waitTextPresence(waitVisibility(elementLocator, timeout), expectedText, timeout);
+  }
+
+  /**
+   * Waits until {@link WebElement} which defined by {@code elementLocator} contains the specified
+   * {@code expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param elementLocator locator of the element which should be checked
+   * @param expectedText text which should be presented
+   */
+  public void waitTextPresence(By elementLocator, String expectedText) {
+    waitTextPresence(elementLocator, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -765,5 +883,80 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAndSwitchToFrame(WebElement frame) {
     waitAndSwitchToFrame(frame, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Creates {@link Actions} by using {@link ActionsFactory}.
+   *
+   * @param seleniumWebDriver webDriver by which actions factory should be initialized
+   * @return created {@link Actions}
+   */
+  public Actions getAction(SeleniumWebDriver seleniumWebDriver) {
+    return actionsFactory.createAction(seleniumWebDriver);
+  }
+
+  /**
+   * Creates {@link Actions} by using {@link ActionsFactory}.
+   *
+   * @return created {@link Actions}
+   */
+  public Actions getAction() {
+    return getAction(this.seleniumWebDriver);
+  }
+
+  /** Switches to IDE frame and waits for Project Explorer is available. */
+  public String switchToIdeFrameAndWaitAvailability() {
+    return switchToIdeFrameAndWaitAvailability(APPLICATION_START_TIMEOUT_SEC);
+  }
+
+  /**
+   * Switches to IDE frame and waits during {@code timeout} for Project Explorer is available.
+   *
+   * @param timeout waiting time in seconds
+   */
+  public String switchToIdeFrameAndWaitAvailability(int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  waitAndSwitchToFrame(By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+                  if (isVisible(By.id("gwt-debug-projectTree"))) {
+                    return true;
+                  }
+
+                  seleniumWebDriver.switchTo().parentFrame();
+                  return false;
+                });
+
+    return seleniumWebDriver.getWindowHandle();
+  }
+
+  /** Waits while in a browser appears more than one window */
+  public void waitOpenedSomeWin() {
+    webDriverWaitFactory
+        .get(WIDGET_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                input -> {
+                  Set<String> driverWindows = seleniumWebDriver.getWindowHandles();
+                  return (driverWindows.size() > 1);
+                });
+  }
+
+  /**
+   * Switches to next browser window (this means that if opened 2 windows, and we are in the window
+   * 1, we will be switched into the window 2)
+   *
+   * @param windowHandlerToSwitchFrom
+   */
+  public void switchToNextWindow(String windowHandlerToSwitchFrom) {
+    waitOpenedSomeWin();
+    for (String handle : seleniumWebDriver.getWindowHandles()) {
+      if (!windowHandlerToSwitchFrom.equals(handle)) {
+        seleniumWebDriver.switchTo().window(handle);
+        break;
+      }
+    }
   }
 }

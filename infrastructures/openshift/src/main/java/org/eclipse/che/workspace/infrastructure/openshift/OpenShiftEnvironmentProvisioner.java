@@ -23,8 +23,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNames
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 
@@ -42,7 +42,7 @@ public class OpenShiftEnvironmentProvisioner {
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final UniqueNamesProvisioner<OpenShiftEnvironment> uniqueNamesProvisioner;
   private final RouteTlsProvisioner routeTlsProvisioner;
-  private final OpenShiftServersConverter openShiftServersConverter;
+  private final ServersConverter serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
   private final RamLimitProvisioner ramLimitProvisioner;
@@ -55,7 +55,7 @@ public class OpenShiftEnvironmentProvisioner {
       @Named("che.infra.kubernetes.pvc.enabled") boolean pvcEnabled,
       OpenShiftUniqueNamesProvisioner uniqueNamesProvisioner,
       RouteTlsProvisioner routeTlsProvisioner,
-      OpenShiftServersConverter openShiftServersConverter,
+      ServersConverter serversConverter,
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
       WorkspaceVolumesStrategy volumesStrategy,
@@ -67,7 +67,7 @@ public class OpenShiftEnvironmentProvisioner {
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
     this.routeTlsProvisioner = routeTlsProvisioner;
-    this.openShiftServersConverter = openShiftServersConverter;
+    this.serversConverter = serversConverter;
     this.envVarsConverter = envVarsConverter;
     this.restartPolicyRewriter = restartPolicyRewriter;
     this.ramLimitProvisioner = ramLimitProvisioner;
@@ -85,7 +85,7 @@ public class OpenShiftEnvironmentProvisioner {
     }
 
     // 2 stage - converting Che model env to OpenShift env
-    openShiftServersConverter.provision(osEnv, identity);
+    serversConverter.provision(osEnv, identity);
     envVarsConverter.provision(osEnv, identity);
     if (pvcEnabled) {
       volumesStrategy.provision(osEnv, identity);

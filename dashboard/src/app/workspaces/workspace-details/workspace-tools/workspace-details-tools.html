@@ -1,0 +1,7 @@
+<div class="workspace-tools-tab-content">
+  <workspace-tools-ide ng-if="workspaceDetailsToolsController.isIDE(workspaceDetailsToolsController.selectedMachine)"
+    machine="workspaceDetailsToolsController.selectedMachine"
+    on-change="workspaceDetailsToolsController.onChange()"
+    environment-manager="workspaceDetailsToolsController.environmentManager">
+  </workspace-tools-ide>
+</div>

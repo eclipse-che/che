@@ -20,22 +20,16 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -43,7 +37,7 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class FetchAndMergeRemoteBranchIntoLocalTest {
   private static final String PROJECT_NAME = NameGenerator.generate("FetchAndMergeTest-", 4);
-  private static final String CHANGE_CONTENT =
+  private static final String NEW_CONTENT =
       String.format("//change_content-%s", String.valueOf(System.currentTimeMillis()));
 
   @Inject private TestWorkspace ws;
@@ -51,36 +45,25 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
   @Inject private TestUser productUser;
   @Inject private TestGitHubRepository testRepo;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private Git git;
   @Inject private Events eventsPanel;
-  @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
-  @Inject private Consoles consoles;
-  @Inject private TestSshServiceClient testSshServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
 
   @BeforeClass
   public void prepare() throws Exception {
-    String commitMess = String.format("add-new-content-%s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     Path entryPath = Paths.get(getClass().getResource("/projects/guess-project").getPath());
-    testRepo.addContent(entryPath, commitMess);
+    testRepo.addContent(entryPath);
 
     ide.open(ws);
-  }
-
-  @AfterClass
-  public void deleteRepo() throws IOException {
-    testRepo.delete();
   }
 
   @Test
@@ -101,10 +84,10 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change content in the test repo on GitHub
-    deleteFileOnGithubSide(String.format("%s/%s", pathToJspFile, jspFile), "delete index.jsp");
-    changeContentOnGithubSide(
-        String.format("%s/%s.java", pathToJavaFile, javaFile), CHANGE_CONTENT);
-    changeContentOnGithubSide(textFile, CHANGE_CONTENT);
+    testRepo.deleteFile(String.format("%s/%s", pathToJspFile, jspFile));
+    testRepo.changeFileContent(
+        String.format("%s/%s.java", pathToJavaFile, javaFile), NEW_CONTENT, "file-" + NEW_CONTENT);
+    testRepo.changeFileContent(textFile, NEW_CONTENT, "file-" + NEW_CONTENT);
 
     performFetch();
     git.waitGitStatusBarWithMess(fetchMess);
@@ -114,10 +97,10 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     projectExplorer.openItemByPath(
         String.format("%s/%s/%s.java", PROJECT_NAME, pathToJavaFile, javaFile));
     editor.waitActive();
-    editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT);
+    editor.waitTextNotPresentIntoEditor(NEW_CONTENT);
     projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, textFile));
     editor.waitActive();
-    editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT);
+    editor.waitTextNotPresentIntoEditor(NEW_CONTENT);
     projectExplorer.waitVisibilityByName(jspFile);
 
     mergeRemoteBranch(originMaster);
@@ -130,10 +113,10 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     // check the content is changed
     editor.selectTabByName(javaFile);
     editor.waitActive();
-    editor.waitTextIntoEditor(CHANGE_CONTENT);
+    editor.waitTextIntoEditor(NEW_CONTENT);
     editor.selectTabByName(textFile);
     editor.waitActive();
-    editor.waitTextIntoEditor(CHANGE_CONTENT);
+    editor.waitTextIntoEditor(NEW_CONTENT);
     projectExplorer.waitItemInvisibility(
         String.format("%s/%s/%s", PROJECT_NAME, "src/main/webapp", jspFile));
 
@@ -144,17 +127,9 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     // wait commit in git history
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
-    git.waitTextInHistoryForm(CHANGE_CONTENT);
+    git.waitTextInHistoryForm(NEW_CONTENT);
     git.clickOnHistoryRowInСommitsList(0);
-    git.waitContentInHistoryEditor(CHANGE_CONTENT);
-  }
-
-  private void deleteFileOnGithubSide(String pathToContent, String commitMess) throws IOException {
-    testRepo.getFileContent(pathToContent).delete(commitMess);
-  }
-
-  private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
-    testRepo.getFileContent(String.format("/%s", pathToContent)).update(content, "add " + content);
+    git.waitContentInHistoryEditor(NEW_CONTENT);
   }
 
   private void performFetch() {

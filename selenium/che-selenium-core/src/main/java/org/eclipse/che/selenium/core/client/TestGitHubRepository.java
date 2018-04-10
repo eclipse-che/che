@@ -19,100 +19,194 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.PreDestroy;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHContent;
+import org.kohsuke.github.GHFileNotFoundException;
+import org.kohsuke.github.GHRef;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Dmytro Nochevnov */
+/**
+ * This is facade and helper for {@link GHRepository}.
+ *
+ * @author Dmytro Nochevnov
+ */
 public class TestGitHubRepository {
 
-  private static final int REPO_CREATION_TIMEOUT_SEC = 6;
+  private static final int GITHUB_OPERATION_TIMEOUT_SEC = 1;
+  private static final int REPO_CREATION_ATTEMPTS = 6;
+
   private final String repoName = NameGenerator.generate("EclipseCheTestRepo-", 5);
   private static final Logger LOG = LoggerFactory.getLogger(TestGitHubRepository.class);
 
-  private final GHRepository ghRepository;
+  private final GHRepository ghRepo;
   private final GitHub gitHub;
 
+  /**
+   * Creates repository with semi-random name on GitHub for certain {@code gitHubUsername}. Waits
+   * until repository is really created.
+   *
+   * @param gitHubUsername default github user name
+   * @param gitHubPassword default github user password
+   * @throws IOException
+   * @throws InterruptedException
+   */
   @Inject
   public TestGitHubRepository(
       @Named("github.username") String gitHubUsername,
       @Named("github.password") String gitHubPassword)
       throws IOException, InterruptedException {
     gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
-    ghRepository = create();
-  }
-
-  private GHRepository create() throws IOException, InterruptedException {
-    GHRepository repo = gitHub.createRepository(repoName).create();
-    ensureRepositoryCreated(repo);
-
-    LOG.info("GitHub repo {} has been created", repo.getHtmlUrl());
-    return repo;
-  }
-
-  private void ensureRepositoryCreated(GHRepository repo) throws IOException {
-    Throwable lastIOException = null;
-
-    for (int i = 0; i < REPO_CREATION_TIMEOUT_SEC; i++) {
-      try {
-        gitHub.getRepository(repo.getFullName());
-        return;
-      } catch (IOException e) {
-        lastIOException = e;
-        LOG.info("Waiting for {} to be created", repo.getHtmlUrl());
-        sleepQuietly(1); // sleep one second
-      }
-    }
-
-    throw new IOException(
-        format(
-            "GitHub repo %s hasn't been created in %s seconds",
-            repo.getHtmlUrl(), REPO_CREATION_TIMEOUT_SEC),
-        lastIOException);
+    ghRepo = create();
   }
 
   public String getName() {
     return repoName;
   }
 
-  public void addContent(Path localRepo, String commitMessage) throws IOException {
-    Files.walk(localRepo)
+  /**
+   * Creates reference to branch, tag, ... from master branch.
+   *
+   * @param refName is a name of branch, tag, etc
+   * @return reference to the new branch
+   * @throws IOException
+   */
+  public GHRef createBranchFromMaster(String refName) throws IOException {
+    GHRef master = ghRepo.getRef("heads/master");
+    return ghRepo.createRef("refs/heads/" + refName, master.getObject().getSha());
+  }
+
+  /**
+   * Copies content of directory {@code pathToRootContentDirectory} to the GitHub repository. It
+   * tries to recreate the file ones again in case of FileNotFoundException occurs.
+   *
+   * @param pathToRootContentDirectory path to the directory with content
+   * @throws IOException
+   */
+  public void addContent(Path pathToRootContentDirectory) throws IOException {
+    Files.walk(pathToRootContentDirectory)
         .filter(Files::isRegularFile)
         .forEach(
-            path -> {
+            pathToFile -> {
               try {
-                byte[] contentBytes = Files.readAllBytes(path);
-                String relativePath = localRepo.relativize(path).toString();
-                ghRepository.createContent(contentBytes, commitMessage, relativePath);
+                createFile(pathToRootContentDirectory, pathToFile);
               } catch (IOException e) {
                 throw new UncheckedIOException(e);
               }
             });
   }
 
+  /**
+   * Changes content of the file
+   *
+   * @param pathToFile path to specified file
+   * @param content content to change
+   * @throws IOException
+   */
+  public void changeFileContent(String pathToFile, String content) throws IOException {
+    changeFileContent(pathToFile, content, format("Change file %s", pathToFile));
+  }
+
+  /**
+   * Changes content of the file
+   *
+   * @param pathToFile path to specified file
+   * @param content content to change
+   * @param commitMessage message to commit
+   * @throws IOException
+   */
+  public void changeFileContent(String pathToFile, String content, String commitMessage)
+      throws IOException {
+    ghRepo.getFileContent(String.format("/%s", pathToFile)).update(content, commitMessage);
+  }
+
+  public void deleteFile(String pathToFile) throws IOException {
+    ghRepo.getFileContent(pathToFile).delete("Delete file " + pathToFile);
+  }
+
+  /**
+   * Delete folder with content inside the repository on GitHub.
+   *
+   * @param folder folder to delete
+   * @param deleteCommitMessage commit message which is used to delete the message
+   * @throws IOException
+   */
   public void deleteFolder(Path folder, String deleteCommitMessage) throws IOException {
-    for (GHContent ghContent : ghRepository.getDirectoryContent(folder.toString())) {
+    for (GHContent ghContent : ghRepo.getDirectoryContent(folder.toString())) {
       ghContent.delete(deleteCommitMessage);
     }
   }
 
+  @PreDestroy
   public void delete() throws IOException {
-    ghRepository.delete();
-    LOG.info("GitHub repo {} has been removed", ghRepository.getHtmlUrl());
-  }
-
-  public GHContent getFileContent(String path) throws IOException {
-    return ghRepository.getFileContent(path);
+    ghRepo.delete();
+    LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
   }
 
   public String getHtmlUrl() {
-    return ghRepository.getHtmlUrl().toString();
+    return ghRepo.getHtmlUrl().toString();
   }
 
   public String getSshUrl() {
-    return ghRepository.getSshUrl();
+    return ghRepo.getSshUrl();
+  }
+
+  private GHRepository create() throws IOException, InterruptedException {
+    GHRepository repo = gitHub.createRepository(repoName).create();
+    ensureRepositoryCreated(repo, System.currentTimeMillis());
+
+    LOG.info("GitHub repo {} has been created", repo.getHtmlUrl());
+    return repo;
+  }
+
+  private void ensureRepositoryCreated(GHRepository repo, long startCreationTimeInMillisec)
+      throws IOException {
+    Throwable lastIOException = null;
+    for (int i = 0; i < REPO_CREATION_ATTEMPTS; i++) {
+      try {
+        gitHub.getRepository(repo.getFullName());
+        return;
+      } catch (IOException e) {
+        lastIOException = e;
+        LOG.info("Waiting for {} to be created", repo.getHtmlUrl());
+        sleepQuietly(GITHUB_OPERATION_TIMEOUT_SEC); // sleep one second
+      }
+    }
+
+    long durationOfRepoCreationInSec =
+        (System.currentTimeMillis() - startCreationTimeInMillisec) / 1000;
+
+    throw new IOException(
+        format(
+            "GitHub repo %s hasn't been created in %s seconds",
+            repo.getHtmlUrl(), durationOfRepoCreationInSec),
+        lastIOException);
+  }
+
+  /**
+   * Creates file in GitHub repository.
+   *
+   * @param pathToRootContentDirectory path to the root directory of file locally
+   * @param pathToFile path to file locally
+   * @throws IOException
+   */
+  private void createFile(Path pathToRootContentDirectory, Path pathToFile) throws IOException {
+    byte[] contentBytes = Files.readAllBytes(pathToFile);
+    String relativePath = pathToRootContentDirectory.relativize(pathToFile).toString();
+    String commitMessage = String.format("Add file %s", relativePath);
+
+    try {
+      ghRepo.createContent(contentBytes, commitMessage, relativePath);
+    } catch (GHFileNotFoundException e) {
+      // try to create content once again
+      LOG.warn(
+          "Error of creation of {} occurred. Is trying to create it once again...",
+          ghRepo.getHtmlUrl() + "/" + relativePath);
+      sleepQuietly(GITHUB_OPERATION_TIMEOUT_SEC);
+      ghRepo.createContent(contentBytes, commitMessage, relativePath);
+    }
   }
 }

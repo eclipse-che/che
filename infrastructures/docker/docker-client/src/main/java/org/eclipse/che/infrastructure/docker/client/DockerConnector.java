@@ -12,6 +12,7 @@ package org.eclipse.che.infrastructure.docker.client;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
+import static java.lang.String.format;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
@@ -43,7 +44,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.che.api.core.util.FileCleaner;
@@ -139,6 +143,7 @@ public class DockerConnector {
           .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
           .create();
 
+  private final long imageBuildTimeoutSec;
   private final URI dockerDaemonUri;
   private final DockerRegistryAuthResolver authResolver;
   private final ExecutorService executor;
@@ -148,10 +153,12 @@ public class DockerConnector {
 
   @Inject
   public DockerConnector(
+      @Named("che.infra.docker.build_timeout_sec") long imageBuildTimeoutSec,
       DockerConnectorConfiguration connectorConfiguration,
       DockerConnectionFactory connectionFactory,
       DockerRegistryAuthResolver authResolver,
       DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider) {
+    this.imageBuildTimeoutSec = imageBuildTimeoutSec;
     this.dockerDaemonUri = connectorConfiguration.getDockerDaemonUri();
     this.connectionFactory = connectionFactory;
     this.authResolver = authResolver;
@@ -900,7 +907,7 @@ public class DockerConnector {
                       "Docker image build failed. Image id not found in build output.", 500);
                 });
 
-        return imageIdFuture.get();
+        return imageIdFuture.get(imageBuildTimeoutSec, TimeUnit.SECONDS);
       } catch (ExecutionException e) {
         // unwrap exception thrown by task with .getCause()
         if (e.getCause() instanceof ImageNotFoundException) {
@@ -911,6 +918,9 @@ public class DockerConnector {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         throw new DockerException("Docker image build was interrupted", 500);
+      } catch (TimeoutException ex) {
+        throw new DockerException(
+            format("Docker image build exceed timeout %s seconds.", imageBuildTimeoutSec), 500);
       }
     }
   }
