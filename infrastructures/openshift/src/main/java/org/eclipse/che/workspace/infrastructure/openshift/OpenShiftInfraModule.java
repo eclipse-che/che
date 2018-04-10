@@ -25,6 +25,10 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
@@ -77,5 +81,8 @@ public class OpenShiftInfraModule extends AbstractModule {
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(LogsRootEnvVariableProvider.class);
+
+    bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
+    bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
   }
 }
