@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.PreDestroy;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHFileNotFoundException;
@@ -41,7 +43,7 @@ public class TestGitHubRepository {
   private final String repoName = NameGenerator.generate("EclipseCheTestRepo-", 5);
   private static final Logger LOG = LoggerFactory.getLogger(TestGitHubRepository.class);
 
-  private final GHRepository ghRepo;
+  private GHRepository ghRepo;
   private final GitHub gitHub;
 
   /**
@@ -94,12 +96,9 @@ public class TestGitHubRepository {
     return ghRepo.createRef("refs/tags/" + tagName, defaultBranch.getObject().getSha());
   }
 
-  public String printDefaultBranch() {
-    return ghRepo.getDefaultBranch();
-  }
-
   public void setDefaultBranch(String branchName) throws IOException {
     ghRepo.setDefaultBranch(branchName);
+    ghRepo = gitHub.getRepository(ghRepo.getFullName());
   }
 
   /**
@@ -163,11 +162,11 @@ public class TestGitHubRepository {
     }
   }
 
-  /*@PreDestroy
+  @PreDestroy
   public void delete() throws IOException {
     ghRepo.delete();
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
-  }*/
+  }
 
   public String getHtmlUrl() {
     return ghRepo.getHtmlUrl().toString();
@@ -234,6 +233,6 @@ public class TestGitHubRepository {
   }
 
   public String getFileContent(String pathToFile) throws IOException {
-    return ghRepo.getFileContent(pathToFile).getContent();
+    return IOUtils.toString(ghRepo.getFileContent(pathToFile).read(), "UTF-8");
   }
 }
