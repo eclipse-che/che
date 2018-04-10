@@ -17,7 +17,6 @@ import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -41,7 +40,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -144,7 +142,6 @@ public class PushingChangesTest {
         testRepo.getFileContent(PROJECT_FOLDER_NAME + "/README.md"),
         contentForCheckingForcePushing);
   }
-
 
   private void doChangesInTheProjectFileByProjectServiceClient(
       String pathToItem, String newFileForPushing, String newContent) throws Exception {

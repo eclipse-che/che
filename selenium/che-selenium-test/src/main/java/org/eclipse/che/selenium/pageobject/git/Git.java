@@ -937,7 +937,6 @@ public class Git {
     waitPushFormToClose();
   }
 
-
   public void pushChanges(boolean withForce) {
     menu.runCommand(GIT, REMOTES_TOP, PUSH);
     loader.waitOnClosed();
