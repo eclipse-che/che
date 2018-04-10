@@ -64,7 +64,7 @@ public class GitPanelTest {
   private static final String JAVA_SPRING_DELETED_FILE_NAME = "spring-servlet.xml";
   private static final String JAVA_SPRING_ADDED_FILE_NAME = "test.java";
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 

@@ -57,21 +57,6 @@
   <che-label-container ng-if="workspaceEnvironmentsController.machines.length > 0"
                        che-label-name="Machines"
                        class="che-label-container-last">
-    <ng-form name="workspaceDevMachineForm">
-      <div class="workspace-environments-input">
-        <che-input che-form="workspaceDevMachineForm"
-                   che-name="dev"
-                   type="hidden"
-                   ng-model="workspaceEnvironmentsController.devMachineName"
-                   required>
-          <che-error-messages che-message-scope="workspace-details-environment"
-                              che-message-name="Dev machine">
-            <div ng-message></div>
-            <div ng-message="required">The environment should contain exactly one dev machine. Switch on Dev property to have terminal, SSH and IDE tooling injected to the machine.</div>
-          </che-error-messages>
-        </che-input>
-      </div>
-    </ng-form>
   </che-label-container>
   <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines | orderBy:'name'"
                             machine-name="machine.name"

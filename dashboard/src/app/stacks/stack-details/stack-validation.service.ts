@@ -159,11 +159,8 @@ export class StackValidationService {
         devMachines.push(key);
       }
     });
-    if (devMachines.length !== 1) {
-      let error = `Exactly one of machines should contain '${wsAgent}' in agent's list.`;
-      if (devMachines.length === 0) {
-        error = 'Can\'t find development machine. ' + error;
-      }
+    if (devMachines.length > 1) {
+      let error = `Only one of the machines can contain '${wsAgent}' in agent's list.`;
       isValid = false;
       errors.push(error);
     }

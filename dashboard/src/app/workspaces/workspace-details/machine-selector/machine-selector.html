@@ -1,10 +1,10 @@
-<div class="che-machine-selector" flex="100" layout="row" layout-align="start stretch">
+<div class="che-machine-selector" flex="100" layout="row" layout-align="start stretch"
+     ng-show="machineSelectorController.machinesList.length > 0">
   <!-- Machine selector -->
   <div class="machines-list">
     <div class="machine-selector-label">Machines</div>
     <div ng-repeat="machine in machineSelectorController.machinesList">
-      <toggle-single-button ng-class="{'dev-machine' : machine.isDev}"
-                            id="workspace-machine-{{machine.name}}"
+      <toggle-single-button id="workspace-machine-{{machine.name}}"
                             che-title="{{machine.name}}"
                             che-font-icon="chefont cheico-stacks"
                             che-on-change="state && machineSelectorController.updateData(machine.name)"
@@ -17,4 +17,7 @@
     <div class="machine-selector-label">{{machineSelectorController.contentTitle}}</div>
     <div ng-transclude class="transclude"></div>
   </div>
+</div>
+<div class="che-list-empty" ng-show="machineSelectorController.machinesList.length === 0">
+  <span>There are no machines to display.</span>
 </div>

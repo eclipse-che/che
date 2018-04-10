@@ -20,7 +20,7 @@ import javax.inject.Named;
 @Singleton
 public class CheTestOfflineToAccessTokenExchangeApiEndpointUrlProvider
     implements TestOfflineToAccessTokenExchangeApiEndpointUrlProvider {
-  @Inject(optional = true)
+  @Inject
   @Named("che.offline.to.access.token.exchange.endpoint")
   private String offlineToAccessTokenExchangeApiEndpointUrl;
 

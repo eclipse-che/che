@@ -47,12 +47,11 @@ export class ProfileController {
   editProfile(): void {
     this.$window.open(this.profileUrl);
   }
-  
+
   /**
    * Edit profile - redirects to proper page.
    */
-  get cannotEdit: boolean {
+  get cannotEdit(): boolean {
     return !this.profileUrl;
   }
-  
 }

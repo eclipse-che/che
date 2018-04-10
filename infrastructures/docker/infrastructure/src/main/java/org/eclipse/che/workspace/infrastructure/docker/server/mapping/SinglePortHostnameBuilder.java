@@ -22,7 +22,7 @@ import org.eclipse.che.inject.ConfigurationException;
 
 /**
  * Produces host names in form:
- * [serverName].[machineName].[workspaceId].<external_or_internal_address>.<wildcardNipDomain> If
+ * [serverName]-[machineName]-[workspaceId].<external_or_internal_address>.<wildcardNipDomain> If
  * some of the server name or machine name or workspace id is null, they will be not included.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
@@ -54,7 +54,7 @@ public class SinglePortHostnameBuilder {
    * @return composite hostname
    */
   public String build(String serverName, String machineName, String workspaceID) {
-    StringJoiner joiner = new StringJoiner(".");
+    StringJoiner joiner = new StringJoiner("-");
     if (serverName != null) {
       joiner.add(normalize(serverName));
     }
@@ -64,18 +64,24 @@ public class SinglePortHostnameBuilder {
     if (workspaceID != null) {
       joiner.add(normalize(workspaceID));
     }
-    joiner.add(wildcardDomain);
-    return joiner.toString();
+    return joiner.toString() + "." + wildcardDomain;
   }
 
   /**
-   * Gets a Wildcard domain based on the ip using an external provider like nip.io
+   * Gets a Wildcard domain based on the ip using an external provider like nip.io or by providing
+   * an IP-less DNS yourself
    *
    * @return wildcard domain
    */
   private String getWildcardDomain(String localAddress, String wildcardHost) {
-    return String.format(
-        "%s.%s", getExternalIp(localAddress), wildcardHost == null ? "nip.io" : wildcardHost);
+    if (wildcardHost == null) {
+      return String.format("%s.%s", getExternalIp(localAddress), "nip.io");
+    } else if (wildcardHost.contains("nip.io") || wildcardHost.contains("xip.io")) {
+      return String.format("%s.%s", getExternalIp(localAddress), wildcardHost);
+    } else {
+      // IP-less DNS
+      return wildcardHost;
+    }
   }
 
   private String getExternalIp(String localAddress) {

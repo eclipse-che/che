@@ -60,13 +60,9 @@ public class CheckoutToRemoteBranchTest {
   @Inject private TestUser productUser;
   @Inject private TestGitHubRepository testRepo;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
-
-  @Inject(optional = true)
-  @Named("github.password")
-  private String gitHubPassword;;
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;

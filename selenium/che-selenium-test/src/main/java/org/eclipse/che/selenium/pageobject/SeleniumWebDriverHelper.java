@@ -12,7 +12,10 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -26,6 +29,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
@@ -898,5 +902,61 @@ public class SeleniumWebDriverHelper {
    */
   public Actions getAction() {
     return getAction(this.seleniumWebDriver);
+  }
+
+  /** Switches to IDE frame and waits for Project Explorer is available. */
+  public String switchToIdeFrameAndWaitAvailability() {
+    return switchToIdeFrameAndWaitAvailability(APPLICATION_START_TIMEOUT_SEC);
+  }
+
+  /**
+   * Switches to IDE frame and waits during {@code timeout} for Project Explorer is available.
+   *
+   * @param timeout waiting time in seconds
+   */
+  public String switchToIdeFrameAndWaitAvailability(int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  waitAndSwitchToFrame(By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+                  if (isVisible(By.id("gwt-debug-projectTree"))) {
+                    return true;
+                  }
+
+                  seleniumWebDriver.switchTo().parentFrame();
+                  return false;
+                });
+
+    return seleniumWebDriver.getWindowHandle();
+  }
+
+  /** Waits while in a browser appears more than one window */
+  public void waitOpenedSomeWin() {
+    webDriverWaitFactory
+        .get(WIDGET_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                input -> {
+                  Set<String> driverWindows = seleniumWebDriver.getWindowHandles();
+                  return (driverWindows.size() > 1);
+                });
+  }
+
+  /**
+   * Switches to next browser window (this means that if opened 2 windows, and we are in the window
+   * 1, we will be switched into the window 2)
+   *
+   * @param windowHandlerToSwitchFrom
+   */
+  public void switchToNextWindow(String windowHandlerToSwitchFrom) {
+    waitOpenedSomeWin();
+    for (String handle : seleniumWebDriver.getWindowHandles()) {
+      if (!windowHandlerToSwitchFrom.equals(handle)) {
+        seleniumWebDriver.switchTo().window(handle);
+        break;
+      }
+    }
   }
 }

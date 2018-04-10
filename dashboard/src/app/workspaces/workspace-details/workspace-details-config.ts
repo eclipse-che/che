@@ -55,7 +55,6 @@ import {ListAgents} from './environments/list-agents/list-agents.directive';
 import {WorkspaceMachinesController} from './workspace-machines/workspace-machines.controller';
 import {WorkspaceMachines} from './workspace-machines/workspace-machines.directive';
 import {WorkspaceMachineItem} from './workspace-machines/machine-item/workspace-machine-item.directive';
-import {ChangeDevMachineDialogController} from './workspace-machines/change-dev-machine-dialog/change-dev-machine-dialog.controller';
 import {EditMachineDialogController} from './workspace-machines/edit-machine-dialog/edit-machine-dialog.controller';
 import {CheWorkspaceStatusButton} from './status-button/workspace-status-button.directive';
 import {WorkspaceDetailsOverviewController} from './workspace-overview/workspace-details-overview.controller';
@@ -82,6 +81,7 @@ import {NoGithubOauthDialogController} from '../create-workspace/project-source-
 import {EditMachineVolumeDialogController} from './workspace-machine-volumes/edit-volume-dialog/edit-volume-dialog.controller';
 import {MachineVolumes} from './workspace-machine-volumes/machine-volumes.directive';
 import {MachineVolumesController} from './workspace-machine-volumes/machine-volumes.controller';
+import {WorkspaceToolsConfig} from './workspace-tools/workspace-tools-config';
 
 
 
@@ -152,7 +152,6 @@ export class WorkspaceDetailsConfig {
     register.controller('WorkspaceMachinesController', WorkspaceMachinesController);
     register.directive('workspaceMachines', WorkspaceMachines);
     register.directive('workspaceMachineItem', WorkspaceMachineItem);
-    register.controller('ChangeDevMachineDialogController', ChangeDevMachineDialogController);
     register.controller('EditMachineDialogController', EditMachineDialogController);
     register.directive('workspaceStatusButton', CheWorkspaceStatusButton);
     register.controller('WorkspaceDetailsOverviewController', WorkspaceDetailsOverviewController);
@@ -171,6 +170,9 @@ export class WorkspaceDetailsConfig {
     register.controller('MachineAgentsController', MachineAgentsController);
     register.directive('cheMachineAgents', MachineAgents);
 
+    /* tslint:disable */
+    new WorkspaceToolsConfig(register);
+    /* tslint:enable */
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
