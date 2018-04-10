@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -27,49 +26,56 @@ import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Implementation of concrete Runtime
  *
  * @author gazarenkov
  */
-public abstract class InternalRuntime<T extends RuntimeContext> implements Runtime {
+public abstract class InternalRuntime<T extends RuntimeContext> {
 
   private final T context;
   private final URLRewriter urlRewriter;
   private final List<Warning> warnings;
   private WorkspaceStatus status;
 
-  public InternalRuntime(
-      T context, URLRewriter urlRewriter, List<Warning> warnings, boolean running) {
+  public InternalRuntime(T context, URLRewriter urlRewriter, List<Warning> warnings) {
     this.context = context;
     this.urlRewriter = urlRewriter;
     this.warnings = new CopyOnWriteArrayList<>();
     if (warnings != null) {
       this.warnings.addAll(warnings);
     }
-    if (running) {
-      status = WorkspaceStatus.RUNNING;
-    }
   }
 
-  @Override
+  public InternalRuntime(
+      T context,
+      URLRewriter urlRewriter,
+      List<Warning> warnings,
+      @Nullable WorkspaceStatus status) {
+    this.context = context;
+    this.urlRewriter = urlRewriter;
+    this.warnings = new CopyOnWriteArrayList<>();
+    if (warnings != null) {
+      this.warnings.addAll(warnings);
+    }
+    this.status = status;
+  }
+
   public String getActiveEnv() {
     return context.getIdentity().getEnvName();
   }
 
-  @Override
   public String getOwner() {
     return context.getIdentity().getOwnerId();
   }
 
-  @Override
   public List<? extends Warning> getWarnings() {
     return warnings;
   }
 
-  @Override
-  public Map<String, ? extends Machine> getMachines() {
+  public Map<String, ? extends Machine> getMachines() throws InfrastructureException {
     return getInternalMachines()
         .entrySet()
         .stream()
@@ -88,7 +94,18 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
    *
    * <p>Implementation should not return null
    */
-  protected abstract Map<String, ? extends Machine> getInternalMachines();
+  protected abstract Map<String, ? extends Machine> getInternalMachines()
+      throws InfrastructureException;
+
+  /**
+   * Returns workspace status.
+   *
+   * <p>Note that by default status is STARTING since context preparing is a part of workspace
+   * start.
+   */
+  public WorkspaceStatus getStatus() throws InfrastructureException {
+    return status == null ? WorkspaceStatus.STARTING : status;
+  }
 
   /**
    * Starts Runtime. In practice this method launching supposed to take unpredictable long time so
@@ -102,12 +119,14 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
    * @throws InfrastructureException when any other error occurs
    */
   public void start(Map<String, String> startOptions) throws InfrastructureException {
-    if (this.status != null) {
-      throw new StateException("Runtime already started");
+    markStarting();
+    try {
+      internalStart(startOptions);
+      markRunning();
+    } catch (InfrastructureException e) {
+      markStopped();
+      throw e;
     }
-    status = WorkspaceStatus.STARTING;
-    internalStart(startOptions);
-    status = WorkspaceStatus.RUNNING;
   }
 
   /**
@@ -134,15 +153,11 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
    * @throws InfrastructureException when any other error occurs
    */
   public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-    if (status != WorkspaceStatus.RUNNING && status != WorkspaceStatus.STARTING) {
-      throw new StateException("The environment must be running or starting");
-    }
-    status = WorkspaceStatus.STOPPING;
-
+    markStopping();
     try {
       internalStop(stopOptions);
     } finally {
-      status = WorkspaceStatus.STOPPED;
+      markStopped();
     }
   }
 
@@ -201,5 +216,61 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
     }
 
     return outgoing;
+  }
+
+  /**
+   * Marks runtime as {@link WorkspaceStatus#STARTING STARTING}.
+   *
+   * <p>Note that this method must be overridden if runtime implementation stores status itself.
+   *
+   * @throws StateException when the runtime is already marked as STARTING
+   * @throws InfrastructureException when any other exception occurs
+   */
+  protected void markStarting() throws InfrastructureException {
+    if (status != null && status != WorkspaceStatus.STOPPED) {
+      throw new StateException("Runtime already started");
+    }
+    this.status = WorkspaceStatus.STARTING;
+  }
+
+  /**
+   * Marks runtime as {@link WorkspaceStatus#RUNNING RUNNING}.
+   *
+   * <p>Note that this method must be overridden if runtime implementation stores status itself.
+   *
+   * @throws InfrastructureException when any exception occurs
+   */
+  protected void markRunning() throws InfrastructureException {
+    this.status = WorkspaceStatus.RUNNING;
+  }
+
+  /**
+   * Marks runtime as {@link WorkspaceStatus#STOPPING STOPPING}.
+   *
+   * <p>Note that this method must be overridden if runtime implementation stores status itself.
+   * Also this method must be overridden if runtime implementation doesn't support start
+   * interruption.
+   *
+   * @throws StateException when the runtime is not RUNNING or STARTING
+   * @throws StateException when the runtime is STARTING and implementation doesn't support start
+   *     interruption
+   * @throws InfrastructureException when any exception occurs
+   */
+  protected void markStopping() throws InfrastructureException {
+    if (status != WorkspaceStatus.RUNNING && status != WorkspaceStatus.STARTING) {
+      throw new StateException("The environment must be running or starting");
+    }
+    status = WorkspaceStatus.STOPPING;
+  }
+
+  /**
+   * Marks runtime as {@link WorkspaceStatus#STOPPED STOPPED}.
+   *
+   * <p>Note that this method must be overridden if runtime implementation stores status itself.
+   *
+   * @throws InfrastructureException when any exception occurs
+   */
+  protected void markStopped() throws InfrastructureException {
+    status = WorkspaceStatus.STOPPED;
   }
 }

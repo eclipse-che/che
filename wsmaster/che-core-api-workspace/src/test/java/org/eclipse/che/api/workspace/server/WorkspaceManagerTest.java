@@ -67,6 +67,7 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -215,7 +216,7 @@ public class WorkspaceManagerTest {
 
     final WorkspaceImpl workspace1 = createAndMockWorkspace(config, NAMESPACE_1);
     final WorkspaceImpl workspace2 = createAndMockWorkspace(config, NAMESPACE_2);
-    final TestInternalRuntime runtime2 = mockRuntime(workspace2, RUNNING);
+    final RuntimeImpl runtime2 = mockRuntime(workspace2, RUNNING);
     when(workspaceDao.getWorkspaces(eq(NAMESPACE_1), anyInt(), anyLong()))
         .thenReturn(new Page<>(asList(workspace1, workspace2), 0, 2, 2));
 
@@ -298,7 +299,7 @@ public class WorkspaceManagerTest {
   public void getsWorkspacesByNamespaceWithRuntimes() throws Exception {
     // given
     final WorkspaceImpl workspace = createAndMockWorkspace();
-    final TestInternalRuntime runtime = mockRuntime(workspace, RUNNING);
+    final RuntimeImpl runtime = mockRuntime(workspace, RUNNING);
 
     // when
     final Page<WorkspaceImpl> result =
@@ -524,7 +525,7 @@ public class WorkspaceManagerTest {
     when(runtimes.getStatus(workspace.getId())).thenReturn(status);
   }
 
-  private TestInternalRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
+  private RuntimeImpl mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
       throws Exception {
     RuntimeIdentity identity =
         new RuntimeIdentityImpl(workspace.getId(), workspace.getConfig().getDefaultEnv(), "id");
@@ -539,16 +540,18 @@ public class WorkspaceManagerTest {
     machines.put("machine1", machine1);
     machines.put("machine2", machine2);
     TestInternalRuntime runtime = new TestInternalRuntime(mockContext(identity), machines);
+    RuntimeImpl runtimeImpl =
+        new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner());
     doAnswer(
             inv -> {
               workspace.setStatus(status);
-              workspace.setRuntime(runtime);
+              workspace.setRuntime(runtimeImpl);
               return null;
             })
         .when(runtimes)
         .injectRuntime(workspace);
     when(runtimes.isAnyRunning()).thenReturn(true);
-    return runtime;
+    return runtimeImpl;
   }
 
   private WorkspaceImpl createAndMockWorkspace() throws Exception {
@@ -634,7 +637,7 @@ public class WorkspaceManagerTest {
     final Map<String, Machine> machines;
 
     TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      super(context, null, null, false);
+      super(context, null, null, STOPPED);
       this.machines = machines;
     }
 
