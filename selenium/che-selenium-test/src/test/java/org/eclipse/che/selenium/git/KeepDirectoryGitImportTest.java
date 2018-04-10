@@ -107,7 +107,7 @@ public class KeepDirectoryGitImportTest {
   public void keepDirectoryImportBySshUrlTest() throws Exception {
     projectExplorer.waitProjectExplorer();
 
-    makeKeepDirectoryFromGitUrl(testRepo.getHtmlUrl(), PROJECT_NAME, DIRECTORY_NAME_1);
+    makeKeepDirectoryFromGitUrl(testRepo.getSshUrl(), PROJECT_NAME, DIRECTORY_NAME_1);
     projectExplorer.waitItem(PROJECT_NAME);
 
     projectExplorer.waitAndSelectItemByName(PROJECT_NAME);

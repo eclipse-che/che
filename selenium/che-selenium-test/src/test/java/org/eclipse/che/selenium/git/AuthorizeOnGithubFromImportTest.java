@@ -18,16 +18,14 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -56,13 +54,12 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class AuthorizeOnGithubFromImportTest {
   private static final Logger LOG = LoggerFactory.getLogger(AuthorizeOnGithubFromImportTest.class);
-  private static final String PROJECT_NAME1 = NameGenerator.generate("KeepDir-", 4);
-  private static final String PROJECT_NAME2 = NameGenerator.generate("ImportIntoBranch-", 4);
-  private static final String PROJECT_NAME3 = NameGenerator.generate("RecursiveSubmodule-", 4);
   private static final String GITHUB_COM = "github.com";
-  private static final String BRANCH_1 = "xxx";
-  private static final String BRANCH_2 = "zzz";
-  private static final String BRANCH_3 = "second_branch";
+  private static final String FIRST_BRANCH = "firstBranch";
+  private static final String SECOND_BRANCH = "secondBranch";
+  private static final String THIRD_BRANCH = "thirdBranch";
+  private static final String FIRST_SUBMODULE_NAME = "Repo_For_Test";
+  private static final String SECOND_SUBMODULE_NAME = "testRepo";
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -100,6 +97,7 @@ public class AuthorizeOnGithubFromImportTest {
   @Inject private Git git;
   @Inject private Wizard projectWizard;
   @Inject private CodenvyEditor editor;
+  @Inject private TestUser testUser;
 
   @BeforeClass(groups = TestGroup.MULTIUSER)
   @AfterClass(groups = TestGroup.MULTIUSER)
@@ -135,30 +133,14 @@ public class AuthorizeOnGithubFromImportTest {
   }
 
   @BeforeClass
-  private void initGitRepositories() throws IOException, URISyntaxException, InterruptedException {
-    /*testRepo1.addContent(entryPath1);
-
-    Path sourceProject =
-        Paths.get(getClass().getResource("/projects/default-spring-project").toURI());
-    Path sourceBranchProject =
-        Paths.get(getClass().getResource("/projects/Repo_For_Test_branch1").toURI());
-
-    testRepo2.addContent(sourceProject);
-
-    testRepo2.createBranchFromMaster(BRANCH_1);
-    testRepo2.createBranchFromMaster(BRANCH_2);
-    testRepo2.createBranchFromMaster(BRANCH_3);
-
-    testRepo2.addContent(sourceBranchProject, BRANCH_3);*/
-
-    testRepo3.addContent(Paths.get(getClass().getResource("/projects/java-multimodule").getPath()));
-    testRepo3.addSubmodule(Paths.get(getClass().getResource("/projects/Repo_For_Test").getPath()), "Repo_For_Test");
-    testRepo3.addSubmodule(Paths.get(getClass().getResource("/projects/testRepo").getPath()), "testRepo");
+  private void initGitRepositories() throws Exception {
+    initRepoForFirstTest();
+    initRepoForSecondTest();
+    initRepoForThirdTest();
   }
 
   @Test
   public void checkAuthorizationOnGitHubWhenImportProject() throws Exception {
-
     ide.open(ws);
     String ideWin = seleniumWebDriver.getWindowHandle();
 
@@ -169,15 +151,7 @@ public class AuthorizeOnGithubFromImportTest {
     importProject.selectGitHubSourceItem();
     importProject.clickLoadRepoBtn();
 
-    // login to github
-    try {
-      askDialog.waitFormToOpen(25);
-    } catch (TimeoutException ex) {
-      importProject.closeWithIcon();
-      events.clickEventLogBtn();
-      events.waitExpectedMessage("Failed to authorize application on GitHub");
-      fail("Known issue https://github.com/eclipse/che/issues/8288", ex);
-    }
+    loginToGitHub();
 
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
@@ -228,9 +202,6 @@ public class AuthorizeOnGithubFromImportTest {
 
   @Test(priority = 1)
   public void keepDirectoryImportFromGitHub() throws Exception {
-    Path entryPath1 = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
-    testRepo1.addContent(entryPath1);
-
     projectExplorer.waitProjectExplorer();
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
@@ -246,7 +217,7 @@ public class AuthorizeOnGithubFromImportTest {
         gitHubClientService.getName(gitHubUsername, gitHubPassword));
 
     importProject.selectProjectByName(testRepo1.getName());
-    importProject.typeProjectName(PROJECT_NAME1);
+    importProject.typeProjectName(testRepo1.getName());
     importProject.waitKeepDirectoryIsNotSelected();
     importProject.clickOnKeepDirectoryCheckbox();
     importProject.waitKeepDirectoryIsSelected();
@@ -255,39 +226,26 @@ public class AuthorizeOnGithubFromImportTest {
     importProject.waitMainFormIsClosed();
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME1);
-    projectExplorer.waitAndSelectItemByName(PROJECT_NAME1);
-    projectExplorer.openItemByPath(PROJECT_NAME1);
+    projectExplorer.waitItem(testRepo1.getName());
+    projectExplorer.waitAndSelectItemByName(testRepo1.getName());
+    projectExplorer.openItemByPath(testRepo1.getName());
     loader.waitOnClosed();
-    projectExplorer.waitItemInvisibility(PROJECT_NAME1 + "/my-lib");
+    projectExplorer.waitItemInvisibility(testRepo1.getName() + "/my-lib");
 
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME1 + "/my-webapp/src/main/webapp");
+    projectExplorer.expandPathInProjectExplorer(testRepo1.getName() + "/my-webapp/src/main/webapp");
 
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME1 + "/my-webapp");
+    projectExplorer.openContextMenuByPathSelectedItem(testRepo1.getName() + "/my-webapp");
     projectExplorer.clickOnItemInContextMenu(GO_INTO);
     loader.waitOnClosed();
     projectExplorer.waitVisibilityByName("my-webapp");
-    projectExplorer.waitItemInvisibility(PROJECT_NAME1);
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME1 + "/my-webapp");
+    projectExplorer.waitItemInvisibility(testRepo1.getName());
+    projectExplorer.openContextMenuByPathSelectedItem(testRepo1.getName() + "/my-webapp");
     projectExplorer.clickOnItemInContextMenu(GO_BACK);
-    projectExplorer.waitItem(PROJECT_NAME1);
+    projectExplorer.waitItem(testRepo1.getName());
   }
 
   @Test(priority = 2)
   public void checkImportProjectInBranchFromGitHub() throws Exception {
-    Path sourceProject =
-        Paths.get(getClass().getResource("/projects/default-spring-project").toURI());
-    Path sourceBranchProject =
-        Paths.get(getClass().getResource("/projects/Repo_For_Test_branch1").toURI());
-
-    testRepo2.addContent(sourceProject);
-
-    testRepo2.createBranchFromMaster(BRANCH_1);
-    testRepo2.createBranchFromMaster(BRANCH_2);
-    testRepo2.createBranchFromMaster(BRANCH_3);
-
-    testRepo2.addContent(sourceBranchProject, BRANCH_3);
-
     projectExplorer.waitProjectExplorer();
     importIntoBranchFromGitHub();
     projectWizard.waitCreateProjectWizardForm();
@@ -297,16 +255,138 @@ public class AuthorizeOnGithubFromImportTest {
     loader.waitOnClosed();
     projectWizard.waitCreateProjectWizardFormIsClosed();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME1);
-    projectExplorer.waitAndSelectItemByName(PROJECT_NAME2);
+    projectExplorer.waitItem(testRepo2.getName());
+    projectExplorer.waitAndSelectItemByName(testRepo2.getName());
     loader.waitOnClosed();
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
-    git.waitBranchInTheListWithCoState(BRANCH_3);
+    git.waitBranchInTheListWithCoState(THIRD_BRANCH);
     git.closeBranchesForm();
-    projectExplorer.openItemByPath(PROJECT_NAME2);
+    projectExplorer.openItemByPath(testRepo2.getName());
     loader.waitOnClosed();
-    projectExplorer.openItemByPath(PROJECT_NAME2 + "/AppController.java");
+    projectExplorer.openItemByPath(testRepo2.getName() + "/AppController.java");
     editor.waitActive();
+  }
+
+  @Test(priority = 3)
+  public void checkImportProjectSubmoduleFromGithub() throws Exception {
+    projectExplorer.waitProjectExplorer();
+    importRecursivelyFromGitHub(testRepo3.getName());
+    openSubmoduleOne(testRepo3.getName());
+    openSubmoduleTwo(testRepo3.getName());
+  }
+
+  private void initRepoForFirstTest() throws IOException {
+    testRepo1.addContent(Paths.get(getClass().getResource("/projects/java-multimodule").getPath()));
+  }
+
+  private void initRepoForSecondTest() throws IOException {
+    testRepo2.addContent(
+        Paths.get(getClass().getResource("/projects/default-spring-project").getPath()));
+
+    testRepo2.createBranchFromMaster(FIRST_BRANCH);
+    testRepo2.createBranchFromMaster(SECOND_BRANCH);
+    testRepo2.createBranchFromMaster(THIRD_BRANCH);
+
+    testRepo2.addContent(
+        Paths.get(getClass().getResource("/projects/Repo_For_Test_branch1").getPath()),
+        THIRD_BRANCH);
+  }
+
+  private void initRepoForThirdTest() throws Exception {
+    testRepo3.addContent(Paths.get(getClass().getResource("/projects/java-multimodule").getPath()));
+    testRepo3.addSubmodule(
+        Paths.get(getClass().getResource("/projects/Repo_For_Test").getPath()),
+        FIRST_SUBMODULE_NAME);
+    testRepo3.addSubmodule(
+        Paths.get(getClass().getResource("/projects/testRepo").getPath()), SECOND_SUBMODULE_NAME);
+  }
+
+  private void loginToGitHub() {
+    try {
+      askDialog.waitFormToOpen(25);
+    } catch (TimeoutException ex) {
+      importProject.closeWithIcon();
+      events.clickEventLogBtn();
+      events.waitExpectedMessage("Failed to authorize application on GitHub");
+      fail("Known issue https://github.com/eclipse/che/issues/8288", ex);
+    }
+  }
+
+  private void importRecursivelyFromGitHub(String projectName) throws Exception {
+    loader.waitOnClosed();
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    importProject.waitMainForm();
+    loader.waitOnClosed();
+    importProject.selectGitHubSourceItem();
+    loader.waitOnClosed();
+    importProject.waitLoadRepoBtn();
+    importProject.clickLoadRepoBtn();
+    loader.waitOnClosed();
+    importProject.selectItemInAccountList(
+        gitHubClientService.getName(gitHubUsername, gitHubPassword));
+    importProject.selectProjectByName(projectName);
+    importProject.typeProjectName(projectName);
+    importProject.waitImportRecursivelyIsNotSelected();
+    importProject.clickOnImportRecursivelyCheckbox();
+    importProject.waitImportRecursivelyIsSelected();
+    importProject.clickImportBtn();
+    importProject.waitMainFormIsClosed();
+    loader.waitOnClosed();
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
+    loader.waitOnClosed();
+    projectWizard.clickSaveButton();
+    loader.waitOnClosed();
+    projectWizard.waitCreateProjectWizardFormIsClosed();
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(projectName);
+  }
+
+  private void openSubmoduleOne(String projectName) throws Exception {
+    projectExplorer.openItemByPath(projectName);
+    projectExplorer.waitAndSelectItem(projectName + "/" + FIRST_SUBMODULE_NAME);
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT,
+        TestMenuCommandsConstants.Project.CONVERT_TO_PROJECT);
+    projectWizard.waitOpenProjectConfigForm();
+    projectWizard.waitTextParentDirectoryName("/" + projectName);
+    projectWizard.waitTextProjectNameInput(FIRST_SUBMODULE_NAME);
+    projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
+    loader.waitOnClosed();
+    projectWizard.clickSaveButton();
+    projectWizard.waitCloseProjectConfigForm();
+    loader.waitOnClosed();
+    projectExplorer.waitItem(projectName);
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        projectName + "/" + FIRST_SUBMODULE_NAME + "/src/main/java/com.codenvy.example.spring",
+        "GreetingController.java");
+    projectExplorer.waitVisibilityByName("HelloWorld.java");
+    editor.closeFileByNameWithSaving("GreetingController");
+  }
+
+  private void openSubmoduleTwo(String projectName) throws Exception {
+    projectExplorer.waitAndSelectItem(projectName + "/" + SECOND_SUBMODULE_NAME);
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT,
+        TestMenuCommandsConstants.Project.CONVERT_TO_PROJECT);
+    projectWizard.waitOpenProjectConfigForm();
+    projectWizard.waitTextParentDirectoryName("/" + projectName);
+    projectWizard.waitTextProjectNameInput(SECOND_SUBMODULE_NAME);
+    projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
+    loader.waitOnClosed();
+    projectWizard.clickSaveButton();
+    projectWizard.waitCloseProjectConfigForm();
+    loader.waitOnClosed();
+    projectExplorer.waitItem(projectName);
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        projectName + "/" + SECOND_SUBMODULE_NAME + "/src/main/java/com.company.example", "A.java");
+    projectExplorer.openItemByPath(
+        projectName + "/" + SECOND_SUBMODULE_NAME + "/src/main/java/commenttest");
+    projectExplorer.waitVisibilityByName("GitPullTest.java");
+    projectExplorer.waitVisibilityByName("JavaCommentsTest.java");
+    editor.closeFileByNameWithSaving("A");
   }
 
   private void importIntoBranchFromGitHub() throws Exception {
@@ -323,11 +403,11 @@ public class AuthorizeOnGithubFromImportTest {
     importProject.selectItemInAccountList(
         gitHubClientService.getName(gitHubUsername, gitHubPassword));
     importProject.selectProjectByName(testRepo2.getName());
-    importProject.typeProjectName(PROJECT_NAME2);
+    importProject.typeProjectName(testRepo2.getName());
     importProject.waitBranchIsNotSelected();
     importProject.clickBranchCheckbox();
     importProject.waitBranchIsSelected();
-    importProject.typeBranchName(BRANCH_3);
+    importProject.typeBranchName(THIRD_BRANCH);
     importProject.clickImportBtn();
     importProject.waitMainFormIsClosed();
     loader.waitOnClosed();

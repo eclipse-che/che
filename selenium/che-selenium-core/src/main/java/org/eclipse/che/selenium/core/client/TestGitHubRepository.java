@@ -296,9 +296,9 @@ public class TestGitHubRepository {
     submodules.add(submodule);
   }
 
-  private void createSubmodule(TestGitHubRepository pathToRootContentDirectory, String pathForSubmodule)
+  private void createSubmodule(
+      TestGitHubRepository pathToRootContentDirectory, String pathForSubmodule)
       throws IOException, URISyntaxException {
-    getSubmoduleConfig(pathToRootContentDirectory, pathForSubmodule);
     String submoduleSha = createTreeWithSubmodule(pathToRootContentDirectory, pathForSubmodule);
 
     GHCommit treeCommit =
@@ -309,7 +309,6 @@ public class TestGitHubRepository {
   }
 
   private boolean isGitmodulesFileExist() throws IOException {
-
     return 0
         < ghRepo
             .getDirectoryContent("")
