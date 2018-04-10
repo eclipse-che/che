@@ -32,10 +32,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftInfraModule extends AbstractModule {
@@ -65,6 +67,8 @@ public class OpenShiftInfraModule extends AbstractModule {
     volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
+
+    bind(ExternalServerExposerStrategy.class).to(OpenShiftExternalServerExposer.class);
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
