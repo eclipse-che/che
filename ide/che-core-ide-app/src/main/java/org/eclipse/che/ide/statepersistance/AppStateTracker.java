@@ -42,7 +42,7 @@ public class AppStateTracker
   private AppContext appContext;
   private AppStateSyncWriter appStateSyncWriter;
   private AppStateManager appStateManager;
-  private AppStateBackCompatibility appStateBackCompatibility;
+  private AppStateBackwardCompatibility appStateBackwardCompatibility;
 
   private EventRemover blurEventRemover;
   private HandlerRegistration windowEventsRemover;
@@ -71,12 +71,12 @@ public class AppStateTracker
       AppContext appContext,
       AppStateSyncWriter appStateSyncWriter,
       AppStateManager appStateManager,
-      AppStateBackCompatibility appStateBackCompatibility) {
+      AppStateBackwardCompatibility appStateBackwardCompatibility) {
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.appStateSyncWriter = appStateSyncWriter;
     this.appStateManager = appStateManager;
-    this.appStateBackCompatibility = appStateBackCompatibility;
+    this.appStateBackwardCompatibility = appStateBackwardCompatibility;
 
     eventBus.addHandler(WorkspaceReadyEvent.getType(), this::onWorkspaceReady);
   }
@@ -109,7 +109,7 @@ public class AppStateTracker
   }
 
   private void restoreState() {
-    JsonObject appStateFromPreferences = appStateBackCompatibility.getAppState();
+    JsonObject appStateFromPreferences = appStateBackwardCompatibility.getAppState();
     if (appStateFromPreferences != null) {
       appStateManager
           .restoreState(appStateFromPreferences)
@@ -118,7 +118,7 @@ public class AppStateTracker
                 addHandlers();
               });
 
-      appStateBackCompatibility.removeAppState();
+      appStateBackwardCompatibility.removeAppState();
     } else {
       appStateManager
           .readState()

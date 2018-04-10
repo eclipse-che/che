@@ -37,7 +37,7 @@ public class AppStateServiceClientImpl implements AppStateServiceClient {
   }
 
   @Override
-  public Promise<String> getState() {
+  public Promise<String> loadState() {
     String userId = appContext.getCurrentUser().getId();
     String url = appContext.getWsAgentServerApiEndpoint() + PREFIX + "?userId=" + userId;
     return asyncRequestFactory

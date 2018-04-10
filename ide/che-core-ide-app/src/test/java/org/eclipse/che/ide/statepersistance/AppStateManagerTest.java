@@ -75,7 +75,7 @@ public class AppStateManagerTest {
 
   @Before
   public void setUp() {
-    when(appStateService.getState()).thenReturn(getStatePromise);
+    when(appStateService.loadState()).thenReturn(getStatePromise);
     when(getStatePromise.thenPromise((Function<String, Promise<Void>>) any())).thenReturn(promise);
 
     List<StateComponent> components = new ArrayList<>();

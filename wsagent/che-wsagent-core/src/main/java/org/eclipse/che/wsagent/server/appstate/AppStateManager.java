@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Allows to get or persist serialized IDE state by user identifier. It is expected that incoming
+ * Allows to load or persist serialized IDE state by user identifier. It is expected that incoming
  * IDE state object is valid, so the manager doesn't perform any validations.
  *
  * @author Roman Nikitenko
@@ -46,7 +46,7 @@ public class AppStateManager {
   }
 
   /**
-   * Get saved IDE state of current workspace for given user in JSON format. Note: it is expected
+   * Load saved IDE state of current workspace for given user in JSON format. Note: it is expected
    * that saved IDE state object is valid, so any validations are not performed. Empty string will
    * be returned when IDE state is not found.
    *
@@ -55,7 +55,7 @@ public class AppStateManager {
    * @throws ValidationException when user identifier is {@code null} or empty
    * @throws ServerException when any server error occurs
    */
-  public String getAppState(String userId) throws ValidationException, ServerException {
+  public String loadAppState(String userId) throws ValidationException, ServerException {
     checkUserIdentifier(userId);
 
     String appStateHolderPath = getAppStateHolderPath(userId);
@@ -64,8 +64,8 @@ public class AppStateManager {
         return fsManager.readAsString(appStateHolderPath);
       }
     } catch (NotFoundException | ConflictException e) {
-      LOG.error("Can not get app state for user %s, the reason is: %s", userId, e.getCause());
-      throw new ServerException("Can not save app state for user " + userId);
+      LOG.error("Can not load app state for user %s, the reason is: %s", userId, e.getCause());
+      throw new ServerException("Can not load app state for user " + userId);
     }
     return "";
   }

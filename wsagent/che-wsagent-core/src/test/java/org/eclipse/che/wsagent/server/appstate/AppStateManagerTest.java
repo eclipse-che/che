@@ -44,14 +44,14 @@ public class AppStateManagerTest {
   @Test(expectedExceptions = ValidationException.class)
   public void shouldThrowExceptionAtGettingAppState() throws Exception {
     // user id is not valid
-    appStateManager.getAppState("");
+    appStateManager.loadAppState("");
   }
 
   @Test
   public void shouldReadState() throws Exception {
     when(fsManager.existsAsFile(anyString())).thenReturn(true);
 
-    appStateManager.getAppState(USER_ID);
+    appStateManager.loadAppState(USER_ID);
 
     verify(fsManager).existsAsFile(anyString());
     verify(fsManager).readAsString(anyString());
@@ -61,7 +61,7 @@ public class AppStateManagerTest {
   public void shouldReturnEmptyStringWhenStateNotFound() throws Exception {
     when(fsManager.existsAsFile(anyString())).thenReturn(false);
 
-    String appState = appStateManager.getAppState(USER_ID);
+    String appState = appStateManager.loadAppState(USER_ID);
 
     verify(fsManager).existsAsFile(anyString());
     verify(fsManager, never()).readAsString(anyString());

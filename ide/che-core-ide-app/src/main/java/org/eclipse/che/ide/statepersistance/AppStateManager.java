@@ -67,12 +67,12 @@ public class AppStateManager {
   }
 
   /**
-   * Allows to get saved IDE state for current workspace from server side. Creates 'clear' state
+   * Allows to load saved IDE state for current workspace from server side. Creates 'clear' state
    * when state for current workspace is not found.
    */
   public Promise<Void> readState() {
     return appStateService
-        .getState()
+        .loadState()
         .thenPromise(
             (Function<String, Promise<Void>>)
                 state -> {

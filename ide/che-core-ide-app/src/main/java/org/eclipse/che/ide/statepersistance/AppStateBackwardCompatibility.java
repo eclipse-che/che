@@ -12,6 +12,7 @@ package org.eclipse.che.ide.statepersistance;
 
 import static org.eclipse.che.ide.statepersistance.AppStateConstants.APP_STATE;
 import static org.eclipse.che.ide.statepersistance.AppStateConstants.WORKSPACE;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,7 +22,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.util.loging.Log;
+import org.slf4j.Logger;
 
 /**
  * User preferences was used to storage serialized IDE state. The class provides back compatibility
@@ -30,13 +31,15 @@ import org.eclipse.che.ide.util.loging.Log;
  * @author Roman Nikitenko
  */
 @Singleton
-public class AppStateBackCompatibility {
+public class AppStateBackwardCompatibility {
+  private static final Logger LOG = getLogger(AppStateBackwardCompatibility.class);
+
   private final AppContext appContext;
   private final JsonFactory jsonFactory;
   private final PreferencesManager preferencesManager;
 
   @Inject
-  public AppStateBackCompatibility(
+  public AppStateBackwardCompatibility(
       AppContext appContext, JsonFactory jsonFactory, PreferencesManager preferencesManager) {
     this.appContext = appContext;
     this.jsonFactory = jsonFactory;
@@ -97,9 +100,8 @@ public class AppStateBackCompatibility {
         .flushPreferences()
         .catchError(
             error -> {
-              Log.error(
-                  AppStateBackCompatibility.class,
-                  "Failed to store app's state to user's preferences: " + error.getMessage());
+              LOG.error(
+                  "Failed to store app's state to user's preferences: {}", error.getMessage());
             });
   }
 }

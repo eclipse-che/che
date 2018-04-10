@@ -69,7 +69,7 @@ public class AppStateServiceTest {
 
   @Test
   public void shouldGetAppState() throws Exception {
-    when(appStateManager.getAppState(USER_ID)).thenReturn(APP_STATE);
+    when(appStateManager.loadAppState(USER_ID)).thenReturn(APP_STATE);
 
     final Response response =
         given()
@@ -86,7 +86,7 @@ public class AppStateServiceTest {
 
   @Test
   public void shouldThrowBadRequestAtGettingAppState() throws Exception {
-    when(appStateManager.getAppState("")).thenThrow(new ValidationException(EXCEPTION_MESSAGE));
+    when(appStateManager.loadAppState("")).thenThrow(new ValidationException(EXCEPTION_MESSAGE));
 
     final Response response =
         given()

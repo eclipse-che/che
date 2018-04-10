@@ -14,18 +14,18 @@ import elemental.json.JsonFactory;
 import org.eclipse.che.api.promises.client.Promise;
 
 /**
- * Service allows to get or persist IDE state for current user.
+ * Service allows to load or persist IDE state for current user.
  *
  * @author Roman Nikitenko
  */
 public interface AppStateServiceClient {
 
   /**
-   * Get saved IDE state for current workspace in JSON format. Use {@link JsonFactory#parse(String)}
-   * to get corresponding object. Note: it is expected that saved IDE state object is valid, so any
-   * validations are not performed.
+   * Load saved IDE state for current workspace in JSON format. Use {@link
+   * JsonFactory#parse(String)} to get corresponding object. Note: it is expected that saved IDE
+   * state object is valid, so any validations are not performed.
    */
-  Promise<String> getState();
+  Promise<String> loadState();
 
   /**
    * Save IDE state for current workspace.
