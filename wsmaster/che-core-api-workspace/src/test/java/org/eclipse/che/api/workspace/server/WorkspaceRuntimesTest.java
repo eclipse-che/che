@@ -161,34 +161,6 @@ public class WorkspaceRuntimesTest {
   }
 
   @Test
-  public void runtimeIsNotRecoveredIfAnotherRuntimeWithTheSameIdentityAlreadyExists()
-      throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
-
-    mockWorkspace(identity);
-    RuntimeContext context = mockContext(identity);
-
-    // runtime 1(has 1 machine) must be successfully saved
-    Map<String, Machine> r1machines = ImmutableMap.of("m1", mock(Machine.class));
-    InternalRuntime runtime1 = spy(new TestInternalRuntime(context, r1machines));
-    when(context.getRuntime()).thenReturn(runtime1);
-    runtimes.recoverOne(infrastructure, identity);
-
-    // runtime 2 must not be saved
-    Map<String, Machine> r2machines =
-        ImmutableMap.of("m1", mock(Machine.class), "m2", mock(Machine.class));
-    InternalRuntime runtime2 = new TestInternalRuntime(context, r2machines);
-    when(context.getRuntime()).thenReturn(runtime2);
-    runtimes.recoverOne(infrastructure, identity);
-
-    WorkspaceImpl workspace = new WorkspaceImpl(identity.getWorkspaceId(), null, null);
-    runtimes.injectRuntime(workspace);
-
-    assertNotNull(workspace.getRuntime());
-    assertEquals(workspace.getRuntime().getMachines().keySet(), r1machines.keySet());
-  }
-
-  @Test
   public void attributesIsSetWhenRuntimeAbnormallyStopped() throws Exception {
     String error = "Some kind of error happened";
     EventService localEventService = new EventService();
