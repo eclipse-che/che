@@ -100,7 +100,6 @@ public class CheckoutReferenceTest {
   @Test(priority = 1)
   public void checkoutReferenceByHashCommit() throws Exception {
     // preconditions
-    System.out.println("defBranch=" + testRepo.printDefaultBranch());
     String branchDetachedMess = String.format("(detached from %s)", sha1);
     String hashCommit = sha1.substring(0, 8);
     String wrongHashCommit = String.format("%s ##", hashCommit);
