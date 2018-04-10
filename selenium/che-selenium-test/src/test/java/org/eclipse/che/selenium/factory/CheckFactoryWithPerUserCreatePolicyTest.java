@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   private TestFactory testFactory;
   private final Logger LOG = LoggerFactory.getLogger(CheckFactoryWithPerUserCreatePolicyTest.class);
 
@@ -60,7 +62,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     // accept factory
     testFactory.open(seleniumWebDriver);
 
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
 
@@ -70,7 +72,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     testFactory.open(seleniumWebDriver);
 
     try {
-      seleniumWebDriver.switchFromDashboardIframeToIde();
+      seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     } catch (TimeoutException ex) {
       LOG.info(
           String.format(

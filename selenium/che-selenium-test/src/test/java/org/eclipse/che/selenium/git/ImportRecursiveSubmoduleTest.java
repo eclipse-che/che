@@ -40,11 +40,11 @@ public class ImportRecursiveSubmoduleTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 

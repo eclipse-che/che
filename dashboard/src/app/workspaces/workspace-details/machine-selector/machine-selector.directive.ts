@@ -23,6 +23,7 @@ interface IMachineSelectorTranscludeScope extends ng.IScope {
   onChange?: Function;
   machine?: IEnvironmentManagerMachine;
   environmentManager?: EnvironmentManager;
+
 }
 
 /**
@@ -63,7 +64,8 @@ export class MachineSelector implements ng.IDirective {
     this.scope = {
       onChange: '&',
       contentTitle: '@',
-      workspaceDetails: '='
+      workspaceDetails: '=',
+      filter: '='
     };
   }
 

@@ -122,15 +122,15 @@ public abstract class SeleniumTestHandler
   @Named("sys.driver.version")
   private String webDriverVersion;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 
-  @Inject(optional = true)
+  @Inject
   @Named("sys.excludedGroups")
   private String excludedGroups;
 
@@ -156,7 +156,7 @@ public abstract class SeleniumTestHandler
 
   private void revokeGithubOauthToken() {
     // do not revoke if github tests are not being executed
-    if (excludedGroups == null || excludedGroups.contains(TestGroup.GITHUB)) {
+    if (excludedGroups != null && excludedGroups.contains(TestGroup.GITHUB)) {
       return;
     }
 

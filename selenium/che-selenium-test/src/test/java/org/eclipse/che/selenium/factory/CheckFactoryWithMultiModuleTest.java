@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -39,11 +40,12 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   private TestFactory testFactory;
 
@@ -70,7 +72,7 @@ public class CheckFactoryWithMultiModuleTest {
   public void checkFactoryProcessing() throws Exception {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");

@@ -12,16 +12,13 @@ package org.eclipse.che.selenium.workspaces.notjavastack;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.AfterClass;
@@ -33,14 +30,11 @@ public class CreateWorkspaceWithPHPStackTest {
   private final String WORKSPACE = NameGenerator.generate("WsPHP", 4);
 
   @Inject private TestUser defaultTestUser;
-  @Inject private NavigationBar navigationBar;
   @Inject private NewWorkspace newWorkspace;
   @Inject private Dashboard dashboard;
-  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Loader loader;
   @Inject private MachineTerminal terminal;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
 
@@ -68,7 +62,7 @@ public class CreateWorkspaceWithPHPStackTest {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     dashboard.waitNotificationIsClosed();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     projectExplorer.waitProjectExplorer();
     terminal.waitTerminalTab(60);

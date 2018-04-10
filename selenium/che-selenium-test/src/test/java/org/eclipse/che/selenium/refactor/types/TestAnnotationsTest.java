@@ -36,10 +36,10 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class TestAnnotationsTest {
-  private static final String nameOfProject =
-      NameGenerator.generate(TestAnnotationsTest.class.getName(), 4);
-  private static final String pathToPackageInChePrefix =
-      nameOfProject + "/src/main/java/renametype";
+  private static final String NAME_OF_PROJECT =
+      NameGenerator.generate(TestAnnotationsTest.class.getSimpleName(), 4);
+  private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
+      NAME_OF_PROJECT + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -59,14 +59,14 @@ public class TestAnnotationsTest {
   public void setup() throws Exception {
     URL resource = TestAnnotationsTest.this.getClass().getResource("/projects/RenameType");
     testProjectServiceClient.importProject(
-        workspace.getId(), get(resource.toURI()), nameOfProject, ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), get(resource.toURI()), NAME_OF_PROJECT, ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
   }
 
   @Test
   public void testAnnotation1() throws Exception {
-    projectExplorer.waitVisibleItem(nameOfProject);
+    projectExplorer.waitVisibleItem(NAME_OF_PROJECT);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     setFieldsForTest("testAnnotation1");
@@ -95,7 +95,7 @@ public class TestAnnotationsTest {
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {
-    pathToCurrentPackage = pathToPackageInChePrefix + "/" + nameCurrentTest;
+    pathToCurrentPackage = PATH_TO_PACKAGE_IN_CHE_PREFIX + "/" + nameCurrentTest;
 
     URL resourcesInA =
         getClass()
