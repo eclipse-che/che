@@ -62,9 +62,6 @@
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
-            <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
             <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
