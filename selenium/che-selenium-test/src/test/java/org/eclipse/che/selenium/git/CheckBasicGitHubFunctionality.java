@@ -52,8 +52,8 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 @Test(groups = TestGroup.GITHUB)
-public class AuthorizeOnGithubFromImportTest {
-  private static final Logger LOG = LoggerFactory.getLogger(AuthorizeOnGithubFromImportTest.class);
+public class CheckBasicGitHubFunctionality {
+  private static final Logger LOG = LoggerFactory.getLogger(CheckBasicGitHubFunctionality.class);
   private static final String GITHUB_COM = "github.com";
   private static final String FIRST_BRANCH = "firstBranch";
   private static final String SECOND_BRANCH = "secondBranch";
