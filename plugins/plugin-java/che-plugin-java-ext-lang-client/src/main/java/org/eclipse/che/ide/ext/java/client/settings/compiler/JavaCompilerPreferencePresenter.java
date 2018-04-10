@@ -41,8 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
