@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 public class DirectUrlFactoryWithRootFolderTest {
   private static final String EXPECTED_PROJECT = "quickstart";
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 

@@ -249,37 +249,13 @@ export abstract class EnvironmentManager {
   }
 
   /**
-   * Returns whether machine is developer or not.
+   * Returns whether machine contains 'ws-agent' installer.
    *
    * @param {IEnvironmentManagerMachine} machine
    * @returns {boolean}
    */
   isDev(machine: IEnvironmentManagerMachine): boolean {
     return machine.installers && machine.installers.indexOf(WS_AGENT_NAME) >= 0;
-  }
-
-  /**
-   * Set machine as developer one - contains 'ws-agent' agent.
-   *
-   * @param {IEnvironmentManagerMachine} machine machine to edit
-   * @param {boolean} isDev defined whether machine is developer or not
-   */
-  setDev(machine: IEnvironmentManagerMachine, isDev: boolean): void {
-    let hasWsAgent = this.isDev(machine);
-    if (isDev) {
-      machine.installers = machine.installers ? machine.installers : [];
-      if (!hasWsAgent) {
-        machine.installers.push(WS_AGENT_NAME);
-      }
-      if (machine.installers.indexOf(TERMINAL_AGENT_NAME) < 0) {
-        machine.installers.push(TERMINAL_AGENT_NAME);
-      }
-      return;
-    }
-
-    if (!isDev && hasWsAgent) {
-      machine.installers.splice(machine.installers.indexOf(WS_AGENT_NAME), 1);
-    }
   }
 
   getServers(machine: IEnvironmentManagerMachine): {[serverName: string]: IEnvironmentManagerMachineServer} {

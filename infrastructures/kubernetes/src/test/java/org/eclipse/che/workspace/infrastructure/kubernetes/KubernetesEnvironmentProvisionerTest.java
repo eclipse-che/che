@@ -16,6 +16,7 @@ import static org.mockito.Mockito.inOrder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
@@ -52,6 +53,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   @Mock private SecurityContextProvisioner securityContextProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
+  @Mock private IngressTlsProvisioner externalServerIngressTlsProvisioner;
 
   private KubernetesEnvironmentProvisioner osInfraProvisioner;
 
@@ -71,7 +73,8 @@ public class KubernetesEnvironmentProvisionerTest {
             installerServersPortProvisioner,
             logsVolumeMachineProvisioner,
             securityContextProvisioner,
-            podTerminationGracePeriodProvisioner);
+            podTerminationGracePeriodProvisioner,
+            externalServerIngressTlsProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -83,7 +86,8 @@ public class KubernetesEnvironmentProvisionerTest {
             restartPolicyRewriter,
             ramLimitProvisioner,
             securityContextProvisioner,
-            podTerminationGracePeriodProvisioner);
+            podTerminationGracePeriodProvisioner,
+            externalServerIngressTlsProvisioner);
   }
 
   @Test
@@ -100,6 +104,9 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(restartPolicyRewriter).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(ramLimitProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(externalServerIngressTlsProvisioner)
+        .provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(securityContextProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(podTerminationGracePeriodProvisioner)
