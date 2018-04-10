@@ -34,7 +34,7 @@ public interface NavigateToFileView extends View<NavigateToFileView.ActionDelega
      *
      * @param fileName file name
      */
-    void onFileNameChanged(String fileName);
+    void onFileNameChanged();
 
     /**
      * Is called when file is selected.
@@ -56,6 +56,13 @@ public interface NavigateToFileView extends View<NavigateToFileView.ActionDelega
    * @param items items of suggestions
    */
   void showItems(List<SearchResultDto> items);
+
+  /**
+   * Set the file name input field enabled or disabled.
+   *
+   * @param enabled {@code true} if field has to be enabled, otherwise {@code false}
+   */
+  void setFileNameTextBoxEnabled(boolean enabled);
 
   /** Returns entered file name. */
   String getFileName();
