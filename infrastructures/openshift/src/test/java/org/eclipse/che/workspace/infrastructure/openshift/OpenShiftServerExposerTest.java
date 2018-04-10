@@ -12,8 +12,8 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposer.SERVER_PREFIX;
-import static org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposer.SERVER_UNIQUE_PART_SIZE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -36,13 +36,14 @@ import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- * Test for {@link OpenShiftServerExposer}.
+ * Test for KubernetesServerExposer<OpenShiftEnvironment> .
  *
  * @author Sergii Leshchenko
  */
@@ -56,7 +57,8 @@ public class OpenShiftServerExposerTest {
       Pattern.compile('^' + SERVER_PREFIX + "[A-z0-9]{" + SERVER_UNIQUE_PART_SIZE + "}-pod-main$");
   public static final String MACHINE_NAME = "pod/main";
 
-  private OpenShiftServerExposer serverExposer;
+  private KubernetesServerExposer<OpenShiftEnvironment> serverExposer;
+  private OpenShiftExternalServerExposer openShiftExternalServerExposer;
   private OpenShiftEnvironment openShiftEnvironment;
   private Container container;
 
@@ -75,8 +77,10 @@ public class OpenShiftServerExposerTest {
 
     openShiftEnvironment =
         OpenShiftEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
+    openShiftExternalServerExposer = new OpenShiftExternalServerExposer();
     this.serverExposer =
-        new OpenShiftServerExposer(MACHINE_NAME, pod, container, openShiftEnvironment);
+        new KubernetesServerExposer(
+            openShiftExternalServerExposer, MACHINE_NAME, pod, container, openShiftEnvironment);
   }
 
   @Test
