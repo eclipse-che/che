@@ -84,11 +84,11 @@ public class CommitFilesByMultiSelectTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 

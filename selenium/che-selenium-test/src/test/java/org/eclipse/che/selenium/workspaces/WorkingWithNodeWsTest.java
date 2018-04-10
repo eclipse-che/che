@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -58,6 +59,7 @@ public class WorkingWithNodeWsTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private AskDialog askDialog;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
 
@@ -84,8 +86,7 @@ public class WorkingWithNodeWsTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriver.switchFromDashboardIframeToIde();
-    currentWindow = seleniumWebDriver.getWindowHandle();
+    currentWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -103,7 +104,7 @@ public class WorkingWithNodeWsTest {
     // Check the preview url is present after refreshing
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitPreviewUrlIsPresent();
 
@@ -111,11 +112,11 @@ public class WorkingWithNodeWsTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     consoles.selectProcessInProcessConsoleTreeByName(RUN_PROCESS);
     consoles.clickOnPreviewUrl();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     checkAngularYeomanAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     // Close terminal tab for 'run' process
     consoles.closeProcessInProcessConsoleTreeByName(RUN_PROCESS);

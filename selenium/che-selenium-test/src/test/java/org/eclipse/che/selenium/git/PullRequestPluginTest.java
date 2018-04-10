@@ -68,11 +68,11 @@ public class PullRequestPluginTest {
   private static final String COMMENT = generate("Comment: ", 8);
   private static final String PATH_TO_README_FILE = FIRST_PROJECT_NAME + "/README.md";
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 
@@ -207,11 +207,11 @@ public class PullRequestPluginTest {
 
     // open and check projects page on github
     pullRequestPanel.openPullRequestOnGitHub();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     checkGitHubUserPage();
 
     consumeFactoryOnGitHub();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(FIRST_PROJECT_NAME);

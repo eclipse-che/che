@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core;
 
+import static com.google.inject.name.Names.named;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
@@ -19,7 +20,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 import java.io.IOException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -76,9 +76,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   @Override
   public void configure() {
     TestConfiguration config = new SeleniumTestConfiguration();
-    config
-        .getMap()
-        .forEach((key, value) -> bindConstant().annotatedWith(Names.named(key)).to(value));
+    config.getMap().forEach((key, value) -> bindConstant().annotatedWith(named(key)).to(value));
 
     bind(TestUser.class).to(CheDefaultTestUser.class);
 

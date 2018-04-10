@@ -42,7 +42,7 @@ public class GitPullTest {
   @Inject private TestUser productUser;
   @Inject private TestGitHubRepository testRepo;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 

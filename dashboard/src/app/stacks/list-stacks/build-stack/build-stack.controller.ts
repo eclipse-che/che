@@ -109,9 +109,9 @@ export class BuildStackController {
     // set recipe for default environment
     defaultEnv.recipe = angular.copy(recipeEditor.recipe);
 
-    // create dev-machine in case of dockerfile or dockerimage recipe
+    // create new-machine in case of dockerfile or dockerimage recipe
     defaultEnv.machines = (CheRecipeTypes.DOCKERFILE === recipeEditor.recipe.type || CheRecipeTypes.DOCKERIMAGE === recipeEditor.recipe.type) ? {
-      'dev-machine': {
+      'new-machine': {
         'installers': [],
         'attributes': {
           'memoryLimitBytes': 2147483648
@@ -119,11 +119,6 @@ export class BuildStackController {
       }
     } : {};
     const machines = recipeEditor.environmentManager.getMachines(defaultEnv);
-
-    // add ws-agent to a machine if it's the only one
-    if (machines.length === 1) {
-      recipeEditor.environmentManager.setDev(machines[0], true);
-    }
 
     // check each machine for RAM to be set
     machines.forEach((machine: IEnvironmentManagerMachine) => {

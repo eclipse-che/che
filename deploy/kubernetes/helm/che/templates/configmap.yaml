@@ -56,3 +56,4 @@ data:
 {{- else }}
   CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"kubernetes.io/ingress.class": "nginx", "{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/rewrite-target": "/","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect": "false","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout": "3600","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout": "3600"}'
 {{- end }}
+  CHE_LOGS_APPENDERS_IMPL: "plaintext"
