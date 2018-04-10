@@ -343,8 +343,6 @@ public class TestGitHubRepository {
   private void createGitModulesFile(TestGitHubRepository targetRepository, String pathForSubmodule)
       throws IOException {
     final String gitmodulesFileName = ".gitmodules";
-    String fileAddMessage = "Add " + gitmodulesFileName;
-    String fileUpdateMessage = "Update " + gitmodulesFileName;
     String submoduleConfig = getSubmoduleConfig(targetRepository, pathForSubmodule);
 
     if (isGitmodulesFileExist()) {
@@ -352,10 +350,10 @@ public class TestGitHubRepository {
       String fileContent = IOUtils.toString(submoduleFileContent.read());
       String newFileContent = fileContent + "\n" + submoduleConfig;
 
-      submoduleFileContent.update(newFileContent, fileUpdateMessage);
+      submoduleFileContent.update(newFileContent, "Update " + gitmodulesFileName);
       return;
     }
 
-    ghRepo.createContent(submoduleConfig, fileAddMessage, gitmodulesFileName);
+    ghRepo.createContent(submoduleConfig, "Add " + gitmodulesFileName, gitmodulesFileName);
   }
 }
