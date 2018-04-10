@@ -14,8 +14,6 @@ import static java.lang.String.format;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import java.io.IOException;
-import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
@@ -95,12 +93,6 @@ public class TestUserImpl implements DefaultTestUser, AdminTestUser {
   @Override
   public String getOfflineToken() {
     return offlineToken;
-  }
-
-  @Override
-  @PreDestroy
-  public void cleanUp() throws IOException {
-    testUserProvider.delete(this);
   }
 
   @Override

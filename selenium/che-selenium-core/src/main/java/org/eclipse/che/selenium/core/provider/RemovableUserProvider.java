@@ -22,5 +22,5 @@ import org.eclipse.che.selenium.core.user.TestUser;
 public interface RemovableUserProvider<T extends TestUser> extends Provider<T> {
 
   /** Deletes user. */
-  void delete(T testUser) throws IOException;
+  void delete() throws IOException;
 }

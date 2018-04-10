@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.core.user;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.TestUserProvider;
@@ -73,7 +74,8 @@ public class MultiUserCheTestUserProvider implements TestUserProvider {
   }
 
   @Override
-  public void delete(TestUser testUser) throws IOException {
+  @PreDestroy
+  public void delete() throws IOException {
     if (isNewUser) {
       keycloakAdminConsoleClient.delete(testUser);
     }

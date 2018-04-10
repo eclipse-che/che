@@ -46,7 +46,7 @@ public class SingleUserCheDefaultTestUserProvider implements DefaultTestUserProv
   }
 
   @Override
-  public void delete(DefaultTestUser testUser) throws IOException {
+  public void delete() throws IOException {
     // we don't need to remove test user of Single User Eclipse Che
   }
 }

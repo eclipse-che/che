@@ -76,7 +76,10 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
       this.isNewUser = false;
     }
 
-    LOG.info("User name='{}', id='{}' is being used by default for testing", name, defaultTestUser);
+    LOG.info(
+        "User name='{}', id='{}' is being used by default for testing",
+        defaultTestUser.getName(),
+        defaultTestUser.getId());
   }
 
   @Override
@@ -85,9 +88,9 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
   }
 
   @Override
-  public void delete(DefaultTestUser testUser) throws IOException {
+  public void delete() throws IOException {
     if (isNewUser) {
-      keycloakAdminConsoleClient.delete(testUser);
+      keycloakAdminConsoleClient.delete(defaultTestUser);
     }
   }
 }

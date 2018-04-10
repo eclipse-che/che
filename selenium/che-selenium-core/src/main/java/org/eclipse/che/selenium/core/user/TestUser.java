@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.core.user;
 
-import java.io.IOException;
-
 /**
  * Represents a user in a test environment.
  *
@@ -35,12 +33,4 @@ public interface TestUser {
 
   /** Return user's id. */
   String getId();
-
-  /**
-   * Return true if user is being created for the time of testing, or false otherwise boolean
-   * isNewUser;
-   *
-   * <p>/** Clean up user's stuff.
-   */
-  void cleanUp() throws IOException;
 }

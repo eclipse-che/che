@@ -57,7 +57,7 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
   }
 
   @Override
-  public void delete(AdminTestUser testUser) throws IOException {
+  public void delete() throws IOException {
     // do nothing because we don't remove admin user
   }
 }
