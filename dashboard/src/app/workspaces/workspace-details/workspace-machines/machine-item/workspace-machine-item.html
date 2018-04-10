@@ -7,7 +7,6 @@
       <!-- Checkbox -->
       <div layout="column" layout-align="center center" class="che-list-item-checkbox">
         <md-checkbox aria-label="Machine-{{machine.name}}"
-                     ng-disabled="machine.isDev"
                      ng-model="cheListHelper.itemsSelectionStatus[machine.name]"
                      ng-change="cheListHelper.updateBulkSelectionStatus()"></md-checkbox>
       </div>
@@ -21,15 +20,8 @@
           <span class="che-list-item-name workspace-machine-item-item-name" machine-name="{{machine.name}}">{{machine.name}}</span>
         </div>
         <!-- Image -->
-        <div flex="30" layout="column" layout-align="center start">
+        <div flex="40" layout="column" layout-align="center start">
           <span class="che-list-item-secondary workspace-machine-item-secondary-color" machine-image="{{machine.image}}">{{machine.image}}</span>
-        </div>
-        <!-- Is Dev -->
-        <div flex="10" layout="column" layout-align="center start">
-          <md-switch ng-model="machine.isDev"
-                     ng-change="machineDevOnChange({name: machine.name})"
-                     aria-label="Dev machine">
-          </md-switch>
         </div>
         <!-- RAM limit -->
         <div flex="20" layout="column" layout-align="center start">

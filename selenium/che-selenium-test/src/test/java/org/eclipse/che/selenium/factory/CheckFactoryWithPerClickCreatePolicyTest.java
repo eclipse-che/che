@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,6 +34,7 @@ public class CheckFactoryWithPerClickCreatePolicyTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   private TestFactory testFactory;
 
@@ -55,7 +57,7 @@ public class CheckFactoryWithPerClickCreatePolicyTest {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
 
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
 
@@ -63,7 +65,7 @@ public class CheckFactoryWithPerClickCreatePolicyTest {
 
     // accept factory
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
 
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");

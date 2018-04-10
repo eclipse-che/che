@@ -19,6 +19,9 @@ spec:
       labels:
         io.kompose.service: postgres
     spec:
+      securityContext:
+        runAsUser: 26
+        fsGroup: 26
       containers:
       - env:
         - name: POSTGRESQL_USER

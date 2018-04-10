@@ -20,8 +20,7 @@ import {CheAPI} from '../../../../../components/api/che-api.factory';
  */
 
 /** List of the agents which shouldn't be switched by user */
-const DISABLED_AGENTS: Array<string> = ['org.eclipse.che.ws-agent',
-                                        'com.codenvy.rsync_in_machine',
+const DISABLED_AGENTS: Array<string> = ['com.codenvy.rsync_in_machine',
                                         'com.codenvy.external_rsync'];
 
 export class ListAgentsController {

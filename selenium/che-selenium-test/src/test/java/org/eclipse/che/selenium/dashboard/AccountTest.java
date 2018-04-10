@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.user.CheSecondTestUser;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.Account;
 import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
@@ -38,6 +39,7 @@ public class AccountTest {
   @Inject private KeycloakAccountPage keycloakAccount;
   @Inject private KeycloakPasswordPage keycloakPasswordPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private KeycloakHeaderButtons keycloakHeaderButtons;
 
   @BeforeClass
@@ -65,7 +67,7 @@ public class AccountTest {
             .isEquals(dashboardAccount.getCurrentFieldsValue()));
     dashboardAccount.clickOnEditButton();
 
-    seleniumWebDriver.switchToNoneCurrentWindow(parentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(parentWindow);
 
     keycloakAccount.waitAccountPageIsLoaded();
 
@@ -96,7 +98,7 @@ public class AccountTest {
     dashboardAccount.waitPageIsLoaded();
     dashboardAccount.clickOnEditButton();
 
-    seleniumWebDriver.switchToNoneCurrentWindow(parentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(parentWindow);
     keycloakAccount.waitAccountPageIsLoaded();
     keycloakHeaderButtons.clickOnPasswordButton();
     keycloakPasswordPage.waitPasswordPageIsLoaded();
