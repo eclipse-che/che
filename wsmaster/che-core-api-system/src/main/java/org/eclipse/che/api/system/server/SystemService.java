@@ -52,8 +52,8 @@ public class SystemService extends Service {
   @Path("/stop")
   @ApiOperation("Stops system services. Prepares system to shutdown")
   @ApiResponses({
-      @ApiResponse(code = 204, message = "The system is preparing to stop"),
-      @ApiResponse(code = 409, message = "Stop has been already called")
+    @ApiResponse(code = 204, message = "The system is preparing to stop"),
+    @ApiResponse(code = 409, message = "Stop has been already called")
   })
   public void stop(@QueryParam("shutdown") @DefaultValue("false") boolean shutdown)
       throws ConflictException {
