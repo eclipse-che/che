@@ -20,6 +20,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.statepersistance.AppStateManager;
 
 /**
  * The class contains business logic to stop workspace.
@@ -28,6 +29,7 @@ import org.eclipse.che.ide.api.app.AppContext;
  */
 public class StopWorkspaceAction extends AbstractPerspectiveAction {
 
+  private AppStateManager appStateManager;
   private final CurrentWorkspaceManager workspaceManager;
   private final AppContext appContext;
 
@@ -35,9 +37,11 @@ public class StopWorkspaceAction extends AbstractPerspectiveAction {
   public StopWorkspaceAction(
       CoreLocalizationConstant locale,
       AppContext appContext,
+      AppStateManager appStateManager,
       CurrentWorkspaceManager workspaceManager) {
     super(singletonList(PROJECT_PERSPECTIVE_ID), locale.stopWsTitle(), locale.stopWsDescription());
     this.appContext = appContext;
+    this.appStateManager = appStateManager;
     this.workspaceManager = workspaceManager;
   }
 
@@ -51,7 +55,11 @@ public class StopWorkspaceAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent event) {
     checkNotNull(appContext.getWorkspace().getId(), "Workspace id should not be null");
-
-    workspaceManager.stopWorkspace();
+    appStateManager
+        .persistState()
+        .then(
+            arg -> {
+              workspaceManager.stopWorkspace();
+            });
   }
 }
