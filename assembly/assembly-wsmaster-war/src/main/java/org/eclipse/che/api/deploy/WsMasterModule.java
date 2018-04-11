@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
+import org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -83,13 +85,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
-import org.eclipse.persistence.config.CacheCoordinationProtocol;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 /** @author andrew00x */
 @DynaModule
 public class WsMasterModule extends AbstractModule {
+
   @Override
   protected void configure() {
     // db related components modules
@@ -219,24 +221,9 @@ public class WsMasterModule extends AbstractModule {
 
     String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
-      persistenceProperties.put(
-          PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
-          "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
-
-      if (OpenShiftInfrastructure.NAME.equals(infrastructure)
-          || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-        persistenceProperties.put(
-            PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
-        persistenceProperties.put(
-            PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, "jgroups/che-tcp.xml");
-      }
-
       configureMultiUserMode(persistenceProperties, infrastructure);
     } else {
-      persistenceProperties.put(
-          PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
-          "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
-      configureSingleUserMode();
+      configureSingleUserMode(persistenceProperties);
     }
 
     install(
@@ -255,8 +242,10 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
   }
 
-  private void configureSingleUserMode() {
-
+  private void configureSingleUserMode(Map<String, String> persistenceProperties) {
+    persistenceProperties.put(
+        PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
+        "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
 
@@ -273,10 +262,21 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+    bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
   }
 
   private void configureMultiUserMode(
       Map<String, String> persistenceProperties, String infrastructure) {
+    if (OpenShiftInfrastructure.NAME.equals(infrastructure)
+        || KubernetesInfrastructure.NAME.equals(infrastructure)) {
+      install(new ReplicationModule(persistenceProperties));
+    } else {
+      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+    }
+    persistenceProperties.put(
+        PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
+        "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
+
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
 
