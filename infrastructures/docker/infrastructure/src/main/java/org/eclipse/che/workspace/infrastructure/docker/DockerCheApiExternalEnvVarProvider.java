@@ -10,12 +10,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import com.google.common.base.Strings;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
@@ -24,22 +22,17 @@ import org.eclipse.che.commons.lang.Pair;
  * @author Alexander Garagatyi
  */
 @Singleton
-public class DockerCheApiEnvVarProvider implements CheApiEnvVarProvider {
+public class DockerCheApiExternalEnvVarProvider implements CheApiExternalEnvVarProvider {
 
-  private Pair<String, String> apiEnvVar;
+  private final Pair<String, String> apiEnvVar;
 
   @Inject
-  public DockerCheApiEnvVarProvider(
-      @Named("che.infra.docker.master_api_endpoint") String apiEndpoint) {
-    String apiEndpointEnvVar = System.getenv(CHE_API_VARIABLE);
-    if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
-      apiEndpoint = apiEndpointEnvVar;
-    }
-    apiEnvVar = Pair.of(CHE_API_VARIABLE, apiEndpoint);
+  public DockerCheApiExternalEnvVarProvider() {
+    apiEnvVar = Pair.of(CHE_API_EXTERNAL_VARIABLE, System.getenv(CHE_API_EXTERNAL_VARIABLE));
   }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-    return new Pair<>(apiEnvVar.first, apiEnvVar.second);
+    return apiEnvVar;
   }
 }

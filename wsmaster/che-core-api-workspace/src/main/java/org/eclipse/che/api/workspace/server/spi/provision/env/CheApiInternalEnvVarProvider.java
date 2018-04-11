@@ -15,10 +15,10 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 
 /** @author Sergii Leshchenko */
-public interface CheApiEnvVarProvider extends EnvVarProvider {
+public interface CheApiInternalEnvVarProvider extends EnvVarProvider {
 
   /** Env variable for machine that contains url of Che API */
-  String CHE_API_VARIABLE = "CHE_API";
+  String CHE_API_INTERNAL_VARIABLE = "CHE_API_INTERNAL";
 
   /**
    * Returns Che API environment variable which should be injected into machines.

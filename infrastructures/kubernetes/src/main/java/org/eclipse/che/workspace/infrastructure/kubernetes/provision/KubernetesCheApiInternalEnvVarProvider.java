@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
@@ -22,12 +22,12 @@ import org.eclipse.che.commons.lang.Pair;
  *
  * @author Sergii Leshchenko
  */
-public class KubernetesCheApiEnvVarProvider implements CheApiEnvVarProvider {
+public class KubernetesCheApiInternalEnvVarProvider implements CheApiInternalEnvVarProvider {
 
   private final String cheServerEndpoint;
 
   @Inject
-  public KubernetesCheApiEnvVarProvider(@Named("che.api") String cheServerEndpoint) {
+  public KubernetesCheApiInternalEnvVarProvider(@Named("che.api") String cheServerEndpoint) {
     this.cheServerEndpoint = cheServerEndpoint;
   }
 

@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
@@ -24,18 +24,18 @@ import org.eclipse.che.commons.lang.Pair;
  * @author Alexander Garagatyi
  */
 @Singleton
-public class DockerCheApiEnvVarProvider implements CheApiEnvVarProvider {
+public class DockerCheApiInternalEnvVarProvider implements CheApiInternalEnvVarProvider {
 
   private Pair<String, String> apiEnvVar;
 
   @Inject
-  public DockerCheApiEnvVarProvider(
+  public DockerCheApiInternalEnvVarProvider(
       @Named("che.infra.docker.master_api_endpoint") String apiEndpoint) {
-    String apiEndpointEnvVar = System.getenv(CHE_API_VARIABLE);
+    String apiEndpointEnvVar = System.getenv(CHE_API_INTERNAL_VARIABLE);
     if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
       apiEndpoint = apiEndpointEnvVar;
     }
-    apiEnvVar = Pair.of(CHE_API_VARIABLE, apiEndpoint);
+    apiEnvVar = Pair.of(CHE_API_INTERNAL_VARIABLE, apiEndpoint);
   }
 
   @Override
