@@ -576,10 +576,6 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(projectName);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         projectName + "/" + SECOND_SUBMODULE_NAME + "/src/main/java/com.company.example", "A.java");
-    projectExplorer.openItemByPath(
-        projectName + "/" + SECOND_SUBMODULE_NAME + "/src/main/java/commenttest");
-    projectExplorer.waitVisibilityByName("GitPullTest.java");
-    projectExplorer.waitVisibilityByName("JavaCommentsTest.java");
     editor.closeFileByNameWithSaving("A");
   }
 
