@@ -91,6 +91,8 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;

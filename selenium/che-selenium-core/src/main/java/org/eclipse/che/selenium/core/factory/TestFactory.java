@@ -18,6 +18,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.WebDriver;
 
 /** @author Anatolii Bazko */
@@ -30,6 +31,7 @@ public class TestFactory {
   private final Entrance entrance;
   private final String factoryUrl;
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   public TestFactory(
       String factoryUrl,
@@ -39,7 +41,8 @@ public class TestFactory {
       TestFactoryServiceClient factoryServiceClient,
       TestWorkspaceServiceClient workspaceServiceClient,
       Entrance entrance,
-      SeleniumWebDriver seleniumWebDriver) {
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.factoryDto = factoryDto;
     this.owner = owner;
     this.factoryUrl = factoryUrl;
@@ -48,6 +51,7 @@ public class TestFactory {
     this.workspaceServiceClient = workspaceServiceClient;
     this.entrance = entrance;
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
   }
 
   /** Login to factory and open it by url. */
@@ -55,7 +59,7 @@ public class TestFactory {
     seleniumWebDriver.get(dashboardUrl.get().toString());
     entrance.login(owner);
     seleniumWebDriver.get(factoryUrl);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
   }
 
   /** Opens factory url. */

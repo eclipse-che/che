@@ -17,8 +17,8 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
