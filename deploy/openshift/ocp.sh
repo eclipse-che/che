@@ -246,18 +246,23 @@ wait_for_che() {
 deploy_che_to_ocp() {
     $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}"
     $OC_BINARY new-project "${CHE_OPENSHIFT_PROJECT}"
-    $OC_BINARY apply -f templates/pvc/che-server-pvc.yaml
+    $OC_BINARY apply -f ${BASE_DIR}/templates/pvc/che-server-pvc.yaml
     if [ "${CHE_MULTIUSER}" == "true" ]; then
       if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
         export KEYCLOAK_PARAM="-p CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=false"
       fi
-      $OC_BINARY new-app -f templates/multi/postgres-template.yaml
+      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml
       wait_for_postgres
-      $OC_BINARY new-app -f templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_KEYCLOAK=eivantsov/keycloak ${KEYCLOAK_PARAM}
+      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_KEYCLOAK=eivantsov/keycloak ${KEYCLOAK_PARAM}
       wait_for_keycloak
       export CHE_MULTIUSER_PARAM="-p CHE_MULTIUSER=true"
     fi
-    $OC_BINARY new-app -f templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} ${CHE_MULTIUSER_PARAM}
+      CHE_VAR_ARRAY=$(env | grep "CHE_.")
+      if [ ${#CHE_VAR_ARRAY[@]} > 0 ]; then
+        ENV="-e ${CHE_VAR_ARRAY}"
+      fi
+
+    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} ${CHE_MULTIUSER_PARAM} ${ENV}
     $OC_BINARY set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
     echo "Waiting for Che to boot..."
     wait_for_che
