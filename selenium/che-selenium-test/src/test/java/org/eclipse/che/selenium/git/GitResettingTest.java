@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.git.GitRevertCommit;
@@ -36,6 +37,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
@@ -55,29 +57,30 @@ public class GitResettingTest {
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private GitStatusBar gitStatusBar;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void prepare() throws Exception {
     String phpRepoLocation = "https://github.com/che-samples/web-php-simple.git";
+    String nameOfProjectForCheckingGitSoftReset = "checkGitSoftReset";
+    String nameOfProjectForCheckingGitHardReset = "checkGitHardReset";
+    String nameOfProjectForCheckingGitMixReset = "checkGitMixReset";
 
-    SourceStorageDto sourceStorage =
-            DtoFactory.getInstance()
-                      .createDto(SourceStorageDto.class)
-                      .withLocation(phpRepoLocation)
-                      .withType("git");
-
-    ProjectConfigDto projectConfigDto = DtoFactory.getInstance().createDto(ProjectConfigDto.class);
-    projectConfigDto.setName("php");
-    projectConfigDto.setType("php");
-    projectConfigDto.setSource(sourceStorage);
-    projectConfigDto.setPath("/php");
     List<ProjectConfigDto> list = new ArrayList<>();
-    list.add(projectConfigDto);
 
+    List<String> projects =
+        Arrays.asList(
+            nameOfProjectForCheckingGitSoftReset,
+            nameOfProjectForCheckingGitHardReset,
+            nameOfProjectForCheckingGitMixReset);
+    SourceStorageDto sourceStorage =
+        DtoFactory.getInstance()
+            .createDto(SourceStorageDto.class)
+            .withLocation(phpRepoLocation)
+            .withType("git");
 
-
-
+    projects.forEach(item -> list.add(setUpTestProject(item, sourceStorage)));
     WorkspaceConfigDto workspace =
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(UBUNTU_JDK8);
 
@@ -92,10 +95,21 @@ public class GitResettingTest {
             workspaceServiceClient);
 
     ide.open(testWorkspace);
+    projects.forEach(item -> projectExplorer.waitItem(item));
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
   }
 
   @Test
-  public void checkA() {
-    projectExplorer.waitProjectExplorer();
+  public void checkSoftReset() {
+
+  }
+
+  private ProjectConfigDto setUpTestProject(String projectName, SourceStorageDto gitSource) {
+    ProjectConfigDto projectConfigDto = DtoFactory.getInstance().createDto(ProjectConfigDto.class);
+    projectConfigDto.setName(projectName);
+    projectConfigDto.setType(projectName);
+    projectConfigDto.setSource(gitSource);
+    projectConfigDto.setPath("/" + projectName);
+    return projectConfigDto;
   }
 }
