@@ -11,7 +11,15 @@
 package org.eclipse.che.multiuser.machine.authentication.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureAlgorithmEnvProvider;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignaturePublicKeyEnvProvider;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.jpa.JpaSignatureKeyDao;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 
 /**
  * Machine auth module.
@@ -25,5 +33,14 @@ public class MachineAuthModule extends AbstractModule {
     bind(MachineSessionInvalidator.class).asEagerSingleton();
 
     bind(MachineTokenProvider.class).to(MachineTokenProviderImpl.class);
+
+    bind(SignatureKeyManager.class);
+    bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
+    final Multibinder<EnvVarProvider> envVarProviders =
+        Multibinder.newSetBinder(binder(), EnvVarProvider.class);
+    envVarProviders.addBinding().to(SignaturePublicKeyEnvProvider.class);
+    envVarProviders.addBinding().to(SignatureAlgorithmEnvProvider.class);
+    bindConstant().annotatedWith(Names.named("che.auth.signature_key_size")).to(2048);
+    bindConstant().annotatedWith(Names.named("che.auth.signature_key_algorithm")).to("RSA");
   }
 }

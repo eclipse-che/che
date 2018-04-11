@@ -38,9 +38,9 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class TestEnumerationsTest {
   private static final String NAME_OF_PROJECT =
-      NameGenerator.generate(TestEnumerationsTest.class.getName(), 2);
+      NameGenerator.generate(TestEnumerationsTest.class.getSimpleName(), 2);
   private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
-      NAME_OF_PROJECT + "/src" + "/main" + "/java" + "/renametype";
+      NAME_OF_PROJECT + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;

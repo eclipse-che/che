@@ -17,6 +17,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -175,8 +176,14 @@ type processesMap struct {
 
 // Start starts MachineProcess.
 func Start(newProcess MachineProcess) (MachineProcess, error) {
-	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
-	cmd := exec.Command("setsid", shellInterpreter, "-c", newProcess.CommandLine)
+
+	var cmd *exec.Cmd
+	if runtime.GOOS == "linux" { // also can be specified to FreeBSD
+		// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
+		cmd = exec.Command("setsid", shellInterpreter, "-c", newProcess.CommandLine)
+	} else {
+		cmd = exec.Command(shellInterpreter, "-c", newProcess.CommandLine)
+	}
 
 	// getting stdout pipe
 	stdout, err := cmd.StdoutPipe()

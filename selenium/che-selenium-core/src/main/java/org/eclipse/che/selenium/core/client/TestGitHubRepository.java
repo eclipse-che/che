@@ -209,4 +209,8 @@ public class TestGitHubRepository {
       ghRepo.createContent(contentBytes, commitMessage, relativePath);
     }
   }
+
+  public String getFileContent(String pathToFile) throws IOException {
+    return ghRepo.getFileContent(pathToFile).getContent();
+  }
 }

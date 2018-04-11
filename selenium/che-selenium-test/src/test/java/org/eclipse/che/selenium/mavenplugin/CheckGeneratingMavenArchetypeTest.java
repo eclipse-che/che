@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.mavenplugin;
 
 import java.util.stream.Stream;
 import javax.inject.Inject;
-import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckGeneratingMavenArchetypeTest {
-  private static final String NAME_OF_ARTIFACT = "quickStart";
+  private static final String NAME_OF_ARTIFACT = NameGenerator.generate("quickStart", 4);
   @Inject private Wizard projectWizard;
   @Inject private Menu menu;
   @Inject private ProjectExplorer projectExplorer;
@@ -37,6 +37,13 @@ public class CheckGeneratingMavenArchetypeTest {
 
   @Test
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
+    String expectedContnetInPomXml =
+        String.format(
+            "  <groupId>%s</groupId>\n"
+                + "  <artifactId>%s</artifactId>\n"
+                + "  <version>1.0-SNAPSHOT</version>",
+            NAME_OF_ARTIFACT, NAME_OF_ARTIFACT);
+
     Stream<String> expectedItems =
         Stream.of(
             NAME_OF_ARTIFACT + "/src/main/java/" + NAME_OF_ARTIFACT + "/App.java",
@@ -60,12 +67,6 @@ public class CheckGeneratingMavenArchetypeTest {
     projectExplorer.quickExpandWithJavaScript();
     expectedItems.forEach(projectExplorer::waitItem);
     projectExplorer.openItemByPath(NAME_OF_ARTIFACT + "/pom.xml");
-
-    String pathToExpectedContentOfPom =
-        CheckGeneratingMavenArchetypeTest.class
-            .getResource("pom-quick-start-archetype-context")
-            .getFile();
-    editor.waitTextIntoEditor(
-        IoUtil.readAndCloseQuietly(IoUtil.getResource(pathToExpectedContentOfPom)));
+    editor.waitTextIntoEditor(expectedContnetInPomXml);
   }
 }
