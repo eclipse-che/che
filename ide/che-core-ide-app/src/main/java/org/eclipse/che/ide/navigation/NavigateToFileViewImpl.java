@@ -18,8 +18,9 @@ import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEUP;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
 
 import com.google.common.base.Strings;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -89,8 +90,6 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   private HandlerRegistration resizeHandler;
 
-  private String previosFileName;
-
   @Inject
   public NavigateToFileViewImpl(
       CoreLocalizationConstant locale,
@@ -129,7 +128,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
             @Override
             public void run() {
               getElement().getStyle().setProperty("clip", "auto");
-              delegate.onFileNameChanged(fileName.getText());
+              delegate.onFileNameChanged();
             }
           }.schedule(300);
         });
@@ -273,6 +272,14 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     suggestionsPanel.getElement().getStyle().setHeight(newHeight, Style.Unit.PX);
   }
 
+  @Override
+  public void setFileNameTextBoxEnabled(boolean enabled) {
+    fileName.setEnabled(enabled);
+    if (enabled) {
+      Scheduler.get().scheduleFinally(() -> fileName.setFocus(true));
+    }
+  }
+
   private final SimpleList.ListEventDelegate<SearchResultDto> eventDelegate =
       new SimpleList.ListEventDelegate<SearchResultDto>() {
         @Override
@@ -287,7 +294,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
       };
 
   @UiHandler("fileName")
-  void handleKeyDown(KeyDownEvent event) {
+  void handleKeyUp(KeyUpEvent event) {
     int nativeKeyCode = event.getNativeKeyCode();
     switch (nativeKeyCode) {
       case KEY_UP:
@@ -337,22 +344,11 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         hidePopup();
         break;
       default:
-        // here need some delay to be sure input box initiated with given value
-        // in manually testing hard to reproduce this problem but it reproduced with selenium tests
-        new Timer() {
-          @Override
-          public void run() {
-            String fileName = NavigateToFileViewImpl.this.fileName.getText();
-            if (Strings.isNullOrEmpty(fileName)) {
-              showItems(Collections.emptyList());
-              return;
-            }
-            if (!fileName.equalsIgnoreCase(previosFileName)) {
-              previosFileName = fileName;
-              delegate.onFileNameChanged(fileName);
-            }
-          }
-        }.schedule(300);
+        if (Strings.isNullOrEmpty(fileName.getText())) {
+          showItems(Collections.emptyList());
+        } else {
+          delegate.onFileNameChanged();
+        }
         break;
     }
   }
