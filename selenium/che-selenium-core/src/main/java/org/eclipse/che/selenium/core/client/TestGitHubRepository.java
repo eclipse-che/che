@@ -351,9 +351,8 @@ public class TestGitHubRepository {
 
     if (isGitmodulesFileExist()) {
       GHContent submoduleFileContent = ghRepo.getFileContent(gitmodulesFileName);
-      String fileContent = IOUtils.toString(submoduleFileContent.read());
-      String newFileContent =
-          ""; // = getFileContent(gitmodulesFileName) + "\n" + submodugitmodulesFileName
+      String newFileContent = getFileContent(gitmodulesFileName) + "\n" + submoduleConfig;
+
       submoduleFileContent.update(newFileContent, "Update " + gitmodulesFileName);
       return;
     }
