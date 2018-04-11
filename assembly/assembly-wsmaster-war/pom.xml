@@ -326,6 +326,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.extension</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa</artifactId>
         </dependency>
         <dependency>
@@ -339,6 +343,14 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jgroups</groupId>
+            <artifactId>jgroups</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jgroups.kubernetes</groupId>
+            <artifactId>kubernetes</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

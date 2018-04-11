@@ -83,6 +83,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
+import org.eclipse.persistence.config.CacheCoordinationProtocol;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
@@ -214,15 +215,23 @@ public class WsMasterModule extends AbstractModule {
     persistenceProperties.put(PersistenceUnitProperties.LOGGING_LEVEL, "SEVERE");
     persistenceProperties.put(
         PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che");
-
     bindConstant().annotatedWith(Names.named("jndi.datasource.name")).to("java:/comp/env/jdbc/che");
 
+    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       persistenceProperties.put(
           PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
           "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
 
-      configureMultiUserMode();
+      if (OpenShiftInfrastructure.NAME.equals(infrastructure)
+          || KubernetesInfrastructure.NAME.equals(infrastructure)) {
+        persistenceProperties.put(
+            PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
+        persistenceProperties.put(
+            PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, "jgroups/che-tcp.xml");
+      }
+
+      configureMultiUserMode(persistenceProperties, infrastructure);
     } else {
       persistenceProperties.put(
           PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
@@ -234,7 +243,6 @@ public class WsMasterModule extends AbstractModule {
         new com.google.inject.persist.jpa.JpaPersistModule("main")
             .properties(persistenceProperties));
 
-    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)) {
       install(new OpenShiftInfraModule());
     } else if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
@@ -267,7 +275,8 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
   }
 
-  private void configureMultiUserMode() {
+  private void configureMultiUserMode(
+      Map<String, String> persistenceProperties, String infrastructure) {
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
 
