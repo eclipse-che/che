@@ -476,9 +476,9 @@ public class ImportWizardFormTest {
     importBranchRepo.addContent(
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath()));
 
-    importBranchRepo.createBranchFromMaster(FIRST_BRANCH);
-    importBranchRepo.createBranchFromMaster(SECOND_BRANCH);
-    importBranchRepo.createBranchFromMaster(THIRD_BRANCH);
+    importBranchRepo.createBranch(FIRST_BRANCH);
+    importBranchRepo.createBranch(SECOND_BRANCH);
+    importBranchRepo.createBranch(THIRD_BRANCH);
 
     importBranchRepo.addContent(
         Paths.get(getClass().getResource("/projects/Repo_For_Test_branch1").getPath()),

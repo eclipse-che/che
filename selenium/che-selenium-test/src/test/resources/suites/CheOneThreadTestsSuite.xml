@@ -60,7 +60,6 @@
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
             <class name="org.eclipse.che.selenium.git.ImportWizardFormTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
-            <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>

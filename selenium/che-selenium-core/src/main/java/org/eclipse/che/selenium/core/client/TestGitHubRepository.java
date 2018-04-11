@@ -48,7 +48,7 @@ public class TestGitHubRepository {
   private final String repoName = NameGenerator.generate("EclipseCheTestRepo-", 5);
   private static final Logger LOG = LoggerFactory.getLogger(TestGitHubRepository.class);
 
-  private final GHRepository ghRepo;
+  private GHRepository ghRepo;
   private final GitHub gitHub;
 
   private final String gitHubUsername;
@@ -115,16 +115,41 @@ public class TestGitHubRepository {
     return repoName;
   }
 
+  public String getSha1(String branchName) throws IOException {
+    return ghRepo.getBranch(branchName).getSHA1();
+  }
+
   /**
-   * Creates reference to branch, tag, ... from master branch.
+   * Creates reference to the new branch with {@code branch} from default branch.
    *
-   * @param refName is a name of branch, tag, etc
+   * @param branchName name of the branch which should be created
    * @return reference to the new branch
    * @throws IOException
    */
-  public GHRef createBranchFromMaster(String refName) throws IOException {
-    GHRef master = ghRepo.getRef("heads/master");
-    return ghRepo.createRef("refs/heads/" + refName, master.getObject().getSha());
+  public GHRef createBranch(String branchName) throws IOException {
+    GHRef defaultBranch = getReferenceToDefaultBranch();
+    return ghRepo.createRef("refs/heads/" + branchName, defaultBranch.getObject().getSha());
+  }
+
+  /**
+   * Creates reference to the new tag with {@code tagName} from default branch.
+   *
+   * @param tagName is a name of new tag
+   * @return reference to the new tag
+   * @throws IOException
+   */
+  public GHRef createTag(String tagName) throws IOException {
+    GHRef defaultBranch = getReferenceToDefaultBranch();
+    return ghRepo.createRef("refs/tags/" + tagName, defaultBranch.getObject().getSha());
+  }
+
+  private GHRef getReferenceToDefaultBranch() throws IOException {
+    return ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
+  }
+
+  public void setDefaultBranch(String branchName) throws IOException {
+    ghRepo.setDefaultBranch(branchName);
+    ghRepo = gitHub.getRepository(ghRepo.getFullName());
   }
 
   /**
@@ -280,7 +305,7 @@ public class TestGitHubRepository {
   }
 
   public String getFileContent(String pathToFile) throws IOException {
-    return IOUtils.toString(ghRepo.getFileContent(pathToFile).read());
+    return IOUtils.toString(ghRepo.getFileContent(pathToFile).read(), "UTF-8");
   }
 
   public String getRepoSha() throws IOException {
