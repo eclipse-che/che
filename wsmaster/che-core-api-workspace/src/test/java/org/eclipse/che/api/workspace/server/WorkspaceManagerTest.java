@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -31,9 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,8 +44,8 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.util.Strings.isNullOrEmpty;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.account.api.AccountManager;
@@ -55,26 +54,23 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -215,7 +211,7 @@ public class WorkspaceManagerTest {
 
     final WorkspaceImpl workspace1 = createAndMockWorkspace(config, NAMESPACE_1);
     final WorkspaceImpl workspace2 = createAndMockWorkspace(config, NAMESPACE_2);
-    final TestInternalRuntime runtime2 = mockRuntime(workspace2, RUNNING);
+    final TestRuntime runtime2 = mockRuntime(workspace2, RUNNING);
     when(workspaceDao.getWorkspaces(eq(NAMESPACE_1), anyInt(), anyLong()))
         .thenReturn(new Page<>(asList(workspace1, workspace2), 0, 2, 2));
 
@@ -232,7 +228,8 @@ public class WorkspaceManagerTest {
         res2.getStatus(),
         RUNNING,
         "Workspace status wasn't changed to the runtime instance status");
-    assertEquals(res2.getRuntime(), runtime2, "Workspace doesn't have expected runtime");
+    assertEquals(
+        res2.getRuntime(), new RuntimeImpl(runtime2), "Workspace doesn't have expected runtime");
     assertFalse(res2.isTemporary(), "Workspace must be permanent");
   }
 
@@ -298,7 +295,7 @@ public class WorkspaceManagerTest {
   public void getsWorkspacesByNamespaceWithRuntimes() throws Exception {
     // given
     final WorkspaceImpl workspace = createAndMockWorkspace();
-    final TestInternalRuntime runtime = mockRuntime(workspace, RUNNING);
+    final TestRuntime runtime = mockRuntime(workspace, RUNNING);
 
     // when
     final Page<WorkspaceImpl> result =
@@ -312,7 +309,8 @@ public class WorkspaceManagerTest {
         res1.getStatus(),
         RUNNING,
         "Workspace status wasn't changed to the runtime instance status");
-    assertEquals(res1.getRuntime(), runtime, "Workspace doesn't have expected runtime");
+    assertEquals(
+        res1.getRuntime(), new RuntimeImpl(runtime), "Workspace doesn't have expected runtime");
     assertFalse(res1.isTemporary(), "Workspace must be permanent");
   }
 
@@ -524,30 +522,29 @@ public class WorkspaceManagerTest {
     when(runtimes.getStatus(workspace.getId())).thenReturn(status);
   }
 
-  private TestInternalRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
+  private TestRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
       throws Exception {
-    RuntimeIdentity identity =
-        new RuntimeIdentityImpl(workspace.getId(), workspace.getConfig().getDefaultEnv(), "id");
-    //        doAnswer(inv -> {
-    //            final WorkspaceImpl ws = (WorkspaceImpl)inv.getArguments()[0];
-    //            ws.setStatus(status);
-    //            return ws;
-    //        }).when(runtimes).injectStatus(workspace);
     MachineImpl machine1 = spy(createMachine());
     MachineImpl machine2 = spy(createMachine());
     Map<String, Machine> machines = new HashMap<>();
     machines.put("machine1", machine1);
     machines.put("machine2", machine2);
-    TestInternalRuntime runtime = new TestInternalRuntime(mockContext(identity), machines);
+    TestRuntime runtime = new TestRuntime(machines);
     doAnswer(
             inv -> {
               workspace.setStatus(status);
-              workspace.setRuntime(runtime);
+              workspace.setRuntime(
+                  new RuntimeImpl(
+                      runtime.getActiveEnv(),
+                      runtime.getMachines(),
+                      runtime.getOwner(),
+                      runtime.getWarnings()));
               return null;
             })
         .when(runtimes)
         .injectRuntime(workspace);
     when(runtimes.isAnyRunning()).thenReturn(true);
+
     return runtime;
   }
 
@@ -622,40 +619,32 @@ public class WorkspaceManagerTest {
     return new MachineImpl(emptyMap(), emptyMap(), MachineStatus.RUNNING);
   }
 
-  private RuntimeContext mockContext(RuntimeIdentity identity) throws Exception {
-    RuntimeContext context = mock(RuntimeContext.class);
-    doReturn(context).when(infrastructure).prepare(eq(identity), any(InternalEnvironment.class));
-    when(context.getInfrastructure()).thenReturn(infrastructure);
-    when(context.getIdentity()).thenReturn(identity);
-    return context;
-  }
+  private static class TestRuntime implements Runtime {
 
-  private static class TestInternalRuntime extends InternalRuntime<RuntimeContext> {
     final Map<String, Machine> machines;
 
-    TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      super(context, null, null, false);
+    TestRuntime(Map<String, Machine> machines) {
       this.machines = machines;
     }
 
     @Override
-    protected Map<String, Machine> getInternalMachines() {
+    public String getActiveEnv() {
+      return "default";
+    }
+
+    @Override
+    public Map<String, ? extends Machine> getMachines() {
       return machines;
     }
 
     @Override
-    public Map<String, String> getProperties() {
-      return Collections.emptyMap();
+    public String getOwner() {
+      return "owner";
     }
 
     @Override
-    protected void internalStop(Map stopOptions) throws InfrastructureException {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected void internalStart(Map startOptions) throws InfrastructureException {
-      throw new UnsupportedOperationException();
+    public List<? extends Warning> getWarnings() {
+      return emptyList();
     }
   }
 }
