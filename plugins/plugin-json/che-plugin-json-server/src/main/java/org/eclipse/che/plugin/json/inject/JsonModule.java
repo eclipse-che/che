@@ -10,34 +10,23 @@
  */
 package org.eclipse.che.plugin.json.inject;
 
-import static java.util.Arrays.asList;
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.json.languageserver.JsonLanguageServerLauncher;
+import org.eclipse.che.plugin.json.languageserver.JsonLanguageServerConfig;
 
 /** @author Anatolii Bazko */
 @DynaModule
 public class JsonModule extends AbstractModule {
   public static final String LANGUAGE_ID = "json";
-  private static final String[] EXTENSIONS =
-      new String[] {"json", "bowerrc", "jshintrc", "jscsrc", "eslintrc", "babelrc"};
-  private static final String MIME_TYPE = "application/json";
 
   @Override
   protected void configure() {
-    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-        .addBinding()
-        .to(JsonLanguageServerLauncher.class);
-    LanguageDescription description = new LanguageDescription();
-    description.setFileExtensions(asList(EXTENSIONS));
-    description.setLanguageId(LANGUAGE_ID);
-    description.setMimeType(MIME_TYPE);
-    Multibinder.newSetBinder(binder(), LanguageDescription.class)
-        .addBinding()
-        .toInstance(description);
+    newMapBinder(binder(), String.class, LanguageServerConfig.class)
+        .addBinding("org.eclipse.che.plugin.json.languageserver")
+        .to(JsonLanguageServerConfig.class)
+        .asEagerSingleton();
   }
 }

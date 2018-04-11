@@ -9,15 +9,6 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.maven.server.core.reconcile;
-/**
- * ***************************************************************************** Copyright (c)
- * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * <p>Contributors: Red Hat, Inc. - initial API and implementation
- * *****************************************************************************
- */
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -31,10 +22,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
@@ -42,7 +36,8 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopy;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyManager;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyUpdatedEvent;
-import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.api.languageserver.CheLanguageClientFactory;
+import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.shared.dto.EditorChangesDto;
 import org.eclipse.che.commons.xml.XMLTreeException;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -73,6 +68,7 @@ import org.xml.sax.SAXParseException;
  *
  * @author Roman Nikitenko
  */
+@Singleton
 public class PomReconciler {
   private static final Logger LOG = LoggerFactory.getLogger(PomReconciler.class);
 
@@ -82,15 +78,16 @@ public class PomReconciler {
   private EventSubscriber<EditorWorkingCopyUpdatedEvent> editorContentUpdateEventSubscriber;
   private LanguageClient client;
 
+  @Inject
   public PomReconciler(
       MavenProjectManager mavenProjectManager,
       EditorWorkingCopyManager editorWorkingCopyManager,
       EventService eventService,
-      LanguageClient client) {
+      CheLanguageClientFactory cheLanguageClientFactory) {
     this.mavenProjectManager = mavenProjectManager;
     this.editorWorkingCopyManager = editorWorkingCopyManager;
     this.eventService = eventService;
-    this.client = client;
+    this.client = cheLanguageClientFactory.create("maven-language-server");
 
     editorContentUpdateEventSubscriber =
         new EventSubscriber<EditorWorkingCopyUpdatedEvent>() {
@@ -144,7 +141,7 @@ public class PomReconciler {
       result.addAll(problemList);
     } catch (XMLTreeException exception) {
       Throwable cause = exception.getCause();
-      if (cause != null && cause instanceof SAXParseException) {
+      if (cause instanceof SAXParseException) {
         result.add(createProblem(pomContent, (SAXParseException) cause));
 
       } else {
@@ -234,13 +231,11 @@ public class PomReconciler {
 
   private static List<Diagnostic> convertProblems(String text, List<Problem> problems) {
     Map<Integer, Position> positions = mapPositions(text, problems);
-    List<Diagnostic> diagnostics =
-        problems
-            .stream()
-            .map((Problem p) -> convertProblem(positions, p))
-            .filter(o -> o != null)
-            .collect(Collectors.toList());
-    return diagnostics;
+    return problems
+        .stream()
+        .map(p -> convertProblem(positions, p))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 
   private static Map<Integer, Position> mapPositions(String text, List<Problem> problems) {

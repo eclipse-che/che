@@ -39,7 +39,7 @@ public class YamlService {
   @Consumes(MediaType.APPLICATION_JSON)
   public void putSchemas(YamlDTO yamlDto) throws ApiException {
 
-    LanguageServer yamlLS = YamlLanguageServerLauncher.getYamlLanguageServer();
+    LanguageServer yamlLS = YamlLanguageServerConfig.getYamlLanguageServer();
 
     if (yamlDto != null && yamlLS != null) {
 

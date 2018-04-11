@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
@@ -35,14 +34,9 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.PathTransformer;
-import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
-import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
-import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.maven.server.MavenTerminal;
-import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
@@ -50,6 +44,7 @@ import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
+import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 
@@ -65,8 +60,8 @@ public class MavenServerService {
   private final ProjectManager projectManager;
   private final MavenWorkspace mavenWorkspace;
   private final EclipseWorkspaceProvider eclipseWorkspaceProvider;
-  private final PathTransformer pathTransformer;
   private final FsManager fsManager;
+  private final PomReconciler pomReconciler;
 
   @Inject private MavenProgressNotifier notifier;
 
@@ -76,23 +71,21 @@ public class MavenServerService {
 
   @Inject private ClasspathManager classpathManager;
 
-  @Inject private LanguageServerRegistry lsRegistry;
-
   @Inject
   public MavenServerService(
       MavenWrapperManager wrapperManager,
       ProjectManager projectManager,
       MavenWorkspace mavenWorkspace,
       EclipseWorkspaceProvider eclipseWorkspaceProvider,
-      PathTransformer pathTransformer,
-      FsManager fsManager) {
+      FsManager fsManager,
+      PomReconciler pomReconciler) {
 
     this.wrapperManager = wrapperManager;
     this.projectManager = projectManager;
     this.mavenWorkspace = mavenWorkspace;
     this.eclipseWorkspaceProvider = eclipseWorkspaceProvider;
-    this.pathTransformer = pathTransformer;
     this.fsManager = fsManager;
+    this.pomReconciler = pomReconciler;
   }
 
   /**
@@ -172,17 +165,6 @@ public class MavenServerService {
           String pomPath)
       throws ForbiddenException, ConflictException, NotFoundException, ServerException {
     String projectPath = new File(pomPath).getParent();
-    List<Collection<InitializedLanguageServer>> languageServers =
-        lsRegistry.getApplicableLanguageServers(LanguageServiceUtils.prefixURI(pomPath));
-    languageServers
-        .stream()
-        .flatMap(Collection::stream)
-        .map(InitializedLanguageServer::getServer)
-        .filter(ls -> ls instanceof MavenLanguageServer)
-        .findAny()
-        .ifPresent(
-            ls -> {
-              ((MavenLanguageServer) ls).reconcile(pomPath, projectPath);
-            });
+    pomReconciler.reconcilePath(pomPath, projectPath);
   }
 }

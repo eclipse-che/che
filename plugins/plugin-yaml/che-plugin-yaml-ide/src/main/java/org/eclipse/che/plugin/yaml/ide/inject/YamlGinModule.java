@@ -10,11 +10,14 @@
  */
 package org.eclipse.che.plugin.yaml.ide.inject;
 
+import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
+
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
+import org.eclipse.che.plugin.yaml.ide.YamlDescriptionProvider;
 import org.eclipse.che.plugin.yaml.ide.YamlServiceClient;
 import org.eclipse.che.plugin.yaml.ide.YamlServiceClientImpl;
 import org.eclipse.che.plugin.yaml.ide.preferences.YamlExtensionManagerPresenter;
@@ -33,10 +36,14 @@ public class YamlGinModule extends AbstractGinModule {
   @Override
   protected void configure() {
     bind(YamlServiceClient.class).to(YamlServiceClientImpl.class).in(Singleton.class);
-
     bind(YamlExtensionManagerView.class).to(YamlExtensionManagerViewImpl.class).in(Singleton.class);
-    GinMultibinder<PreferencePagePresenter> prefBinder =
-        GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);
-    prefBinder.addBinding().to(YamlExtensionManagerPresenter.class);
+
+    newSetBinder(binder(), PreferencePagePresenter.class)
+        .addBinding()
+        .to(YamlExtensionManagerPresenter.class);
+
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(YamlDescriptionProvider.class);
   }
 }

@@ -56,5 +56,5 @@ public interface FileTypeRegistry {
    * @return file type or default file type if no file type's name pattern matches the given file
    *     name
    */
-  FileType getFileTypeByNamePattern(String name);
+  FileType getFileTypeByFileName(String name);
 }

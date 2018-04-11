@@ -10,18 +10,20 @@
  */
 package org.eclipse.che.plugin.cpp.ide.inject;
 
+import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
 import static org.eclipse.che.plugin.cpp.shared.Constants.CPP_EXT;
 import static org.eclipse.che.plugin.cpp.shared.Constants.C_EXT;
 import static org.eclipse.che.plugin.cpp.shared.Constants.H_EXT;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
+import org.eclipse.che.plugin.cpp.ide.CppLanguageDescriptionProvider;
 import org.eclipse.che.plugin.cpp.ide.CppResources;
 import org.eclipse.che.plugin.cpp.ide.project.CProjectWizardRegistrar;
 import org.eclipse.che.plugin.cpp.ide.project.CppProjectWizardRegistrar;
@@ -33,12 +35,15 @@ public class CppGinModule extends AbstractGinModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class)
+    newSetBinder(binder(), ProjectWizardRegistrar.class)
         .addBinding()
         .to(CppProjectWizardRegistrar.class);
-    GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class)
+    newSetBinder(binder(), ProjectWizardRegistrar.class)
         .addBinding()
         .to(CProjectWizardRegistrar.class);
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(CppLanguageDescriptionProvider.class);
   }
 
   @Provides

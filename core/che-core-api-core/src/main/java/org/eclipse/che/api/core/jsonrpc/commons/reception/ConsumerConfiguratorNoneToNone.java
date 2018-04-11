@@ -39,4 +39,8 @@ public class ConsumerConfiguratorNoneToNone {
     LOGGER.debug("Configuring incoming request binary: consumer for method: " + method);
     handlerManager.registerNoneToNone(method, consumer);
   }
+
+  public void withRunnable(Runnable runnable) {
+    withConsumer(s -> runnable.run());
+  }
 }

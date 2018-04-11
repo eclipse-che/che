@@ -10,33 +10,23 @@
  */
 package org.eclipse.che.plugin.camel.server.inject;
 
-import static java.util.Arrays.asList;
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.camel.server.languageserver.CamelLanguageServerLauncher;
+import org.eclipse.che.plugin.camel.server.languageserver.CamelLanguageServerConfig;
 
 /** Apache Camel module for server side of Camel Language Server */
 @DynaModule
 public class CamelModule extends AbstractModule {
   public static final String LANGUAGE_ID = "LANGUAGE_ID_APACHE_CAMEL";
-  private static final String[] EXTENSIONS = new String[] {"xml"};
-  private static final String MIME_TYPE = "text/xml";
 
   @Override
   protected void configure() {
-    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-        .addBinding()
-        .to(CamelLanguageServerLauncher.class);
-    LanguageDescription description = new LanguageDescription();
-    description.setFileExtensions(asList(EXTENSIONS));
-    description.setLanguageId(LANGUAGE_ID);
-    description.setMimeType(MIME_TYPE);
-    Multibinder.newSetBinder(binder(), LanguageDescription.class)
-        .addBinding()
-        .toInstance(description);
+    newMapBinder(binder(), String.class, LanguageServerConfig.class)
+        .addBinding("org.eclipse.che.plugin.camel.server.languageserver")
+        .to(CamelLanguageServerConfig.class)
+        .asEagerSingleton();
   }
 }

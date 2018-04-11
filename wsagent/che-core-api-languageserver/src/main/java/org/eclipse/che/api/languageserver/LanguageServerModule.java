@@ -10,48 +10,35 @@
  */
 package org.eclipse.che.api.languageserver;
 
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
-import org.eclipse.che.api.languageserver.registry.CheLanguageClientFactory;
-import org.eclipse.che.api.languageserver.registry.DefaultLanguageRecognizer;
-import org.eclipse.che.api.languageserver.registry.LanguageRecognizer;
-import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;
-import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
-import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
-import org.eclipse.che.api.languageserver.registry.ServerInitializer;
-import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
-import org.eclipse.che.api.languageserver.remote.LsRemoteModule;
-import org.eclipse.che.api.languageserver.service.LanguageRegistryService;
-import org.eclipse.che.api.languageserver.service.LanguageServerInitializationHandler;
-import org.eclipse.che.api.languageserver.service.TextDocumentService;
-import org.eclipse.che.api.languageserver.service.WorkspaceService;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 
 public class LanguageServerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new LsRemoteModule());
-
-    bind(LanguageRecognizer.class).to(DefaultLanguageRecognizer.class);
-    bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
-    bind(ServerInitializer.class).to(ServerInitializerImpl.class);
-    bind(LanguageRegistryService.class);
-    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class);
-
     bind(WorkspaceService.class).asEagerSingleton();
     bind(TextDocumentService.class).asEagerSingleton();
     bind(PublishDiagnosticsParamsJsonRpcTransmitter.class).asEagerSingleton();
     bind(ShowMessageJsonRpcTransmitter.class).asEagerSingleton();
-    Multibinder.newSetBinder(binder(), LanguageDescription.class);
-
-    bind(LanguageServerInitializationHandler.class).asEagerSingleton();
     bind(LanguageServerFileWatcher.class).asEagerSingleton();
-    bind(LanguageServerInitializationHandler.class).asEagerSingleton();
+    bind(LanguageServerConfigInitializer.class).asEagerSingleton();
+    bind(LanguageServerService.class).asEagerSingleton();
+
     install(new FactoryModuleBuilder().build(CheLanguageClientFactory.class));
+
+    newMapBinder(binder(), String.class, LanguageServerConfig.class);
+
+    newSetBinder(binder(), LanguageServerConfigProvider.class)
+        .addBinding()
+        .to(WorkspaceConfigProvider.class);
+    newSetBinder(binder(), LanguageServerConfigProvider.class)
+        .addBinding()
+        .to(GuiceConfigProvider.class);
   }
 }
