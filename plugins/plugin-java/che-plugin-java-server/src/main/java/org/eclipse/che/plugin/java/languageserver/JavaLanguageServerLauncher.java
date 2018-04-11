@@ -18,18 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
-import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
-import org.eclipse.lsp4j.DidChangeConfigurationParams;
-import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -42,8 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Mäder
  */
 @Singleton
-public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
-    implements ServerInitializerObserver {
+public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
   private static final Logger LOG = LoggerFactory.getLogger(JavaLanguageServerLauncher.class);
 
   private static final LanguageServerDescription DESCRIPTION = createServerDescription();
@@ -132,16 +125,5 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
                 "glob:**/.classpath",
                 "glob:**/settings/*.prefs"));
     return description;
-  }
-
-  @Override
-  public void onServerInitialized(
-      LanguageServerLauncher launcher,
-      LanguageServer server,
-      ServerCapabilities capabilities,
-      String rootPath) {
-    Map<String, String> settings =
-        Collections.singletonMap("java.configuration.updateBuildConfiguration", "automatic");
-    server.getWorkspaceService().didChangeConfiguration(new DidChangeConfigurationParams(settings));
   }
 }
