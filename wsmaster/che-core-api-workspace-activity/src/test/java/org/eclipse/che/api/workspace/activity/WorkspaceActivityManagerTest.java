@@ -10,10 +10,8 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,9 +26,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
-import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -53,7 +48,6 @@ public class WorkspaceActivityManagerTest {
   @Mock private Account account;
   @Mock private WorkspaceImpl workspace;
   @Mock private WorkspaceActivityDao workspaceActivityDao;
-  @Mock private ResourceManager resourceManager;
 
   @Mock private EventService eventService;
 
@@ -63,12 +57,7 @@ public class WorkspaceActivityManagerTest {
   private void setUp() throws Exception {
     activityManager =
         new WorkspaceActivityManager(
-            workspaceManager,
-            workspaceActivityDao,
-            accountManager,
-            resourceManager,
-            eventService,
-            EXPIRE_PERIOD_MS);
+            workspaceManager, workspaceActivityDao, eventService, EXPIRE_PERIOD_MS);
 
     when(account.getName()).thenReturn("accountName");
     when(account.getId()).thenReturn("account123");
@@ -76,21 +65,11 @@ public class WorkspaceActivityManagerTest {
 
     when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
     when(workspace.getNamespace()).thenReturn("accountName");
-
-    doReturn(
-            singletonList(
-                new ResourceImpl(
-                    TimeoutResourceType.ID,
-                    EXPIRE_PERIOD_MS / 60 / 1000,
-                    TimeoutResourceType.UNIT)))
-        .when(resourceManager)
-        .getAvailableResources(anyString());
   }
 
   @Test
   public void shouldAddNewActiveWorkspace() throws Exception {
     final String wsId = "testWsId";
-    final String wsName = "testWsName";
     final long activityTime = 1000L;
 
     activityManager.update(wsId, activityTime);
