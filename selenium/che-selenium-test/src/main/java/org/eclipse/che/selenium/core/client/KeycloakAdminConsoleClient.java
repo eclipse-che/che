@@ -44,6 +44,7 @@ public class KeycloakAdminConsoleClient {
   private final TestUserFactory testUserFactory;
   private final ProcessAgent processAgent;
   private final String keycloakContainerId;
+  private final String cheInfrastructure;
 
   @Inject
   public KeycloakAdminConsoleClient(
@@ -55,6 +56,7 @@ public class KeycloakAdminConsoleClient {
     this.dockerUtil = dockerUtil;
     this.testUserFactory = testUserFactory;
     this.processAgent = processAgent;
+    this.cheInfrastructure = cheInfrastructure;
 
     // obtain id of keycloak docker container
     switch (cheInfrastructure) {
@@ -72,7 +74,7 @@ public class KeycloakAdminConsoleClient {
   }
 
   public TestUserImpl createUser(RemovableUserProvider testUserProvider) throws IOException {
-    if (!dockerUtil.isCheRunLocally()) {
+    if (cheInfrastructure == DOCKER_INFRASTRUCTURE && !dockerUtil.isCheRunLocally()) {
       throw new IOException(
           "It's impossible to create test user because of Che is running on the different host.");
     }
