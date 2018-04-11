@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
@@ -64,9 +63,6 @@ class CurrentWorkspaceManager {
     this.startWorkspaceNotification = startWorkspaceNotification;
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> handleWorkspaceStatus());
-
-    // TODO (spi ide): get from CHE_PROJECTS_ROOT environment variable
-    ((AppContextImpl) appContext).setProjectsRoot(Path.valueOf("/projects"));
   }
 
   /** Start the current workspace with a default environment. */
