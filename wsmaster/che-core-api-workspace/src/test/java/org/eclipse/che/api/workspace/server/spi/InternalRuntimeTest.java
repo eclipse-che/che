@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -633,7 +634,7 @@ public class InternalRuntimeTest {
           new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "id"), null),
           urlRewriter,
           emptyList(),
-          running);
+          running ? WorkspaceStatus.RUNNING : null);
     }
 
     @Override
