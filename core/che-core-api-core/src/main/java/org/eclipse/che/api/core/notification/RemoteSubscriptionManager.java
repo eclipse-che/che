@@ -76,7 +76,8 @@ public class RemoteSubscriptionManager {
     remoteSubscriptionStorage
         .getByMethod(eventSubscription.getMethod())
         .removeIf(
-            remoteSubscriptionContext -> Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
+            remoteSubscriptionContext ->
+                Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
   }
 
   private <T> void transmit(String endpointId, String method, T event) {

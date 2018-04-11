@@ -25,7 +25,8 @@ import javax.inject.Singleton;
 @Singleton
 public class InmemoryRemoteSubscriptionStorage implements RemoteSubscriptionStorage {
 
-  private final Map<String, Set<RemoteSubscriptionContext>> subscriptions = new ConcurrentHashMap<>();
+  private final Map<String, Set<RemoteSubscriptionContext>> subscriptions =
+      new ConcurrentHashMap<>();
 
   @Override
   public Set<RemoteSubscriptionContext> getByMethod(String method) {
@@ -44,7 +45,7 @@ public class InmemoryRemoteSubscriptionStorage implements RemoteSubscriptionStor
     subscriptions
         .getOrDefault(method, Collections.emptySet())
         .removeIf(
-            remoteSubscriptionContext -> Objects
-                .equals(remoteSubscriptionContext.getEndpointId(), endpointId));
+            remoteSubscriptionContext ->
+                Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
   }
 }

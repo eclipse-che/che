@@ -267,7 +267,6 @@ public class WsMasterModule extends AbstractModule {
 
   private void configureMultiUserMode(
       Map<String, String> persistenceProperties, String infrastructure) {
-
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(new ReplicationModule(persistenceProperties));
