@@ -162,10 +162,27 @@ public class ProjectExplorerPresenter extends BasePresenter
               for (Node node : event.getReceivedNodes()) {
                 if (node instanceof ResourceNode
                     && expandQueue.remove(((ResourceNode) node).getData().getLocation())) {
-                  view.getTree().setExpanded(node, true);
+                  expandNode(node);
                 }
               }
             });
+
+    view.getTree()
+        .addNodeAddedHandler(
+            event ->
+                event
+                    .getNodes()
+                    .stream()
+                    .filter(node -> node instanceof ResourceNode)
+                    .forEach(
+                        node ->
+                            node.getChildren(false)
+                                .then(
+                                    children -> {
+                                      if (!children.isEmpty()) {
+                                        expandNode(node);
+                                      }
+                                    })));
 
     treeExpander = new ProjectExplorerTreeExpander(view.getTree(), appContext);
 
@@ -179,6 +196,10 @@ public class ProjectExplorerPresenter extends BasePresenter
             partStack.setActivePart(ProjectExplorerPresenter.this);
           }
         });
+  }
+
+  private void expandNode(Node node) {
+    view.getTree().setExpanded(node, true);
   }
 
   private void onWorkspaceStopped() {
