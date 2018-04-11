@@ -308,7 +308,7 @@ public class TestGitHubRepository {
     return IOUtils.toString(ghRepo.getFileContent(pathToFile).read(), "UTF-8");
   }
 
-  public String getRepoSha() throws IOException {
+  public String getDefaultBranchSha() throws IOException {
     return getReferenceToDefaultBranch().getObject().getSha();
   }
 
@@ -330,7 +330,7 @@ public class TestGitHubRepository {
         ghRepo.createCommit().tree(submoduleSha).message("Create submodule").create();
 
     getReferenceToDefaultBranch().updateTo(treeCommit.getSHA1(), true);
-    createGitModulesFile(pathToRootContentDirectory, pathForSubmodule);
+    setupSubmoduleConfig(pathToRootContentDirectory, pathForSubmodule);
   }
 
   private boolean isGitmodulesFileExist() throws IOException {
@@ -342,33 +342,38 @@ public class TestGitHubRepository {
             .count();
   }
 
-  private String createTreeWithSubmodule(
-      TestGitHubRepository targetRepository, String pathForSubmodule) throws IOException {
+  private String createTreeWithSubmodule(TestGitHubRepository submodule, String pathForSubmodule)
+      throws IOException {
     return ghRepo
         .createTree()
-        .baseTree(this.getRepoSha())
+        .baseTree(this.getDefaultBranchSha())
         .entry(
             pathForSubmodule,
             TreeElementMode.SUBMODULE.get(),
             GitNodeType.COMMIT.get(),
-            targetRepository.getRepoSha(),
+            submodule.getDefaultBranchSha(),
             null)
         .create()
         .getSha();
   }
 
-  private String getSubmoduleConfig(TestGitHubRepository targetRepository, String pathToSubmodule) {
-    String repoName = Paths.get(pathToSubmodule).getFileName().toString();
-    String repoUrl = targetRepository.getHtmlUrl() + ".git";
+  private String getSubmoduleConfig(TestGitHubRepository submodule, String pathToSubmoduleContent) {
+    String repoName = Paths.get(pathToSubmoduleContent).getFileName().toString();
+    String repoUrl = submodule.getHtmlUrl() + ".git";
     String modulePattern = "[submodule \"%s\"]\n\tpath = %s\n\turl = %s";
 
-    return String.format(modulePattern, repoName, pathToSubmodule, repoUrl);
+    return String.format(modulePattern, repoName, pathToSubmoduleContent, repoUrl);
   }
 
-  private void createGitModulesFile(TestGitHubRepository targetRepository, String pathForSubmodule)
+  /**
+   * Creates ".gitmodules" file or updates if it already exist.
+   *
+   * @see <a href="https://git-scm.com/docs/gitmodules">gitmodules </a>
+   */
+  private void setupSubmoduleConfig(TestGitHubRepository submodule, String pathToSubmoduleContent)
       throws IOException {
     final String gitmodulesFileName = ".gitmodules";
-    String submoduleConfig = getSubmoduleConfig(targetRepository, pathForSubmodule);
+    String submoduleConfig = getSubmoduleConfig(submodule, pathToSubmoduleContent);
 
     if (isGitmodulesFileExist()) {
       GHContent submoduleFileContent = ghRepo.getFileContent(gitmodulesFileName);
