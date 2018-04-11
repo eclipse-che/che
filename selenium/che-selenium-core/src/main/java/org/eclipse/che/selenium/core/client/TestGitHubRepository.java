@@ -73,14 +73,14 @@ public class TestGitHubRepository {
   }
 
   /**
-   * Creates reference to the new branch with {@code branchName} from default branch.
+   * Creates reference to the new branch with {@code branch} from default branch.
    *
-   * @param branchName is a name of new branch
+   * @param branchName name of the branch which should be created
    * @return reference to the new branch
    * @throws IOException
    */
   public GHRef createBranch(String branchName) throws IOException {
-    GHRef defaultBranch = ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
+    GHRef defaultBranch = getReferenceToDefaultBranch();
     return ghRepo.createRef("refs/heads/" + branchName, defaultBranch.getObject().getSha());
   }
 
@@ -92,8 +92,12 @@ public class TestGitHubRepository {
    * @throws IOException
    */
   public GHRef createTag(String tagName) throws IOException {
-    GHRef defaultBranch = ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
+    GHRef defaultBranch = getReferenceToDefaultBranch();
     return ghRepo.createRef("refs/tags/" + tagName, defaultBranch.getObject().getSha());
+  }
+
+  private GHRef getReferenceToDefaultBranch() throws IOException {
+    return ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
   }
 
   public void setDefaultBranch(String branchName) throws IOException {

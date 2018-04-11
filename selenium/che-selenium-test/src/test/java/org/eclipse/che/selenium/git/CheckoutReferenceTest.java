@@ -104,8 +104,8 @@ public class CheckoutReferenceTest {
     String hashCommit = sha1.substring(0, 8);
     String wrongHashCommit = String.format("%s ##", hashCommit);
     String failMessage = String.format("Branch name %s is not allowed", wrongHashCommit);
-    // import the test repo
 
+    // import the test repo
     projectExplorer.waitProjectExplorer();
     git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, BLANK);
 
@@ -131,6 +131,7 @@ public class CheckoutReferenceTest {
     performCheckoutReference(hashCommit);
 
     editor.selectTabByName(JS_FILE);
+    editor.waitTextIntoEditor(CHANGE_FILE);
     editor.waitTextNotPresentIntoEditor(UPDATE_FILE);
 
     // switch to default branch

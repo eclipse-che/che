@@ -134,9 +134,7 @@ public class GitHistory {
   /** Returns all cells from top row divided by "\n" */
   private String getGitHistoryTopContent() {
     String rowTopIndex = Integer.toString(0);
-    return seleniumWebDriverHelper
-        .waitVisibility(
-            By.xpath(String.format(Locators.HISTORY_ROW_NUMBER, rowTopIndex)), ELEMENT_TIMEOUT_SEC)
-        .getText();
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(
+        By.xpath(String.format(Locators.HISTORY_ROW_NUMBER, rowTopIndex)));
   }
 }
