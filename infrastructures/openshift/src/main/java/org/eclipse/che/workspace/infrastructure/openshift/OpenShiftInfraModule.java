@@ -14,6 +14,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
@@ -32,10 +33,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftInfraModule extends AbstractModule {
@@ -65,6 +69,10 @@ public class OpenShiftInfraModule extends AbstractModule {
     volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
+
+    bind(new TypeLiteral<ExternalServerExposerStrategy<OpenShiftEnvironment>>() {})
+        .to(OpenShiftExternalServerExposer.class);
+    bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);

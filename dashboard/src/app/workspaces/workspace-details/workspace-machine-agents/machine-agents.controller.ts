@@ -18,7 +18,7 @@ export interface IAgentItem extends che.IAgent {
 }
 
 /** List of the locked agents which shouldn't be switched by user */
-const LOCKED_AGENTS: Array<string> = ['org.eclipse.che.ws-agent', 'com.codenvy.rsync_in_machine', 'com.codenvy.external_rsync'];
+const LOCKED_AGENTS: Array<string> = ['com.codenvy.rsync_in_machine', 'com.codenvy.external_rsync'];
 const LATEST: string = 'latest';
 /**
  * @ngdoc controller

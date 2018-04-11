@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -51,6 +52,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private Wizard wizard;
   @Inject private CommandsToolbar commandsToolbar;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private NotificationsPopupPanel notificationsPanel;
   @Inject private MachineTerminal terminal;
   @Inject private TestProjectServiceClient projectService;
@@ -149,7 +151,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private boolean switchToOpenedWindowAndCheckTextIsPresent(
       String currentWindow, String expectedText) {
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     boolean result = getBodyText().contains(expectedText);
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
@@ -166,7 +168,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private Boolean isPreviewPageAvailable(String currentWindow, String expectedText) {
     consoles.clickOnPreviewUrl();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
     if (getBodyText().contains(expectedText)) {
       seleniumWebDriver.close();

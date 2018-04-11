@@ -39,7 +39,7 @@ public class RouteTlsProvisioner implements ConfigurationProvisioner<OpenShiftEn
   private final boolean isTlsEnabled;
 
   @Inject
-  public RouteTlsProvisioner(@Named("che.infra.openshift.tls_enabled") boolean isTlsEnabled) {
+  public RouteTlsProvisioner(@Named("che.infra.kubernetes.tls_enabled") boolean isTlsEnabled) {
     this.isTlsEnabled = isTlsEnabled;
   }
 

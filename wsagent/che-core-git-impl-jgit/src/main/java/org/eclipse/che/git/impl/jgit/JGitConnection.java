@@ -21,6 +21,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.api.git.params.CommitParams.create;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
@@ -1779,19 +1780,23 @@ class JGitConnection implements GitConnection {
 
   @Override
   public RevertResult revert(String commit) throws GitException {
-    RevCommit revCommit;
+    String newHead = null;
     RevertCommand revertCommand = getGit().revert();
     try {
       revertCommand.include(this.repository.resolve(commit));
-      revCommit = revertCommand.call();
+      RevCommit revCommit = revertCommand.call();
+      // JGit sets commit author of revert commit from OS preferences.
+      // Do amend commit to reset commit author.
+      if (revCommit != null && revCommit.getFullMessage() != null) {
+        newHead = commit(create(revCommit.getFullMessage()).withAmend(true)).getId();
+      }
     } catch (IOException | GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }
-
     return newDto(RevertResult.class)
         .withRevertedCommits(getRevertedCommits(revertCommand))
         .withConflicts(getRevertConflicts(revertCommand))
-        .withNewHead(revCommit != null ? revCommit.getId().getName() : null);
+        .withNewHead(newHead);
   }
 
   private List<String> getRevertedCommits(RevertCommand revertCommand) {
