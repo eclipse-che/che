@@ -45,6 +45,11 @@
             <classifier>tests</classifier>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-machine-authentication</artifactId>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
@@ -160,6 +165,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-machine-authentication</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>javax.persistence</artifactId>
             <scope>test</scope>
@@ -242,7 +252,8 @@
                                         che-core-api-user,
                                         che-core-api-ssh,
                                         che-core-api-workspace,
-                                        che-core-api-installer</includeArtifactIds>
+                                        che-core-api-installer,
+                                        che-multiuser-machine-authentication</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                     <includeClassifiers>tests</includeClassifiers>
                                 </configuration>

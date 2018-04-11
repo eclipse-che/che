@@ -11,6 +11,9 @@
 package org.eclipse.che.selenium.pageobject.git;
 
 import static java.util.Arrays.stream;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -930,6 +933,17 @@ public class Git {
         TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
         TestMenuCommandsConstants.Git.Remotes.PUSH);
     waitPushFormToOpen();
+    clickPush();
+    waitPushFormToClose();
+  }
+
+  public void pushChanges(boolean withForce) {
+    menu.runCommand(GIT, REMOTES_TOP, PUSH);
+    loader.waitOnClosed();
+    waitPushFormToOpen();
+    if (withForce) {
+      selectForcePushCheckBox();
+    }
     clickPush();
     waitPushFormToClose();
   }

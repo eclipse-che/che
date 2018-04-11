@@ -21,6 +21,8 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Alexander Garagatyi */
 @Singleton
@@ -28,8 +30,8 @@ public class IngressAnnotationsProvider implements Provider<Map<String, String>>
 
   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
   private static final Type type = new TypeToken<Map<String, String>>() {}.getType();
-
-  private Map<String, String> annotations;
+  private final Map<String, String> annotations;
+  private static final Logger LOG = LoggerFactory.getLogger(IngressAnnotationsProvider.class);
 
   @Inject
   public IngressAnnotationsProvider(
@@ -39,6 +41,9 @@ public class IngressAnnotationsProvider implements Provider<Map<String, String>>
       annotations = GSON.fromJson(annotationsString, type);
     } else {
       annotations = Collections.emptyMap();
+      LOG.warn(
+          "Ingresses annotations are absent. Make sure that workspace ingresses don't need "
+              + "to be configured according to ingress controller.");
     }
   }
 

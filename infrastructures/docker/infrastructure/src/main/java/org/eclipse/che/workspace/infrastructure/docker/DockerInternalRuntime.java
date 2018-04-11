@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -180,7 +181,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       WorkspaceProbesFactory probesFactory,
       ParallelDockerImagesBuilderFactory imagesBuilderFactory,
       int bootstrappingTimeoutMinutes) {
-    super(context, urlRewriter, warnings, running);
+    super(context, urlRewriter, warnings, running ? WorkspaceStatus.RUNNING : null);
     this.networks = networks;
     this.containerStarter = machineStarter;
     this.eventService = eventService;

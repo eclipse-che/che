@@ -13,17 +13,14 @@ package org.eclipse.che.workspace.infrastructure.openshift.server;
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
 
-import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.IntOrString;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
-import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
@@ -89,18 +86,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  * @author Alexander Garagatyi
  * @see Annotations
  */
-public class OpenShiftServerExposer extends KubernetesServerExposer<OpenShiftEnvironment> {
-
-  private final OpenShiftEnvironment openShiftEnvironment;
-
-  public OpenShiftServerExposer(
-      String machineName, Pod pod, Container container, OpenShiftEnvironment openShiftEnvironment) {
-    super(Collections.emptyMap(), machineName, pod, container, openShiftEnvironment);
-    this.openShiftEnvironment = openShiftEnvironment;
-  }
+public class OpenShiftExternalServerExposer
+    implements ExternalServerExposerStrategy<OpenShiftEnvironment> {
 
   @Override
-  protected void exposeExternalServers(
+  public void exposeExternalServers(
+      OpenShiftEnvironment openShiftEnvironment,
+      String machineName,
       String serviceName,
       Map<String, ServicePort> portToServicePort,
       Map<String, ServerConfig> externalServers) {
