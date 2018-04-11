@@ -26,9 +26,9 @@ spec:
     spec:
       initContainers:
 {{- if .Values.global.multiuser }}
-      - name: wait-for-postgres
+      - name: wait-for-postgres-and-keycloak
         image: alpine:3.5
-        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        command: ["sh", "-c", "apk --no-cache add curl jq ; pg_adresses_length=0 ; kc_adresses_length=0 ; until [ $pg_adresses_length -gt 0 -a $kc_adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; pg_adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/keycloak`; kc_adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"` ; done;"]
         env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -46,11 +46,6 @@ spec:
 {{- end }}
       containers:
       - env:
-        - name: CHE_DOMAIN
-          valueFrom:
-            configMapKeyRef:
-              key: CHE_DOMAIN
-              name: che
         - name: CHE_HOST
           valueFrom:
             configMapKeyRef:
@@ -80,6 +75,11 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: CHE_INFRASTRUCTURE_ACTIVE
+              name: che
+        - name: CHE_INFRA_KUBERNETES_INGRESS_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_INGRESS_DOMAIN
               name: che
         - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
           valueFrom:
@@ -158,6 +158,16 @@ spec:
               key: CHE_KEYCLOAK_REALM
               name: che
 {{- end }}
+        - name: CHE_INFRA_KUBERNETES_TLS__ENABLED
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_TLS__ENABLED
+              name: che
+        - name: CHE_INFRA_KUBERNETES_TLS__SECRET
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_TLS__SECRET
+              name: che
         - name: CHE_INFRA_KUBERNETES_NAMESPACE
           valueFrom:
             configMapKeyRef:
@@ -207,6 +217,11 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON
+              name: che
+        - name: CHE_INFRA_KUBERNETES_SERVER__STRATEGY
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_SERVER__STRATEGY
               name: che
         - name: CHE_LOGS_APPENDERS_IMPL
           valueFrom:

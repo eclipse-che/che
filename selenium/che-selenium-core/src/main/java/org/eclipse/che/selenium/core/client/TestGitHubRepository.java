@@ -279,6 +279,10 @@ public class TestGitHubRepository {
     }
   }
 
+  public String getFileContent(String pathToFile) throws IOException {
+    return IOUtils.toString(ghRepo.getFileContent(pathToFile).read());
+  }
+
   public String getRepoSha() throws IOException {
     return getDefaultBranch().getObject().getSha();
   }
@@ -348,8 +352,8 @@ public class TestGitHubRepository {
     if (isGitmodulesFileExist()) {
       GHContent submoduleFileContent = ghRepo.getFileContent(gitmodulesFileName);
       String fileContent = IOUtils.toString(submoduleFileContent.read());
-      String newFileContent = fileContent + "\n" + submoduleConfig;
-
+      String newFileContent =
+          ""; // = getFileContent(gitmodulesFileName) + "\n" + submodugitmodulesFileName
       submoduleFileContent.update(newFileContent, "Update " + gitmodulesFileName);
       return;
     }
