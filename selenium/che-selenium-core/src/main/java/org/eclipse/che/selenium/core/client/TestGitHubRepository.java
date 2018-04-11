@@ -309,11 +309,7 @@ public class TestGitHubRepository {
   }
 
   public String getRepoSha() throws IOException {
-    return getDefaultBranch().getObject().getSha();
-  }
-
-  public GHRef getDefaultBranch() throws IOException {
-    return ghRepo.getRef("heads/" + ghRepo.getDefaultBranch());
+    return getReferenceToDefaultBranch().getObject().getSha();
   }
 
   public void addSubmodule(Path pathToRootContentDirectory, String submoduleName)
@@ -333,7 +329,7 @@ public class TestGitHubRepository {
     GHCommit treeCommit =
         ghRepo.createCommit().tree(submoduleSha).message("Create submodule").create();
 
-    getDefaultBranch().updateTo(treeCommit.getSHA1(), true);
+    getReferenceToDefaultBranch().updateTo(treeCommit.getSHA1(), true);
     createGitModulesFile(pathToRootContentDirectory, pathForSubmodule);
   }
 
