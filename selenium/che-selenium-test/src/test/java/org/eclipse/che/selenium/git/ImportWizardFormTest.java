@@ -12,6 +12,8 @@ package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.BRANCHES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.GO_BACK;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.GO_INTO;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
@@ -52,7 +54,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Aleksandr Shmaraev */
+/**
+ * @author Aleksandr Shmaraev
+ * @author Ihor Okhrimenko
+ */
 @Test(groups = TestGroup.GITHUB)
 public class ImportWizardFormTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportWizardFormTest.class);
@@ -150,9 +155,7 @@ public class ImportWizardFormTest {
     ide.open(ws);
     String ideWin = seleniumWebDriver.getWindowHandle();
 
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
     importProject.waitMainForm();
     importProject.selectGitHubSourceItem();
     importProject.clickLoadRepoBtn();
@@ -176,9 +179,7 @@ public class ImportWizardFormTest {
     importProject.closeWithIcon();
 
     // import project
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
     importProject.waitMainForm();
     importProject.selectGitHubSourceItem();
     importProject.clickLoadRepoBtn();
@@ -253,9 +254,7 @@ public class ImportWizardFormTest {
     currentProjectName = keepDirectoryRepo.getName();
     projectExplorer.waitProjectExplorer();
 
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
     importProject.waitMainForm();
     loader.waitOnClosed();
@@ -423,9 +422,7 @@ public class ImportWizardFormTest {
 
   private void importRecursivelyFromGitUrl(String url, String projectName) throws Exception {
     loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
     importProject.waitMainForm();
     loader.waitOnClosed();
@@ -459,9 +456,7 @@ public class ImportWizardFormTest {
 
   private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName)
       throws Exception {
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
     importProject.waitMainForm();
     loader.waitOnClosed();
@@ -486,9 +481,7 @@ public class ImportWizardFormTest {
   private void performImportIntoBranch(String url, String projectName, String branchName)
       throws IOException, JsonParseException {
     projectExplorer.waitProjectExplorer();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
     importProject.waitMainForm();
     loader.waitOnClosed();
@@ -562,9 +555,7 @@ public class ImportWizardFormTest {
 
   private void importRecursivelyFromGitHub(String projectName) throws Exception {
     loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
     importProject.waitMainForm();
     loader.waitOnClosed();
@@ -657,9 +648,7 @@ public class ImportWizardFormTest {
   }
 
   private void importIntoBranchFromGitHub() throws Exception {
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
     importProject.waitMainForm();
     loader.waitOnClosed();
