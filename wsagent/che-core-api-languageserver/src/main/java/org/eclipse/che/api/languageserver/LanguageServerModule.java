@@ -10,9 +10,18 @@
  */
 package org.eclipse.che.api.languageserver;
 
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
+
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import java.nio.file.Path;
+import java.util.function.Consumer;
+import org.eclipse.che.api.languageserver.consumers.LanguageServerFileChangeConsumer;
+import org.eclipse.che.api.languageserver.consumers.LanguageServerFileCreateConsumer;
+import org.eclipse.che.api.languageserver.consumers.LanguageServerFileDeleteConsumer;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
@@ -22,8 +31,6 @@ import org.eclipse.che.api.languageserver.registry.LanguageRecognizer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
-import org.eclipse.che.api.languageserver.registry.ServerInitializer;
-import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
 import org.eclipse.che.api.languageserver.remote.LsRemoteModule;
 import org.eclipse.che.api.languageserver.service.LanguageRegistryService;
 import org.eclipse.che.api.languageserver.service.LanguageServerInitializationHandler;
@@ -39,7 +46,6 @@ public class LanguageServerModule extends AbstractModule {
 
     bind(LanguageRecognizer.class).to(DefaultLanguageRecognizer.class);
     bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
-    bind(ServerInitializer.class).to(ServerInitializerImpl.class);
     bind(LanguageRegistryService.class);
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class);
 
@@ -53,5 +59,19 @@ public class LanguageServerModule extends AbstractModule {
     bind(LanguageServerFileWatcher.class).asEagerSingleton();
     bind(LanguageServerInitializationHandler.class).asEagerSingleton();
     install(new FactoryModuleBuilder().build(CheLanguageClientFactory.class));
+
+    configureFileWatcher();
+  }
+
+  private void configureFileWatcher() {
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.create"))
+        .addBinding()
+        .to(LanguageServerFileCreateConsumer.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.delete"))
+        .addBinding()
+        .to(LanguageServerFileDeleteConsumer.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.update"))
+        .addBinding()
+        .to(LanguageServerFileChangeConsumer.class);
   }
 }

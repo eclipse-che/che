@@ -28,6 +28,34 @@ public final class Constants {
 
   public static final String JAVAC = "javac";
 
+  // LS requests timeout constants
+  public static final int REQUEST_TIMEOUT = 10_000;
+  public static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
+  public static final int REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT = 60_000;
+
+  // JSON RPC methods
+  public static final String FILE_STRUCTURE = "java/filestructure";
+  public static final String EXTERNAL_LIBRARIES = "java/externalLibraries";
+  public static final String EXTERNAL_LIBRARIES_CHILDREN = "java/externalLibrariesChildren";
+  public static final String EXTERNAL_LIBRARY_CHILDREN = "java/libraryChildren";
+  public static final String EXTERNAL_LIBRARY_ENTRY = "java/libraryEntry";
+  public static final String CLASS_PATH_TREE = "java/classpathTree";
+  public static final String ORGANIZE_IMPORTS = "java/organizeImports";
+  public static final String EFFECTIVE_POM = "java/effective-pom";
+  public static final String REIMPORT_MAVEN_PROJECTS = "java/reimport-maven-projects";
+  public static final String IMPLEMENTERS = "java/implementers";
+  public static final String USAGES = "java/usages";
+
+  public static final String GET_JAVA_CORE_OPTIONS = "java/getJavaCoreOptions";
+  public static final String UPDATE_JAVA_CORE_OPTIONS = "java/updateJavaCoreOptions";
+  public static final String GET_PREFERENCES = "java/getPreferences";
+  public static final String UPDATE_PREFERENCES = "java/updatePreferences";
+  public static final String RECOMPUTE_POM_DIAGNOSTICS = "java/recomputePomDiagnostics";
+
+  public static final String PROGRESS_REPORT_METHOD = "java/progressReport";
+  public static final String PROGRESS_OUTPUT_UNSUBSCRIBE = "progressOutput/unsubscribe";
+  public static final String PROGRESS_OUTPUT_SUBSCRIBE = "progressOutput/subscribe";
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }

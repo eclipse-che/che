@@ -10,25 +10,29 @@
  */
 package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.util.Collections;
-import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
-import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
+import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
+import org.eclipse.che.plugin.java.languageserver.WorkspaceSynchronizer;
 
 /** @author Vitaly Parfonov */
 @Singleton
-public class MavenProjectInitHandler extends AbstractJavaInitHandler {
+public class MavenProjectInitHandler implements ProjectInitHandler {
 
-  private final Provider<MavenWorkspace> mavenWorkspace;
+  private final WorkspaceSynchronizer workspaceSynchronizer;
 
   @Inject
-  public MavenProjectInitHandler(Provider<MavenWorkspace> mavenWorkspace) {
-    this.mavenWorkspace = mavenWorkspace;
+  public MavenProjectInitHandler(WorkspaceSynchronizer workspaceSynchronizer) {
+    this.workspaceSynchronizer = workspaceSynchronizer;
   }
 
   @Override
@@ -37,7 +41,12 @@ public class MavenProjectInitHandler extends AbstractJavaInitHandler {
   }
 
   @Override
-  protected void initializeClasspath(IJavaProject javaProject) {
-    mavenWorkspace.get().update(Collections.singletonList(javaProject.getProject()));
+  public void onProjectInitialized(String projectFolder)
+      throws ServerException, ForbiddenException, ConflictException, NotFoundException {
+
+    UpdateWorkspaceParameters params = new UpdateWorkspaceParameters();
+    params.setAddedProjectsUri(Collections.singletonList(prefixURI(projectFolder)));
+
+    workspaceSynchronizer.syncronizerWorkspaceAsync(params);
   }
 }

@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.languageserver;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,9 +25,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.registry.CheLanguageClient;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
-import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
-import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
@@ -75,12 +74,12 @@ public class ShowMessageRequestTest {
     CompletableFuture<MessageActionItem> future = new CompletableFuture<>();
     when(transmitter.sendShowMessageRequest(any())).thenReturn(future);
 
-    ServerInitializerImpl initializer = new ServerInitializerImpl();
     CheLanguageClient client = new CheLanguageClient(eventService, transmitter, "id");
-    CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize =
-        initializer.initialize(launcher, client, "/tmp");
-    Pair<LanguageServer, InitializeResult> resultPair = initialize.get();
-    server = resultPair.first;
+    server = launcher.launch("file:///tmp", client);
+    InitializeParams params = new InitializeParams();
+    params.setRootUri("file:///tmp");
+    params.setCapabilities(new ClientCapabilities());
+    server.initialize(params);
     ArgumentCaptor<ShowMessageRequestParams> captor =
         ArgumentCaptor.forClass(ShowMessageRequestParams.class);
     verify(transmitter, timeout(1500)).sendShowMessageRequest(captor.capture());

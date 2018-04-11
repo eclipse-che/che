@@ -19,8 +19,8 @@ import java.util.Map;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
-import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * Storage of the classpath entries.
@@ -31,15 +31,14 @@ import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChangedHandler {
   public static String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
-  private final ClasspathServiceClient classpathServiceClient;
-
-  private Map<String, Promise<List<ClasspathEntryDto>>> classpathes;
+  private final JavaLanguageExtensionServiceClient extensionService;
+  private Map<String, Promise<List<ClasspathEntry>>> classpath;
 
   @Inject
-  public ClasspathContainer(ClasspathServiceClient classpathServiceClient, EventBus eventBus) {
-    this.classpathServiceClient = classpathServiceClient;
-
-    classpathes = new HashMap<>();
+  public ClasspathContainer(
+      JavaLanguageExtensionServiceClient extensionService, EventBus eventBus) {
+    this.extensionService = extensionService;
+    classpath = new HashMap<>();
 
     eventBus.addHandler(ClasspathChangedEvent.TYPE, this);
   }
@@ -51,18 +50,18 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
    * @param projectPath path to the project
    * @return list of the classpath entries
    */
-  public Promise<List<ClasspathEntryDto>> getClasspathEntries(String projectPath) {
-    if (classpathes.containsKey(projectPath)) {
-      return classpathes.get(projectPath);
+  public Promise<List<ClasspathEntry>> getClasspathEntries(String projectPath) {
+    if (classpath.containsKey(projectPath)) {
+      return classpath.get(projectPath);
     } else {
-      Promise<List<ClasspathEntryDto>> result = classpathServiceClient.getClasspath(projectPath);
-      classpathes.put(projectPath, result);
+      Promise<List<ClasspathEntry>> result = extensionService.classpathTree(projectPath);
+      classpath.put(projectPath, result);
       return result;
     }
   }
 
   @Override
   public void onClasspathChanged(ClasspathChangedEvent event) {
-    classpathes.put(event.getPath(), Promises.resolve(event.getEntries()));
+    classpath.put(event.getPath(), Promises.resolve(event.getEntries()));
   }
 }

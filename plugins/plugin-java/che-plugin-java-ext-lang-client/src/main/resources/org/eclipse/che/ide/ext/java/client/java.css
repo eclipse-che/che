@@ -11,6 +11,7 @@
 @eval errorColor org.eclipse.che.ide.api.theme.Style.getErrorColor();
 @eval disableTextColor org.eclipse.che.ide.api.theme.Style.getEditorInfoTextColor();
 @eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
+@eval progressColor org.eclipse.che.ide.api.theme.Style.theme.loaderProgressStatusColor();
 @eval projectExplorerPresentableTextShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerPresentableTextShadow();
 
 .exo-autocomplete-fqn {
@@ -80,4 +81,22 @@
     border-radius: 2px;
     padding-right: 2px;
     padding-left: 2px;
+}
+
+
+.progressContainer {
+    height: 10px;
+    padding: 2px;
+    border: solid black 1px;
+}
+
+.progress {
+    border-radius: 4px;
+    height: 10px;
+    display: block;
+    left: 0;
+    top: 19px;
+    background: -webkit-linear-gradient(left, #4b6cb7, progressColor); /*Chrome, Safari*/
+    background: -moz-linear-gradient(left, #4b6cb7, progressColor); /*Fx (3.6 -15)*/
+    background: linear-gradient(left, #4b6cb7, progressColor);
 }

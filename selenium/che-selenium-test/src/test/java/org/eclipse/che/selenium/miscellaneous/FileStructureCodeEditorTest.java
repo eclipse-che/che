@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -49,6 +50,7 @@ public class FileStructureCodeEditorTest {
   @Inject private Menu menu;
   @Inject private FileStructure fileStructure;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -59,6 +61,7 @@ public class FileStructureCodeEditorTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -70,9 +73,8 @@ public class FileStructureCodeEditorTest {
     // check the highlighted item in editor
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
-    fileStructure.selectItemInFileStructureByDoubleClick("getInstance() : Company");
+    fileStructure.selectItemInFileStructureByDoubleClick("getInstance()");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("getInstance");
     editor.waitSpecifiedValueForLineAndChar(40, 27);
 
@@ -80,15 +82,13 @@ public class FileStructureCodeEditorTest {
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.selectItemInFileStructureByEnter("INSTANCE");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("INSTANCE");
     editor.waitSpecifiedValueForLineAndChar(24, 38);
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
-    fileStructure.selectItemInFileStructureByEnter("getId() : double");
+    fileStructure.selectItemInFileStructureByEnter("getId()");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("getId");
     editor.waitSpecifiedValueForLineAndChar(36, 23);
 

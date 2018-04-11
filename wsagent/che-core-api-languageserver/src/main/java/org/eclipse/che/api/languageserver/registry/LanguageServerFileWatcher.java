@@ -11,23 +11,30 @@
 package org.eclipse.che.api.languageserver.registry;
 
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.lsp4j.FileChangeType.Changed;
+import static org.eclipse.lsp4j.FileChangeType.Created;
+import static org.eclipse.lsp4j.FileChangeType.Deleted;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.util.Collections;
-import java.util.concurrent.CopyOnWriteArrayList;
-import javax.annotation.PreDestroy;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.languageserver.consumers.LanguageServerFileChangeConsumer;
+import org.eclipse.che.api.languageserver.consumers.LanguageServerFileCreateConsumer;
+import org.eclipse.che.api.languageserver.consumers.LanguageServerFileDeleteConsumer;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implement <a
@@ -36,15 +43,22 @@ import org.eclipse.lsp4j.services.LanguageServer;
  */
 @Singleton
 public class LanguageServerFileWatcher {
+  private static final Logger LOG = LoggerFactory.getLogger(LanguageServerFileWatcher.class);
 
-  private final FileWatcherManager watcherManager;
-
-  private CopyOnWriteArrayList<Integer> watcherIds = new CopyOnWriteArrayList<>();
+  private final LanguageServerFileCreateConsumer fileCreateConsumer;
+  private final LanguageServerFileChangeConsumer fileUpdateConsumer;
+  private final LanguageServerFileDeleteConsumer fileDeleteConsumer;
 
   @Inject
   public LanguageServerFileWatcher(
-      FileWatcherManager watcherManager, ServerInitializer serverInitializer) {
-    this.watcherManager = watcherManager;
+      LanguageServerFileCreateConsumer fileCreateConsumer,
+      LanguageServerFileChangeConsumer fileUpdateConsumer,
+      LanguageServerFileDeleteConsumer fileDeleteConsumer,
+      LanguageServerRegistry serverInitializer) {
+    this.fileCreateConsumer = fileCreateConsumer;
+    this.fileUpdateConsumer = fileUpdateConsumer;
+    this.fileDeleteConsumer = fileDeleteConsumer;
+
     serverInitializer.addObserver(this::onServerInitialized);
   }
 
@@ -52,15 +66,9 @@ public class LanguageServerFileWatcher {
     DidChangeWatchedFilesParams params =
         new DidChangeWatchedFilesParams(
             Collections.singletonList(new FileEvent(prefixURI(filePath), changeType)));
-    server.getWorkspaceService().didChangeWatchedFiles(params);
-  }
 
-  @PreDestroy
-  @VisibleForTesting
-  public void removeAllWatchers() {
-    for (Integer watcherId : watcherIds) {
-      watcherManager.unRegisterByMatcher(watcherId);
-    }
+    LOG.debug("sending " + changeType + " to LS: " + filePath);
+    server.getWorkspaceService().didChangeWatchedFiles(params);
   }
 
   private void onServerInitialized(
@@ -69,17 +77,20 @@ public class LanguageServerFileWatcher {
       ServerCapabilities capabilities,
       String projectPath) {
     LanguageServerDescription description = launcher.getDescription();
-    FileSystem fileSystem = FileSystems.getDefault();
-    for (String pattern : description.getFileWatchPatterns()) {
-      PathMatcher matcher = fileSystem.getPathMatcher(pattern);
-      int watcherId =
-          watcherManager.registerByMatcher(
-              matcher,
-              s -> send(server, s, FileChangeType.Created),
-              s -> send(server, s, FileChangeType.Changed),
-              s -> send(server, s, FileChangeType.Deleted));
+    Set<PathMatcher> matchers =
+        description
+            .getFileWatchPatterns()
+            .stream()
+            .map(patternToMatcher())
+            .collect(Collectors.toSet());
 
-      watcherIds.add(watcherId);
-    }
+    fileCreateConsumer.watch(s -> send(server, s, Created), matchers);
+    fileUpdateConsumer.watch(s -> send(server, s, Changed), matchers);
+    fileDeleteConsumer.watch(s -> send(server, s, Deleted), matchers);
+  }
+
+  static Function<String, PathMatcher> patternToMatcher() {
+    FileSystem fileSystem = FileSystems.getDefault();
+    return fileSystem::getPathMatcher;
   }
 }

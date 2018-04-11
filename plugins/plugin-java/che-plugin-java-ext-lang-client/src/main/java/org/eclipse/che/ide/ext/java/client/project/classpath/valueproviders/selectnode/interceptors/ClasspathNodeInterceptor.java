@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors;
 
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 
@@ -25,6 +24,6 @@ public interface ClasspathNodeInterceptor extends NodeInterceptor {
   /** Returns {@code true} if node is valid for this interceptor else returns {@code false}. */
   boolean isNodeValid(Node node);
 
-  /** Returns type of classpath entry. For more details see {@link ClasspathEntryDto} * */
+  /** Returns type of classpath entry. */
   int getKind();
 }

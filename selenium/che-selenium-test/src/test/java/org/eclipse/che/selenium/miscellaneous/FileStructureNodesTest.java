@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -41,94 +42,92 @@ public class FileStructureNodesTest {
   private static final String INTERFACE_NAME = "Inter";
 
   private static final String ITEMS_CLASS =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
-          + "listEmployees\n"
-          + "listId\n"
-          + "listName\n"
-          + "listDate\n"
+      "Company\n"
+          + "Company()\n"
           + "CompanyHelper\n"
           + "INSTANCE\n"
           + "ONE\n"
           + "QWE\n"
           + "TWO\n"
           + "Inter\n"
-          + "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
           + "ASD\n"
           + "FIVE\n"
-          + "TEN";
-
-  private static final String ITEMS_CLASS_1 =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
+          + "TEN\n"
+          + "setDate()\n"
+          + "getId()\n"
+          + "getDate()\n"
+          + "getInstance()\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
+          + "doListId()\n"
+          + "doListName()\n"
+          + "doListDate()\n"
+          + "createListEmpl()\n"
+          + "createListEmpl(int)\n"
+          + "removeEmployee(String)\n"
+          + "getListEmployees()\n"
+          + "sortSalary()\n"
+          + "sortSurname()\n"
+          + "sortId()\n"
+          + "sortDate()";
+
+  private static final String ITEMS_CLASS_1 =
+      "Company\n"
+          + "Company()\n"
           + "CompanyHelper\n"
-          + "Inter";
+          + "Inter\n"
+          + "getInstance()\n"
+          + "listEmployees\n"
+          + "listId\n"
+          + "listName\n"
+          + "listDate\n"
+          + "doListId()\n"
+          + "doListName()\n"
+          + "doListDate()\n"
+          + "createListEmpl()\n"
+          + "createListEmpl(int)\n"
+          + "removeEmployee(String)\n"
+          + "getListEmployees()\n"
+          + "sortSalary()\n"
+          + "sortSurname()\n"
+          + "sortId()\n"
+          + "sortDate()";
 
   private static final String ITEMS_INNER_CLASS = "INSTANCE\n" + "ONE\n" + "QWE\n" + "TWO\n";
 
   private static final String ITEMS_INTERFACE =
-      "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
-          + "ASD\n"
-          + "FIVE\n"
-          + "TEN";
+      "ASD\n" + "FIVE\n" + "TEN\n" + "setDate()\n" + "getId()\n" + "getDate()";
 
   private static final String ITEMS_FILTERED_GET =
       "Company\n"
-          + "getInstance() : Company\n"
-          + "getListEmployees() : List<Employee>\n"
           + "Inter\n"
-          + "getId() : double\n"
-          + "getDate() : String\n";
+          + "getId()\n"
+          + "getDate()\n"
+          + "getInstance()\n"
+          + "getListEmployees()\n";
 
   private static final String ITEMS_FILTERED_I =
       "Company\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
+          + "CompanyHelper\n"
+          + "INSTANCE\n"
+          + "Inter\n"
+          + "FIVE\n"
+          + "getId()\n"
+          + "getInstance()\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
-          + "CompanyHelper\n"
-          + "INSTANCE\n"
-          + "Inter\n"
-          + "getId() : double\n"
-          + "FIVE\n";
+          + "doListId()\n"
+          + "doListName()\n"
+          + "doListDate()\n"
+          + "createListEmpl()\n"
+          + "createListEmpl(int)\n"
+          + "removeEmployee(String)\n"
+          + "getListEmployees()\n"
+          + "sortId()";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -136,6 +135,7 @@ public class FileStructureNodesTest {
   @Inject private Menu menu;
   @Inject private FileStructure fileStructure;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -143,6 +143,7 @@ public class FileStructureNodesTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -173,45 +174,24 @@ public class FileStructureNodesTest {
 
   @Test(priority = 1)
   public void checkFileStructureNodes() {
-    // check work nodes in the 'file structure' by double click
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
-    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
-
     // check work nodes in the 'file structure' by click on the icon
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
-    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
 
     fileStructure.closeFileStructureFormByEscape();
     fileStructure.waitFileStructureFormIsClosed();

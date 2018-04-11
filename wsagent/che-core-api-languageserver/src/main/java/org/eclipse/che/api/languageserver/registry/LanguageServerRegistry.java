@@ -12,12 +12,14 @@ package org.eclipse.che.api.languageserver.registry;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 /** @author Anatoliy Bazko */
-public interface LanguageServerRegistry {
+public interface LanguageServerRegistry extends Observable<ServerInitializerObserver> {
   /**
    * Finds appropriate language servers according to file uri.
    *
@@ -41,4 +43,6 @@ public interface LanguageServerRegistry {
   ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException;
 
   InitializedLanguageServer getServer(String id);
+
+  Optional<InitializedLanguageServer> findServer(Predicate<InitializedLanguageServer> condition);
 }

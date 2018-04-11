@@ -34,8 +34,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
-import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.filters.FuzzyMatches;
@@ -46,9 +44,9 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHel
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 
@@ -70,6 +68,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
   private final FuzzyMatches fuzzyMatches;
   private PromiseProvider promiseProvider;
   private final ThrottledDelayer<List<SymbolEntry>> delayer;
+  private DtoBuildHelper dtoHelper;
 
   @Inject
   public FindSymbolAction(
@@ -78,6 +77,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
       QuickOpenPresenter presenter,
       WorkspaceServiceClient workspaceServiceClient,
       DtoFactory dtoFactory,
+      DtoBuildHelper dtoHelper,
       EditorAgent editorAgent,
       SymbolKindHelper symbolKindHelper,
       FuzzyMatches fuzzyMatches,
@@ -90,6 +90,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
     this.presenter = presenter;
     this.workspaceServiceClient = workspaceServiceClient;
     this.dtoFactory = dtoFactory;
+    this.dtoHelper = dtoHelper;
     this.editorAgent = editorAgent;
     this.symbolKindHelper = symbolKindHelper;
     this.fuzzyMatches = fuzzyMatches;
@@ -143,8 +144,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
     ExtendedWorkspaceSymbolParams params =
         dtoFactory.createDto(ExtendedWorkspaceSymbolParams.class);
     params.setQuery(value);
-    params.setFileUri(
-        editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
+    params.setFileUri(dtoHelper.getUri(editorAgent.getActiveEditor().getEditorInput().getFile()));
     return workspaceServiceClient
         .symbol(params)
         .then(
@@ -168,26 +168,13 @@ public class FindSymbolAction extends AbstractPerspectiveAction
         Location location = element.getLocation();
         if (location != null && location.getUri() != null) {
           String filePath = location.getUri();
-          Range locationRange = location.getRange();
-
-          TextRange range = null;
-          if (locationRange != null) {
-            range =
-                new TextRange(
-                    new TextPosition(
-                        locationRange.getStart().getLine(),
-                        locationRange.getStart().getCharacter()),
-                    new TextPosition(
-                        locationRange.getEnd().getLine(), locationRange.getEnd().getCharacter()));
-          }
           result.add(
               new SymbolEntry(
                   element.getName(),
                   "",
                   filePath,
-                  filePath,
+                  location,
                   symbolKindHelper.from(element.getKind()),
-                  range,
                   symbolKindHelper.getIcon(element.getKind()),
                   editorHelper,
                   matches));

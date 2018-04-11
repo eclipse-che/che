@@ -825,6 +825,16 @@ public class CodenvyEditor {
     return autocompleteContainer.getText();
   }
 
+  /** Scroll autocomplete form to the bottom */
+  public void scrollAutocompleteFormToBottom() {
+    webDriverWaitFactory
+        .get(ELEMENT_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.AUTOCOMPLETE_CONTAINER + "/li[2]")))
+        .sendKeys(Keys.END);
+  }
+
   /**
    * Selects specified {@code item} in the autocomplete proposal container, and presses "ENTER".
    *

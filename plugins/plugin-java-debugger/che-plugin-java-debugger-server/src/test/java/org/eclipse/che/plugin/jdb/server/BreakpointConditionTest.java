@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.plugin.jdb.server;
 
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -44,12 +44,19 @@ public class BreakpointConditionTest {
     ProjectApiUtils.ensure();
 
     Location location =
-        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 17, "/test");
+        new LocationImpl(
+            "/test/src/org/eclipse/BreakpointsByConditionTest.java",
+            17,
+            false,
+            null,
+            "/test",
+            null,
+            -1);
 
     events = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
 
-    ensureSuspendAtDesiredLocation(location, events);
+    ensureDebuggerSuspendAtLocation(location, events);
   }
 
   @AfterClass
@@ -83,7 +90,14 @@ public class BreakpointConditionTest {
   public void shouldStopByCondition() throws Exception {
     Breakpoint breakpoint =
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 24, "/test"),
+            new LocationImpl(
+                "/test/src/org/eclipse/BreakpointsByConditionTest.java",
+                19,
+                false,
+                null,
+                "/test",
+                null,
+                -1),
             true,
             new BreakpointConfigurationImpl("i==5"));
 

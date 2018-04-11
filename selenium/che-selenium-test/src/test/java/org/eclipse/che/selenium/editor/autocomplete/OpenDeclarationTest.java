@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -51,6 +52,7 @@ public class OpenDeclarationTest {
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private Events events;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -75,6 +77,7 @@ public class OpenDeclarationTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -101,53 +104,52 @@ public class OpenDeclarationTest {
 
     editor.goToCursorPositionVisible(26, 10);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("DNSNameServiceDescriptor");
+    editor.waitTabIsPresent("DNSNameServiceDescriptor.class");
     editor.waitActive();
-    editor.setCursorToLine(5);
+    editor.setCursorToLine(4);
     editor.waitTextElementsActiveLine("DNSNameServiceDescriptor");
-    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor");
+    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor.class");
     editor.waitTabIsNotPresent("DNSNameServiceDescriptor");
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(27, 39);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("DNSNameServiceDescriptor");
-    editor.setCursorToLine(11);
+    editor.waitTabIsPresent("DNSNameServiceDescriptor.class");
+    editor.setCursorToLine(13);
     editor.waitTextElementsActiveLine("getProviderName");
-    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor");
+    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor.class");
 
     // check an ability to download source
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(30, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     // editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
-    editor.clickOnDownloadSourcesLink();
     loader.waitOnClosed();
     // editor.waitTextIntoEditor(expectedTextAfterDownloadSources);
 
-    editor.closeFileByNameWithSaving("ModelAndView");
+    editor.closeFileByNameWithSaving("ModelAndView.class");
 
     // check go to class
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(30, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     editor.waitTextElementsActiveLine("ModelAndView");
     editor.waitSpecifiedValueForLineAndChar(44, 14);
-    editor.closeFileByNameWithSaving("ModelAndView");
+    editor.closeFileByNameWithSaving("ModelAndView.class");
 
     // Check go to method
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(43, 16);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     editor.waitTextElementsActiveLine("addObject");
     editor.waitSpecifiedValueForLineAndChar(226, 22);
 
     // Check go to inner method
     editor.goToCursorPositionVisible(227, 9);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     editor.waitTextElementsActiveLine("getModelMap()");
     editor.waitSpecifiedValueForLineAndChar(203, 18);
   }

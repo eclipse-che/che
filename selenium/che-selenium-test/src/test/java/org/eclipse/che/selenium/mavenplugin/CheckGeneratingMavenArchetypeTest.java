@@ -34,6 +34,7 @@ public class CheckGeneratingMavenArchetypeTest {
   @Inject private CodenvyEditor editor;
   @Inject private Ide ide;
   @Inject private TestWorkspace workspace;
+  @Inject private Consoles consoles;
 
   @Test
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
@@ -63,6 +64,7 @@ public class CheckGeneratingMavenArchetypeTest {
     projectWizard.checkVersionOnWizardContainsText("1.0-SNAPSHOT");
     projectWizard.clickCreateButton();
     projectExplorer.waitItem(NAME_OF_ARTIFACT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(NAME_OF_ARTIFACT);
     console.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.quickExpandWithJavaScript();
     expectedItems.forEach(projectExplorer::waitItem);

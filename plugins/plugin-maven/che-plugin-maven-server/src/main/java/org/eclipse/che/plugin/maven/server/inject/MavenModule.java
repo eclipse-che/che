@@ -18,7 +18,6 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.nio.file.PathMatcher;
 import java.util.Collections;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -26,13 +25,10 @@ import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeJsonRpcMessenger;
-import org.eclipse.che.plugin.maven.lsp.MavenLanguageServerLauncher;
-import org.eclipse.che.plugin.maven.server.PomModificationDetector;
 import org.eclipse.che.plugin.maven.server.core.MavenJsonRpcCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenServerNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenTerminalImpl;
-import org.eclipse.che.plugin.maven.server.core.project.PomChangeListener;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenTargetExcludeMatcher;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProviderFactory;
@@ -41,7 +37,6 @@ import org.eclipse.che.plugin.maven.server.projecttype.handler.GeneratorStrategy
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectInitHandler;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.SimpleGeneratorStrategy;
-import org.eclipse.che.plugin.maven.server.rest.MavenServerService;
 
 /** @author Artem Zatsarynnyi */
 @DynaModule
@@ -80,17 +75,13 @@ public class MavenModule extends AbstractModule {
     bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
     bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);
 
-    bind(MavenServerService.class);
     bind(MavenJsonRpcCommunication.class);
     bind(MavenArchetypeJsonRpcMessenger.class);
 
-    bind(PomChangeListener.class).asEagerSingleton();
-    bind(PomModificationDetector.class).asEagerSingleton();
-    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-        .addBinding()
-        .to(MavenLanguageServerLauncher.class)
-        .asEagerSingleton();
-    ;
+    //    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
+    //        .addBinding()
+    //        .to(MavenLanguageServerLauncher.class)
+    //        .asEagerSingleton();
 
     LanguageDescription description = new LanguageDescription();
     description.setLanguageId("pom");

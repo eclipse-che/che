@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -34,9 +35,7 @@ public class FileStructureBaseOperationTest {
   private static final String PROJECT_NAME = generate("project", 4);
 
   private static final String CLASS_MEMBERS_1 =
-      "AppController\n"
-          + "handleRequest(HttpServletRequest, HttpServletResponse) : ModelAndView\n"
-          + "secretNum";
+      "AppController\n" + "secretNum\n" + "handleRequest(HttpServletRequest, HttpServletResponse)";
 
   private static final String CLASS_MEMBERS_2 =
       "AppController\n"
@@ -66,6 +65,7 @@ public class FileStructureBaseOperationTest {
   @Inject private Menu menu;
   @Inject private Loader loader;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -74,6 +74,7 @@ public class FileStructureBaseOperationTest {
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
 
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
