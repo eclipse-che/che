@@ -60,8 +60,8 @@ public class ImportWizardFormTest {
   private static final String TEST_BRANCH = "test-branch";
   private static final String ANOTHER_TEST_BRANCH = "another-test-branch";
   private static final String BRANCH_WITH_CHANGES = "branch-with-changes";
-  private static final String REPO_FOR_TEST_SUBMODULE = "Repo_For_Test";
-  private static final String TEST_REPO_SUBMODULE = "testRepo";
+  private static final String SPRING_SUBMODULE = "Repo_For_Test";
+  private static final String REGULAR_SUBMODULE = "testRepo";
   public static final String MY_LIB_DIRECTORY = "my-lib";
   public static final String TEST_DIRECTORY = "my-lib/src/test";
   private String currentProjectName;
@@ -397,8 +397,8 @@ public class ImportWizardFormTest {
     projectExplorer.waitProjectExplorer();
 
     importRecursivelyFromGitUrl(multimoduleRepo.getHtmlUrl(), currentProjectName);
-    openRepoForTestSubmodule(currentProjectName);
-    openTestRepoSubmodule(currentProjectName);
+    openAndCheckSpringSubmodule(currentProjectName);
+    openAndCheckRegularSubmodule(currentProjectName);
   }
 
   @Test(priority = 8)
@@ -407,8 +407,8 @@ public class ImportWizardFormTest {
     projectExplorer.waitProjectExplorer();
 
     importRecursivelyFromGitUrl(multimoduleRepo.getSshUrl(), currentProjectName);
-    openRepoForTestSubmodule(currentProjectName);
-    openTestRepoSubmodule(currentProjectName);
+    openAndCheckSpringSubmodule(currentProjectName);
+    openAndCheckRegularSubmodule(currentProjectName);
   }
 
   @Test(priority = 9)
@@ -417,8 +417,8 @@ public class ImportWizardFormTest {
     projectExplorer.waitProjectExplorer();
 
     importRecursivelyFromGitHub(currentProjectName);
-    openRepoForTestSubmodule(currentProjectName);
-    openTestRepoSubmodule(currentProjectName);
+    openAndCheckSpringSubmodule(currentProjectName);
+    openAndCheckRegularSubmodule(currentProjectName);
   }
 
   private void importRecursivelyFromGitUrl(String url, String projectName) throws Exception {
@@ -555,10 +555,9 @@ public class ImportWizardFormTest {
     multimoduleRepo.addContent(
         Paths.get(getClass().getResource("/projects/java-multimodule").getPath()));
     multimoduleRepo.addSubmodule(
-        Paths.get(getClass().getResource("/projects/Repo_For_Test").getPath()),
-        REPO_FOR_TEST_SUBMODULE);
+        Paths.get(getClass().getResource("/projects/Repo_For_Test").getPath()), SPRING_SUBMODULE);
     multimoduleRepo.addSubmodule(
-        Paths.get(getClass().getResource("/projects/testRepo").getPath()), TEST_REPO_SUBMODULE);
+        Paths.get(getClass().getResource("/projects/testRepo").getPath()), REGULAR_SUBMODULE);
   }
 
   private void importRecursivelyFromGitHub(String projectName) throws Exception {
@@ -604,9 +603,9 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(projectName);
   }
 
-  private void openRepoForTestSubmodule(String projectName) throws Exception {
+  private void openAndCheckSpringSubmodule(String projectName) throws Exception {
     projectExplorer.openItemByPath(projectName);
-    projectExplorer.waitAndSelectItem(projectName + "/" + REPO_FOR_TEST_SUBMODULE);
+    projectExplorer.waitAndSelectItem(projectName + "/" + SPRING_SUBMODULE);
 
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
@@ -614,7 +613,7 @@ public class ImportWizardFormTest {
 
     projectWizard.waitOpenProjectConfigForm();
     projectWizard.waitTextParentDirectoryName("/" + projectName);
-    projectWizard.waitTextProjectNameInput(REPO_FOR_TEST_SUBMODULE);
+    projectWizard.waitTextProjectNameInput(SPRING_SUBMODULE);
 
     projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
     loader.waitOnClosed();
@@ -625,7 +624,7 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(projectName);
 
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        projectName + "/" + REPO_FOR_TEST_SUBMODULE + "/src/main/java/com.codenvy.example.spring",
+        projectName + "/" + SPRING_SUBMODULE + "/src/main/java/com.codenvy.example.spring",
         "GreetingController.java");
 
     projectExplorer.waitVisibilityByName("HelloWorld.java");
@@ -633,8 +632,8 @@ public class ImportWizardFormTest {
     editor.closeFileByNameWithSaving("GreetingController");
   }
 
-  private void openTestRepoSubmodule(String projectName) throws Exception {
-    projectExplorer.waitAndSelectItem(projectName + "/" + TEST_REPO_SUBMODULE);
+  private void openAndCheckRegularSubmodule(String projectName) throws Exception {
+    projectExplorer.waitAndSelectItem(projectName + "/" + REGULAR_SUBMODULE);
 
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
@@ -642,7 +641,7 @@ public class ImportWizardFormTest {
 
     projectWizard.waitOpenProjectConfigForm();
     projectWizard.waitTextParentDirectoryName("/" + projectName);
-    projectWizard.waitTextProjectNameInput(TEST_REPO_SUBMODULE);
+    projectWizard.waitTextProjectNameInput(REGULAR_SUBMODULE);
 
     projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
     loader.waitOnClosed();
@@ -653,7 +652,7 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(projectName);
 
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        projectName + "/" + TEST_REPO_SUBMODULE + "/src/main/java/com.company.example", "A.java");
+        projectName + "/" + REGULAR_SUBMODULE + "/src/main/java/com.company.example", "A.java");
     editor.closeFileByNameWithSaving("A");
   }
 
