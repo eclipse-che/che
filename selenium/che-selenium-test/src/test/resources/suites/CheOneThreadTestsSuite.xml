@@ -58,7 +58,7 @@
             <class name="org.eclipse.che.selenium.dashboard.organization.AddWorkspaceToOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
-            <class name="org.eclipse.che.selenium.git.CheckBasicGitHubFunctionality"/>
+            <class name="org.eclipse.che.selenium.git.ImportWizardFormTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
