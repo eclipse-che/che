@@ -11,14 +11,13 @@
 package org.eclipse.che.multiuser.api.workspace.activity;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
 
 /**
  * Implementation of
  *
- * @author Anton Korneta
+ * @author Mykhailo Kuznietsov
  */
-@Singleton
 public class MultiUserWorkspaceActivityModule extends AbstractModule {
 
   @Override

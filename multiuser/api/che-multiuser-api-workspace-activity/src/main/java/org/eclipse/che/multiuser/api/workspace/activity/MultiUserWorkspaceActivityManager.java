@@ -12,6 +12,7 @@ package org.eclipse.che.multiuser.api.workspace.activity;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.util.List;
 import java.util.Optional;
 import org.eclipse.che.account.api.AccountManager;
@@ -30,9 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of
+ * Implementation of WorkspaceActivityManager with overriden retrieval of timeout, with using
+ * Resource API to get user's limits
  *
- * @author Anton Korneta
+ * @author Mykhailo Kuznietsov
  */
 @Singleton
 public class MultiUserWorkspaceActivityManager extends WorkspaceActivityManager {

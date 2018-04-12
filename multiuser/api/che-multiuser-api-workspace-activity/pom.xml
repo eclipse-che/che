@@ -41,6 +41,7 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace-activity</artifactId>
+            <version>6.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
