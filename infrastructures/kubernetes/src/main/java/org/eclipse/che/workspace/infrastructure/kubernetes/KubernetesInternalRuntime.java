@@ -109,7 +109,7 @@ public class KubernetesInternalRuntime<
       @Assisted T context,
       @Assisted KubernetesNamespace namespace,
       @Assisted List<Warning> warnings) {
-    super(context, urlRewriter, warnings, false);
+    super(context, urlRewriter, warnings);
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
     this.volumesStrategy = volumesStrategy;

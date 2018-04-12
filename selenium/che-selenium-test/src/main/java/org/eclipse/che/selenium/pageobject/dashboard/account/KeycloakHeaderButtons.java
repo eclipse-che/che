@@ -15,7 +15,7 @@ import static org.openqa.selenium.By.xpath;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Arrays;
-import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 
 /** @author Igor Ohrimenko */

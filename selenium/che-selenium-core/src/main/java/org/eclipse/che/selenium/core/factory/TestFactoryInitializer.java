@@ -41,6 +41,7 @@ import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 
 /** @author Anatolii Bazko */
 @Singleton
@@ -55,6 +56,7 @@ public class TestFactoryInitializer {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Entrance entrance;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   @Named("che.infrastructure")
@@ -100,7 +102,8 @@ public class TestFactoryInitializer {
         testFactoryServiceClient,
         workspaceServiceClient,
         entrance,
-        seleniumWebDriver);
+        seleniumWebDriver,
+        seleniumWebDriverHelper);
   }
 
   /** Builder for {@link TestFactory}. */
@@ -121,7 +124,8 @@ public class TestFactoryInitializer {
           testFactoryServiceClient,
           workspaceServiceClient,
           entrance,
-          seleniumWebDriver);
+          seleniumWebDriver,
+          seleniumWebDriverHelper);
     }
 
     @Override

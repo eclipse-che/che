@@ -1,8 +1,16 @@
 {
 	"ImportPath": "github.com/eclipse/che/agents/go-agents",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v74",
+	"GodepVersion": "v80",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/dgrijalva/jwt-go",
+			"Comment": "v3.1.0",
+			"Rev": "dbeaa9332f19a944acb5736b4456cfcc02140e29"
+		},
 		{
 			"ImportPath": "github.com/eclipse/che-lib/pty",
 			"Comment": "4.6.0-2-g69a9cee",

@@ -10,14 +10,10 @@
  */
 package org.eclipse.che.api.core.notification;
 
-import static java.util.Collections.emptySet;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -25,17 +21,19 @@ import org.eclipse.che.api.core.notification.dto.EventSubscription;
 
 @Singleton
 public class RemoteSubscriptionManager {
-  private final Map<String, Set<SubscriptionContext>> subscriptionContexts =
-      new ConcurrentHashMap<>();
 
   private final EventService eventService;
   private final RequestTransmitter requestTransmitter;
+  private final RemoteSubscriptionStorage remoteSubscriptionStorage;
 
   @Inject
   public RemoteSubscriptionManager(
-      EventService eventService, RequestTransmitter requestTransmitter) {
+      EventService eventService,
+      RequestTransmitter requestTransmitter,
+      RemoteSubscriptionStorage remoteSubscriptionStorage) {
     this.eventService = eventService;
     this.requestTransmitter = requestTransmitter;
+    this.remoteSubscriptionStorage = remoteSubscriptionStorage;
   }
 
   @Inject
@@ -59,26 +57,27 @@ public class RemoteSubscriptionManager {
       String method, Class<T> eventType, BiPredicate<T, Map<String, String>> biPredicate) {
     eventService.subscribe(
         event ->
-            subscriptionContexts
-                .getOrDefault(method, emptySet())
+            remoteSubscriptionStorage
+                .getByMethod(method)
                 .stream()
-                .filter(context -> biPredicate.test(event, context.scope))
-                .forEach(context -> transmit(context.endpointId, method, event)),
+                .filter(context -> biPredicate.test(event, context.getScope()))
+                .forEach(context -> transmit(context.getEndpointId(), method, event)),
         eventType);
   }
 
   private void consumeSubscriptionRequest(String endpointId, EventSubscription eventSubscription) {
-    subscriptionContexts
-        .computeIfAbsent(eventSubscription.getMethod(), k -> ConcurrentHashMap.newKeySet(1))
-        .add(new SubscriptionContext(endpointId, eventSubscription.getScope()));
+    remoteSubscriptionStorage.addSubscription(
+        eventSubscription.getMethod(),
+        new RemoteSubscriptionContext(endpointId, eventSubscription.getScope()));
   }
 
   private void consumeUnSubscriptionRequest(
       String endpointId, EventSubscription eventSubscription) {
-    subscriptionContexts
-        .getOrDefault(eventSubscription.getMethod(), emptySet())
+    remoteSubscriptionStorage
+        .getByMethod(eventSubscription.getMethod())
         .removeIf(
-            subscriptionContext -> Objects.equals(subscriptionContext.endpointId, endpointId));
+            remoteSubscriptionContext ->
+                Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
   }
 
   private <T> void transmit(String endpointId, String method, T event) {
@@ -88,15 +87,5 @@ public class RemoteSubscriptionManager {
         .methodName(method)
         .paramsAsDto(event)
         .sendAndSkipResult();
-  }
-
-  private class SubscriptionContext {
-    private final String endpointId;
-    private final Map<String, String> scope;
-
-    private SubscriptionContext(String endpointId, Map<String, String> scope) {
-      this.endpointId = endpointId;
-      this.scope = scope;
-    }
   }
 }

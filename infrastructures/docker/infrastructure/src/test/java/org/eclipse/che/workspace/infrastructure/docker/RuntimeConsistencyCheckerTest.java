@@ -28,7 +28,7 @@ public class RuntimeConsistencyCheckerTest {
 
   @Test(dataProvider = "consistentRuntimesProvider")
   public void consistentRuntimes(InternalEnvironment environment, DockerInternalRuntime runtime)
-      throws ValidationException {
+      throws Exception {
     new RuntimeConsistencyChecker().check(environment, runtime);
   }
 
@@ -37,19 +37,19 @@ public class RuntimeConsistencyCheckerTest {
     expectedExceptions = ValidationException.class
   )
   public void inconsistentRuntimes(InternalEnvironment environment, DockerInternalRuntime runtime)
-      throws ValidationException {
+      throws Exception {
     new RuntimeConsistencyChecker().check(environment, runtime);
   }
 
   @DataProvider
-  private static Object[][] consistentRuntimesProvider() {
+  private static Object[][] consistentRuntimesProvider() throws Exception {
     return new Object[][] {
       {environment("a", "b"), runtime("b", "a")}, {environment("b", "a"), runtime("b", "a")}
     };
   }
 
   @DataProvider
-  private static Object[][] inconsistentRuntimesProvider() {
+  private static Object[][] inconsistentRuntimesProvider() throws Exception {
     return new Object[][] {
       {environment("a", "b"), runtime("a")},
       {environment("a", "b"), runtime("a", "c")},
@@ -71,7 +71,7 @@ public class RuntimeConsistencyCheckerTest {
     return environment;
   }
 
-  private static DockerInternalRuntime runtime(String... names) {
+  private static DockerInternalRuntime runtime(String... names) throws Exception {
     Map<String, DockerMachine> machines = new HashMap<>();
     for (String name : names) {
       machines.put(name, mock(DockerMachine.class));
