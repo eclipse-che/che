@@ -26,7 +26,7 @@ public class MultiUserWorkspaceActivityModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(WorkspaceActivityService.class);
-    bind(WorkspaceActivityManager.class).to(MultiUserWorkspaceActivityManager.class);
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
+    bind(WorkspaceActivityManager.class).to(MultiUserWorkspaceActivityManager.class);
   }
 }
