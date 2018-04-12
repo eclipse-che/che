@@ -67,7 +67,9 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
     projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, nameCommandForKillWsAgent);
 
     toastLoader.waitToastLoaderIsOpen();
+    toastLoader.waitExpectedTextInToastLoader("Workspace agent is not running");
     toastLoader.clickOnToastLoaderButton("Restart");
+    toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime...");
     testWorkspaceServiceClient.waitStatus(workspace.getName(), defaultTestUser.getName(), RUNNING);
   }
 
