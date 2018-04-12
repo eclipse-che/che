@@ -76,6 +76,6 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "workspace-client": "git+https://github.com/akurinnoy/workspace-client.git"
+    "@eclipse-che/workspace-client": "0.0.1-1523456289"
   }
 }

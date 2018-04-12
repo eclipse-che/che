@@ -10,15 +10,15 @@
  */
 'use strict';
 
-import {getMasterApiClient, IWorkspaceMasterApi} from 'workspace-client';
+import WorkspaceClient, {IWorkspaceMasterApi} from '@eclipse-che/workspace-client';
 
-export type IWorkspaceMasterApi = IWorkspaceMasterApi;
+export {IWorkspaceMasterApi};
 
 export class CheWorkspaceJsonRpcClientService {
   static $inject = [];
 
   getMasterApiClient(entryPoint: string): IWorkspaceMasterApi {
-    return getMasterApiClient(entryPoint);
+    return WorkspaceClient.getJsonRpcApi(entryPoint);
   }
 
 }

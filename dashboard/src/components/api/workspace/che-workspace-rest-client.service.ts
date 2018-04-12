@@ -10,19 +10,14 @@
  */
 'use strict';
 
-import {
-  getBackend,
-  getRestApi,
+import WorkspaceClient, {
   IBackend,
   IRemoteAPI,
   IRequestError,
-  IResourceCreateQueryParams
-} from 'workspace-client';
+  IResourceCreateQueryParams as IWorkspaceCreateQueryParams
+} from '@eclipse-che/workspace-client';
 
-export type IBackend = IBackend;
-export type IRemoteAPI = IRemoteAPI;
-export type IRequestError = IRequestError;
-export type IWorkspaceCreateQueryParams = IResourceCreateQueryParams;
+export {IBackend, IRemoteAPI, IRequestError, IWorkspaceCreateQueryParams};
 
 export class CheWorkspaceRestClientService {
   static $inject = ['$q', '$rootScope', 'keycloakAuth'];
@@ -43,9 +38,9 @@ export class CheWorkspaceRestClientService {
     if (keycloakAuth && keycloakAuth.keycloak) {
       headers.Authorization = 'Bearer ' + keycloakAuth.keycloak.token;
     }
-    const restApi = getRestApi({headers});
+    const restApi = WorkspaceClient.getRestApi({headers});
     this._restApi = new RestAPIWrapper(this.$q, this.$rootScope, restApi);
-    this._backend = getBackend();
+    this._backend = WorkspaceClient.getRestBackend();
   }
 
   get restClient(): IRestAPIWrapper {
