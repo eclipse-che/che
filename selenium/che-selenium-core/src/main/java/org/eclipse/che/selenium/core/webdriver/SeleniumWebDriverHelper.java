@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject;
+package org.eclipse.che.selenium.core.webdriver;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;

@@ -13,11 +13,10 @@ package org.eclipse.che.wsagent.server;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import java.net.URI;
-import java.security.PublicKey;
-import org.eclipse.che.MachinePublicKeyProvider;
 import org.eclipse.che.MachineTokenProvider;
 import org.eclipse.che.UriApiEndpointProvider;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.wsagent.server.appstate.AppStateService;
 
 /**
  * Configuration of Che ws agent core part that can be different in different assembly.
@@ -39,8 +38,6 @@ public class CheWsAgentModule extends AbstractModule {
         .annotatedWith(Names.named("wsagent.endpoint"))
         .toProvider(WsAgentURLProvider.class);
 
-    bind(PublicKey.class)
-        .annotatedWith(Names.named("signature.public.key"))
-        .toProvider(MachinePublicKeyProvider.class);
+    bind(AppStateService.class);
   }
 }
