@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.pageobject.git;
 
 import static java.util.Arrays.stream;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.RESET;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
 
@@ -33,52 +34,52 @@ import org.openqa.selenium.support.PageFactory;
 /** @author Aleksandr Shmaraev on 25.11.15 */
 @Singleton
 public class Git {
-  public final GitStatusBar gitStatusBar;
-  private final GitBranches gitBranchesForm;
-  private final GitHistory gitHistoryForm;
-  private final GitAddToIndex gitAddToIndex;
-  private final GitRemoveFromIndex gitRemoveFromIndex;
-  private final GitCommit gitCommit;
-  private final GitPull gitPull;
-  private final GitPush gitPush;
-  private final GitMerge gitMerge;
-  private final GitFetch gitFetch;
-  private final GitCompare gitCompare;
-  private final GitReset gitReset;
-  private final GitReference gitReference;
-  private final Loader loader;
-  private final AskForValueDialog askForValueDialog;
-  private ProjectExplorer projectExplorer;
-  private Menu menu;
-  private ImportProjectFromLocation importProject;
-  private Wizard projectWizard;
-  private MavenPluginStatusBar mavenPluginStatusBar;
-  private AskDialog askDialog;
+  public final  GitStatusBar              gitStatusBar;
+  private final GitBranches               gitBranchesForm;
+  private final GitHistory                gitHistoryForm;
+  private final GitAddToIndex             gitAddToIndex;
+  private final GitRemoveFromIndex        gitRemoveFromIndex;
+  private final GitCommit                 gitCommit;
+  private final GitPull                   gitPull;
+  private final GitPush                   gitPush;
+  private final GitMerge                  gitMerge;
+  private final GitFetch                  gitFetch;
+  private final GitCompare                gitCompare;
+  private final GitReset                  gitReset;
+  private final GitReference              gitReference;
+  private final Loader                    loader;
+  private final AskForValueDialog         askForValueDialog;
+  private       ProjectExplorer           projectExplorer;
+  private       Menu                      menu;
+  private       ImportProjectFromLocation importProject;
+  private       Wizard                    projectWizard;
+  private       MavenPluginStatusBar      mavenPluginStatusBar;
+  private       AskDialog                 askDialog;
 
   @Inject
   public Git(
-      GitStatusBar gitStatusBar,
-      GitBranches gitBranchesForm,
-      GitHistory gitHistoryForm,
-      GitAddToIndex gitAddToIndex,
-      GitRemoveFromIndex gitRemoveFromIndex,
-      GitCommit gitCommit,
-      GitPull gitPull,
-      GitPush gitPush,
-      GitMerge gitMerge,
-      GitFetch gitFetch,
-      GitCompare gitCompare,
-      GitReset gitReset,
-      GitReference gitReference,
-      SeleniumWebDriver seleniumWebDriver,
-      Loader loader,
-      AskForValueDialog askForValueDialog,
-      ProjectExplorer projectExplorer,
-      Menu menu,
-      ImportProjectFromLocation importProject,
-      Wizard projectWizard,
-      MavenPluginStatusBar mavenPluginStatusBar,
-      AskDialog askDialog) {
+          GitStatusBar gitStatusBar,
+          GitBranches gitBranchesForm,
+          GitHistory gitHistoryForm,
+          GitAddToIndex gitAddToIndex,
+          GitRemoveFromIndex gitRemoveFromIndex,
+          GitCommit gitCommit,
+          GitPull gitPull,
+          GitPush gitPush,
+          GitMerge gitMerge,
+          GitFetch gitFetch,
+          GitCompare gitCompare,
+          GitReset gitReset,
+          GitReference gitReference,
+          SeleniumWebDriver seleniumWebDriver,
+          Loader loader,
+          AskForValueDialog askForValueDialog,
+          ProjectExplorer projectExplorer,
+          Menu menu,
+          ImportProjectFromLocation importProject,
+          Wizard projectWizard,
+          MavenPluginStatusBar mavenPluginStatusBar,
+          AskDialog askDialog) {
     this.gitStatusBar = gitStatusBar;
     this.gitBranchesForm = gitBranchesForm;
     this.gitHistoryForm = gitHistoryForm;
@@ -102,6 +103,12 @@ public class Git {
     this.askDialog = askDialog;
     PageFactory.initElements(seleniumWebDriver, this);
   }
+
+
+  public enum  ResetModes {
+    HARD, SOFT, MIX
+  }
+
 
   /** click on git-info panel tab, wait while info panel will close */
   public void closeGitInfoPanel() {
@@ -132,7 +139,8 @@ public class Git {
   /**
    * wait all branches in the main form of branches
    *
-   * @param listNames is the list of names branches
+   * @param listNames
+   *         is the list of names branches
    */
   public void waitAllBranchesInMainForm(String listNames) {
     gitBranchesForm.waitListBranchesInMainForm(listNames);
@@ -162,7 +170,8 @@ public class Git {
   /**
    * wait for the branch search filter label to be with given text.
    *
-   * @param text text to check
+   * @param text
+   *         text to check
    */
   public void waitBranchSearchFilerWithText(String text) {
     gitBranchesForm.waitBranchesForm();
@@ -172,7 +181,8 @@ public class Git {
   /**
    * Type text to the branch search filter.
    *
-   * @param text typed text
+   * @param text
+   *         typed text
    */
   public void typeToBranchSearchFilter(String text) {
     gitBranchesForm.typeSearchFilter(text);
@@ -188,7 +198,8 @@ public class Git {
   /**
    * waiting disappearing a name deleting branch
    *
-   * @param nameOfBranch is a name of branch
+   * @param nameOfBranch
+   *         is a name of branch
    */
   public void waitDisappearBranchName(String nameOfBranch) {
     gitBranchesForm.disappearBranchName(nameOfBranch);
@@ -197,7 +208,8 @@ public class Git {
   /**
    * select needed branch click on delete branch button
    *
-   * @param nameOfBranch is name of branch
+   * @param nameOfBranch
+   *         is name of branch
    */
   public void selectBranchAndClickDelBranch(String nameOfBranch) {
     gitBranchesForm.selectBranchInListAndCheckEnabledButtonDelete(nameOfBranch);
@@ -207,7 +219,8 @@ public class Git {
   /**
    * select needed branch click on checkout button
    *
-   * @param nameOfBranch is name of branch
+   * @param nameOfBranch
+   *         is name of branch
    */
   public void selectBranchAndClickCheckoutBtn(String nameOfBranch) {
     gitBranchesForm.selectBranchAndCheckEnabledButtonCheckout(nameOfBranch);
@@ -224,7 +237,8 @@ public class Git {
   /**
    * select needed branch click on rename button
    *
-   * @param nameOfBranch is name of branch
+   * @param nameOfBranch
+   *         is name of branch
    */
   public void selectBranchAndClickRenameBtn(String nameOfBranch) {
     gitBranchesForm.selectBranchInListAndCheckEnabledButtonRename(nameOfBranch);
@@ -245,7 +259,8 @@ public class Git {
   /**
    * send a text and click on OK button on codenvy window
    *
-   * @param nameOfBranch is a name of branch
+   * @param nameOfBranch
+   *         is a name of branch
    */
   public void typeAndWaitNewBranchName(String nameOfBranch) {
     askForValueDialog.waitFormToOpen();
@@ -332,7 +347,8 @@ public class Git {
   /**
    * wait the files selected by multi-select in the add to index form
    *
-   * @param files is the selected files
+   * @param files
+   *         is the selected files
    */
   public void waitFilesAddToIndexByMultiSelect(String files) {
     gitAddToIndex.waitFilesAddIndexByMultiSelect(files);
@@ -383,7 +399,8 @@ public class Git {
   /**
    * Wait opening form, type commit message, click on 'Commit' button and wait closing form.
    *
-   * @param text text for commit
+   * @param text
+   *         text for commit
    */
   public void waitAndRunCommit(String text) {
     gitCommit.waitMainFormCommit();
@@ -397,8 +414,10 @@ public class Git {
    * Wait opening form, type commit message, click on 'Push After commit' check-box, select remote
    * branch, click on 'Commit' button and wait closing form.
    *
-   * @param text text for commit
-   * @param branch remote branch to push in
+   * @param text
+   *         text for commit
+   * @param branch
+   *         remote branch to push in
    */
   public void waitAndRunCommitWithPush(String text, String branch) {
     gitCommit.waitMainFormCommit();
@@ -414,11 +433,12 @@ public class Git {
    * Wait amend proposal dialog, wait opening form, check 'amend commit' is selected, type new
    * commit message click on 'Commit' button and wait closing form
    *
-   * @param text commit message
+   * @param text
+   *         commit message
    */
   public void waitAndRunAmendCommitMessage(String text) {
     askDialog.acceptDialogWithText(
-        "Nothing to commit, working directory is clean. Would you like to perform amend commit?");
+            "Nothing to commit, working directory is clean. Would you like to perform amend commit?");
     gitCommit.waitMainFormCommit();
     gitCommit.waitAmendCommitIsSelected();
     gitCommit.typeCommitMsg(text);
@@ -431,7 +451,8 @@ public class Git {
    * wait opening form, select 'amend commit' type new commit message click on button OK and wait
    * closing form
    *
-   * @param text is new commit message
+   * @param text
+   *         is new commit message
    */
   public void waitAndRunAmendPreviousCommit(String text) {
     gitCommit.waitMainFormCommit();
@@ -643,7 +664,8 @@ public class Git {
   /**
    * wait expected text into left editor of the 'Git Compare'
    *
-   * @param expText expected value
+   * @param expText
+   *         expected value
    */
   public void waitExpTextIntoCompareLeftEditor(String expText) {
     gitCompare.waitExpectedTextIntoLeftEditor(expText);
@@ -652,7 +674,8 @@ public class Git {
   /**
    * wait expected text into right editor of the 'Git Compare'
    *
-   * @param expText expected value
+   * @param expText
+   *         expected value
    */
   public void waitTextNotPresentIntoCompareRightEditor(String expText) {
     gitCompare.waitTextNotPresentIntoRightEditor(expText);
@@ -667,8 +690,10 @@ public class Git {
   /**
    * set the cursor in the specified line
    *
-   * @param positionLine is the specified number line
-   * @param status is expected line and column position
+   * @param positionLine
+   *         is the specified number line
+   * @param status
+   *         is expected line and column position
    */
   public void setCursorToLine(int positionLine, String status) {
     loader.waitOnClosed();
@@ -708,7 +733,8 @@ public class Git {
   /**
    * select a branch into the git 'Compare with branch' form
    *
-   * @param branchName is name of the branch
+   * @param branchName
+   *         is name of the branch
    */
   public void selectBranchIntoGitCompareBranchForm(String branchName) {
     gitCompare.selectBranchIntoCompareBranchForm(branchName);
@@ -768,7 +794,8 @@ public class Git {
   /**
    * wait expected text into group git compare
    *
-   * @param expText is expected value
+   * @param expText
+   *         is expected value
    */
   public void waitExpTextInGroupGitCompare(String expText) {
     gitCompare.waitExpTextInGroupGitCompare(expText);
@@ -789,7 +816,8 @@ public class Git {
   /**
    * Select file in the 'Git changed files tree panel'.
    *
-   * @param name name of the file
+   * @param name
+   *         name of the file
    */
   public void selectFileInChangedFilesTreePanel(String name) {
     gitCompare.selectChangedFile(name);
@@ -798,7 +826,8 @@ public class Git {
   /**
    * Click the check-box of the item in the 'Git changed files tree panel' of the 'Commit' window.
    *
-   * @param itemName name of the item
+   * @param itemName
+   *         name of the item
    */
   public void clickItemCheckBoxInCommitWindow(String itemName) {
     gitCommit.clickItemCheckBox(itemName);
@@ -808,7 +837,8 @@ public class Git {
    * Wait for item check-box in the 'Git changed files tree panel' in 'Commit' window to be
    * selected.
    *
-   * @param itemName name of the item
+   * @param itemName
+   *         name of the item
    */
   public void waitItemCheckBoxToBeSelectedInCommitWindow(String... itemName) {
     stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeSelected);
@@ -818,7 +848,8 @@ public class Git {
    * Wait for item check-box in the 'Git changed files tree panel' in 'Commit' window to be
    * unselected.
    *
-   * @param itemName name of the item
+   * @param itemName
+   *         name of the item
    */
   public void waitItemCheckBoxToBeUnSelectedInCommitWindow(String... itemName) {
     stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeUnSelected);
@@ -828,7 +859,8 @@ public class Git {
    * Wait for item check-box in the 'Git changed files tree panel' in 'Commit' window to be
    * indeterminate.
    *
-   * @param itemName name of the item
+   * @param itemName
+   *         name of the item
    */
   public void waitItemCheckBoxToBeIndeterminateInCommitWindow(String... itemName) {
     stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeIndeterminate);
@@ -862,7 +894,8 @@ public class Git {
   /**
    * Wait commit is present in the 'Reset Commit' window
    *
-   * @param text text from comment
+   * @param text
+   *         text from comment
    */
   public void waitCommitIsPresentResetWindow(String text) {
     gitReset.waitCommitIsPresent(text);
@@ -871,10 +904,15 @@ public class Git {
   /**
    * Select commit by number of line. Numbering starts at zero.
    *
-   * @param numberLine number of line for commit
+   * @param numberLine
+   *         number of line for commit
    */
   public void selectCommitResetWindow(int numberLine) {
-    gitReset.selectCommit(numberLine);
+    gitReset.selectCommitByNumber(numberLine);
+  }
+
+  public void selectResetToCommitByText(String text) {
+    gitReset.selectCommitByText(text);
   }
 
   /** wait the 'Checkout Reference' form is open */
@@ -891,7 +929,8 @@ public class Git {
    * wait opening reference form, type new reference click on checkout button and wait closing the
    * widget
    *
-   * @param reference the reference defined by user
+   * @param reference
+   *         the reference defined by user
    */
   public void typeReferenceAndConfirm(String reference) {
     gitReference.waitOpeningMainForm();
@@ -909,16 +948,18 @@ public class Git {
   /**
    * Creates a new file, then makes commit and pushes to remote repository.
    *
-   * @param path - full path to the folder in which a new file will be created (e.g.
-   *     "MyProject/src/main/webapp")
-   * @param fileName - name of the new file
+   * @param path
+   *         - full path to the folder in which a new file will be created (e.g.
+   *         "MyProject/src/main/webapp")
+   * @param fileName
+   *         - name of the new file
    */
   public void createNewFileAndPushItToGitHub(String path, String fileName) {
     projectExplorer.waitAndSelectItem(path);
     menu.runCommand(
-        TestMenuCommandsConstants.Project.PROJECT,
-        TestMenuCommandsConstants.Project.New.NEW,
-        TestMenuCommandsConstants.Project.New.FILE);
+            TestMenuCommandsConstants.Project.PROJECT,
+            TestMenuCommandsConstants.Project.New.NEW,
+            TestMenuCommandsConstants.Project.New.FILE);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(fileName);
     askForValueDialog.clickOkBtn();
@@ -929,9 +970,9 @@ public class Git {
     waitAndRunCommit("new file");
     waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT,
-        TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
-        TestMenuCommandsConstants.Git.Remotes.PUSH);
+            TestMenuCommandsConstants.Git.GIT,
+            TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
+            TestMenuCommandsConstants.Git.Remotes.PUSH);
     waitPushFormToOpen();
     clickPush();
     waitPushFormToClose();
@@ -951,8 +992,8 @@ public class Git {
   public void importJavaApp(String url, String nameApp, String typeProject) {
     loader.waitOnClosed();
     menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+            TestMenuCommandsConstants.Workspace.WORKSPACE,
+            TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
     importProject.waitAndTypeImporterAsGitInfo(url, nameApp);
     projectWizard.waitCreateProjectWizardForm();
     projectWizard.selectTypeProject(typeProject);
@@ -964,36 +1005,25 @@ public class Git {
     loader.waitOnClosed();
   }
 
-  public void importJavaAppAndCheckMavenPluginBar(
-      String url, String nameApp, String typeProject, String expectedMessage) {
-    loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
-    importProject.waitAndTypeImporterAsGitInfo(url, nameApp);
-    projectWizard.waitCreateProjectWizardForm();
-    projectWizard.selectTypeProject(typeProject);
-    loader.waitOnClosed();
-    projectWizard.clickSaveButton();
-    loader.waitOnClosed();
-    projectWizard.waitCreateProjectWizardFormIsClosed();
-    projectExplorer.waitItem(nameApp);
-    loader.waitOnClosed();
+  public void doResetToCommitMessage(ResetModes mode, String commitMessage){
+    menu.runCommand(GIT, RESET);
+    waitResetWindowOpen();
+    switch (mode) {
+      case SOFT:
+        selectSoftReset();
+        break;
+      case MIX:
+        select
+        break;
+      case HARD:
+        selectHardReset();
+        break;
+    }
+    selectResetToCommitByText(commitMessage);
+
+    clickResetBtn();
+    waitResetWindowClose();
+
   }
 
-  public void importJavaAppAndCheckMavenPluginBar(String url, String nameApp, String typeProject) {
-    loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
-    importProject.waitAndTypeImporterAsGitInfo(url, nameApp);
-    projectWizard.waitCreateProjectWizardForm();
-    projectWizard.selectTypeProject(typeProject);
-    loader.waitOnClosed();
-    projectWizard.clickSaveButton();
-    loader.waitOnClosed();
-    projectWizard.waitCreateProjectWizardFormIsClosed();
-    projectExplorer.waitItem(nameApp);
-    loader.waitOnClosed();
-  }
 }

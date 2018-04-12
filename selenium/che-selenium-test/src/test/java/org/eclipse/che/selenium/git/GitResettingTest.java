@@ -10,8 +10,14 @@
  */
 package org.eclipse.che.selenium.git;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.RESET;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 
+import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -36,12 +42,6 @@ import org.eclipse.che.selenium.pageobject.git.GitStatusBar;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
-
 public class GitResettingTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
@@ -59,13 +59,13 @@ public class GitResettingTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   private TestWorkspace testWorkspace;
+  private String nameOfProjectForCheckingGitSoftReset = "checkGitSoftReset";
+  private String nameOfProjectForCheckingGitHardReset = "checkGitHardReset";
+  private String nameOfProjectForCheckingGitMixReset = "checkGitMixReset";
 
   @BeforeClass
   public void prepare() throws Exception {
     String phpRepoLocation = "https://github.com/che-samples/web-php-simple.git";
-    String nameOfProjectForCheckingGitSoftReset = "checkGitSoftReset";
-    String nameOfProjectForCheckingGitHardReset = "checkGitHardReset";
-    String nameOfProjectForCheckingGitMixReset = "checkGitMixReset";
 
     List<ProjectConfigDto> list = new ArrayList<>();
 
@@ -97,11 +97,15 @@ public class GitResettingTest {
     ide.open(testWorkspace);
     projects.forEach(item -> projectExplorer.waitItem(item));
     notificationsPopupPanel.waitPopupPanelsAreClosed();
+    projectExplorer.quickExpandWithJavaScript();
   }
 
   @Test
   public void checkSoftReset() {
+    String dateToResetting = "2016 Jan 6 16:18:39";
+    projectExplorer.waitAndSelectItem(nameOfProjectForCheckingGitSoftReset);
 
+    git.waitGitStatusBarWithMess("modified:   README.md");
   }
 
   private ProjectConfigDto setUpTestProject(String projectName, SourceStorageDto gitSource) {

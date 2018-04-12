@@ -10,29 +10,32 @@
  */
 package org.eclipse.che.selenium.pageobject.git;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.pageobject.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Andrey Chizhikov */
 @Singleton
 public class GitReset {
+  @Inject WebDriverWaitFactory webDriverWaitFactory;
+
   interface Locators {
     String RESET_TO_COMMIT_FORM = "gwt-debug-git-reset-window";
     String RESET_BTN = "git-reset-reset";
     String HARD_RESET_LABEL = "gwt-debug-git-reset-hard-label";
     String SOFT_RESET_LABEL = "gwt-debug-git-reset-soft-label";
     String COMMENT = "//div[text()='%s']";
-    String COMMIT_ITEM = "//div[@id='gwt-debug-git-reset-mainForm']//tbody[1]/tr[%s]";
+    String MAIN_FORM_XPATH = "//div[@id='gwt-debug-git-reset-mainForm']";
+    String COMMIT_ITEM = MAIN_FORM_XPATH + "//tbody[1]/tr[%s]";
+    String ITEM_WITH_TEXT_XPATH = MAIN_FORM_XPATH + "//tbody//div[text()='%s']";
   }
 
   @FindBy(id = Locators.RESET_TO_COMMIT_FORM)
@@ -50,20 +53,21 @@ public class GitReset {
   private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
-  public GitReset(SeleniumWebDriver seleniumWebDriver) {
+  public GitReset(SeleniumWebDriver seleniumWebDriver, WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   /** Wait 'Reset to commit' window is open */
   public void waitOpen() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(form));
+    webDriverWaitFactory.get().until(ExpectedConditions.visibilityOf(form));
   }
 
   /** Wait 'Reset to commit' window is close */
   public void waitClose() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get()
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(Locators.RESET_TO_COMMIT_FORM)));
@@ -71,7 +75,8 @@ public class GitReset {
 
   /** Click on 'Reset' button in the 'Reset Commit' window */
   public void clickResetBtn() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(resetBtn))
         .click();
   }
@@ -92,7 +97,8 @@ public class GitReset {
    * @param text text from comment
    */
   public void waitCommitIsPresent(String text) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get()
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(Locators.COMMENT, text))));
@@ -103,11 +109,21 @@ public class GitReset {
    *
    * @param numberLine number of line for commit
    */
-  public void selectCommit(int numberLine) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+  public void selectCommitByNumber(int numberLine) {
+    webDriverWaitFactory
+        .get()
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(Locators.COMMIT_ITEM, numberLine))))
+        .click();
+  }
+
+  public void selectCommitByText(String text) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.ITEM_WITH_TEXT_XPATH, text))))
         .click();
   }
 }
