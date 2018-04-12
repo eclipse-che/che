@@ -74,7 +74,7 @@ public class KeycloakAdminConsoleClient {
   }
 
   public TestUserImpl createUser(RemovableUserProvider testUserProvider) throws IOException {
-    if (cheInfrastructure == DOCKER_INFRASTRUCTURE && !dockerUtil.isCheRunLocally()) {
+    if (!dockerUtil.isCheRunLocally()) {
       throw new IOException(
           "It's impossible to create test user because of Che is running on the different host.");
     }
