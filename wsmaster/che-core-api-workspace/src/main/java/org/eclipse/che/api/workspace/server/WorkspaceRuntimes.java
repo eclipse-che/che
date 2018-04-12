@@ -163,6 +163,7 @@ public class WorkspaceRuntimes {
     }
   }
 
+
   private InternalRuntime<?> getInternalRuntime(String workspaceId)
       throws InfrastructureException, ServerException {
     InternalRuntime<?> runtime = runtimes.get(workspaceId);
@@ -278,7 +279,6 @@ public class WorkspaceRuntimes {
   }
 
   private class StartRuntimeTask implements Runnable {
-
     private final Workspace workspace;
     private final Map<String, String> options;
     private final InternalRuntime runtime;
@@ -381,7 +381,6 @@ public class WorkspaceRuntimes {
   }
 
   private class StopRuntimeTask implements Runnable {
-
     private final Workspace workspace;
     private final Map<String, String> options;
     private final String stoppedBy;
@@ -395,7 +394,6 @@ public class WorkspaceRuntimes {
     @Override
     public void run() {
       String workspaceId = workspace.getId();
-
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
       try {
@@ -498,6 +496,7 @@ public class WorkspaceRuntimes {
     }
 
     InternalRuntime runtime;
+    WorkspaceStatus status;
     try {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       runtime = infra.prepare(identity, internalEnv).getRuntime();
@@ -624,7 +623,6 @@ public class WorkspaceRuntimes {
   }
 
   private class AbnormalRuntimeStopListener implements EventSubscriber<RuntimeStatusEvent> {
-
     @Override
     public void onEvent(RuntimeStatusEvent event) {
       if (event.isFailed()) {
@@ -660,7 +658,6 @@ public class WorkspaceRuntimes {
   }
 
   private static class RuntimeState {
-
     final InternalRuntime runtime;
     final WorkspaceStatus status;
 

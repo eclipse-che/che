@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
@@ -27,9 +26,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
-import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +35,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -52,13 +49,14 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesServerExposerTest {
 
+  @Mock private ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy;
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final Map<String, String> INTERNAL_SERVER_ATTRIBUTE_MAP =
       singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.TRUE.toString());
 
   private static final Pattern SERVER_PREFIX_REGEX =
       Pattern.compile('^' + SERVER_PREFIX + "[A-z0-9]{" + SERVER_UNIQUE_PART_SIZE + "}-pod-main$");
-  public static final String MACHINE_NAME = "pod/main";
+  private static final String MACHINE_NAME = "pod/main";
 
   private KubernetesServerExposer<KubernetesEnvironment> serverExposer;
   private KubernetesEnvironment kubernetesEnvironment;
@@ -81,11 +79,11 @@ public class KubernetesServerExposerTest {
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
     this.serverExposer =
         new KubernetesServerExposer<>(
-            emptyMap(), MACHINE_NAME, pod, container, kubernetesEnvironment);
+            externalServerExposerStrategy, MACHINE_NAME, pod, container, kubernetesEnvironment);
   }
 
   @Test
-  public void shouldExposeContainerPortAndCreateServiceAndIngressForServer() {
+  public void shouldExposeContainerPortAndCreateServiceForServer() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -105,8 +103,7 @@ public class KubernetesServerExposerTest {
   }
 
   @Test
-  public void
-      shouldExposeContainerPortAndCreateServiceAndIngressForServerWhenTwoServersHasTheSamePort() {
+  public void shouldExposeContainerPortAndCreateServiceAndForServerWhenTwoServersHasTheSamePort() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -122,7 +119,7 @@ public class KubernetesServerExposerTest {
 
     // then
     assertEquals(kubernetesEnvironment.getServices().size(), 1);
-    assertEquals(kubernetesEnvironment.getIngresses().size(), 1);
+
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
         "http-server",
@@ -138,8 +135,7 @@ public class KubernetesServerExposerTest {
   }
 
   @Test
-  public void
-      shouldExposeContainerPortsAndCreateServiceAndIngressesForServerWhenTwoServersHasDifferentPorts() {
+  public void shouldExposeContainerPortsAndCreateServiceForServerWhenTwoServersHasDifferentPorts() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -155,7 +151,7 @@ public class KubernetesServerExposerTest {
 
     // then
     assertEquals(kubernetesEnvironment.getServices().size(), 1);
-    assertEquals(kubernetesEnvironment.getIngresses().size(), 2);
+
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
         "http-server",
@@ -172,7 +168,7 @@ public class KubernetesServerExposerTest {
 
   @Test
   public void
-      shouldExposeTcpContainerPortsAndCreateServiceAndIngressForServerWhenProtocolIsMissedInPort() {
+      shouldExposeTcpContainerPortsAndCreateServiceAndForServerWhenProtocolIsMissedInPort() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080", "http", "/api", ATTRIBUTES_MAP);
@@ -184,7 +180,7 @@ public class KubernetesServerExposerTest {
 
     // then
     assertEquals(kubernetesEnvironment.getServices().size(), 1);
-    assertEquals(kubernetesEnvironment.getIngresses().size(), 1);
+
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
         "http-server",
@@ -341,24 +337,6 @@ public class KubernetesServerExposerTest {
     Annotations.Deserializer serviceAnnotations =
         Annotations.newDeserializer(service.getMetadata().getAnnotations());
     assertEquals(serviceAnnotations.machineName(), machineName);
-
-    // ensure that required ingress is created
-    Ingress ingress =
-        kubernetesEnvironment
-            .getIngresses()
-            .get(service.getMetadata().getName() + "-server-" + port);
-    IngressRule ingressRule = ingress.getSpec().getRules().get(0);
-    IngressBackend backend = ingressRule.getHttp().getPaths().get(0).getBackend();
-    assertEquals(backend.getServiceName(), service.getMetadata().getName());
-    assertEquals(backend.getServicePort().getStrVal(), servicePort.getName());
-
-    Annotations.Deserializer ingressAnnotations =
-        Annotations.newDeserializer(ingress.getMetadata().getAnnotations());
-    Map<String, ServerConfigImpl> servers = ingressAnnotations.servers();
-    ServerConfig serverConfig = servers.get(serverNameRegex);
-    assertEquals(serverConfig, expected);
-
-    assertEquals(ingressAnnotations.machineName(), machineName);
   }
 
   private void assertThatInternalServerIsExposed(

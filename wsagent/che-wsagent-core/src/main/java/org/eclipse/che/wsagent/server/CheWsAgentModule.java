@@ -16,6 +16,7 @@ import java.net.URI;
 import org.eclipse.che.MachineTokenProvider;
 import org.eclipse.che.UriApiEndpointProvider;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.wsagent.server.appstate.AppStateService;
 
 /**
  * Configuration of Che ws agent core part that can be different in different assembly.
@@ -36,5 +37,7 @@ public class CheWsAgentModule extends AbstractModule {
     bind(String.class)
         .annotatedWith(Names.named("wsagent.endpoint"))
         .toProvider(WsAgentURLProvider.class);
+
+    bind(AppStateService.class);
   }
 }

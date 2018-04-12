@@ -58,7 +58,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-// TODO Adapt tests
 /** @author Alexander Garagatyi */
 public class InternalRuntimeTest {
   private static final long SECOND_IN_MILLISECONDS = 1_000L;
@@ -131,6 +130,37 @@ public class InternalRuntimeTest {
     internalRuntime.start(emptyMap());
   }
 
+  @Test(
+    expectedExceptions = StateException.class,
+    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
+  )
+  public void shouldNotStartStoppedRuntime() throws Exception {
+    // given
+    setRunningRuntime();
+    internalRuntime.stop(emptyMap());
+
+    // when
+    internalRuntime.start(emptyMap());
+  }
+
+  @Test(
+    dataProvider = "excProvider",
+    expectedExceptions = StateException.class,
+    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
+  )
+  public void shouldNotStartRuntimeThatThrewExceptionOnPreviousStart(Exception e) throws Exception {
+    // given
+    setNewRuntime();
+    doThrow(e).when(internalRuntime).internalStart(emptyMap());
+    try {
+      internalRuntime.start(emptyMap());
+    } catch (Exception ignored) {
+    }
+
+    // when
+    internalRuntime.start(emptyMap());
+  }
+
   @DataProvider(name = "excProvider")
   public static Object[][] excProvider() {
     return new Object[][] {
@@ -191,7 +221,10 @@ public class InternalRuntimeTest {
     internalRuntime.stop(emptyMap());
   }
 
-  @Test
+  @Test(
+    expectedExceptions = StateException.class,
+    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
+  )
   public void shouldNotStartRuntimeAfterStopThatCaughtInfrastructureExceptionInInternalStop()
       throws Exception {
     // given
@@ -206,8 +239,12 @@ public class InternalRuntimeTest {
     internalRuntime.start(emptyMap());
   }
 
-  @Test
-  public void shouldStartRuntimeAfterStopThatCaughtExceptionFromInternalStop(Exception e)
+  @Test(
+    dataProvider = "excProvider",
+    expectedExceptions = StateException.class,
+    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
+  )
+  public void shouldNotStartRuntimeAfterStopThatCaughtExceptionFromInternalStop(Exception e)
       throws Exception {
     // given
     setRunningRuntime();
@@ -597,7 +634,7 @@ public class InternalRuntimeTest {
           new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "id"), null),
           urlRewriter,
           emptyList(),
-          running ? WorkspaceStatus.RUNNING : WorkspaceStatus.STOPPED);
+          running ? WorkspaceStatus.RUNNING : null);
     }
 
     @Override

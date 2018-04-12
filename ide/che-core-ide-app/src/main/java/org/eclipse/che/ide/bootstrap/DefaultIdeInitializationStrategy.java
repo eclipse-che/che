@@ -34,7 +34,6 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
-import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.theme.ThemeAgentImpl;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
@@ -60,7 +59,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   protected final ThemeAgent themeAgent;
   protected final StyleInjector styleInjector;
   protected final Provider<StandardComponentInitializer> standardComponentsInitializerProvider;
-  protected final AppStateManager appStateManager;
   protected final Provider<WorkspacePresenter> workspacePresenterProvider;
   protected final EventBus eventBus;
   protected final DialogFactory dialogFactory;
@@ -74,7 +72,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
       ThemeAgent themeAgent,
       StyleInjector styleInjector,
       Provider<StandardComponentInitializer> standardComponentsInitializerProvider,
-      AppStateManager appStateManager,
       Provider<WorkspacePresenter> workspacePresenterProvider,
       EventBus eventBus,
       DialogFactory dialogFactory) {
@@ -85,7 +82,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     this.themeAgent = themeAgent;
     this.styleInjector = styleInjector;
     this.standardComponentsInitializerProvider = standardComponentsInitializerProvider;
-    this.appStateManager = appStateManager;
     this.workspacePresenterProvider = workspacePresenterProvider;
     this.eventBus = eventBus;
     this.dialogFactory = dialogFactory;
@@ -149,7 +145,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   private Operation<Void> showUI() {
     return aVoid -> {
       standardComponentsInitializerProvider.get().initialize();
-      appStateManager.readStateFromPreferences();
       showRootPresenter();
 
       // Bind browser's window events

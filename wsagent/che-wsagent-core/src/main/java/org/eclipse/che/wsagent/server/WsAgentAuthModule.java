@@ -11,6 +11,9 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
+import java.security.PublicKey;
+import org.eclipse.che.MachinePublicKeyProvider;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
@@ -29,5 +32,8 @@ public class WsAgentAuthModule extends AbstractModule {
   private void configureMultiUserMode() {
     bind(HttpJsonRequestFactory.class).to(AgentHttpJsonRequestFactory.class);
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
+    bind(PublicKey.class)
+        .annotatedWith(Names.named("signature.public.key"))
+        .toProvider(MachinePublicKeyProvider.class);
   }
 }
