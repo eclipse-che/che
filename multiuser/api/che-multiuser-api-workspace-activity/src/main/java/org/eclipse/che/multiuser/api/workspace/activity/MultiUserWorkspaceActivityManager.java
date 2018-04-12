@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.multiuser.api.workspace.activity;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
@@ -32,12 +31,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of
+ *
  * @author Anton Korneta
  */
 @Singleton
 public class MultiUserWorkspaceActivityManager extends WorkspaceActivityManager {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MultiUserWorkspaceActivityManager.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(MultiUserWorkspaceActivityManager.class);
 
   private final AccountManager accountManager;
   private final ResourceManager resourceManager;
@@ -55,7 +56,6 @@ public class MultiUserWorkspaceActivityManager extends WorkspaceActivityManager 
     this.accountManager = accountManager;
     this.resourceManager = resourceManager;
     this.defaultTimeout = defaultTimeout;
-
   }
 
   @Override

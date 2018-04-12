@@ -14,14 +14,10 @@ import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.List;
-import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.account.api.AccountManager;
-import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -29,12 +25,8 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
-import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
-import org.eclipse.che.multiuser.resource.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,8 +119,8 @@ public class WorkspaceActivityManager {
   }
 
   @ScheduleDelay(
-      initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
-      delayParameterName = "che.workspace.activity_check_scheduler_period_s"
+    initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
+    delayParameterName = "che.workspace.activity_check_scheduler_period_s"
   )
   private void invalidate() {
     try {
