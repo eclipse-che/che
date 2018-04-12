@@ -188,21 +188,23 @@ public class ImportWizardFormTest {
     importProject.selectProjectByName(currentProjectName);
 
     importProject.clickImportBtn();
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.clickSaveButton();
+    projectWizard.waitCreateProjectWizardFormIsClosed();
+    projectExplorer.waitItem(currentProjectName);
 
     // check GitHub identity is present in Keycloak account management page
     if (isMultiuser) {
       keycloakFederatedIdentitiesPage.open();
       assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), gitHubUsername);
+      ide.open(ws);
     }
-
-    projectWizard.clickSaveButton();
-    projectExplorer.waitItem(currentProjectName);
   }
 
   @Test(priority = 1)
   public void keepDirectoryImportBySshUrlTest() throws Exception {
-    currentProjectName = keepDirectoryRepo.getName() + "Ssh";
     projectExplorer.waitProjectExplorer();
+    currentProjectName = keepDirectoryRepo.getName() + "Ssh";
 
     makeKeepDirectoryFromGitUrl(
         keepDirectoryRepo.getSshUrl(), currentProjectName, MY_LIB_DIRECTORY);
@@ -220,8 +222,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 2)
   public void keepDirectoryImportByHttpsUrlTest() throws Exception {
-    currentProjectName = keepDirectoryRepo.getName() + "Https";
     projectExplorer.waitProjectExplorer();
+    currentProjectName = keepDirectoryRepo.getName() + "Https";
 
     makeKeepDirectoryFromGitUrl(keepDirectoryRepo.getHtmlUrl(), currentProjectName, TEST_DIRECTORY);
 
@@ -251,8 +253,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 3)
   public void keepDirectoryImportFromGitHub() throws Exception {
-    currentProjectName = keepDirectoryRepo.getName();
     projectExplorer.waitProjectExplorer();
+    currentProjectName = keepDirectoryRepo.getName();
 
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
@@ -310,8 +312,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 4)
   public void checkImportProjectInBranchBySshUrl() throws IOException, JsonParseException {
-    currentProjectName = importBranchRepo.getName() + "Ssh";
     projectExplorer.waitProjectExplorer();
+    currentProjectName = importBranchRepo.getName() + "Ssh";
 
     performImportIntoBranch(importBranchRepo.getSshUrl(), currentProjectName, TEST_BRANCH);
     projectExplorer.waitItem(currentProjectName);
@@ -334,8 +336,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 5)
   public void checkImportProjectInBranchByHttpsUrl() throws IOException, JsonParseException {
-    currentProjectName = importBranchRepo.getName() + "Https";
     projectExplorer.waitProjectExplorer();
+    currentProjectName = importBranchRepo.getName() + "Https";
 
     performImportIntoBranch(importBranchRepo.getHtmlUrl(), currentProjectName, ANOTHER_TEST_BRANCH);
 
@@ -360,8 +362,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 6)
   public void checkImportProjectInBranchFromGitHub() throws Exception {
-    currentProjectName = importBranchRepo.getName();
     projectExplorer.waitProjectExplorer();
+    currentProjectName = importBranchRepo.getName();
 
     importIntoBranchFromGitHub();
 
@@ -392,8 +394,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 7)
   public void checkImportProjectSubmoduleByHttpsUrl() throws Exception {
-    currentProjectName = multimoduleRepo.getName() + "Https";
     projectExplorer.waitProjectExplorer();
+    currentProjectName = multimoduleRepo.getName() + "Https";
 
     importRecursivelyFromGitUrl(multimoduleRepo.getHtmlUrl(), currentProjectName);
     openAndCheckSpringSubmodule(currentProjectName);
@@ -402,8 +404,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 8)
   public void checkImportProjectSubmoduleBySshUrl() throws Exception {
-    currentProjectName = multimoduleRepo.getName() + "Ssh";
     projectExplorer.waitProjectExplorer();
+    currentProjectName = multimoduleRepo.getName() + "Ssh";
 
     importRecursivelyFromGitUrl(multimoduleRepo.getSshUrl(), currentProjectName);
     openAndCheckSpringSubmodule(currentProjectName);
@@ -412,8 +414,8 @@ public class ImportWizardFormTest {
 
   @Test(priority = 9)
   public void checkImportProjectSubmoduleFromGithub() throws Exception {
-    currentProjectName = multimoduleRepo.getName();
     projectExplorer.waitProjectExplorer();
+    currentProjectName = multimoduleRepo.getName();
 
     importRecursivelyFromGitHub(currentProjectName);
     openAndCheckSpringSubmodule(currentProjectName);
