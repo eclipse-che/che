@@ -1709,7 +1709,7 @@ public class JavaModelManager {
     //        }
     //
     //        // set deprecated options using preferences service lookup
-    //        Iterator deprecatedEntries = this.deprecatedOptions.entrySet().iterator();
+    //        Iterator deprecatedEntries = this.deprecatedOptions.mapSlice().iterator();
     //        while (deprecatedEntries.hasNext()) {
     //            Entry entry = (Entry) deprecatedEntries.next();
     //            String propertyName = (String) entry.getKey();

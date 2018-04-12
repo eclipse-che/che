@@ -759,7 +759,7 @@ public class ChePreferences implements IEclipsePreferences {
     }
 
     /* (non-Javadoc)
-     * @see java.util.Hashtable#entrySet()
+     * @see java.util.Hashtable#mapSlice()
      */
     public Set entrySet() {
       TreeSet set =
