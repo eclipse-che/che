@@ -14,10 +14,14 @@ import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.List;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -25,8 +29,12 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
+import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
+import org.eclipse.che.multiuser.resource.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +56,7 @@ public class WorkspaceActivityManager {
 
   private static final String ACTIVITY_CHECKER = "activity-checker";
 
-  private final long timeout;
+  private final long defaultTimeout;
   private final WorkspaceActivityDao activityDao;
   private final EventService eventService;
   private final EventSubscriber<?> workspaceEventsSubscriber;
@@ -60,11 +68,11 @@ public class WorkspaceActivityManager {
       WorkspaceManager workspaceManager,
       WorkspaceActivityDao activityDao,
       EventService eventService,
-      @Named("che.workspace.agent.dev.inactive_stop_timeout_ms") long timeout) {
-    this.timeout = timeout > 0 ? timeout : -1;
+      @Named("che.limits.workspace.idle.timeout") long timeout) {
     this.workspaceManager = workspaceManager;
     this.eventService = eventService;
     this.activityDao = activityDao;
+    this.defaultTimeout = timeout;
     this.workspaceEventsSubscriber =
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
@@ -104,18 +112,23 @@ public class WorkspaceActivityManager {
    * @param activityTime moment in which the activity occurred
    */
   public void update(String wsId, long activityTime) {
-    if (timeout > 0) {
-      try {
+    try {
+      long timeout = getIdleTimeout(wsId);
+      if (timeout > 0) {
         activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
-      } catch (ServerException e) {
-        LOG.error(e.getLocalizedMessage(), e);
       }
+    } catch (NotFoundException | ServerException e) {
+      LOG.error(e.getLocalizedMessage(), e);
     }
   }
 
+  protected long getIdleTimeout(String wsId) throws NotFoundException, ServerException {
+    return defaultTimeout;
+  }
+
   @ScheduleDelay(
-    initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
-    delayParameterName = "che.workspace.activity_check_scheduler_period_s"
+      initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
+      delayParameterName = "che.workspace.activity_check_scheduler_period_s"
   )
   private void invalidate() {
     try {
