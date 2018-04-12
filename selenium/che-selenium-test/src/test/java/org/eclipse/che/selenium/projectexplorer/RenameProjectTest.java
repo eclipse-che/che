@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.projectexplorer;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.RENAME;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -25,6 +26,7 @@ import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -68,7 +70,13 @@ public class RenameProjectTest {
 
     // Wait that project renamed and folder has project type
     projectExplorer.waitItem(NEW_PROJECT_NAME);
-    projectExplorer.waitItemInvisibility(PROJECT_NAME);
+    try {
+      projectExplorer.waitItemInvisibility(PROJECT_NAME);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/9393");
+    }
+
     projectExplorer.waitDefinedTypeOfFolder(NEW_PROJECT_NAME, PROJECT_FOLDER);
 
     // Test that the Rename project dialog is started from menu
