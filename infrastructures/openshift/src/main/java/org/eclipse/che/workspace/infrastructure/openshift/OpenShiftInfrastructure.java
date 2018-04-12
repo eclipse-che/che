@@ -25,6 +25,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -38,6 +39,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final OpenShiftRuntimeContextFactory runtimeContextFactory;
   private final OpenShiftEnvironmentProvisioner osEnvProvisioner;
+  private final KubernetesRuntimeStateCache runtimeStatusesCache;
 
   @Inject
   public OpenShiftInfrastructure(
@@ -45,7 +47,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       OpenShiftRuntimeContextFactory runtimeContextFactory,
       OpenShiftEnvironmentProvisioner osEnvProvisioner,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
-      DockerImageEnvironmentConverter dockerImageEnvConverter) {
+      DockerImageEnvironmentConverter dockerImageEnvConverter,
+      KubernetesRuntimeStateCache runtimeStatusesCache) {
     super(
         NAME,
         ImmutableSet.of(
@@ -55,6 +58,12 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     this.runtimeContextFactory = runtimeContextFactory;
     this.osEnvProvisioner = osEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
+    this.runtimeStatusesCache = runtimeStatusesCache;
+  }
+
+  @Override
+  public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+    return runtimeStatusesCache.getIdentities();
   }
 
   @Override

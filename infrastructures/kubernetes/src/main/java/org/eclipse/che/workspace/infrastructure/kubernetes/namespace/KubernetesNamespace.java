@@ -55,48 +55,65 @@ public class KubernetesNamespace {
   private static final String DEFAULT_SERVICE_ACCOUNT_NAME = "default";
 
   private final String workspaceId;
+  private final String name;
 
   private final KubernetesPods pods;
   private final KubernetesServices services;
   private final KubernetesPersistentVolumeClaims pvcs;
   private final KubernetesIngresses ingresses;
+  private final KubernetesClientFactory clientFactory;
 
   @VisibleForTesting
   protected KubernetesNamespace(
+      KubernetesClientFactory clientFactory,
       String workspaceId,
+      String name,
       KubernetesPods pods,
       KubernetesServices services,
       KubernetesPersistentVolumeClaims pvcs,
       KubernetesIngresses kubernetesIngresses) {
+    this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
+    this.name = name;
     this.pods = pods;
     this.services = services;
     this.pvcs = pvcs;
     this.ingresses = kubernetesIngresses;
   }
 
-  public KubernetesNamespace(KubernetesClientFactory clientFactory, String name, String workspaceId)
-      throws InfrastructureException {
-    this(clientFactory, name, workspaceId, true);
-  }
-
-  protected KubernetesNamespace(
-      KubernetesClientFactory clientFactory, String name, String workspaceId, boolean doPrepare)
-      throws InfrastructureException {
+  public KubernetesNamespace(
+      KubernetesClientFactory clientFactory, String name, String workspaceId) {
+    this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
+    this.name = name;
     this.pods = new KubernetesPods(name, workspaceId, clientFactory);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
-    if (doPrepare) {
-      doPrepare(name, clientFactory.create(workspaceId));
-    }
   }
 
-  private void doPrepare(String name, KubernetesClient client) throws InfrastructureException {
+  /**
+   * Prepare namespace for using.
+   *
+   * <p>Preparing includes creating if needed and waiting for default service account.
+   *
+   * @throws InfrastructureException if any exception occurs during namespace preparing
+   */
+  void prepare() throws InfrastructureException {
+    KubernetesClient client = clientFactory.create(workspaceId);
     if (get(name, client) == null) {
       create(name, client);
     }
+  }
+
+  /** Returns namespace name */
+  public String getName() {
+    return name;
+  }
+
+  /** Returns identifier of the workspace for which current namespace is used */
+  public String getWorkspaceId() {
+    return workspaceId;
   }
 
   /** Returns object for managing {@link Pod} instances inside namespace. */

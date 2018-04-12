@@ -40,8 +40,34 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     this.clientFactory = clientFactory;
   }
 
+  /**
+   * Creates a OpenShift project for the specified workspace.
+   *
+   * <p>The project name will be chosen according to a configuration, and it will be prepared
+   * (created if necessary).
+   *
+   * @param workspaceId identifier of the workspace
+   * @return created project
+   * @throws InfrastructureException if any exception occurs during project preparing
+   */
   public OpenShiftProject create(String workspaceId) throws InfrastructureException {
     final String projectName = isNullOrEmpty(this.projectName) ? workspaceId : this.projectName;
+
+    OpenShiftProject osProject = new OpenShiftProject(clientFactory, projectName, workspaceId);
+    osProject.prepare();
+
+    return osProject;
+  }
+
+  /**
+   * Creates a kubernetes namespace for the specified workspace.
+   *
+   * <p>Project won't be prepared. This method should be used only in case workspace recovering.
+   *
+   * @param workspaceId identifier of the workspace
+   * @return created namespace
+   */
+  public OpenShiftProject create(String workspaceId, String projectName) {
     return new OpenShiftProject(clientFactory, projectName, workspaceId);
   }
 }
