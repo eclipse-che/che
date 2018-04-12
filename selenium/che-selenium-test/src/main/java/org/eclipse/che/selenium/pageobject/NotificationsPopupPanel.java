@@ -18,7 +18,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -42,8 +41,6 @@ public class NotificationsPopupPanel {
   private static final String PROGRESS_POPUP_PANEL_ID = "gwt-debug-popup-container";
   private static final String CLOSE_POPUP_IMG_XPATH =
       "//div[@id='gwt-debug-popup-container']/descendant::*[local-name()='svg'][2]";
-  private static final String RESTART_WORKSPACE_BUTTON =
-      "//div[@id='gwt-debug-popupLoader']//button[text()='Restart']";
 
   @FindBy(id = PROGRESS_POPUP_PANEL_ID)
   private WebElement progressPopupPanel;
@@ -94,14 +91,5 @@ public class NotificationsPopupPanel {
   /** wait disappearance of notification popups */
   public void waitPopupPanelsAreClosed() {
     seleniumWebDriverHelper.waitInvisibility(progressPopupPanel, WIDGET_TIMEOUT_SEC);
-  }
-
-  public void waitWorkspaceAgentIsNotRunning() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(RESTART_WORKSPACE_BUTTON), WIDGET_TIMEOUT_SEC);
-  }
-
-  /** click on the Restart workspace button */
-  public void clickOnRestartWorkspaceButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(RESTART_WORKSPACE_BUTTON));
   }
 }

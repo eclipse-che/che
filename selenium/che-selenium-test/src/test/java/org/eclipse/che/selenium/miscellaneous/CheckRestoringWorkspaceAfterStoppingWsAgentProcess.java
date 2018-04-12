@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
@@ -18,15 +19,14 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRIN
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
  * @author Serhii Skoryk
  */
 public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final String PROJECT_NAME = generate("project", 4);
   private static final String nameCommandForKillWsAgent = "killWsAgent";
   private static final String killPIDWSAgentCommand =
       "kill -9 $(ps ax | grep java | grep ws-agent | grep conf | grep -v grep | awk '{print $1}')";
@@ -47,7 +47,7 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private ToastLoader toastLoader;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -66,8 +66,8 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
 
     projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, nameCommandForKillWsAgent);
 
-    notificationsPopupPanel.waitWorkspaceAgentIsNotRunning();
-    notificationsPopupPanel.clickOnRestartWorkspaceButton();
+    toastLoader.waitToastLoaderIsOpen();
+    toastLoader.clickOnToastLoaderButton("Restart");
     testWorkspaceServiceClient.waitStatus(workspace.getName(), defaultTestUser.getName(), RUNNING);
   }
 
