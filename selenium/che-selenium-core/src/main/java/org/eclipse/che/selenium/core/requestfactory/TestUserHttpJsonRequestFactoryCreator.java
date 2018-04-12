@@ -11,11 +11,9 @@
 package org.eclipse.che.selenium.core.requestfactory;
 
 import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Dmytro Nochevnov */
 public interface TestUserHttpJsonRequestFactoryCreator {
-  TestUserHttpJsonRequestFactory create(
-      @Assisted("name") String name,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken);
+  TestUserHttpJsonRequestFactory create(@Assisted TestUser testUser);
 }

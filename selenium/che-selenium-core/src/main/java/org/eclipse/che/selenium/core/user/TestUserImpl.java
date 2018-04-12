@@ -53,11 +53,13 @@ public class TestUserImpl implements DefaultTestUser, AdminTestUser {
       throws Exception {
     this.authServiceClient = authServiceClient;
     this.testUserProvider = testUserProvider;
-    this.userServiceClient = testUserServiceClientFactory.create(name, password, offlineToken);
+
+    this.name = name;
     this.email = email;
     this.password = password;
-    this.name = name;
     this.offlineToken = offlineToken;
+
+    this.userServiceClient = testUserServiceClientFactory.create(this);
     this.id = userServiceClient.findByEmail(email).getId();
   }
 

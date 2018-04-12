@@ -38,6 +38,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
 import org.slf4j.Logger;
@@ -65,12 +66,8 @@ public class TestWorkspaceServiceClient {
   public TestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted("name") String name,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken) {
-    this(
-        apiEndpointProvider,
-        userHttpJsonRequestFactoryCreator.create(name, password, offlineToken));
+      @Assisted TestUser testUser) {
+    this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(testUser));
   }
 
   private String getBaseUrl() {
