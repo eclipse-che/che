@@ -11,7 +11,10 @@
 package org.eclipse.che.multiuser.api.workspace.activity;
 
 import com.google.inject.AbstractModule;
+import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityService;
 
 /**
  * Implementation of
@@ -22,6 +25,8 @@ public class MultiUserWorkspaceActivityModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(WorkspaceActivityService.class);
     bind(WorkspaceActivityManager.class).to(MultiUserWorkspaceActivityManager.class);
+    bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
   }
 }

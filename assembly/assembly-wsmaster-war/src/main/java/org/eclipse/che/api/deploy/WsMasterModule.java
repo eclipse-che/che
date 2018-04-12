@@ -192,8 +192,6 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-    install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
-
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
@@ -264,6 +262,8 @@ public class WsMasterModule extends AbstractModule {
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
     bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+
+    install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
   }
 
   private void configureMultiUserMode(
