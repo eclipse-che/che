@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
  * @author Musienko Maxim
  * @author Serhii Skoryk
  */
-public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
+public class CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String nameCommandForKillWsAgent = "killWsAgent";
   private static final String killPIDWSAgentCommand =
