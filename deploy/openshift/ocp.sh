@@ -162,8 +162,6 @@ run_ocp() {
     test_dns_provider
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
-    $OC_BINARY login -u system:admin
-    $OC_BINARY create serviceaccount pv-recycler-controller -n openshift-infra
 }
 
 wait_for_postgres() {
