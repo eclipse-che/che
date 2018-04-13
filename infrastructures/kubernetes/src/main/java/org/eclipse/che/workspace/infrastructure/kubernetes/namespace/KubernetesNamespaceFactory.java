@@ -38,9 +38,34 @@ public class KubernetesNamespaceFactory {
     this.clientFactory = clientFactory;
   }
 
+  /**
+   * Creates a Kubernetes namespace for the specified workspace.
+   *
+   * <p>The namespace name will be chosen according to a configuration, and it will be prepared
+   * (created if necessary).
+   *
+   * @param workspaceId identifier of the workspace
+   * @return created namespace
+   * @throws InfrastructureException if any exception occurs during namespace preparing
+   */
   public KubernetesNamespace create(String workspaceId) throws InfrastructureException {
     final String namespaceName =
         isNullOrEmpty(this.namespaceName) ? workspaceId : this.namespaceName;
-    return new KubernetesNamespace(clientFactory, namespaceName, workspaceId);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, namespaceName, workspaceId);
+    namespace.prepare();
+    return namespace;
+  }
+
+  /**
+   * Creates a Kubernetes namespace for the specified workspace.
+   *
+   * <p>Namespace won't be prepared. This method should be used only in case workspace recovering.
+   *
+   * @param workspaceId identifier of the workspace
+   * @return created namespace
+   */
+  public KubernetesNamespace create(String workspaceId, String namespace) {
+    return new KubernetesNamespace(clientFactory, namespace, workspaceId);
   }
 }
