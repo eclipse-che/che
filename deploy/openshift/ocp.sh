@@ -233,7 +233,8 @@ wait_for_che() {
     done
 
     if [ "${progressing}" == "\"True\"" ]; then
-      echo "[CHE] Che deployed successfully"
+      CHE_ROUTE=$(oc get route/che -o=jsonpath='{.spec.host}')
+      echo "[CHE] Che successfully deployed and is available at http://${CHE_ROUTE}"
     elif [ "${progressing}" == "False" ]; then
       echo "[CHE] [ERROR] Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
       exit 1
@@ -253,7 +254,7 @@ deploy_che_to_ocp() {
       fi
       $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml
       wait_for_postgres
-      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_KEYCLOAK=eivantsov/keycloak ${KEYCLOAK_PARAM}
+      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} ${KEYCLOAK_PARAM}
       wait_for_keycloak
       export CHE_MULTIUSER_PARAM="-p CHE_MULTIUSER=true"
     fi
@@ -262,7 +263,7 @@ deploy_che_to_ocp() {
         ENV="-e ${CHE_VAR_ARRAY}"
       fi
 
-    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_CHE=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} ${CHE_MULTIUSER_PARAM} ${ENV}
+    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_CHE=${CHE_IMAGE_REPO} -p CHE_VERSION=${CHE_IMAGE_TAG} ${CHE_MULTIUSER_PARAM} ${ENV}
     $OC_BINARY set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
     echo "Waiting for Che to boot..."
     wait_for_che
