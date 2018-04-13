@@ -26,6 +26,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -56,6 +57,7 @@ public class ImportProjectFromGitHubTest {
   @Inject private TestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
+  @Inject private ToastLoader toastLoader;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
@@ -98,7 +100,7 @@ public class ImportProjectFromGitHubTest {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability(ELEMENT_TIMEOUT_SEC);
-
+    toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(projectName);
     projectExplorer.waitDefinedTypeOfFolder(projectName, PROJECT_FOLDER);

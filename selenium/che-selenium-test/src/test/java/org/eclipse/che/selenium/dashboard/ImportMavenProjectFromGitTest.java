@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -43,6 +44,7 @@ public class ImportMavenProjectFromGitTest {
   @Inject private TestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
+  @Inject private ToastLoader toastLoader;
 
   @BeforeClass
   public void setUp() {
@@ -74,7 +76,7 @@ public class ImportMavenProjectFromGitTest {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-
+    toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
   }

@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -38,6 +39,7 @@ public class ImportProjectFromZipTest {
   @Inject private ProjectExplorer explorer;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
+  @Inject private ToastLoader toastLoader;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;
@@ -74,7 +76,7 @@ public class ImportProjectFromZipTest {
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-
+    toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
     explorer.waitAndSelectItem(PROJECT_NAME);

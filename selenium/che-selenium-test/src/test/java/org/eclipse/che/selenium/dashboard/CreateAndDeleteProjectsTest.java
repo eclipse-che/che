@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -58,6 +59,7 @@ public class CreateAndDeleteProjectsTest {
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
+  @Inject private ToastLoader toastLoader;
 
   @BeforeClass
   public void setUp() {
@@ -86,6 +88,7 @@ public class CreateAndDeleteProjectsTest {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     String dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
 
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);

@@ -62,7 +62,6 @@ public class Ide {
   }
 
   public void waitOpenedWorkspaceIsReadyToUse() {
-    toastLoader.clickOnToastLoaderButton("Start");
     projectExplorer.waitProjectExplorer(PREPARING_WS_TIMEOUT_SEC);
     terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
     menu.waitMenuItemIsEnabled(PROFILE_MENU);

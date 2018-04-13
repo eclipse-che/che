@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
@@ -60,6 +61,7 @@ public class WorkspaceDetailsComposeTest {
   @Inject private WorkspaceMachines workspaceMachines;
   @Inject private WorkspaceEnvVariables workspaceEnvVariables;
   @Inject private Ide ide;
+  @Inject private ToastLoader toastLoader;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -148,7 +150,7 @@ public class WorkspaceDetailsComposeTest {
     // check that created machine exists in the Process Console tree
     workspaceDetails.clickOpenInIdeWsBtn();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-
+    toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
