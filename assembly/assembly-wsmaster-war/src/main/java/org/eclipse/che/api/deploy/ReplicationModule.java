@@ -16,9 +16,9 @@ import java.util.Map;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
-import org.eclipse.che.multiuser.api.subscription.DistributedRemoteSubscriptionStorage;
 import org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceLockService;
 import org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceStatusCache;
+import org.eclipse.che.multiuser.api.subscription.DistributedRemoteSubscriptionStorage;
 import org.eclipse.persistence.config.CacheCoordinationProtocol;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 
