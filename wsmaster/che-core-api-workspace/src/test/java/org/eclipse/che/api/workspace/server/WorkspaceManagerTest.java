@@ -405,8 +405,8 @@ public class WorkspaceManagerTest {
   }
 
   @Test(
-      expectedExceptions = NotFoundException.class,
-      expectedExceptionsMessageRegExp = "Workspace '.*' doesn't contain environment '.*'"
+    expectedExceptions = NotFoundException.class,
+    expectedExceptionsMessageRegExp = "Workspace '.*' doesn't contain environment '.*'"
   )
   public void throwsNotFoundExceptionWhenStartWorkspaceWithNotExistingEnv() throws Exception {
     final WorkspaceImpl workspace = createAndMockWorkspace();
@@ -531,16 +531,16 @@ public class WorkspaceManagerTest {
     machines.put("machine2", machine2);
     TestRuntime runtime = new TestRuntime(machines);
     doAnswer(
-        inv -> {
-          workspace.setStatus(status);
-          workspace.setRuntime(
-              new RuntimeImpl(
-                  runtime.getActiveEnv(),
-                  runtime.getMachines(),
-                  runtime.getOwner(),
-                  runtime.getWarnings()));
-          return null;
-        })
+            inv -> {
+              workspace.setStatus(status);
+              workspace.setRuntime(
+                  new RuntimeImpl(
+                      runtime.getActiveEnv(),
+                      runtime.getMachines(),
+                      runtime.getOwner(),
+                      runtime.getWarnings()));
+              return null;
+            })
         .when(runtimes)
         .injectRuntime(workspace);
     when(runtimes.isAnyRunning()).thenReturn(true);

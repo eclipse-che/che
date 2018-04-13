@@ -11,7 +11,6 @@
 package org.eclipse.che.api.workspace.server;
 
 import java.util.Map;
-import java.util.Set;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
 /** @author Anton Korneta */
@@ -62,7 +61,7 @@ public interface WorkspaceStatusCache {
    */
   WorkspaceStatus putIfAbsent(String workspaceId, WorkspaceStatus status);
 
-  Map<String, WorkspaceStatus> mapSlice();
+  Map<String, WorkspaceStatus> toMap();
 
   boolean containsValue(WorkspaceStatus starting);
 }

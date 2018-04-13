@@ -66,6 +66,11 @@ public final class Constants {
    * Workspace#getAttributes}
    */
   public static final String ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage";
+  /**
+   * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
+   * from {@link Workspace#getAttributes}
+   */
+  public static final String WORKSPACE_RUNTIMES_ID_ATTRIBUTE = "org.eclipse.che.runtimes_id";
 
   public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";
   public static final String COMMAND_GOAL_ATTRIBUTE_NAME = "goal";

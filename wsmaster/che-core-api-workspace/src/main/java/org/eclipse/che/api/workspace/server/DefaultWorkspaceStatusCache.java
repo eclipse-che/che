@@ -12,8 +12,6 @@ package org.eclipse.che.api.workspace.server;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
@@ -54,7 +52,7 @@ public class DefaultWorkspaceStatusCache implements WorkspaceStatusCache {
   }
 
   @Override
-  public Map<String, WorkspaceStatus> mapSlice() {
+  public Map<String, WorkspaceStatus> toMap() {
     return new HashMap<>(delegate);
   }
 
