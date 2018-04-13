@@ -92,7 +92,6 @@ public class AppContextImpl
   private CurrentUser currentUser;
   private WorkspaceImpl workspace;
   private FactoryImpl factory;
-  // private Path projectsRoot;
   private ResourceManager resourceManager;
   private Map<String, String> properties;
 
