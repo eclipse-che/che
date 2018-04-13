@@ -623,14 +623,24 @@ public class WorkspaceRuntimes {
     return !runtimes.isEmpty();
   }
 
-  // TODO check workspace only for this node workspaces by this node
-
   /**
    * Returns true if there is at least one local workspace starting or stopping (it's status is
    * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}), otherwise returns false.
    */
   public boolean isAnyInProgress() {
-    return statusCache.containsValue(STARTING) || statusCache.containsValue(STOPPING);
+    for (Entry<String, WorkspaceStatus> e : statusCache.toMap().entrySet()) {
+      if (STARTING == e.getValue() || STOPPING == e.getValue()) {
+        try {
+          final WorkspaceImpl workspace = workspaceDao.get(e.getKey());
+          if (workspaceRuntimesId.equals(
+              workspace.getAttributes().get(WORKSPACE_RUNTIMES_ID_ATTRIBUTE))) {
+            return true;
+          }
+        } catch (NotFoundException | ServerException ignored) {
+        }
+      }
+    }
+    return false;
   }
 
   /**
