@@ -71,9 +71,4 @@ public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
   public Map<String, WorkspaceStatus> toMap() {
     return new HashMap<>(delegate);
   }
-
-  @Override
-  public boolean containsValue(WorkspaceStatus starting) {
-    return delegate.containsValue(starting);
-  }
 }

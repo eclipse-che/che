@@ -23,7 +23,7 @@ import org.jgroups.blocks.locking.LockService;
 @Singleton
 public class JGroupsWorkspaceLockService implements WorkspaceLockService {
 
-  private static final String CHANNEL_NAME = "WorkspaceLockService";
+  private static final String CHANNEL_NAME = "WorkspaceLocks";
 
   private final LockService lockService;
 
