@@ -270,7 +270,6 @@ public class WorkspaceRuntimes {
                   "Could not start workspace '%s' because its state is '%s'",
                   workspaceId, existingStatus));
         }
-        // TODO check mb it's need to be putIfAbsent
         runtimes.put(workspaceId, runtime);
       }
       LOG.info(
