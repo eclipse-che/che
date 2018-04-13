@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.pageobject.WebDriverWaitFactory;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -32,6 +32,7 @@ public class GitReset {
     String RESET_BTN = "git-reset-reset";
     String HARD_RESET_LABEL = "gwt-debug-git-reset-hard-label";
     String SOFT_RESET_LABEL = "gwt-debug-git-reset-soft-label";
+    String MIXED_RESET_LABEL = "gwt-debug-git-reset-mixed-label";
     String COMMENT = "//div[text()='%s']";
     String MAIN_FORM_XPATH = "//div[@id='gwt-debug-git-reset-mainForm']";
     String COMMIT_ITEM = MAIN_FORM_XPATH + "//tbody[1]/tr[%s]";
@@ -49,6 +50,9 @@ public class GitReset {
 
   @FindBy(id = Locators.SOFT_RESET_LABEL)
   WebElement softResetLabel;
+
+  @FindBy(id = Locators.MIXED_RESET_LABEL)
+  WebElement mixedResetLabel;
 
   private final SeleniumWebDriver seleniumWebDriver;
 
@@ -89,6 +93,11 @@ public class GitReset {
   /** Select 'hard' in the 'Reset Commit' window */
   public void selectSoftReset() {
     softResetLabel.click();
+  }
+
+  /** Select 'mixed' in the 'Reset Commit' window */
+  public void selectMixedReset() {
+    mixedResetLabel.click();
   }
 
   /**
