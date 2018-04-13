@@ -10,11 +10,12 @@
  */
 package org.eclipse.che.ide.navigation;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
-import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Comparator;
@@ -23,6 +24,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -39,7 +41,7 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate {
 
-  private static final int TYPING_PERIOD_DELAY_MS = 400;
+  private static final int TYPING_PERIOD_DELAY_MS = 500;
   private static final Comparator<SearchResultDto> SEARCH_COMPARATOR =
       (o1, o2) -> {
         String ext1 = getFileExtension(o1.getItemReference().getName());
@@ -53,7 +55,54 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
   private final NavigateToFileView view;
   private final AppContext appContext;
 
-  private Timer timer;
+  private DelayedTask searchTask =
+      new DelayedTask() {
+        @Override
+        public void onExecute() {
+          String searchName = view.getFileName();
+
+          if (isNullOrEmpty(searchName)) {
+            view.showItems(emptyList());
+            return;
+          }
+
+          view.setFileNameTextBoxEnabled(false);
+
+          ProjectSearchRequestDto params =
+              dtoFactory
+                  .createDto(ProjectSearchRequestDto.class)
+                  .withPath("")
+                  .withName(searchName + "*");
+
+          requestTransmitter
+              .newRequest()
+              .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+              .methodName("project/search")
+              .paramsAsDto(params)
+              .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
+              .onSuccess(
+                  response -> {
+                    List<SearchResultDto> items =
+                        response
+                            .getItemReferences()
+                            .stream()
+                            .sorted(SEARCH_COMPARATOR)
+                            .collect(toList());
+                    view.showItems(items);
+                    view.setFileNameTextBoxEnabled(true);
+                  })
+              .onFailure(
+                  error -> {
+                    view.setFileNameTextBoxEnabled(true);
+                    Log.error(getClass(), error.getMessage());
+                  })
+              .onTimeout(
+                  () -> {
+                    view.setFileNameTextBoxEnabled(true);
+                    Log.error(getClass(), "Project search request failed due timeout");
+                  });
+        }
+      };
 
   @Inject
   public NavigateToFilePresenter(
@@ -91,47 +140,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
   }
 
   @Override
-  public void onFileNameChanged(final String fileName) {
-    if (fileName.isEmpty()) {
-      view.showItems(emptyList());
-      return;
-    }
-
-    ProjectSearchRequestDto requestParams =
-        dtoFactory.createDto(ProjectSearchRequestDto.class).withPath("").withName(fileName + "*");
-    if (timer != null) {
-      timer.cancel();
-    }
-
-    timer =
-        new Timer() {
-          @Override
-          public void run() {
-            requestTransmitter
-                .newRequest()
-                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                .methodName("project/search")
-                .paramsAsDto(requestParams)
-                .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
-                .onSuccess(
-                    response -> {
-                      // Check that the file name from request corresponds to the actual file name
-                      // from the view.
-                      if (fileName.equals(view.getFileName())) {
-                        prepareResults(response);
-                      }
-                    })
-                .onFailure(error -> Log.error(getClass(), error.getMessage()))
-                .onTimeout(
-                    () -> Log.error(getClass(), "Project search request failed due timeout"));
-          }
-        };
-    timer.schedule(TYPING_PERIOD_DELAY_MS);
-  }
-
-  private void prepareResults(ProjectSearchResponseDto response) {
-    List<SearchResultDto> results = response.getItemReferences();
-    results.sort(SEARCH_COMPARATOR);
-    view.showItems(results);
+  public void onFileNameChanged() {
+    searchTask.delay(TYPING_PERIOD_DELAY_MS);
   }
 }

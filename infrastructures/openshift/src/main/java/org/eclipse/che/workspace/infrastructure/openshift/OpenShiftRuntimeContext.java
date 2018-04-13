@@ -11,14 +11,17 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.inject.assistedinject.Assisted;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
@@ -26,12 +29,14 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftEnvironment> {
   private final OpenShiftRuntimeFactory runtimeFactory;
   private final OpenShiftProjectFactory projectFactory;
+  private final KubernetesRuntimeStateCache runtimeStatuses;
 
   @Inject
   public OpenShiftRuntimeContext(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       OpenShiftProjectFactory projectFactory,
       OpenShiftRuntimeFactory runtimeFactory,
+      KubernetesRuntimeStateCache runtimeStatuses,
       @Assisted OpenShiftEnvironment openShiftEnvironment,
       @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure)
@@ -40,18 +45,39 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
         cheWebsocketEndpoint,
         projectFactory,
         runtimeFactory,
+        runtimeStatuses,
         openShiftEnvironment,
         identity,
         infrastructure);
+    this.runtimeStatuses = runtimeStatuses;
     this.runtimeFactory = runtimeFactory;
     this.projectFactory = projectFactory;
   }
 
   @Override
-  public KubernetesInternalRuntime getRuntime() throws InfrastructureException {
-    return runtimeFactory.create(
-        this,
-        projectFactory.create(getIdentity().getWorkspaceId()),
-        getEnvironment().getWarnings());
+  public OpenShiftInternalRuntime getRuntime() throws InfrastructureException {
+    Optional<KubernetesRuntimeState> runtimeStateOpt = runtimeStatuses.get(getIdentity());
+    String workspaceId = getIdentity().getWorkspaceId();
+
+    if (!runtimeStateOpt.isPresent()) {
+      // there is no cached runtime, create a new one
+      return runtimeFactory.create(
+          this, projectFactory.create(workspaceId), getEnvironment().getWarnings());
+    }
+
+    // there is cached runtime, restore cached one
+    KubernetesRuntimeState runtimeState = runtimeStateOpt.get();
+
+    OpenShiftInternalRuntime runtime =
+        runtimeFactory.create(
+            this,
+            projectFactory.create(workspaceId, runtimeState.getNamespace()),
+            getEnvironment().getWarnings());
+
+    if (runtime.getStatus() != WorkspaceStatus.RUNNING
+        || runtime.getStatus() != WorkspaceStatus.STOPPED) {
+      runtime.startServersCheckers();
+    }
+    return runtime;
   }
 }

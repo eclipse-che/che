@@ -65,7 +65,7 @@ public class CheckStoppingWsByTimeoutTest {
 
   @Test
   public void checkLoadToasterAfterStopping() {
-    toastLoader.waitStartButtonInToastLoader();
+    toastLoader.waitToastLoaderButton("Start");
   }
 
   private int getCommonTimeoutInMilliSec() {

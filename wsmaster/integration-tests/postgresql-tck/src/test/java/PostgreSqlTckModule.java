@@ -17,14 +17,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.installer.server.jpa.JpaInstallerDao;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.server.model.impl.InstallerServerConfigImpl;
@@ -71,8 +69,19 @@ import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.jpa.JpaSignatureKeyDao;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyImpl;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.SHA512PasswordEncryptor;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.postgresql.Driver;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
@@ -122,7 +131,16 @@ public class PostgreSqlTckModule extends TckModule {
                 InstallerImpl.class,
                 InstallerServerConfigImpl.class,
                 WorkspaceExpiration.class,
-                VolumeImpl.class)
+                VolumeImpl.class,
+                SignatureKeyImpl.class,
+                SignatureKeyPairImpl.class,
+                // k8s-runtimes
+                KubernetesRuntimeState.class,
+                KubernetesRuntimeState.RuntimeId.class,
+                KubernetesMachineImpl.class,
+                KubernetesMachineImpl.MachineId.class,
+                KubernetesServerImpl.class,
+                KubernetesServerImpl.ServerId.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
             .build());
@@ -155,8 +173,6 @@ public class PostgreSqlTckModule extends TckModule {
     // machine
     bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipeImpl.class));
-    bind(new TypeLiteral<TckRepository<Workspace>>() {})
-        .toInstance(new WorkspaceRepoForSnapshots());
 
     // ssh
     bind(SshDao.class).to(JpaSshDao.class);
@@ -176,6 +192,21 @@ public class PostgreSqlTckModule extends TckModule {
     bind(InstallerDao.class).to(JpaInstallerDao.class);
     bind(new TypeLiteral<TckRepository<InstallerImpl>>() {})
         .toInstance(new JpaTckRepository<>(InstallerImpl.class));
+
+    // sign keys
+    bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
+    bind(new TypeLiteral<TckRepository<SignatureKeyPairImpl>>() {})
+        .toInstance(new JpaTckRepository<>(SignatureKeyPairImpl.class));
+
+    // k8s runtimes
+    bind(new TypeLiteral<TckRepository<KubernetesRuntimeState>>() {})
+        .toInstance(new JpaTckRepository<>(KubernetesRuntimeState.class));
+
+    bind(new TypeLiteral<TckRepository<KubernetesMachineImpl>>() {})
+        .toInstance(new JpaTckRepository<>(KubernetesMachineImpl.class));
+
+    bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
+    bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
   }
 
   private static void waitConnectionIsEstablished(String dbUrl, String dbUser, String dbPassword) {
@@ -253,24 +284,6 @@ public class PostgreSqlTckModule extends TckModule {
           .createQuery("SELECT u FROM Usr u", UserImpl.class)
           .getResultList()
           .forEach(managerProvider.get()::remove);
-    }
-  }
-
-  static class WorkspaceRepoForSnapshots extends JpaTckRepository<Workspace> {
-    public WorkspaceRepoForSnapshots() {
-      super(WorkspaceImpl.class);
-    }
-
-    @Override
-    public void createAll(Collection<? extends Workspace> entities) throws TckRepositoryException {
-      super.createAll(
-          entities
-              .stream()
-              .map(
-                  w ->
-                      new WorkspaceImpl(
-                          w, new AccountImpl(w.getNamespace(), w.getNamespace(), "simple")))
-              .collect(Collectors.toList()));
     }
   }
 

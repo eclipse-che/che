@@ -36,19 +36,18 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
  * @author Alexander Garagatyi
  */
 @Singleton
-public class ServersConverter implements ConfigurationProvisioner {
+public class ServersConverter<T extends KubernetesEnvironment>
+    implements ConfigurationProvisioner<T> {
 
-  private final ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy;
+  private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
 
   @Inject
-  public ServersConverter(
-      ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy) {
+  public ServersConverter(ExternalServerExposerStrategy<T> externalServerExposerStrategy) {
     this.externalServerExposerStrategy = externalServerExposerStrategy;
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
-      throws InfrastructureException {
+  public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
 
     for (Pod podConfig : k8sEnv.getPods().values()) {
       final PodSpec podSpec = podConfig.getSpec();

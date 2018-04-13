@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 
 /**
@@ -34,6 +35,17 @@ public class RuntimeImpl implements Runtime {
     this.activeEnv = activeEnv;
     this.machines = machines;
     this.owner = owner;
+  }
+
+  public RuntimeImpl(
+      String activeEnv,
+      Map<String, ? extends Machine> machines,
+      String owner,
+      List<? extends Warning> warnings) {
+    this.activeEnv = activeEnv;
+    this.machines = machines;
+    this.owner = owner;
+    this.warnings = warnings.stream().map(WarningImpl::new).collect(Collectors.toList());
   }
 
   public RuntimeImpl(Runtime runtime) {

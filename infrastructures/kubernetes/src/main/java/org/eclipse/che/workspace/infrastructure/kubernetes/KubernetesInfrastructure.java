@@ -25,6 +25,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
 
@@ -37,6 +38,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
+  private final KubernetesRuntimeStateCache runtimeStatusesCache;
 
   @Inject
   public KubernetesInfrastructure(
@@ -44,7 +46,8 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
       KubernetesRuntimeContextFactory runtimeContextFactory,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
-      DockerImageEnvironmentConverter dockerImageEnvConverter) {
+      DockerImageEnvironmentConverter dockerImageEnvConverter,
+      KubernetesRuntimeStateCache runtimeStatusesCache) {
     super(
         NAME,
         ImmutableSet.of(KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE),
@@ -53,6 +56,12 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
     this.runtimeContextFactory = runtimeContextFactory;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
+    this.runtimeStatusesCache = runtimeStatusesCache;
+  }
+
+  @Override
+  public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+    return runtimeStatusesCache.getIdentities();
   }
 
   @Override

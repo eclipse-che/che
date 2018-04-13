@@ -12,6 +12,7 @@ package org.eclipse.che.ide.statepersistance;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
+import org.eclipse.che.ide.api.statepersistance.AppStateServiceClient;
 import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerStateComponent;
@@ -22,7 +23,9 @@ public class PersistenceApiModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
+    bind(AppStateTracker.class).asEagerSingleton();
     bind(AppStateManager.class).asEagerSingleton();
+    bind(AppStateServiceClient.class).to(AppStateServiceClientImpl.class);
 
     GinMultibinder<StateComponent> stateComponents =
         GinMultibinder.newSetBinder(binder(), StateComponent.class);
