@@ -73,7 +73,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
     editor.waitTabIsNotPresent("index.jsp");
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME);
 
-    toastLoader.clickOnStartButton();
+    toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
 
     try {
