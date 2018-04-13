@@ -162,8 +162,10 @@ public class WorkspaceRuntimes {
               "Error occured while fetching runtime status. Cause: " + e.getMessage());
         }
         workspace.setStatus(workspaceStatus);
-      } else {
+      } else if (workspaceStatus == null) {
         workspace.setStatus(STOPPED);
+      } else  {
+        workspace.setStatus(workspaceStatus);
       }
     }
   }
