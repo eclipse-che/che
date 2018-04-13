@@ -208,12 +208,6 @@ public class AppContextImpl
             });
   }
 
-  //  @Deprecated
-  //  @Override
-  //  public String getWorkspaceName() {
-  //    return workspace.getConfig().getName();
-  //  }
-
   /** {@inheritDoc} */
   @Override
   public void onResourceChanged(ResourceChangedEvent event) {

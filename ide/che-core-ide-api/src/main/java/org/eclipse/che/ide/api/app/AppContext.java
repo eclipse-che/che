@@ -102,17 +102,6 @@ public interface AppContext {
   @Beta
   Project getRootProject();
 
-  //  /**
-  //   * Returns the workspace human readable name.
-  //   *
-  //   * @return the workspace name
-  //   * @see WorkspaceConfigDto#getName()
-  //   * @since 4.3.0
-  //   * @deprecated use {@link WorkspaceConfigImpl#getName()}
-  //   */
-  //  @Deprecated
-  //  String getWorkspaceName();
-
   /**
    * Returns the path where projects are stored on file system.
    *
