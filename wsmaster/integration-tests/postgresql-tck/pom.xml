@@ -45,6 +45,15 @@
             <classifier>tests</classifier>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.infrastructure</groupId>
+            <artifactId>infrastructure-kubernetes</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure</groupId>
+            <artifactId>infrastructure-kubernetes</artifactId>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-machine-authentication</artifactId>
             <classifier>tests</classifier>
@@ -253,7 +262,8 @@
                                         che-core-api-ssh,
                                         che-core-api-workspace,
                                         che-core-api-installer,
-                                        che-multiuser-machine-authentication</includeArtifactIds>
+                                        che-multiuser-machine-authentication,
+                                        infrastructure-kubernetes</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                     <includeClassifiers>tests</includeClassifiers>
                                 </configuration>
