@@ -154,7 +154,7 @@ public class WorkspaceRuntimes {
   public void injectRuntime(WorkspaceImpl workspace) throws ServerException {
     try (Unlocker ignored = lockService.writeLock()) {
       final WorkspaceStatus workspaceStatus = statuses.get(workspace.getId());
-      if (workspaceStatus != null) {
+      if (workspaceStatus != null && workspaceStatus.equals(RUNNING)) {
         try {
           workspace.setRuntime(asRuntime(getRuntime(workspace.getId())));
         } catch (InfrastructureException e) {
@@ -173,17 +173,21 @@ public class WorkspaceRuntimes {
     try (Unlocker ignored = lockService.writeLock()) {
       final InternalRuntime<?> runtime = runtimes.get(workspaceId);
       if (runtime == null) {
-        final Optional<RuntimeIdentity> runtimeIdentity =
-            infrastructure
-                .getIdentities()
-                .stream()
-                .filter(id -> id.getWorkspaceId().equals(workspaceId))
-                .findAny();
+        try {
+          final Optional<RuntimeIdentity> runtimeIdentity =
+              infrastructure
+                  .getIdentities()
+                  .stream()
+                  .filter(id -> id.getWorkspaceId().equals(workspaceId))
+                  .findAny();
 
-        if (runtimeIdentity.isPresent()) {
-          recoverOne(infrastructure, runtimeIdentity.get());
-        } else {
-          // runtime is not considered by Infrastructure as active, sync state
+          if (runtimeIdentity.isPresent()) {
+            recoverOne(infrastructure, runtimeIdentity.get());
+          } else {
+            // runtime is not considered by Infrastructure as active, sync state
+            statuses.remove(workspaceId);
+          }
+        } catch (UnsupportedOperationException e) {
           statuses.remove(workspaceId);
         }
       }
@@ -194,6 +198,7 @@ public class WorkspaceRuntimes {
   private static RuntimeImpl asRuntime(InternalRuntime<?> runtime) throws InfrastructureException {
     return new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner());
   }
+
   /**
    * Gets workspace status by its identifier.
    *
@@ -284,6 +289,7 @@ public class WorkspaceRuntimes {
   }
 
   private class StartRuntimeTask implements Runnable {
+
     private final Workspace workspace;
     private final Map<String, String> options;
     private final InternalRuntime runtime;
@@ -352,7 +358,7 @@ public class WorkspaceRuntimes {
    * @param workspace workspace which runtime should be stopped
    * @throws NotFoundException when workspace with specified identifier does not have runtime
    * @throws ConflictException when running workspace status is different from {@link
-   *     WorkspaceStatus#RUNNING} or {@link WorkspaceStatus#STARTING}
+   * WorkspaceStatus#RUNNING} or {@link WorkspaceStatus#STARTING}
    * @see WorkspaceStatus#STOPPING
    */
   public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
@@ -390,6 +396,7 @@ public class WorkspaceRuntimes {
   }
 
   private class StopRuntimeTask implements Runnable {
+
     private final Workspace workspace;
     private final Map<String, String> options;
     private final String stoppedBy;
@@ -561,7 +568,7 @@ public class WorkspaceRuntimes {
    * directly.
    *
    * @return true if this is the caller is the one who refused start, otherwise if start is being
-   *     already refused returns false
+   * already refused returns false
    */
   public boolean refuseStart() {
     return isStartRefused.compareAndSet(false, true);
@@ -572,7 +579,7 @@ public class WorkspaceRuntimes {
    * then that workspace wasn't stopped at the moment of method execution.
    *
    * @return workspaces identifiers for those workspaces that are running(not stopped), or an empty
-   *     set if there is no a single running workspace
+   * set if there is no a single running workspace
    */
   public Set<String> getRuntimesIds() {
     return ImmutableSet.copyOf(runtimes.keySet());
@@ -640,6 +647,7 @@ public class WorkspaceRuntimes {
   }
 
   private class AbnormalRuntimeStopListener implements EventSubscriber<RuntimeStatusEvent> {
+
     @Override
     public void onEvent(RuntimeStatusEvent event) {
       if (event.isFailed()) {
