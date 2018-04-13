@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
@@ -155,6 +156,7 @@ public class CreateFactoryTest {
     createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
     createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
     createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
+    WaitUtils.sleepQuietly(1);
     createFactoryPage.clickOnCreateFactoryButton();
     factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
     factoryDetails.clickOnBackToFactoriesListButton();
@@ -163,7 +165,7 @@ public class CreateFactoryTest {
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.waitFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
     assertEquals(
-        dashboardFactories.getFactoryRamLimit(FACTORY_CREATED_FROM_WORKSPACE_NAME), "3072 MB");
+        dashboardFactories.getFactoryRamLimit(FACTORY_CREATED_FROM_WORKSPACE_NAME), "2048 MB");
   }
 
   @Test
@@ -196,9 +198,9 @@ public class CreateFactoryTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     loader.waitOnClosed();
+    newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(workspaceName);
-    newWorkspace.setMachineRAM(machineName, 3.0);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(WEB_JAVA_SPRING);

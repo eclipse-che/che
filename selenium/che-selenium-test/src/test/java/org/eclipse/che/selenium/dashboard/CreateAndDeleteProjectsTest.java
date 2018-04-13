@@ -76,6 +76,7 @@ public class CreateAndDeleteProjectsTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
 
+    newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     newWorkspace.typeWorkspaceName(WORKSPACE);
     projectSourcePage.clickOnAddOrImportProjectButton();

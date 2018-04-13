@@ -215,6 +215,7 @@ public class WorkspacesListTest {
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+    newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(name);
     projectSourcePage.clickOnAddOrImportProjectButton();

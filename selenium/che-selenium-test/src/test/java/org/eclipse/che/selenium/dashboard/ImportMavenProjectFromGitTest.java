@@ -61,6 +61,7 @@ public class ImportMavenProjectFromGitTest {
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+    newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
