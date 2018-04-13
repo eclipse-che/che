@@ -29,6 +29,10 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.RemoveNamespaceOnWorkspaceRemove;
@@ -94,5 +98,8 @@ public class KubernetesInfraModule extends AbstractModule {
     bind(new TypeLiteral<Map<String, String>>() {})
         .annotatedWith(com.google.inject.name.Names.named("infra.kubernetes.ingress.annotations"))
         .toProvider(IngressAnnotationsProvider.class);
+
+    bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
+    bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
   }
 }
