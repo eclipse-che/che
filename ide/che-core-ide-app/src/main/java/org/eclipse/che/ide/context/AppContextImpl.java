@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
