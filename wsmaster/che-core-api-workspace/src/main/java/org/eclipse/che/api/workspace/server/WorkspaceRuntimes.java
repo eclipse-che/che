@@ -14,6 +14,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
@@ -29,7 +30,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -89,7 +89,7 @@ public class WorkspaceRuntimes {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRuntimes.class);
 
   private final ConcurrentMap<String, InternalRuntime<?>> runtimes;
-  private final WorkspaceStatusCache statusCache;
+  private final WorkspaceStatusCache statuses;
   private final WorkspaceLockService lockService;
   private final EventService eventService;
   private final WorkspaceSharedPool sharedPool;
@@ -98,6 +98,7 @@ public class WorkspaceRuntimes {
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
   private final ProbeScheduler probeScheduler;
+  // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
 
   @Inject
@@ -109,11 +110,11 @@ public class WorkspaceRuntimes {
       WorkspaceDao workspaceDao,
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
-      WorkspaceStatusCache statusCache,
+      WorkspaceStatusCache statuses,
       WorkspaceLockService lockService) {
     this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
-    this.statusCache = statusCache;
+    this.statuses = statuses;
     this.eventService = eventService;
     this.sharedPool = sharedPool;
     this.workspaceDao = workspaceDao;
@@ -158,7 +159,7 @@ public class WorkspaceRuntimes {
    */
   public void injectRuntime(WorkspaceImpl workspace) throws ServerException {
     try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
-      final WorkspaceStatus workspaceStatus = statusCache.get(workspace.getId());
+      final WorkspaceStatus workspaceStatus = statuses.get(workspace.getId());
       if (workspaceStatus != null) {
         try {
           workspace.setRuntime(asRuntime(getRuntime(workspace.getId())));
@@ -190,10 +191,10 @@ public class WorkspaceRuntimes {
             recoverOne(infrastructure, runtimeIdentity.get());
           } else {
             // runtime is not considered by Infrastructure as active, sync state
-            statusCache.remove(workspaceId);
+            statuses.remove(workspaceId);
           }
         } catch (UnsupportedOperationException e) {
-          statusCache.remove(workspaceId);
+          statuses.remove(workspaceId);
         } catch (ConflictException ignoredEx) {
           // just go to return, recovering is locked.
         }
@@ -213,7 +214,7 @@ public class WorkspaceRuntimes {
    */
   public WorkspaceStatus getStatus(String workspaceId) {
     try (Unlocker ignored = lockService.readLock(workspaceId)) {
-      final WorkspaceStatus status = statusCache.get(workspaceId);
+      final WorkspaceStatus status = statuses.get(workspaceId);
       return status != null ? status : STOPPED;
     }
   }
@@ -264,14 +265,13 @@ public class WorkspaceRuntimes {
       InternalRuntime runtime = runtimeContext.getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspaceId)) {
-        final WorkspaceStatus existingStatus = statusCache.putIfAbsent(workspaceId, STARTING);
+        final WorkspaceStatus existingStatus = statuses.putIfAbsent(workspaceId, STARTING);
         if (existingStatus != null) {
           throw new ConflictException(
               format(
                   "Could not start workspace '%s' because its state is '%s'",
                   workspaceId, existingStatus));
         }
-        // TODO check mb it's need to be putIfAbsent
         runtimes.put(workspaceId, runtime);
       }
       LOG.info(
@@ -314,7 +314,7 @@ public class WorkspaceRuntimes {
       try {
         runtime.start(options);
         try (Unlocker ignored = lockService.writeLock(workspaceId)) {
-          statusCache.replace(workspaceId, RUNNING);
+          statuses.replace(workspaceId, RUNNING);
         }
 
         LOG.info(
@@ -327,7 +327,7 @@ public class WorkspaceRuntimes {
       } catch (InfrastructureException e) {
         try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
-          statusCache.remove(workspaceId);
+          statuses.remove(workspaceId);
         }
         // Cancels workspace servers probes if any
         probeScheduler.cancel(workspaceId);
@@ -371,7 +371,7 @@ public class WorkspaceRuntimes {
   public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
       throws NotFoundException, ConflictException {
     String workspaceId = workspace.getId();
-    WorkspaceStatus status = statusCache.get(workspaceId);
+    WorkspaceStatus status = statuses.get(workspaceId);
     if (status == null) {
       throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
     }
@@ -379,8 +379,8 @@ public class WorkspaceRuntimes {
       throw new ConflictException(
           format("Could not stop workspace '%s' because its state is '%s'", workspaceId, status));
     }
-    if (!statusCache.replace(workspaceId, status, STOPPING)) {
-      WorkspaceStatus newStatus = statusCache.get(workspaceId);
+    if (!statuses.replace(workspaceId, status, STOPPING)) {
+      WorkspaceStatus newStatus = statuses.get(workspaceId);
       throw new ConflictException(
           format(
               "Could not stop workspace '%s' because its state is '%s'",
@@ -428,7 +428,7 @@ public class WorkspaceRuntimes {
         // remove before firing an event to have consistency between state and the event
         try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
-          statusCache.remove(workspaceId);
+          statuses.remove(workspaceId);
         }
         LOG.info(
             "Workspace '{}/{}' with id '{}' stopped by user '{}'",
@@ -441,7 +441,7 @@ public class WorkspaceRuntimes {
         // remove before firing an event to have consistency between state and the event
         try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
-          statusCache.remove(workspaceId);
+          statuses.remove(workspaceId);
         }
         LOG.info(
             "Error occurs on workspace '{}/{}' with id '{}' stopped by user '{}'. Error: {}",
@@ -540,7 +540,7 @@ public class WorkspaceRuntimes {
       runtime = infra.prepare(identity, internalEnv).getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
-        statusCache.putIfAbsent(identity.getWorkspaceId(), runtime.getStatus());
+        statuses.putIfAbsent(identity.getWorkspaceId(), runtime.getStatus());
         runtimes.put(identity.getWorkspaceId(), runtime);
       }
       LOG.info(
@@ -610,23 +610,14 @@ public class WorkspaceRuntimes {
    * (it's status is  {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING})
    */
   public Set<String> getInProgress() {
-    final Set<String> result = new HashSet<>();
-    for (Entry<String, WorkspaceStatus> e : statusCache.toMap().entrySet()) {
-      if (STARTING == e.getValue() || STOPPING == e.getValue()) {
-        try {
-          final WorkspaceImpl workspace = workspaceDao.get(e.getKey());
-          if (workspaceRuntimesId.equals(
-              workspace.getAttributes().get(WORKSPACE_RUNTIMES_ID_ATTRIBUTE))) {
-            result.add(e.getKey());
-          }
-        } catch (NotFoundException | ServerException ex) {
-          LOG.warn(
-              String.format(
-                  "Failed to get processing workspace %s. Cause: %s", e.getKey(), ex.getMessage()));
-        }
-      }
-    }
-    return result;
+    return statuses
+        .toMap()
+        .entrySet()
+        .stream()
+        .filter(e -> STARTING == e.getValue() || STOPPING == e.getValue())
+        .map(Entry::getKey)
+        .filter(this::containsThisRuntimesId)
+        .collect(toSet());
   }
 
   /**
@@ -642,17 +633,27 @@ public class WorkspaceRuntimes {
    * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}), otherwise returns false.
    */
   public boolean isAnyInProgress() {
-    for (Entry<String, WorkspaceStatus> e : statusCache.toMap().entrySet()) {
-      if (STARTING == e.getValue() || STOPPING == e.getValue()) {
-        try {
-          final WorkspaceImpl workspace = workspaceDao.get(e.getKey());
-          if (workspaceRuntimesId.equals(
-              workspace.getAttributes().get(WORKSPACE_RUNTIMES_ID_ATTRIBUTE))) {
-            return true;
-          }
-        } catch (NotFoundException | ServerException ignored) {
-        }
+    return statuses
+        .toMap()
+        .entrySet()
+        .stream()
+        .filter(e -> STARTING == e.getValue() || STOPPING == e.getValue())
+        .map(Entry::getKey)
+        .anyMatch(this::containsThisRuntimesId);
+  }
+
+  /** Checks whether workspace with given id, related to this workspace runtimes. */
+  private boolean containsThisRuntimesId(String workspaceId) {
+    try {
+      final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+      if (workspaceRuntimesId.equals(
+          workspace.getAttributes().get(WORKSPACE_RUNTIMES_ID_ATTRIBUTE))) {
+        return true;
       }
+    } catch (NotFoundException | ServerException ex) {
+      LOG.warn(
+          String.format(
+              "Failed to get processing workspace %s. Cause: %s", workspaceId, ex.getMessage()));
     }
     return false;
   }
@@ -716,7 +717,7 @@ public class WorkspaceRuntimes {
         final WorkspaceStatus status;
         try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
-          status = statusCache.remove(workspaceId);
+          status = statuses.remove(workspaceId);
         }
         if (status != null) {
           publishWorkspaceStatusEvent(
