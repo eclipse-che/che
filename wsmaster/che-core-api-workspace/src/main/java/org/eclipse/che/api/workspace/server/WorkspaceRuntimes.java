@@ -14,7 +14,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
@@ -30,8 +29,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -65,7 +65,6 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -592,27 +591,28 @@ public class WorkspaceRuntimes {
     return ImmutableSet.copyOf(runtimes.keySet());
   }
 
-  // TODO filter workspaces by this node
   /**
-   * Gets the list of  workspace id's which are ciurrently starting or stopping (it's status is
+   * Gets the list of workspace id's which are ciurrently starting or stopping (it's status is
    * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}).
    */
   public Set<String> getInProgress() {
-    try {
-      final Map<String, String> result = new HashMap<>();
-      final Map<String, WorkspaceStatus> wsStatuses = statusCache.toMap();
-      for (WorkspaceImpl workspace :
-          iterate((maxItems, skipCount) -> workspaceDao.getWorkspaces(false, maxItems, skipCount))) {
-        WorkspaceStatus status = wsStatuses.get(workspace.getId());
-        if (workspaceRuntimesId.equals(workspace.getAttributes().get(WORKSPACE_RUNTIMES_ID_ATTRIBUTE)) &&
-            (WorkspaceStatus.STARTING == status || WorkspaceStatus.STOPPING == status)) {
-          result.put(workspace.getId(), workspace.getConfig().getName());
+    final Set<String> result = new HashSet<>();
+    for (Entry<String, WorkspaceStatus> e : statusCache.toMap().entrySet()) {
+      if (STARTING == e.getValue() || STOPPING == e.getValue()) {
+        try {
+          final WorkspaceImpl workspace = workspaceDao.get(e.getKey());
+          if (workspaceRuntimesId.equals(
+              workspace.getAttributes().get(WORKSPACE_RUNTIMES_ID_ATTRIBUTE))) {
+            result.add(e.getKey());
+          }
+        } catch (NotFoundException | ServerException ex) {
+          LOG.warn(
+              String.format(
+                  "Failed to get processing workspace %s. Cause: %s", e.getKey(), ex.getMessage()));
         }
       }
-      return result.keySet();
-    } catch (ServerException ex) {
-      throw new RuntimeException(ex);
     }
+    return result;
   }
 
   /**
@@ -627,8 +627,7 @@ public class WorkspaceRuntimes {
 
   /**
    * Returns true if there is at least one local workspace starting or stopping (it's status is
-   * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}), otherwise returns
-   * false.
+   * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}), otherwise returns false.
    */
   public boolean isAnyInProgress() {
     return statusCache.containsValue(STARTING) || statusCache.containsValue(STOPPING);
