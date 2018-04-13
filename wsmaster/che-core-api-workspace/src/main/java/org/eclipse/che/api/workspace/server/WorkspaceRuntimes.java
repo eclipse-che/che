@@ -154,7 +154,7 @@ public class WorkspaceRuntimes {
   public void injectRuntime(WorkspaceImpl workspace) throws ServerException {
     try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
       final WorkspaceStatus workspaceStatus = statuses.get(workspace.getId());
-      if (workspaceStatus != null && workspaceStatus.equals(RUNNING)) {
+      if (workspaceStatus != null) {
         try {
           workspace.setRuntime(asRuntime(getRuntime(workspace.getId())));
         } catch (InfrastructureException e) {
@@ -162,10 +162,8 @@ public class WorkspaceRuntimes {
               "Error occured while fetching runtime status. Cause: " + e.getMessage());
         }
         workspace.setStatus(workspaceStatus);
-      } else if (workspaceStatus == null) {
+      } else {
         workspace.setStatus(STOPPED);
-      } else  {
-        workspace.setStatus(workspaceStatus);
       }
     }
   }
