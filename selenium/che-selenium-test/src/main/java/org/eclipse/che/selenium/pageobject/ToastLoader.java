@@ -53,8 +53,9 @@ public class ToastLoader {
 
   private interface Locators {
     String MAIN_FORM_ID = "gwt-debug-popupLoader";
-    String TOAST_LOADER_BUTTON_XPATH = "//div[@id='gwt-debug-popupLoader']//button[text()='%s']";
-    String MAINFORM_WITH_TEXT_CONTAINER_XPATH =
+    String TOAST_LOADER_BUTTON_XPATH_PATTERN =
+        "//div[@id='gwt-debug-popupLoader']//button[text()='%s']";
+    String MAINFORM_WITH_TEXT_CONTAINER_XPATH_PATTERN =
         "//div[@id='gwt-debug-popupLoader']/div[contains(text(),'%s')]";
   }
 
@@ -83,7 +84,7 @@ public class ToastLoader {
    */
   public void waitExpectedTextInToastLoader(String expText, int timeout) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.MAINFORM_WITH_TEXT_CONTAINER_XPATH, expText)), timeout);
+        By.xpath(format(Locators.MAINFORM_WITH_TEXT_CONTAINER_XPATH_PATTERN, expText)), timeout);
   }
 
   /** wait for closing of widget */
@@ -187,13 +188,14 @@ public class ToastLoader {
   /** wait appearance of button in the widget */
   public void waitToastLoaderButton(String buttonName) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH, buttonName)), WIDGET_TIMEOUT_SEC);
+        By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)),
+        WIDGET_TIMEOUT_SEC);
   }
 
   /** wait appearance of button in the widget and click on this one */
   public void clickOnToastLoaderButton(String buttonName) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH, buttonName)));
+        By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)));
   }
 }
