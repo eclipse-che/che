@@ -92,6 +92,7 @@ public class FileTreeWalkerTest {
   @Test
   public void shouldRunFileCreatedConsumer() throws Exception {
     fileCreateConsumers.add(fileCreatedConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFile(TEST_FILE_NAME);
 
@@ -102,6 +103,7 @@ public class FileTreeWalkerTest {
   @Test
   public void shouldRunFileUpdateConsumer() throws Exception {
     fileUpdateConsumers.add(fileUpdateConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFile(TEST_FILE_NAME);
     sleep(FS_LATENCY_DELAY);
@@ -117,6 +119,7 @@ public class FileTreeWalkerTest {
   @Test
   public void shouldRunFileDeleteConsumer() throws Exception {
     fileDeleteConsumers.add(fileDeleteConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFile(TEST_FILE_NAME);
     sleep(FS_LATENCY_DELAY);
@@ -132,6 +135,7 @@ public class FileTreeWalkerTest {
   @Test
   public void shouldRunDirectoryCreatedConsumer() throws Exception {
     directoryCreateConsumers.add(directoryCreatedConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFolder(TEST_FOLDER_NAME);
 
@@ -142,6 +146,7 @@ public class FileTreeWalkerTest {
   @Test
   public void shouldRunDirectoryUpdateConsumer() throws Exception {
     directoryUpdateConsumers.add(directoryUpdateConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFolder(TEST_FOLDER_NAME);
     sleep(FS_LATENCY_DELAY);
@@ -157,6 +162,7 @@ public class FileTreeWalkerTest {
   @Test
   public void shouldRunDirectoryDeleteConsumer() throws Exception {
     directoryDeleteConsumers.add(directoryDeleteConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFolder(TEST_FOLDER_NAME);
     sleep(FS_LATENCY_DELAY);
@@ -173,6 +179,7 @@ public class FileTreeWalkerTest {
   public void shouldProperlySkipExcludedFile() throws Exception {
     fileExcludes.add(it -> it.getFileName().toString().equals(TEST_FILE_NAME));
     fileCreateConsumers.add(fileCreatedConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFile(TEST_FILE_NAME);
 
@@ -184,10 +191,33 @@ public class FileTreeWalkerTest {
   public void shouldProperlySkipExcludedDirectory() throws Exception {
     directoryExcludes.add(it -> it.getFileName().toString().equals(TEST_FOLDER_NAME));
     directoryCreateConsumers.add(directoryCreatedConsumerMock);
+    fileTreeWalker.initialize();
 
     File file = rootFolder.newFolder(TEST_FOLDER_NAME);
 
     fileTreeWalker.walk();
     verify(directoryCreatedConsumerMock, never()).accept(file.toPath());
+  }
+
+  @Test
+  public void shouldNotRunDirectoryCreatedConsumerForAlreadyExistingDirectory() throws Exception {
+    directoryCreateConsumers.add(directoryCreatedConsumerMock);
+    File file = rootFolder.newFolder(TEST_FOLDER_NAME);
+
+    fileTreeWalker.initialize();
+
+    fileTreeWalker.walk();
+    verify(directoryCreatedConsumerMock, never()).accept(file.toPath());
+  }
+
+  @Test
+  public void shouldNotRunFileCreatedConsumerForAlreadyExistingFile() throws Exception {
+    fileCreateConsumers.add(fileCreatedConsumerMock);
+    File file = rootFolder.newFile(TEST_FILE_NAME);
+
+    fileTreeWalker.initialize();
+
+    fileTreeWalker.walk();
+    verify(fileCreatedConsumerMock, never()).accept(file.toPath());
   }
 }
