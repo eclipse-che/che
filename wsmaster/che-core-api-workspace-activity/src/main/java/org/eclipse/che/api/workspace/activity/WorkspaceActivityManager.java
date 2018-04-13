@@ -109,12 +109,12 @@ public class WorkspaceActivityManager {
       if (timeout > 0) {
         activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
       }
-    } catch (NotFoundException | ServerException e) {
+    } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
   }
 
-  protected long getIdleTimeout(String wsId) throws NotFoundException, ServerException {
+  protected long getIdleTimeout(String wsId) {
     return defaultTimeout;
   }
 
