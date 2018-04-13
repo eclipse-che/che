@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.XML_FILE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -36,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -125,13 +123,7 @@ public class ConvertToProjectWithPomFileTest {
     editor.closeAllTabs();
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
-
-    try {
-      projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, SIMPLE_FOLDER);
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551");
-    }
+    projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, SIMPLE_FOLDER);
   }
 
   @Test
@@ -148,12 +140,7 @@ public class ConvertToProjectWithPomFileTest {
 
     seleniumWebDriver.navigate().refresh();
     ide.waitOpenedWorkspaceIsReadyToUse();
-    try {
-      projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551");
-    }
+    projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     editor.waitTabIsPresent("new-qa-spring-sample");
 
     editor.closeAllTabsByContextMenu();
