@@ -586,6 +586,10 @@ public class WorkspaceRuntimes {
   }
 
   // TODO filter workspaces by this node
+  /**
+   * Gets the list of  workspace id's which are ciurrently starting or stopping (it's status is
+   * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}).
+   */
   public Set<String> getInProgress() {
       return statuses
           .mapSlice()
@@ -605,6 +609,12 @@ public class WorkspaceRuntimes {
   }
 
   // TODO check workspace only for this node workspaces by this node
+
+  /**
+   * Returns true if there is at least one local workspace starting or stopping (it's status is
+   * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}), otherwise returns
+   * false.
+   */
   public boolean isAnyInProgress() {
       return statuses.containsValue(STARTING) || statuses.containsValue(STOPPING);
   }
