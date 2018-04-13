@@ -194,6 +194,8 @@ public class WorkspaceRuntimes {
           }
         } catch (UnsupportedOperationException e) {
           statusCache.remove(workspaceId);
+        } catch (ConflictException ignoredEx) {
+          // just go to return, recovering is locked.
         }
       }
       return runtime;
@@ -478,6 +480,10 @@ public class WorkspaceRuntimes {
 
   @VisibleForTesting
   void recover() {
+    if (isStartRefused.get()) {
+      LOG.warn("Recovery of the workspaces is rejected.");
+      return;
+    }
     try {
       for (RuntimeIdentity identity : infrastructure.getIdentities()) {
         recoverOne(infrastructure, identity);
@@ -490,7 +496,7 @@ public class WorkspaceRuntimes {
               "An error occurred while attempted to recover runtimes using infrastructure '%s'",
               infrastructure.getName()),
           x);
-    } catch (ServerException | InfrastructureException x) {
+    } catch (ConflictException | ServerException | InfrastructureException x) {
       LOG.error(
           "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
           infrastructure.getName(),
@@ -499,7 +505,15 @@ public class WorkspaceRuntimes {
   }
 
   @VisibleForTesting
-  void recoverOne(RuntimeInfrastructure infra, RuntimeIdentity identity) throws ServerException {
+  void recoverOne(RuntimeInfrastructure infra, RuntimeIdentity identity)
+      throws ServerException, ConflictException {
+    if (isStartRefused.get()) {
+      throw new ConflictException(
+          format(
+              "Recovery of the workspace '%s' is rejected by the system, "
+                  + "no more workspaces are allowed to start",
+              identity.getWorkspaceId()));
+    }
     Workspace workspace;
     try {
       workspace = workspaceDao.get(identity.getWorkspaceId());
@@ -592,8 +606,8 @@ public class WorkspaceRuntimes {
   }
 
   /**
-   * Gets the list of workspace id's which are ciurrently starting or stopping (it's status is
-   * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING}).
+   * Gets the list of workspace id's which are currently starting or stopping on given node.
+   * (it's status is  {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING})
    */
   public Set<String> getInProgress() {
     final Set<String> result = new HashSet<>();
