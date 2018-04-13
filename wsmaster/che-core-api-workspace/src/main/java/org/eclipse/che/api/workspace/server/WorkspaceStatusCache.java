@@ -36,10 +36,12 @@ public interface WorkspaceStatusCache {
   WorkspaceStatus replace(String workspaceId, WorkspaceStatus newStatus);
 
   /**
-   * @param workspaceId
-   * @param prevStatus
-   * @param newStatus
-   * @return
+   * Replaces workspace status with given new value only if currently mapped to the specified value.
+   *
+   * @param workspaceId workspace identifier
+   * @param prevStatus expected workspace status mapped to given id
+   * @param newStatus new workspace status that is going to be mapped to given id
+   * @return {@code true} when workspace status is replaced
    */
   boolean replace(String workspaceId, WorkspaceStatus prevStatus, WorkspaceStatus newStatus);
 
@@ -53,15 +55,14 @@ public interface WorkspaceStatusCache {
   WorkspaceStatus remove(String workspaceId);
 
   /**
-   * Puts workspace status
+   * Puts workspace status when specified key is not already mapped.
    *
    * @param workspaceId workspace identifier
    * @param status workspace status
-   * @return null
+   * @return previous workspace status or {@code null} mapped with given workspace id
    */
   WorkspaceStatus putIfAbsent(String workspaceId, WorkspaceStatus status);
 
+  /** Returns copy of this cache in map representation */
   Map<String, WorkspaceStatus> toMap();
-
-  boolean containsValue(WorkspaceStatus starting);
 }
