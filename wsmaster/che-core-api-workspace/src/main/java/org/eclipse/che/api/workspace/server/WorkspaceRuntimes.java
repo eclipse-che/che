@@ -606,8 +606,8 @@ public class WorkspaceRuntimes {
   }
 
   /**
-   * Gets the list of workspace id's which are currently starting or stopping on given node.
-   * (it's status is  {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING})
+   * Gets the list of workspace id's which are currently starting or stopping on given node. (it's
+   * status is {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING})
    */
   public Set<String> getInProgress() {
     return statuses
