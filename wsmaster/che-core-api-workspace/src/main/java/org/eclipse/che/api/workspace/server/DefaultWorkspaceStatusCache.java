@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
 /**
@@ -24,7 +25,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
  */
 public class DefaultWorkspaceStatusCache implements WorkspaceStatusCache {
 
-  private final Map<String, WorkspaceStatus> delegate = new HashMap<>();
+  private final Map<String, WorkspaceStatus> delegate = new ConcurrentHashMap<>();
 
   @Override
   public WorkspaceStatus get(String workspaceId) {

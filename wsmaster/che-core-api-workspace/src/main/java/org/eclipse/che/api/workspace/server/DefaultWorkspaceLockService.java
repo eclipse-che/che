@@ -11,9 +11,6 @@
 package org.eclipse.che.api.workspace.server;
 
 import com.google.inject.Singleton;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.che.commons.lang.concurrent.StripedLocks;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 
@@ -24,33 +21,19 @@ import org.eclipse.che.commons.lang.concurrent.Unlocker;
  */
 @Singleton
 public class DefaultWorkspaceLockService implements WorkspaceLockService {
-  private final ReadWriteLock delegate;
+  private final StripedLocks delegate;
 
   public DefaultWorkspaceLockService() {
-    this.delegate = new ReentrantReadWriteLock();
+    this.delegate = new StripedLocks(16);
   }
 
   @Override
-  public Unlocker readLock() {
-    return new LockUnlocker(delegate.readLock());
+  public Unlocker readLock(String key) {
+    return delegate.readLock(key);
   }
 
   @Override
-  public Unlocker writeLock() {
-    return new LockUnlocker(delegate.writeLock());
-  }
-
-  private static class LockUnlocker implements Unlocker {
-
-    private final Lock lock;
-
-    private LockUnlocker(Lock lock) {
-      this.lock = lock;
-    }
-
-    @Override
-    public void unlock() {
-      lock.unlock();
-    }
+  public Unlocker writeLock(String key) {
+    return delegate.writeLock(key);
   }
 }

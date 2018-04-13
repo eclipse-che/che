@@ -39,13 +39,13 @@ public class JGroupsWorkspaceLockService implements WorkspaceLockService {
   }
 
   @Override
-  public Unlocker readLock() {
+  public Unlocker readLock(String key) {
     return () -> {};
   }
 
   @Override
-  public Unlocker writeLock() {
-    final Lock lock = lockService.getLock("WorkspaceLock");
+  public Unlocker writeLock(String key) {
+    final Lock lock = lockService.getLock(key);
     lock.lock();
     return new UnlockerImpl(lock);
   }

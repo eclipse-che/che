@@ -152,7 +152,7 @@ public class WorkspaceRuntimes {
    * @param workspace the workspace to inject runtime into
    */
   public void injectRuntime(WorkspaceImpl workspace) throws ServerException {
-    try (Unlocker ignored = lockService.writeLock()) {
+    try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
       final WorkspaceStatus workspaceStatus = statuses.get(workspace.getId());
       if (workspaceStatus != null && workspaceStatus.equals(RUNNING)) {
         try {
@@ -170,7 +170,7 @@ public class WorkspaceRuntimes {
 
   private InternalRuntime<?> getRuntime(String workspaceId)
       throws InfrastructureException, ServerException {
-    try (Unlocker ignored = lockService.writeLock()) {
+    try (Unlocker ignored = lockService.writeLock(workspaceId)) {
       final InternalRuntime<?> runtime = runtimes.get(workspaceId);
       if (runtime == null) {
         try {
@@ -205,7 +205,7 @@ public class WorkspaceRuntimes {
    * @param workspaceId workspace identifier
    */
   public WorkspaceStatus getStatus(String workspaceId) {
-    try (Unlocker ignored = lockService.readLock()) {
+    try (Unlocker ignored = lockService.readLock(workspaceId)) {
       final WorkspaceStatus status = statuses.get(workspaceId);
       return status != null ? status : STOPPED;
     }
@@ -256,7 +256,7 @@ public class WorkspaceRuntimes {
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
 
-      try (Unlocker ignored = lockService.writeLock()) {
+      try (Unlocker ignored = lockService.writeLock(workspaceId)) {
         final WorkspaceStatus existingStatus = statuses.putIfAbsent(workspaceId, STARTING);
         if (existingStatus != null) {
           throw new ConflictException(
@@ -306,7 +306,7 @@ public class WorkspaceRuntimes {
       String workspaceId = workspace.getId();
       try {
         runtime.start(options);
-        try (Unlocker ignored = lockService.writeLock()) {
+        try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           statuses.replace(workspaceId, RUNNING);
         }
 
@@ -318,7 +318,7 @@ public class WorkspaceRuntimes {
             sessionUserNameOr("undefined"));
         publishWorkspaceStatusEvent(workspaceId, RUNNING, STARTING, null);
       } catch (InfrastructureException e) {
-        try (Unlocker ignored = lockService.writeLock()) {
+        try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
           statuses.remove(workspaceId);
         }
@@ -418,7 +418,7 @@ public class WorkspaceRuntimes {
         runtime.stop(options);
 
         // remove before firing an event to have consistency between state and the event
-        try (Unlocker ignored = lockService.writeLock()) {
+        try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
           statuses.remove(workspaceId);
         }
@@ -431,7 +431,7 @@ public class WorkspaceRuntimes {
         publishWorkspaceStatusEvent(workspaceId, STOPPED, STOPPING, null);
       } catch (ServerException | InfrastructureException e) {
         // remove before firing an event to have consistency between state and the event
-        try (Unlocker ignored = lockService.writeLock()) {
+        try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
           statuses.remove(workspaceId);
         }
@@ -519,7 +519,7 @@ public class WorkspaceRuntimes {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       runtime = infra.prepare(identity, internalEnv).getRuntime();
 
-      try (Unlocker ignored = lockService.writeLock()) {
+      try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
         statuses.putIfAbsent(identity.getWorkspaceId(), runtime.getStatus());
         runtimes.put(identity.getWorkspaceId(), runtime);
       }
@@ -585,8 +585,8 @@ public class WorkspaceRuntimes {
     return ImmutableSet.copyOf(runtimes.keySet());
   }
 
+  // TODO filter workspaces by this node
   public Set<String> getInProgress() {
-    try (Unlocker ignored = lockService.writeLock()) {
       return statuses
           .mapSlice()
           .entrySet()
@@ -594,7 +594,6 @@ public class WorkspaceRuntimes {
           .filter(e -> e.getValue() == STARTING || e.getValue() == STOPPING)
           .map(Map.Entry::getKey)
           .collect(Collectors.toSet());
-    }
   }
 
   /**
@@ -605,10 +604,9 @@ public class WorkspaceRuntimes {
     return !runtimes.isEmpty();
   }
 
+  // TODO check workspace only for this node workspaces by this node
   public boolean isAnyInProgress() {
-    try (Unlocker ignored = lockService.readLock()) {
       return statuses.containsValue(STARTING) || statuses.containsValue(STOPPING);
-    }
   }
 
   /**
@@ -655,7 +653,7 @@ public class WorkspaceRuntimes {
         // Cancels workspace servers probes if any
         probeScheduler.cancel(workspaceId);
         final WorkspaceStatus status;
-        try (Unlocker ignored = lockService.writeLock()) {
+        try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
           status = statuses.remove(workspaceId);
         }

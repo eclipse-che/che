@@ -23,18 +23,20 @@ import org.eclipse.che.commons.lang.concurrent.Unlocker;
 public interface WorkspaceLockService {
 
   /**
-   * Acquires read lock. Returned instance may follow the read lock contract defined in
+   * Acquires lock by given key. Returned instance may follow the read lock contract defined in
    * {@link java.util.concurrent.locks.ReadWriteLock}.
    *
+   * @param key lock key
    * @return lock instance wrapped in {@link Unlocker}
    */
-  Unlocker readLock();
+  Unlocker readLock(String key);
 
   /**
-   * Acquires write lock. Returned instance may follow the write lock contract defined in
+   * Acquires lock by given key. Returned instance may follow the write lock contract defined in
    * {@link java.util.concurrent.locks.ReadWriteLock}.
    *
+   * @param key lock key
    * @return lock instance wrapped in {@link Unlocker}
    */
-  Unlocker writeLock();
+  Unlocker writeLock(String key);
 }
