@@ -30,7 +30,8 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesMachine;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,8 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  */
 public class KubernetesBootstrapper extends AbstractBootstrapper {
+  private static final int EXEC_TIMEOUT_MIN = 5;
+
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesBootstrapper.class);
 
   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
@@ -53,17 +56,19 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   private final List<? extends Installer> installers;
   private final int serverCheckPeriodSeconds;
   private final int installerTimeoutSeconds;
-  private final KubernetesMachine kubernetesMachine;
+  private final KubernetesMachineImpl kubernetesMachine;
   private final String bootstrapperBinaryUrl;
   private final String bootstrapperLogsFolder;
   private final String bootstrapperLogsFile;
   private final EventService eventService;
+  private final KubernetesNamespace namespace;
 
   @Inject
   public KubernetesBootstrapper(
       @Assisted RuntimeIdentity runtimeIdentity,
       @Assisted List<? extends Installer> installers,
-      @Assisted KubernetesMachine kubernetesMachine,
+      @Assisted KubernetesMachineImpl kubernetesMachine,
+      @Assisted KubernetesNamespace namespace,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.kubernetes.bootstrapper.binary_url") String bootstrapperBinaryUrl,
       @Named("che.infra.kubernetes.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
@@ -85,6 +90,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     this.kubernetesMachine = kubernetesMachine;
     this.bootstrapperLogsFolder = logsRootPath + "/bootstrapper";
     this.eventService = eventService;
+    this.namespace = namespace;
     this.bootstrapperLogsFile = bootstrapperLogsFolder + "/bootstrapper.log";
   }
 
@@ -93,7 +99,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
       throws InfrastructureException {
     injectBootstrapper();
 
-    kubernetesMachine.exec(
+    exec(
         "sh",
         "-c",
         BOOTSTRAPPER_DIR
@@ -138,21 +144,19 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
                     .withTime(ZonedDateTime.now().format(ISO_OFFSET_DATE_TIME))
                     .withMachineName(mName));
     LOG.debug("Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, mName);
+    exec(outputConsumer, "mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
 
-    kubernetesMachine.exec(outputConsumer, "mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
     LOG.debug("Bootstrapping {}:{}. Downloading bootstrapper binary", runtimeIdentity, mName);
-
-    kubernetesMachine.exec(
+    exec(
         outputConsumer,
         "curl",
         "-sSo",
         BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE,
         bootstrapperBinaryUrl);
-    kubernetesMachine.exec(outputConsumer, "chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
+    exec(outputConsumer, "chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
     LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, mName);
-
-    kubernetesMachine.exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE);
+    exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE);
 
     List<String> contentsToConcatenate = new ArrayList<>();
     contentsToConcatenate.add("[");
@@ -167,10 +171,32 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     }
     contentsToConcatenate.add("]");
     for (String content : contentsToConcatenate) {
-      kubernetesMachine.exec(
+      exec(
           "sh",
           "-c",
           "cat >> " + BOOTSTRAPPER_DIR + CONFIG_FILE + " << 'EOF'\n" + content + "\nEOF");
     }
+  }
+
+  private void exec(BiConsumer<String, String> outputConsumer, String... command)
+      throws InfrastructureException {
+    namespace
+        .pods()
+        .exec(
+            kubernetesMachine.getPodName(),
+            kubernetesMachine.getContainerName(),
+            EXEC_TIMEOUT_MIN,
+            command,
+            outputConsumer);
+  }
+
+  private void exec(String... command) throws InfrastructureException {
+    namespace
+        .pods()
+        .exec(
+            kubernetesMachine.getPodName(),
+            kubernetesMachine.getContainerName(),
+            EXEC_TIMEOUT_MIN,
+            command);
   }
 }

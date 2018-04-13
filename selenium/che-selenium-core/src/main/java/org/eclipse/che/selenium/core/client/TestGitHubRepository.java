@@ -17,11 +17,16 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.PreDestroy;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHFileNotFoundException;
 import org.kohsuke.github.GHRef;
@@ -46,6 +51,11 @@ public class TestGitHubRepository {
   private GHRepository ghRepo;
   private final GitHub gitHub;
 
+  private final String gitHubUsername;
+  private final String gitHubPassword;
+
+  private final List<TestGitHubRepository> submodules = new ArrayList<>();
+
   /**
    * Creates repository with semi-random name on GitHub for certain {@code gitHubUsername}. Waits
    * until repository is really created.
@@ -62,6 +72,43 @@ public class TestGitHubRepository {
       throws IOException, InterruptedException {
     gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
     ghRepo = create();
+
+    this.gitHubUsername = gitHubUsername;
+    this.gitHubPassword = gitHubPassword;
+  }
+
+  public enum TreeElementMode {
+    BLOB("100644"),
+    EXECUTABLE_BLOB("100755"),
+    SUBDIRECTORY("040000"),
+    SUBMODULE("160000"),
+    BLOB_SYMLINK("120000");
+
+    private String mode;
+
+    TreeElementMode(String mode) {
+      this.mode = mode;
+    }
+
+    public String get() {
+      return this.mode;
+    }
+  }
+
+  public enum GitNodeType {
+    BLOB("blob"),
+    TREE("tree"),
+    COMMIT("commit");
+
+    private String nodeType;
+
+    GitNodeType(String nodeType) {
+      this.nodeType = nodeType;
+    }
+
+    public String get() {
+      return this.nodeType;
+    }
   }
 
   public String getName() {
@@ -113,12 +160,25 @@ public class TestGitHubRepository {
    * @throws IOException
    */
   public void addContent(Path pathToRootContentDirectory) throws IOException {
+    addContent(pathToRootContentDirectory, null);
+  }
+
+  /**
+   * Copies content of directory {@code pathToRootContentDirectory} to the specified branch in the
+   * GitHub repository. It tries to recreate the file ones again in case of FileNotFoundException
+   * occurs.
+   *
+   * @param pathToRootContentDirectory path to the directory with content
+   * @param branch name of the target branch
+   * @throws IOException
+   */
+  public void addContent(Path pathToRootContentDirectory, String branch) throws IOException {
     Files.walk(pathToRootContentDirectory)
         .filter(Files::isRegularFile)
         .forEach(
             pathToFile -> {
               try {
-                createFile(pathToRootContentDirectory, pathToFile);
+                createFile(pathToRootContentDirectory, pathToFile, branch);
               } catch (IOException e) {
                 throw new UncheckedIOException(e);
               }
@@ -167,8 +227,14 @@ public class TestGitHubRepository {
   }
 
   @PreDestroy
-  public void delete() throws IOException {
-    ghRepo.delete();
+  public void delete() {
+    try {
+      ghRepo.delete();
+    } catch (IOException e) {
+      throw new RuntimeException(e.getMessage(), e);
+    }
+
+    submodules.forEach(TestGitHubRepository::delete);
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
   }
 
@@ -213,19 +279,21 @@ public class TestGitHubRepository {
   }
 
   /**
-   * Creates file in GitHub repository.
+   * Creates file in GitHub repository in the specified {@code branch}.
    *
    * @param pathToRootContentDirectory path to the root directory of file locally
    * @param pathToFile path to file locally
+   * @param branch name of the target branch
    * @throws IOException
    */
-  private void createFile(Path pathToRootContentDirectory, Path pathToFile) throws IOException {
+  private void createFile(Path pathToRootContentDirectory, Path pathToFile, String branch)
+      throws IOException {
     byte[] contentBytes = Files.readAllBytes(pathToFile);
     String relativePath = pathToRootContentDirectory.relativize(pathToFile).toString();
     String commitMessage = String.format("Add file %s", relativePath);
 
     try {
-      ghRepo.createContent(contentBytes, commitMessage, relativePath);
+      ghRepo.createContent(contentBytes, commitMessage, relativePath, branch);
     } catch (GHFileNotFoundException e) {
       // try to create content once again
       LOG.warn(
@@ -238,5 +306,83 @@ public class TestGitHubRepository {
 
   public String getFileContent(String pathToFile) throws IOException {
     return IOUtils.toString(ghRepo.getFileContent(pathToFile).read(), "UTF-8");
+  }
+
+  public String getDefaultBranchSha() throws IOException {
+    return getReferenceToDefaultBranch().getObject().getSha();
+  }
+
+  public void addSubmodule(Path pathToRootContentDirectory, String submoduleName)
+      throws IOException, URISyntaxException, InterruptedException {
+
+    TestGitHubRepository submodule = new TestGitHubRepository(gitHubUsername, gitHubPassword);
+    submodule.addContent(pathToRootContentDirectory);
+    createSubmodule(submodule, submoduleName);
+    submodules.add(submodule);
+  }
+
+  private void createSubmodule(
+      TestGitHubRepository pathToRootContentDirectory, String pathForSubmodule)
+      throws IOException, URISyntaxException {
+    String submoduleSha = createTreeWithSubmodule(pathToRootContentDirectory, pathForSubmodule);
+
+    GHCommit treeCommit =
+        ghRepo.createCommit().tree(submoduleSha).message("Create submodule").create();
+
+    getReferenceToDefaultBranch().updateTo(treeCommit.getSHA1(), true);
+    setupSubmoduleConfig(pathToRootContentDirectory, pathForSubmodule);
+  }
+
+  private boolean isGitmodulesFileExist() throws IOException {
+    return 0
+        < ghRepo
+            .getDirectoryContent("")
+            .stream()
+            .filter(item -> item.getName().equals(".gitmodules"))
+            .count();
+  }
+
+  private String createTreeWithSubmodule(TestGitHubRepository submodule, String pathForSubmodule)
+      throws IOException {
+    return ghRepo
+        .createTree()
+        .baseTree(this.getDefaultBranchSha())
+        .entry(
+            pathForSubmodule,
+            TreeElementMode.SUBMODULE.get(),
+            GitNodeType.COMMIT.get(),
+            submodule.getDefaultBranchSha(),
+            null)
+        .create()
+        .getSha();
+  }
+
+  private String getSubmoduleConfig(TestGitHubRepository submodule, String pathToSubmoduleContent) {
+    String repoName = Paths.get(pathToSubmoduleContent).getFileName().toString();
+    String repoUrl = submodule.getHtmlUrl() + ".git";
+    String modulePattern = "[submodule \"%s\"]\n\tpath = %s\n\turl = %s";
+
+    return String.format(modulePattern, repoName, pathToSubmoduleContent, repoUrl);
+  }
+
+  /**
+   * Creates ".gitmodules" file or updates if it already exist.
+   *
+   * @see <a href="https://git-scm.com/docs/gitmodules">gitmodules </a>
+   */
+  private void setupSubmoduleConfig(TestGitHubRepository submodule, String pathToSubmoduleContent)
+      throws IOException {
+    final String gitmodulesFileName = ".gitmodules";
+    String submoduleConfig = getSubmoduleConfig(submodule, pathToSubmoduleContent);
+
+    if (isGitmodulesFileExist()) {
+      GHContent submoduleFileContent = ghRepo.getFileContent(gitmodulesFileName);
+      String newFileContent = getFileContent(gitmodulesFileName) + "\n" + submoduleConfig;
+
+      submoduleFileContent.update(newFileContent, "Update " + gitmodulesFileName);
+      return;
+    }
+
+    ghRepo.createContent(submoduleConfig, "Add " + gitmodulesFileName, gitmodulesFileName);
   }
 }

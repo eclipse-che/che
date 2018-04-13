@@ -14,7 +14,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPIT_HORISONTALLY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPLIT_VERTICALLY;
-import static org.testng.Assert.fail;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
@@ -38,7 +37,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -99,12 +97,7 @@ public class CheckRestoringSplitEditorTest {
 
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
-    try {
-      projectExplorer.waitVisibilityByName(javaClassName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551", ex);
-    }
+    projectExplorer.waitVisibilityByName(javaClassName);
 
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     checkSplitdEditorAfterRefreshing(

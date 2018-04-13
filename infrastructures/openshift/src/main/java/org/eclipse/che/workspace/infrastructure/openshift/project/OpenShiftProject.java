@@ -33,30 +33,45 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
 public class OpenShiftProject extends KubernetesNamespace {
 
   private final OpenShiftRoutes routes;
+  private final OpenShiftClientFactory clientFactory;
 
   @VisibleForTesting
   OpenShiftProject(
+      OpenShiftClientFactory clientFactory,
       String workspaceId,
+      String name,
       KubernetesPods pods,
       KubernetesServices services,
       OpenShiftRoutes routes,
       KubernetesPersistentVolumeClaims pvcs,
       KubernetesIngresses ingresses) {
-    super(workspaceId, pods, services, pvcs, ingresses);
+    super(clientFactory, workspaceId, name, pods, services, pvcs, ingresses);
+    this.clientFactory = clientFactory;
     this.routes = routes;
   }
 
-  public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId)
-      throws InfrastructureException {
-    super(clientFactory, name, workspaceId, false);
+  public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId) {
+    super(clientFactory, name, workspaceId);
+    this.clientFactory = clientFactory;
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
-    doPrepare(name, clientFactory.create(workspaceId), clientFactory.createOC(workspaceId));
   }
 
-  private void doPrepare(String name, KubernetesClient kubeClient, OpenShiftClient osClient)
-      throws InfrastructureException {
-    if (get(name, osClient) == null) {
-      create(name, kubeClient, osClient);
+  /**
+   * Prepare project for using.
+   *
+   * <p>Preparing includes creating if needed and waiting for default service account.
+   *
+   * @throws InfrastructureException if any exception occurs during namespace preparing
+   */
+  void prepare() throws InfrastructureException {
+    String workspaceId = getWorkspaceId();
+    String projectName = getName();
+
+    KubernetesClient kubeClient = clientFactory.create(workspaceId);
+    OpenShiftClient osClient = clientFactory.createOC(workspaceId);
+
+    if (get(projectName, osClient) == null) {
+      create(projectName, kubeClient, osClient);
     }
   }
 

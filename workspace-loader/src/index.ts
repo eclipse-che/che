@@ -315,13 +315,13 @@ export class WorkspaceLoader {
                 for (let serverId in servers) {
                     let attributes = servers[serverId].attributes;
                     if (attributes['type'] === 'ide') {
-                        this.openURL(servers[serverId].url);
+                        this.openURL(servers[serverId].url + this.getQueryString());
                         return;
                     }
                 }
             }
 
-            this.openURL(workspace.links.ide);
+            this.openURL(workspace.links.ide + this.getQueryString());
         });
     }
 
