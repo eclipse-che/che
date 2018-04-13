@@ -58,12 +58,8 @@
             <class name="org.eclipse.che.selenium.dashboard.organization.AddWorkspaceToOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
-            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromImportTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
-            <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginTest"/>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
             <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
