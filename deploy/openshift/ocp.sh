@@ -254,7 +254,7 @@ deploy_che_to_ocp() {
       fi
       $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml
       wait_for_postgres
-      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} ${KEYCLOAK_PARAM}
+      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_KEYCLOAK=eivantsov/keycloak ${KEYCLOAK_PARAM}
       wait_for_keycloak
       export CHE_MULTIUSER_PARAM="-p CHE_MULTIUSER=true"
     fi
