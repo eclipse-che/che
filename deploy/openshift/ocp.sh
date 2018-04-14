@@ -263,7 +263,7 @@ deploy_che_to_ocp() {
         ENV="-e ${CHE_VAR_ARRAY}"
       fi
 
-    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_CHE=${CHE_IMAGE_REPO} -p CHE_VERSION=${CHE_IMAGE_TAG} ${CHE_MULTIUSER_PARAM} -p CHE_INFRA_OPENSHIFT_PROJECT='' -p CHE_INFRA_KUBERNETES_USERNAME=${OPENSHIFT_USERNAME} -p CHE_INFRA_KUBERNETES_PASSWORD=${OPENSHIFT_PASSWORD} ${ENV}
+    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_CHE=${CHE_IMAGE_REPO} -p CHE_VERSION=${CHE_IMAGE_TAG} ${CHE_MULTIUSER_PARAM} -p CHE_INFRA_OPENSHIFT_PROJECT='' -p OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME} -p OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD} ${ENV}
     $OC_BINARY set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
     echo "Waiting for Che to boot..."
     wait_for_che
