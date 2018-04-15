@@ -35,7 +35,8 @@ public class SingleUserCheDefaultTestUserProvider implements DefaultTestUserProv
     String email = "che@eclipse.org";
     String password = "secret";
     String offlineToken = "";
-    this.defaultTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+    this.defaultTestUser =
+        testUserFactory.createDefaultTestUser(name, email, password, offlineToken, this);
 
     LOG.info("User name='{}', id='{}' is being used by default", name, defaultTestUser.getId());
   }

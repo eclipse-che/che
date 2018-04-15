@@ -26,4 +26,20 @@ public interface TestUserFactory {
       @Assisted("password") String password,
       @Assisted("offlineToken") String offlineToken,
       RemovableUserProvider testUserProvider);
+
+  /** Creates default test user instance with given name, e-mail, password and offline token */
+  DefaultTestUser createDefaultTestUser(
+      @Assisted("name") String name,
+      @Assisted("email") String email,
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken,
+      RemovableUserProvider testUserProvider);
+
+  /** Creates admin test user instance with given name, e-mail, password and offline token */
+  AdminTestUser createAdminTestUser(
+      @Assisted("name") String name,
+      @Assisted("email") String email,
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken,
+      RemovableUserProvider testUserProvider);
 }

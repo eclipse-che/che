@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import javax.inject.Singleton;
 import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.core.user.TestUserImpl;
@@ -84,6 +85,33 @@ public class KeycloakAdminConsoleClient {
     String email = username + "@1.com";
     String password = String.valueOf(currentTimeInMillisec);
 
+    String userId = doCreateUser(username, email, password);
+
+    LOG.info("Test user with name='{}' and id='{}' has been created.", username, userId);
+
+    return testUserFactory.create(username, email, password, "", testUserProvider);
+  }
+
+  public DefaultTestUser createDefaultUser(RemovableUserProvider testUserProvider)
+      throws IOException {
+    if (!dockerUtil.isCheRunLocally()) {
+      throw new IOException(
+          "It's impossible to create test user because of Che is running on the different host.");
+    }
+
+    long currentTimeInMillisec = System.currentTimeMillis();
+    String username = "user" + currentTimeInMillisec;
+    String email = username + "@1.com";
+    String password = String.valueOf(currentTimeInMillisec);
+
+    String userId = doCreateUser(username, email, password);
+
+    LOG.info("Default test user with name='{}' and id='{}' has been created.", username, userId);
+
+    return testUserFactory.createDefaultTestUser(username, email, password, "", testUserProvider);
+  }
+
+  private String doCreateUser(String username, String email, String password) throws IOException {
     String authPartOfCommand =
         format(
             "--no-config --server http://localhost:8080/auth --user %s --password %s --realm master",
@@ -130,9 +158,7 @@ public class KeycloakAdminConsoleClient {
       throw e;
     }
 
-    LOG.info("Test user with name='{}' and id='{}' has been created.", username, userId);
-
-    return testUserFactory.create(username, email, password, "", testUserProvider);
+    return userId;
   }
 
   /** Adds role "read-token" of client "broker" to admin user */

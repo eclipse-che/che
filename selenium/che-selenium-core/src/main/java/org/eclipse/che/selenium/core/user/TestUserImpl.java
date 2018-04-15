@@ -14,22 +14,22 @@ import static java.lang.String.format;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import java.io.IOException;
+import javax.annotation.PreDestroy;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
 import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Anatolii Bazko
  * @author Dmytro Nochevnov
  * @author Anton Korneta
  */
-public class TestUserImpl implements DefaultTestUser, AdminTestUser {
-
-  private static final Logger LOG = LoggerFactory.getLogger(TestUserImpl.class);
-
+public class TestUserImpl implements TestUser {
   private final String email;
   private final String password;
   private final String name;
@@ -50,7 +50,7 @@ public class TestUserImpl implements DefaultTestUser, AdminTestUser {
       @Assisted("email") String email,
       @Assisted("password") String password,
       @Assisted("offlineToken") String offlineToken)
-      throws Exception {
+      throws NotFoundException, ServerException, BadRequestException {
     this.authServiceClient = authServiceClient;
     this.testUserProvider = testUserProvider;
 
@@ -100,7 +100,13 @@ public class TestUserImpl implements DefaultTestUser, AdminTestUser {
   @Override
   public String toString() {
     return format(
-        "%s{name=%s, email=%s, password=%s}",
-        this.getClass().getSimpleName(), this.getName(), this.getEmail(), getPassword());
+        "%s{name=%s, email=%s, id=%s}",
+        this.getClass().getSimpleName(), this.getName(), this.getEmail(), this.getId());
+  }
+
+  @Override
+  @PreDestroy
+  public void delete() throws IOException {
+    testUserProvider.delete();
   }
 }

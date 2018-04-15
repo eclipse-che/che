@@ -46,10 +46,10 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
       @Named("che.testuser.offline_token") String offlineToken) {
     this.keycloakAdminConsoleClient = keycloakAdminConsoleClient;
     if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-      TestUserImpl testUser;
+      DefaultTestUser testUser;
       Boolean isNewUser;
       try {
-        testUser = keycloakAdminConsoleClient.createUser(this);
+        testUser = keycloakAdminConsoleClient.createDefaultUser(this);
         isNewUser = true;
       } catch (IOException e) {
         LOG.warn(
@@ -61,7 +61,7 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
 
         AdminTestUser adminTestUser = adminTestUserProvider.get();
         testUser =
-            testUserFactory.create(
+            testUserFactory.createDefaultTestUser(
                 adminTestUser.getName(),
                 adminTestUser.getEmail(),
                 adminTestUser.getPassword(),
@@ -71,15 +71,16 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
 
       this.defaultTestUser = testUser;
       this.isNewUser = isNewUser;
+
+      LOG.info(
+          "User name='{}', id='{}' is being used by default for testing",
+          defaultTestUser.getName(),
+          defaultTestUser.getId());
     } else {
-      this.defaultTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+      this.defaultTestUser =
+          testUserFactory.createDefaultTestUser(name, email, password, offlineToken, this);
       this.isNewUser = false;
     }
-
-    LOG.info(
-        "User name='{}', id='{}' is being used by default for testing",
-        defaultTestUser.getName(),
-        defaultTestUser.getId());
   }
 
   @Override

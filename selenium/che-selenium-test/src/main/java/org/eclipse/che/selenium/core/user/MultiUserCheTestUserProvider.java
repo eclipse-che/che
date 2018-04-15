@@ -59,13 +59,15 @@ public class MultiUserCheTestUserProvider implements TestUserProvider {
               adminTestUser.getPassword(),
               adminTestUser.getOfflineToken(),
               adminTestUserProvider);
+
+      LOG.info(
+          "User name='{}', id='{}' is being used for testing",
+          testUser.getName(),
+          testUser.getId());
     }
 
     this.testUser = testUser;
     this.isNewUser = isNewUser;
-
-    LOG.info(
-        "User name='{}', id='{}' is being used for testing", testUser.getName(), testUser.getId());
   }
 
   @Override

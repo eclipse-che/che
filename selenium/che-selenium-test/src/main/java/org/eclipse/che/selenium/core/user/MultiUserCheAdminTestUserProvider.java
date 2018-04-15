@@ -45,7 +45,7 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
       throw new IllegalStateException("Admin test user credentials are unknown");
     }
 
-    adminTestUser = testUserFactory.create(name, email, password, offlineToken, this);
+    adminTestUser = testUserFactory.createAdminTestUser(name, email, password, offlineToken, this);
     keycloakAdminConsoleClient.setupAdmin(adminTestUser);
 
     LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());
