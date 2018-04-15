@@ -27,14 +27,12 @@ import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
-import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestIdeUrlProvider;
@@ -45,15 +43,11 @@ import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.provider.TestUserProvider;
 import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.CheTestAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
@@ -83,9 +77,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     TestConfiguration config = new SeleniumTestConfiguration();
     config.getMap().forEach((key, value) -> bindConstant().annotatedWith(named(key)).to(value));
 
-    bind(TestUser.class).toProvider(TestUserProvider.class);
     bind(DefaultTestUser.class).toProvider(DefaultTestUserProvider.class);
-    bind(AdminTestUser.class).toProvider(AdminTestUserProvider.class);
 
     bind(TestUserServiceClient.class).to(CheTestUserServiceClient.class);
 
@@ -142,14 +134,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     TestWorkspace ws = workspaceProvider.createWorkspace(testUser, defaultMemoryGb, DEFAULT);
     ws.await();
     return ws;
-  }
-
-  @Provides
-  @Named(ADMIN)
-  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
-      TestApiEndpointUrlProvider apiEndpointUrlProvider,
-      CheTestAdminHttpJsonRequestFactory requestFactory) {
-    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
   }
 
   @Provides

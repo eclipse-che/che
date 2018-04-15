@@ -11,16 +11,23 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.client.CheTestMachineServiceClient;
 import org.eclipse.che.selenium.core.client.KeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestMachineServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestUserProvider;
+import org.eclipse.che.selenium.core.requestfactory.CheTestAdminHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.MultiUserCheAdminTestUserProvider;
 import org.eclipse.che.selenium.core.user.MultiUserCheDefaultTestUserProvider;
 import org.eclipse.che.selenium.core.user.MultiUserCheTestUserProvider;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Anton Korneta */
 public class CheSeleniumMultiUserModule extends AbstractModule {
@@ -29,8 +36,21 @@ public class CheSeleniumMultiUserModule extends AbstractModule {
   protected void configure() {
     bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
-    bind(AdminTestUserProvider.class).to(MultiUserCheAdminTestUserProvider.class);
+
     bind(DefaultTestUserProvider.class).to(MultiUserCheDefaultTestUserProvider.class);
+
+    bind(TestUser.class).toProvider(TestUserProvider.class);
     bind(TestUserProvider.class).to(MultiUserCheTestUserProvider.class);
+
+    bind(AdminTestUser.class).toProvider(AdminTestUserProvider.class);
+    bind(AdminTestUserProvider.class).to(MultiUserCheAdminTestUserProvider.class);
+  }
+
+  @Provides
+  @Named(CheSeleniumSuiteModule.ADMIN)
+  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      CheTestAdminHttpJsonRequestFactory requestFactory) {
+    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
   }
 }
