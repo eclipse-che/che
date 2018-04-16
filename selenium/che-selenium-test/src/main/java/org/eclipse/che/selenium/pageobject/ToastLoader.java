@@ -67,6 +67,10 @@ public class ToastLoader {
     seleniumWebDriverHelper.waitVisibility(mainForm, UPDATING_PROJECT_TIMEOUT_SEC);
   }
 
+  public Boolean isToastLoaderIsOpened() {
+    return seleniumWebDriverHelper.isVisible(mainForm);
+  }
+
   /**
    * wait expected text in the widget
    *
@@ -196,6 +200,11 @@ public class ToastLoader {
   public void clickOnToastLoaderButton(String buttonName) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)));
+  }
+
+  public Boolean isToastLoaderButtonIsVisible(String buttonName) {
+    return seleniumWebDriverHelper.isVisible(
         By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)));
   }
 }

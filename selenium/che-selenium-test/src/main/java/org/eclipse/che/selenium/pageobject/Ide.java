@@ -19,6 +19,7 @@ import java.net.URL;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.entrance.Entrance;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -63,6 +64,12 @@ public class Ide {
 
   public void waitOpenedWorkspaceIsReadyToUse() {
     projectExplorer.waitProjectExplorer(PREPARING_WS_TIMEOUT_SEC);
+    if (toastLoader.isToastLoaderIsOpened()) {
+      WaitUtils.sleepQuietly(5);
+      if (toastLoader.isToastLoaderButtonIsVisible("Start")) {
+        toastLoader.clickOnToastLoaderButton("Start");
+      }
+    }
     terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
     menu.waitMenuItemIsEnabled(PROFILE_MENU);
   }
