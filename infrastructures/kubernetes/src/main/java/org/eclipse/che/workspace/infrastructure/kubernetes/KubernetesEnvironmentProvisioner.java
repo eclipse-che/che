@@ -41,7 +41,7 @@ public class KubernetesEnvironmentProvisioner {
   private final boolean pvcEnabled;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
-  private final ServersConverter serversConverter;
+  private final ServersConverter<KubernetesEnvironment> serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
   private final RamLimitProvisioner ramLimitProvisioner;
@@ -55,7 +55,7 @@ public class KubernetesEnvironmentProvisioner {
   public KubernetesEnvironmentProvisioner(
       @Named("che.infra.kubernetes.pvc.enabled") boolean pvcEnabled,
       UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner,
-      ServersConverter serversConverter,
+      ServersConverter<KubernetesEnvironment> serversConverter,
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
       WorkspaceVolumesStrategy volumesStrategy,

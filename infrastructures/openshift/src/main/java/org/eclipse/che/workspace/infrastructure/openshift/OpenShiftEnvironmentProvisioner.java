@@ -42,7 +42,7 @@ public class OpenShiftEnvironmentProvisioner {
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final UniqueNamesProvisioner<OpenShiftEnvironment> uniqueNamesProvisioner;
   private final RouteTlsProvisioner routeTlsProvisioner;
-  private final ServersConverter serversConverter;
+  private final ServersConverter<OpenShiftEnvironment> serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
   private final RamLimitProvisioner ramLimitProvisioner;
@@ -55,7 +55,7 @@ public class OpenShiftEnvironmentProvisioner {
       @Named("che.infra.kubernetes.pvc.enabled") boolean pvcEnabled,
       OpenShiftUniqueNamesProvisioner uniqueNamesProvisioner,
       RouteTlsProvisioner routeTlsProvisioner,
-      ServersConverter serversConverter,
+      ServersConverter<OpenShiftEnvironment> serversConverter,
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
       WorkspaceVolumesStrategy volumesStrategy,

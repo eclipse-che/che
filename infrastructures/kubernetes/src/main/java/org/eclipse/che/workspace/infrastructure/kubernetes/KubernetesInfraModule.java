@@ -43,6 +43,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.DefaultHostIngressExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategyProvider;
@@ -77,8 +78,11 @@ public class KubernetesInfraModule extends AbstractModule {
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
 
-    MapBinder<String, ExternalServerExposerStrategy> ingressStrategies =
-        MapBinder.newMapBinder(binder(), String.class, ExternalServerExposerStrategy.class);
+    MapBinder<String, ExternalServerExposerStrategy<KubernetesEnvironment>> ingressStrategies =
+        MapBinder.newMapBinder(
+            binder(),
+            new TypeLiteral<String>() {},
+            new TypeLiteral<ExternalServerExposerStrategy<KubernetesEnvironment>>() {});
     ingressStrategies
         .addBinding(MULTI_HOST_STRATEGY)
         .to(MultiHostIngressExternalServerExposer.class);
@@ -88,8 +92,11 @@ public class KubernetesInfraModule extends AbstractModule {
     ingressStrategies
         .addBinding(DEFAULT_HOST_STRATEGY)
         .to(DefaultHostIngressExternalServerExposer.class);
-    bind(ExternalServerExposerStrategy.class)
-        .toProvider(ExternalServerExposerStrategyProvider.class);
+    bind(new TypeLiteral<ExternalServerExposerStrategy<KubernetesEnvironment>>() {})
+        .toProvider(
+            new TypeLiteral<ExternalServerExposerStrategyProvider<KubernetesEnvironment>>() {});
+
+    bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<KubernetesEnvironment>>() {});
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);

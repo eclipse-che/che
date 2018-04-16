@@ -18,7 +18,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
 /**
- * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
+ * Provides a path-based strategy for exposing service ports outside the cluster using Ingress.
  * Ingresses will be created with a common host name for all workspaces.
  *
  * <p>This strategy uses different Ingress path entries <br>
