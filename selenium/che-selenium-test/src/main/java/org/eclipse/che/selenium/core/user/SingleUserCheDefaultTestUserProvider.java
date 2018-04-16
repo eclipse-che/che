@@ -30,13 +30,13 @@ public class SingleUserCheDefaultTestUserProvider implements DefaultTestUserProv
   private final DefaultTestUser defaultTestUser;
 
   @Inject
-  public SingleUserCheDefaultTestUserProvider(TestUserFactory testUserFactory) {
+  public SingleUserCheDefaultTestUserProvider(
+      TestUserFactory<DefaultTestUser> defaultTestUserFactory) {
     String name = "che";
     String email = "che@eclipse.org";
     String password = "secret";
     String offlineToken = "";
-    this.defaultTestUser =
-        testUserFactory.createDefaultTestUser(name, email, password, offlineToken, this);
+    this.defaultTestUser = defaultTestUserFactory.create(name, email, password, offlineToken, this);
 
     LOG.info("User name='{}', id='{}' is being used by default", name, defaultTestUser.getId());
   }

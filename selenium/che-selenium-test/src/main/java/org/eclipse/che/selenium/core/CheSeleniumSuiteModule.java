@@ -17,7 +17,9 @@ import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
 import java.io.IOException;
@@ -78,6 +80,9 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     config.getMap().forEach((key, value) -> bindConstant().annotatedWith(named(key)).to(value));
 
     bind(DefaultTestUser.class).toProvider(DefaultTestUserProvider.class);
+    install(
+        new FactoryModuleBuilder()
+            .build(Key.get(new TypeLiteral<TestUserFactory<DefaultTestUser>>() {}.getType())));
 
     bind(TestUserServiceClient.class).to(CheTestUserServiceClient.class);
 
@@ -97,7 +102,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
 
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
     install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
-    install(new FactoryModuleBuilder().build(TestUserFactory.class));
     install(new FactoryModuleBuilder().build(TestUserServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(WebDriverLogsReaderFactory.class));
 

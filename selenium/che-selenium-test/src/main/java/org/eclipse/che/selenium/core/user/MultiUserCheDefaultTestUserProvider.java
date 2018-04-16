@@ -37,7 +37,7 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
 
   @Inject
   public MultiUserCheDefaultTestUserProvider(
-      TestUserFactory testUserFactory,
+      TestUserFactory<DefaultTestUser> defaultTestUserFactory,
       KeycloakAdminConsoleClient keycloakAdminConsoleClient,
       MultiUserCheAdminTestUserProvider adminTestUserProvider,
       @Named("che.testuser.name") String name,
@@ -61,7 +61,7 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
 
         AdminTestUser adminTestUser = adminTestUserProvider.get();
         testUser =
-            testUserFactory.createDefaultTestUser(
+            defaultTestUserFactory.create(
                 adminTestUser.getName(),
                 adminTestUser.getEmail(),
                 adminTestUser.getPassword(),
@@ -73,7 +73,7 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
       this.isNewUser = isNewUser;
     } else {
       this.defaultTestUser =
-          testUserFactory.createDefaultTestUser(name, email, password, offlineToken, this);
+          defaultTestUserFactory.create(name, email, password, offlineToken, this);
       this.isNewUser = false;
 
       LOG.info(

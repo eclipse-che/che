@@ -34,7 +34,7 @@ public class MultiUserCheTestUserProvider implements TestUserProvider {
 
   @Inject
   public MultiUserCheTestUserProvider(
-      TestUserFactory testUserFactory,
+      TestUserFactory<TestUserImpl> testUserFactory,
       KeycloakAdminConsoleClient keycloakAdminConsoleClient,
       AdminTestUserProvider adminTestUserProvider) {
     this.keycloakAdminConsoleClient = keycloakAdminConsoleClient;

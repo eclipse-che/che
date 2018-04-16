@@ -43,10 +43,12 @@ public class KeycloakAdminConsoleClient {
   private static final Pattern EXTRACT_USER_ID_PATTERN =
       Pattern.compile("^.*Created new user with id '(.*)'.*$", Pattern.DOTALL);
 
+  // we need to inject AdminTestUser separately to avoid circular dependency error
   @Inject private AdminTestUser adminTestUser;
 
   private final DockerUtil dockerUtil;
-  private final TestUserFactory testUserFactory;
+  private final TestUserFactory<DefaultTestUser> defaultTestUserFactory;
+  private final TestUserFactory<TestUserImpl> testUserFactory;
   private final ProcessAgent processAgent;
   private final String keycloakContainerId;
   private final String cheInfrastructure;
@@ -54,12 +56,14 @@ public class KeycloakAdminConsoleClient {
   @Inject
   public KeycloakAdminConsoleClient(
       DockerUtil dockerUtil,
-      TestUserFactory testUserFactory,
+      TestUserFactory<TestUserImpl> testUserFactory,
+      TestUserFactory<DefaultTestUser> defaultTestUserFactory,
       ProcessAgent processAgent,
       @Named("che.infrastructure") String cheInfrastructure)
       throws ProcessAgentException {
     this.dockerUtil = dockerUtil;
     this.testUserFactory = testUserFactory;
+    this.defaultTestUserFactory = defaultTestUserFactory;
     this.processAgent = processAgent;
     this.cheInfrastructure = cheInfrastructure;
 
@@ -112,7 +116,7 @@ public class KeycloakAdminConsoleClient {
 
     LOG.info("Default test user with name='{}' and id='{}' has been created.", username, userId);
 
-    return testUserFactory.createDefaultTestUser(username, email, password, "", testUserProvider);
+    return defaultTestUserFactory.create(username, email, password, "", testUserProvider);
   }
 
   private String doCreateUser(String username, String email, String password) throws IOException {

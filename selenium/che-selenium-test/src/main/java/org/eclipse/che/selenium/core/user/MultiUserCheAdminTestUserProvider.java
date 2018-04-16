@@ -35,7 +35,7 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
 
   @Inject
   public MultiUserCheAdminTestUserProvider(
-      TestUserFactory testUserFactory,
+      TestUserFactory<AdminTestUser> adminTestUserFactory,
       KeycloakAdminConsoleClient keycloakAdminConsoleClient,
       @Named("che.admin.name") String name,
       @Named("che.admin.email") String email,
@@ -45,7 +45,7 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
       throw new IllegalStateException("Admin test user credentials are unknown");
     }
 
-    adminTestUser = testUserFactory.createAdminTestUser(name, email, password, offlineToken, this);
+    adminTestUser = adminTestUserFactory.create(name, email, password, offlineToken, this);
     keycloakAdminConsoleClient.setupAdmin(adminTestUser);
 
     LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());

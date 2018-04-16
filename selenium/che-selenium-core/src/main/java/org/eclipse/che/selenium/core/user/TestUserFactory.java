@@ -17,26 +17,10 @@ import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
  * @author Anton Korneta
  * @author Dmytro Nochevnov
  */
-public interface TestUserFactory {
+public interface TestUserFactory<T extends TestUserImpl> {
 
   /** Creates test user instance with given name, e-mail, password and offline token */
-  TestUserImpl create(
-      @Assisted("name") String name,
-      @Assisted("email") String email,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken,
-      RemovableUserProvider testUserProvider);
-
-  /** Creates default test user instance with given name, e-mail, password and offline token */
-  DefaultTestUser createDefaultTestUser(
-      @Assisted("name") String name,
-      @Assisted("email") String email,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken,
-      RemovableUserProvider testUserProvider);
-
-  /** Creates admin test user instance with given name, e-mail, password and offline token */
-  AdminTestUser createAdminTestUser(
+  T create(
       @Assisted("name") String name,
       @Assisted("email") String email,
       @Assisted("password") String password,

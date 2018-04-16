@@ -11,7 +11,10 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.client.CheTestMachineServiceClient;
 import org.eclipse.che.selenium.core.client.KeycloakTestAuthServiceClient;
@@ -28,6 +31,8 @@ import org.eclipse.che.selenium.core.user.MultiUserCheAdminTestUserProvider;
 import org.eclipse.che.selenium.core.user.MultiUserCheDefaultTestUserProvider;
 import org.eclipse.che.selenium.core.user.MultiUserCheTestUserProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.TestUserFactory;
+import org.eclipse.che.selenium.core.user.TestUserImpl;
 
 /** @author Anton Korneta */
 public class CheSeleniumMultiUserModule extends AbstractModule {
@@ -44,6 +49,14 @@ public class CheSeleniumMultiUserModule extends AbstractModule {
 
     bind(AdminTestUser.class).toProvider(AdminTestUserProvider.class);
     bind(AdminTestUserProvider.class).to(MultiUserCheAdminTestUserProvider.class);
+
+    install(
+        new FactoryModuleBuilder()
+            .build(Key.get(new TypeLiteral<TestUserFactory<AdminTestUser>>() {}.getType())));
+
+    install(
+        new FactoryModuleBuilder()
+            .build(Key.get(new TypeLiteral<TestUserFactory<TestUserImpl>>() {}.getType())));
   }
 
   @Provides
