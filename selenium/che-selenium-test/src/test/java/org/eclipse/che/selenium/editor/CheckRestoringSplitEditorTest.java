@@ -25,11 +25,13 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -37,6 +39,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,6 +68,7 @@ public class CheckRestoringSplitEditorTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestApiEndpointUrlProvider testApiEndpointUrlProvider;
   @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
+  @Inject private WebDriverLogsReader webDriverLogsReader;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -113,13 +117,16 @@ public class CheckRestoringSplitEditorTest {
       String nameOfEditorTab,
       String expectedTextAfterRefresh,
       Pair<Integer, Integer> pair)
-      throws IOException {
-
+      throws IOException, JsonParseException {
     editor.waitActive();
     editor.selectTabByName(nameOfEditorTab);
     editor.waitCursorPosition(pair.first, pair.second);
-    editor.waitTextInDefinedSplitEditor(
-        numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
+    try {
+      editor.waitTextInDefinedSplitEditor(
+          numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
+    } catch (TimeoutException ex) {
+      System.out.println(webDriverLogsReader.getAllLogs());
+    }
   }
 
   private void splitEditorAndOpenFiles() {
@@ -147,13 +154,5 @@ public class CheckRestoringSplitEditorTest {
     editor.goToPosition(cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);
     editor.goToPosition(cursorPositionForPomFile.first, cursorPositionForPomFile.second);
-  }
-
-  private String getPreferences() throws Exception {
-    return httpJsonRequestFactory
-        .fromUrl(testApiEndpointUrlProvider.get() + "preferences")
-        .useGetMethod()
-        .request()
-        .asString();
   }
 }
