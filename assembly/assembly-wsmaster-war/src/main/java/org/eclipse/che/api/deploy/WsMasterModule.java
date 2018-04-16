@@ -70,6 +70,7 @@ import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitializer;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
+import org.eclipse.che.multiuser.api.workspace.activity.MultiUserWorkspaceActivityModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
@@ -191,8 +192,6 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-    install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
-
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
@@ -263,6 +262,8 @@ public class WsMasterModule extends AbstractModule {
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
     bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+
+    install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
   }
 
   private void configureMultiUserMode(
@@ -287,6 +288,7 @@ public class WsMasterModule extends AbstractModule {
     install(
         new org.eclipse.che.multiuser.permission.workspace.server.jpa
             .MultiuserWorkspaceJpaModule());
+    install(new MultiUserWorkspaceActivityModule());
 
     // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
