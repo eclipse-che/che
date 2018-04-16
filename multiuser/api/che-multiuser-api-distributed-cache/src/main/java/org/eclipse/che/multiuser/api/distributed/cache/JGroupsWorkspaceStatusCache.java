@@ -20,7 +20,11 @@ import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.jgroups.JChannel;
 import org.jgroups.blocks.ReplicatedHashMap;
 
-/** @author Anton Korneta */
+/**
+ * JGroups based implementation of {@link WorkspaceStatusCache}.
+ *
+ * @author Anton Korneta
+ */
 @Singleton
 public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
 

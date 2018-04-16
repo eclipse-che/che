@@ -44,6 +44,8 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.WorkspaceLockService;
+import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
@@ -261,7 +263,12 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
-    bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+    bind(RemoteSubscriptionStorage.class)
+        .to(org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage.class);
+    bind(WorkspaceLockService.class)
+        .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService.class);
+    bind(WorkspaceStatusCache.class)
+        .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
   }

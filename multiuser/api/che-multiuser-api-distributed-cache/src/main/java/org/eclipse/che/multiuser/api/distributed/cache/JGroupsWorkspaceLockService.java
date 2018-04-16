@@ -19,7 +19,11 @@ import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.jgroups.JChannel;
 import org.jgroups.blocks.locking.LockService;
 
-/** @author Anton Korneta */
+/**
+ * JGroups based implementation of {@link WorkspaceLockService}.
+ *
+ * @author Anton Korneta
+ */
 @Singleton
 public class JGroupsWorkspaceLockService implements WorkspaceLockService {
 

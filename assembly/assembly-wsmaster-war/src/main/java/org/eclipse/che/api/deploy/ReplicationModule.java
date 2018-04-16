@@ -16,8 +16,6 @@ import java.util.Map;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
-import org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceLockService;
-import org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceStatusCache;
 import org.eclipse.che.multiuser.api.subscription.DistributedRemoteSubscriptionStorage;
 import org.eclipse.persistence.config.CacheCoordinationProtocol;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -43,7 +41,9 @@ public class ReplicationModule extends AbstractModule {
     bindConstant().annotatedWith(Names.named("jgroups.config.file")).to(JGROUPS_CONF_FILE);
     bind(RemoteSubscriptionStorage.class).to(DistributedRemoteSubscriptionStorage.class);
 
-    bind(WorkspaceLockService.class).to(JGroupsWorkspaceLockService.class);
-    bind(WorkspaceStatusCache.class).to(JGroupsWorkspaceStatusCache.class);
+    bind(WorkspaceLockService.class)
+        .to(org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceLockService.class);
+    bind(WorkspaceStatusCache.class)
+        .to(org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceStatusCache.class);
   }
 }
