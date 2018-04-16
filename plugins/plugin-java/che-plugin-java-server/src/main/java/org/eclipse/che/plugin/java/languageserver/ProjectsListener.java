@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
-import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
 
 /**
@@ -63,14 +62,6 @@ public class ProjectsListener {
             onPreProjectDeleted(event);
           }
         });
-
-    eventService.subscribe(
-        new EventSubscriber<ProjectInitializedEvent>() {
-          @Override
-          public void onEvent(ProjectInitializedEvent event) {
-            onProjectInitializedEvent(event);
-          }
-        });
   }
 
   private void onProjectCreated(ProjectCreatedEvent event) {
@@ -92,17 +83,6 @@ public class ProjectsListener {
     String projectUri = prefixURI(event.getProjectPath());
     UpdateWorkspaceParameters params =
         new UpdateWorkspaceParameters(emptyList(), singletonList(projectUri));
-    workspaceSynchronizer.syncronizerWorkspaceAsync(params);
-  }
-
-  private void onProjectInitializedEvent(ProjectInitializedEvent event) {
-    if (!isProjectRegistered(event.getProjectPath())) {
-      return;
-    }
-
-    String projectUri = prefixURI(event.getProjectPath());
-    UpdateWorkspaceParameters params =
-        new UpdateWorkspaceParameters(singletonList(projectUri), emptyList());
     workspaceSynchronizer.syncronizerWorkspaceAsync(params);
   }
 
