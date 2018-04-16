@@ -67,7 +67,7 @@ public class LanguageServerFileWatcher {
         new DidChangeWatchedFilesParams(
             Collections.singletonList(new FileEvent(prefixURI(filePath), changeType)));
 
-    LOG.debug("sending " + changeType + " to LS: " + filePath);
+    LOG.debug("sending {} to LS: {}", changeType, filePath);
     server.getWorkspaceService().didChangeWatchedFiles(params);
   }
 
