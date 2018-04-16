@@ -32,7 +32,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -164,11 +163,6 @@ public class MacrosCommandsEditorTest {
    */
   private void runCommandWithCheckResult() {
     commandsEditor.clickOnRunButton();
-    try {
-      consoles.waitExpectedTextIntoConsole(PATH_TO_ROOT_FOLDER);
-    } catch (TimeoutException ex) {
-      commandsEditor.clickOnRunButton();
-      consoles.waitExpectedTextIntoConsole(PATH_TO_ROOT_FOLDER);
-    }
+    consoles.waitExpectedTextIntoConsole(PATH_TO_ROOT_FOLDER);
   }
 }
