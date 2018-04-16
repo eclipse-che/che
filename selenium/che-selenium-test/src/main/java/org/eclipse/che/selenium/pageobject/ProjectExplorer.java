@@ -255,8 +255,6 @@ public class ProjectExplorer {
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }
-
-      fail("Known issue https://github.com/eclipse/che/issues/9100", ex);
     }
   }
 
