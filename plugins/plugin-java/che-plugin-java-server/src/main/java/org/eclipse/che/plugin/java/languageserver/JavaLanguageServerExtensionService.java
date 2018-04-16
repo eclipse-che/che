@@ -654,12 +654,7 @@ public class JavaLanguageServerExtensionService {
     List<Object> params = singletonList(updateWorkspaceParameters);
 
     try {
-      return doGetOne(
-          Commands.UPDATE_WORKSPACE,
-          params,
-          type,
-          REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT,
-          TimeUnit.MILLISECONDS);
+      return doGetOne(Commands.UPDATE_WORKSPACE, params, type, 1, TimeUnit.HOURS);
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
       return new JobResult(Severity.ERROR, 1, e.getMessage());
