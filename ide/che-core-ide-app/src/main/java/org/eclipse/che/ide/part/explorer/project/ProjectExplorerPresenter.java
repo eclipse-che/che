@@ -61,6 +61,7 @@ import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
+import org.eclipse.che.ide.resources.tree.ContainerNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -173,7 +174,9 @@ public class ProjectExplorerPresenter extends BasePresenter
                 event
                     .getNodes()
                     .stream()
-                    .filter(node -> node instanceof ResourceNode)
+                    .filter(node -> node instanceof ContainerNode)
+                    .map(node -> (ContainerNode) node)
+                    .filter(node -> node.getData().getLocation().segmentCount() != 1)
                     .forEach(
                         node ->
                             node.getChildren(false)
