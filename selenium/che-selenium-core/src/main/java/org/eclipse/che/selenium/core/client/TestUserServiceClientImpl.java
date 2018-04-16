@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Musienko Maxim */
 public class TestUserServiceClientImpl implements TestUserServiceClient {
@@ -46,12 +47,8 @@ public class TestUserServiceClientImpl implements TestUserServiceClient {
   public TestUserServiceClientImpl(
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted("name") String name,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken) {
-    this(
-        apiEndpointProvider,
-        userHttpJsonRequestFactoryCreator.create(name, password, offlineToken));
+      @Assisted TestUser testUser) {
+    this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(testUser));
   }
 
   @Override

@@ -32,7 +32,7 @@ import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -80,7 +80,7 @@ public class PullRequestPluginTest {
   @Inject private Menu menu;
   @Inject private Loader loader;
   @Inject private Wizard wizard;
-  @Inject private TestUser user;
+  @Inject private DefaultTestUser user;
   @Inject private CodenvyEditor editor;
   @Inject private AskDialog askDialog;
   @Inject private Preferences preferences;
