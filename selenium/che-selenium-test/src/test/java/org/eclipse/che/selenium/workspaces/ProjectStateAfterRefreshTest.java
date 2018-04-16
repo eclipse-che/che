@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -24,7 +23,6 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -62,12 +60,7 @@ public class ProjectStateAfterRefreshTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
 
-    try {
-      checkFilesAreOpened();
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551");
-    }
+    checkFilesAreOpened();
 
     editor.closeAllTabsByContextMenu();
   }
@@ -88,13 +81,7 @@ public class ProjectStateAfterRefreshTest {
     seleniumWebDriver.navigate().refresh();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
-
-    try {
-      editor.waitTabIsPresent("qa-spring-sample");
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551");
-    }
+    editor.waitTabIsPresent("qa-spring-sample");
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");

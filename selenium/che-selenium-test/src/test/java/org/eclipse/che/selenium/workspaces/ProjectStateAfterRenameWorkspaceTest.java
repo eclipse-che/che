@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,7 +27,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -98,14 +96,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
 
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
-
-    try {
-      projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551");
-    }
-
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     projectExplorer.waitItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitTabIsPresent("index.jsp");
