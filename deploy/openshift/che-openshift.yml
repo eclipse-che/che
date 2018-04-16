@@ -27,9 +27,9 @@ items:
     selector:
       app: che
     strategy:
-      type: Recreate
-      recreateParams:
-        timeoutSeconds: 10000
+      type: Rolling
+      rollingParams:
+        timeoutSeconds: 300
     template:
       metadata:
         labels:
@@ -74,6 +74,7 @@ items:
           volumeMounts:
           #CHE_MASTER_VOLUME_MOUNTS
         serviceAccountName: che
+        terminationGracePeriodSeconds: 180
         volumes:
         #CHE_MASTER_VOLUMES
     triggers:
