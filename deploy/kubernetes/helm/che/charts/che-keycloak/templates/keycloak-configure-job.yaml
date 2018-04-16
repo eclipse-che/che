@@ -27,7 +27,7 @@ spec:
         command: ["/scripts/keycloak_config.sh"]
         env:
           - name: HTTP_PROTOCOL
-{{- if .Values.global.tlsEnabled }}
+{{- if .Values.global.tls.enabled }}
             value: "https"
 {{- else }}
             value: "http"
@@ -38,5 +38,6 @@ spec:
             value: {{ .Values.requireAdminPasswordChange | quote }}
           - name: CHE_HOST
             value: {{ template "cheHost" . }}
+      serviceAccountName: che-keycloak
       restartPolicy: Never
   backoffLimit: 4

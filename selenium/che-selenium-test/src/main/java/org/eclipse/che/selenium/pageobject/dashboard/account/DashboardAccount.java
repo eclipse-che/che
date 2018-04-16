@@ -19,7 +19,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAcc
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 
 /** @author Igor Ohrimenko */

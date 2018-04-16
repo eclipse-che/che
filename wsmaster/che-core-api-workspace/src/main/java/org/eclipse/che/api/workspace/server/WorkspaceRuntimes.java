@@ -144,16 +144,25 @@ public class WorkspaceRuntimes {
    *
    * @param workspace the workspace to inject runtime into
    */
-  public void injectRuntime(WorkspaceImpl workspace) {
+  public void injectRuntime(WorkspaceImpl workspace) throws ServerException {
     RuntimeState runtimeState = runtimes.get(workspace.getId());
     if (runtimeState != null) {
-      workspace.setRuntime(new RuntimeImpl(runtimeState.runtime));
+      try {
+        workspace.setRuntime(asRuntime(runtimeState));
+      } catch (InfrastructureException e) {
+        throw new ServerException(
+            "Error occurred while runtime state inspection. " + e.getMessage());
+      }
       workspace.setStatus(runtimeState.status);
     } else {
       workspace.setStatus(STOPPED);
     }
   }
 
+  private RuntimeImpl asRuntime(RuntimeState runtimeState) throws InfrastructureException {
+    InternalRuntime<?> runtime = runtimeState.runtime;
+    return new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner());
+  }
   /**
    * Gets workspace status by its identifier.
    *
@@ -461,9 +470,11 @@ public class WorkspaceRuntimes {
     }
 
     InternalRuntime runtime;
+    WorkspaceStatus status;
     try {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       runtime = infra.prepare(identity, internalEnv).getRuntime();
+      status = runtime.getStatus();
     } catch (InfrastructureException | ValidationException | NotFoundException x) {
       LOG.error(
           "Couldn't recover runtime '{}:{}'. Error: {}",
@@ -474,7 +485,7 @@ public class WorkspaceRuntimes {
     }
 
     RuntimeState prev =
-        runtimes.putIfAbsent(identity.getWorkspaceId(), new RuntimeState(runtime, RUNNING));
+        runtimes.putIfAbsent(identity.getWorkspaceId(), new RuntimeState(runtime, status));
     if (prev == null) {
       LOG.info(
           "Successfully recovered workspace runtime '{}'",

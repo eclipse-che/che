@@ -22,7 +22,6 @@
       <i class="config-title-action-show fa"
          ng-class="{'fa-chevron-circle-down': workspaceMachineConfigController.machineIsOpened, 'fa-chevron-circle-right': !workspaceMachineConfigController.machineIsOpened}"></i>
       <div class="config-title">{{workspaceMachineConfigController.machineName}}</div>
-      <dev-machine-label ng-if="workspaceMachineConfigController.machineConfig.isDev"></dev-machine-label>
     </div>
     <div layout="row" layout-align="center center"
          class="config-title-action-edit"
@@ -63,18 +62,6 @@
           <che-workspace-ram-allocation-slider ng-model="workspaceMachineConfigController.newRam"
                                                che-on-change="workspaceMachineConfigController.updateRam(workspaceMachineConfigForm.$valid)"></che-workspace-ram-allocation-slider>
         </ng-form>
-      </div>
-    </che-label-container>
-
-    <!-- Is Dev -->
-    <che-label-container che-label-name="Dev">
-      <div class="config-dev-machine-switch">
-        <md-switch ng-model="workspaceMachineConfigController.newDev"
-                   ng-change="workspaceMachineConfigController.enableDev()"
-                   ng-disabled="workspaceMachineConfigController.machineConfig.isDev"
-                   aria-label="Dev machine">
-          <span class="config-dev-machine-info">Injects terminal, SSH and IDE tooling.</span>
-        </md-switch>
       </div>
     </che-label-container>
 

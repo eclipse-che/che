@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
-import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
@@ -37,9 +36,7 @@ import org.testng.annotations.Test;
 @Listeners(value = MockitoTestNGListener.class)
 /** Tests for {@link WorkspaceActivityNotifier} */
 public class WorkspaceActivityManagerTest {
-  private static final long EXPIRE_PERIOD_MS = 60_000L; // 1 minute
-
-  @Mock private AccountManager accountManager;
+  private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
 
   @Mock private WorkspaceManager workspaceManager;
 
@@ -57,11 +54,10 @@ public class WorkspaceActivityManagerTest {
   private void setUp() throws Exception {
     activityManager =
         new WorkspaceActivityManager(
-            workspaceManager, workspaceActivityDao, eventService, EXPIRE_PERIOD_MS);
+            workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT);
 
     when(account.getName()).thenReturn("accountName");
     when(account.getId()).thenReturn("account123");
-    when(accountManager.getByName(anyString())).thenReturn(account);
 
     when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
     when(workspace.getNamespace()).thenReturn("accountName");
@@ -74,7 +70,7 @@ public class WorkspaceActivityManagerTest {
 
     activityManager.update(wsId, activityTime);
 
-    WorkspaceExpiration expected = new WorkspaceExpiration(wsId, activityTime + EXPIRE_PERIOD_MS);
+    WorkspaceExpiration expected = new WorkspaceExpiration(wsId, activityTime + DEFAULT_TIMEOUT);
     verify(workspaceActivityDao, times(1)).setExpiration(eq(expected));
   }
 

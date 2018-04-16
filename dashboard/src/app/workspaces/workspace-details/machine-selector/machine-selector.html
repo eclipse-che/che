@@ -4,8 +4,7 @@
   <div class="machines-list">
     <div class="machine-selector-label">Machines</div>
     <div ng-repeat="machine in machineSelectorController.machinesList">
-      <toggle-single-button ng-class="{'dev-machine' : machine.isDev}"
-                            id="workspace-machine-{{machine.name}}"
+      <toggle-single-button id="workspace-machine-{{machine.name}}"
                             che-title="{{machine.name}}"
                             che-font-icon="chefont cheico-stacks"
                             che-on-change="state && machineSelectorController.updateData(machine.name)"

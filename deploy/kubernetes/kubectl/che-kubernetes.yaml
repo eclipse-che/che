@@ -69,6 +69,7 @@ items:
     JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
     CHE_WORKSPACE_AUTO_START: "false"
     CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"nginx.ingress.kubernetes.io/rewrite-target": "/","nginx.ingress.kubernetes.io/ssl-redirect": "false","nginx.ingress.kubernetes.io/proxy-connect-timeout": "3600","nginx.ingress.kubernetes.io/proxy-read-timeout": "3600"}'
+    CHE_LOGS_APPENDERS_IMPL: "plaintext"
 - apiVersion: extensions/v1beta1
   kind: Ingress
   metadata:
@@ -248,6 +249,15 @@ items:
               configMapKeyRef:
                 key: CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON
                 name: che
+          - name: OPENSHIFT_KUBE_PING_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: CHE_LOGS_APPENDERS_IMPL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_LOGS_APPENDERS_IMPL
+                name: che
           image: eclipse/che-server:nightly
           imagePullPolicy: Always
           livenessProbe:
@@ -263,6 +273,8 @@ items:
             name: http
           - containerPort: 8000
             name: http-debug
+          - containerPort: 8888
+            name: jgroups-ping
           readinessProbe:
             httpGet:
               path: /api/system/state

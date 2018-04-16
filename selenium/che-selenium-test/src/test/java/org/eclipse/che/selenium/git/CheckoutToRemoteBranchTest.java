@@ -84,7 +84,7 @@ public class CheckoutToRemoteBranchTest {
     ide.open(ws);
 
     // create another branch in the test repo
-    testRepo.createBranchFromMaster(SECOND_BRANCH);
+    testRepo.createBranch(SECOND_BRANCH);
   }
 
   @Test

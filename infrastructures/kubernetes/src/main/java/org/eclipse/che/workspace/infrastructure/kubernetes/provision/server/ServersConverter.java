@@ -15,7 +15,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Map;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -24,6 +23,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 
 /**
@@ -36,19 +36,18 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
  * @author Alexander Garagatyi
  */
 @Singleton
-public class ServersConverter implements ConfigurationProvisioner {
+public class ServersConverter<T extends KubernetesEnvironment>
+    implements ConfigurationProvisioner<T> {
 
-  private final Map<String, String> ingressAnnotations;
+  private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
 
   @Inject
-  public ServersConverter(
-      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations) {
-    this.ingressAnnotations = ingressAnnotations;
+  public ServersConverter(ExternalServerExposerStrategy<T> externalServerExposerStrategy) {
+    this.externalServerExposerStrategy = externalServerExposerStrategy;
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
-      throws InfrastructureException {
+  public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
 
     for (Pod podConfig : k8sEnv.getPods().values()) {
       final PodSpec podSpec = podConfig.getSpec();
@@ -58,7 +57,7 @@ public class ServersConverter implements ConfigurationProvisioner {
         if (!machineConfig.getServers().isEmpty()) {
           KubernetesServerExposer kubernetesServerExposer =
               new KubernetesServerExposer<>(
-                  ingressAnnotations, machineName, podConfig, containerConfig, k8sEnv);
+                  externalServerExposerStrategy, machineName, podConfig, containerConfig, k8sEnv);
           kubernetesServerExposer.expose(machineConfig.getServers());
         }
       }

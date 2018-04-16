@@ -129,7 +129,6 @@ public class WorkspaceDetailsSingleMachineTest {
   @Test
   public void checkWorkingWithInstallers() {
     workspaceDetails.selectTabInWorkspaceMenu(INSTALLERS);
-    assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API"));
 
     // check all needed installers in dev-machine exist
     workspaceMachines.selectMachine("Workspace Installers", "dev-machine");

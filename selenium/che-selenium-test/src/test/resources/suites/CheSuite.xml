@@ -111,9 +111,11 @@
           <class name="org.eclipse.che.selenium.filewatcher.UpdateFilesWithoutIDE"/>
           <class name="org.eclipse.che.selenium.filewatcher.CheckDeletingProjectByApiTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.CheckFileWatcherExcludeFeatureTest"/>
+          <class name="org.eclipse.che.selenium.git.ImportWizardFormTest"/>
           <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest"/>
           <class name="org.eclipse.che.selenium.git.AmendCommitTest"/>
           <class name="org.eclipse.che.selenium.git.BranchTest"/>
+          <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
           <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
           <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
           <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
@@ -140,7 +142,7 @@
           <class name="org.eclipse.che.selenium.mavenplugin.GenerateEffectivePomTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.CheckCreatingProjectInEmptyWsTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.CheckMacrosFeatureTest"/>
-          <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcess"/>
+          <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ConvertToProjectFromConfigurationTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ConvertToProjectWithPomFileTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.DialogAboutTest"/>

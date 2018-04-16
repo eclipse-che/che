@@ -33,6 +33,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -58,14 +59,22 @@ import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
@@ -78,13 +87,21 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
@@ -99,6 +116,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -107,7 +125,6 @@ import org.testng.annotations.Test;
  * @author Anton Korneta
  */
 public class KubernetesInternalRuntimeTest {
-
   private static final int EXPOSED_PORT_1 = 4401;
   private static final int EXPOSED_PORT_2 = 8081;
   private static final int INTERNAL_PORT = 4411;
@@ -144,6 +161,8 @@ public class KubernetesInternalRuntimeTest {
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
+  private KubernetesRuntimeStateCache runtimeStatesCache;
+  private KubernetesMachineCache machinesCache;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -153,6 +172,10 @@ public class KubernetesInternalRuntimeTest {
   @BeforeMethod
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
+
+    runtimeStatesCache = new MapBasedRuntimeStateCache();
+    machinesCache = new MapBasedMachinesCache();
+
     internalRuntime =
         new KubernetesInternalRuntime<>(
             13,
@@ -165,6 +188,8 @@ public class KubernetesInternalRuntimeTest {
             workspaceProbesFactory,
             new RuntimeEventsPublisher(eventService),
             new KubernetesSharedPool(),
+            runtimeStatesCache,
+            machinesCache,
             context,
             namespace,
             emptyList());
@@ -176,7 +201,7 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.services()).thenReturn(services);
     when(namespace.ingresses()).thenReturn(ingresses);
     when(namespace.pods()).thenReturn(pods);
-    when(bootstrapperFactory.create(any(), anyList(), any())).thenReturn(bootstrapper);
+    when(bootstrapperFactory.create(any(), anyList(), any(), any())).thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
@@ -385,6 +410,90 @@ public class KubernetesInternalRuntimeTest {
     verify(probesScheduler).schedule(eq(workspaceProbes), any());
   }
 
+  @Test
+  public void shouldMarkRuntimeStarting() throws Exception {
+    // when
+    internalRuntime.markStarting();
+
+    assertEquals(internalRuntime.getStatus(), WorkspaceStatus.STARTING);
+  }
+
+  @Test(
+    expectedExceptions = StateException.class,
+    expectedExceptionsMessageRegExp = "Runtime is already started"
+  )
+  public void shouldThrowExceptionIfRuntimeIsAlreadyStarting() throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(
+            internalRuntime.getContext().getIdentity(), "test", WorkspaceStatus.STARTING));
+
+    // when
+    internalRuntime.markStarting();
+  }
+
+  @Test
+  public void shouldMarkRuntimeRunning() throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(
+            internalRuntime.getContext().getIdentity(), "test", WorkspaceStatus.STARTING));
+
+    // when
+    internalRuntime.markRunning();
+
+    // then
+    assertEquals(internalRuntime.getStatus(), WorkspaceStatus.RUNNING);
+  }
+
+  @Test
+  public void shouldMarkRuntimeStopping() throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(
+            internalRuntime.getContext().getIdentity(), "test", WorkspaceStatus.RUNNING));
+
+    // when
+    internalRuntime.markStopping();
+
+    // then
+    assertEquals(internalRuntime.getStatus(), WorkspaceStatus.STOPPING);
+  }
+
+  @Test(
+    expectedExceptions = StateException.class,
+    expectedExceptionsMessageRegExp = "The environment must be running",
+    dataProvider = "nonRunningStatuses"
+  )
+  public void shouldThrowExceptionWhenTryToMakeNonRunningNorStartingRuntimeAsStopping(
+      WorkspaceStatus status) throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(internalRuntime.getContext().getIdentity(), "test", status));
+
+    // when
+    internalRuntime.markStopping();
+  }
+
+  @DataProvider
+  Object[][] nonRunningStatuses() {
+    return new Object[][] {{WorkspaceStatus.STOPPING}, {WorkspaceStatus.STOPPED}};
+  }
+
+  @Test
+  public void shouldRemoveRuntimeStateOnMarkingRuntimeStopped() throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(
+            internalRuntime.getContext().getIdentity(), "test", WorkspaceStatus.STOPPING));
+
+    // when
+    internalRuntime.markStopped();
+
+    // then
+    assertFalse(runtimeStatesCache.get(internalRuntime.getContext().getIdentity()).isPresent());
+  }
+
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {
     return newDto(MachineStatusEvent.class)
         .withIdentity(DtoConverter.asDto(IDENTITY))
@@ -522,5 +631,118 @@ public class KubernetesInternalRuntimeTest {
 
   private static IntOrString intOrString(int port) {
     return new IntOrStringBuilder().withIntVal(port).withStrVal(String.valueOf(port)).build();
+  }
+
+  private static class MapBasedRuntimeStateCache implements KubernetesRuntimeStateCache {
+    private Map<RuntimeId, KubernetesRuntimeState> runtimesStates = new HashMap<>();
+
+    @Override
+    public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+      return new HashSet<>(runtimesStates.keySet());
+    }
+
+    @Override
+    public boolean putIfAbsent(KubernetesRuntimeState state) throws InfrastructureException {
+      return runtimesStates.putIfAbsent(state.getRuntimeId(), state) == null;
+    }
+
+    @Override
+    public void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus)
+        throws InfrastructureException {
+      runtimesStates.get(new RuntimeId(runtimeId)).setStatus(newStatus);
+    }
+
+    @Override
+    public boolean updateStatus(
+        RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
+        throws InfrastructureException {
+      KubernetesRuntimeState state = runtimesStates.get(new RuntimeId(identity));
+      if (predicate.test(state.getStatus())) {
+        state.setStatus(newStatus);
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    public WorkspaceStatus getStatus(RuntimeIdentity runtimeId) throws InfrastructureException {
+      return runtimesStates.get(new RuntimeId(runtimeId)).getStatus();
+    }
+
+    @Override
+    public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId)
+        throws InfrastructureException {
+      return Optional.ofNullable(runtimesStates.get(new RuntimeId(runtimeId)));
+    }
+
+    @Override
+    public void remove(RuntimeIdentity runtimeId) throws InfrastructureException {
+      runtimesStates.remove(new RuntimeId(runtimeId));
+    }
+  }
+
+  private static class MapBasedMachinesCache implements KubernetesMachineCache {
+    private Map<MachineId, KubernetesMachineImpl> machines = new HashMap<>();
+
+    private MachineId machineIdOf(RuntimeIdentity runtimeId, KubernetesMachineImpl machine) {
+      return new MachineId(runtimeId.getWorkspaceId(), machine.getName());
+    }
+
+    private MachineId machineIdOf(RuntimeIdentity runtimeId, String machineName) {
+      return new MachineId(runtimeId.getWorkspaceId(), machineName);
+    }
+
+    @Override
+    public void put(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
+        throws InfrastructureException {
+      machines.put(machineIdOf(runtimeIdentity, machine), machine);
+    }
+
+    @Override
+    public boolean updateServerStatus(
+        RuntimeIdentity runtimeIdentity,
+        String machineName,
+        String serverName,
+        ServerStatus newStatus)
+        throws InfrastructureException {
+      KubernetesServerImpl server =
+          machines.get(machineIdOf(runtimeIdentity, machineName)).getServers().get(serverName);
+
+      if (server.getStatus().equals(newStatus)) {
+        return false;
+      } else {
+        server.setStatus(newStatus);
+        return true;
+      }
+    }
+
+    @Override
+    public KubernetesServerImpl getServer(
+        RuntimeIdentity runtimeIdentity, String machineName, String serverName)
+        throws InfrastructureException {
+      return machines.get(machineIdOf(runtimeIdentity, machineName)).getServers().get(serverName);
+    }
+
+    @Override
+    public void updateMachineStatus(
+        RuntimeIdentity runtimeIdentity, String machineName, MachineStatus newStatus)
+        throws InfrastructureException {
+      machines.get(machineIdOf(runtimeIdentity, machineName)).setStatus(newStatus);
+    }
+
+    @Override
+    public Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity)
+        throws InfrastructureException {
+      return machines
+          .entrySet()
+          .stream()
+          .filter(e -> e.getKey().getWorkspaceId().equals(runtimeIdentity.getWorkspaceId()))
+          .collect(Collectors.toMap(e -> e.getValue().getName(), Entry::getValue));
+    }
+
+    @Override
+    public void remove(RuntimeIdentity identity) throws InfrastructureException {
+      machines.keySet().removeIf(id -> id.getWorkspaceId().equals(identity.getWorkspaceId()));
+    }
   }
 }
