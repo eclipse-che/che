@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.java.languageserver;
 
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
@@ -30,6 +32,15 @@ public class JavaLSWrapper {
   }
 
   public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
+    Map<String, Object> initOptions = new HashMap<>();
+    Map<String, String> extendedCapabilities = new HashMap<>();
+    extendedCapabilities.put("progressReportProvider", "true");
+    initOptions.put("extendedClientCapabilities", extendedCapabilities);
+
+    Map<String, String> settings = new HashMap<>();
+    settings.put("java.configuration.updateBuildConfiguration", "automatic");
+    initOptions.put("settings", settings);
+    params.setInitializationOptions(initOptions);
     return wrapped
         .initialize(params)
         .thenApply(
