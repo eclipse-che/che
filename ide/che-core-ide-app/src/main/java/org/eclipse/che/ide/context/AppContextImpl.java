@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.model.factory.Factory;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -91,7 +92,6 @@ public class AppContextImpl
   private CurrentUser currentUser;
   private WorkspaceImpl workspace;
   private FactoryImpl factory;
-  private Path projectsRoot;
   private ResourceManager resourceManager;
   private Map<String, String> properties;
 
@@ -207,12 +207,6 @@ public class AppContextImpl
             });
   }
 
-  @Deprecated
-  @Override
-  public String getWorkspaceName() {
-    return workspace.getConfig().getName();
-  }
-
   /** {@inheritDoc} */
   @Override
   public void onResourceChanged(ResourceChangedEvent event) {
@@ -279,11 +273,34 @@ public class AppContextImpl
 
   @Override
   public Path getProjectsRoot() {
-    return projectsRoot;
-  }
 
-  public void setProjectsRoot(Path projectsRoot) {
-    this.projectsRoot = projectsRoot;
+    // default root (backward compatible solution)
+    Path projectsRoot = Path.valueOf("/projects");
+
+    if (workspace != null && workspace.getStatus().equals(WorkspaceStatus.RUNNING)) {
+
+      String machineName =
+          wsAgentServerUtilProvider.get().getWsAgentServerMachine().get().getName();
+      String activeEnv = workspace.getRuntime().getActiveEnv();
+
+      projectsRoot =
+          Path.valueOf(
+              workspace
+                  .getConfig()
+                  .getEnvironments()
+                  .get(activeEnv)
+                  .getMachines()
+                  .get(machineName)
+                  .getVolumes()
+                  .get("projects")
+                  .getPath());
+    }
+
+    Log.debug(
+        AppContextImpl.class,
+        "Project Root: " + projectsRoot + " workspace: " + workspace.getConfig().getName());
+
+    return projectsRoot;
   }
 
   @Override

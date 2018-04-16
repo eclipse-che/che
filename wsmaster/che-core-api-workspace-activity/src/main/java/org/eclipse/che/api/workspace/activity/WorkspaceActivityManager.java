@@ -48,7 +48,7 @@ public class WorkspaceActivityManager {
 
   private static final String ACTIVITY_CHECKER = "activity-checker";
 
-  private final long timeout;
+  private final long defaultTimeout;
   private final WorkspaceActivityDao activityDao;
   private final EventService eventService;
   private final EventSubscriber<?> workspaceEventsSubscriber;
@@ -60,11 +60,11 @@ public class WorkspaceActivityManager {
       WorkspaceManager workspaceManager,
       WorkspaceActivityDao activityDao,
       EventService eventService,
-      @Named("che.workspace.agent.dev.inactive_stop_timeout_ms") long timeout) {
-    this.timeout = timeout > 0 ? timeout : -1;
+      @Named("che.limits.workspace.idle.timeout") long timeout) {
     this.workspaceManager = workspaceManager;
     this.eventService = eventService;
     this.activityDao = activityDao;
+    this.defaultTimeout = timeout;
     this.workspaceEventsSubscriber =
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
@@ -104,13 +104,18 @@ public class WorkspaceActivityManager {
    * @param activityTime moment in which the activity occurred
    */
   public void update(String wsId, long activityTime) {
-    if (timeout > 0) {
-      try {
+    try {
+      long timeout = getIdleTimeout(wsId);
+      if (timeout > 0) {
         activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
-      } catch (ServerException e) {
-        LOG.error(e.getLocalizedMessage(), e);
       }
+    } catch (ServerException e) {
+      LOG.error(e.getLocalizedMessage(), e);
     }
+  }
+
+  protected long getIdleTimeout(String wsId) {
+    return defaultTimeout;
   }
 
   @ScheduleDelay(
