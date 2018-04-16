@@ -619,7 +619,7 @@ public class StandardVMType implements IVMInstallType {
     // DebugPlugin.getDefault().getLaunchManager().getNativeEnvironmentCasePreserved();
     ////					if (map.remove(StandardVMDebugger.JAVA_JVM_VERSION) != null) {
     ////						envp = new String[map.size()];
-    ////						Iterator<Entry<String, String>> iterator = map.mapSlice().iterator();
+    ////						Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
     ////						int i = 0;
     ////						while (iterator.hasNext()) {
     ////							Entry<String, String> entry = iterator.next();
