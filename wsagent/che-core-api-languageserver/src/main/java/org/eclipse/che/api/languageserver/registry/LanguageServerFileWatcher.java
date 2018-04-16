@@ -33,6 +33,8 @@ import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implement <a
@@ -41,6 +43,8 @@ import org.eclipse.lsp4j.services.LanguageServer;
  */
 @Singleton
 public class LanguageServerFileWatcher {
+  private static final Logger LOG = LoggerFactory.getLogger(LanguageServerFileWatcher.class);
+
   private final LanguageServerFileCreateConsumer fileCreateConsumer;
   private final LanguageServerFileChangeConsumer fileUpdateConsumer;
   private final LanguageServerFileDeleteConsumer fileDeleteConsumer;
@@ -62,6 +66,8 @@ public class LanguageServerFileWatcher {
     DidChangeWatchedFilesParams params =
         new DidChangeWatchedFilesParams(
             Collections.singletonList(new FileEvent(prefixURI(filePath), changeType)));
+
+    LOG.debug("sending {} to LS: {}", changeType, filePath);
     server.getWorkspaceService().didChangeWatchedFiles(params);
   }
 
