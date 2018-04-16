@@ -39,6 +39,14 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
+   * Returns true if namespace is predefined for all workspaces or false if each workspace will be
+   * provided with a new namespace.
+   */
+  public boolean isPredefined() {
+    return isNullOrEmpty(namespaceName);
+  }
+
+  /**
    * Creates a Kubernetes namespace for the specified workspace.
    *
    * <p>The namespace name will be chosen according to a configuration, and it will be prepared
