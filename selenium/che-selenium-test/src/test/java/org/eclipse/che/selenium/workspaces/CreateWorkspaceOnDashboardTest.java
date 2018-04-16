@@ -19,9 +19,9 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PR
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -40,12 +40,13 @@ public class CreateWorkspaceOnDashboardTest {
 
   private static final String WS_NAME = generate("workspace", 4);
   private static final String PROJECT_NAME = "web-java-spring";
+  private static final String PATH_TO_EXPAND = "/src/main/java/org.eclipse.che.examples";
   private static final String PATH_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
   @Inject private TestUser defaultTestUser;
@@ -77,7 +78,7 @@ public class CreateWorkspaceOnDashboardTest {
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     // wait that the workspace is started
     ide.waitOpenedWorkspaceIsReadyToUse();
@@ -93,8 +94,7 @@ public class CreateWorkspaceOnDashboardTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // open a file in the Editor
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem(PATH_JAVA_FILE);
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.openItemByPath(PATH_JAVA_FILE);
     editor.waitActive();
     editor.waitTabIsPresent("GreetingController");

@@ -11,13 +11,14 @@
 package org.eclipse.che.ide.statepersistance;
 
 /**
- * Constants for the mappings in user preferences to store/restore app state.
+ * Constants for the mappings to store/restore app state.
  *
  * @author Roman Nikitenko
  */
 public final class AppStateConstants {
 
   public static final String APP_STATE = "IdeAppStates";
+  public static final String WORKSPACE = "workspace";
   public static final String PERSPECTIVES = "perspectives";
   public static final String PART_STACKS = "PART_STACKS";
   public static final String PART_STACK_STATE = "STATE";

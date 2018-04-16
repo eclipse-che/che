@@ -27,6 +27,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     networks:
       - default
       - che-network
@@ -129,8 +131,12 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/var/lib/pgsql/init-che-user.sh'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user-and-run.sh:/var/lib/pgsql/init-che-user-and-run.sh'
 <% if scope.lookupvar('che::che_single_port') == 'false' -%>
+    expose:
+      - '5432'
+<% if scope.lookupvar('che::che_env') == 'development' -%>
     ports:
       - '5432:5432'
+<% end -%>
 <% end -%>
     restart: always
     healthcheck:
@@ -192,6 +198,11 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak:/opt/jboss/keycloak/standalone/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs/keycloak:/opt/jboss/keycloak/standalone/log'
     restart: always
+    healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/" ]
+        interval: 10s
+        timeout: 10s
+        retries: 10
 
 networks:
   che-network:

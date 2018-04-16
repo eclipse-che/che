@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.WindowActionEvent;
 import org.eclipse.che.ide.api.WindowActionHandler;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 
 /**
  * Tracks and allows to manage the file watcher exclude patterns for tracking creation, modification
@@ -52,7 +53,7 @@ public class FileWatcherExcludesOperation implements WindowActionHandler {
     this.promises = promises;
     this.requestTransmitter = requestTransmitter;
     eventBus.addHandler(WindowActionEvent.TYPE, this);
-    subscribe();
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), event -> subscribe());
   }
 
   @Inject

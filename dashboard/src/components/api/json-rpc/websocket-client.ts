@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {ICommunicationClient} from './json-rpc-client';
+import {communicationClientEvent, ICommunicationClient} from './json-rpc-client';
 
 /**
  * The implementation for JSON RPC protocol communication through websocket.
@@ -22,9 +22,13 @@ export class WebsocketClient implements ICommunicationClient {
   private $q: ng.IQService;
   private websocketStream;
 
+  private handlers: {[event: string]: Function[]};
+
   constructor ($websocket: any, $q: ng.IQService) {
     this.$websocket = $websocket;
     this.$q = $q;
+
+    this.handlers = {};
   }
 
   /**
@@ -35,16 +39,44 @@ export class WebsocketClient implements ICommunicationClient {
   connect(entrypoint: string): ng.IPromise<any> {
     let deferred = this.$q.defer();
     this.websocketStream = this.$websocket(entrypoint);
+
     this.websocketStream.onOpen(() => {
+      const event: communicationClientEvent = 'open';
+      if (!this.handlers[event] || this.handlers[event].length === 0) {
+        return;
+      }
+
+      this.handlers[event].forEach((handler: Function) => handler() );
+
       deferred.resolve();
     });
-
     this.websocketStream.onError(() => {
+      const event: communicationClientEvent = 'error';
+      if (!this.handlers[event] || this.handlers[event].length === 0) {
+        return;
+      }
+
+      this.handlers[event].forEach((handler: Function) => handler() );
+
       deferred.reject();
     });
     this.websocketStream.onMessage((message: any) => {
-      let data = JSON.parse(message.data);
-      this.onResponse(data);
+      const data = JSON.parse(message.data);
+
+      const event: communicationClientEvent = 'response';
+      if (!this.handlers[event] || this.handlers[event].length === 0) {
+        return;
+      }
+
+      this.handlers[event].forEach((handler: Function) => handler(data) );
+    });
+    this.websocketStream.onClose(() => {
+      const event: communicationClientEvent = 'close';
+      if (!this.handlers[event] || this.handlers[event].length === 0) {
+        return;
+      }
+
+      this.handlers[event].forEach((handler: Function) => handler() );
     });
 
     return deferred.promise;
@@ -57,6 +89,36 @@ export class WebsocketClient implements ICommunicationClient {
     if (this.websocketStream) {
       this.websocketStream.close();
     }
+  }
+
+  /**
+   * Adds a listener on an event.
+   *
+   * @param {communicationClientEvent} event
+   * @param {Function} handler
+   */
+  addListener(event: communicationClientEvent, handler: Function): void {
+    if (!this.handlers[event]) {
+      this.handlers[event] = [];
+    }
+    this.handlers[event].push(handler);
+  }
+
+  /**
+   * Removes a listener.
+   *
+   * @param {communicationClientEvent} event
+   * @param {Function} handler
+   */
+  removeListener(event: communicationClientEvent, handler: Function): void {
+    if (!this.handlers[event] || !handler) {
+      return;
+    }
+    const index = this.handlers[event].indexOf(handler);
+    if (index === -1) {
+      return;
+    }
+    this.handlers[event].splice(index, 1);
   }
 
   /**

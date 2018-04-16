@@ -1,0 +1,32 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+# the following section is for secure registries. when uncommented, a pull secret will be created
+#registry:
+#  host: my-secure-private-registry.com
+#  username: myUser
+#  password: myPass
+
+cheImage: eclipse/che-server:nightly
+cheImagePullPolicy: Always
+cheKeycloakRealm: "che"
+cheKeycloakClientId: "che-public"
+
+
+global:
+  cheNamespace: ""
+  multiuser: false
+  ingressDomain: 192.168.99.100.nip.io
+  # See --annotations-prefix flag (https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md)
+  ingressAnnotationsPrefix: "nginx."
+  # options: default-host, single-host, multi-host
+  serverStrategy: multi-host
+  tls:
+    enabled: false
+    useCertManager: true
+    useStaging: true
+    secretName: che-tls

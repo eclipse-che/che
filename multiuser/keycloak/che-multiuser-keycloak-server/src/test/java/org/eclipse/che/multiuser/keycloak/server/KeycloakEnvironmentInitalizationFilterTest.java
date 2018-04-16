@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static io.jsonwebtoken.SignatureAlgorithm.RS512;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -21,18 +22,20 @@ import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.DefaultHeader;
 import io.jsonwebtoken.impl.DefaultJwt;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -40,6 +43,8 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.eclipse.che.multiuser.machine.authentication.shared.Constants;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -51,7 +56,8 @@ import org.testng.annotations.Test;
 @Listeners(value = {MockitoTestNGListener.class})
 public class KeycloakEnvironmentInitalizationFilterTest {
 
-  @Mock private UserManager userManager;
+  @Mock private SignatureKeyManager keyManager;
+  @Mock private KeycloakUserManager userManager;
   @Mock private RequestTokenExtractor tokenExtractor;
   @Mock private PermissionChecker permissionChecker;
   @Mock private FilterChain chain;
@@ -70,14 +76,26 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     EnvironmentContext.setCurrent(context);
     filter =
         new KeycloakEnvironmentInitalizationFilter(userManager, tokenExtractor, permissionChecker);
+    filter.signatureKeyManager = keyManager;
+    final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
+    when(keyManager.getKeyPair()).thenReturn(kp);
   }
 
   @Test
   public void shouldSkipRequestsWithMachineTokens() throws Exception {
-
-    EnvironmentContext context = EnvironmentContext.getCurrent();
-    // given
-    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("machine123123token");
+    final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+    kpg.initialize(1024);
+    final KeyPair keyPair = kpg.generateKeyPair();
+    when(keyManager.getKeyPair()).thenReturn(keyPair);
+    final Map<String, Object> header = new HashMap<>();
+    header.put("kind", Constants.MACHINE_TOKEN_KIND);
+    final String token =
+        Jwts.builder()
+            .setPayload("payload")
+            .setHeader(header)
+            .signWith(RS512, keyPair.getPrivate())
+            .compact();
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
 
     // when
     filter.doFilter(request, response, chain);
@@ -85,7 +103,6 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     // then
     verify(chain).doFilter(eq(request), eq(response));
     verifyNoMoreInteractions(userManager);
-    verifyNoMoreInteractions(context);
   }
 
   @Test
@@ -101,7 +118,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
     when(request.getAttribute("token")).thenReturn(createJwt());
     when(session.getAttribute(eq("che_subject"))).thenReturn(existingSubject);
-    when(userManager.getById(anyString())).thenReturn(user);
+    when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(user);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
 
@@ -117,60 +134,6 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     assertEquals(expectedSubject.getUserId(), captor.getAllValues().get(1).getUserId());
     assertEquals(expectedSubject.getUserName(), captor.getAllValues().get(0).getUserName());
     assertEquals(expectedSubject.getUserName(), captor.getAllValues().get(1).getUserName());
-  }
-
-  @Test
-  public void shouldCreateUserIfNoneExists() throws Exception {
-
-    UserImpl user = new UserImpl();
-    DefaultJwt<Claims> jwt = createJwt();
-    user.setEmail((String) jwt.getBody().get("email"));
-    user.setId(jwt.getBody().getSubject());
-    user.setName((String) jwt.getBody().get("preferred_username"));
-
-    ArgumentCaptor<UserImpl> captor = ArgumentCaptor.forClass(UserImpl.class);
-
-    // given
-    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
-    when(request.getScheme()).thenReturn("http");
-    when(request.getSession()).thenReturn(session);
-    when(request.getAttribute("token")).thenReturn(jwt);
-    when(session.getAttribute(eq("che_subject"))).thenReturn(null);
-    when(userManager.getById(anyString())).thenThrow(NotFoundException.class);
-    when(userManager.create(any(User.class), anyBoolean())).thenReturn(user);
-
-    // when
-    filter.doFilter(request, response, chain);
-
-    // then
-    verify(session).setAttribute(eq("che_subject"), captor.capture());
-    verify(userManager).create(captor.capture(), eq(false));
-    assertEquals(jwt.getBody().getSubject(), captor.getValue().getId());
-    assertEquals(jwt.getBody().get("email"), captor.getValue().getEmail());
-    assertEquals(jwt.getBody().get("preferred_username"), captor.getValue().getName());
-  }
-
-  @Test
-  public void shouldUpdateUserWhenEmailsNotMatch() throws Exception {
-
-    Subject existingSubject = new SubjectImpl("name", "id1", "token", false);
-    UserImpl user = new UserImpl("id2", "test2@test.com", "username2");
-    DefaultJwt<Claims> jwt = createJwt();
-
-    ArgumentCaptor<UserImpl> captor = ArgumentCaptor.forClass(UserImpl.class);
-
-    // given
-    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
-    when(request.getAttribute("token")).thenReturn(jwt);
-    when(session.getAttribute(eq("che_subject"))).thenReturn(existingSubject);
-    when(userManager.getById(anyString())).thenReturn(user);
-
-    // when
-    filter.doFilter(request, response, chain);
-
-    // then
-    verify(userManager).update(captor.capture());
-    assertEquals(jwt.getBody().get("email"), captor.getValue().getEmail());
   }
 
   private DefaultJwt<Claims> createJwt() {

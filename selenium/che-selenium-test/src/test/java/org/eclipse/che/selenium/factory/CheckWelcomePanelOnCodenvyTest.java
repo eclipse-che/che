@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -40,6 +41,7 @@ public class CheckWelcomePanelOnCodenvyTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   private TestFactory testFactory;
   private WebDriverWait webDriverWait;
@@ -77,7 +79,7 @@ public class CheckWelcomePanelOnCodenvyTest {
   public void shouldAppearsWelcomePanelAfterUsingFactory() throws Exception {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitItem("Spring");
     checkWelcomePanel();
   }

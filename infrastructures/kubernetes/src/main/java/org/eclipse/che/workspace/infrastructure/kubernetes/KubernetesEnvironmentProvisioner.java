@@ -17,8 +17,10 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -46,6 +48,8 @@ public class KubernetesEnvironmentProvisioner {
   private final InstallerServersPortProvisioner installerServersPortProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final SecurityContextProvisioner securityContextProvisioner;
+  private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
+  private final IngressTlsProvisioner externalServerIngressTlsProvisioner;
 
   @Inject
   public KubernetesEnvironmentProvisioner(
@@ -58,7 +62,9 @@ public class KubernetesEnvironmentProvisioner {
       RamLimitProvisioner ramLimitProvisioner,
       InstallerServersPortProvisioner installerServersPortProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
-      SecurityContextProvisioner securityContextProvisioner) {
+      SecurityContextProvisioner securityContextProvisioner,
+      PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
+      IngressTlsProvisioner externalServerIngressTlsProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -69,6 +75,8 @@ public class KubernetesEnvironmentProvisioner {
     this.installerServersPortProvisioner = installerServersPortProvisioner;
     this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
     this.securityContextProvisioner = securityContextProvisioner;
+    this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
+    this.externalServerIngressTlsProvisioner = externalServerIngressTlsProvisioner;
   }
 
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
@@ -90,6 +98,8 @@ public class KubernetesEnvironmentProvisioner {
     restartPolicyRewriter.provision(k8sEnv, identity);
     uniqueNamesProvisioner.provision(k8sEnv, identity);
     ramLimitProvisioner.provision(k8sEnv, identity);
+    externalServerIngressTlsProvisioner.provision(k8sEnv, identity);
     securityContextProvisioner.provision(k8sEnv, identity);
+    podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
   }
 }

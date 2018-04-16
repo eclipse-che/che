@@ -71,7 +71,7 @@ public class KubernetesServerResolver {
     return servers;
   }
 
-  protected void fillInternalServers(String machineName, Map<String, ServerImpl> servers) {
+  private void fillInternalServers(String machineName, Map<String, ServerImpl> servers) {
     services.get(machineName).forEach(service -> fillServiceServers(service, servers));
   }
 

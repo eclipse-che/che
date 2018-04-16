@@ -164,8 +164,6 @@ public class WorkspaceManager {
   /**
    * Gets list of workspaces which user can read
    *
-   * <p>
-   *
    * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status or status defined by
    * their runtime instances(if those exist).
    *
@@ -175,7 +173,7 @@ public class WorkspaceManager {
    * @return the list of workspaces or empty list if user can't read any workspace
    * @throws NullPointerException when {@code user} is null
    * @throws ServerException when any server error occurs while getting workspaces with {@link
-   *     WorkspaceDao#getWorkspaces(String)}
+   *     WorkspaceDao#getWorkspaces(String, int, long)}
    */
   public Page<WorkspaceImpl> getWorkspaces(
       String user, boolean includeRuntimes, int maxItems, long skipCount) throws ServerException {
@@ -201,7 +199,7 @@ public class WorkspaceManager {
    * @return the list of workspaces or empty list if no matches
    * @throws NullPointerException when {@code namespace} is null
    * @throws ServerException when any server error occurs while getting workspaces with {@link
-   *     WorkspaceDao#getByNamespace(String)}
+   *     WorkspaceDao#getByNamespace(String, int, long)}
    */
   public Page<WorkspaceImpl> getByNamespace(
       String namespace, boolean includeRuntimes, int maxItems, long skipCount)

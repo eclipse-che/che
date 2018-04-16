@@ -65,6 +65,8 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -102,7 +104,7 @@ public class OpenShiftInternalRuntimeTest {
   private static final String M2_NAME = POD_NAME + '/' + CONTAINER_NAME_2;
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
 
   @Mock private OpenShiftRuntimeContext context;
   @Mock private EventService eventService;
@@ -118,6 +120,8 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
+  @Mock private KubernetesRuntimeStateCache runtimeStateCache;
+  @Mock private KubernetesMachineCache machinesCache;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -141,6 +145,8 @@ public class OpenShiftInternalRuntimeTest {
             workspaceProbesFactory,
             new RuntimeEventsPublisher(eventService),
             mock(KubernetesSharedPool.class),
+            runtimeStateCache,
+            machinesCache,
             context,
             project,
             emptyList());
@@ -151,7 +157,7 @@ public class OpenShiftInternalRuntimeTest {
     when(project.services()).thenReturn(services);
     when(project.routes()).thenReturn(routes);
     when(project.pods()).thenReturn(pods);
-    when(bootstrapperFactory.create(any(), anyList(), any())).thenReturn(bootstrapper);
+    when(bootstrapperFactory.create(any(), anyList(), any(), any())).thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,

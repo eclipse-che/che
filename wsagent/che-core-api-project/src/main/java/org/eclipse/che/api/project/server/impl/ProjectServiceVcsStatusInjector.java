@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 
@@ -54,7 +55,7 @@ public class ProjectServiceVcsStatusInjector {
    */
   public ItemReference injectVcsStatus(ItemReference itemReference)
       throws ServerException, NotFoundException {
-    Optional<VcsStatusProvider> optional = getVcsStatusProvider(itemReference.getProject());
+    Optional<VcsStatusProvider> optional = getVcsStatusProvider(itemReference);
     if (optional.isPresent()) {
       Map<String, String> attributes = new HashMap<>(itemReference.getAttributes());
       attributes.put("vcs.status", optional.get().getStatus(itemReference.getPath()).toString());
@@ -77,8 +78,8 @@ public class ProjectServiceVcsStatusInjector {
             .filter(itemReference -> "file".equals(itemReference.getType()))
             .findAny();
     if (itemReferenceOptional.isPresent()) {
-      String project = itemReferenceOptional.get().getProject();
-      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(project);
+      Optional<VcsStatusProvider> vcsStatusProviderOptional =
+          getVcsStatusProvider(itemReferenceOptional.get());
       if (vcsStatusProviderOptional.isPresent()) {
         List<String> itemReferenceFiles =
             itemReferences
@@ -87,7 +88,9 @@ public class ProjectServiceVcsStatusInjector {
                 .map(this::getFilePathWithoutProject)
                 .collect(Collectors.toList());
         Map<String, VcsStatusProvider.VcsStatus> statusMap =
-            vcsStatusProviderOptional.get().getStatus(project, itemReferenceFiles);
+            vcsStatusProviderOptional
+                .get()
+                .getStatus(itemReferenceOptional.get().getProject(), itemReferenceFiles);
 
         itemReferences
             .stream()
@@ -117,8 +120,8 @@ public class ProjectServiceVcsStatusInjector {
             .filter(treeElement -> "file".equals(treeElement.getNode().getType()))
             .findAny();
     if (treeElementOptional.isPresent()) {
-      String project = treeElementOptional.get().getNode().getProject();
-      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(project);
+      ItemReference node = treeElementOptional.get().getNode();
+      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(node);
       if (vcsStatusProviderOptional.isPresent()) {
         List<String> paths =
             treeElements
@@ -127,7 +130,7 @@ public class ProjectServiceVcsStatusInjector {
                 .map(treeElement -> getFilePathWithoutProject(treeElement.getNode()))
                 .collect(Collectors.toList());
         Map<String, VcsStatusProvider.VcsStatus> status =
-            vcsStatusProviderOptional.get().getStatus(project, paths);
+            vcsStatusProviderOptional.get().getStatus(node.getProject(), paths);
 
         treeElements
             .stream()
@@ -150,6 +153,12 @@ public class ProjectServiceVcsStatusInjector {
     String projectPath = itemReference.getProject();
     String itemPath = absolutize(itemReference.getPath());
     return itemPath.substring(itemPath.indexOf(projectPath) + projectPath.length() + 1);
+  }
+
+  private Optional<VcsStatusProvider> getVcsStatusProvider(ItemReference itemReference)
+      throws NotFoundException {
+    String project = itemReference.getProject();
+    return isNullOrEmpty(project) ? Optional.empty() : getVcsStatusProvider(project);
   }
 
   private Optional<VcsStatusProvider> getVcsStatusProvider(String project)

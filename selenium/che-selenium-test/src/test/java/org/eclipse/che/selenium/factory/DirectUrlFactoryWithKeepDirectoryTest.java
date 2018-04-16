@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class DirectUrlFactoryWithKeepDirectoryTest {
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 

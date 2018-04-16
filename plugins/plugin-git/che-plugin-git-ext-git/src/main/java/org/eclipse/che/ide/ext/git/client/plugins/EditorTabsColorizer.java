@@ -19,6 +19,8 @@ import static org.eclipse.che.ide.ext.git.client.GitUtil.getRootPath;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryDeletedEventDto;
+import org.eclipse.che.api.git.shared.RepositoryInitializedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -102,5 +104,37 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
                 tab.setTitleColor(NOT_MODIFIED.getColor());
               }
             });
+  }
+
+  @Override
+  public void onGitRepositoryDeleted(
+      String endpointId, RepositoryDeletedEventDto repositoryDeletedEventDto) {
+    editorAgentProvider
+        .get()
+        .getOpenedEditors()
+        .stream()
+        .filter(editor -> editor instanceof HasVcsChangeMarkerRender)
+        .forEach(
+            editor ->
+                multiPartStackProvider
+                    .get()
+                    .getTabByPart(editor)
+                    .setTitleColor(NOT_MODIFIED.getColor()));
+  }
+
+  @Override
+  public void onGitRepositoryInitialized(
+      String endpointId, RepositoryInitializedEventDto gitRepositoryInitializedEventDto) {
+    editorAgentProvider
+        .get()
+        .getOpenedEditors()
+        .stream()
+        .filter(editor -> editor instanceof HasVcsChangeMarkerRender)
+        .forEach(
+            editor ->
+                multiPartStackProvider
+                    .get()
+                    .getTabByPart(editor)
+                    .setTitleColor(UNTRACKED.getColor()));
   }
 }

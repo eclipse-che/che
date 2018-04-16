@@ -22,6 +22,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -32,7 +33,6 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -52,6 +52,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private Wizard wizard;
   @Inject private CommandsToolbar commandsToolbar;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private NotificationsPopupPanel notificationsPanel;
   @Inject private MachineTerminal terminal;
   @Inject private TestProjectServiceClient projectService;
@@ -119,36 +120,21 @@ public class CheckIntelligenceCommandFromToolbarTest {
   }
 
   private void checkTestAppByPreviewUrlAndReturnToIde(String currentWindow, String expectedText) {
-    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
-    // this auxiliary method for investigate problem that was described in the issue:
-    // https://github.com/eclipse/che/issues/8105
-    try {
-      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-          .until(
-              (ExpectedCondition<Boolean>)
-                  driver ->
-                      clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
-                          currentWindow, expectedText));
-    } catch (WebDriverException e) {
-      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
-    }
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    clickOnPreviewUrlAndCheckTextIsPresentInPageBody(currentWindow, expectedText));
   }
 
   private void checkTestAppByPreviewButtonAndReturnToIde(
       String currentWindow, String expectedText) {
-    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
-    // this auxiliary method for investigate problem that was described in the issue:
-    // https://github.com/eclipse/che/issues/8105
-    try {
-      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-          .until(
-              (ExpectedCondition<Boolean>)
-                  driver ->
-                      clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
-                          currentWindow, expectedText));
-    } catch (WebDriverException e) {
-      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
-    }
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
+                        currentWindow, expectedText));
   }
 
   private boolean clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
@@ -165,7 +151,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private boolean switchToOpenedWindowAndCheckTextIsPresent(
       String currentWindow, String expectedText) {
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
     boolean result = getBodyText().contains(expectedText);
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
@@ -182,7 +168,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private Boolean isPreviewPageAvailable(String currentWindow, String expectedText) {
     consoles.clickOnPreviewUrl();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
     if (getBodyText().contains(expectedText)) {
       seleniumWebDriver.close();

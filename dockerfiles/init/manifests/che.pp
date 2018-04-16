@@ -38,7 +38,7 @@ node default {
 
   ###############################
   # HTTPS configuration
-  # options: letsencrypt-staging, letsencrypt, file
+  # options: letsencrypt, letsencrypt-staging, file
   $https_certificate_provider = getValue("CHE_HTTPS_CERTIFICATE_PROVIDER", "letsencrypt-staging")
 
   ###############################

@@ -14,11 +14,22 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"regexp"
 
-	"github.com/eclipse/che/agents/go-agents/core/rest"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"os"
+)
+
+const (
+	TokenKind      = "machine_token"
+	WorkspaceIdEnv = "CHE_WORKSPACE_ID"
+)
+
+var (
+	WorkspaceId                 = os.Getenv(WorkspaceIdEnv)
+	KeyProvider SignKeyProvider = &EnvSignKeyProvider{}
 )
 
 // TokenCache represents authentication tokens cache
@@ -47,6 +58,13 @@ type cachingHandler struct {
 	cache               TokenCache
 	unauthorizedHandler UnauthorizedHandler
 	ignoreMapping       *regexp.Regexp
+}
+
+type JWTClaims struct {
+	*jwt.StandardClaims
+	UserId      string `json:"uid,omitempty"`
+	UserName    string `json:"uname,omitempty"`
+	WorkspaceId string `json:"wsid,omitempty"`
 }
 
 // NewHandler creates HTTP handler that authenticates http calls that don't match provided non authenticated path pattern on workspace master.
@@ -93,7 +111,7 @@ func (handler handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	token := req.URL.Query().Get("token")
-	if err := authenticateOnMaster(handler.apiEndpoint, token); err == nil {
+	if err := authenticate(token); err == nil {
 		handler.delegate.ServeHTTP(w, req)
 	} else {
 		handler.unauthorizedHandler(w, req, err)
@@ -109,7 +127,7 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	token := req.URL.Query().Get("token")
 	if handler.cache.Contains(token) {
 		handler.delegate.ServeHTTP(w, req)
-	} else if err := authenticateOnMaster(handler.apiEndpoint, token); err == nil {
+	} else if err := authenticate(token); err == nil {
 		handler.cache.Put(token)
 		handler.delegate.ServeHTTP(w, req)
 	} else {
@@ -117,23 +135,36 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	}
 }
 
-func authenticateOnMaster(apiEndpoint string, tokenParam string) error {
-	if tokenParam == "" {
-		return rest.Unauthorized(errors.New("Authentication failed: missing 'token' query parameter"))
+func authenticate(token string) error {
+	if token == "" {
+		return errors.New("Authentication failed because: missing 'token' query parameter")
 	}
-	req, err := http.NewRequest("GET", apiEndpoint+"/user/", nil)
+
+	claims := &JWTClaims{}
+	jwt, err := jwt.ParseWithClaims(token, claims, rsaKeyFunc)
 	if err != nil {
-		return rest.Unauthorized(err)
+		return errors.New("Authentication failed. " + err.Error())
 	}
-	req.Header.Add("Authorization", tokenParam)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return rest.Unauthorized(err)
-	}
-	if resp.StatusCode != 200 {
-		return rest.Unauthorized(fmt.Errorf("Authentication failed, token: %s is invalid", tokenParam))
+
+	kind := jwt.Header["kind"].(string)
+	if TokenKind != kind || WorkspaceId != claims.WorkspaceId {
+		// signature is ok, but the token kind or workspace identifier is invalid
+		return fmt.Errorf("Authentication failed, due to kind: '%v' or workspace id: '%v' is wrong", kind, WorkspaceId)
 	}
 	return nil
+}
+
+// Supplies RSA public key for verification of given token,
+// when token 'alg' header is different or any problem occurs while retrieving key then error will be returned
+func rsaKeyFunc(token *jwt.Token) (interface{}, error) {
+	if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+		return nil, fmt.Errorf("token with unsupported signing method '%v' provided", token.Header["alg"])
+	}
+	key, err := KeyProvider.GetKey()
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
 }
 
 func defaultUnauthorizedHandler(w http.ResponseWriter, r *http.Request, err error) {

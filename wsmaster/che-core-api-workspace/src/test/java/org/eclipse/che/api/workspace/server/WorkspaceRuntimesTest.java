@@ -36,6 +36,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -101,11 +102,12 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsRecovered() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
-    when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
+    when(context.getRuntime())
+        .thenReturn(new TestInternalRuntime(context, emptyMap(), WorkspaceStatus.STARTING));
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
     doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
 
@@ -115,11 +117,12 @@ public class WorkspaceRuntimesTest {
     WorkspaceImpl workspace = new WorkspaceImpl(identity.getWorkspaceId(), null, null);
     runtimes.injectRuntime(workspace);
     assertNotNull(workspace.getRuntime());
+    assertEquals(workspace.getStatus(), WorkspaceStatus.STARTING);
   }
 
   @Test
   public void runtimeIsNotRecoveredIfNoWorkspaceFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     when(workspaceDao.get(identity.getWorkspaceId())).thenThrow(new NotFoundException("no!"));
 
     // try recover
@@ -130,7 +133,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfNoEnvironmentFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     WorkspaceImpl workspace = mockWorkspace(identity);
     when(workspace.getConfig().getEnvironments()).thenReturn(emptyMap());
 
@@ -142,7 +145,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfInfraPreparationFailed() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
     mockWorkspace(identity);
     InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
@@ -160,7 +163,7 @@ public class WorkspaceRuntimesTest {
   @Test
   public void runtimeIsNotRecoveredIfAnotherRuntimeWithTheSameIdentityAlreadyExists()
       throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
@@ -203,10 +206,11 @@ public class WorkspaceRuntimesTest {
         DtoFactory.newDto(RuntimeIdentityDto.class)
             .withWorkspaceId("workspace123")
             .withEnvName("my-env")
-            .withOwnerName("me")
             .withOwnerId("myId");
     mockWorkspace(identity);
-    mockContext(identity);
+    RuntimeContext context = mockContext(identity);
+    when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
+
     RuntimeStatusEvent event =
         DtoFactory.newDto(RuntimeStatusEvent.class)
             .withIdentity(identity)
@@ -277,9 +281,14 @@ public class WorkspaceRuntimesTest {
 
     final Map<String, Machine> machines;
 
-    TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      super(context, null, null, false);
+    TestInternalRuntime(
+        RuntimeContext context, Map<String, Machine> machines, WorkspaceStatus status) {
+      super(context, null, null, status);
       this.machines = machines;
+    }
+
+    TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
+      this(context, machines, WorkspaceStatus.STARTING);
     }
 
     TestInternalRuntime(RuntimeContext context) {

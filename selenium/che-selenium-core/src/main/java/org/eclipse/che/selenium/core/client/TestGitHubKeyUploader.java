@@ -29,11 +29,11 @@ public class TestGitHubKeyUploader {
 
   @Inject private TestSshServiceClient testSshServiceClient;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 

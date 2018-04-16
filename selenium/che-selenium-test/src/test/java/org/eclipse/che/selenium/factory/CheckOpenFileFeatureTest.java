@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -54,6 +55,7 @@ public class CheckOpenFileFeatureTest {
   @Inject private TestWorkspace testWorkspace;
   @Inject private TestUser user;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
 
@@ -83,9 +85,9 @@ public class CheckOpenFileFeatureTest {
     dashboardFactories.clickAddOnAddAction();
     dashboardFactories.clickOnOpenFactory();
     String currentWin = seleniumWebDriver.getWindowHandle();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
+    seleniumWebDriverHelper.switchToNextWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitItem(PROJECT_NAME);
     editor.waitTabIsPresent("web-java-spring", ELEMENT_TIMEOUT_SEC);
   }

@@ -19,6 +19,7 @@ import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Events;
@@ -48,11 +49,11 @@ public class AuthorizeOnGithubFromPreferencesTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject(optional = true)
+  @Inject
   @Named("github.password")
   private String gitHubPassword;
 
@@ -66,6 +67,7 @@ public class AuthorizeOnGithubFromPreferencesTest {
   @Inject private ImportProjectFromLocation importProject;
   @Inject private Preferences preferences;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private AskDialog askDialog;
   @Inject private GitHub gitHub;
   @Inject private TestGitHubServiceClient gitHubClientService;
@@ -121,7 +123,7 @@ public class AuthorizeOnGithubFromPreferencesTest {
     askDialog.waitFormToOpen(25);
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-    seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
+    seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
     gitHub.waitAuthorizationPageOpened();
     gitHub.typeLogin(gitHubUsername);

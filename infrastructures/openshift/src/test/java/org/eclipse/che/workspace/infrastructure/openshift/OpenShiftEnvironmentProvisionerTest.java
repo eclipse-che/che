@@ -17,11 +17,12 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.mockito.InOrder;
@@ -46,10 +47,11 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private RouteTlsProvisioner tlsRouteProvisioner;
   @Mock private EnvVarsConverter envVarsProvisioner;
-  @Mock private OpenShiftServersConverter serversProvisioner;
+  @Mock private ServersConverter serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
   @Mock private RamLimitProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
+  @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -68,7 +70,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             volumesStrategy,
             ramLimitProvisioner,
             installerServersPortProvisioner,
-            logsVolumeMachineProvisioner);
+            logsVolumeMachineProvisioner,
+            podTerminationGracePeriodProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -79,7 +82,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
             restartPolicyRewriter,
-            ramLimitProvisioner);
+            ramLimitProvisioner,
+            podTerminationGracePeriodProvisioner);
   }
 
   @Test
@@ -97,6 +101,9 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(ramLimitProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(podTerminationGracePeriodProvisioner)
+        .provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
