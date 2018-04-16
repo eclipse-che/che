@@ -18,6 +18,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -32,8 +33,6 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -65,25 +64,19 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   public static final String UNIQUE_STRATEGY = "unique";
 
   private final String pvcNamePrefix;
-  private final String namespaceName;
   private final String pvcQuantity;
   private final String pvcAccessMode;
-  private final KubernetesClientFactory clientFactory;
   private final KubernetesNamespaceFactory factory;
 
   @Inject
   public UniqueWorkspacePVCStrategy(
-      @Nullable @Named("che.infra.kubernetes.namespace") String namespaceName,
       @Named("che.infra.kubernetes.pvc.name") String pvcNamePrefix,
       @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
-      KubernetesNamespaceFactory factory,
-      KubernetesClientFactory clientFactory) {
+      KubernetesNamespaceFactory factory) {
     this.pvcNamePrefix = pvcNamePrefix;
     this.pvcQuantity = pvcQuantity;
-    this.namespaceName = namespaceName;
     this.pvcAccessMode = pvcAccessMode;
-    this.clientFactory = clientFactory;
     this.factory = factory;
   }
 
@@ -173,12 +166,10 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
   @Override
   public void cleanup(String workspaceId) throws InfrastructureException {
-    clientFactory
+    factory
         .create(workspaceId)
         .persistentVolumeClaims()
-        .inNamespace(namespaceName)
-        .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
-        .delete();
+        .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
   }
 
   private void addVolumeIfAbsent(PodSpec podSpec, String pvcUniqueName) {
