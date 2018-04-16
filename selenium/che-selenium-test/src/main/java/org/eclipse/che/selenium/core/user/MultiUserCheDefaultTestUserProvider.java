@@ -71,15 +71,15 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
 
       this.defaultTestUser = testUser;
       this.isNewUser = isNewUser;
-
-      LOG.info(
-          "User name='{}', id='{}' is being used by default for testing",
-          defaultTestUser.getName(),
-          defaultTestUser.getId());
     } else {
       this.defaultTestUser =
           testUserFactory.createDefaultTestUser(name, email, password, offlineToken, this);
       this.isNewUser = false;
+
+      LOG.info(
+          "User name='{}', id='{}' is being used as default user",
+          defaultTestUser.getName(),
+          defaultTestUser.getId());
     }
   }
 

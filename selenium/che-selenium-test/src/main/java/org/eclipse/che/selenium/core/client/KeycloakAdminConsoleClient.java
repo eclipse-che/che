@@ -32,7 +32,11 @@ import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Dmytro Nochevnov */
+/**
+ * This is java-client of 'keycloak/bin/kcadm.sh' command line application of keycloak container
+ *
+ * @author Dmytro Nochevnov
+ */
 @Singleton
 public class KeycloakAdminConsoleClient {
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakAdminConsoleClient.class);
