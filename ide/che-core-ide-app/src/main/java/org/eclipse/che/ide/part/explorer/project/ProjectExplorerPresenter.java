@@ -61,6 +61,7 @@ import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
+import org.eclipse.che.ide.resources.tree.ContainerNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -162,10 +163,29 @@ public class ProjectExplorerPresenter extends BasePresenter
               for (Node node : event.getReceivedNodes()) {
                 if (node instanceof ResourceNode
                     && expandQueue.remove(((ResourceNode) node).getData().getLocation())) {
-                  view.getTree().setExpanded(node, true);
+                  expandNode(node);
                 }
               }
             });
+
+    view.getTree()
+        .addNodeAddedHandler(
+            event ->
+                event
+                    .getNodes()
+                    .stream()
+                    .filter(node -> node instanceof ContainerNode)
+                    .map(node -> (ContainerNode) node)
+                    .filter(node -> node.getData().getLocation().segmentCount() != 1)
+                    .forEach(
+                        node ->
+                            node.getChildren(false)
+                                .then(
+                                    children -> {
+                                      if (!children.isEmpty()) {
+                                        expandNode(node);
+                                      }
+                                    })));
 
     treeExpander = new ProjectExplorerTreeExpander(view.getTree(), appContext);
 
@@ -179,6 +199,10 @@ public class ProjectExplorerPresenter extends BasePresenter
             partStack.setActivePart(ProjectExplorerPresenter.this);
           }
         });
+  }
+
+  private void expandNode(Node node) {
+    view.getTree().setExpanded(node, true);
   }
 
   private void onWorkspaceStopped() {
