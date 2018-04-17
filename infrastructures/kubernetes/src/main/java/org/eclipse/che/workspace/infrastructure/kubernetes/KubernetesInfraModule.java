@@ -22,6 +22,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import java.util.Map;
+import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
@@ -76,6 +77,10 @@ public class KubernetesInfraModule extends AbstractModule {
     volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
+
+    Multibinder.newSetBinder(binder(), ServiceTermination.class)
+        .addBinding()
+        .to(KubernetesClientTermination.class);
 
     MapBinder<String, ExternalServerExposerStrategy> ingressStrategies =
         MapBinder.newMapBinder(binder(), String.class, ExternalServerExposerStrategy.class);
