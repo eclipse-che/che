@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.core.user;
 
+import java.io.IOException;
+
 /**
  * Represents a user in a test environment.
  *
@@ -22,11 +24,8 @@ public interface TestUser {
   /** Returns user's password. */
   String getPassword();
 
-  /**
-   * Returns the current authentication token of the user. Will be changed after login/logout
-   * procedure.
-   */
-  String getAuthToken();
+  /** Re-login to product to obtain authentication token of the user. */
+  String obtainAuthToken();
 
   /** Return user's offline token. */
   String getOfflineToken();
@@ -37,6 +36,6 @@ public interface TestUser {
   /** Return user's id. */
   String getId();
 
-  /** Clean up user's stuff. */
-  void cleanUp();
+  /** Remove user. */
+  void delete() throws IOException;
 }

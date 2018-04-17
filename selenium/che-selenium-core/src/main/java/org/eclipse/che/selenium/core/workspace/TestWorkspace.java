@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.core.workspace;
 
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /**
  * Represents workspace in a test environment.
@@ -27,7 +27,7 @@ public interface TestWorkspace {
   String getId() throws ExecutionException, InterruptedException;
 
   /** Returns owner of the workspace. */
-  TestUser getOwner();
+  DefaultTestUser getOwner();
 
   /** Waits until workspace is started. */
   void await() throws InterruptedException, ExecutionException;

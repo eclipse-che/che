@@ -20,7 +20,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -36,7 +36,7 @@ public class CheckStoppingWsByTimeoutTest {
   @Inject private ToastLoader toastLoader;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestWorkspace testWorkspace;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
 
   @Inject
   @Named("che.workspace_agent_dev_inactive_stop_timeout_ms")

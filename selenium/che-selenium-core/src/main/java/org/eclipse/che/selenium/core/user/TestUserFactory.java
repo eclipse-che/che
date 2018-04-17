@@ -11,17 +11,19 @@
 package org.eclipse.che.selenium.core.user;
 
 import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 
 /**
  * @author Anton Korneta
  * @author Dmytro Nochevnov
  */
-public interface TestUserFactory {
+public interface TestUserFactory<T extends TestUserImpl> {
 
-  /** Creates new test user with given name, e-mail, password and offline token */
-  TestUserImpl create(
+  /** Creates test user instance with given name, e-mail, password and offline token */
+  T create(
       @Assisted("name") String name,
       @Assisted("email") String email,
       @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken);
+      @Assisted("offlineToken") String offlineToken,
+      RemovableUserProvider testUserProvider);
 }

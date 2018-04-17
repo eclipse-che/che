@@ -14,12 +14,10 @@ import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.workspace.model.WorkspaceConfigImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.resource.Path;
 
@@ -103,17 +101,6 @@ public interface AppContext {
    */
   @Beta
   Project getRootProject();
-
-  /**
-   * Returns the workspace human readable name.
-   *
-   * @return the workspace name
-   * @see WorkspaceConfigDto#getName()
-   * @since 4.3.0
-   * @deprecated use {@link WorkspaceConfigImpl#getName()}
-   */
-  @Deprecated
-  String getWorkspaceName();
 
   /**
    * Returns the path where projects are stored on file system.

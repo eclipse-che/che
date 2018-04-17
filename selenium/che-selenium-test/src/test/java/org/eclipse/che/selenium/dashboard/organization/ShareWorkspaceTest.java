@@ -22,7 +22,7 @@ import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -50,10 +50,12 @@ public class ShareWorkspaceTest {
   @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private NavigationBar navigationBar;
+
   @Inject private AdminTestUser adminTestUser;
+
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
   @Inject private WorkspaceShare workspaceShare;
 
   @BeforeClass
