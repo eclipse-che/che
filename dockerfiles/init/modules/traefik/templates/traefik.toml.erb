@@ -119,9 +119,6 @@ email = "admin@<%= scope.lookupvar('che::che_ip') %>"
 storage = "/etc/traefik/acme.json"
 entryPoint = "https"
 OnHostRule = true
-<% if scope.lookupvar('che::https_certificate_provider') == 'letsencrypt-staging' -%>
-caServer = "https://acme-staging.api.letsencrypt.org/directory"
-<% end -%>
 [acme.httpChallenge]
 entryPoint = "http"
 <% end -%>
