@@ -29,11 +29,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class ExternalServerExposerStrategyProvider<T extends KubernetesEnvironment>
     implements Provider<ExternalServerExposerStrategy<T>> {
 
+  public static final String STRATEGY_PROPERTY = "che.infra.kubernetes.server_strategy";
+
   private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
 
   @Inject
   public ExternalServerExposerStrategyProvider(
-      @Named("che.infra.kubernetes.server_strategy") String strategy,
+      @Named(STRATEGY_PROPERTY) String strategy,
       Map<String, ExternalServerExposerStrategy<T>> strategies) {
     final ExternalServerExposerStrategy<T> externalServerExposerStrategy = strategies.get(strategy);
     if (externalServerExposerStrategy != null) {
