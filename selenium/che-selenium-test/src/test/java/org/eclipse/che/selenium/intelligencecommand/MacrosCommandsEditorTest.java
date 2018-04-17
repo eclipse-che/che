@@ -102,7 +102,8 @@ public class MacrosCommandsEditorTest {
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
     commandsEditor.enterMacroCommandByDoubleClick("${current.project.path}");
     commandsEditor.waitTextIntoEditor("echo ${current.project.path}");
-    runCommandWithCheckResult();
+    commandsEditor.clickOnRunButton();
+    consoles.waitExpectedTextIntoConsole(PATH_TO_ROOT_FOLDER);
   }
 
   @Test(priority = 2)
@@ -155,14 +156,5 @@ public class MacrosCommandsEditorTest {
     loader.waitOnClosed();
     commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
     commandsEditor.waitTabIsPresent(JAVA_NAME);
-  }
-
-  /**
-   * in very rare cases on the OCP platform we have a situation when after command start, the macros
-   * output is not displayed
-   */
-  private void runCommandWithCheckResult() {
-    commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoConsole(PATH_TO_ROOT_FOLDER);
   }
 }
