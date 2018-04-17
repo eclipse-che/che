@@ -265,11 +265,13 @@ public class TreeResourceRevealer {
                     }
 
                     if (handler[0] != null) {
-                        Scheduler.get().scheduleFixedDelay(() -> {
-                            handler[0].removeHandler();
-                            return false;
-                        }, 1000);
-
+                      Scheduler.get()
+                          .scheduleFixedDelay(
+                              () -> {
+                                handler[0].removeHandler();
+                                return false;
+                              },
+                              1000);
                     }
 
                     final List<Node> children =
