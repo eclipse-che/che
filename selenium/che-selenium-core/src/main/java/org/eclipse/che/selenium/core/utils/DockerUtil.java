@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.core.utils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.IOException;
 import javax.inject.Singleton;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.slf4j.Logger;
@@ -24,23 +25,20 @@ public class DockerUtil {
 
   @Inject
   @Named("che.host")
-  private String cheHost;
+  private String cheHostParameter;
 
   @Inject private ProcessAgent processAgent;
 
   public boolean isCheRunLocally() {
-    String command =
-        String.format(
-            "[[ $(docker run --rm --net host eclipse/che-ip:nightly) == '%s' ]] && echo true",
-            cheHost);
+    String command = "docker run --rm --net host eclipse/che-ip:nightly";
 
     try {
-      String result = processAgent.execute(command);
+      String cheIpAddress = processAgent.execute(command);
 
-      if (result != null && result.equals("true")) {
+      if (cheIpAddress != null && cheHostParameter.contains(cheIpAddress)) {
         return true;
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.warn("Can't check if Eclipse Che run locally.", e);
     }
 

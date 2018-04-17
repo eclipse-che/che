@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.core.entrance;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.openqa.selenium.Cookie;
 
 /**
@@ -37,8 +37,8 @@ public class CookieEntrance implements Entrance {
    * @param user
    */
   @Override
-  public void login(TestUser user) {
-    Cookie accessKey = new Cookie("session-access-key", user.getAuthToken());
+  public void login(DefaultTestUser user) {
+    Cookie accessKey = new Cookie("session-access-key", user.obtainAuthToken());
     seleniumWebDriver.manage().addCookie(accessKey);
   }
 }

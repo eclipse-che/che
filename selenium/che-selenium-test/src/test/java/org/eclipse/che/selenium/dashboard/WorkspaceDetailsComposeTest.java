@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -48,7 +48,7 @@ public class WorkspaceDetailsComposeTest {
           "MYSQL_ROOT_PASSWORD", "password",
           "MYSQL_USER", "petclinic");
 
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
   @Inject private Loader loader;
   @Inject private NewWorkspace newWorkspace;
   @Inject private Dashboard dashboard;

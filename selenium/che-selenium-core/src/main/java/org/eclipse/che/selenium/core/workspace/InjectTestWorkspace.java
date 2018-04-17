@@ -16,12 +16,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /**
  * To instantiate {@link TestWorkspace} in test classes with none default parameters.
  *
- * @see TestWorkspaceProvider#createWorkspace(TestUser, int, String)
+ * @see TestWorkspaceProvider#createWorkspace(DefaultTestUser, int, String)
  * @author Anatolii Bazko
  */
 @Target({FIELD})

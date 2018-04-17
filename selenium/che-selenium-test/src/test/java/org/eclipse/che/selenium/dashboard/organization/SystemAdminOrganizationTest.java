@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.ADMIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.ACTIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM;
@@ -52,13 +53,14 @@ public class SystemAdminOrganizationTest {
   private TestOrganization childOrg;
 
   @Inject
-  @Named("admin")
+  @Named(ADMIN)
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private CheMultiuserAdminDashboard dashboard;
+
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass

@@ -19,7 +19,7 @@ import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import java.lang.reflect.Field;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /**
  * Injector for custom annotation {@link InjectTestWorkspace}.
@@ -47,9 +47,9 @@ public class TestWorkspaceInjector<T> implements MembersInjector<T> {
         injector.getInstance(Key.get(int.class, Names.named("workspace.default_memory_gb")));
 
     try {
-      TestUser testUser =
+      DefaultTestUser testUser =
           isNullOrEmpty(injectTestWorkspace.user())
-              ? injector.getInstance(TestUser.class)
+              ? injector.getInstance(DefaultTestUser.class)
               : findInjectedUser(instance, injectTestWorkspace.user());
 
       int memoryGb =
@@ -69,14 +69,14 @@ public class TestWorkspaceInjector<T> implements MembersInjector<T> {
     }
   }
 
-  private TestUser findInjectedUser(T instance, String userEmail) {
+  private DefaultTestUser findInjectedUser(T instance, String userEmail) {
     for (Field field : instance.getClass().getDeclaredFields()) {
-      if (field.getType() == TestUser.class) {
+      if (field.getType() == DefaultTestUser.class) {
         field.setAccessible(true);
 
-        TestUser testUser;
+        DefaultTestUser testUser;
         try {
-          testUser = (TestUser) field.get(instance);
+          testUser = (DefaultTestUser) field.get(instance);
         } catch (IllegalAccessException e) {
           throw new IllegalArgumentException(e);
         }
