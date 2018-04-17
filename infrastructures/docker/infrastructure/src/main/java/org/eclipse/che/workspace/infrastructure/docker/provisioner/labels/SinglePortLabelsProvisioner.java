@@ -109,8 +109,6 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
           }
         }
         containerLabels.put(format("traefik.%s.port", serviceName), port);
-        //        containerLabels.put(
-        //            format("traefik.%s.frontend.entryPoints", serviceName), cheHostProtocol);
         containerLabels.put(format("traefik.%s.frontend.rule", serviceName), "Host:" + host);
         // Needed to activate per-service rules
         containerLabels.put("traefik.frontend.rule", machineName);
