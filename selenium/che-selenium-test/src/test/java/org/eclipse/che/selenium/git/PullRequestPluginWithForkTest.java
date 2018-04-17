@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.BRANCH_PUSHED_ON_YOUR_FORK;
@@ -22,12 +23,11 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.eclipse.che.selenium.core.CheSeleniumSuiteModule;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -60,14 +60,14 @@ public class PullRequestPluginWithForkTest {
   private String githubUserPassword;
 
   @Inject
-  @Named(CheSeleniumSuiteModule.AUXILIARY)
+  @Named(AUXILIARY)
   private TestGitHubRepository testAuxiliaryRepo;
 
   @Inject private Git git;
   @Inject private Ide ide;
   @Inject private Menu menu;
   @Inject private Loader loader;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
   @Inject private CodenvyEditor editor;
   @Inject private Preferences preferences;
   @Inject private TestWorkspace testWorkspace;

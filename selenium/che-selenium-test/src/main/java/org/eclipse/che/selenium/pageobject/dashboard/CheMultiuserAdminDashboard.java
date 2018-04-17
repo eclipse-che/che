@@ -23,7 +23,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.WebElement;
@@ -43,7 +43,7 @@ public class CheMultiuserAdminDashboard extends Dashboard {
   @Inject
   public CheMultiuserAdminDashboard(
       SeleniumWebDriver seleniumWebDriver,
-      TestUser defaultUser,
+      DefaultTestUser defaultUser,
       TestDashboardUrlProvider testDashboardUrlProvider,
       Entrance entrance,
       LoginPage loginPage,

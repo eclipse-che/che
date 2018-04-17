@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.commons.schedule.ScheduleRate;
@@ -58,6 +59,8 @@ public class FileTreeWalker {
   private final Map<Path, Long> files = new HashMap<>();
   private final Map<Path, Long> directories = new HashMap<>();
 
+  private boolean initialized;
+
   @Inject
   public FileTreeWalker(
       @Named("che.user.workspaces.storage") File root,
@@ -83,8 +86,51 @@ public class FileTreeWalker {
     this.fileExcludes = fileExcludes;
   }
 
+  @PostConstruct
+  void initialize() {
+    try {
+      walkFileTree(
+          root.toPath(),
+          new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+              for (PathMatcher matcher : directoryExcludes) {
+                if (matcher.matches(dir)) {
+                  return SKIP_SUBTREE;
+                }
+              }
+
+              directories.put(dir, attrs.lastModifiedTime().toMillis());
+
+              return CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+              for (PathMatcher matcher : fileExcludes) {
+                if (matcher.matches(file)) {
+                  return CONTINUE;
+                }
+              }
+
+              files.put(file, attrs.lastModifiedTime().toMillis());
+
+              return CONTINUE;
+            }
+          });
+    } catch (IOException e) {
+      LOG.error("Error while walking file tree", e);
+    }
+
+    initialized = true;
+  }
+
   @ScheduleRate(period = 10)
   void walk() {
+    if (!initialized) {
+      return;
+    }
+
     try {
       LOG.debug("Tree walk started");
 

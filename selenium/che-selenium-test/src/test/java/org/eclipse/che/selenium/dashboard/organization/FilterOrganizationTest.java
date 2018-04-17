@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.ADMIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
@@ -45,14 +46,16 @@ public class FilterOrganizationTest {
   @InjectTestOrganization private TestOrganization organization;
 
   @Inject
-  @Named("admin")
+  @Named(ADMIN)
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private AddOrganization addOrganization;
   @Inject private NavigationBar navigationBar;
+
   @Inject private AdminTestUser adminTestUser;
+
   @Inject private Dashboard dashboard;
 
   @BeforeClass

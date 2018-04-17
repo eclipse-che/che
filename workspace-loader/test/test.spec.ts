@@ -171,6 +171,36 @@ describe('Workspace Loader', () => {
         });
     });
 
+    describe('must open preconfigured IDE with query parameters', () => {
+        let ideURL = "ide URL"
+        let workspaceLoader;
+
+        beforeEach((done) => {
+            let loader = new Loader();
+            workspaceLoader = new WorkspaceLoader(loader);
+
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getQueryString').and.returnValue("?param=value");
+
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
+                return new Promise((resolve) => {
+                    fakeWorkspaceConfig.status = 'RUNNING';
+                    fakeWorkspaceConfig.runtime = {machines: {ide: {servers: {server1: {attributes: {type: "ide"}, url: ideURL}}}}}
+                    resolve(fakeWorkspaceConfig);
+                    done();
+                });
+            });
+
+            spyOn(workspaceLoader, "openIDE").and.callThrough();
+            spyOn(workspaceLoader, "openURL");
+            workspaceLoader.load();
+        });
+
+        it('must be called', () => {
+            expect(workspaceLoader.openURL).toHaveBeenCalledWith(ideURL + "?param=value");
+        });
+    });
+
     describe('must handle workspace when it has IDE server', () => {
         let workspaceLoader;
 

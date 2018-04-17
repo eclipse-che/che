@@ -81,29 +81,34 @@ public class OpenShiftProjectTest {
     when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
     when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
 
-    openShiftProject = new OpenShiftProject(WORKSPACE_ID, pods, services, routes, pvcs, ingresses);
+    openShiftProject =
+        new OpenShiftProject(
+            clientFactory, WORKSPACE_ID, PROJECT_NAME, pods, services, routes, pvcs, ingresses);
   }
 
   @Test
-  public void testOpenShiftProjectCreationWhenProjectExists() throws Exception {
+  public void testOpenShiftProjectPreparingWhenProjectExists() throws Exception {
     // given
     prepareProject(PROJECT_NAME);
+    OpenShiftProject openShiftProject =
+        new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    openShiftProject.prepare();
   }
 
   @Test
-  public void testOpenShiftProjectCreationWhenProjectDoesNotExist() throws Exception {
+  public void testOpenShiftProjectPreparingWhenProjectDoesNotExist() throws Exception {
     // given
     MetadataNested projectMetadata = prepareProjectRequest();
 
     Resource resource = prepareProjectResource(PROJECT_NAME);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
-
-    // when
     OpenShiftProject openShiftProject =
         new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+
+    // when
+    openShiftProject.prepare();
 
     // then
     verify(projectMetadata).withName(PROJECT_NAME);

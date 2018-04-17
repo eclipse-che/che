@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.ADMIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 
 import com.google.inject.Inject;
@@ -20,7 +21,7 @@ import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -40,7 +41,7 @@ public class OrganizationMembersTest {
   @InjectTestOrganization private TestOrganization organization;
 
   @Inject
-  @Named("admin")
+  @Named(ADMIN)
   private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
@@ -50,7 +51,8 @@ public class OrganizationMembersTest {
   @Inject private AddMember addMember;
   @Inject private Loader loader;
   @Inject private Dashboard dashboard;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
+
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass

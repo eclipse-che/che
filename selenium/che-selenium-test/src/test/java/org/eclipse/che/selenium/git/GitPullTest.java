@@ -23,7 +23,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -39,7 +39,7 @@ public class GitPullTest {
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
-  @Inject private TestUser productUser;
+  @Inject private DefaultTestUser productUser;
   @Inject private TestGitHubRepository testRepo;
 
   @Inject

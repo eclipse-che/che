@@ -254,6 +254,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-workspace-activity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-keycloak-server</artifactId>
         </dependency>
         <dependency>

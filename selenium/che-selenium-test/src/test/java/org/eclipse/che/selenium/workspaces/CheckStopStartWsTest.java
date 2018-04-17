@@ -40,7 +40,7 @@ public class CheckStopStartWsTest {
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
 
-    toastLoader.clickOnStartButton();
+    toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
   }
 }
