@@ -40,11 +40,15 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckRestoringSplitEditorTest {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(CheckRestoringSplitEditorTest.class.getSimpleName());
   private String javaClassName = "AppController.java";
   private String readmeFileName = "README.md";
   private String pomFileTab = "qa-spring-sample";
@@ -125,7 +129,8 @@ public class CheckRestoringSplitEditorTest {
       editor.waitTextInDefinedSplitEditor(
           numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
     } catch (TimeoutException ex) {
-      System.out.println(webDriverLogsReader.getAllLogs());
+      LOG.info(webDriverLogsReader.getAllLogs());
+      throw ex;
     }
   }
 
