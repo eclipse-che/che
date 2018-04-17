@@ -102,6 +102,7 @@ public class ImportProjectFromGitHubTest {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability(ELEMENT_TIMEOUT_SEC);
+    toastLoader.waitToastLoaderAndClickButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(projectName);
     projectExplorer.waitDefinedTypeOfFolder(projectName, PROJECT_FOLDER);

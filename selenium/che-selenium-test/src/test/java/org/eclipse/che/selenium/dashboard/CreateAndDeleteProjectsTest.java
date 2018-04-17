@@ -88,6 +88,7 @@ public class CreateAndDeleteProjectsTest {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     String dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    toastLoader.waitToastLoaderAndClickButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
 
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);

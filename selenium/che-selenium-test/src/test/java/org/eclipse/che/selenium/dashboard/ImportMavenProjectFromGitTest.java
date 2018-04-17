@@ -77,6 +77,7 @@ public class ImportMavenProjectFromGitTest {
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
+    toastLoader.waitToastLoaderAndClickButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
   }

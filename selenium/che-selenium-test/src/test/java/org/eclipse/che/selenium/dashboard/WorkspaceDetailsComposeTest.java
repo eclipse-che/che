@@ -150,6 +150,7 @@ public class WorkspaceDetailsComposeTest {
     // check that created machine exists in the Process Console tree
     workspaceDetails.clickOpenInIdeWsBtn();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    toastLoader.waitToastLoaderAndClickButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
