@@ -36,7 +36,7 @@ public class GitReset {
     String COMMENT = "//div[text()='%s']";
     String MAIN_FORM_XPATH = "//div[@id='gwt-debug-git-reset-mainForm']";
     String COMMIT_ITEM = MAIN_FORM_XPATH + "//tbody[1]/tr[%s]";
-    String ITEM_WITH_TEXT_XPATH = MAIN_FORM_XPATH + "//tbody//div[text()='%s']";
+    String ITEM_WITH_TEXT_XPATH = MAIN_FORM_XPATH + "//tbody//div[contains(.,'%s')]";
   }
 
   @FindBy(id = Locators.RESET_TO_COMMIT_FORM)

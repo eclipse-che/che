@@ -10,8 +10,17 @@
  */
 package org.eclipse.che.selenium.git;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
+import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.HARD;
+import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.MIXED;
+import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.SOFT;
 
+import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -20,7 +29,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
@@ -34,25 +43,12 @@ import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.git.GitRevertCommit;
 import org.eclipse.che.selenium.pageobject.git.GitStatusBar;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
-import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
-import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.HARD;
-import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.MIXED;
-import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.SOFT;
-
-public class GitResettingTest {
+public class GitResetTest {
   @Inject private Ide ide;
-  @Inject private TestUser productUser;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
   @Inject private WorkspaceDtoDeserializer workspaceDtoDeserializer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
@@ -66,9 +62,10 @@ public class GitResettingTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   private TestWorkspace testWorkspace;
-  private String nameOfProjectForCheckingGitSoftReset = "checkGitSoftReset";
-  private String nameOfProjectForCheckingGitHardReset = "checkGitHardReset";
-  private String nameOfProjectForCheckingGitMixReset = "checkGitMixReset";
+  private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_SOFT_RESET = "checkGitSoftReset";
+  private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_HARD_RESET = "checkGitHardReset";
+  private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_MIX_RESET = "checkGitMixReset";
+  private final String COMMIT_MESSAGE = "added php samples";
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -78,9 +75,9 @@ public class GitResettingTest {
 
     List<String> projects =
         Arrays.asList(
-            nameOfProjectForCheckingGitSoftReset,
-            nameOfProjectForCheckingGitHardReset,
-            nameOfProjectForCheckingGitMixReset);
+            NAME_OF_PROJECT_FOR_CHECKING_GIT_SOFT_RESET,
+            NAME_OF_PROJECT_FOR_CHECKING_GIT_HARD_RESET,
+            NAME_OF_PROJECT_FOR_CHECKING_GIT_MIX_RESET);
     SourceStorageDto sourceStorage =
         DtoFactory.getInstance()
             .createDto(SourceStorageDto.class)
@@ -88,8 +85,7 @@ public class GitResettingTest {
             .withType("git");
 
     projects.forEach(item -> list.add(configureTestProject(item, sourceStorage)));
-    WorkspaceConfigDto workspace =
-        workspaceDtoDeserializer.deserializeWorkspaceTemplate(UBUNTU_JDK8);
+    WorkspaceConfigDto workspace = workspaceDtoDeserializer.deserializeWorkspaceTemplate(DEFAULT);
 
     workspace.setProjects(list);
 
@@ -107,7 +103,6 @@ public class GitResettingTest {
     projectExplorer.quickExpandWithJavaScript();
   }
 
-
   @AfterClass
   public void tearDown() {
     testWorkspace.delete();
@@ -115,22 +110,20 @@ public class GitResettingTest {
 
   @Test
   public void checkSoftReset() {
-    String uniqueTextForSelection = "2016 Jan 6 16:18:39";
     String expectedTextInGitStatusConsole =
         "On branch master\n Changes to be committed:\n  new file:   .codenvy.json\n modified:   README.md";
-    projectExplorer.waitAndSelectItem(nameOfProjectForCheckingGitSoftReset);
-    git.doResetToCommitMessage(SOFT, uniqueTextForSelection);
+    projectExplorer.waitAndSelectItem(NAME_OF_PROJECT_FOR_CHECKING_GIT_SOFT_RESET);
+    git.doResetToCommitMessage(SOFT, COMMIT_MESSAGE);
     menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess(expectedTextInGitStatusConsole);
   }
 
   @Test
   public void checkMixReset() {
-    String uniqueTextForSelection = "2016 Jan 6 15:41:30";
     String expectedTextInGitStatusConsole =
         "On branch master\n Changes not staged for commit:\n  new file:   .codenvy.json\n modified:   README.md";
-    projectExplorer.waitAndSelectItem(nameOfProjectForCheckingGitMixReset);
-    git.doResetToCommitMessage(MIXED, uniqueTextForSelection);
+    projectExplorer.waitAndSelectItem(NAME_OF_PROJECT_FOR_CHECKING_GIT_MIX_RESET);
+    git.doResetToCommitMessage(MIXED, COMMIT_MESSAGE);
     menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess(expectedTextInGitStatusConsole);
   }
@@ -139,16 +132,17 @@ public class GitResettingTest {
   public void checkHardReset() {
     String textInEditorBeforeReset =
         "To access database, run `env | grep MYSQL` in the terminal. You will get MySQL user, password and database. `root` user is passwordless.";
-    String uniqueTextForSelection = "2016 Jan 6 15:35:22";
+    String commitMessage = "Initial commit";
     String expectedTextInEditorAfterHardResetting =
         "# web-php-apache2-simple\nA hello world PHP script";
     String expectedTextInGitStatusConsole = "On branch master\n nothing to commit";
 
-    projectExplorer.openItemByPath(nameOfProjectForCheckingGitHardReset + "/README.md");
+    projectExplorer.openItemByPath(NAME_OF_PROJECT_FOR_CHECKING_GIT_HARD_RESET + "/README.md");
     editor.waitTextIntoEditor(textInEditorBeforeReset);
-    git.doResetToCommitMessage(HARD, uniqueTextForSelection);
+    git.doResetToCommitMessage(HARD, commitMessage);
     menu.runCommand(GIT, STATUS);
-    projectExplorer.waitDisappearItemByPath(nameOfProjectForCheckingGitHardReset + "/index.php");
+    projectExplorer.waitDisappearItemByPath(
+        NAME_OF_PROJECT_FOR_CHECKING_GIT_HARD_RESET + "/index.php");
     git.waitGitStatusBarWithMess(expectedTextInGitStatusConsole);
     editor.waitTextIntoEditor(expectedTextInEditorAfterHardResetting);
   }
