@@ -38,8 +38,8 @@ node default {
 
   ###############################
   # HTTPS configuration
-  # options: letsencrypt, file
-  $https_certificate_provider = getValue("CHE_HTTPS_CERTIFICATE_PROVIDER", "letsencrypt")
+  # options: file
+  $https_certificate_provider = getValue("CHE_HTTPS_CERTIFICATE_PROVIDER", "file")
 
   ###############################
   # Single port configuration

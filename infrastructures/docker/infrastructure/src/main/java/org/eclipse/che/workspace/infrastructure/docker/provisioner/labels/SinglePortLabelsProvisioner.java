@@ -88,14 +88,8 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
         if (cheHostProtocol.equals("https")) {
           // rewrite to use https and wss
           if (protocol.equals("ws") || protocol.equals("http")) {
-            if (cheHttpsCertificateProvider.contains("letsencrypt")) {
-              // http needed for ACME http challenge
-              containerLabels.put(
-                  format("traefik.%s.frontend.entryPoints", serviceName), "https,wss,http");
-            } else {
-              containerLabels.put(
-                  format("traefik.%s.frontend.entryPoints", serviceName), "https,wss");
-            }
+            containerLabels.put(
+                format("traefik.%s.frontend.entryPoints", serviceName), "https,wss");
           } else {
             // not a protocol traefik understands
             containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), protocol);

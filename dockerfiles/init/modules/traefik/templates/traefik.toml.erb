@@ -77,9 +77,6 @@ checkNewVersion = false
 # Default: ["http"]
 #
 # defaultEntryPoints = ["http", "https"]
-<% if scope.lookupvar('che::https_certificate_provider').include? "letsencrypt" -%>
-defaultEntryPoints = ["http", "https"]
-<% end -%>
 
 <% if scope.lookupvar('che::che_env') == 'development' -%>
 [web]
@@ -112,13 +109,3 @@ address = ":7070"
 
 [docker]
 watch = true
-
-<% if scope.lookupvar('che::https_certificate_provider').include? "letsencrypt" -%>
-[acme]
-email = "admin@<%= scope.lookupvar('che::che_ip') %>"
-storage = "/etc/traefik/acme.json"
-entryPoint = "https"
-OnHostRule = true
-[acme.httpChallenge]
-entryPoint = "http"
-<% end -%>
