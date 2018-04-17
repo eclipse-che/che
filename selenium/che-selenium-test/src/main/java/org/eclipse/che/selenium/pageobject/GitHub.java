@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -30,10 +30,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class GitHub {
   private final SeleniumWebDriver seleniumWebDriver;
-  private final org.eclipse.che.selenium.core.user.TestUser testUser;
+  private final DefaultTestUser testUser;
 
   @Inject
-  public GitHub(SeleniumWebDriver seleniumWebDriver, TestUser testUser) {
+  public GitHub(SeleniumWebDriver seleniumWebDriver, DefaultTestUser testUser) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.testUser = testUser;
     PageFactory.initElements(seleniumWebDriver, this);
