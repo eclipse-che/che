@@ -1,8 +1,10 @@
 # Deploy single user Che to Kubernetes using Helm
 
 ## Prerequisites
-- Start minikube with sufficient resources and RBAC 
-  - `minikube start --cpus 2 --memory 4096 --extra-config=apiserver.Authorization.Mode=RBAC`
+- Start minikube with sufficient resources and RBAC enabled
+  - for minikube 0.26.0 and greater `minikube start --cpus 2 --memory 4096 --extra-config=apiserver.authorization-mode=RBAC`
+  - for minikube 0.25.2 and lower `minikube start --cpus 2 --memory 4096 --extra-config=apiserver.Authorization.Mode=RBAC`
+- Add cluster-admin role for `kube-system:default` account
   - `kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default`
 - Install the [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md) CLI
 - Set your default Kubernetes context (this is required to use helm):
