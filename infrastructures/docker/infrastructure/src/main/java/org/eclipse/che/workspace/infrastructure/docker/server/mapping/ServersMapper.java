@@ -176,27 +176,21 @@ public class ServersMapper {
     // now we can grab the config
 
     LOG.debug(
-        "ContainerPort: "
-            + port.toString()
-            + "\n ServerConfig: "
-            + cfg.toString()
-            + "\n Hostname: "
-            + hostname);
-    LOG.debug("URL result: \t" + makeUrl(port, cfg.getProtocol(), cfg.getPath(), hostname));
+        "ContainerPort: {}\n ServerConfig: {}\n Hostname: {}",
+        port.toString(),
+        cfg.toString(),
+        hostname);
     return makeUrl(port, cfg.getProtocol(), cfg.getPath(), hostname);
   }
 
   private String makeUrl(ContainerPort port, String protocol, String path, String hostname)
       throws InternalInfrastructureException {
     LOG.debug(
-        "Port: "
-            + port.toString()
-            + "\n Protocol: "
-            + protocol
-            + "\n Path: "
-            + path
-            + "\n Hostname: "
-            + hostname);
+        "Port: {}\n Protocol: {}\n Path: {}\n Hostname: {}",
+        port.toString(),
+        protocol,
+        path,
+        hostname);
     if (protocol == null) {
       if (port.getType() == null) {
         protocol = "tcp";
