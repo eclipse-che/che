@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceWithCppStackTest {
   private final String WORKSPACE = NameGenerator.generate("WsCpp", 4);
 
-  @Inject private TestUser defaultTestUser;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private NewWorkspace newWorkspace;
   @Inject private Dashboard dashboard;
   @Inject private ProjectExplorer projectExplorer;

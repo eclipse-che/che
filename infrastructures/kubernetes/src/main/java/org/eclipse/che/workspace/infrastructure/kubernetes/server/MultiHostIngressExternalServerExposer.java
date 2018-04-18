@@ -10,12 +10,17 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
+import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategyProvider.STRATEGY_PROPERTY;
+
+import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.inject.ConfigurationException;
 
 /**
  * Provides a host-based strategy for exposing service ports outside the cluster using Ingress
@@ -45,13 +50,23 @@ public class MultiHostIngressExternalServerExposer
     extends AbstractIngressExternalServerExposerStrategy {
 
   public static final String MULTI_HOST_STRATEGY = "multi-host";
+  private static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
+
   private final String domain;
   private final Map<String, String> ingressAnnotations;
 
   @Inject
   public MultiHostIngressExternalServerExposer(
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations,
-      @Named("che.infra.kubernetes.ingress.domain") String domain) {
+      @Named(INGRESS_DOMAIN_PROPERTY) String domain,
+      @Named(STRATEGY_PROPERTY) String strategy) {
+    if (Strings.isNullOrEmpty(domain) && MULTI_HOST_STRATEGY.equals(strategy)) {
+      throw new ConfigurationException(
+          format(
+              "Strategy of generating ingress URLs for Che servers is set to '%s', "
+                  + "but property '%s' is not set",
+              MULTI_HOST_STRATEGY, INGRESS_DOMAIN_PROPERTY));
+    }
     this.ingressAnnotations = ingressAnnotations;
     this.domain = domain;
   }

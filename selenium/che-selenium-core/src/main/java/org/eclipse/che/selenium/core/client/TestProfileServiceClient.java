@@ -16,29 +16,28 @@ import com.google.inject.Singleton;
 import java.util.Map;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /** @author Musienko Maxim */
 @Singleton
 public class TestProfileServiceClient {
   private final String apiEndpoint;
   private final HttpJsonRequestFactory requestFactory;
-  private final TestUser defaultTestUser;
+  private final DefaultTestUser defaultTestUser;
 
   @Inject
   public TestProfileServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       HttpJsonRequestFactory requestFactory,
-      TestUser defaultTestUser) {
+      DefaultTestUser defaultTestUser) {
     this.apiEndpoint = apiEndpointProvider.get().toString();
     this.requestFactory = requestFactory;
     this.defaultTestUser = defaultTestUser;
   }
 
-  public void setAttributes(Map<String, String> attributes, String authToken) throws Exception {
+  public void setAttributes(Map<String, String> attributes) throws Exception {
     requestFactory
         .fromUrl(apiEndpoint + "profile/attributes")
-        .setAuthorizationHeader(authToken)
         .usePutMethod()
         .setBody(attributes)
         .request();
@@ -50,6 +49,6 @@ public class TestProfileServiceClient {
             "firstName", name,
             "lastName", lastName);
 
-    setAttributes(attributes, defaultTestUser.getAuthToken());
+    setAttributes(attributes);
   }
 }

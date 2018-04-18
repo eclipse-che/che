@@ -11,18 +11,15 @@
 package org.eclipse.che.selenium.core.requestfactory;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /** @author Anton Korneta */
 public class CheTestDefaultUserHttpJsonRequestFactory extends TestUserHttpJsonRequestFactory {
 
   @Inject
   public CheTestDefaultUserHttpJsonRequestFactory(
-      TestAuthServiceClient authServiceClient,
-      @Named("che.testuser.name") String name,
-      @Named("che.testuser.password") String password,
-      @Named("che.testuser.offline_token") String offlineToken) {
-    super(authServiceClient, name, password, offlineToken);
+      TestAuthServiceClient authServiceClient, DefaultTestUser defaultTestUser) {
+    super(authServiceClient, defaultTestUser);
   }
 }

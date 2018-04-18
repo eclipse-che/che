@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -28,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastruct
  * @author Sergii Leshchenko
  */
 public class KubernetesPersistentVolumeClaims {
+
   private final String namespace;
   private final String workspaceId;
   private final KubernetesClientFactory clientFactory;
@@ -113,6 +115,25 @@ public class KubernetesPersistentVolumeClaims {
       if (!existing.contains(pvc.getMetadata().getName())) {
         create(pvc);
       }
+    }
+  }
+
+  /**
+   * Removes all PVCs which have the specified labels.
+   *
+   * @param labels labels to filter PVCs
+   * @throws InfrastructureException when any error occurs while removing
+   */
+  public void delete(Map<String, String> labels) throws InfrastructureException {
+    try {
+      clientFactory
+          .create(workspaceId)
+          .persistentVolumeClaims()
+          .inNamespace(namespace)
+          .withLabels(labels)
+          .delete();
+    } catch (KubernetesClientException e) {
+      throw new KubernetesInfrastructureException(e);
     }
   }
 }
