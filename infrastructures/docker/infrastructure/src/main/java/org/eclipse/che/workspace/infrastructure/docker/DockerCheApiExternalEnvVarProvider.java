@@ -17,9 +17,9 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvV
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Provides env variable to docker machine with url of Che API.
+ * Provides env variable to docker machine with url of Che external API.
  *
- * @author Alexander Garagatyi
+ * @author Mykhailo Kuznietsov
  */
 @Singleton
 public class DockerCheApiExternalEnvVarProvider implements CheApiExternalEnvVarProvider {

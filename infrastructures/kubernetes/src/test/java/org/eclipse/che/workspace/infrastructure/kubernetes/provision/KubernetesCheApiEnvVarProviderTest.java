@@ -10,37 +10,38 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static org.testng.Assert.assertEquals;
+
+import org.eclipse.che.commons.lang.Pair;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link KubernetesCheApiInternalEnvVarProvider}.
+ * Tests {@link KubernetesCheApiEnvVarProvider}.
  *
  * @author Sergii Leshchenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class KubernetesCheApiInternalEnvVarProviderTest {
+public class KubernetesCheApiEnvVarProviderTest {
 
   private static final String CHE_SERVER_ENDPOINT = "localhost:8080";
 
-  private KubernetesCheApiInternalEnvVarProvider kubernetesCheApiEnvVarProvider;
+  private KubernetesCheApiEnvVarProvider kubernetesCheApiEnvVarProvider;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    kubernetesCheApiEnvVarProvider =
-        new KubernetesCheApiInternalEnvVarProvider(CHE_SERVER_ENDPOINT);
+    kubernetesCheApiEnvVarProvider = new KubernetesCheApiEnvVarProvider(CHE_SERVER_ENDPOINT);
   }
 
   @Test
   public void shouldReturnCheApiEnv() throws Exception {
-    //    // when
-    //    Pair<String, String> cheApiEnv = kubernetesCheApiEnvVarProvider.get(null);
-    //
-    //    // then
-    //    assertEquals(cheApiEnv.first,
-    // KubernetesCheApiInternalEnvVarProvider.CHE_API_INTERNAL_VARIABLE);
-    //    assertEquals(cheApiEnv.second, CHE_SERVER_ENDPOINT);
+    // when
+    Pair<String, String> cheApiEnv = kubernetesCheApiEnvVarProvider.get(null);
+
+    // then
+    assertEquals(cheApiEnv.first, KubernetesCheApiEnvVarProvider.CHE_API_VARIABLE);
+    assertEquals(cheApiEnv.second, CHE_SERVER_ENDPOINT);
   }
 }

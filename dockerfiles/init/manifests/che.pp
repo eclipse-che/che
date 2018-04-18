@@ -14,8 +14,6 @@ node default {
   $docker_host = getValue("DOCKER_HOST","tcp://localhost:2375")
   $che_user = getValue("CHE_USER","root")
   $che_server_url = getValue("CHE_SERVER_URL", "${che_protocol}://${che_ip}:${che_port}")
-  $che_api_internal = getValue("CHE_API_INTERNAL", "${che_server_url}/api")
-  $che_api_external = getValue("CHE_API_EXTERNAL", "${che_server_url}/api")
   $che_master_container_ram = getValue("CHE_MASTER_CONTAINER_RAM", "750m")
   $che_docker_ip_external = getValue("CHE_DOCKER_IP_EXTERNAL","")
 
