@@ -97,7 +97,7 @@ public class KubernetesInternalRuntime<
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final RuntimeEventsPublisher eventPublisher;
   private final Executor executor;
-  private final KubernetesRuntimeStateCache runtimeStatuses;
+  private final KubernetesRuntimeStateCache runtimeStates;
   private final KubernetesMachineCache machines;
 
   @Inject
@@ -112,7 +112,7 @@ public class KubernetesInternalRuntime<
       WorkspaceProbesFactory probesFactory,
       RuntimeEventsPublisher eventPublisher,
       KubernetesSharedPool sharedPool,
-      KubernetesRuntimeStateCache runtimeStatuses,
+      KubernetesRuntimeStateCache runtimeStates,
       KubernetesMachineCache machines,
       @Assisted T context,
       @Assisted KubernetesNamespace namespace,
@@ -128,7 +128,7 @@ public class KubernetesInternalRuntime<
     this.namespace = namespace;
     this.eventPublisher = eventPublisher;
     this.executor = sharedPool.getExecutor();
-    this.runtimeStatuses = runtimeStatuses;
+    this.runtimeStates = runtimeStates;
     this.machines = machines;
   }
 
@@ -460,12 +460,12 @@ public class KubernetesInternalRuntime<
 
   @Override
   public WorkspaceStatus getStatus() throws InfrastructureException {
-    return runtimeStatuses.getStatus(getContext().getIdentity());
+    return runtimeStates.getStatus(getContext().getIdentity());
   }
 
   @Override
   protected void markStarting() throws InfrastructureException {
-    if (!runtimeStatuses.putIfAbsent(
+    if (!runtimeStates.putIfAbsent(
         new KubernetesRuntimeState(
             getContext().getIdentity(), namespace.getName(), WorkspaceStatus.STARTING))) {
       throw new StateException("Runtime is already started");
@@ -474,12 +474,12 @@ public class KubernetesInternalRuntime<
 
   @Override
   protected void markRunning() throws InfrastructureException {
-    runtimeStatuses.updateStatus(getContext().getIdentity(), WorkspaceStatus.RUNNING);
+    runtimeStates.updateStatus(getContext().getIdentity(), WorkspaceStatus.RUNNING);
   }
 
   @Override
   protected void markStopping() throws InfrastructureException {
-    if (!runtimeStatuses.updateStatus(
+    if (!runtimeStates.updateStatus(
         getContext().getIdentity(),
         s -> s == WorkspaceStatus.RUNNING || s == WorkspaceStatus.STARTING,
         WorkspaceStatus.STOPPING)) {
@@ -490,7 +490,7 @@ public class KubernetesInternalRuntime<
   @Override
   protected void markStopped() throws InfrastructureException {
     machines.remove(getContext().getIdentity());
-    runtimeStatuses.remove(getContext().getIdentity());
+    runtimeStates.remove(getContext().getIdentity());
   }
 
   private List<Ingress> createAndWaitReady(Collection<Ingress> ingresses)
