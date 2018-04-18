@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.system.server;
 
+import java.util.Set;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
@@ -49,4 +50,12 @@ public interface ServiceTermination {
    * SystemServiceItemStoppedEvent} or {@link SystemServiceStoppedEvent}.
    */
   String getServiceName();
+
+  /**
+   * Returns set of terminations service names on which the given termination depends, i.e. it MUST
+   * be executed after them.
+   *
+   * @return list of dependencies is any, or empty list otherwise.
+   */
+  Set<String> getDependencies();
 }

@@ -10,6 +10,13 @@
  */
 package org.eclipse.che.api.system.server;
 
+import static java.lang.String.format;
+
+import com.google.common.annotations.VisibleForTesting;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
@@ -30,12 +37,12 @@ class ServiceTerminator {
   private static final Logger LOG = LoggerFactory.getLogger(ServiceTerminator.class);
 
   private final EventService eventService;
-  private final Set<ServiceTermination> terminations;
+  private final LinkedHashSet<ServiceTermination> terminations;
 
   @Inject
   ServiceTerminator(EventService eventService, Set<ServiceTermination> terminations) {
     this.eventService = eventService;
-    this.terminations = terminations;
+    this.terminations = orderedTerminations(terminations);
   }
 
   /**
@@ -76,7 +83,8 @@ class ServiceTerminator {
     }
   }
 
-  private void doTerminate(ServiceTermination termination) throws InterruptedException {
+  @VisibleForTesting
+  void doTerminate(ServiceTermination termination) throws InterruptedException {
     eventService.publish(new StoppingSystemServiceEvent(termination.getServiceName()));
     try {
       termination.terminate();
@@ -87,5 +95,48 @@ class ServiceTerminator {
     }
     LOG.info("Service '{}' is shut down", termination.getServiceName());
     eventService.publish(new SystemServiceStoppedEvent(termination.getServiceName()));
+  }
+
+  private LinkedHashSet<ServiceTermination> orderedTerminations(
+      Set<ServiceTermination> terminations) {
+
+    HashMap<String, ServiceTermination> unSorted =
+        terminations
+            .stream()
+            .collect(
+                HashMap<String, ServiceTermination>::new,
+                (m, t) -> m.put(t.getServiceName(), t),
+                (m, u) -> {});
+    LinkedHashMap<String, ServiceTermination> sorted = new LinkedHashMap<>();
+
+    for (ServiceTermination termination : terminations) {
+      doSort(termination, sorted, unSorted, new HashSet<>());
+    }
+    return new LinkedHashSet<>(sorted.values());
+  }
+
+  private void doSort(
+      ServiceTermination termination,
+      LinkedHashMap<String, ServiceTermination> sorted,
+      HashMap<String, ServiceTermination> unSorted,
+      Set<String> pending) {
+    if (sorted.keySet().contains(termination.getServiceName())) {
+      return;
+    }
+    pending.add(termination.getServiceName());
+
+    Set<String> dependencies = termination.getDependencies();
+    for (String dependency : dependencies) {
+      if (pending.contains(dependency)) {
+        throw new RuntimeException(
+            format(
+                "Circular dependency found between terminations '%s' and '%s'",
+                termination.getServiceName(), dependency));
+      }
+
+      doSort(unSorted.get(dependency), sorted, unSorted, pending);
+    }
+    sorted.put(termination.getServiceName(), termination);
+    pending.remove(termination.getServiceName());
   }
 }
