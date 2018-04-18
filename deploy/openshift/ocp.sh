@@ -62,7 +62,7 @@ export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OP
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 
-DEFAULT_CHE_IMAGE_TAG="nightly"
+DEFAULT_CHE_IMAGE_TAG="6.4.0"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 
 DEFAULT_IMAGE_PULL_POLICY="Always"
@@ -309,7 +309,7 @@ remove_che_from_ocp() {
 }
 
 detectIP() {
-    docker run --rm --net host eclipse/che-ip:nightly
+    docker run --rm --net host eclipse/che-ip:6.4.0
 }
 
 parse_args() {

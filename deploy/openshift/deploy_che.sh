@@ -223,7 +223,7 @@ CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 DEFAULT_COMMAND="deploy"
 DEFAULT_CHE_MULTIUSER="false"
 DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
-DEFAULT_CHE_IMAGE_TAG="nightly"
+DEFAULT_CHE_IMAGE_TAG="6.4.0"
 DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
 DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD="true"
@@ -272,8 +272,8 @@ else
     HTTP_PROTOCOL="http"
     WS_PROTOCOL="ws"
 fi
-export IMAGE_POSTGRES=${IMAGE_POSTGRES:-"eclipse/che-postgres:nightly"}
-export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
+export IMAGE_POSTGRES=${IMAGE_POSTGRES:-"eclipse/che-postgres:6.4.0"}
+export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:6.4.0"}
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
