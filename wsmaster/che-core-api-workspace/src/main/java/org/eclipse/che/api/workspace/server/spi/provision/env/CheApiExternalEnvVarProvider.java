@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 
-/** @author Sergii Leshchenko */
+/** @author Mykhailo Kuznietsov */
 public interface CheApiExternalEnvVarProvider extends EnvVarProvider {
 
   /** Env variable for machine that contains url of Che API */
