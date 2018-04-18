@@ -14,6 +14,7 @@ import static org.eclipse.che.api.system.server.DtoConverter.asDto;
 
 import com.google.common.base.Preconditions;
 import java.util.Collections;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -76,6 +77,11 @@ public class WorkspaceServiceTermination implements ServiceTermination {
   @Override
   public String getServiceName() {
     return "workspace";
+  }
+
+  @Override
+  public Set<String> getDependencies() {
+    return Collections.emptySet();
   }
 
   /**
