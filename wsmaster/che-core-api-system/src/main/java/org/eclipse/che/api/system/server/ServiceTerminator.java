@@ -11,11 +11,9 @@
 package org.eclipse.che.api.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
-import java.util.Collections;
+import com.google.common.collect.ImmutableSortedSet;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,14 +36,13 @@ class ServiceTerminator {
   private static final Logger LOG = LoggerFactory.getLogger(ServiceTerminator.class);
 
   private final EventService eventService;
-  private final List<ServiceTermination> terminations;
+  private final Set<ServiceTermination> terminations;
 
   @Inject
   ServiceTerminator(EventService eventService, Set<ServiceTermination> terminations) {
     this.eventService = eventService;
-    ArrayList<ServiceTermination> terminationsList = new ArrayList<>(terminations);
-    Collections.sort(terminationsList, new ServiceTerminationComparator(terminations));
-    this.terminations = terminationsList;
+    this.terminations =
+        ImmutableSortedSet.copyOf(new ServiceTerminationComparator(terminations), terminations);
   }
 
   /**
@@ -114,10 +111,9 @@ class ServiceTerminator {
 
     @Override
     public int compare(ServiceTermination o1, ServiceTermination o2) {
-
       return checkTransitiveDependency(o1.getServiceName(), o2.getServiceName(), new HashSet<>());
     }
-
+    // Recursively dig into dependencies and sort them out
     private int checkTransitiveDependency(String o1, String o2, Set<String> loopList) {
       if (loopList.contains(o1)) {
         throw new RuntimeException("Circular dependency found between terminations " + loopList);

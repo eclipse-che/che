@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.system.server.ServiceTermination;
+import org.eclipse.che.api.workspace.server.WorkspaceServiceTermination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,6 @@ public class KubernetesClientTermination implements ServiceTermination {
 
   @Override
   public Set<String> getDependencies() {
-    return ImmutableSet.of("workspace");
+    return ImmutableSet.of(WorkspaceServiceTermination.SERVICE_NAME);
   }
 }

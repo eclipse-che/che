@@ -53,6 +53,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
 
   /** Delay in MS between runtimes stopped checks. The value is experimental. */
   private static final long DEFAULT_PULL_RUNTIMES_PERIOD_MS = TimeUnit.SECONDS.toMillis(1);
+  public static final String SERVICE_NAME = "workspace";
 
   private final WorkspaceManager manager;
   private final WorkspaceSharedPool sharedPool;
@@ -76,7 +77,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
 
   @Override
   public String getServiceName() {
-    return "workspace";
+    return SERVICE_NAME;
   }
 
   @Override
