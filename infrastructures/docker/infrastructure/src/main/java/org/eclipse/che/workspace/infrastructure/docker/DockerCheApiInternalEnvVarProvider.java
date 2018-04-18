@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import com.google.common.base.Strings;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -26,15 +25,11 @@ import org.eclipse.che.commons.lang.Pair;
 @Singleton
 public class DockerCheApiInternalEnvVarProvider implements CheApiInternalEnvVarProvider {
 
-  private Pair<String, String> apiEnvVar;
+  private final Pair<String, String> apiEnvVar;
 
   @Inject
   public DockerCheApiInternalEnvVarProvider(
       @Named("che.infra.docker.master_api_endpoint") String apiEndpoint) {
-    String apiEndpointEnvVar = System.getenv(CHE_API_INTERNAL_VARIABLE);
-    if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
-      apiEndpoint = apiEndpointEnvVar;
-    }
     apiEnvVar = Pair.of(CHE_API_INTERNAL_VARIABLE, apiEndpoint);
   }
 

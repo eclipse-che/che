@@ -15,8 +15,6 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
@@ -24,17 +22,17 @@ import org.eclipse.che.commons.lang.Pair;
  *
  * @author Sergii Leshchenko
  */
-public class KubernetesCheApiEnvVarProvider implements CheApiEnvVarProvider{
+public class KubernetesCheApiEnvVarProvider implements CheApiEnvVarProvider {
 
-  private final String cheServerEndpoint;
+  private final Pair<String, String> apiEnvVar;
 
   @Inject
   public KubernetesCheApiEnvVarProvider(@Named("che.api") String cheServerEndpoint) {
-    this.cheServerEndpoint = cheServerEndpoint;
+    this.apiEnvVar = Pair.of(CHE_API_VARIABLE, cheServerEndpoint);
   }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
-    return Pair.of(CHE_API_VARIABLE, cheServerEndpoint);
+    return apiEnvVar;
   }
 }
