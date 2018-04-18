@@ -70,6 +70,8 @@ items:
     CHE_WORKSPACE_AUTO_START: "false"
     CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"nginx.ingress.kubernetes.io/rewrite-target": "/","nginx.ingress.kubernetes.io/ssl-redirect": "false","nginx.ingress.kubernetes.io/proxy-connect-timeout": "3600","nginx.ingress.kubernetes.io/proxy-read-timeout": "3600"}'
     CHE_LOGS_APPENDERS_IMPL: "plaintext"
+    CHE_INFRA_KUBERNETES_INGRESS_DOMAIN: "192.168.99.101.nip.io"
+    CHE_INFRA_KUBERNETES_SERVER__STRATEGY: "default-host"
 - apiVersion: extensions/v1beta1
   kind: Ingress
   metadata:
@@ -257,6 +259,16 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_LOGS_APPENDERS_IMPL
+                name: che
+          - name: CHE_INFRA_KUBERNETES_INGRESS_DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_INGRESS_DOMAIN
+                name: che
+          - name: CHE_INFRA_KUBERNETES_SERVER__STRATEGY
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_SERVER__STRATEGY
                 name: che
           image: eclipse/che-server:nightly
           imagePullPolicy: Always

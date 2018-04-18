@@ -31,28 +31,43 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
   private static final Logger LOG =
       LoggerFactory.getLogger(MultiUserCheDefaultTestUserProvider.class);
 
-  private final AdminTestUser adminTestUser;
+  private AdminTestUser adminTestUser;
+
+  @Inject private TestUserFactory<AdminTestUser> adminTestUserFactory;
+  @Inject private KeycloakAdminConsoleClient keycloakAdminConsoleClient;
 
   @Inject
-  public MultiUserCheAdminTestUserProvider(
-      TestUserFactory<AdminTestUser> adminTestUserFactory,
-      KeycloakAdminConsoleClient keycloakAdminConsoleClient,
-      @Named("che.admin.name") String name,
-      @Named("che.admin.email") String email,
-      @Named("che.admin.password") String password,
-      @Named("che.admin.offline_token") String offlineToken) {
-    if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-      throw new IllegalStateException("Admin test user credentials are unknown");
-    }
+  @Named("che.admin.name")
+  private String name;
 
-    adminTestUser = adminTestUserFactory.create(name, email, password, offlineToken, this);
-    keycloakAdminConsoleClient.setupAdmin(adminTestUser);
+  @Inject
+  @Named("che.admin.email")
+  private String email;
 
-    LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());
-  }
+  @Inject
+  @Named("che.admin.password")
+  private String password;
+
+  @Inject
+  @Named("che.admin.offline_token")
+  private String offlineToken;
 
   @Override
   public AdminTestUser get() {
+    if (adminTestUser == null) {
+      if (email == null
+          || email.trim().isEmpty()
+          || password == null
+          || password.trim().isEmpty()) {
+        throw new IllegalStateException("Admin test user credentials are unknown");
+      }
+
+      adminTestUser = adminTestUserFactory.create(name, email, password, offlineToken, this);
+      keycloakAdminConsoleClient.setupAdmin(adminTestUser);
+
+      LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());
+    }
+
     return adminTestUser;
   }
 
