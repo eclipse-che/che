@@ -121,7 +121,7 @@ public class SystemTerminatorTest {
   @Test(
     dataProvider = "loopableTerminations",
     expectedExceptions = RuntimeException.class,
-    expectedExceptionsMessageRegExp = "Circular dependency found between terminations 'D' and 'B'"
+    expectedExceptionsMessageRegExp = "Circular dependency found between terminations \\[B, D\\]"
   )
   public void shouldFailOnCyclicDependency(Set<ServiceTermination> terminations) throws Exception {
     new ServiceTerminator(eventService, terminations);
@@ -133,10 +133,13 @@ public class SystemTerminatorTest {
       {
         ImmutableSet.of(
             getServiceTerminationWithDependency("A", Collections.emptySet()),
-            getServiceTerminationWithDependency("B", ImmutableSet.of("C", "D")),
+            getServiceTerminationWithDependency("B", ImmutableSet.of("C", "D", "G")),
             getServiceTerminationWithDependency("C", Collections.emptySet()),
-            getServiceTerminationWithDependency("D", ImmutableSet.of("C"))),
-        ImmutableSet.of("A", "C", "D", "B")
+            getServiceTerminationWithDependency("D", ImmutableSet.of("C")),
+            getServiceTerminationWithDependency("E", ImmutableSet.of("B")),
+            getServiceTerminationWithDependency("F", ImmutableSet.of("C")),
+            getServiceTerminationWithDependency("G", ImmutableSet.of("C"))),
+        ImmutableSet.of("A", "C", "D", "F", "G", "B", "E")
       }
     };
   }
