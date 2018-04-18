@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -44,7 +45,7 @@ public class KeycloakAdminConsoleClient {
       Pattern.compile("^.*Created new user with id '(.*)'.*$", Pattern.DOTALL);
 
   // we need to inject AdminTestUser separately to avoid circular dependency error
-  @Inject private AdminTestUser adminTestUser;
+  @Inject private AdminTestUserProvider adminTestUserProvider;
 
   private final DockerUtil dockerUtil;
   private final TestUserFactory<DefaultTestUser> defaultTestUserFactory;
@@ -123,7 +124,7 @@ public class KeycloakAdminConsoleClient {
     String authPartOfCommand =
         format(
             "--no-config --server http://localhost:8080/auth --user %s --password %s --realm master",
-            adminTestUser.getName(), adminTestUser.getPassword());
+            adminTestUserProvider.get().getName(), adminTestUserProvider.get().getPassword());
 
     String createUserCommand =
         format(
@@ -210,8 +211,8 @@ public class KeycloakAdminConsoleClient {
             keycloakContainerId,
             userId,
             username,
-            adminTestUser.getName(),
-            adminTestUser.getPassword());
+            adminTestUserProvider.get().getName(),
+            adminTestUserProvider.get().getPassword());
 
     processAgent.execute(commandToDeleteUser);
 
