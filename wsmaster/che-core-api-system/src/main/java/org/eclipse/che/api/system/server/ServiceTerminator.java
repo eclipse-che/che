@@ -13,11 +13,9 @@ package org.eclipse.che.api.system.server;
 import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
@@ -37,12 +35,53 @@ class ServiceTerminator {
   private static final Logger LOG = LoggerFactory.getLogger(ServiceTerminator.class);
 
   private final EventService eventService;
-  private final LinkedHashSet<ServiceTermination> terminations;
+  private final List<ServiceTermination> terminations;
 
   @Inject
   ServiceTerminator(EventService eventService, Set<ServiceTermination> terminations) {
     this.eventService = eventService;
-    this.terminations = orderedTerminations(terminations);
+    this.terminations = new ArrayList(terminations);
+    Collections.sort(new ArrayList(terminations), new ServiceTerminationComparator(terminations));
+  }
+
+  public static class ServiceTerminationComparator implements Comparator<ServiceTermination> {
+    public ServiceTerminationComparator(Set<ServiceTermination> terminations) {
+      this.dependencies =
+          terminations
+              .stream()
+              .collect(
+                  Collectors.toMap(ServiceTermination::getServiceName, e -> e.getDependencies()));
+    }
+
+    private final Map<String, Set<String>> dependencies;
+
+    @Override
+    public int compare(ServiceTermination o1, ServiceTermination o2) {
+
+      return checkTransitiveDependecy(o1.getServiceName(), o2.getServiceName(), new HashSet<>());
+    }
+
+    private int checkTransitiveDependecy(String o1, String o2, Set<String> loopList) {
+      if (loopList.contains(o1)) {
+        throw new RuntimeException("Loop detected " + loopList);
+      }
+      Set<String> directDependencies = dependencies.get(o1);
+      if (directDependencies.isEmpty()) {
+        return -1;
+      } else {
+        if (directDependencies.contains(o2)) {
+          return 1;
+        } else {
+          loopList.add(o1);
+          for (String dependency : directDependencies) {
+            if (checkTransitiveDependecy(dependency, o2, loopList) > 0) {
+              return 1;
+            }
+          }
+          return -1;
+        }
+      }
+    }
   }
 
   /**
