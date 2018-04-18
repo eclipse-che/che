@@ -72,7 +72,7 @@ public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
   }
 
   @Override
-  public Map<String, WorkspaceStatus> toMap() {
+  public Map<String, WorkspaceStatus> asMap() {
     return new HashMap<>(delegate);
   }
 }

@@ -44,6 +44,8 @@ public class JGroupsWorkspaceLockService implements WorkspaceLockService {
 
   @Override
   public Unlocker readLock(String key) {
+    // JGroups lock service does not contain an associated pair of read/write locks, that's why
+    // there no way provide a reliable version of a read lock.
     return () -> {};
   }
 

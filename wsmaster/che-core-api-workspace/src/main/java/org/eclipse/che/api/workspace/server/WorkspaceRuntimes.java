@@ -611,7 +611,7 @@ public class WorkspaceRuntimes {
    */
   public Set<String> getInProgress() {
     return statuses
-        .toMap()
+        .asMap()
         .entrySet()
         .stream()
         .filter(e -> STARTING == e.getValue() || STOPPING == e.getValue())
@@ -634,7 +634,7 @@ public class WorkspaceRuntimes {
    */
   public boolean isAnyInProgress() {
     return statuses
-        .toMap()
+        .asMap()
         .entrySet()
         .stream()
         .filter(e -> STARTING == e.getValue() || STOPPING == e.getValue())
