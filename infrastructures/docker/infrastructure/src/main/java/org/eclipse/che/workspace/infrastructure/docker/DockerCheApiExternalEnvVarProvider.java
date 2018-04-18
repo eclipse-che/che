@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
@@ -27,8 +28,8 @@ public class DockerCheApiExternalEnvVarProvider implements CheApiExternalEnvVarP
   private final Pair<String, String> apiEnvVar;
 
   @Inject
-  public DockerCheApiExternalEnvVarProvider() {
-    apiEnvVar = Pair.of(CHE_API_EXTERNAL_VARIABLE, System.getenv(CHE_API_EXTERNAL_VARIABLE));
+  public DockerCheApiExternalEnvVarProvider(@Named("che.api") String apiEndpoint) {
+    apiEnvVar = Pair.of(CHE_API_EXTERNAL_VARIABLE, apiEndpoint);
   }
 
   @Override
