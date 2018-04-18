@@ -258,7 +258,7 @@ deploy_che_to_ocp() {
       wait_for_keycloak
       export CHE_MULTIUSER_PARAM="-p CHE_MULTIUSER=true"
     fi
-      CHE_VAR_ARRAY=$(env | grep "CHE_.")
+      CHE_VAR_ARRAY=$(env | grep -P '^\w*CHE_\w*(?==)')
       if [ ${#CHE_VAR_ARRAY[@]} > 0 ]; then
         ENV="-e ${CHE_VAR_ARRAY}"
       fi
