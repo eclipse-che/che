@@ -991,7 +991,9 @@ public class Git {
    */
   public void doResetToCommitMessage(ResetModes mode, String textInResetToCommitWidget) {
     menu.runCommand(GIT, RESET);
+
     waitResetWindowOpen();
+
     switch (mode) {
       case SOFT:
         selectSoftReset();
@@ -1003,6 +1005,7 @@ public class Git {
         selectHardReset();
         break;
     }
+
     selectResetToCommitByText(textInResetToCommitWidget);
     clickResetBtn();
     waitResetWindowClose();
