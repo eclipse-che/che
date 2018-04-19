@@ -22,7 +22,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -41,7 +40,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@Test(groups = TestGroup.OSIO)
 public class CreateFactoryTest {
 
   private static final String MINIMAL_TEMPLATE_FACTORY_NAME = generate("factory", 4);
@@ -158,6 +156,7 @@ public class CreateFactoryTest {
     createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
     createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
     createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
+    // wait that the Create Factory button is enabled after a workspace selecting
     WaitUtils.sleepQuietly(1);
     createFactoryPage.clickOnCreateFactoryButton();
     factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);

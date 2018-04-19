@@ -70,7 +70,7 @@ public class ToastLoader {
     seleniumWebDriverHelper.waitVisibility(mainForm, UPDATING_PROJECT_TIMEOUT_SEC);
   }
 
-  public Boolean isToastLoaderIsOpened() {
+  public Boolean isToastLoaderOpened() {
     return seleniumWebDriverHelper.isVisible(mainForm);
   }
 
@@ -206,11 +206,12 @@ public class ToastLoader {
         By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)));
   }
 
-  public void waitToastLoaderAndClickButton(String buttonName) {
+  public void waitToastLoaderAndClickStartButton() {
     projectExplorer.waitProjectExplorer();
-    WaitUtils.sleepQuietly(5);
-    if (isToastLoaderIsOpened()) {
-      clickOnToastLoaderButton(buttonName);
+    try {
+      seleniumWebDriverHelper.waitInvisibility(mainForm, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      clickOnToastLoaderButton("Start");
     }
   }
 }

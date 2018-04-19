@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
@@ -17,7 +18,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.OSIO)
 public class CreateAndDeleteProjectsTest {
 
-  private final String WORKSPACE = NameGenerator.generate("workspace", 4);
+  private final String WORKSPACE = generate("workspace", 4);
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
@@ -90,7 +90,7 @@ public class CreateAndDeleteProjectsTest {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     String dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    toastLoader.waitToastLoaderAndClickButton("Start");
+    toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
 
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);

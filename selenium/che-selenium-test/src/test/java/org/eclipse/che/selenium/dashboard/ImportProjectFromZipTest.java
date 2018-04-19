@@ -79,7 +79,7 @@ public class ImportProjectFromZipTest {
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    toastLoader.waitToastLoaderAndClickButton("Start");
+    toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
     explorer.waitAndSelectItem(PROJECT_NAME);
