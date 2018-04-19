@@ -10,19 +10,27 @@
  */
 package org.eclipse.che.api.system.server;
 
+import static java.util.stream.Collectors.toSet;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.Collections;
+import java.util.Set;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.service.SuspendingSystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceSuspendedEvent;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -72,7 +80,7 @@ public class SystemTerminatorTest {
   }
 
   @Test
-  public void executesTermitationsWheSuspendalsNotSupported() throws Exception {
+  public void executesTermitationsWhenSuspendalsNotSupported() throws Exception {
 
     doThrow(UnsupportedOperationException.class).when(termination1).suspend();
     terminator.suspendAll();
@@ -96,5 +104,75 @@ public class SystemTerminatorTest {
     doThrow(new InterruptedException("interrupt!")).when(termination1).terminate();
 
     terminator.terminateAll();
+  }
+
+  @Test(dataProvider = "dependableTerminations")
+  public void shouldOrderTerminationsByDependency(
+      Set<ServiceTermination> terminations, Set<String> expectedOrder) throws Exception {
+    ServiceTerminator localTerminator = spy(new ServiceTerminator(eventService, terminations));
+    localTerminator.suspendAll();
+    ArgumentCaptor<ServiceTermination> captor = ArgumentCaptor.forClass(ServiceTermination.class);
+    verify(localTerminator, times(terminations.size())).doTerminate(captor.capture());
+    assertEquals(
+        captor.getAllValues().stream().map(ServiceTermination::getServiceName).collect(toSet()),
+        expectedOrder);
+  }
+
+  @Test(
+    dataProvider = "loopableTerminations",
+    expectedExceptions = RuntimeException.class,
+    expectedExceptionsMessageRegExp = "Circular dependency found between terminations \\[B, D\\]"
+  )
+  public void shouldFailOnCyclicDependency(Set<ServiceTermination> terminations) throws Exception {
+    new ServiceTerminator(eventService, terminations);
+  }
+
+  @DataProvider(name = "dependableTerminations")
+  public Object[][] dependableTerminations() {
+    return new Object[][] {
+      {
+        ImmutableSet.of(
+            getServiceTerminationWithDependency("A", Collections.emptySet()),
+            getServiceTerminationWithDependency("B", ImmutableSet.of("C", "D", "G")),
+            getServiceTerminationWithDependency("C", Collections.emptySet()),
+            getServiceTerminationWithDependency("D", ImmutableSet.of("C")),
+            getServiceTerminationWithDependency("E", ImmutableSet.of("B")),
+            getServiceTerminationWithDependency("F", ImmutableSet.of("C")),
+            getServiceTerminationWithDependency("G", ImmutableSet.of("C"))),
+        ImmutableSet.of("A", "C", "D", "F", "G", "B", "E")
+      }
+    };
+  }
+
+  @DataProvider(name = "loopableTerminations")
+  public Object[][] loopableTerminations() {
+    return new Object[][] {
+      {
+        ImmutableSet.of(
+            getServiceTerminationWithDependency("A", Collections.emptySet()),
+            getServiceTerminationWithDependency("B", ImmutableSet.of("C", "D")),
+            getServiceTerminationWithDependency("C", Collections.emptySet()),
+            getServiceTerminationWithDependency("D", ImmutableSet.of("B")) // loop here
+            )
+      }
+    };
+  }
+
+  private ServiceTermination getServiceTerminationWithDependency(
+      String name, Set<String> depencencies) {
+    return new ServiceTermination() {
+      @Override
+      public void terminate() throws InterruptedException {}
+
+      @Override
+      public String getServiceName() {
+        return name;
+      }
+
+      @Override
+      public Set<String> getDependencies() {
+        return depencencies;
+      }
+    };
   }
 }
