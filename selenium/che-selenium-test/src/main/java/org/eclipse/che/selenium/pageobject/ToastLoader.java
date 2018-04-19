@@ -206,11 +206,6 @@ public class ToastLoader {
         By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)));
   }
 
-  public Boolean isToastLoaderButtonIsVisible(String buttonName) {
-    return seleniumWebDriverHelper.isVisible(
-        By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)));
-  }
-
   public void waitToastLoaderAndClickButton(String buttonName) {
     projectExplorer.waitProjectExplorer();
     WaitUtils.sleepQuietly(5);

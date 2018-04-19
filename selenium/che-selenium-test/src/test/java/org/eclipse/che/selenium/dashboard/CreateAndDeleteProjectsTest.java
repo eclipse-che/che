@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -40,6 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = TestGroup.OSIO)
 public class CreateAndDeleteProjectsTest {
 
   private final String WORKSPACE = NameGenerator.generate("workspace", 4);

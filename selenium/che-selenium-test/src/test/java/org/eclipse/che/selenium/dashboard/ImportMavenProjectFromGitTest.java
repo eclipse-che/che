@@ -10,12 +10,13 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
@@ -31,8 +32,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = TestGroup.OSIO)
 public class ImportMavenProjectFromGitTest {
-  private final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGit", 4);
+
+  private final String WORKSPACE = generate("ImtMvnPrjGit", 4);
   private static final String PROJECT_NAME = "guess-project";
 
   @Inject private Dashboard dashboard;

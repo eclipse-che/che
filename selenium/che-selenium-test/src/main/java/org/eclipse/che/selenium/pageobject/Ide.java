@@ -30,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 @Singleton
 public class Ide {
   private final SeleniumWebDriver seleniumWebDriver;
-  private final ToastLoader toastLoader;
   private final TestWorkspaceUrlResolver testWorkspaceUrlResolver;
   private final Entrance entrance;
   private final ProjectExplorer projectExplorer;
@@ -40,14 +39,12 @@ public class Ide {
   @Inject
   public Ide(
       SeleniumWebDriver seleniumWebDriver,
-      ToastLoader toastLoader,
       TestWorkspaceUrlResolver testWorkspaceUrlResolver,
       Entrance entrance,
       ProjectExplorer projectExplorer,
       MachineTerminal terminal,
       Menu menu) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.toastLoader = toastLoader;
     this.testWorkspaceUrlResolver = testWorkspaceUrlResolver;
     this.entrance = entrance;
     this.projectExplorer = projectExplorer;

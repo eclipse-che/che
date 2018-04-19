@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
@@ -19,7 +20,6 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -37,9 +37,9 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = TestGroup.GITHUB)
+@Test(groups = {TestGroup.GITHUB, TestGroup.OSIO})
 public class ImportProjectFromGitHubTest {
-  private static final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGitHub", 4);
+  private static final String WORKSPACE = generate("ImtMvnPrjGitHub", 4);
   private static final String GITHUB_PROJECT_NAME = "AngularJS";
 
   private String projectName;
