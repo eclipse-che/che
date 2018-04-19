@@ -39,7 +39,7 @@ import org.eclipse.che.selenium.pageobject.git.GitStatusBar;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
+/** @author Musienko Maxim */
 public class GitResetTest {
   @Inject private Ide ide;
   @Inject private DefaultTestUser testUser;
