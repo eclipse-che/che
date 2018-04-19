@@ -32,7 +32,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -65,7 +65,7 @@ public class WorkingWithJavaMySqlStackTest {
           "The process %s:build and deploy will be terminated after closing console. Do you want to continue?",
           PROJECT_NAME);
 
-  @Inject private TestUser defaultTestUser;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private Consoles consoles;

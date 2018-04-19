@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAcc
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.selenium.core.user.CheSecondTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 
@@ -27,13 +26,10 @@ import org.openqa.selenium.By;
 @Singleton
 public class DashboardAccount {
 
-  private final CheSecondTestUser cheSecondTestUser;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public DashboardAccount(
-      CheSecondTestUser cheSecondTestUser, SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.cheSecondTestUser = cheSecondTestUser;
+  public DashboardAccount(SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
   }
 
@@ -46,24 +42,13 @@ public class DashboardAccount {
     String TITLE_ID = "Account";
   }
 
-  public Account getDefaultFieldsValue() {
+  public Account getAllFields() {
     Account account = new Account();
 
-    account.setEmail(cheSecondTestUser.getEmail());
-    account.setLogin(cheSecondTestUser.getName());
-    account.setFirstName("");
-    account.setLastName("");
-
-    return account;
-  }
-
-  public Account getCurrentFieldsValue() {
-    Account account = new Account();
-
-    account.setEmail(getEmailFieldValue());
-    account.setLogin(getLoginFieldValue());
-    account.setFirstName(getFirstNameFieldValue());
-    account.setLastName(getLastNameFieldValue());
+    account.withEmail(getEmailFieldValue());
+    account.withLogin(getLoginFieldValue());
+    account.withFirstName(getFirstNameFieldValue());
+    account.withLastName(getLastNameFieldValue());
 
     return account;
   }

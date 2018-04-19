@@ -27,7 +27,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -60,7 +60,7 @@ public class RunPlainJavaProjectTest {
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
-  @Inject private TestUser productUser;
+  @Inject private DefaultTestUser productUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor codenvyEditor;
   @Inject private ConfigureClasspath configureClasspath;

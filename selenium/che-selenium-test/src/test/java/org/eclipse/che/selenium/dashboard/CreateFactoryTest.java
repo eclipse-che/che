@@ -24,7 +24,7 @@ import static org.testng.Assert.assertFalse;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
@@ -57,7 +57,7 @@ public class CreateFactoryTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private FactoryDetails factoryDetails;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private TestUser defaultTestUser;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private CreateFactoryPage createFactoryPage;
   @Inject private Dashboard dashboard;

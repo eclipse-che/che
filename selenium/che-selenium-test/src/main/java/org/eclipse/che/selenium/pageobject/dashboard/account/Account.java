@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
+import static java.lang.String.format;
+
+import java.util.Objects;
+
 /** @author Igor Ohrimenko */
 public class Account {
   private String login;
@@ -17,34 +21,24 @@ public class Account {
   private String firstName;
   private String lastName;
 
-  public Account() {
-    this.login = "";
-    this.email = "";
-    this.firstName = "";
-    this.lastName = "";
-  }
-
-  public Account(String login, String email, String firstName, String lastName) {
+  public Account withLogin(String login) {
     this.login = login;
+    return this;
+  }
+
+  public Account withEmail(String email) {
     this.email = email;
+    return this;
+  }
+
+  public Account withFirstName(String firstName) {
     this.firstName = firstName;
+    return this;
+  }
+
+  public Account withLastName(String lastName) {
     this.lastName = lastName;
-  }
-
-  public void setLogin(String login) {
-    this.login = login;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
+    return this;
   }
 
   public String getLogin() {
@@ -63,10 +57,23 @@ public class Account {
     return this.lastName;
   }
 
-  public boolean isEquals(Account accountForCompare) {
-    return this.login.equals(accountForCompare.getLogin())
-        && this.email.equals(accountForCompare.getEmail())
-        && this.firstName.equals(accountForCompare.getFirstName())
-        && this.lastName.equals(accountForCompare.getLastName());
+  @Override
+  public boolean equals(Object accountToCompare) {
+    return accountToCompare instanceof Account
+        && Objects.equals(login, ((Account) accountToCompare).getLogin())
+        && Objects.equals(email, ((Account) accountToCompare).getEmail())
+        && Objects.equals(firstName, ((Account) accountToCompare).getFirstName())
+        && Objects.equals(lastName, ((Account) accountToCompare).getLastName());
+  }
+
+  @Override
+  public String toString() {
+    return format(
+        "%s{login=%s, email=%s, firstName=%s, lastName=%s}",
+        this.getClass().getSimpleName(),
+        this.getLogin(),
+        this.getEmail(),
+        getFirstName(),
+        getLastName());
   }
 }

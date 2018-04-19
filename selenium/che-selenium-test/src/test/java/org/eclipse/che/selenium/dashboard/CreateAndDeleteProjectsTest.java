@@ -21,7 +21,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
@@ -53,7 +53,7 @@ public class CreateAndDeleteProjectsTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestUser defaultTestUser;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private Workspaces workspaces;

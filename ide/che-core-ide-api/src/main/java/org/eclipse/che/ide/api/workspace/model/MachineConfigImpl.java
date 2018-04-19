@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
+import org.eclipse.che.commons.annotation.Nullable;
 
 public class MachineConfigImpl implements MachineConfig {
 
@@ -108,6 +109,15 @@ public class MachineConfigImpl implements MachineConfig {
       volumes = new HashMap<>();
     }
     return volumes;
+  }
+
+  /**
+   * @param name
+   * @return volume by name or null if no such volume defined
+   */
+  @Nullable
+  public VolumeImpl getVolume(String name) {
+    return volumes.get(name);
   }
 
   @Override
