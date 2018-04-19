@@ -140,7 +140,6 @@ objects:
         storage: 1Gi
 
 parameters:
-
 - name: PROTOCOL
   displayName: htpps or http protocol
   description: Protocol to be used in Che communications
@@ -153,7 +152,6 @@ parameters:
   displayName: Keycloak admin password
   description: Default Keycloak admin password. Can be changed after login
   value: "admin"
-  value: http
 - name: ROUTING_SUFFIX
   displayName: Routing suffix of your OpenShift cluster
   description: This is the suffix appended to routes in your OpenShift cluster <route>.<project>.<routing_suffix>
