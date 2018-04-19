@@ -44,9 +44,9 @@ objects:
           - name: POSTGRES_PASSWORD
             value: keycloak
           - name: KEYCLOAK_USER
-            value: admin
+            value: "${KEYCLOAK_USER}"
           - name: KEYCLOAK_PASSWORD
-            value: admin
+            value: "${KEYCLOAK_PASSWORD}"
           - name: PROTOCOL
             value: "${PROTOCOL}"
           - name: ROUTING_SUFFIX
@@ -140,9 +140,19 @@ objects:
         storage: 1Gi
 
 parameters:
+
 - name: PROTOCOL
   displayName: htpps or http protocol
   description: Protocol to be used in Che communications
+  value: http
+- name: KEYCLOAK_USER
+  displayName: Keycloak admin user
+  description: Default Keycloak admin user
+  value: "admin"
+- name: KEYCLOAK_PASSWORD
+  displayName: Keycloak admin password
+  description: Default Keycloak admin password. Can be changed after login
+  value: "admin"
   value: http
 - name: ROUTING_SUFFIX
   displayName: Routing suffix of your OpenShift cluster
