@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.core.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,7 @@ public class CheTestAuthServiceClient implements TestAuthServiceClient {
   private final HttpJsonRequestFactory requestFactory;
 
   @Inject
-  public CheTestAuthServiceClient(
-      String apiEndpoint, DefaultHttpJsonRequestFactory requestFactory) {
+  public CheTestAuthServiceClient(String apiEndpoint, HttpJsonRequestFactory requestFactory) {
     this.apiEndpoint = apiEndpoint;
     this.requestFactory = requestFactory;
   }

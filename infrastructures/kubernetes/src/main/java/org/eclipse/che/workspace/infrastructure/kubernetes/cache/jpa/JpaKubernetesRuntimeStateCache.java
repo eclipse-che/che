@@ -53,7 +53,7 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     }
   }
 
-  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  @Transactional(rollbackOn = InfrastructureException.class)
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
     try {
@@ -69,26 +69,24 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     }
   }
 
-  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  @Transactional(rollbackOn = InfrastructureException.class)
   @Override
-  public WorkspaceStatus getStatus(RuntimeIdentity runtimeId) throws InfrastructureException {
+  public WorkspaceStatus getStatus(RuntimeIdentity id) throws InfrastructureException {
     try {
-      RuntimeId id = new RuntimeId(runtimeId);
+      Optional<KubernetesRuntimeState> runtimeStateOpt = get(id);
 
-      KubernetesRuntimeState runtimeState =
-          managerProvider.get().find(KubernetesRuntimeState.class, id);
-
-      if (runtimeState == null) {
-        throw new InfrastructureException("State for runtime with id '" + id + "' was not found");
+      if (!runtimeStateOpt.isPresent()) {
+        throw new InfrastructureException(
+            "Runtime state for workspace with id '" + id.getWorkspaceId() + "' was not found");
       }
 
-      return runtimeState.getStatus();
+      return runtimeStateOpt.get().getStatus();
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getMessage(), x);
     }
   }
 
-  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  @Transactional(rollbackOn = InfrastructureException.class)
   @Override
   public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId)
       throws InfrastructureException {
@@ -115,7 +113,7 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
       RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
       throws InfrastructureException {
     try {
-      doReplaceStatus(identity, predicate, newStatus);
+      doUpdateStatus(identity, predicate, newStatus);
       return true;
     } catch (IllegalStateException e) {
       return false;
@@ -145,25 +143,35 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     }
   }
 
-  @Transactional
-  protected void doUpdateStatus(RuntimeIdentity runtimeIdentity, WorkspaceStatus status) {
-    EntityManager entityManager = managerProvider.get();
+  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  protected void doUpdateStatus(RuntimeIdentity id, WorkspaceStatus status)
+      throws InfrastructureException {
+    Optional<KubernetesRuntimeState> runtimeStateOpt = get(id);
 
-    KubernetesRuntimeState runtimeState =
-        entityManager.find(KubernetesRuntimeState.class, new RuntimeId(runtimeIdentity));
+    if (!runtimeStateOpt.isPresent()) {
+      throw new InfrastructureException(
+          "Runtime state for workspace with id '" + id.getWorkspaceId() + "' was not found");
+    }
 
-    runtimeState.setStatus(status);
+    runtimeStateOpt.get().setStatus(status);
 
-    entityManager.flush();
+    managerProvider.get().flush();
   }
 
-  @Transactional
-  protected void doReplaceStatus(
-      RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus) {
+  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  protected void doUpdateStatus(
+      RuntimeIdentity id, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
+      throws InfrastructureException {
     EntityManager entityManager = managerProvider.get();
-    KubernetesRuntimeState existingState =
-        entityManager.find(KubernetesRuntimeState.class, new RuntimeId(identity));
 
+    Optional<KubernetesRuntimeState> existingStateOpt = get(id);
+
+    if (!existingStateOpt.isPresent()) {
+      throw new InfrastructureException(
+          "Runtime state for workspace with id '" + id.getWorkspaceId() + "' was not found");
+    }
+
+    KubernetesRuntimeState existingState = existingStateOpt.get();
     if (!predicate.test(existingState.getStatus())) {
       throw new IllegalStateException("Runtime status doesn't match to the specified predicate");
     }

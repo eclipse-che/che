@@ -18,6 +18,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.inject.ConfigurationException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
  * Provides implementation of {@link ExternalServerExposerStrategy} for configured value.
@@ -25,16 +26,18 @@ import org.eclipse.che.inject.ConfigurationException;
  * @author Guy Daich
  */
 @Singleton
-public class ExternalServerExposerStrategyProvider
-    implements Provider<ExternalServerExposerStrategy> {
+public class ExternalServerExposerStrategyProvider<T extends KubernetesEnvironment>
+    implements Provider<ExternalServerExposerStrategy<T>> {
 
-  private final ExternalServerExposerStrategy externalServerExposerStrategy;
+  public static final String STRATEGY_PROPERTY = "che.infra.kubernetes.server_strategy";
+
+  private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
 
   @Inject
   public ExternalServerExposerStrategyProvider(
-      @Named("che.infra.kubernetes.server_strategy") String strategy,
-      Map<String, ExternalServerExposerStrategy> strategies) {
-    final ExternalServerExposerStrategy externalServerExposerStrategy = strategies.get(strategy);
+      @Named(STRATEGY_PROPERTY) String strategy,
+      Map<String, ExternalServerExposerStrategy<T>> strategies) {
+    final ExternalServerExposerStrategy<T> externalServerExposerStrategy = strategies.get(strategy);
     if (externalServerExposerStrategy != null) {
       this.externalServerExposerStrategy = externalServerExposerStrategy;
     } else {
@@ -44,7 +47,7 @@ public class ExternalServerExposerStrategyProvider
   }
 
   @Override
-  public ExternalServerExposerStrategy get() {
+  public ExternalServerExposerStrategy<T> get() {
     return externalServerExposerStrategy;
   }
 }
