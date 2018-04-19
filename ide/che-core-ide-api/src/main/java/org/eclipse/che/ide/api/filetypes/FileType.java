@@ -32,6 +32,18 @@ public class FileType {
 
   private String namePattern;
 
+  public void setImage(SVGResource image) {
+    this.image = image;
+  }
+
+  public void setExtension(String extension) {
+    this.extension = extension;
+  }
+
+  public void setNamePattern(String namePattern) {
+    this.namePattern = namePattern;
+  }
+
   public FileType(SVGResource image, String extension) {
     this(image, extension, null);
   }

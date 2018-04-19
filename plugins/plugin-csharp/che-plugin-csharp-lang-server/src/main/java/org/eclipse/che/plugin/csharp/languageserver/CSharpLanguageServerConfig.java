@@ -62,7 +62,9 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
 
   private void onLSProxyInitialized(LanguageServerInitializedEvent event) {
     try {
-      restoreDependencies(pathTransformer.transform(ROOT));
+      if ("org.eclipse.che.plugin.csharp.languageserver".equals(event.getId())) {
+        restoreDependencies(pathTransformer.transform(ROOT));
+      }
     } catch (LanguageServerException e) {
       LOG.error(e.getMessage(), e);
     }

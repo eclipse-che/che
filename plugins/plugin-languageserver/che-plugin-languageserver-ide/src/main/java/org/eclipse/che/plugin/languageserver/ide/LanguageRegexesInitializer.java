@@ -60,7 +60,6 @@ public class LanguageRegexesInitializer {
 
                     FileType fileTypeCandidate = null;
                     for (FileType fileType : fileTypeRegistry.getRegisteredFileTypes()) {
-
                       String extension = fileType.getExtension();
                       if (extension != null && RegExp.compile(namePattern).test('.' + extension)) {
                         fileTypeCandidate = fileType;
@@ -76,6 +75,8 @@ public class LanguageRegexesInitializer {
                     if (fileTypeCandidate == null) {
                       fileTypeCandidate = new FileType(resources.file(), null, namePattern);
                       fileTypeRegistry.registerFileType(fileTypeCandidate);
+                    } else {
+                      fileTypeCandidate.setNamePattern(namePattern);
                     }
 
                     lsRegistry.registerFileType(fileTypeCandidate, languageRegex);

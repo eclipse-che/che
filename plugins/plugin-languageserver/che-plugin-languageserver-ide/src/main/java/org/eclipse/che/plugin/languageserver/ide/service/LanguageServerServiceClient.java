@@ -23,7 +23,6 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageRegex;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 @Singleton
@@ -59,11 +58,7 @@ public class LanguageServerServiceClient {
                 .methodName("languageServer/getLanguageRegexes")
                 .noParams()
                 .sendAndReceiveResultAsListOfDto(LanguageRegex.class)
-                .onSuccess(
-                    arg -> {
-                      Log.error(getClass(), "arg: " + arg);
-                      resolve.apply(arg);
-                    })
+                .onSuccess(resolve::apply)
                 .onFailure(error -> reject.apply(getPromiseError(error))));
   }
 

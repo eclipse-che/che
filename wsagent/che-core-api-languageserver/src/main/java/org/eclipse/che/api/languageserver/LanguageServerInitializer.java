@@ -106,7 +106,7 @@ class LanguageServerInitializer {
   CompletableFuture<ServerCapabilities> initialize(String wsPath) {
     return supplyAsync(
         () -> {
-          LOG.debug("Initializing of language servers for workspace path '{}': started", wsPath);
+          LOG.info("Started language servers initialization, file path '{}'", wsPath);
 
           Set<ServerCapabilities> serverCapabilitiesSet =
               findId
@@ -122,7 +122,7 @@ class LanguageServerInitializer {
                   .filter(Objects::nonNull)
                   .collect(toSet());
 
-          LOG.debug("Initializing of language servers for workspace path '{}': finished", wsPath);
+          LOG.info("Finished language servers initialization, file path '{}'", wsPath);
 
           LOG.debug("Calculating number of initialized servers and accumulating capabilities");
           if (serverCapabilitiesSet.isEmpty()) {
@@ -212,6 +212,8 @@ class LanguageServerInitializer {
         LOG.debug("Published a corresponding event: {}", event);
 
         LOG.debug("Initializing of a language server instance for server '{}': finished", id);
+
+        LOG.info("Initialized language server '{}'", id);
         return serverCapabilitiesRegistry.add(id, initializeResult.getCapabilities());
       }
     } catch (LanguageServerException
