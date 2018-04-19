@@ -30,7 +30,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
@@ -45,7 +45,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class Dashboard {
   protected final SeleniumWebDriver seleniumWebDriver;
-  protected final TestUser defaultUser;
+  protected final DefaultTestUser defaultUser;
 
   private final TestDashboardUrlProvider testDashboardUrlProvider;
   private final Entrance entrance;
@@ -57,7 +57,7 @@ public class Dashboard {
   @Inject
   public Dashboard(
       SeleniumWebDriver seleniumWebDriver,
-      TestUser defaultUser,
+      DefaultTestUser defaultUser,
       TestDashboardUrlProvider testDashboardUrlProvider,
       Entrance entrance,
       LoginPage loginPage,

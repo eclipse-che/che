@@ -85,8 +85,6 @@ initVariables() {
     unset TMP_SUITE_PATH
     unset ORIGIN_TESTS_SCOPE
     unset TMP_DIR
-    unset NEW_DEFAULT_USER_ID
-    unset NEW_SECOND_USER_ID
     unset EXCLUDE_PARAM
 }
 
@@ -94,16 +92,6 @@ cleanUpEnvironment() {
     if [[ ${MODE} == "grid" ]]; then
         stopWebDriver
         stopSeleniumDockerContainers
-    fi
-
-    if [[ -n ${NEW_USER_ID} ]]; then
-       echo "[TEST] Removing default test user with name '${CHE_TESTUSER_NAME}'..."
-       removeUser ${NEW_USER_ID}  ${CHE_TESTUSER_NAME}
-    fi
-
-    if [[ -n ${NEW_SECOND_USER_ID} ]]; then
-       echo "[TEST] Removing second test user with name '${CHE_SECOND_TESTUSER_NAME}'..."
-       removeUser ${NEW_SECOND_USER_ID} ${CHE_SECOND_TESTUSER_NAME}
     fi
 }
 
@@ -882,108 +870,6 @@ prepareToFirstRun() {
     checkIfProductIsRun
     cleanUpEnvironment
     initRunMode
-
-    if [[ ${CHE_MULTIUSER} == false ]]; then
-      prepareTestUsersForSingleuserChe
-    else
-      prepareTestUsersForMultiuserChe
-    fi
-}
-
-prepareTestUsersForSingleuserChe() {
-    export CHE_ADMIN_NAME=
-    export CHE_ADMIN_EMAIL=
-    export CHE_ADMIN_PASSWORD=
-    export CHE_ADMIN_OFFLINE__TOKEN=
-
-    export CHE_TESTUSER_NAME=che
-    export CHE_TESTUSER_EMAIL=che@eclipse.org
-    export CHE_TESTUSER_PASSWORD=secret
-    export CHE_TESTUSER_OFFLINE__TOKEN=
-}
-
-prepareTestUsersForMultiuserChe() {
-    export CHE_ADMIN_NAME=${CHE_ADMIN_NAME:-admin}
-    export CHE_ADMIN_EMAIL=${CHE_ADMIN_EMAIL:-admin@admin.com}
-    export CHE_ADMIN_PASSWORD=${CHE_ADMIN_PASSWORD:-admin}
-    export CHE_ADMIN_OFFLINE__TOKEN=${CHE_ADMIN_OFFLINE__TOKEN}
-
-    export CHE_TESTUSER_OFFLINE__TOKEN=${CHE_TESTUSER_OFFLINE__TOKEN}
-    export CHE_SECOND_TESTUSER_OFFLINE__TOKEN=${CHE_SECOND_TESTUSER_OFFLINE__TOKEN}
-
-    if [[ -n ${CHE_TESTUSER_EMAIL+x} ]] && [[ -n ${CHE_TESTUSER_PASSWORD+x} ]]; then
-        return
-    fi
-
-    # create test user by executing kcadm.sh commands inside keycloak docker container if there are no its credentials among environment variables
-    if [[ "${PRODUCT_HOST}" == "$(detectDockerInterfaceIp)" ]] || [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
-        # create default test user
-        local time=$(date +%s)
-        export CHE_TESTUSER_NAME=${CHE_TESTUSER_NAME:-user${time}}
-        export CHE_TESTUSER_EMAIL=${CHE_TESTUSER_EMAIL:-${CHE_TESTUSER_NAME}@1.com}
-        export CHE_TESTUSER_PASSWORD=${CHE_TESTUSER_PASSWORD:-${time}}
-        echo "[TEST] Creating default test user with name '$CHE_TESTUSER_NAME'..."
-        NEW_USER_ID=$(createUser ${CHE_TESTUSER_NAME} ${CHE_TESTUSER_EMAIL} ${CHE_TESTUSER_PASSWORD})
-        if [[ -z ${NEW_USER_ID} ]]; then
-           # set test user credentials to be equal to admin ones in case of problem with creation of user
-           echo -e "${RED}[WARN] There is a problem with creation of default test user in Keycloak server: '${response}'.${NO_COLOUR}"
-           echo -e "Admin user will be used as default test user."
-           CHE_TESTUSER_NAME=${CHE_ADMIN_NAME}
-           CHE_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
-           CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
-        fi
-
-        # create second test user
-        time=$(date +%s)
-        export CHE_SECOND_TESTUSER_NAME=${CHE_SECOND_TESTUSER_NAME:-user${time}}
-        export CHE_SECOND_TESTUSER_EMAIL=${CHE_SECOND_TESTUSER_EMAIL:-${CHE_SECOND_TESTUSER_NAME}@1.com}
-        export CHE_SECOND_TESTUSER_PASSWORD=${CHE_SECOND_TESTUSER_PASSWORD:-${time}}
-        echo "[TEST] Creating second test user with name '$CHE_SECOND_TESTUSER_NAME'..."
-        NEW_SECOND_USER_ID=$(createUser ${CHE_SECOND_TESTUSER_NAME} ${CHE_SECOND_TESTUSER_EMAIL} ${CHE_SECOND_TESTUSER_PASSWORD})
-        if [[ -z ${NEW_SECOND_USER_ID} ]]; then
-           # set test user credentials to be equal to admin ones in case of problem with creation of user
-           echo -e "${RED}[WARN] There is a problem with creation of second test user in Keycloak server: '${response}'.${NO_COLOUR}"
-           echo -e "Admin user will be used as a second test user."
-           CHE_SECOND_TESTUSER_NAME=${CHE_ADMIN_NAME}
-           CHE_SECOND_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
-           CHE_SECOND_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
-        fi
-
-        # add role "read-token" of client "broker" to admin user
-        docker exec -i $(getKeycloakContainerId) sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_ADMIN_NAME} --cclientid broker --rolename read-token --no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
-    fi
-}
-
-createUser() {
-    local username=$1
-    local email=$2
-    local password=$3
-
-    local kc_container_id=$(getKeycloakContainerId)
-
-    local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
-    local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh create users -r che -s username=${username} -s enabled=true $cli_auth 2>&1")
-    if [[ "$response" =~ "Created new user with id" ]]; then
-       local newUserId=$(echo "$response" | grep "Created new user with id" | sed -e "s#Created new user with id ##" | sed -e "s#'##g")
-       # set test user's permanent password
-       docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh set-password -r che --username ${username} --new-password ${password} $cli_auth"
-       # set email of test user to ${cheTestUserEmail}
-       docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh update users/${newUserId} -r che --set email=${email} $cli_auth"
-       # add realm role "user" test user
-       docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${username} --rolename user $cli_auth"
-       # add role "read-token" of client "broker" to test user
-       docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${username} --cclientid broker --rolename read-token $cli_auth"
-
-       echo $newUserId
-    fi
-}
-
-removeUser() {
-    local userId=$1
-    local username=$2
-
-    local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
-    docker exec -i $(getKeycloakContainerId) sh -c "keycloak/bin/kcadm.sh delete users/${userId} -r che -s username=${username} ${cli_auth} 2>&1"
 }
 
 getKeycloakContainerId() {

@@ -11,9 +11,12 @@
 package org.eclipse.che.ide.resources;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
@@ -29,8 +32,10 @@ import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -50,14 +55,22 @@ public class ProjectTreeChangeHandler {
 
   private final AppContext appContext;
   private final PromiseProvider promises;
+  private final NotificationManager notificationManager;
+  private final CoreLocalizationConstant constants;
   private final List<FileChange> workingQueue;
   private final FileChangesDeferredScheduler changesScheduler;
   private static final int UPDATE_PERIOD_MS = 500;
 
   @Inject
-  public ProjectTreeChangeHandler(AppContext appContext, PromiseProvider promises) {
+  public ProjectTreeChangeHandler(
+      AppContext appContext,
+      PromiseProvider promises,
+      NotificationManager notificationManager,
+      CoreLocalizationConstant constants) {
     this.appContext = appContext;
     this.promises = promises;
+    this.notificationManager = notificationManager;
+    this.constants = constants;
 
     workingQueue = new ArrayList<>();
     changesScheduler = this.new FileChangesDeferredScheduler();
@@ -222,6 +235,7 @@ public class ProjectTreeChangeHandler {
       if (deltas == null || deltas.length == 0) {
         promise = container.synchronize();
       } else {
+        stream(deltas).filter(this::isProjectCreatedDelta).forEach(this::notifyProjectCreated);
         promise = container.synchronize(deltas);
       }
 
@@ -240,6 +254,16 @@ public class ProjectTreeChangeHandler {
       return isNullOrEmpty(change.getPath())
           ? synchronizeChanges()
           : synchronizeChanges(getResourceDelta(change));
+    }
+
+    private boolean isProjectCreatedDelta(ResourceDelta delta) {
+      return delta.getKind() == ADDED && delta.getToPath().segmentCount() == 1;
+    }
+
+    private void notifyProjectCreated(ResourceDelta delta) {
+      String message =
+          ProjectTreeChangeHandler.this.constants.projectCreated(delta.getToPath().segment(0));
+      ProjectTreeChangeHandler.this.notificationManager.notify(message, SUCCESS, FLOAT_MODE);
     }
   }
 }

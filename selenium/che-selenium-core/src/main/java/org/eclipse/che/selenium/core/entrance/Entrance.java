@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.core.entrance;
 
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /** @author Dmytro Nochevnov */
 public interface Entrance {
@@ -19,5 +19,5 @@ public interface Entrance {
    *
    * @param user user to login
    */
-  void login(TestUser user);
+  void login(DefaultTestUser user);
 }

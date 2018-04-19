@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -60,7 +61,8 @@ public class MultiHostIngressExternalServerExposerTest {
 
     kubernetesEnvironment =
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
-    externalServerExposer = new MultiHostIngressExternalServerExposer(emptyMap(), DOMAIN);
+    externalServerExposer =
+        new MultiHostIngressExternalServerExposer(emptyMap(), DOMAIN, MULTI_HOST_STRATEGY);
   }
 
   @Test
