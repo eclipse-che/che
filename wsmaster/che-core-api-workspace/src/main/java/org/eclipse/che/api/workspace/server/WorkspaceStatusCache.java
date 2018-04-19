@@ -13,7 +13,11 @@ package org.eclipse.che.api.workspace.server;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
-/** @author Anton Korneta */
+/**
+ * Defines a base set of operations that are used to manage {@link WorkspaceStatus}.
+ *
+ * @author Anton Korneta
+ */
 public interface WorkspaceStatusCache {
 
   /**
@@ -63,6 +67,6 @@ public interface WorkspaceStatusCache {
    */
   WorkspaceStatus putIfAbsent(String workspaceId, WorkspaceStatus status);
 
-  /** Returns copy of this cache in map representation */
-  Map<String, WorkspaceStatus> toMap();
+  /** Returns copy of this cache as map. */
+  Map<String, WorkspaceStatus> asMap();
 }

@@ -256,7 +256,7 @@ public class ProjectExplorer {
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }
 
-      fail("Known issue https://github.com/eclipse/che/issues/9100", ex);
+      throw ex;
     }
   }
 

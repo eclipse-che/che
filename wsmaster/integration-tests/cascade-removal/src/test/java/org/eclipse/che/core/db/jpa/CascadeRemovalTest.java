@@ -61,10 +61,11 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
-import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
@@ -204,8 +205,8 @@ public class CascadeRemovalTest {
                             mock(WorkspaceDao.class),
                             mock(DBInitializer.class),
                             mock(ProbeScheduler.class),
-                            mock(WorkspaceStatusCache.class),
-                            null));
+                            new DefaultWorkspaceStatusCache(),
+                            new DefaultWorkspaceLockService()));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);

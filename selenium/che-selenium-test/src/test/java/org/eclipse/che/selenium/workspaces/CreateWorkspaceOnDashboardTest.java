@@ -20,7 +20,7 @@ import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SP
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -49,7 +49,7 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private TestUser defaultTestUser;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private ToastLoader toastLoader;
   @Inject private Workspaces workspaces;
   @Inject private CodenvyEditor editor;

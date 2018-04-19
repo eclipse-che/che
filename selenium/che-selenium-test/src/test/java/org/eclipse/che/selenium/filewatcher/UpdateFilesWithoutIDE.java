@@ -21,7 +21,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Events;
@@ -37,7 +37,7 @@ public class UpdateFilesWithoutIDE {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
 
   @Inject private TestWorkspace ws;
-  @Inject private TestUser user;
+  @Inject private DefaultTestUser user;
 
   @InjectPageObject(driverId = 1)
   private Ide ide1;

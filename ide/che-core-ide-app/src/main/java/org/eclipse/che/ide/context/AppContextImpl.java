@@ -52,6 +52,7 @@ import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+import org.eclipse.che.ide.api.workspace.model.VolumeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
@@ -92,6 +93,7 @@ public class AppContextImpl
   private CurrentUser currentUser;
   private WorkspaceImpl workspace;
   private FactoryImpl factory;
+
   private ResourceManager resourceManager;
   private Map<String, String> properties;
 
@@ -283,17 +285,17 @@ public class AppContextImpl
           wsAgentServerUtilProvider.get().getWsAgentServerMachine().get().getName();
       String activeEnv = workspace.getRuntime().getActiveEnv();
 
-      projectsRoot =
-          Path.valueOf(
-              workspace
-                  .getConfig()
-                  .getEnvironments()
-                  .get(activeEnv)
-                  .getMachines()
-                  .get(machineName)
-                  .getVolumes()
-                  .get("projects")
-                  .getPath());
+      VolumeImpl vol =
+          workspace
+              .getConfig()
+              .getEnvironments()
+              .get(activeEnv)
+              .getMachines()
+              .get(machineName)
+              .getVolume("projects");
+
+      // if voulme exists return its path, otherwise use backward compatible path (/projects)
+      if (vol != null) projectsRoot = Path.valueOf(vol.getPath());
     }
 
     Log.debug(

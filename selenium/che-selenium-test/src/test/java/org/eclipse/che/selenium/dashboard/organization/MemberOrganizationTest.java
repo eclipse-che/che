@@ -27,7 +27,7 @@ import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
@@ -56,7 +56,7 @@ public class MemberOrganizationTest {
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
 
   @BeforeClass
   public void setUp() throws Exception {

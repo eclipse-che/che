@@ -16,14 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
 /**
- * Default implementation of {@link WorkspaceStatusCache} based on Map. Note that is not safe for
- * multiple thread usage without external synchronization.
+ * Default implementation of {@link WorkspaceStatusCache} based on {@link ConcurrentHashMap}.
  *
  * @author Anton Korneta
  */
 public class DefaultWorkspaceStatusCache implements WorkspaceStatusCache {
 
-  private final Map<String, WorkspaceStatus> delegate = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, WorkspaceStatus> delegate = new ConcurrentHashMap<>();
 
   @Override
   public WorkspaceStatus get(String workspaceId) {
@@ -52,7 +51,7 @@ public class DefaultWorkspaceStatusCache implements WorkspaceStatusCache {
   }
 
   @Override
-  public Map<String, WorkspaceStatus> toMap() {
+  public Map<String, WorkspaceStatus> asMap() {
     return new HashMap<>(delegate);
   }
 }

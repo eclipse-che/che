@@ -37,6 +37,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
@@ -65,12 +66,8 @@ public class TestWorkspaceServiceClient {
   public TestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted("name") String name,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken) {
-    this(
-        apiEndpointProvider,
-        userHttpJsonRequestFactoryCreator.create(name, password, offlineToken));
+      @Assisted TestUser testUser) {
+    this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(testUser));
   }
 
   private String getBaseUrl() {
@@ -204,7 +201,7 @@ public class TestWorkspaceServiceClient {
   }
 
   /** Starts workspace. */
-  public void start(String workspaceId, String workspaceName, TestUser workspaceOwner)
+  public void start(String workspaceId, String workspaceName, DefaultTestUser workspaceOwner)
       throws Exception {
     sendStartRequest(workspaceId, workspaceName);
     waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
