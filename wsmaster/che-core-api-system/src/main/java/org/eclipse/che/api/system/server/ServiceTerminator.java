@@ -10,7 +10,13 @@
  */
 package org.eclipse.che.api.system.server;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSortedSet;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
@@ -35,7 +41,8 @@ class ServiceTerminator {
   @Inject
   ServiceTerminator(EventService eventService, Set<ServiceTermination> terminations) {
     this.eventService = eventService;
-    this.terminations = terminations;
+    this.terminations =
+        ImmutableSortedSet.copyOf(new ServiceTerminationComparator(terminations), terminations);
   }
 
   /**
@@ -76,7 +83,8 @@ class ServiceTerminator {
     }
   }
 
-  private void doTerminate(ServiceTermination termination) throws InterruptedException {
+  @VisibleForTesting
+  void doTerminate(ServiceTermination termination) throws InterruptedException {
     eventService.publish(new StoppingSystemServiceEvent(termination.getServiceName()));
     try {
       termination.terminate();
@@ -87,5 +95,45 @@ class ServiceTerminator {
     }
     LOG.info("Service '{}' is shut down", termination.getServiceName());
     eventService.publish(new SystemServiceStoppedEvent(termination.getServiceName()));
+  }
+
+  public static class ServiceTerminationComparator implements Comparator<ServiceTermination> {
+    public ServiceTerminationComparator(Set<ServiceTermination> terminations) {
+      this.dependencies =
+          terminations
+              .stream()
+              .collect(
+                  Collectors.toMap(
+                      ServiceTermination::getServiceName, ServiceTermination::getDependencies));
+    }
+
+    private final Map<String, Set<String>> dependencies;
+
+    @Override
+    public int compare(ServiceTermination o1, ServiceTermination o2) {
+      return checkTransitiveDependency(o1.getServiceName(), o2.getServiceName(), new HashSet<>());
+    }
+    // Recursively dig into dependencies and sort them out
+    private int checkTransitiveDependency(String o1, String o2, Set<String> loopList) {
+      if (loopList.contains(o1)) {
+        throw new RuntimeException("Circular dependency found between terminations " + loopList);
+      }
+      Set<String> directDependencies = dependencies.get(o1);
+      if (directDependencies.isEmpty()) {
+        return -1;
+      } else {
+        if (directDependencies.contains(o2)) {
+          return 1;
+        } else {
+          loopList.add(o1);
+          for (String dependency : directDependencies) {
+            if (checkTransitiveDependency(dependency, o2, loopList) > 0) {
+              return 1;
+            }
+          }
+          return -1;
+        }
+      }
+    }
   }
 }
