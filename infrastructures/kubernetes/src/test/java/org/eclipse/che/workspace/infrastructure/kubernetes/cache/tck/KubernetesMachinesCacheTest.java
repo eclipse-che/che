@@ -205,6 +205,20 @@ public class KubernetesMachinesCacheTest {
     assertEquals(fetchedServer.getStatus(), ServerStatus.RUNNING);
   }
 
+  @Test(
+    expectedExceptions = InfrastructureException.class,
+    expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found"
+  )
+  public void shouldThrowExceptionWhenServerWasNotFoundOnStatusUpdating() throws Exception {
+    // given
+    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    KubernetesMachineImpl machine = machines[0];
+
+    // when
+    machineCache.updateServerStatus(
+        runtimeId, machine.getName(), "non-existing", ServerStatus.RUNNING);
+  }
+
   @Test
   public void shouldUpdateMachineStatus() throws Exception {
     // given

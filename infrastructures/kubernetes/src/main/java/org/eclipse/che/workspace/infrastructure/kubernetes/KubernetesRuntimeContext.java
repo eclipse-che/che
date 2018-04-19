@@ -81,10 +81,10 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
             namespaceFactory.create(workspaceId, runtimeState.getNamespace()),
             getEnvironment().getWarnings());
 
-    if (runtime.getStatus() != WorkspaceStatus.RUNNING
-        || runtime.getStatus() != WorkspaceStatus.STOPPED) {
+    if (runtime.getStatus() == WorkspaceStatus.RUNNING) {
       runtime.startServersCheckers();
     }
+
     return runtime;
   }
 }
