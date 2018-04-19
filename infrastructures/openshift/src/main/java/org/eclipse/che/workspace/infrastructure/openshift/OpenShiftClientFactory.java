@@ -226,15 +226,6 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
     return createOC(buildConfig(getDefaultConfig(), null));
   }
 
-  @PreDestroy
-  private void cleanup() {
-    try {
-      doCleanup();
-    } catch (RuntimeException ex) {
-      LOG.error(ex.getMessage());
-    }
-  }
-
   /** Decorates the {@link DefaultOpenShiftClient} so that it can not be closed from the outside. */
   private static class UnclosableOpenShiftClient extends DefaultOpenShiftClient {
 
