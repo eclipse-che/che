@@ -41,6 +41,12 @@ export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
 
+DEFAULT_IMAGE_PULL_POLICY="Always"
+export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
+
+DEFAULT_UPDATE_STRATEGY="Recreate"
+export UPDATE_STRATEGY=${UPDATE_STRATEGY:-${DEFAULT_UPDATE_STRATEGY}}
+
 DNS_PROVIDERS=(
 xip.io
 nip.codenvy-stg.com
@@ -256,14 +262,20 @@ deploy_che_to_ocp() {
       wait_for_postgres
       $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} ${KEYCLOAK_PARAM}
       wait_for_keycloak
-      export CHE_MULTIUSER_PARAM="-p CHE_MULTIUSER=true"
     fi
-      CHE_VAR_ARRAY=$(env | grep "CHE_.")
+      CHE_VAR_ARRAY=$(env | grep "^CHE_.")
       if [ ${#CHE_VAR_ARRAY[@]} > 0 ]; then
         ENV="-e ${CHE_VAR_ARRAY}"
       fi
 
-    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_CHE=${CHE_IMAGE_REPO} -p CHE_VERSION=${CHE_IMAGE_TAG} ${CHE_MULTIUSER_PARAM} ${ENV}
+    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
+                       -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} \
+                       -p IMAGE_CHE=${CHE_IMAGE_REPO} \
+                       -p CHE_VERSION=${CHE_IMAGE_TAG} \
+                       -p PULL_POLICY=${IMAGE_PULL_POLICY} \
+                       -p STRATEGY=${UPDATE_STRATEGY} \
+                       -p CHE_MULTIUSER=${CHE_MULTIUSER} \
+                       ${ENV}
     $OC_BINARY set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
     echo "Waiting for Che to boot..."
     wait_for_che
