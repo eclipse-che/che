@@ -23,6 +23,8 @@ public class WorkspaceTemplate {
   public static final String UBUNTU_JDK8 = "ubuntu_jdk8.json";
   public static final String UBUNTU = "ubuntu.json";
   public static final String DEFAULT = "default.json";
+  public static final String DEFAULT_WITH_PREDEFINED_PROJECTS =
+      "default_ws_with_predefined_projects.json";
 
   private WorkspaceTemplate() {}
 }

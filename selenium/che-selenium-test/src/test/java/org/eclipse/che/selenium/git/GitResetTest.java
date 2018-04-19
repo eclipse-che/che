@@ -12,27 +12,21 @@ package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
-import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT_WITH_PREDEFINED_PROJECTS;
 import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.HARD;
 import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.MIXED;
 import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.SOFT;
 
 import com.google.inject.Inject;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
+import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -61,43 +55,24 @@ public class GitResetTest {
   @Inject private GitStatusBar gitStatusBar;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  private TestWorkspace testWorkspace;
+
+  @InjectTestWorkspace(template = DEFAULT_WITH_PREDEFINED_PROJECTS)
+  private TestWorkspace ws;
+
   private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_SOFT_RESET = "checkGitSoftReset";
   private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_HARD_RESET = "checkGitHardReset";
-  private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_MIX_RESET = "checkGitMixReset";
+  private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_MIX_RESET = "checkGitMixedReset";
   private final String COMMIT_MESSAGE = "added php samples";
 
   @BeforeClass
   public void prepare() throws Exception {
-    String phpRepoLocation = "https://github.com/che-samples/web-php-simple.git";
-
-    List<ProjectConfigDto> list = new ArrayList<>();
-
     List<String> projects =
         Arrays.asList(
             NAME_OF_PROJECT_FOR_CHECKING_GIT_SOFT_RESET,
             NAME_OF_PROJECT_FOR_CHECKING_GIT_HARD_RESET,
             NAME_OF_PROJECT_FOR_CHECKING_GIT_MIX_RESET);
-    SourceStorageDto sourceStorage =
-        DtoFactory.getInstance()
-            .createDto(SourceStorageDto.class)
-            .withLocation(phpRepoLocation)
-            .withType("git");
 
-    projects.forEach(item -> list.add(configureTestProject(item, sourceStorage)));
-    WorkspaceConfigDto workspace = workspaceDtoDeserializer.deserializeWorkspaceTemplate(DEFAULT);
-
-    workspace.setProjects(list);
-
-    testWorkspace =
-        new TestWorkspaceImpl(
-            NameGenerator.generate("check-resetting-test", 4),
-            testUser,
-            4,
-            workspace,
-            workspaceServiceClient);
-
-    ide.open(testWorkspace);
+    ide.open(ws);
     projects.forEach(item -> projectExplorer.waitItem(item));
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     projectExplorer.quickExpandWithJavaScript();
@@ -105,7 +80,7 @@ public class GitResetTest {
 
   @AfterClass
   public void tearDown() {
-    testWorkspace.delete();
+    ws.delete();
   }
 
   @Test
@@ -145,14 +120,5 @@ public class GitResetTest {
         NAME_OF_PROJECT_FOR_CHECKING_GIT_HARD_RESET + "/index.php");
     git.waitGitStatusBarWithMess(expectedTextInGitStatusConsole);
     editor.waitTextIntoEditor(expectedTextInEditorAfterHardResetting);
-  }
-
-  private ProjectConfigDto configureTestProject(String projectName, SourceStorageDto gitSource) {
-    ProjectConfigDto projectConfigDto = DtoFactory.getInstance().createDto(ProjectConfigDto.class);
-    projectConfigDto.setName(projectName);
-    projectConfigDto.setType(projectName);
-    projectConfigDto.setSource(gitSource);
-    projectConfigDto.setPath("/" + projectName);
-    return projectConfigDto;
   }
 }
