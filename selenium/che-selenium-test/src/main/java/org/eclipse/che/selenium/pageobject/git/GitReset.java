@@ -10,22 +10,19 @@
  */
 package org.eclipse.che.selenium.pageobject.git;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /** @author Andrey Chizhikov */
 @Singleton
 public class GitReset {
-  @Inject WebDriverWaitFactory webDriverWaitFactory;
+  @Inject SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   interface Locators {
     String RESET_TO_COMMIT_FORM = "gwt-debug-git-reset-window";
@@ -57,32 +54,26 @@ public class GitReset {
   private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
-  public GitReset(SeleniumWebDriver seleniumWebDriver, WebDriverWaitFactory webDriverWaitFactory) {
+  public GitReset(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.webDriverWaitFactory = webDriverWaitFactory;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   /** Wait 'Reset to commit' window is open */
   public void waitOpen() {
-    webDriverWaitFactory.get().until(ExpectedConditions.visibilityOf(form));
+    seleniumWebDriverHelper.waitVisibility(form);
   }
 
   /** Wait 'Reset to commit' window is close */
   public void waitClose() {
-    webDriverWaitFactory
-        .get()
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath(Locators.RESET_TO_COMMIT_FORM)));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.RESET_TO_COMMIT_FORM));
   }
 
   /** Click on 'Reset' button in the 'Reset Commit' window */
   public void clickResetBtn() {
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(resetBtn))
-        .click();
+    seleniumWebDriverHelper.waitVisibility(resetBtn).click();
   }
 
   /** Select 'hard' in the 'Reset Commit' window */
@@ -106,11 +97,7 @@ public class GitReset {
    * @param text text from comment
    */
   public void waitCommitIsPresent(String text) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.COMMENT, text))));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(String.format(Locators.COMMENT, text)));
   }
 
   /**
@@ -119,20 +106,14 @@ public class GitReset {
    * @param numberLine number of line for commit
    */
   public void selectCommitByNumber(int numberLine) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.COMMIT_ITEM, numberLine))))
+    seleniumWebDriverHelper
+        .waitVisibility(By.xpath(String.format(Locators.COMMIT_ITEM, numberLine)))
         .click();
   }
 
   public void selectCommitByText(String text) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.ITEM_WITH_TEXT_XPATH, text))))
+    seleniumWebDriverHelper
+        .waitVisibility(By.xpath(String.format(Locators.ITEM_WITH_TEXT_XPATH, text)))
         .click();
   }
 }
