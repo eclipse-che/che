@@ -265,6 +265,8 @@ public class TreeResourceRevealer {
                     }
 
                     if (handler[0] != null) {
+                      // Do not remove the handler immediately to not to lose 'loadChildren' events
+                      // that were fired after the children request.
                       Scheduler.get()
                           .scheduleFixedDelay(
                               () -> {
