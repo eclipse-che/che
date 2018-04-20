@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.selenium.pageobject.dashboard.stacks;
 
 import static java.lang.String.format;
@@ -45,17 +55,18 @@ public class Stacks {
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Stack list']";
 
     String STACK_ITEM_CHECKBOX_XPATH_PATTERN = "//div[@id='stack-name-%s']//md-checkbox";
-    String STACK_ITEM_NAME_XPATH_PATTERN =
-        "//div[@id='stack-name-%s']//div[@class='stack-item-name']";
+    String STACK_ITEM_NAME_XPATH_PATTERN = "//div[@id='stack-name-%s']";
     String STACK_ITEM_COMPONENTS_XPATH_PATTERN =
-        "//div[@id='stack-name-%s']//div[@class='stack-item-components']";
+        "//div[@id='stack-name-%s']//div[contains(@class,'stack-item-components')]";
     String STACK_ITEM_DESCRIPTION_XPATH_PATTERN =
-        "//div[@id='stack-name-%s']//div[@class='stack-item-description']";
+        "//div[@id='stack-name-%s']//div[contains(@class,'stack-item-description')]";
 
     String STACK_ITEM_DELETE_BUTTON_XPATH_PATTERN =
         "//div[@id='stack-name-%s']//a[@uib-tooltip='Delete Stack']";
     String STACK_ITEM_DUPLICATE_STACK_BUTTON_XPATH_PATTERN =
         "//div[@id='stack-name-%s']//a[@uib-tooltip='Duplicate stack']";
+
+    String BUILD_STACK_FROM_RECIPE_DIALOG_XPATH = "//*[@title='Build stack from recipe']";
   }
 
   @FindBy(id = Locators.TOOLBAR)
@@ -65,16 +76,16 @@ public class Stacks {
   WebElement addWorkspaceBtn;
 
   @FindBy(id = Locators.DELETE_STACK_BTN)
-  WebElement deleleWorkspaceButton;
+  WebElement deleteStackButton;
 
-  @FindBy(id = Locators.BULK_CHECKBOX)
+  @FindBy(xpath = Locators.BULK_CHECKBOX)
   WebElement bulkCheckbox;
 
   @FindBy(xpath = Locators.BUILD_STACK_FROM_RECIPE_BUTTON_XPATH)
   WebElement buildStackFromRecipeButton;
 
   @FindBy(xpath = Locators.DELETE_DIALOG_BUTTON)
-  WebElement deleteBtn;
+  WebElement deleteDialogBtn;
 
   @FindBy(xpath = Locators.SEARCH_STACK_FIELD)
   WebElement searchWorkspaceField;
@@ -100,6 +111,11 @@ public class Stacks {
         By.xpath(String.format(Locators.STACK_ITEM_CHECKBOX_XPATH_PATTERN, stackName)));
   }
 
+  public void openStackDetails(String stackName) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(String.format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
+  }
+
   public boolean isStackChecked(String workspaceName) {
     String attrValue =
         redrawUiElementsTimeout
@@ -109,6 +125,11 @@ public class Stacks {
             .getAttribute("aria-checked");
 
     return Boolean.parseBoolean(attrValue);
+  }
+
+  public Boolean isStackItemExists(String stackName) {
+    return seleniumWebDriverHelper.isVisible(
+        By.xpath(format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
   }
 
   public String getStackDescription(String stackName) {
@@ -126,8 +147,27 @@ public class Stacks {
         By.xpath(format(Locators.STACK_ITEM_DELETE_BUTTON_XPATH_PATTERN, stackName)));
   }
 
+  public Boolean isDeleteStackButtonEnabled(String stackName) {
+    return seleniumWebDriverHelper
+        .waitVisibility(
+            By.xpath(format(Locators.STACK_ITEM_DELETE_BUTTON_XPATH_PATTERN, stackName)))
+        .isEnabled();
+  }
+
   public void clickOnDuplicateStackActionButton(String stackName) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.STACK_ITEM_DUPLICATE_STACK_BUTTON_XPATH_PATTERN, stackName)));
+  }
+
+  public void waitBuildStackFromRecipeDialog() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.BUILD_STACK_FROM_RECIPE_DIALOG_XPATH));
+  }
+
+  public void clickOnDeleteStackButton() {
+    seleniumWebDriverHelper.waitAndClick(deleteStackButton);
+  }
+
+  public void clickOnDeleteDialogButton() {
+    seleniumWebDriverHelper.waitAndClick(deleteDialogBtn);
   }
 }
