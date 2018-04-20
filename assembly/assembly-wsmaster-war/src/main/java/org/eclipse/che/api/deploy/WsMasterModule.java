@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
-import org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
@@ -279,7 +278,12 @@ public class WsMasterModule extends AbstractModule {
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(new ReplicationModule(persistenceProperties));
     } else {
-      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+      bind(RemoteSubscriptionStorage.class)
+          .to(org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage.class);
+      bind(WorkspaceLockService.class)
+          .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService.class);
+      bind(WorkspaceStatusCache.class)
+          .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
     }
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
