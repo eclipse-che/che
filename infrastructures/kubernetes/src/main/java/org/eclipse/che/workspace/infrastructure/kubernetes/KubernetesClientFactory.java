@@ -192,8 +192,8 @@ public class KubernetesClientFactory {
   }
 
   /**
-   * Shuts down the {@link KubernetesClient} by closing it's connection pool.
-   * Typically should be called on application tear down.
+   * Shuts down the {@link KubernetesClient} by closing it's connection pool. Typically should be
+   * called on application tear down.
    */
   public void shutdownClient() {
     ConnectionPool connectionPool = httpClient.connectionPool();
