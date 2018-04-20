@@ -13,9 +13,6 @@ cat /scripts/che-users-0.json.erb | \
                                   sed -e "/<% end -%>/d" | \
                                   sed -e "/\"requiredActions\" : \[ \],/d" > /scripts/che-users-0.json
 
-cp /scripts/master-users-0.json.erb /scripts/master-users-0.json
-cp /scripts/master-realm.json.erb /scripts/master-realm.json
-
 if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
     sed -i -e "s#\"UPDATE_PASSWORD\"##" /scripts/che-users-0.json
 fi
@@ -23,6 +20,12 @@ fi
 cat /scripts/che-realm.json.erb | \
                                 sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}@" \
                                 > /scripts/che-realm.json
+
+echo "Creating Admin user..."
+
+if [ $KEYCLOAK_USER ] && [ $KEYCLOAK_PASSWORD ]; then
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh --user $KEYCLOAK_USER --password $KEYCLOAK_PASSWORD
+fi
 
 echo "Starting Keycloak server..."
 
