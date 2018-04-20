@@ -25,14 +25,14 @@ public class GitReset {
   @Inject SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   interface Locators {
-    String RESET_TO_COMMIT_FORM       = "gwt-debug-git-reset-window";
-    String RESET_BTN                     = "git-reset-reset";
-    String HARD_RESET_LABEL              = "gwt-debug-git-reset-hard-label";
-    String SOFT_RESET_LABEL              = "gwt-debug-git-reset-soft-label";
-    String MIXED_RESET_LABEL             = "gwt-debug-git-reset-mixed-label";
-    String COMMENT                       = "//div[text()='%s']";
-    String MAIN_FORM_XPATH               = "//div[@id='gwt-debug-git-reset-mainForm']";
-    String COMMIT_ITEM_XPATH_TEMPLATE    = MAIN_FORM_XPATH + "//tbody[1]/tr[%s]";
+    String RESET_TO_COMMIT_FORM = "gwt-debug-git-reset-window";
+    String RESET_BTN = "git-reset-reset";
+    String HARD_RESET_LABEL = "gwt-debug-git-reset-hard-label";
+    String SOFT_RESET_LABEL = "gwt-debug-git-reset-soft-label";
+    String MIXED_RESET_LABEL = "gwt-debug-git-reset-mixed-label";
+    String COMMENT = "//div[text()='%s']";
+    String MAIN_FORM_XPATH = "//div[@id='gwt-debug-git-reset-mainForm']";
+    String COMMIT_ITEM_XPATH_TEMPLATE = MAIN_FORM_XPATH + "//tbody[1]/tr[%s]";
     String ITEM_WITH_TEXT_XPATH_TEMPLATE = MAIN_FORM_XPATH + "//tbody//div[contains(.,'%s')]";
   }
 
@@ -107,7 +107,8 @@ public class GitReset {
    */
   public void selectCommitByNumber(int numberOfCommitLine) {
     seleniumWebDriverHelper
-        .waitVisibility(By.xpath(String.format(Locators.COMMIT_ITEM_XPATH_TEMPLATE, numberOfCommitLine)))
+        .waitVisibility(
+            By.xpath(String.format(Locators.COMMIT_ITEM_XPATH_TEMPLATE, numberOfCommitLine)))
         .click();
   }
 

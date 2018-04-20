@@ -981,10 +981,11 @@ public class Git {
   }
 
   /**
-   * Invoke the Reset to commit widget from Git -> Reset menu. Set the mode of resetting and click on
-   * the visible text. Click on reset button and check on closing the widget.
+   * Invoke the Reset to commit widget from Git -> Reset menu. Set the mode of resetting and click
+   * on the visible text. Click on reset button and check on closing the widget.
    *
-   * @param mode select a mode of resetting in the Reset to commit widget.(switch radiobutton to soft/mixed/hard items)
+   * @param mode select a mode of resetting in the Reset to commit widget.(switch radiobutton to
+   *     soft/mixed/hard items)
    * @param textInResetToCommitWidget click on visible text in the Reset to commit widget. Note! If
    *     we have 2 or more the same text fragments, will be selected the first fragment in DOM
    */

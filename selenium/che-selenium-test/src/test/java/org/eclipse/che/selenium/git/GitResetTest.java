@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
-import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT_WITH_PREDEFINED_PROJECTS;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT_WITH_GITHUB_PROJECTS;
 import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.HARD;
 import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.MIXED;
 import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.SOFT;
@@ -57,7 +57,7 @@ public class GitResetTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
-  @InjectTestWorkspace(template = DEFAULT_WITH_PREDEFINED_PROJECTS)
+  @InjectTestWorkspace(template = DEFAULT_WITH_GITHUB_PROJECTS)
   private TestWorkspace ws;
 
   private final String NAME_OF_PROJECT_FOR_CHECKING_GIT_SOFT_RESET = "checkGitSoftReset";
