@@ -7,66 +7,66 @@
             "org.eclipse.che.ws-agent"
           ],
           "attributes": {
-            "memoryLimitBytes": "2147483648"
+            "memoryLimitBytes": "desired_memory_value"
           }
         }
       },
       "recipe": {
-        "ecipe": {
-          "content": "eclipse/ubuntu_jdk8",
-          "type": "dockerimage"
-        }
+        "content":"eclipse/ubuntu_jdk8",
+        "type":"dockerimage"
       }
+    }
+  },
+  "defaultEnv": "replaced_name",
+  "projects": [
+    {
+      "links": [],
+      "name": "checkGitMixedReset",
+      "attributes": {},
+      "type": "blank",
+      "source": {
+        "location": "https://github.com/che-samples/web-php-simple.git",
+        "type": "git",
+        "parameters": {}
+      },
+      "path": "/checkGitMixedReset",
+      "description": "A php project example.",
+      "problems": [],
+      "mixins": []
     },
-    "defaultEnv": "replaced_name",
-    "projects": [
-      {
-        "links": [],
-        "name": "checkGitMixedReset",
-        "attributes": {},
-        "type": "blank",
-        "source": {
-          "location": "https://github.com/che-samples/web-php-simple.git",
-          "type": "git",
-          "parameters": {}
-        },
-        "path": "/checkGitMixedReset",
-        "description": "A php project example.",
-        "problems": [],
-        "mixins": []
+
+    {
+      "links": [],
+      "name": "checkGitHardReset",
+      "attributes": {},
+      "type": "blank",
+      "source": {
+        "location": "https://github.com/che-samples/web-php-simple.git",
+        "type": "git",
+        "parameters": {}
       },
-      {
-        "links": [],
-        "name": "checkGitHardReset",
-        "attributes": {},
-        "type": "blank",
-        "source": {
-          "location": "https://github.com/che-samples/web-php-simple.git",
-          "type": "git",
-          "parameters": {}
-        },
-        "path": "/checkGitHardReset",
-        "description": "A php project example.",
-        "problems": [],
-        "mixins": []
+      "path": "/checkGitHardReset",
+      "description": "A php project example.",
+      "problems": [],
+      "mixins": []
+    },
+    {
+      "links": [],
+      "name": "checkGitSoftReset",
+      "attributes": {},
+      "type": "blank",
+      "source": {
+        "location": "https://github.com/che-samples/web-php-simple.git",
+        "type": "git",
+        "parameters": {}
       },
-      {
-        "links": [],
-        "name": "checkGitSoftReset",
-        "attributes": {},
-        "type": "blank",
-        "source": {
-          "location": "https://github.com/che-samples/web-php-simple.git",
-          "type": "git",
-          "parameters": {}
-        },
-        "path": "/checkGitSoftReset",
-        "description": "A php project example.",
-        "problems": [],
-        "mixins": []
-      }
-    ],
-    "name": "replaced_name",
-    "attributes": {},
-    "temporary": false
-  }
+      "path": "/checkGitSoftReset",
+      "description": "A php project example.",
+      "problems": [],
+      "mixins": []
+    }
+  ],
+  "name": "replaced_name",
+  "attributes": {},
+  "temporary": false
+}
