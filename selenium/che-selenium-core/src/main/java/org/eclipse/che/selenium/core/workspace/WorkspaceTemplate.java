@@ -24,7 +24,7 @@ public class WorkspaceTemplate {
   public static final String UBUNTU = "ubuntu.json";
   public static final String DEFAULT = "default.json";
   public static final String DEFAULT_WITH_PREDEFINED_PROJECTS =
-      "default_ws_with_predefined_projects.json";
+      "default_with_github_projects.json";
 
   private WorkspaceTemplate() {}
 }

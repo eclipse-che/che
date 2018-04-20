@@ -25,15 +25,15 @@ public class GitReset {
   @Inject SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   interface Locators {
-    String RESET_TO_COMMIT_FORM     = "gwt-debug-git-reset-window";
-    String RESET_BTN                = "git-reset-reset";
-    String HARD_RESET_LABEL         = "gwt-debug-git-reset-hard-label";
-    String SOFT_RESET_LABEL         = "gwt-debug-git-reset-soft-label";
-    String MIXED_RESET_LABEL        = "gwt-debug-git-reset-mixed-label";
-    String COMMENT                  = "//div[text()='%s']";
-    String MAIN_FORM_XPATH_TEMPLATE = "//div[@id='gwt-debug-git-reset-mainForm']";
-    String COMMIT_ITEM              = MAIN_FORM_XPATH_TEMPLATE + "//tbody[1]/tr[%s]";
-    String ITEM_WITH_TEXT_XPATH     = MAIN_FORM_XPATH_TEMPLATE + "//tbody//div[contains(.,'%s')]";
+    String RESET_TO_COMMIT_FORM       = "gwt-debug-git-reset-window";
+    String RESET_BTN                     = "git-reset-reset";
+    String HARD_RESET_LABEL              = "gwt-debug-git-reset-hard-label";
+    String SOFT_RESET_LABEL              = "gwt-debug-git-reset-soft-label";
+    String MIXED_RESET_LABEL             = "gwt-debug-git-reset-mixed-label";
+    String COMMENT                       = "//div[text()='%s']";
+    String MAIN_FORM_XPATH               = "//div[@id='gwt-debug-git-reset-mainForm']";
+    String COMMIT_ITEM_XPATH_TEMPLATE    = MAIN_FORM_XPATH + "//tbody[1]/tr[%s]";
+    String ITEM_WITH_TEXT_XPATH_TEMPLATE = MAIN_FORM_XPATH + "//tbody//div[contains(.,'%s')]";
   }
 
   @FindBy(id = Locators.RESET_TO_COMMIT_FORM)
@@ -103,17 +103,17 @@ public class GitReset {
   /**
    * Select commit by number of line. Numbering starts at zero.
    *
-   * @param numberLine number of line for commit
+   * @param numberOfCommitLine number of line for commit
    */
-  public void selectCommitByNumber(int numberLine) {
+  public void selectCommitByNumber(int numberOfCommitLine) {
     seleniumWebDriverHelper
-        .waitVisibility(By.xpath(String.format(Locators.COMMIT_ITEM, numberLine)))
+        .waitVisibility(By.xpath(String.format(Locators.COMMIT_ITEM_XPATH_TEMPLATE, numberOfCommitLine)))
         .click();
   }
 
   public void selectCommitByText(String text) {
     seleniumWebDriverHelper
-        .waitVisibility(By.xpath(String.format(Locators.ITEM_WITH_TEXT_XPATH, text)))
+        .waitVisibility(By.xpath(String.format(Locators.ITEM_WITH_TEXT_XPATH_TEMPLATE, text)))
         .click();
   }
 }

@@ -7,7 +7,7 @@
             "org.eclipse.che.ws-agent"
           ],
           "attributes": {
-            "memoryLimitBytes": "2147483648"
+            "memoryLimitBytes": "desired_memory_value"
           }
         }
       },
