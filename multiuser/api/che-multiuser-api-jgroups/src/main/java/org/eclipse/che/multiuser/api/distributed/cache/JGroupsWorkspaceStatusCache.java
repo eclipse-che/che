@@ -19,6 +19,8 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.jgroups.JChannel;
 import org.jgroups.blocks.ReplicatedHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JGroups based implementation of {@link WorkspaceStatusCache}.
@@ -29,6 +31,7 @@ import org.jgroups.blocks.ReplicatedHashMap;
 public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
 
   private static final String CHANNEL_NAME = "WorkspaceStateCache";
+  private static final Logger LOG = LoggerFactory.getLogger(JGroupsWorkspaceStatusCache.class);
 
   private final ReplicatedHashMap<String, WorkspaceStatus> delegate;
 
@@ -74,5 +77,13 @@ public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
   @Override
   public Map<String, WorkspaceStatus> asMap() {
     return new HashMap<>(delegate);
+  }
+
+  public void shutdown() {
+    try {
+      delegate.close();
+    } catch (Exception ex) {
+      LOG.error(ex.getMessage());
+    }
   }
 }

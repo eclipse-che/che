@@ -8,10 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.multiuser.api.subscription;
+package org.eclipse.che.multiuser.api.distributed.subscription;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
+@Singleton
 public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionStorage {
 
   private static final Logger LOG = getLogger(DistributedRemoteSubscriptionStorage.class);
@@ -40,12 +42,13 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
   private ReplicatedHashMap<String, Set<RemoteSubscriptionContext>> subscriptions;
 
   private final LockService lockService;
+  private final JChannel channel;
 
   @Inject
   public DistributedRemoteSubscriptionStorage(@Named("jgroups.config.file") String confFile)
       throws Exception {
     try {
-      JChannel channel = new JChannel(confFile);
+      channel = new JChannel(confFile);
       this.lockService = new LockService(channel);
       channel.connect(CHANNEL_NAME);
       subscriptions = new ReplicatedHashMap<>(channel);
@@ -90,5 +93,9 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
     } finally {
       lock.unlock();
     }
+  }
+
+  public void shutdown() {
+    channel.close();
   }
 }

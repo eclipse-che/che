@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.multiuser.api.distributed.cache;
+package org.eclipse.che.multiuser.api.distributed.lock;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,11 +30,12 @@ public class JGroupsWorkspaceLockService implements WorkspaceLockService {
   private static final String CHANNEL_NAME = "WorkspaceLocks";
 
   private final LockService lockService;
+  private final JChannel channel;
 
   @Inject
   public JGroupsWorkspaceLockService(@Named("jgroups.config.file") String confFile) {
     try {
-      final JChannel channel = new JChannel(confFile);
+      this.channel = new JChannel(confFile);
       this.lockService = new LockService(channel);
       channel.connect(CHANNEL_NAME);
     } catch (Exception ex) {
@@ -67,5 +68,9 @@ public class JGroupsWorkspaceLockService implements WorkspaceLockService {
     public void unlock() {
       lock.unlock();
     }
+  }
+
+  public void shutdown() {
+    channel.close();
   }
 }

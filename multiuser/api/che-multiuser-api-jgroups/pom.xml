@@ -18,10 +18,18 @@
         <groupId>org.eclipse.che.multiuser</groupId>
         <version>6.5.0-SNAPSHOT</version>
     </parent>
-    <artifactId>che-multiuser-api-remote-subscription</artifactId>
+    <artifactId>che-multiuser-api-jgroups</artifactId>
     <packaging>jar</packaging>
-    <name>Che Multiuser :: Subscripttion API</name>
+    <name>Che Multiuser :: JGroups API Implementation</name>
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
@@ -29,6 +37,22 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jgroups</groupId>
