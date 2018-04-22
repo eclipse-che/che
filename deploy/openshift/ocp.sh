@@ -32,20 +32,12 @@ export OC_PUBLIC_IP=${OC_PUBLIC_IP:-${DEFAULT_OC_PUBLIC_IP}}
 export OC_BINARY_DOWNLOAD_URL=${OC_BINARY_DOWNLOAD_URL:-${DEFAULT_OC_BINARY_DOWNLOAD_URL}}
 export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWNLOAD_URL}}
 
-DEFAULT_CHE_MULTIUSER="false"
-export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
-
-DEFAULT_IMAGE_PULL_POLICY="Always"
-export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
-
-DEFAULT_UPDATE_STRATEGY="Recreate"
-export UPDATE_STRATEGY=${UPDATE_STRATEGY:-${DEFAULT_UPDATE_STRATEGY}}
 
 DNS_PROVIDERS=(
 xip.io
@@ -56,24 +48,9 @@ export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
 
 export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
 
-DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
-export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-
-export OPENSHIFT_FLAVOR="ocp"
-
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
 export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
-
-DEFAULT_ENABLE_SSL="false"
-export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
-
-DEFAULT_CHE_IMAGE_TAG="nightly"
-export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
-
-DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
-export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-
 }
 
 test_dns_provider() {
@@ -134,7 +111,7 @@ get_tools() {
 
 ocp_is_booted() {
     # we have to wait before docker registry will be started as it is staring as last container and it should be running before we perform che deploy.
-    ocp_registry_container_id=$(docker ps -a  | grep openshift/origin-docker-registry | cut -d ' ' -f1)
+    ocp_registry_container_id=$(docker ps -a  | grep k8s_registry_docker-registry | cut -d ' ' -f1)
     if [ ! -z "$ocp_registry_container_id" ];then
         ocp_registry_container_status=$(docker inspect "$ocp_registry_container_id" | $JQ_BINARY .[0] | $JQ_BINARY -r '.State.Status')
     else
@@ -167,115 +144,9 @@ run_ocp() {
     wait_ocp
 }
 
-wait_for_postgres() {
-    available=$($OC_BINARY get dc postgres -o=jsonpath={.status.conditions[0].status})
-    progressing=$($OC_BINARY get dc postgres -o=jsonpath={.status.conditions[1].status})
-
-    DEPLOYMENT_TIMEOUT_SEC=1200
-    POLLING_INTERVAL_SEC=5
-    end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
-      available=$($OC_BINARY get dc postgres -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
-      progressing=$($OC_BINARY get dc postgres -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
-      timeout_in=$((end-SECONDS))
-      echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
-      sleep ${POLLING_INTERVAL_SEC}
-    done
-
-    if [ "${progressing}" == "\"True\"" ]; then
-      echo "[CHE] Postgres deployed successfully"
-    elif [ "${progressing}" == "False" ]; then
-      echo "[CHE] [ERROR] Postgres deployment failed. Aborting. Run command 'oc rollout status postgres' to get more details."
-      exit 1
-    elif [ ${SECONDS} -ge ${end} ]; then
-      echo "[CHE] [ERROR] Deployment timeout. Aborting."
-      exit 1
-    fi
-}
-
-wait_for_keycloak() {
-
-    echo "[CHE] Wait for Keycloak pod booting..."
-    available=$($OC_BINARY get dc keycloak -o=jsonpath={.status.conditions[0].status})
-    progressing=$($OC_BINARY get dc keycloak -o=jsonpath={.status.conditions[1].status})
-
-    DEPLOYMENT_TIMEOUT_SEC=1200
-    POLLING_INTERVAL_SEC=5
-    end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
-        available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
-        progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
-        timeout_in=$((end-SECONDS))
-        echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
-        sleep ${POLLING_INTERVAL_SEC}
-    done
-
-    if [ "${progressing}" == "\"True\"" ]; then
-        echo "[CHE] Keycloak deployed successfully"
-    elif [ "${progressing}" == "False" ]; then
-        echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
-    elif [ ${SECONDS} -ge ${end} ]; then
-        echo "[CHE] [ERROR] Deployment timeout. Aborting."
-        exit 1
-    fi
-}
-
-wait_for_che() {
-    available=$($OC_BINARY get dc/che -o=jsonpath={.status.conditions[0].status})
-    progressing=$($OC_BINARY get dc/che -o=jsonpath={.status.conditions[1].status})
-
-    DEPLOYMENT_TIMEOUT_SEC=300
-    POLLING_INTERVAL_SEC=5
-    end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
-      available=$($OC_BINARY get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
-      progressing=$($OC_BINARY get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
-      timeout_in=$((end-SECONDS))
-      echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
-      sleep ${POLLING_INTERVAL_SEC}
-    done
-
-    if [ "${progressing}" == "\"True\"" ]; then
-      CHE_ROUTE=$(oc get route/che -o=jsonpath='{.spec.host}')
-      echo "[CHE] Che successfully deployed and is available at http://${CHE_ROUTE}"
-    elif [ "${progressing}" == "False" ]; then
-      echo "[CHE] [ERROR] Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
-      exit 1
-    elif [ ${SECONDS} -lt ${end} ]; then
-      echo "[CHE] [ERROR] Deployment timeout. Aborting."
-      exit 1
-    fi
-}
-
 deploy_che_to_ocp() {
     $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}"
-    $OC_BINARY new-project "${CHE_OPENSHIFT_PROJECT}"
-    $OC_BINARY apply -f ${BASE_DIR}/templates/pvc/che-server-pvc.yaml
-    if [ "${CHE_MULTIUSER}" == "true" ]; then
-      if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
-        export KEYCLOAK_PARAM="-p CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=false"
-      fi
-      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml
-      wait_for_postgres
-      $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} ${KEYCLOAK_PARAM}
-      wait_for_keycloak
-    fi
-      CHE_VAR_ARRAY=$(env | grep "^CHE_.")
-      if [ ${#CHE_VAR_ARRAY[@]} -gt 0 ]; then
-        ENV="-e ${CHE_VAR_ARRAY}"
-      fi
-
-    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
-                       -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} \
-                       -p IMAGE_CHE=${CHE_IMAGE_REPO} \
-                       -p CHE_VERSION=${CHE_IMAGE_TAG} \
-                       -p PULL_POLICY=${IMAGE_PULL_POLICY} \
-                       -p STRATEGY=${UPDATE_STRATEGY} \
-                       -p CHE_MULTIUSER=${CHE_MULTIUSER} \
-                       ${ENV}
-    $OC_BINARY set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
-    echo "Waiting for Che to boot..."
-    wait_for_che
+    ./deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
 }
 
 destroy_ocp() {
