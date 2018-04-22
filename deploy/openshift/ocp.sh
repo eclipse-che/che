@@ -39,6 +39,9 @@ export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
 
+DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
+export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
+
 DNS_PROVIDERS=(
 xip.io
 nip.codenvy-stg.com
@@ -145,8 +148,8 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
+    echo "Logging in to OpenShift cluster..."
     $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
-    echo ${DEPLOY_SCRIPT_ARGS}
     ./deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
 }
 
@@ -253,6 +256,10 @@ parse_args() {
            --update)
                shift
            ;;
+           -p=*| --project=*)
+           export CHE_OPENSHIFT_PROJECT="${i#*=}"
+           shift
+           ;;
            --no-pull)
            shift
            ;;
@@ -263,7 +270,6 @@ parse_args() {
            shift
            ;;
            --image-che=*)
-           shift
            shift
            ;;
            --remove-che)

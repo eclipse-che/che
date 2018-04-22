@@ -71,15 +71,13 @@ case $key in
     ENABLE_SSL=true
     shift
     ;;
-    -p | --project)
-    CHE_OPENSHIFT_PROJECT=$2
-    shift
+    -p=*| --project=*)
+    CHE_OPENSHIFT_PROJECT="${key#*=}"
     shift
     ;;
     --image-che=*)
     CHE_IMAGE_REPO=$(echo "${key#*=}" | sed 's/:.*//')
     CHE_IMAGE_TAG=$(echo "${key#*=}" | sed 's/.*://')
-    shift
     shift
     ;;
     --multiuser)
@@ -107,9 +105,6 @@ case $key in
         exit 1
     ;;
     *)
-    echo "You've passed wrong arg"
-    echo -e "$HELP"
-    exit 1
     ;;
 esac
 done
@@ -159,19 +154,19 @@ export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 printInfo() {
   green=`tput setaf 2`
   reset=`tput sgr0`
-  echo ${green}[INFO]: ${1} ${reset}
+  echo "${green}[INFO]: ${1} ${reset}"
 }
 
 printWarning() {
   yellow=`tput setaf 3`
   reset=`tput sgr0`
-  echo ${yellow}[WARNING]: ${1} ${reset}
+  echo "${yellow}[WARNING]: ${1} ${reset}"
 }
 
 printError() {
   red=`tput setaf 1`
   reset=`tput sgr0`
-  echo ${red}[ERROR]: ${1} ${reset}
+  echo "${red}[ERROR]: ${1} ${reset}"
 }
 
 # --------------------------------------------------------
@@ -298,7 +293,7 @@ createNewProject() {
   ${OC_BINARY} new-project "${CHE_OPENSHIFT_PROJECT}" > /dev/null
   OUT=$?
   if [ ${OUT} -eq 1 ]; then
-    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a shirt while or pick a different project name -p myProject"
+    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a short while or pick a different project name -p myProject"
     exit ${OUT}
   else
     printInfo "Namespace \"${CHE_OPENSHIFT_PROJECT}\" successfully created"
@@ -329,7 +324,20 @@ fi
 
 
 deployChe() {
-    printInfo "Deploying Eclipse Che: Multi-user: ${CHE_MULTIUSER}, HTTPS support: ${ENABLE_SSL}, namespace: ${CHE_OPENSHIFT_PROJECT}, version: ${CHE_IMAGE_TAG}, image: ${CHE_IMAGE_REPO}"
+    CHE_VAR_ARRAY=$(env | grep "^CHE_.")
+    if [ ${#CHE_VAR_ARRAY[@]} -gt 0 ]; then
+      ENV="-e ${CHE_VAR_ARRAY}"
+    fi
+    printInfo "Deploying Eclipse Che with the following params:
+Multi-User: ${CHE_MULTIUSER}
+HTTPS support: ${ENABLE_SSL}
+Namespace: ${CHE_OPENSHIFT_PROJECT}
+Che version: ${CHE_IMAGE_TAG}
+Image: ${CHE_IMAGE_REPO}
+Pull policy: ${IMAGE_PULL_POLICY}
+Update strategy: ${UPDATE_STRATEGY}
+Environment variables:
+${CHE_VAR_ARRAY}"
     if [ "${CHE_MULTIUSER}" == "true" ]; then
       if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
         export KEYCLOAK_PARAM="-p CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=false"
@@ -339,11 +347,6 @@ deployChe() {
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} -p PROTOCOL=${HTTP_PROTOCOL} ${KEYCLOAK_PARAM}
       wait_for_keycloak
     fi
-      CHE_VAR_ARRAY=$(env | grep "^CHE_.")
-      if [ ${#CHE_VAR_ARRAY[@]} -gt 0 ]; then
-        ENV="-e ${CHE_VAR_ARRAY}"
-      fi
-
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
                          -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} \
                          -p IMAGE_CHE=${CHE_IMAGE_REPO} \
