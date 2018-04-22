@@ -200,6 +200,11 @@ parse_args() {
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --multiuser - deploy che in multiuser mode
+    --no-pull - IfNotPresent pull policy for Che server deployment
+    --rolling - rolling update strategy (Recreate is the default one)
+    --wait-che - track Che deployment progress until pod is healthy
+    --debug - deploy Che in a debug mode, create and expose debug route
+    --image-che= - override default Che image. Example --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
     ===================================
     ENV vars
