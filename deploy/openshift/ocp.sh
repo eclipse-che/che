@@ -134,7 +134,7 @@ get_tools() {
 
 ocp_is_booted() {
     # we have to wait before docker registry will be started as it is staring as last container and it should be running before we perform che deploy.
-    ocp_registry_container_id=$(docker ps -a  | grep openshift/origin-docker-registry | cut -d ' ' -f1)
+    ocp_registry_container_id=$(docker ps -a  | grep k8s_registry_docker-registry | cut -d ' ' -f1)
     if [ ! -z "$ocp_registry_container_id" ];then
         ocp_registry_container_status=$(docker inspect "$ocp_registry_container_id" | $JQ_BINARY .[0] | $JQ_BINARY -r '.State.Status')
     else
