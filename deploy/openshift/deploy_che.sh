@@ -54,9 +54,9 @@ case $key in
     shift
     shift
     ;;
-    --image-che)
-    CHE_IMAGE_REPO=$(echo $2 | sed 's/:.*//')
-    CHE_IMAGE_TAG=$(echo $2 | sed 's/.*://')
+    --image-che=*)
+    CHE_IMAGE_REPO=$(echo "${key#*=}" | sed 's/:.*//')
+    CHE_IMAGE_TAG=$(echo "${key#*=}" | sed 's/.*://')
     shift
     shift
     ;;
@@ -113,7 +113,7 @@ DEFAULT_CHE_IMAGE_TAG="nightly"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 
 DEFAULT_ENABLE_SSL="false"
-export ENBALE_SSL=${ENBALE_SSL:-${DEFAULT_ENBALE_SSL}}
+export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
@@ -299,9 +299,9 @@ getRoutingSuffix() {
 fi
 }
 
+
 deployChe() {
-    printInfo "Deploying Eclipse Che: Multiuser: ${CHE_MULTIUSER}, HTTPS support: ${ENABLE_SSL}, namespace: ${CHE_OPENSHIFT_PROJECT}, version: ${CHE_IMAGE_TAG}"
-    ${OC_BINARY} apply -f ${BASE_DIR}/templates/pvc/che-server-pvc.yaml
+    printInfo "Deploying Eclipse Che: Multi-user: ${CHE_MULTIUSER}, HTTPS support: ${ENABLE_SSL}, namespace: ${CHE_OPENSHIFT_PROJECT}, version: ${CHE_IMAGE_TAG}, image: ${CHE_IMAGE_REPO}"
     if [ "${CHE_MULTIUSER}" == "true" ]; then
       if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
         export KEYCLOAK_PARAM="-p CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=false"
@@ -327,7 +327,12 @@ deployChe() {
                          -p WS_PROTOCOL=${WS_PROTOCOL} \
                          -p TLS=${TLS} \
                          ${ENV}
+
+    if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
+    ${OC_BINARY} apply -f ${BASE_DIR}/templates/pvc/che-server-pvc.yaml
     ${OC_BINARY} set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
+    fi
+
     if [ "${ENABLE_SSL}" == "true" ]; then
       ${OC_BINARY} apply -f ${BASE_DIR}/templates/https/che-route-tls.yaml
       if [ "${CHE_MULTIUSER}" == "true" ]; then

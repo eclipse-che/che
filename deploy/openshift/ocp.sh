@@ -145,7 +145,8 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}"
+    $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
+    echo ${DEPLOY_SCRIPT_ARGS}
     ./deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
 }
 
@@ -210,7 +211,7 @@ parse_args() {
     OPENSHIFT_TOKEN - set ocp token for authentication
 "
 
-    DEPLOY_SCRIPT_ARGS=""
+    DEPLOY_SCRIPT_ARGS="$@"
 
     if [ $# -eq 0 ]; then
         echo "No arguments supplied"
@@ -219,11 +220,7 @@ parse_args() {
     fi
 
     if [[ "$@" == *"--multiuser"* ]]; then
-      CHE_MULTIUSER=true
-    fi
-
-    if [[ "$@" == *"--update"* ]]; then
-      DEPLOY_SCRIPT_ARGS="-c rollupdate"
+      export CHE_MULTIUSER=true
     fi
 
     if [[ "$@" == *"--remove-che"* ]]; then
@@ -251,7 +248,23 @@ parse_args() {
            --update)
                shift
            ;;
+           --no-pull)
+           shift
+           ;;
+           --rolling)
+           shift
+           ;;
+           --debug)
+           shift
+           ;;
+           --image-che=*)
+           shift
+           shift
+           ;;
            --remove-che)
+               shift
+           ;;
+           --wait-che)
                shift
            ;;
            --help)
