@@ -10,17 +10,19 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.ZIP;
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -30,14 +32,17 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = TestGroup.OSIO)
 public class ImportProjectFromZipTest {
-  private final String WORKSPACE = NameGenerator.generate("ImptPrjFromZip", 4);
+
+  private final String WORKSPACE = generate("ImptPrjFromZip", 4);
   private static final String PROJECT_NAME = "master";
 
   @Inject private Dashboard dashboard;
   @Inject private ProjectExplorer explorer;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
+  @Inject private ToastLoader toastLoader;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
@@ -61,6 +66,8 @@ public class ImportProjectFromZipTest {
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
+    newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
@@ -73,7 +80,7 @@ public class ImportProjectFromZipTest {
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-
+    toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
     explorer.waitAndSelectItem(PROJECT_NAME);
