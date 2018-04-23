@@ -22,7 +22,6 @@ import io.fabric8.kubernetes.client.utils.Utils;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -192,7 +191,11 @@ public class KubernetesClientFactory {
     };
   }
 
-  protected void doCleanup() {
+  /**
+   * Shuts down the {@link KubernetesClient} by closing it's connection pool. Typically should be
+   * called on application tear down.
+   */
+  public void shutdownClient() {
     ConnectionPool connectionPool = httpClient.connectionPool();
     Dispatcher dispatcher = httpClient.dispatcher();
     ExecutorService executorService =
@@ -224,15 +227,6 @@ public class KubernetesClientFactory {
     clientHttpClient = builder.addInterceptor(buildKubernetesInterceptor(config)).build();
 
     return new UnclosableKubernetesClient(clientHttpClient, config);
-  }
-
-  @PreDestroy
-  private void cleanup() {
-    try {
-      doCleanup();
-    } catch (RuntimeException ex) {
-      LOG.error(ex.getMessage());
-    }
   }
 
   /**
