@@ -15,7 +15,10 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
@@ -52,10 +55,15 @@ public class Stacks {
     String DELETE_STACK_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
     String SEARCH_STACK_FIELD = "//input[@ng-placeholder='Search']";
+    String STACKS_LIST_HEADER = "//md-item[@class='noselect']//span";
+    String SORT_STACKS_BY_NAME_BUTTON_XPATH = "//span[contains(@class, 'header-sort-direction')]";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Stack list']";
+    String NO_STACKS_FOUND = "//span[text()='No stacks found.']";
 
+    String STACK_ITEM_XPATH = "//div[contains(@class, 'stack-item-name')]";
     String STACK_ITEM_CHECKBOX_XPATH_PATTERN = "//div[@id='stack-name-%s']//md-checkbox";
     String STACK_ITEM_NAME_XPATH_PATTERN = "//div[@id='stack-name-%s']";
+    String STACK_ITEM_NAME_CONTAINS_XPATH_PATTERN = "//div[contains(@id,'stack-name-%s')]";
     String STACK_ITEM_COMPONENTS_XPATH_PATTERN =
         "//div[@id='stack-name-%s']//div[contains(@class,'stack-item-components')]";
     String STACK_ITEM_DESCRIPTION_XPATH_PATTERN =
@@ -88,7 +96,7 @@ public class Stacks {
   WebElement deleteDialogBtn;
 
   @FindBy(xpath = Locators.SEARCH_STACK_FIELD)
-  WebElement searchWorkspaceField;
+  WebElement searchStackField;
 
   public void waitToolbarTitleName() {
     seleniumWebDriverHelper.waitVisibility(toolbar);
@@ -132,6 +140,11 @@ public class Stacks {
         By.xpath(format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
   }
 
+  public Boolean isStackDuplicateExists(String stackName) {
+    return seleniumWebDriverHelper.isVisible(
+        By.xpath(format(Locators.STACK_ITEM_NAME_CONTAINS_XPATH_PATTERN, stackName)));
+  }
+
   public String getStackDescription(String stackName) {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(
         By.xpath(format(Locators.STACK_ITEM_DESCRIPTION_XPATH_PATTERN, stackName)));
@@ -157,6 +170,7 @@ public class Stacks {
   public void clickOnDuplicateStackActionButton(String stackName) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.STACK_ITEM_DUPLICATE_STACK_BUTTON_XPATH_PATTERN, stackName)));
+    WaitUtils.sleepQuietly(1);
   }
 
   public void waitBuildStackFromRecipeDialog() {
@@ -169,5 +183,43 @@ public class Stacks {
 
   public void clickOnDeleteDialogButton() {
     seleniumWebDriverHelper.waitAndClick(deleteDialogBtn);
+  }
+
+  public void typeToSearchInput(String value) {
+    seleniumWebDriverHelper.waitVisibility(searchStackField).clear();
+    searchStackField.sendKeys(value);
+    WaitUtils.sleepQuietly(1);
+  }
+
+  public void waitNoStacksFound() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.NO_STACKS_FOUND));
+  }
+
+  public ArrayList<String> getStacksListHeaders() {
+    ArrayList<String> titles = new ArrayList<>();
+    List<WebElement> headers =
+        seleniumWebDriver.findElements(By.xpath(Locators.STACKS_LIST_HEADER));
+    headers.forEach(
+        header -> {
+          titles.add(header.getText());
+        });
+
+    return titles;
+  }
+
+  public ArrayList<String> getStacksNamesList() {
+    ArrayList<String> stacksNames = new ArrayList<>();
+    List<WebElement> names = seleniumWebDriver.findElements(By.xpath(Locators.STACK_ITEM_XPATH));
+    names.forEach(
+        name -> {
+          stacksNames.add(name.getText());
+        });
+
+    return stacksNames;
+  }
+
+  public void clickOnSortStacksByNameButton() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.SORT_STACKS_BY_NAME_BUTTON_XPATH));
+    WaitUtils.sleepQuietly(1);
   }
 }
