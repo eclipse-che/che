@@ -36,12 +36,12 @@ public class UserEmptyOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
 
-  @Inject private TestOrganizationServiceClient testOrganizationServiceClient;
+  @Inject private TestOrganizationServiceClient defaultUserOrganizationServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
     assertTrue(
-        testOrganizationServiceClient.getAll().isEmpty(),
+        defaultUserOrganizationServiceClient.getAll().isEmpty(),
         "This test requires empty organization list inside the default user account.");
     dashboard.open();
   }
