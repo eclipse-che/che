@@ -199,6 +199,7 @@ public class CreateFactoryTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     loader.waitOnClosed();
+    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(workspaceName);

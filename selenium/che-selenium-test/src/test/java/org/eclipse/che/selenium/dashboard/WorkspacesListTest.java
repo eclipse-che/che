@@ -216,6 +216,7 @@ public class WorkspacesListTest {
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(name);

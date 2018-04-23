@@ -80,6 +80,7 @@ public class CreateAndDeleteProjectsTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
 
+    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     newWorkspace.typeWorkspaceName(WORKSPACE);
