@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
+import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,14 +37,14 @@ public class DBTerminator {
   public DBTerminator(EventService eventService, EntityManagerFactory emFactory) {
     this.emFactory = emFactory;
     eventService.subscribe(
-        new EventSubscriber<SystemStatusChangedEvent>() {
+        new EventSubscriber<SystemStatusChangedEventDto>() {
           @Override
-          public void onEvent(SystemStatusChangedEvent event) {
+          public void onEvent(SystemStatusChangedEventDto event) {
             if (READY_TO_SHUTDOWN.equals(event.getStatus())) {
               terminate();
             }
           }
-        });
+        }, SystemStatusChangedEventDto.class);
   }
 
   public void terminate() {
