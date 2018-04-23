@@ -148,9 +148,11 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
+  if [ "${DEPLOY_CHE}" == "true" ];then
     echo "Logging in to OpenShift cluster..."
     $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
-    ./deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
+    ./deploy_che.sh
+  fi
 }
 
 destroy_ocp() {
@@ -218,17 +220,10 @@ parse_args() {
     DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
     OPENSHIFT_TOKEN - set ocp token for authentication
 "
-
-    DEPLOY_SCRIPT_ARGS="$@"
-
     if [ $# -eq 0 ]; then
         echo "No arguments supplied"
         echo -e "$HELP"
         exit 1
-    fi
-
-    if [[ "$@" == *"--multiuser"* ]]; then
-      export CHE_MULTIUSER=true
     fi
 
     if [[ "$@" == *"--remove-che"* ]]; then
@@ -247,35 +242,42 @@ parse_args() {
                shift
            ;;
            --deploy-che)
-               deploy_che_to_ocp
+               DEPLOY_CHE="true"
                shift
            ;;
            --multiuser)
+               export CHE_MULTIUSER=true
                shift
            ;;
            --update)
                shift
            ;;
            -p=*| --project=*)
-           export CHE_OPENSHIFT_PROJECT="${i#*=}"
-           shift
-           ;;
-           --no-pull)
-           shift
-           ;;
-           --rolling)
-           shift
-           ;;
-           --debug)
-           shift
-           ;;
-           --image-che=*)
-           shift
-           ;;
-           --remove-che)
+               export CHE_OPENSHIFT_PROJECT="${i#*=}"
                shift
            ;;
+           --no-pull)
+               export UPDATE_STRATEGY=Rolling
+               shift
+           ;;
+           --rolling)
+               export IMAGE_PULL_POLICY=IfNotPresent
+               shift
+           ;;
+           --debug)
+               export CHE_DEBUG_SERVER=true
+               shift
+           ;;
+           --image-che=*)
+               export CHE_IMAGE_REPO=$(echo "${key#*=}" | sed 's/:.*//')
+               export CHE_IMAGE_TAG=$(echo "${key#*=}" | sed 's/.*://')
+               shift
+           ;;
+           --remove-che)
+           shift
+           ;;
            --wait-che)
+               export WAIT_FOR_CHE=true
                shift
            ;;
            --help)
@@ -294,3 +296,4 @@ parse_args() {
 init
 get_tools
 parse_args "$@"
+deploy_che_to_ocp

@@ -105,6 +105,9 @@ case $key in
         exit 1
     ;;
     *)
+    echo "You've passed wrong arg."
+    echo -e "$HELP"
+    exit 1
     ;;
 esac
 done
