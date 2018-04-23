@@ -61,6 +61,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
   private final WorkspaceRuntimes runtimes;
   private final RuntimeInfrastructure runtimeInfrastructure;
   private final EventService eventService;
+  private final TemporaryWorkspaceRemover workspaceRemover;
 
   @Inject
   public WorkspaceServiceTermination(
@@ -68,12 +69,14 @@ public class WorkspaceServiceTermination implements ServiceTermination {
       WorkspaceSharedPool sharedPool,
       WorkspaceRuntimes runtimes,
       RuntimeInfrastructure runtimeInfrastructure,
-      EventService eventService) {
+      EventService eventService,
+      TemporaryWorkspaceRemover workspaceRemover) {
     this.manager = manager;
     this.sharedPool = sharedPool;
     this.runtimes = runtimes;
     this.runtimeInfrastructure = runtimeInfrastructure;
     this.eventService = eventService;
+    this.workspaceRemover = workspaceRemover;
   }
 
   @Override
@@ -104,6 +107,10 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     } finally {
       eventService.unsubscribe(propagator);
     }
+    try{
+      workspaceRemover.shutdown();
+    }catch (Exception ignored){
+    }
   }
 
   /**
@@ -128,6 +135,10 @@ public class WorkspaceServiceTermination implements ServiceTermination {
       sharedPool.shutdown();
     } finally {
       eventService.unsubscribe(propagator);
+    }
+    try{
+      workspaceRemover.shutdown();
+    }catch (Exception ignored){
     }
   }
 

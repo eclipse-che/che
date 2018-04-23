@@ -64,6 +64,7 @@ import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
+import org.eclipse.che.core.db.jpa.DBTerminator;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
@@ -207,9 +208,12 @@ public class WsMasterModule extends AbstractModule {
 
     // system components
     install(new SystemModule());
-    Multibinder.newSetBinder(binder(), ServiceTermination.class)
+    Multibinder<ServiceTermination> terminationMbinder =
+        Multibinder.newSetBinder(binder(), ServiceTermination.class);
+    terminationMbinder
         .addBinding()
         .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
+    terminationMbinder.addBinding().to(DBTerminator.class);
 
     final Map<String, String> persistenceProperties = new HashMap<>();
     persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");

@@ -49,7 +49,6 @@ public class TemporaryWorkspaceRemover {
     }
   }
 
-  @PreDestroy
   void shutdown() {
     try {
       removeTemporaryWs();
