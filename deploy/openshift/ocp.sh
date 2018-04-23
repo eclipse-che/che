@@ -17,12 +17,12 @@ BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-mac.zip"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
@@ -134,7 +134,7 @@ get_tools() {
 
 ocp_is_booted() {
     # we have to wait before docker registry will be started as it is staring as last container and it should be running before we perform che deploy.
-    ocp_registry_container_id=$(docker ps -a  | grep openshift/origin-docker-registry | cut -d ' ' -f1)
+    ocp_registry_container_id=$(docker ps | grep k8s_registry_docker-registry | cut -d ' ' -f1)
     if [ ! -z "$ocp_registry_container_id" ];then
         ocp_registry_container_status=$(docker inspect "$ocp_registry_container_id" | $JQ_BINARY .[0] | $JQ_BINARY -r '.State.Status')
     else
