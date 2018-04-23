@@ -261,7 +261,7 @@ deploy_che_to_ocp() {
       wait_for_keycloak
     fi
       CHE_VAR_ARRAY=$(env | grep "^CHE_.")
-      if [ ${#CHE_VAR_ARRAY[@]} > 0 ]; then
+      if [ ${#CHE_VAR_ARRAY[@]} -gt 0 ]; then
         ENV="-e ${CHE_VAR_ARRAY}"
       fi
 

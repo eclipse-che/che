@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
@@ -22,7 +23,9 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -89,6 +92,7 @@ public class KubernetesInternalRuntime<
 
   private final int workspaceStartTimeout;
   private final int ingressStartTimeout;
+  private final String unrecoverableEvents;
   private final ServersCheckerFactory serverCheckerFactory;
   private final KubernetesBootstrapperFactory bootstrapperFactory;
   private final ProbeScheduler probeScheduler;
@@ -104,6 +108,7 @@ public class KubernetesInternalRuntime<
   public KubernetesInternalRuntime(
       @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
       @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
+      @Named("che.infra.kubernetes.workspace_unrecoverable_events") String unrecoverableEvents,
       NoOpURLRewriter urlRewriter,
       KubernetesBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
@@ -123,6 +128,7 @@ public class KubernetesInternalRuntime<
     this.volumesStrategy = volumesStrategy;
     this.workspaceStartTimeout = workspaceStartTimeout;
     this.ingressStartTimeout = ingressStartTimeout;
+    this.unrecoverableEvents = unrecoverableEvents;
     this.probeScheduler = probeScheduler;
     this.probesFactory = probesFactory;
     this.namespace = namespace;
@@ -183,6 +189,8 @@ public class KubernetesInternalRuntime<
         throw new InfrastructureException("Kubernetes environment start was interrupted");
       }
       wrapAndRethrow(e);
+    } finally {
+      namespace.pods().stopWatch();
     }
   }
 
@@ -418,7 +426,10 @@ public class KubernetesInternalRuntime<
 
     // TODO https://github.com/eclipse/che/issues/7653
     // namespace.pods().watch(new AbnormalStopHandler());
-    // namespace.pods().watchContainers(new MachineLogsPublisher());
+    namespace.pods().watchContainers(new MachineLogsPublisher());
+    if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
+      namespace.pods().watchContainers(new UnrecoverableEventHanler());
+    }
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(createdServices, readyIngresses);
@@ -600,8 +611,69 @@ public class KubernetesInternalRuntime<
     }
   }
 
+  /** Listens container's events and terminates workspace if unrecoverable event occurs. */
+  public class UnrecoverableEventHanler implements ContainerEventHandler {
+    private List<String> events;
+
+    public UnrecoverableEventHanler() {
+      this.events =
+          Strings.isNullOrEmpty(unrecoverableEvents)
+              ? Collections.EMPTY_LIST
+              : Arrays.asList(unrecoverableEvents.split(","));
+    }
+
+    @Override
+    public void handle(ContainerEvent event) {
+      if (isUnrecoverable(event)) {
+        String reason = event.getReason();
+        String message = event.getMessage();
+        String podName = event.getPodName();
+        try {
+          internalStop(emptyMap());
+        } catch (InfrastructureException e) {
+          String workspaceId = getContext().getIdentity().getWorkspaceId();
+          LOG.error(
+              "Unrecoverable event occured during workspace '{}' startup: {}, {}, {}",
+              workspaceId,
+              reason,
+              message,
+              podName);
+        } finally {
+          eventPublisher.sendRuntimeStoppedEvent(
+              format("Unrecoverable event occured: '%s', '%s', '%s'", reason, message, podName),
+              getContext().getIdentity());
+        }
+      }
+    }
+
+    /**
+     * @param ContainerEvent
+     * @return true if event reason or message matches one of the comma separated values defined in
+     *     'che.infra.kubernetes.workspace_unrecoverable_events',false otherwise
+     */
+    private boolean isUnrecoverable(ContainerEvent event) {
+      boolean isUnrecoverable = false;
+      String reason = event.getReason();
+      String message = event.getMessage();
+      // Consider unrecoverable if event reason 'equals' one of the property values e.g. "Failed
+      // Mount"
+      if (events.contains(reason)) {
+        isUnrecoverable = true;
+      } else {
+        for (String e : events) {
+          // Consider unrecoverable if event message 'startsWith' one of the property values e.g.
+          // "Failed to pull image"
+          if (message != null && message.startsWith(e)) {
+            isUnrecoverable = true;
+          }
+        }
+      }
+      return isUnrecoverable;
+    }
+  }
+
   /** Listens container's events and publish them as machine logs. */
-  class MachineLogsPublisher implements ContainerEventHandler {
+  public class MachineLogsPublisher implements ContainerEventHandler {
 
     @Override
     public void handle(ContainerEvent event) {

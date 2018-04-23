@@ -38,14 +38,16 @@ public abstract class AbstractKeycloakFilter implements Filter {
   /** when a request came from a machine with valid token then auth is not required */
   protected boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
     if (token == null) {
+      if (request.getRequestURI() != null
+          && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js")) {
+        return true;
+      }
       return false;
     }
     try {
       final PublicKey publicKey = signatureKeyManager.getKeyPair().getPublic();
       final Jwt jwt = Jwts.parser().setSigningKey(publicKey).parse(token);
-      return MACHINE_TOKEN_KIND.equals(jwt.getHeader().get("kind"))
-          || (request.getRequestURI() != null
-              && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js"));
+      return MACHINE_TOKEN_KIND.equals(jwt.getHeader().get("kind"));
     } catch (ExpiredJwtException | MalformedJwtException | SignatureException ex) {
       // given token is not signed by particular signature key so it must be checked in another way
       return false;
