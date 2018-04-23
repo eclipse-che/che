@@ -44,7 +44,8 @@ public class DBTerminator {
               terminate();
             }
           }
-        }, SystemStatusChangedEventDto.class);
+        },
+        SystemStatusChangedEventDto.class);
   }
 
   public void terminate() {

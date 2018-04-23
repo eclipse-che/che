@@ -107,9 +107,9 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     } finally {
       eventService.unsubscribe(propagator);
     }
-    try{
+    try {
       workspaceRemover.shutdown();
-    }catch (Exception ignored){
+    } catch (Exception ignored) {
     }
   }
 
@@ -136,9 +136,9 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     } finally {
       eventService.unsubscribe(propagator);
     }
-    try{
+    try {
       workspaceRemover.shutdown();
-    }catch (Exception ignored){
+    } catch (Exception ignored) {
     }
   }
 

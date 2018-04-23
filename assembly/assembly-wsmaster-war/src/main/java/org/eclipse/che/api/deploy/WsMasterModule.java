@@ -213,7 +213,6 @@ public class WsMasterModule extends AbstractModule {
         .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
     bind(DBTerminator.class);
 
-
     final Map<String, String> persistenceProperties = new HashMap<>();
     persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");
     persistenceProperties.put(PersistenceUnitProperties.LOGGING_LOGGER, "DefaultLogger");
