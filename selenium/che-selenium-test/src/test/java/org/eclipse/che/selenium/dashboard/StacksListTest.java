@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.BLANK;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
@@ -21,24 +22,26 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.StackDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class StacksListTest {
+
+  private static final String NEW_STACK_NAME = generate("", 8);
+
   @Inject private Dashboard dashboard;
   @Inject private Stacks stacks;
   @Inject private StackDetails stackDetails;
 
-  private static final String NEW_STACK_NAME = generate("", 8);
-
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
+    createStack(NEW_STACK_NAME);
   }
 
   @BeforeMethod
@@ -48,52 +51,50 @@ public class StacksListTest {
     stacks.waitToolbarTitleName();
   }
 
+  @AfterClass
+  public void deleteCreatedStacks() {
+    // select created stacks by Bulk and delete
+    dashboard.selectStacksItemOnDashboard();
+    stacks.waitToolbarTitleName();
+    stacks.selectAllStacksByBulk();
+    deleteStack();
+  }
+
   @Test
   public void checkStacksList() {
-    // check all headers are present
+    // check UI views of Stacks list
+    stacks.waitToolbarTitleName();
+    stacks.waitDocumentationLink();
+    stacks.waitAddStackButton();
+    stacks.waitBuildStackFromRecipeButton();
+    stacks.waitFilterStacksField();
+
+    // check all Stack list headers are present
     ArrayList<String> headers = stacks.getStacksListHeaders();
     assertTrue(headers.contains("NAME"));
     assertTrue(headers.contains("DESCRIPTION"));
     assertTrue(headers.contains("COMPONENTS"));
     assertTrue(headers.contains("ACTIONS"));
 
-    // check stack info
+    // check JAVA stack info
     assertTrue(stacks.isStackItemExists(JAVA.getName()));
     assertEquals(
         stacks.getStackDescription(JAVA.getName()),
         "Default Java Stack with JDK 8, Maven and Tomcat.");
     assertEquals(stacks.getStackComponents(JAVA.getName()), "JDK, Maven, Tomcat");
-
-    // Assert.assertFalse(stacks.isDeleteStackButtonEnabled(TestStacksConstants.JAVA.getName()));
-    stacks.openStackDetails(JAVA.getName());
-    stackDetails.waitToolbar(JAVA.getName());
   }
 
   @Test
-  public void createNewStack() { // TODO change method name
-    stacks.clickOnAddStackButton();
-    stackDetails.setStackName(NEW_STACK_NAME);
-    stackDetails.clickOnSaveChangesButton();
-    stackDetails.backToStacksList();
-    WaitUtils.sleepQuietly(1); // TODO wait Stacks list page is loaded
-    assertTrue(stacks.isStackItemExists(NEW_STACK_NAME));
+  public void checkStacksSelectingByCheckbox() {
+    // select stack by checkbox and check it is selected
+    stacks.selectStackByCheckbox(NEW_STACK_NAME);
+    assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
+    stacks.selectStackByCheckbox(NEW_STACK_NAME);
+    assertFalse(stacks.isStackChecked(NEW_STACK_NAME));
 
+    // click on the Bulk button and check that created stack is checked
     stacks.selectAllStacksByBulk();
-    deleteStack();
-
-    assertFalse(stacks.isStackItemExists(NEW_STACK_NAME));
-  }
-
-  @Test
-  public void checkDuplicateStackButton() {
-    // create stack duplicate by Duplicate Stack button
-    stacks.clickOnDuplicateStackActionButton(JAVA.getName());
-    assertTrue(stacks.isStackDuplicateExists("Java-copy-"));
-    WaitUtils.sleepQuietly(1);
-    stacks.clickOnDuplicateStackActionButton(BLANK.getName());
-    assertTrue(stacks.isStackDuplicateExists("Blank-copy-"));
-
-    // TODO delete duplicated stacks
+    assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
   }
 
   @Test
@@ -102,7 +103,7 @@ public class StacksListTest {
     stacks.typeToSearchInput("*");
     stacks.waitNoStacksFound();
 
-    // search a workspace by a full name
+    // search stacks by a full name
     stacks.typeToSearchInput(JAVA.getName());
     assertTrue(stacks.isStackItemExists(JAVA.getName()));
     assertTrue(stacks.isStackItemExists(JAVA_MYSQL.getName()));
@@ -113,7 +114,7 @@ public class StacksListTest {
     assertFalse(stacks.isStackItemExists(JAVA.getName()));
     assertFalse(stacks.isStackItemExists(JAVA_MYSQL.getName()));
 
-    // search a workspace by a part name
+    // search stacks by a part name
     stacks.typeToSearchInput(BLANK.getName().substring(BLANK.getName().length() / 2));
     assertTrue(stacks.isStackItemExists(BLANK.getName()));
     assertFalse(stacks.isStackItemExists(JAVA.getName()));
@@ -122,23 +123,41 @@ public class StacksListTest {
 
   @Test
   public void checkStacksSorting() {
-    ArrayList<String> listAfterSorting, listBeforeSorting;
+    ArrayList<String> stackNamesListBeforeSorting, stackNamesListAfterSorting;
 
     // get stacks names list and click on sort stacks button
-    listBeforeSorting = stacks.getStacksNamesList();
+    stackNamesListBeforeSorting = stacks.getStacksNamesList();
     // TODO fix need to click on the sort button twice
     stacks.clickOnSortStacksByNameButton();
     stacks.clickOnSortStacksByNameButton();
 
-    // get stacks name list after sorting and check it with reverted list before sorting
-    listAfterSorting = stacks.getStacksNamesList();
-    Collections.reverse(listBeforeSorting);
-    assertEquals(listBeforeSorting, listAfterSorting);
+    // check that Stacks list reverted
+    stackNamesListAfterSorting = stacks.getStacksNamesList();
+    Collections.reverse(stackNamesListBeforeSorting);
+    assertEquals(stackNamesListBeforeSorting, stackNamesListAfterSorting);
 
     stacks.clickOnSortStacksByNameButton();
-    listBeforeSorting = stacks.getStacksNamesList();
-    Collections.reverse(listAfterSorting);
-    assertEquals(listBeforeSorting, listAfterSorting);
+    stackNamesListBeforeSorting = stacks.getStacksNamesList();
+    Collections.reverse(stackNamesListAfterSorting);
+    assertEquals(stackNamesListBeforeSorting, stackNamesListAfterSorting);
+  }
+
+  @Test
+  public void checkActionButtons() {
+    String stackName = generate("", 8);
+    createStack(stackName);
+    // delete stack by the Action delete stack button
+    stacks.clickOnDeleteActionButton(stackName);
+    stacks.clickOnDeleteDialogButton();
+    dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", stackName));
+    dashboard.waitNotificationIsClosed();
+    assertFalse(stacks.isStackItemExists(stackName));
+
+    // create stack duplicate by Duplicate Stack button
+    stacks.clickOnDuplicateStackButton(JAVA.getName());
+    assertTrue(stacks.isDuplicatedStackExists(JAVA.getName() + "-copy-"));
+    stacks.clickOnDuplicateStackButton(BLANK.getName());
+    assertTrue(stacks.isDuplicatedStackExists(BLANK.getName() + "-copy-"));
   }
 
   private void deleteStack() {
@@ -146,5 +165,18 @@ public class StacksListTest {
     stacks.clickOnDeleteDialogButton();
     dashboard.waitNotificationMessage("Selected stacks have been successfully removed.");
     dashboard.waitNotificationIsClosed();
+  }
+
+  private void createStack(String stackName) {
+    dashboard.selectStacksItemOnDashboard();
+    stacks.waitToolbarTitleName();
+
+    stacks.clickOnAddStackButton();
+    stackDetails.setStackName(stackName);
+    stackDetails.clickOnSaveChangesButton();
+    stackDetails.clickOnToAllStacksList();
+
+    stacks.waitToolbarTitleName();
+    stacks.waitStackItem(stackName);
   }
 }

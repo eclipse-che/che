@@ -20,7 +20,6 @@ import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -31,35 +30,30 @@ public class Stacks {
   private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWait redrawUiElementsTimeout;
-  private final Dashboard dashboard;
 
   @Inject
   public Stacks(
-      SeleniumWebDriver seleniumWebDriver,
-      SeleniumWebDriverHelper seleniumWebDriverHelper,
-      Dashboard dashboard) {
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    this.dashboard = dashboard;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
-    String TOOLBAR = "Stacks";
-    String DOCUMENTATION_LINK = "//div[@che-link-title='Learn more.']/a";
-    String ADD_STACK_BTN = "add-item-button";
+    String TOOLBAR_ID = "Stacks";
+    String DOCUMENTATION_LINK_XPATH = "//div[@che-link-title='Learn more.']/a";
+    String ADD_STACK_BUTTON_ID = "add-item-button";
     String BUILD_STACK_FROM_RECIPE_BUTTON_XPATH =
         "//che-button-primary[@che-button-title='Build Stack From Recipe']";
-    String DELETE_STACK_BTN = "delete-item-button";
-    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
-    String SEARCH_STACK_FIELD = "//input[@ng-placeholder='Search']";
-    String STACKS_LIST_HEADER = "//md-item[@class='noselect']//span";
+    String DELETE_STACK_BUTTON_ID = "delete-item-button";
+    String DELETE_DIALOG_BUTTON_ID = "ok-dialog-button";
+    String SEARCH_STACK_FIELD_XPATH = "//input[@ng-placeholder='Search']";
+    String STACKS_LIST_HEADER_XPATH = "//md-item[@class='noselect']//span";
     String SORT_STACKS_BY_NAME_BUTTON_XPATH = "//span[contains(@class, 'header-sort-direction')]";
-    String BULK_CHECKBOX = "//md-checkbox[@aria-label='Stack list']";
-    String NO_STACKS_FOUND = "//span[text()='No stacks found.']";
-
+    String BULK_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Stack list']";
+    String NO_STACKS_FOUND_XPATH = "//span[text()='No stacks found.']";
     String STACK_ITEM_XPATH = "//div[contains(@class, 'stack-item-name')]";
     String STACK_ITEM_CHECKBOX_XPATH_PATTERN = "//div[@id='stack-name-%s']//md-checkbox";
     String STACK_ITEM_NAME_XPATH_PATTERN = "//div[@id='stack-name-%s']";
@@ -68,46 +62,56 @@ public class Stacks {
         "//div[@id='stack-name-%s']//div[contains(@class,'stack-item-components')]";
     String STACK_ITEM_DESCRIPTION_XPATH_PATTERN =
         "//div[@id='stack-name-%s']//div[contains(@class,'stack-item-description')]";
-
     String STACK_ITEM_DELETE_BUTTON_XPATH_PATTERN =
         "//div[@id='stack-name-%s']//a[@uib-tooltip='Delete Stack']";
-    String STACK_ITEM_DUPLICATE_STACK_BUTTON_XPATH_PATTERN =
+    String DUPLICATE_STACK_BUTTON_XPATH_PATTERN =
         "//div[@id='stack-name-%s']//a[@uib-tooltip='Duplicate stack']";
-
     String BUILD_STACK_FROM_RECIPE_DIALOG_XPATH = "//*[@title='Build stack from recipe']";
   }
 
-  @FindBy(id = Locators.TOOLBAR)
+  @FindBy(id = Locators.TOOLBAR_ID)
   WebElement toolbar;
 
-  @FindBy(id = Locators.ADD_STACK_BTN)
+  @FindBy(id = Locators.ADD_STACK_BUTTON_ID)
   WebElement addWorkspaceBtn;
 
-  @FindBy(id = Locators.DELETE_STACK_BTN)
+  @FindBy(id = Locators.DELETE_STACK_BUTTON_ID)
   WebElement deleteStackButton;
 
-  @FindBy(xpath = Locators.BULK_CHECKBOX)
+  @FindBy(xpath = Locators.BULK_CHECKBOX_XPATH)
   WebElement bulkCheckbox;
 
   @FindBy(xpath = Locators.BUILD_STACK_FROM_RECIPE_BUTTON_XPATH)
   WebElement buildStackFromRecipeButton;
 
-  @FindBy(xpath = Locators.DELETE_DIALOG_BUTTON)
+  @FindBy(id = Locators.DELETE_DIALOG_BUTTON_ID)
   WebElement deleteDialogBtn;
 
-  @FindBy(xpath = Locators.SEARCH_STACK_FIELD)
+  @FindBy(xpath = Locators.SEARCH_STACK_FIELD_XPATH)
   WebElement searchStackField;
 
   public void waitToolbarTitleName() {
     seleniumWebDriverHelper.waitVisibility(toolbar);
   }
 
+  public void waitAddStackButton() {
+    seleniumWebDriverHelper.waitVisibility(addWorkspaceBtn);
+  }
+
   public void clickOnAddStackButton() {
     seleniumWebDriverHelper.waitAndClick(addWorkspaceBtn);
   }
 
+  public void waitBuildStackFromRecipeButton() {
+    seleniumWebDriverHelper.waitVisibility(buildStackFromRecipeButton);
+  }
+
   public void clickOnBuildStackFromRecipeButton() {
     seleniumWebDriverHelper.waitAndClick(buildStackFromRecipeButton);
+  }
+
+  public void waitBuildStackFromRecipeDialog() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.BUILD_STACK_FROM_RECIPE_DIALOG_XPATH));
   }
 
   public void selectAllStacksByBulk() {
@@ -117,11 +121,6 @@ public class Stacks {
   public void selectStackByCheckbox(String stackName) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(String.format(Locators.STACK_ITEM_CHECKBOX_XPATH_PATTERN, stackName)));
-  }
-
-  public void openStackDetails(String stackName) {
-    seleniumWebDriverHelper.waitAndClick(
-        By.xpath(String.format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
   }
 
   public boolean isStackChecked(String workspaceName) {
@@ -135,12 +134,22 @@ public class Stacks {
     return Boolean.parseBoolean(attrValue);
   }
 
+  public void openStackDetails(String stackName) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(String.format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
+  }
+
+  public void waitStackItem(String stackName) {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
+  }
+
   public Boolean isStackItemExists(String stackName) {
     return seleniumWebDriverHelper.isVisible(
         By.xpath(format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
   }
 
-  public Boolean isStackDuplicateExists(String stackName) {
+  public Boolean isDuplicatedStackExists(String stackName) {
     return seleniumWebDriverHelper.isVisible(
         By.xpath(format(Locators.STACK_ITEM_NAME_CONTAINS_XPATH_PATTERN, stackName)));
   }
@@ -160,21 +169,10 @@ public class Stacks {
         By.xpath(format(Locators.STACK_ITEM_DELETE_BUTTON_XPATH_PATTERN, stackName)));
   }
 
-  public Boolean isDeleteStackButtonEnabled(String stackName) {
-    return seleniumWebDriverHelper
-        .waitVisibility(
-            By.xpath(format(Locators.STACK_ITEM_DELETE_BUTTON_XPATH_PATTERN, stackName)))
-        .isEnabled();
-  }
-
-  public void clickOnDuplicateStackActionButton(String stackName) {
+  public void clickOnDuplicateStackButton(String stackName) {
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(Locators.STACK_ITEM_DUPLICATE_STACK_BUTTON_XPATH_PATTERN, stackName)));
+        By.xpath(format(Locators.DUPLICATE_STACK_BUTTON_XPATH_PATTERN, stackName)));
     WaitUtils.sleepQuietly(1);
-  }
-
-  public void waitBuildStackFromRecipeDialog() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.BUILD_STACK_FROM_RECIPE_DIALOG_XPATH));
   }
 
   public void clickOnDeleteStackButton() {
@@ -185,6 +183,10 @@ public class Stacks {
     seleniumWebDriverHelper.waitAndClick(deleteDialogBtn);
   }
 
+  public void waitFilterStacksField() {
+    seleniumWebDriverHelper.waitVisibility(searchStackField);
+  }
+
   public void typeToSearchInput(String value) {
     seleniumWebDriverHelper.waitVisibility(searchStackField).clear();
     searchStackField.sendKeys(value);
@@ -192,13 +194,13 @@ public class Stacks {
   }
 
   public void waitNoStacksFound() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.NO_STACKS_FOUND));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.NO_STACKS_FOUND_XPATH));
   }
 
   public ArrayList<String> getStacksListHeaders() {
     ArrayList<String> titles = new ArrayList<>();
     List<WebElement> headers =
-        seleniumWebDriver.findElements(By.xpath(Locators.STACKS_LIST_HEADER));
+        seleniumWebDriver.findElements(By.xpath(Locators.STACKS_LIST_HEADER_XPATH));
     headers.forEach(
         header -> {
           titles.add(header.getText());
@@ -221,5 +223,9 @@ public class Stacks {
   public void clickOnSortStacksByNameButton() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.SORT_STACKS_BY_NAME_BUTTON_XPATH));
     WaitUtils.sleepQuietly(1);
+  }
+
+  public void waitDocumentationLink() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.DOCUMENTATION_LINK_XPATH));
   }
 }

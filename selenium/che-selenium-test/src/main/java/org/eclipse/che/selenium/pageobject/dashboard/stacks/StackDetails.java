@@ -10,50 +10,36 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.stacks;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static java.lang.String.format;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class StackDetails {
-  private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
-  private final WebDriverWait redrawUiElementsTimeout;
-  private final Dashboard dashboard;
 
   @Inject
   public StackDetails(
-      SeleniumWebDriver seleniumWebDriver,
-      SeleniumWebDriverHelper seleniumWebDriverHelper,
-      Dashboard dashboard) {
-    this.seleniumWebDriver = seleniumWebDriver;
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
-    this.redrawUiElementsTimeout =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    this.dashboard = dashboard;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
-    String TOOLBAR = "//div[@che-title='%s']";
+    String TOOLBAR_XPATH_PATTERN = "//div[@che-title='%s']";
     String NEW_STACK_NAME = "deskname";
-    String SAVE_CHANGES_BUTTON = "saveButton";
-    String BACK_TO_STACKS_LIST_BUTTON_XPATH = "//a[@title='All stacks']";
+    String SAVE_CHANGES_BUTTON_NAME = "saveButton";
+    String TO_ALL_STACKS_LIST_BUTTON_XPATH = "//a[@title='All stacks']";
   }
 
-  @FindBy(name = Locators.NEW_STACK_NAME)
-  WebElement newStackName;
-
   public void waitToolbar(String stackName) {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(String.format(Locators.TOOLBAR, stackName)));
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(Locators.TOOLBAR_XPATH_PATTERN, stackName)));
   }
 
   public void setStackName(String stackName) {
@@ -63,14 +49,14 @@ public class StackDetails {
     stackNameField.clear();
     stackNameField.sendKeys(stackName);
     WaitUtils.sleepQuietly(1);
-    // seleniumWebDriverHelper.setText(newStackName, stackName);
   }
 
   public void clickOnSaveChangesButton() {
-    seleniumWebDriverHelper.waitAndClick(By.name(Locators.SAVE_CHANGES_BUTTON));
+    seleniumWebDriverHelper.waitAndClick(By.name(Locators.SAVE_CHANGES_BUTTON_NAME));
   }
 
-  public void backToStacksList() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.BACK_TO_STACKS_LIST_BUTTON_XPATH));
+  public void clickOnToAllStacksList() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.TO_ALL_STACKS_LIST_BUTTON_XPATH));
+    WaitUtils.sleepQuietly(1);
   }
 }
