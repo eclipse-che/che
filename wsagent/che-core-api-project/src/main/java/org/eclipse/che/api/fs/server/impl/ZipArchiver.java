@@ -64,12 +64,7 @@ class ZipArchiver {
 
       try (FileOutputStream fos = new FileOutputStream(outFile);
           ZipOutputStream zos = new ZipOutputStream(fos)) {
-        Path parent = fsPath.getParent();
-        if (root.startsWith(parent)) {
-          zip(root, inFile, zos);
-        } else {
-          zip(parent, inFile, zos);
-        }
+        zip(fsPath, inFile, zos);
       }
 
       return newInputStream(outFile.toPath());
