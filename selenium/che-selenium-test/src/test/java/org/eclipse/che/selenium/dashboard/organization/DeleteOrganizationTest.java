@@ -15,7 +15,6 @@ import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.CheTestAdminOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
@@ -45,10 +44,7 @@ public class DeleteOrganizationTest {
   @InjectTestOrganization(parentPrefix = "parentOrg")
   private TestOrganization childOrg;
 
-  @Inject private CheTestAdminOrganizationServiceClient adminTestOrganizationServiceClient;
-
   @Inject private TestOrganizationServiceClientFactory testOrganizationServiceClientFactory;
-
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;

@@ -44,13 +44,10 @@ public class DeleteOrganizationInListTest {
   @InjectTestOrganization private TestOrganization org4;
 
   @Inject private CheTestAdminOrganizationServiceClient adminOrganizationServiceClient;
-
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private ConfirmDialog confirmDialog;
-
   @Inject private AdminTestUser adminTestUser;
-
   @Inject private Dashboard dashboard;
 
   @BeforeClass

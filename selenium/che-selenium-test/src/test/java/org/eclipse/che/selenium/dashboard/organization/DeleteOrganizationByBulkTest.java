@@ -44,11 +44,8 @@ public class DeleteOrganizationByBulkTest {
   @InjectTestOrganization private TestOrganization org2;
 
   @Inject private CheTestAdminOrganizationServiceClient adminOrganizationServiceClient;
-
   @Inject private OrganizationListPage organizationListPage;
-
   @Inject private AdminTestUser adminTestUser;
-
   @Inject private NavigationBar navigationBar;
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;

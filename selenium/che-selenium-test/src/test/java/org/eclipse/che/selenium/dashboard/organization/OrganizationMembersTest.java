@@ -39,7 +39,6 @@ public class OrganizationMembersTest {
   @InjectTestOrganization private TestOrganization organization;
 
   @Inject private CheTestAdminOrganizationServiceClient adminOrganizationServiceClient;
-
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
@@ -48,7 +47,6 @@ public class OrganizationMembersTest {
   @Inject private Loader loader;
   @Inject private Dashboard dashboard;
   @Inject private TestUser testUser;
-
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass

@@ -56,14 +56,14 @@ public class SystemAdminOrganizationTest {
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private CheMultiuserAdminDashboard dashboard;
-  @Inject private AdminTestUser adminTestUser;
+  @Inject private AdminTestUser systemAdmin;
 
   @BeforeClass
   public void setUp() throws Exception {
-    parentOrg.addAdmin(adminTestUser.getId());
+    parentOrg.addAdmin(systemAdmin.getId());
     initialRootOrgNumber = adminOrganizationServiceClient.getAllRoot().size();
 
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    dashboard.open(systemAdmin.getName(), systemAdmin.getPassword());
   }
 
   public void testOrganizationListComponents() {

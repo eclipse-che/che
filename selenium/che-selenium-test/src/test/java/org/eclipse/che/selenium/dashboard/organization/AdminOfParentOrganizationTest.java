@@ -49,7 +49,6 @@ public class AdminOfParentOrganizationTest {
   private TestOrganizationServiceClient userTestOrganizationServiceClient;
 
   @Inject private TestOrganizationServiceClientFactory userOrganizationServiceClientFactory;
-
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;

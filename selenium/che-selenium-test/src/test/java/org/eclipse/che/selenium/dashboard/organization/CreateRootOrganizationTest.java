@@ -35,21 +35,18 @@ import org.testng.annotations.Test;
  * @author Ann Shumilova
  */
 @Test(groups = {TestGroup.MULTIUSER})
-public class CreateOrganizationTest {
+public class CreateRootOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-", 4);
   private static final String CHILD_ORG_NAME = generate("child-", 4);
 
   private int initialOrgNumber;
 
   @Inject private CheTestAdminOrganizationServiceClient adminOrganizationServiceClient;
-
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private AddOrganization addOrganization;
   @Inject private NavigationBar navigationBar;
-
   @Inject private AdminTestUser adminTestUser;
-
   @Inject private Dashboard dashboard;
 
   @BeforeClass

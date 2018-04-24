@@ -61,11 +61,10 @@ public class AddWorkspaceToOrganizationTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
-
-  @Inject private TestUser adminTestUser;
-
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
+
+  @Inject private TestUser adminTestUser;
   @Inject private TestUser testUser;
 
   @BeforeClass
