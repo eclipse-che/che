@@ -13,16 +13,12 @@ package org.eclipse.che.api.languageserver;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides all language server configuration that is configured via <code>Guice</code> map binder.
  */
 @Singleton
 class GuiceConfigProvider implements LanguageServerConfigProvider {
-  private static final Logger LOG = LoggerFactory.getLogger(GuiceConfigProvider.class);
-
   private final Map<String, LanguageServerConfig> languageServerConfigs;
 
   @Inject

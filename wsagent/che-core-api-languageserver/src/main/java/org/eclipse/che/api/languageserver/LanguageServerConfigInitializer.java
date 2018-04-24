@@ -39,7 +39,7 @@ class LanguageServerConfigInitializer {
   private final Registry<CommunicationProvider> communicationProviderRegistry;
   private final Registry<Boolean> localityRegistry;
   private final Registry<String> languageFilterRegistry;
-  private Set<LanguageServerConfigProvider> providers;
+  private final Set<LanguageServerConfigProvider> providers;
 
   @Inject
   LanguageServerConfigInitializer(

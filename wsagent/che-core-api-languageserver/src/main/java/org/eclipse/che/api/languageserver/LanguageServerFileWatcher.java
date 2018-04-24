@@ -76,6 +76,8 @@ class LanguageServerFileWatcher {
   }
 
   private void onServerInitialized(LanguageServerInitializedEvent event) {
+    LOG.debug("Registering file watching operations for language server : {}", event.getId());
+
     String id = event.getId();
     LanguageServer languageServer = event.getLanguageServer();
 
