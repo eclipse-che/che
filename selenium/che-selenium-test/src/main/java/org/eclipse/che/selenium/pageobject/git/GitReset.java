@@ -113,8 +113,7 @@ public class GitReset {
   }
 
   public void selectCommitByText(String text) {
-    seleniumWebDriverHelper
-        .waitVisibility(By.xpath(String.format(Locators.ITEM_WITH_TEXT_XPATH_TEMPLATE, text)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(String.format(Locators.ITEM_WITH_TEXT_XPATH_TEMPLATE, text)));
   }
 }
