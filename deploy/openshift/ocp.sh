@@ -17,12 +17,12 @@ BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-mac.zip"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
@@ -40,6 +40,12 @@ export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
+
+DEFAULT_IMAGE_PULL_POLICY="Always"
+export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
+
+DEFAULT_UPDATE_STRATEGY="Recreate"
+export UPDATE_STRATEGY=${UPDATE_STRATEGY:-${DEFAULT_UPDATE_STRATEGY}}
 
 DNS_PROVIDERS=(
 xip.io
@@ -64,9 +70,6 @@ export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 
 DEFAULT_CHE_IMAGE_TAG="nightly"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
-
-DEFAULT_IMAGE_PULL_POLICY="Always"
-export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
@@ -131,7 +134,7 @@ get_tools() {
 
 ocp_is_booted() {
     # we have to wait before docker registry will be started as it is staring as last container and it should be running before we perform che deploy.
-    ocp_registry_container_id=$(docker ps -a  | grep openshift/origin-docker-registry | cut -d ' ' -f1)
+    ocp_registry_container_id=$(docker ps | grep k8s_registry_docker-registry | cut -d ' ' -f1)
     if [ ! -z "$ocp_registry_container_id" ];then
         ocp_registry_container_status=$(docker inspect "$ocp_registry_container_id" | $JQ_BINARY .[0] | $JQ_BINARY -r '.State.Status')
     else
@@ -256,13 +259,20 @@ deploy_che_to_ocp() {
       wait_for_postgres
       $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} ${KEYCLOAK_PARAM}
       wait_for_keycloak
-      export CHE_MULTIUSER_PARAM="-p CHE_MULTIUSER=true"
     fi
-      CHE_VAR_ARRAY=$(env | grep -P '^\w*CHE_\w*(?==)')
-      if [ ${#CHE_VAR_ARRAY[@]} > 0 ]; then
+      CHE_VAR_ARRAY=$(env | grep "^CHE_.")
+      if [ ${#CHE_VAR_ARRAY[@]} -gt 0 ]; then
         ENV="-e ${CHE_VAR_ARRAY}"
       fi
-    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} -p IMAGE_CHE=${CHE_IMAGE_REPO} -p CHE_VERSION=${CHE_IMAGE_TAG} ${CHE_MULTIUSER_PARAM} ${ENV}
+
+    $OC_BINARY new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
+                       -p ROUTING_SUFFIX=${OC_PUBLIC_IP}.${DNS_PROVIDER} \
+                       -p IMAGE_CHE=${CHE_IMAGE_REPO} \
+                       -p CHE_VERSION=${CHE_IMAGE_TAG} \
+                       -p PULL_POLICY=${IMAGE_PULL_POLICY} \
+                       -p STRATEGY=${UPDATE_STRATEGY} \
+                       -p CHE_MULTIUSER=${CHE_MULTIUSER} \
+                       ${ENV}
     $OC_BINARY set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
     echo "Waiting for Che to boot..."
     wait_for_che

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import com.google.common.base.Strings;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
@@ -41,11 +42,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftRuntimeContext> {
 
   private final OpenShiftProject project;
+  private final String unrecoverableEvents;
 
   @Inject
   public OpenShiftInternalRuntime(
       @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
       @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
+      @Named("che.infra.kubernetes.workspace_unrecoverable_events") String unrecoverableEvents,
       NoOpURLRewriter urlRewriter,
       KubernetesBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
@@ -62,6 +65,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     super(
         workspaceStartTimeout,
         ingressStartTimeout,
+        unrecoverableEvents,
         urlRewriter,
         bootstrapperFactory,
         serverCheckerFactory,
@@ -76,6 +80,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         project,
         warnings);
     this.project = project;
+    this.unrecoverableEvents = unrecoverableEvents;
   }
 
   @Override
@@ -92,7 +97,11 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     }
     // TODO https://github.com/eclipse/che/issues/7653
     // project.pods().watch(new AbnormalStopHandler());
-    // project.pods().watchContainers(new MachineLogsPublisher());
+
+    project.pods().watchContainers(new MachineLogsPublisher());
+    if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
+      project.pods().watchContainers(new UnrecoverableEventHanler());
+    }
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
   }

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
@@ -28,7 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -52,8 +53,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
+@Test(groups = TestGroup.OSIO)
 public class WorkspaceDetailsSingleMachineTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final String PROJECT_NAME = generate("project", 4);
   private static final ImmutableMap<String, Boolean> EXPECTED_INSTALLERS =
       ImmutableMap.<String, Boolean>builder()
           .put("C# language server", false)
