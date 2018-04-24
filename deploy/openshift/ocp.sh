@@ -257,11 +257,11 @@ parse_args() {
                shift
            ;;
            --no-pull)
-               export UPDATE_STRATEGY=Rolling
+               export IMAGE_PULL_POLICY=IfNotPresent
                shift
            ;;
            --rolling)
-               export IMAGE_PULL_POLICY=IfNotPresent
+               export UPDATE_STRATEGY=Rolling
                shift
            ;;
            --debug)
