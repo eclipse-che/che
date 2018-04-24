@@ -62,7 +62,6 @@ public class DockerInfraModule extends AbstractModule {
     install(new DockerEnvironmentConvertersModule());
     install(new ContainerSystemSettingsProvisioningModule());
 
-    bind(CheApiEnvVarProvider.class).to(DockerCheApiEnvVarProvider.class);
     bind(CheApiInternalEnvVarProvider.class).to(DockerCheApiInternalEnvVarProvider.class);
     bind(CheApiExternalEnvVarProvider.class).to(DockerCheApiExternalEnvVarProvider.class);
 
