@@ -10,7 +10,8 @@
  */
 package org.eclipse.che.api.languageserver;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;

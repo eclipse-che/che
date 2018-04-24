@@ -11,7 +11,8 @@
 package org.eclipse.che.api.languageserver;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
-import static org.eclipse.che.api.languageserver.LanguageServiceUtils.*;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.truish;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -90,7 +91,7 @@ public class WorkspaceService {
   @SuppressWarnings("deprecation")
   private List<TextEditDto> editFile(FileEditParams params) {
     try {
-      String path = LanguageServiceUtils.removePrefixUri(params.getUri());
+      String path = removePrefixUri(params.getUri());
       String wsPath = absolutize(path);
 
       if (fsManager.existsAsFile(wsPath)) {
