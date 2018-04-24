@@ -37,7 +37,6 @@ public class EnvVarEnvironmentProvisioner implements InternalEnvironmentProvisio
       throws InfrastructureException {
     for (EnvVarProvider envVarProvider : envVarProviders) {
       Pair<String, String> envVar = envVarProvider.get(id);
-
       internalEnvironment
           .getMachines()
           .values()

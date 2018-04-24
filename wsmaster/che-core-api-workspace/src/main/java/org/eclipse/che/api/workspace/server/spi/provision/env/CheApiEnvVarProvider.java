@@ -10,18 +10,24 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 
-import javax.inject.Inject;
-
 /**
+ * CHE_API endpoint var provided. For all currently supported infrastructures, it reuses {@link
+ * CheApiInternalEnvVarProvider} to provide the value.
+ *
+ * @deprecated this class shall soon be removed, as this variable is provided only for backward
+ *     compatibility
  * @author Sergii Leshchenko
+ * @author Mykhailo Kuznietsov
  */
+@Deprecated
 public class CheApiEnvVarProvider implements EnvVarProvider {
 
-  /** Env variable for machine that contains url of Che API */
+  /** Che API url */
   public static final String CHE_API_VARIABLE = "CHE_API";
 
   private final CheApiInternalEnvVarProvider cheApiInternalEnvVarProvider;
