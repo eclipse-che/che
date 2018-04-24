@@ -322,6 +322,8 @@ getRoutingSuffix() {
   WORDTOREMOVE="test-${CHE_OPENSHIFT_PROJECT}."
   export OPENSHIFT_ROUTING_SUFFIX="${ROUTE//$WORDTOREMOVE/}"
   printInfo "Routing suffix identified as: ${OPENSHIFT_ROUTING_SUFFIX}"
+  ${OC_BINARY} delete service test > /dev/null
+  ${OC_BINARY} delete route test > /dev/null
 fi
 }
 
