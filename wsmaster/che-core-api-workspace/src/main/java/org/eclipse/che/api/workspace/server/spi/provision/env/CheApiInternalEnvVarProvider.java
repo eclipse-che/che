@@ -22,6 +22,7 @@ public interface CheApiInternalEnvVarProvider extends EnvVarProvider {
 
   /**
    * Returns Che API environment variable which should be injected into machines.
+   * Internal API URL is meant to be used from the inside of other machine containers.
    *
    * @param runtimeIdentity which may be needed to evaluate environment variable value
    */
