@@ -21,8 +21,8 @@ public interface CheApiExternalEnvVarProvider extends EnvVarProvider {
   String CHE_API_EXTERNAL_VARIABLE = "CHE_API_EXTERNAL";
 
   /**
-   * Returns Che API environment variable which should be injected into machines.
-   * External API URL is meant to be used by external clients like browsers.
+   * Returns Che API environment variable which should be injected into machines. External API URL
+   * is meant to be used by external clients like browsers.
    *
    * @param runtimeIdentity which may be needed to evaluate environment variable value
    */

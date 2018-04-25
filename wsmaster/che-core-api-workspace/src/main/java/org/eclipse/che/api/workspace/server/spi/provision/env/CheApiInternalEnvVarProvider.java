@@ -21,8 +21,8 @@ public interface CheApiInternalEnvVarProvider extends EnvVarProvider {
   String CHE_API_INTERNAL_VARIABLE = "CHE_API_INTERNAL";
 
   /**
-   * Returns Che API environment variable which should be injected into machines.
-   * Internal API URL is meant to be used from the inside of other machine containers.
+   * Returns Che API environment variable which should be injected into machines. Internal API URL
+   * is meant to be used from the inside of other machines.
    *
    * @param runtimeIdentity which may be needed to evaluate environment variable value
    */
