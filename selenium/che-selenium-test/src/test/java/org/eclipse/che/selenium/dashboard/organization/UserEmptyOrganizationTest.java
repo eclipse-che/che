@@ -18,6 +18,8 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
@@ -32,18 +34,24 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.MULTIUSER})
 public class UserEmptyOrganizationTest {
 
+  private TestOrganizationServiceClient organizationServiceClient;
+
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
 
-  @Inject private TestOrganizationServiceClient testOrganizationServiceClient;
+  @Inject private TestOrganizationServiceClientFactory organizationServiceClientFactory;
+
+  @Inject TestUser testUser;
 
   @BeforeClass
   public void setUp() throws Exception {
+    organizationServiceClient = organizationServiceClientFactory.create(testUser);
+
     assertTrue(
-        testOrganizationServiceClient.getAll().isEmpty(),
+        organizationServiceClient.getAll().isEmpty(),
         "This test requires empty organization list inside the default user account.");
-    dashboard.open();
+    dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @Test

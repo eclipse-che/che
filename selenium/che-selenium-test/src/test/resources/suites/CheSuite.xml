@@ -60,6 +60,16 @@
           <class name="org.eclipse.che.selenium.dashboard.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfSubOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.FilterOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.MemberOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.OrganizationMembersTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.RenameOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.AddWorkspaceToOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
           <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
           <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest"/>
@@ -129,6 +139,7 @@
           <class name="org.eclipse.che.selenium.git.GitPullTest"/>
           <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
           <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
+          <class name="org.eclipse.che.selenium.git.GitResetTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>

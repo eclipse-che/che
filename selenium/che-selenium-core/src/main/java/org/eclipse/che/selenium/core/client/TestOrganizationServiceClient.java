@@ -14,8 +14,8 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import java.util.List;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -23,22 +23,31 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.multiuser.api.permission.shared.dto.PermissionsDto;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** This util is handling the requests to Organization API. */
-@Singleton
 public class TestOrganizationServiceClient {
   private static final Logger LOG = LoggerFactory.getLogger(TestOrganizationServiceClient.class);
 
   private final String apiEndpoint;
   private final HttpJsonRequestFactory requestFactory;
 
-  @Inject
   public TestOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpoint = apiEndpointUrlProvider.get().toString();
     this.requestFactory = requestFactory;
+  }
+
+  @AssistedInject
+  public TestOrganizationServiceClient(
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestUserHttpJsonRequestFactoryCreator testUserHttpJsonRequestFactoryCreator,
+      @Assisted TestUser testUser) {
+    this.apiEndpoint = apiEndpointUrlProvider.get().toString();
+    this.requestFactory = testUserHttpJsonRequestFactoryCreator.create(testUser);
   }
 
   public List<OrganizationDto> getAll() throws Exception {

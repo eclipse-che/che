@@ -17,9 +17,10 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
-import com.google.inject.name.Names;
 import java.lang.reflect.Field;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
+import org.eclipse.che.selenium.core.user.AdminTestUser;
 
 /**
  * Injector for custom annotation {@link InjectTestOrganization}.
@@ -48,16 +49,21 @@ public class TestOrganizationInjector<T> implements MembersInjector<T> {
     String name = generateName();
     String parentPrefix = injectTestOrganization.parentPrefix();
 
-    TestOrganizationServiceClient testOrganizationServiceClient =
-        injector.getInstance(Key.get(TestOrganizationServiceClient.class, Names.named("admin")));
+    AdminTestUser adminTestUser = injector.getInstance(Key.get(AdminTestUser.class));
+
+    TestOrganizationServiceClientFactory testOrganizationServiceClient =
+        injector.getInstance(Key.get(TestOrganizationServiceClientFactory.class));
+
+    TestOrganizationServiceClient adminOrganizationServiceClient =
+        testOrganizationServiceClient.create(adminTestUser);
 
     TestOrganization testOrganization;
     try {
       if (parentPrefix.isEmpty()) {
-        testOrganization = new TestOrganization(name, testOrganizationServiceClient);
+        testOrganization = new TestOrganization(name, adminOrganizationServiceClient);
       } else {
         String parentId = findInjectedOrganization(instance, parentPrefix);
-        testOrganization = new TestOrganization(name, parentId, testOrganizationServiceClient);
+        testOrganization = new TestOrganization(name, parentId, adminOrganizationServiceClient);
       }
 
       field.setAccessible(true);
