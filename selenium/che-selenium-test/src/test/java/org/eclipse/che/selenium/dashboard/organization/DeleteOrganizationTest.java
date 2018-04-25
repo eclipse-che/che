@@ -10,14 +10,13 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
-import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.ADMIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -37,6 +36,7 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.MULTIUSER})
 public class DeleteOrganizationTest {
   private int initialOrgNumber;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @InjectTestOrganization(prefix = "parentOrg")
   private TestOrganization parentOrg;
@@ -44,12 +44,7 @@ public class DeleteOrganizationTest {
   @InjectTestOrganization(parentPrefix = "parentOrg")
   private TestOrganization childOrg;
 
-  @Inject
-  @Named(ADMIN)
-  private TestOrganizationServiceClient adminTestOrganizationServiceClient;
-
-  @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
-
+  @Inject private TestOrganizationServiceClientFactory testOrganizationServiceClientFactory;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
@@ -59,9 +54,11 @@ public class DeleteOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    testOrganizationServiceClient = testOrganizationServiceClientFactory.create(testUser);
+
     parentOrg.addAdmin(testUser.getId());
     childOrg.addAdmin(testUser.getId());
-    initialOrgNumber = userTestOrganizationServiceClient.getAll().size();
+    initialOrgNumber = testOrganizationServiceClient.getAll().size();
 
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
