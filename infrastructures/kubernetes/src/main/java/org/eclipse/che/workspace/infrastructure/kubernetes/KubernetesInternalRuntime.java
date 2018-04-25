@@ -333,7 +333,9 @@ public class KubernetesInternalRuntime<
         } catch (InfrastructureException e) {
           LOG.error(
               "Unable to update status of the machine '{}:{}'. Cause: {}",
-              getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+              getContext().getIdentity().getWorkspaceId(),
+              machineName,
+              e.getMessage());
         }
         eventPublisher.sendFailedEvent(machineName, ex.getMessage(), getContext().getIdentity());
       }
@@ -367,7 +369,9 @@ public class KubernetesInternalRuntime<
       } catch (InfrastructureException e) {
         LOG.error(
             "Unable to update status of the machine '{}:{}'. Cause: {}",
-            getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+            getContext().getIdentity().getWorkspaceId(),
+            machineName,
+            e.getMessage());
       }
       eventPublisher.sendRunningEvent(machineName, getContext().getIdentity());
     };
@@ -572,7 +576,10 @@ public class KubernetesInternalRuntime<
       } catch (InfrastructureException e) {
         LOG.error(
             "Unable to update status of the server '{}:{}:{}'. Cause: {}",
-            identity.getWorkspaceId(), machineName, serverRef, e.getMessage());
+            identity.getWorkspaceId(),
+            machineName,
+            serverRef,
+            e.getMessage());
       }
     }
   }
@@ -606,7 +613,10 @@ public class KubernetesInternalRuntime<
       } catch (InfrastructureException e) {
         LOG.error(
             "Unable to update status of the server '{}:{}:{}'. Cause: {}",
-            identity.getWorkspaceId(), machineName, serverName, e.getMessage());
+            identity.getWorkspaceId(),
+            machineName,
+            serverName,
+            e.getMessage());
       }
     }
   }
