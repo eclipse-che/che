@@ -208,9 +208,14 @@ public class WsMasterModule extends AbstractModule {
 
     // system components
     install(new SystemModule());
-    Multibinder.newSetBinder(binder(), ServiceTermination.class)
+    Multibinder<ServiceTermination> terminationMultiBinder = Multibinder
+        .newSetBinder(binder(), ServiceTermination.class);
+    terminationMultiBinder
         .addBinding()
         .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
+    terminationMultiBinder
+        .addBinding()
+        .to(org.eclipse.che.api.system.server.CronThreadPullTermination.class);
     bind(DBTermination.class);
 
     final Map<String, String> persistenceProperties = new HashMap<>();
