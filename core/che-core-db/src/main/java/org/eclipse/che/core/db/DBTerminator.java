@@ -8,13 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.core.db.jpa;
+package org.eclipse.che.core.db;
 
 import static org.eclipse.che.api.system.shared.SystemStatus.READY_TO_SHUTDOWN;
 
 import com.google.inject.Inject;
+import com.google.inject.persist.PersistService;
 import javax.inject.Singleton;
-import javax.persistence.EntityManagerFactory;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Performs termination of db components.
+ * Stops {@link PersistService} when a system is ready to shutdown.
  *
  * @author Anton Korneta
  */
@@ -31,29 +31,22 @@ public class DBTerminator {
 
   private static final Logger LOG = LoggerFactory.getLogger(DBTerminator.class);
 
-  private final EntityManagerFactory emFactory;
-
   @Inject
-  public DBTerminator(EventService eventService, EntityManagerFactory emFactory) {
-    this.emFactory = emFactory;
+  public DBTerminator(EventService eventService, PersistService persistService) {
     eventService.subscribe(
         new EventSubscriber<SystemStatusChangedEventDto>() {
           @Override
           public void onEvent(SystemStatusChangedEventDto event) {
             if (READY_TO_SHUTDOWN.equals(event.getStatus())) {
-              terminate();
+              try {
+                LOG.info("Stopping persistence service.");
+                persistService.stop();
+              } catch (RuntimeException ex) {
+                LOG.error("Failed to stop persistent service. Cause: " + ex.getMessage());
+              }
             }
           }
         },
         SystemStatusChangedEventDto.class);
-  }
-
-  public void terminate() {
-    try {
-      LOG.info("Close entity manager factory..");
-      emFactory.close();
-    } catch (RuntimeException ex) {
-      LOG.error(ex.getMessage());
-    }
   }
 }
