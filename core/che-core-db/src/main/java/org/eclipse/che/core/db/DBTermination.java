@@ -27,12 +27,12 @@ import org.slf4j.LoggerFactory;
  * @author Anton Korneta
  */
 @Singleton
-public class DBTerminator {
+public class DBTermination {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DBTerminator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DBTermination.class);
 
   @Inject
-  public DBTerminator(EventService eventService, PersistService persistService) {
+  public DBTermination(EventService eventService, PersistService persistService) {
     eventService.subscribe(
         new EventSubscriber<SystemStatusChangedEventDto>() {
           @Override

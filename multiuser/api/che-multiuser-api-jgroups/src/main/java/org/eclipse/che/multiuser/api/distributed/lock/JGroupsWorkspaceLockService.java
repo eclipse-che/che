@@ -18,6 +18,8 @@ import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.jgroups.JChannel;
 import org.jgroups.blocks.locking.LockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JGroups based implementation of {@link WorkspaceLockService}.
@@ -26,6 +28,7 @@ import org.jgroups.blocks.locking.LockService;
  */
 @Singleton
 public class JGroupsWorkspaceLockService implements WorkspaceLockService {
+  private static final Logger LOG = LoggerFactory.getLogger(JGroupsWorkspaceLockService.class);
 
   private static final String CHANNEL_NAME = "WorkspaceLocks";
 
@@ -70,7 +73,12 @@ public class JGroupsWorkspaceLockService implements WorkspaceLockService {
     }
   }
 
+  /** Stops the workspace lock service. */
   public void shutdown() {
-    channel.close();
+    try {
+      channel.close();
+    } catch (RuntimeException ex) {
+      LOG.error("Failed to stop workspace locks service. Cause: " + ex.getMessage());
+    }
   }
 }

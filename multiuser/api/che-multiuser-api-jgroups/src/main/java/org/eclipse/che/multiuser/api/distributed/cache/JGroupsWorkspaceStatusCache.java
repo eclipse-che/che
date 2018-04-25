@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.multiuser.api.distributed.cache;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
@@ -79,11 +80,12 @@ public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
     return new HashMap<>(delegate);
   }
 
+  /** Stops workspace status cache. */
   public void shutdown() {
     try {
       delegate.close();
-    } catch (Exception ex) {
-      LOG.error(ex.getMessage());
+    } catch (IOException | RuntimeException ex) {
+      LOG.error("Failed to stop workspace status cache. Cause: " + ex.getMessage());
     }
   }
 }

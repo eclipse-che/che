@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
-import org.eclipse.che.multiuser.api.distributed.JGroupsServiceTerminator;
+import org.eclipse.che.multiuser.api.distributed.JGroupsServiceTermination;
 import org.eclipse.che.multiuser.api.distributed.subscription.DistributedRemoteSubscriptionStorage;
 import org.eclipse.persistence.config.CacheCoordinationProtocol;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -51,6 +51,6 @@ public class ReplicationModule extends AbstractModule {
 
     Multibinder.newSetBinder(binder(), ServiceTermination.class)
         .addBinding()
-        .to(JGroupsServiceTerminator.class);
+        .to(JGroupsServiceTermination.class);
   }
 }

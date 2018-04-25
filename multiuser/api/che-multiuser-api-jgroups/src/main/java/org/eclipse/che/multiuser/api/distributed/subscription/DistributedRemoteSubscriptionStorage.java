@@ -39,8 +39,7 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
 
   private static final String CHANNEL_NAME = "RemoteSubscriptionChannel";
 
-  private ReplicatedHashMap<String, Set<RemoteSubscriptionContext>> subscriptions;
-
+  private final ReplicatedHashMap<String, Set<RemoteSubscriptionContext>> subscriptions;
   private final LockService lockService;
   private final JChannel channel;
 
@@ -95,7 +94,12 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
     }
   }
 
+  /** Stops remote subscription storage. */
   public void shutdown() {
-    channel.close();
+    try {
+      channel.close();
+    } catch (RuntimeException ex) {
+      LOG.error("Failed to stop remote subscription storage. Cause: " + ex.getMessage());
+    }
   }
 }

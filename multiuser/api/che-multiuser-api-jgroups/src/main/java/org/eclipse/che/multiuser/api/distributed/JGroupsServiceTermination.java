@@ -20,22 +20,26 @@ import org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceStatusCac
 import org.eclipse.che.multiuser.api.distributed.lock.JGroupsWorkspaceLockService;
 import org.eclipse.che.multiuser.api.distributed.subscription.DistributedRemoteSubscriptionStorage;
 
-/** @author Anton Korneta */
+/**
+ * Terminates jgroups components.
+ *
+ * @author Anton Korneta
+ */
 @Singleton
-public class JGroupsServiceTerminator implements ServiceTermination {
+public class JGroupsServiceTermination implements ServiceTermination {
 
   private final JGroupsWorkspaceLockService workspaceLockService;
   private final JGroupsWorkspaceStatusCache workspaceStatusCache;
-  private final DistributedRemoteSubscriptionStorage distributedRemoteSubscriptionStorage;
+  private final DistributedRemoteSubscriptionStorage remoteSubscriptionStorage;
 
   @Inject
-  public JGroupsServiceTerminator(
+  public JGroupsServiceTermination(
       JGroupsWorkspaceLockService workspaceLockService,
       JGroupsWorkspaceStatusCache workspaceStatusCache,
-      DistributedRemoteSubscriptionStorage distributedRemoteSubscriptionStorage) {
+      DistributedRemoteSubscriptionStorage remoteSubscriptionStorage) {
     this.workspaceLockService = workspaceLockService;
     this.workspaceStatusCache = workspaceStatusCache;
-    this.distributedRemoteSubscriptionStorage = distributedRemoteSubscriptionStorage;
+    this.remoteSubscriptionStorage = remoteSubscriptionStorage;
   }
 
   @Override
@@ -45,19 +49,9 @@ public class JGroupsServiceTerminator implements ServiceTermination {
 
   @Override
   public void suspend() throws InterruptedException {
-    try {
-      workspaceLockService.shutdown();
-    } catch (RuntimeException e) {
-    }
-
-    try {
-      workspaceStatusCache.shutdown();
-    } catch (RuntimeException e) {
-    }
-    try {
-      distributedRemoteSubscriptionStorage.shutdown();
-    } catch (RuntimeException e) {
-    }
+    workspaceLockService.shutdown();
+    workspaceStatusCache.shutdown();
+    remoteSubscriptionStorage.shutdown();
   }
 
   @Override
