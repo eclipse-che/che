@@ -46,7 +46,7 @@ import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -66,7 +66,6 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
 
-  public static final String ADMIN = "admin";
   public static final String AUXILIARY = "auxiliary";
   public static final String DOCKER_INFRASTRUCTURE = "docker";
   public static final String OPENSHIFT_INFRASTRUCTURE = "openshift";
@@ -87,7 +86,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestUserServiceClient.class).to(CheTestUserServiceClient.class);
 
     bind(HttpJsonRequestFactory.class).to(TestUserHttpJsonRequestFactory.class);
-    bind(TestUserHttpJsonRequestFactory.class).to(CheTestDefaultUserHttpJsonRequestFactory.class);
+    bind(TestUserHttpJsonRequestFactory.class).to(CheTestDefaultHttpJsonRequestFactory.class);
 
     bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
     bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
