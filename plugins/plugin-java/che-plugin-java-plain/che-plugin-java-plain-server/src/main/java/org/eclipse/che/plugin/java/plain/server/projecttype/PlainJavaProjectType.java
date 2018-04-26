@@ -32,12 +32,14 @@ import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
 public class PlainJavaProjectType extends ProjectTypeDef {
   @Inject
   public PlainJavaProjectType(
-      PlainJavaValueProviderFactory valueProviderFactory,
+      //      PlainJavaValueProviderFactory valueProviderFactory,
       MediaTypesExcludeMatcher mediaTypesExcludeMatcher) {
     super(JAVAC, JAVAC_PROJECT_NAME, true, false, true);
 
-    setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);
-    setValueProviderFactory(OUTPUT_FOLDER, valueProviderFactory);
+    //    setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);
+    //    setValueProviderFactory(OUTPUT_FOLDER, valueProviderFactory);
+    addVariableDefinition(SOURCE_FOLDER, "java src folder", true);
+    addVariableDefinition(OUTPUT_FOLDER, "java output folder", true);
 
     addVariableDefinition(LIBRARY_FOLDER, "java library folder", false);
 
