@@ -39,9 +39,9 @@ get_display_url() {
   fi
 
   if ! is_docker_for_mac && ! is_docker_for_windows; then
-    echo "http://${CHE_HOST_LOCAL}:${CHE_PORT}"
+    echo "${CHE_HOST_PROTOCOL}://${CHE_HOST_LOCAL}:${CHE_PORT}"
   else
-    echo "http://localhost:${CHE_PORT}"
+    echo "${CHE_HOST_PROTOCOL}://localhost:${CHE_PORT}"
   fi
 }
 
@@ -56,15 +56,15 @@ get_debug_display_url() {
   fi
 
   if ! is_docker_for_mac && ! is_docker_for_windows; then
-    echo "http://${CHE_HOST}:${CHE_DEBUG_PORT_LOCAL}"
+    echo "${CHE_HOST_PROTOCOL}://${CHE_HOST}:${CHE_DEBUG_PORT_LOCAL}"
   else
-    echo "http://localhost:${CHE_DEBUG_PORT_LOCAL}"
+    echo "${CHE_HOST_PROTOCOL}://localhost:${CHE_DEBUG_PORT_LOCAL}"
   fi
 }
 
 server_is_booted() {
   PING_URL=$(get_boot_url)
-  HTTP_STATUS_CODE=$(curl -I -k ${PING_URL} -s -o /dev/null --write-out '%{http_code}')
+  HTTP_STATUS_CODE=$(curl -I -k ${CHE_HOST_PROTOCOL}://${PING_URL} -s -o /dev/null --write-out '%{http_code}')
   log "${HTTP_STATUS_CODE}"
   if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
     return 0

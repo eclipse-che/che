@@ -14,6 +14,7 @@ node default {
   $docker_host = getValue("DOCKER_HOST","tcp://localhost:2375")
   $che_user = getValue("CHE_USER","root")
   $che_server_url = getValue("CHE_SERVER_URL", "${che_protocol}://${che_ip}:${che_port}")
+  $che_server_url_without_port = "${che_protocol}://${che_ip}"
   $che_master_container_ram = getValue("CHE_MASTER_CONTAINER_RAM", "750m")
   $che_docker_ip_external = getValue("CHE_DOCKER_IP_EXTERNAL","")
 
@@ -34,6 +35,11 @@ node default {
   # provide dns which proxy should not be used for.
   # please leave this as it is if you don't need no_proxy configuration
   $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
+
+  ###############################
+  # HTTPS configuration
+  # options: file
+  $https_certificate_provider = getValue("CHE_HTTPS_CERTIFICATE_PROVIDER", "file")
 
   ###############################
   # Single port configuration

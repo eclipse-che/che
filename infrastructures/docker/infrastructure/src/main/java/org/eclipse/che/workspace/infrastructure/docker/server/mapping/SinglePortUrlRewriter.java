@@ -33,11 +33,15 @@ public class SinglePortUrlRewriter implements URLRewriter {
 
   private final Provider<SinglePortHostnameBuilder> hostnameBuilderprovider;
   private final int chePort;
+  private final String cheHostProtocol;
 
   @Inject
   public SinglePortUrlRewriter(
-      @Named("che.port") int chePort, Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
+      @Named("che.port") int chePort,
+      @Named("che.host.protocol") String cheHostProtocol,
+      Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
     this.chePort = chePort;
+    this.cheHostProtocol = cheHostProtocol;
     this.hostnameBuilderprovider = hostnameBuilderProvider;
   }
 
@@ -52,15 +56,24 @@ public class SinglePortUrlRewriter implements URLRewriter {
         hostnameBuilderprovider.get().build(serverName, machineName, identity.getWorkspaceId());
     try {
       UriBuilder uriBUilder = UriBuilder.fromUri(url).host(host);
-      if (chePort != 80 && chePort != 443) {
-        uriBUilder.port(chePort);
-      }
       url = uriBUilder.build().toString();
+      if ("https".equals(cheHostProtocol)) {
+        url = url.replace("ws://", "wss://");
+        url = url.replace("http://", "https://");
+      }
+      // replace ports for anything passing through traefik (e.g. http, https, ws, wss)
+      if (url.contains("http://")
+          || url.contains("https://")
+          || url.contains("ws://")
+          || url.contains("wss://")) {
+        url = UriBuilder.fromUri(url).port(chePort).build().toString();
+      }
     } catch (UriBuilderException | IllegalArgumentException e) {
       throw new InternalInfrastructureException(
           format(
               "Rewriting of host '%s' in URL '%s' failed. Error: %s", host, url, e.getMessage()));
     }
+
     return url;
   }
 }

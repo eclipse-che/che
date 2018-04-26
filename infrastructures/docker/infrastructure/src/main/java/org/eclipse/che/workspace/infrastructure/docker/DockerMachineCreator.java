@@ -34,6 +34,7 @@ public class DockerMachineCreator {
   private final DockerConnector docker;
   private final String registry;
   private final String internalDockerIP;
+  private final String cheHostProtocol;
   private final DockerMachineStopDetector dockerMachineStopDetector;
 
   @Inject
@@ -41,10 +42,12 @@ public class DockerMachineCreator {
       DockerConnector docker,
       @Named("che.docker.registry") String registry,
       @Named("che.docker.ip") @Nullable String internalDockerIP,
+      @Named("che.host.protocol") String cheHostProtocol,
       DockerMachineStopDetector dockerMachineStopDetector) {
     this.docker = docker;
     this.registry = registry;
     this.internalDockerIP = internalDockerIP;
+    this.cheHostProtocol = cheHostProtocol;
     this.dockerMachineStopDetector = dockerMachineStopDetector;
   }
 
@@ -61,6 +64,7 @@ public class DockerMachineCreator {
   public DockerMachine create(ContainerInfo container) throws InfrastructureException {
     NetworkSettings networkSettings = container.getNetworkSettings();
     String hostname;
+    // we should change that, the server mapper should get both internal and external ip
     if (internalDockerIP != null) {
       hostname = internalDockerIP;
     } else {
@@ -73,7 +77,7 @@ public class DockerMachineCreator {
         container.getId(),
         container.getConfig().getImage(),
         docker,
-        new ServersMapper(hostname, deserializer.machineName())
+        new ServersMapper(cheHostProtocol, hostname, deserializer.machineName())
             .map(networkSettings.getPorts(), configs),
         registry,
         dockerMachineStopDetector,

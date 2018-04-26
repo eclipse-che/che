@@ -40,16 +40,28 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
   private final String internalIpOfContainers;
   private final String externalIpOfContainers;
   private final String dockerNetwork;
+  private final String cheHostProtocol;
+  private final Boolean singleportWildcardIPless;
+  private final String singleportWildcardDomainHost;
+  private final String cheHttpsCertificateProvider;
 
   @Inject
   public SinglePortLabelsProvisioner(
       @Nullable @Named("che.docker.ip") String internalIpOfContainers,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
       @Nullable @Named("che.docker.network") String dockerNetwork,
+      @Nullable @Named("che.host.protocol") String cheHostProtocol,
+      @Nullable @Named("che.singleport.wildcard_domain.ipless") Boolean singleportWildcardIPless,
+      @Nullable @Named("che.singleport.wildcard_domain.host") String singleportWildcardDomainHost,
+      @Nullable @Named("che.https.certificate.provider") String cheHttpsCertificateProvider,
       Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
     this.hostnameBuilderProvider = hostnameBuilderProvider;
     this.internalIpOfContainers = internalIpOfContainers;
     this.externalIpOfContainers = externalIpOfContainers;
+    this.singleportWildcardIPless = singleportWildcardIPless;
+    this.cheHostProtocol = cheHostProtocol;
+    this.singleportWildcardDomainHost = singleportWildcardDomainHost;
+    this.cheHttpsCertificateProvider = cheHttpsCertificateProvider;
     this.dockerNetwork = dockerNetwork;
   }
 
@@ -72,9 +84,25 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
                 .build(serverEntry.getKey(), machineName, identity.getWorkspaceId());
         final String serviceName = getServiceName(host);
         final String port = serverEntry.getValue().getPort().split("/")[0];
-
+        final String protocol = serverEntry.getValue().getProtocol();
+        if (cheHostProtocol.equals("https")) {
+          // rewrite to use https and wss
+          if (protocol.equals("ws") || protocol.equals("http")) {
+            containerLabels.put(
+                format("traefik.%s.frontend.entryPoints", serviceName), "https,wss");
+          } else {
+            // not a protocol traefik understands
+            containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), protocol);
+          }
+        } else {
+          if (protocol.equals("ws") || protocol.equals("http")) {
+            containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), "http,ws");
+          } else {
+            // not a protocol traefik understands
+            containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), protocol);
+          }
+        }
         containerLabels.put(format("traefik.%s.port", serviceName), port);
-        containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), "http");
         containerLabels.put(format("traefik.%s.frontend.rule", serviceName), "Host:" + host);
         // Needed to activate per-service rules
         containerLabels.put("traefik.frontend.rule", machineName);

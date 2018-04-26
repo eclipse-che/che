@@ -35,7 +35,7 @@ public class SinglePortUrlRewriterTest {
       throws Exception {
     Provider<SinglePortHostnameBuilder> provider =
         () -> new SinglePortHostnameBuilder(externalIP, internalIp, nioHost);
-    SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, provider);
+    SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, "http", provider);
 
     String rewrittenURL = rewriter.rewriteURL(identity, machineName, serverName, incomeURL);
 
@@ -100,7 +100,7 @@ public class SinglePortUrlRewriterTest {
   public void shouldThrowExceptionWhenRewritingFails() throws Exception {
     Provider<SinglePortHostnameBuilder> provider =
         () -> new SinglePortHostnameBuilder("172.12.0.2", "127.0.0.1", null);
-    SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, provider);
+    SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, "http", provider);
     rewriter.rewriteURL(new RuntimeIdentityImpl("ws123", null, null), "machine1", "server", ":");
   }
 }

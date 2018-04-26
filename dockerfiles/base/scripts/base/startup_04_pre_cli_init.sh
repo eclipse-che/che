@@ -40,7 +40,6 @@ cli_init() {
       che_cli_env_arr_index=$[$che_cli_env_arr_index+1]
   done
 
-  CHE_HOST_PROTOCOL="http"
   if is_initialized; then
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
     CHE_HOST_ENV=$(get_value_of_var_from_env ${CHE_PRODUCT_NAME}_HOST)
@@ -53,6 +52,8 @@ cli_init() {
     CHE_HOST_PROTOCOL_ENV=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST_PROTOCOL)
     if [[ "${CHE_HOST_PROTOCOL_ENV}" != "" ]]; then
       CHE_HOST_PROTOCOL=${CHE_HOST_PROTOCOL_ENV}
+    else
+      CHE_HOST_PROTOCOL="http"
     fi
 
     if [[ "${CHE_HOST_ENV}" = "" ]] && 

@@ -61,7 +61,11 @@ services:
 <% if scope.lookupvar('che::che_single_port') == 'true' -%>
     labels:
       traefik.che.frontend.backend: "che-server"
+<% if scope.lookupvar('che::che_protocol') == 'https' -%>
+      traefik.che.frontend.entryPoints: "https,wss"
+<% else -%>
       traefik.che.frontend.entryPoints: "http"
+<% end -%>
       traefik.che.port: "<%= scope.lookupvar('che::che_port') -%>"
       traefik.che.frontend.rule: "PathPrefix:/"
 <% if scope.lookupvar('che::che_multiuser') == 'true' -%>
@@ -95,6 +99,10 @@ services:
       traefik.enable: "false"
     ports:
       - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
+<% if scope.lookupvar('che::che_protocol') == 'https' -%>
+<%# enable http -> https redirect -%>
+      - '80:80'
+<% end -%>
 <% if scope.lookupvar('che::che_env') == 'development' -%>
       - '7070:7070'
 <% end -%>
@@ -162,11 +170,18 @@ services:
       - POSTGRES_DATABASE=keycloak
       - POSTGRES_USER=keycloak
       - POSTGRES_PASSWORD=keycloak
+<% if scope.lookupvar('che::che_single_port') == 'true' -%>
+      - PROXY_ADDRESS_FORWARDING=true
+<% end -%>
     links:
       - postgres:postgres
 <% if scope.lookupvar('che::che_single_port') == 'true' -%>
     labels:
+<% if scope.lookupvar('che::che_protocol') == 'https' -%>
+      traefik.keycloak.frontend.entryPoints: "https,wss"
+<% else -%>
       traefik.keycloak.frontend.entryPoints: "http"
+<% end -%>
       traefik.keycloak.port: "8080"
 <% if scope.lookupvar('che::che_single_port') == 'true' and scope.lookupvar('che::che_single_port_wildcard_domain_ipless') == 'true' -%>
       traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
