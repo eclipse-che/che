@@ -11,14 +11,16 @@
 package org.eclipse.che.selenium.core.requestfactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 /** @author Anton Korneta */
-public class CheTestDefaultUserHttpJsonRequestFactory extends TestUserHttpJsonRequestFactory {
+@Singleton
+public class CheTestDefaultHttpJsonRequestFactory extends TestUserHttpJsonRequestFactory {
 
   @Inject
-  public CheTestDefaultUserHttpJsonRequestFactory(
+  public CheTestDefaultHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient, DefaultTestUser defaultTestUser) {
     super(authServiceClient, defaultTestUser);
   }
