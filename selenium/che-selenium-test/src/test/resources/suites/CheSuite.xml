@@ -115,6 +115,8 @@
           <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
           <class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSparseCheckoutTest"/>
+          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>
+          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranchTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.EditFilesWithTabsTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.RefactoringFeatureTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.RemoveFilesWithActiveTabs"/>
