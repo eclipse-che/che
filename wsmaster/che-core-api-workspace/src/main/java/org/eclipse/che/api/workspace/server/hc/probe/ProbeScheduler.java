@@ -26,6 +26,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Schedules workspace servers probes checks asynchronously.
@@ -34,6 +36,8 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
  */
 @Singleton
 public class ProbeScheduler {
+  private static final Logger LOG = LoggerFactory.getLogger(ProbeScheduler.class);
+
   private final ScheduledThreadPoolExecutor probesExecutor;
   /**
    * Use single thread for a scheduling of tasks interruption by timeout. Single thread can be used
@@ -84,6 +88,27 @@ public class ProbeScheduler {
     }
 
     tasks.forEach(task -> task.cancel(true));
+  }
+
+  /** Terminates this probes if it's not terminated yet. */
+  public void shutdown() {
+    if (!probesExecutor.isShutdown()) {
+      probesExecutor.shutdown();
+      try {
+        LOG.info("Shutdown probe scheduler, wait 30s to stop normally");
+        if (!probesExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+          probesExecutor.shutdownNow();
+          LOG.info("Interrupt probe scheduler, wait 60s to stop");
+          if (!probesExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+            LOG.error("Couldn't shutdown probe scheduler threads pool");
+          }
+        }
+      } catch (InterruptedException x) {
+        probesExecutor.shutdownNow();
+        Thread.currentThread().interrupt();
+      }
+      LOG.info("Prode scheduler threads pool is terminated");
+    }
   }
 
   private void schedule(
