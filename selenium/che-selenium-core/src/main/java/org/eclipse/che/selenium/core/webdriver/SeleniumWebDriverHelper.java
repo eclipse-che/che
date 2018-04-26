@@ -675,6 +675,37 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits during {@code timeout} until specified {@code element} does not contain the specified
+   * {@code expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should be not presented
+   * @param timeout waiting time in seconds
+   */
+  public void waitTextIsNotPresence(WebElement element, String expectedText, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> !(waitVisibility(element).getText().contains(expectedText)));
+  }
+
+  /**
+   * Waits until {@link WebElement} which defined by {@code element} does not contain the specified
+   * {@code expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should be not presented
+   */
+  public void waitTextIsNotPresence(WebElement element, String expectedText) {
+    waitTextIsNotPresence(element, expectedText, DEFAULT_TIMEOUT);
+  }
+
+  /**
    * Waits during {@code timeout} of visibility the {@link WebElement} with provided {@code
    * elementLocator} and clicks once on it by {@link WebElement#click()}.
    *
