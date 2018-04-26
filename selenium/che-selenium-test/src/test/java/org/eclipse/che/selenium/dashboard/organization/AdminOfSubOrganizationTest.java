@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -43,6 +44,7 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.MULTIUSER})
 public class AdminOfSubOrganizationTest {
   private int initialOrgNumber;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @InjectTestOrganization(prefix = "parentOrg")
   private TestOrganization parentOrg;
@@ -50,8 +52,7 @@ public class AdminOfSubOrganizationTest {
   @InjectTestOrganization(parentPrefix = "parentOrg")
   private TestOrganization childOrg;
 
-  @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
-
+  @Inject private TestOrganizationServiceClientFactory testOrganizationServiceClientFactory;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
@@ -60,9 +61,11 @@ public class AdminOfSubOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    testOrganizationServiceClient = testOrganizationServiceClientFactory.create(testUser);
+
     parentOrg.addMember(testUser.getId());
     childOrg.addAdmin(testUser.getId());
-    initialOrgNumber = userTestOrganizationServiceClient.getAll().size();
+    initialOrgNumber = testOrganizationServiceClient.getAll().size();
 
     dashboard.open(testUser.getName(), testUser.getPassword());
   }

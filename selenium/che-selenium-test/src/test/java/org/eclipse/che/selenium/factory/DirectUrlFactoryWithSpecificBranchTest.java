@@ -24,7 +24,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -38,12 +38,12 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject
-  @Named("github.username")
-  private String gitHubUsername;
+  @Named("github.auxiliary.username")
+  private String gitHubAuxiliaryUserName;
 
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private Events events;
@@ -58,12 +58,12 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   public void setUp() throws Exception {
     testFactoryWithSpecificBranch =
         testFactoryInitializer.fromUrl(
-            "https://github.com/" + gitHubUsername + "/gitPullTest/tree/contrib-12092015");
+            "https://github.com/" + gitHubAuxiliaryUserName + "/gitPullTest/tree/contrib-12092015");
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (workspaceServiceClient.exists(gitHubUsername, testUser.getName())) {
+    if (workspaceServiceClient.exists(gitHubAuxiliaryUserName, testUser.getName())) {
       testFactoryWithSpecificBranch.delete();
     }
   }

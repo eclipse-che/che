@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -43,6 +44,7 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.MULTIUSER})
 public class MemberOrganizationTest {
   private int initialOrgNumber;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @InjectTestOrganization(prefix = "parentOrg")
   private TestOrganization parentOrg;
@@ -50,8 +52,7 @@ public class MemberOrganizationTest {
   @InjectTestOrganization(parentPrefix = "parentOrg")
   private TestOrganization childOrg;
 
-  @Inject private TestOrganizationServiceClient testOrganizationServiceClient;
-
+  @Inject private TestOrganizationServiceClientFactory testOrganizationServiceClientFactory;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
@@ -60,6 +61,8 @@ public class MemberOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    testOrganizationServiceClient = testOrganizationServiceClientFactory.create(testUser);
+
     parentOrg.addMember(testUser.getId());
     childOrg.addMember(testUser.getId());
     initialOrgNumber = testOrganizationServiceClient.getAll().size();

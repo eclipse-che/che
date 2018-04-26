@@ -50,7 +50,9 @@ public class ShareWorkspaceTest {
   @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private NavigationBar navigationBar;
+
   @Inject private AdminTestUser adminTestUser;
+
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
   @Inject private TestUser testUser;

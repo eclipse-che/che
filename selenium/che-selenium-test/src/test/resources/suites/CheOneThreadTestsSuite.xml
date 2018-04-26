@@ -43,20 +43,10 @@
             </method-selector>
         </method-selectors>
         <classes>
-            <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfSubOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.CreateOrganizationTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.organization.CreateRootOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationByBulkTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationInListTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.FilterOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.MemberOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.OrganizationMembersTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.RenameOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.SystemAdminOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.AddWorkspaceToOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
@@ -66,8 +56,6 @@
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
             <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectoryTest"/>
-            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>
-            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranchTest"/>
         </classes>
     </test>
 </suite>

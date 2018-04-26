@@ -17,12 +17,12 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.AddOrganization;
@@ -41,24 +41,28 @@ public class FilterOrganizationTest {
   private static final String WRONG_ORG_NAME = generate("wrong-org-", 7);
 
   private int initialOrgNumber;
+  private TestOrganizationServiceClient organizationServiceClient;
 
   @InjectTestOrganization private TestOrganization organization;
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
+  @Inject private TestOrganizationServiceClientFactory organizationServiceClientFactory;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private AddOrganization addOrganization;
   @Inject private NavigationBar navigationBar;
-  @Inject private AdminTestUser adminTestUser;
+
+  @Inject private TestUser testUser;
+
   @Inject private Dashboard dashboard;
 
   @BeforeClass
   public void setUp() throws Exception {
-    initialOrgNumber = testOrganizationServiceClient.getAllRoot().size();
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    organizationServiceClient = organizationServiceClientFactory.create(testUser);
+
+    organization.addMember(testUser.getId());
+    initialOrgNumber = organizationServiceClient.getAll().size();
+    dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   public void testOrganizationListFiler() {
@@ -69,7 +73,9 @@ public class FilterOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber);
     assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
-    assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
+    assertTrue(
+        organizationListPage.getValues(NAME).contains(organization.getName()),
+        "Organization list consisted of " + organizationListPage.getValues(NAME));
 
     // Tests filter the organization by full organization name
     organizationListPage.typeInSearchInput(organization.getName());

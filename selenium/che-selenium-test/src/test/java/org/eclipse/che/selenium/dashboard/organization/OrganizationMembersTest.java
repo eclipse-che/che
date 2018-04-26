@@ -14,9 +14,8 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestAdminOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -39,10 +38,7 @@ public class OrganizationMembersTest {
 
   @InjectTestOrganization private TestOrganization organization;
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
-
+  @Inject private CheTestAdminOrganizationServiceClient adminOrganizationServiceClient;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
@@ -61,7 +57,7 @@ public class OrganizationMembersTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
+    adminOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
   }
 
   public void testOperationsWithMembersInExistsOrganization() {

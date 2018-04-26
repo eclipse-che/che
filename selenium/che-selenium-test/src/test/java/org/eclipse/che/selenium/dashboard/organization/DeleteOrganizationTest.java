@@ -14,12 +14,12 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -36,6 +36,7 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.MULTIUSER})
 public class DeleteOrganizationTest {
   private int initialOrgNumber;
+  private TestOrganizationServiceClient testOrganizationServiceClient;
 
   @InjectTestOrganization(prefix = "parentOrg")
   private TestOrganization parentOrg;
@@ -43,24 +44,21 @@ public class DeleteOrganizationTest {
   @InjectTestOrganization(parentPrefix = "parentOrg")
   private TestOrganization childOrg;
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient adminTestOrganizationServiceClient;
-
-  @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
-
+  @Inject private TestOrganizationServiceClientFactory testOrganizationServiceClientFactory;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;
-  @Inject private TestUser testUser;
+  @Inject private DefaultTestUser testUser;
 
   @BeforeClass
   public void setUp() throws Exception {
+    testOrganizationServiceClient = testOrganizationServiceClientFactory.create(testUser);
+
     parentOrg.addAdmin(testUser.getId());
     childOrg.addAdmin(testUser.getId());
-    initialOrgNumber = userTestOrganizationServiceClient.getAll().size();
+    initialOrgNumber = testOrganizationServiceClient.getAll().size();
 
     dashboard.open(testUser.getName(), testUser.getPassword());
   }

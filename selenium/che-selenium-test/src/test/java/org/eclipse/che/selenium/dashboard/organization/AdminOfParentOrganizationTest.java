@@ -22,12 +22,14 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.util.ArrayList;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -44,18 +46,16 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.MULTIUSER})
 public class AdminOfParentOrganizationTest {
   private int initialOrgCount;
+  private TestOrganizationServiceClient userTestOrganizationServiceClient;
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient adminTestOrganizationServiceClient;
-
-  @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
-
+  @Inject private TestOrganizationServiceClientFactory userOrganizationServiceClientFactory;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private TestUser testUser;
+  @Inject private TestApiEndpointUrlProvider apiEndpointUrlProvider;
+  @Inject private TestUserHttpJsonRequestFactoryCreator testUserHttpJsonRequestFactoryCreator;
 
   @InjectTestOrganization(prefix = "parentOrg")
   private TestOrganization parentOrg;
@@ -65,6 +65,8 @@ public class AdminOfParentOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    userTestOrganizationServiceClient = userOrganizationServiceClientFactory.create(testUser);
+
     parentOrg.addAdmin(testUser.getId());
     childOrg.addMember(testUser.getId());
     initialOrgCount = userTestOrganizationServiceClient.getAll().size();

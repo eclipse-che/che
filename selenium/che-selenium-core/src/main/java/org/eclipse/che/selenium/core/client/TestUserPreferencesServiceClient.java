@@ -40,4 +40,12 @@ public class TestUserPreferencesServiceClient {
                 "git.committer.email", committerEmail))
         .request();
   }
+
+  public String getPreferences() throws Exception {
+    return httpRequestFactory
+        .fromUrl(apiEndpoint + "preferences")
+        .useGetMethod()
+        .request()
+        .asString();
+  }
 }

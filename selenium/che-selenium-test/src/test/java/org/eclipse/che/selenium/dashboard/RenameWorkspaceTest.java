@@ -18,8 +18,9 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
@@ -30,7 +31,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = TestGroup.OSIO)
 public class RenameWorkspaceTest {
+
   private static final int MIN_WORKSPACE_NAME_SIZE = 3;
   private static final int MAX_WORKSPACE_NAME_SIZE = 100;
   private static final String MIN_WORKSPACE_NAME = generate("", MIN_WORKSPACE_NAME_SIZE);
@@ -43,7 +46,7 @@ public class RenameWorkspaceTest {
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private TestWorkspace ws;
-  @Inject private TestUser user;
+  @Inject private DefaultTestUser user;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;

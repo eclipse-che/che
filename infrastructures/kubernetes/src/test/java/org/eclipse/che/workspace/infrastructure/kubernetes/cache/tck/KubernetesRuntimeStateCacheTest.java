@@ -25,6 +25,7 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
@@ -131,13 +132,15 @@ public class KubernetesRuntimeStateCacheTest {
     assertEquals(runtimesStates[0].getStatus(), status);
   }
 
-  @Test
-  public void shouldThrowExceptionWhenThereIsNotStateForSpecifiedRuntimeId() throws Exception {
+  @Test(
+    expectedExceptions = InfrastructureException.class,
+    expectedExceptionsMessageRegExp =
+        "Runtime state for workspace with id 'non-existent-ws' was not found"
+  )
+  public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusRetrieving()
+      throws Exception {
     // when
-    WorkspaceStatus status = runtimesStatesCache.getStatus(runtimesStates[0].getRuntimeId());
-
-    // then
-    assertEquals(runtimesStates[0].getStatus(), status);
+    runtimesStatesCache.getStatus(new RuntimeId("non-existent-ws", "defEnv", "acc1"));
   }
 
   @Test(dependsOnMethods = "shouldReturnRuntimeStatus")
@@ -190,6 +193,32 @@ public class KubernetesRuntimeStateCacheTest {
     WorkspaceStatus updatedStatus = runtimesStatesCache.getStatus(stateToUpdate.getRuntimeId());
     assertEquals(updatedStatus, WorkspaceStatus.RUNNING);
     assertEquals(stateToUpdate.getStatus(), WorkspaceStatus.RUNNING);
+  }
+
+  @Test(
+    expectedExceptions = InfrastructureException.class,
+    expectedExceptionsMessageRegExp =
+        "Runtime state for workspace with id 'non-existent-ws' was not found"
+  )
+  public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusUpdatingWithoutPredicate()
+      throws Exception {
+    // when
+    runtimesStatesCache.updateStatus(
+        new RuntimeId("non-existent-ws", "defEnv", "acc1"), WorkspaceStatus.STOPPED);
+  }
+
+  @Test(
+    expectedExceptions = InfrastructureException.class,
+    expectedExceptionsMessageRegExp =
+        "Runtime state for workspace with id 'non-existent-ws' was not found"
+  )
+  public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusUpdatingWithPredicate()
+      throws Exception {
+    // when
+    runtimesStatesCache.updateStatus(
+        new RuntimeId("non-existent-ws", "defEnv", "acc1"),
+        s -> s.equals(WorkspaceStatus.STOPPING),
+        WorkspaceStatus.STOPPED);
   }
 
   @Test(dependsOnMethods = "shouldReturnRuntimeStateByRuntimeId")

@@ -17,9 +17,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestAdminOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -44,10 +43,7 @@ public class DeleteOrganizationByBulkTest {
   @InjectTestOrganization private TestOrganization org1;
   @InjectTestOrganization private TestOrganization org2;
 
-  @Inject
-  @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
-
+  @Inject private CheTestAdminOrganizationServiceClient adminOrganizationServiceClient;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private AdminTestUser adminTestUser;
   @Inject private NavigationBar navigationBar;
@@ -56,7 +52,7 @@ public class DeleteOrganizationByBulkTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    initialOrgNumber = testOrganizationServiceClient.getAllRoot().size();
+    initialOrgNumber = adminOrganizationServiceClient.getAllRoot().size();
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
@@ -18,9 +19,9 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -36,18 +37,18 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+@Test(groups = TestGroup.OSIO)
 public class WorkspacesListTest {
-
-  private String workspaceName1 = NameGenerator.generate("wksp-", 5);
-  private String workspaceName2 = NameGenerator.generate("wksp-", 5);
-  private String workspaceName3 = NameGenerator.generate("wksp-", 5);
+  private String workspaceName1 = generate("wksp-", 5);
+  private String workspaceName2 = generate("wksp-", 5);
+  private String workspaceName3 = generate("wksp-", 5);
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private WorkspaceProjects workspaceProjects;
   @Inject private WorkspaceConfig workspaceConfig;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestUser defaultTestUser;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
@@ -215,6 +216,8 @@ public class WorkspacesListTest {
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
+    newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(name);
     projectSourcePage.clickOnAddOrImportProjectButton();
