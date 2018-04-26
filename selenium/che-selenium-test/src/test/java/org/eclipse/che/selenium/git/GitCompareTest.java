@@ -123,11 +123,11 @@ public class GitCompareTest {
     git.waitTextNotPresentIntoCompareRightEditor("// <<< checking compare content >>>");
     git.closeGitCompareForm();
 
-    // check compare after adding and deleting files
     createNewJavaFile();
     deleteJavaFile();
     addToIndex();
 
+    // check compare to deleting the file
     menu.runCommand(GIT, COMPARE_TOP, COMPARE_LATEST_VER);
     git.waitGroupGitCompareIsOpen();
     git.waitExpTextInGroupGitCompare(TEXT_GROUP);
@@ -138,6 +138,7 @@ public class GitCompareTest {
     gitCompare.waitExpectedTextIntoRightEditor("public class Aclass");
     git.closeGitCompareForm();
 
+    // check compare to adding the file
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("NewClass.java");
     git.clickOnGroupCompareButton();
@@ -176,7 +177,7 @@ public class GitCompareTest {
     git.waitGroupGitCompareIsOpen();
     git.waitExpTextInGroupGitCompare(TEXT_GROUP);
 
-    // check the 'Next' and 'Previous' diff buttons
+    // check the 'Next' diff button
     git.selectFileInChangedFilesTreePanel("Aclass.java");
     git.clickOnGroupCompareButton();
     git.waitGitCompareFormIsOpen();
@@ -185,9 +186,10 @@ public class GitCompareTest {
     git.waitExpTextIntoCompareLeftEditor("public class NewClass");
     gitCompare.clickOnNextDiffButton();
     git.waitExpTextIntoCompareLeftEditor("// <<< checking compare content >>>");
+
+    // check the 'Previous' diff button
     gitCompare.clickOnPreviousDiffButton();
     git.waitExpTextIntoCompareLeftEditor("public class NewClass");
-
     git.closeGitCompareForm();
     git.closeGroupGitCompareForm();
 
@@ -232,6 +234,7 @@ public class GitCompareTest {
     git.waitGitCompareRevisionFormIsOpen();
     git.clickOnCloseRevisionButton();
 
+    // check the change in the editor
     projectExplorer.openItemByPath(PATH_TO_APP_CONTROLLER);
     editor.waitActive();
     editor.waitTextIntoEditor("//change content from compare editor");
