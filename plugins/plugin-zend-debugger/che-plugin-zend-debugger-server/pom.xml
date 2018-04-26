@@ -13,7 +13,7 @@
     <parent>
         <artifactId>che-plugin-zend-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.4.1-SNAPSHOT</version>
+        <version>6.4.1</version>
     </parent>
     <artifactId>che-plugin-zend-debugger-server</artifactId>
     <packaging>jar</packaging>
