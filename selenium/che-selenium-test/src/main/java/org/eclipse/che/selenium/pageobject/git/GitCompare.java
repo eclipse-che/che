@@ -148,7 +148,7 @@ public class GitCompare {
    * @param expText expected value
    */
   public void waitTextNotPresentIntoLeftEditor(String expText) {
-    seleniumWebDriverHelper.waitTextIsNotPresence(leftCompareEditor, expText);
+    seleniumWebDriverHelper.waitTextIsNotPresented(leftCompareEditor, expText);
   }
 
   /**
@@ -166,7 +166,7 @@ public class GitCompare {
    * @param expText expected value
    */
   public void waitTextNotPresentIntoRightEditor(String expText) {
-    seleniumWebDriverHelper.waitTextIsNotPresence(rightCompareEditor, expText);
+    seleniumWebDriverHelper.waitTextIsNotPresented(rightCompareEditor, expText);
   }
 
   /** set focus on the left compare editor */
