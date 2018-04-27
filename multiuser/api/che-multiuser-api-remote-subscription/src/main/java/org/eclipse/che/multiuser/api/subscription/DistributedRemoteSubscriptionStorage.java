@@ -82,11 +82,18 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
     lock.lock();
     try {
       Set<RemoteSubscriptionContext> existing =
-          subscriptions.getOrDefault(method, Collections.emptySet());
+          subscriptions.get(method);
+      if (existing == null) {
+        return;
+      }
       existing.removeIf(
           remoteSubscriptionContext ->
               Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
-      subscriptions.put(method, existing);
+      if (existing.isEmpty()) {
+        subscriptions.remove(method);
+      } else {
+        subscriptions.put(method, existing);
+      }
     } finally {
       lock.unlock();
     }
