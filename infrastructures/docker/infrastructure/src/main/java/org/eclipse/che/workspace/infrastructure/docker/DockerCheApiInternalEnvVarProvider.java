@@ -15,27 +15,29 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
  * Provides env variable to docker machine with url of Che API.
  *
- * @author Alexander Garagatyi
+ * @author Mykhailo Kuznietsov
  */
 @Singleton
-public class DockerCheApiEnvVarProvider implements CheApiEnvVarProvider {
+public class DockerCheApiInternalEnvVarProvider implements CheApiInternalEnvVarProvider {
 
-  private Pair<String, String> apiEnvVar;
+  private static final String CHE_API_VARIABLE = "CHE_API";
+
+  private final Pair<String, String> apiEnvVar;
 
   @Inject
-  public DockerCheApiEnvVarProvider(
+  public DockerCheApiInternalEnvVarProvider(
       @Named("che.infra.docker.master_api_endpoint") String apiEndpoint) {
-    String apiEndpointEnvVar = System.getenv(API_ENDPOINT_URL_VARIABLE);
+    String apiEndpointEnvVar = System.getenv(CHE_API_VARIABLE);
     if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
       apiEndpoint = apiEndpointEnvVar;
     }
-    apiEnvVar = Pair.of(API_ENDPOINT_URL_VARIABLE, apiEndpoint);
+    apiEnvVar = Pair.of(CHE_API_INTERNAL_VARIABLE, apiEndpoint);
   }
 
   @Override

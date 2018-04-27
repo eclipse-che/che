@@ -50,6 +50,8 @@ import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentPro
 import org.eclipse.che.api.workspace.server.spi.provision.ProjectsVolumeForWsAgentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariableProvider;
@@ -153,6 +155,8 @@ public class WsMasterModule extends AbstractModule {
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(CheApiEnvVarProvider.class);
+    envVarProviders.addBinding().to(CheApiInternalEnvVarProvider.class);
+    envVarProviders.addBinding().to(CheApiExternalEnvVarProvider.class);
     envVarProviders.addBinding().to(MachineTokenEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceIdEnvVarProvider.class);
 
