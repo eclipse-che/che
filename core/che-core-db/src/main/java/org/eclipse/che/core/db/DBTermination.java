@@ -63,7 +63,7 @@ public class DBTermination {
    * the system.<br>
    * For more details see {@link JGroupsRemoteConnection#closeInternal()}
    *
-   * <p>TODO insert eclipse-link bug here
+   * <p>TODO eclipse-link extension issue https://bugs.eclipse.org/bugs/show_bug.cgi?id=534148
    */
   private void fixJChannelClosing(EntityManagerFactory emFactory) {
     try {
