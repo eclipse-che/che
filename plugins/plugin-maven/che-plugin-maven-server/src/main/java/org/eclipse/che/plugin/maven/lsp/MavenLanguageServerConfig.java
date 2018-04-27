@@ -35,7 +35,7 @@ public class MavenLanguageServerConfig implements LanguageServerConfig {
     return new RegexProvider() {
       @Override
       public Map<String, String> getLanguageRegexes() {
-        return ImmutableMap.of("maven", ".*pom\\.xml");
+        return ImmutableMap.of("maven", ".*[/\\\\]?pom\\.xml$");
       }
 
       @Override

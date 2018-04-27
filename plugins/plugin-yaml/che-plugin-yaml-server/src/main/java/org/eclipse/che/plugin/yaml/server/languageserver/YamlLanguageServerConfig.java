@@ -71,7 +71,7 @@ public class YamlLanguageServerConfig implements LanguageServerConfig {
 
   @PostConstruct
   private void subscribe() {
-    eventService.subscribe(this::onLSPRoxyInitialized, LanguageServerInitializedEvent.class);
+    eventService.subscribe(this::onLanguageServerInitialized, LanguageServerInitializedEvent.class);
   }
 
   protected static LanguageServer getYamlLanguageServer() {
@@ -82,7 +82,7 @@ public class YamlLanguageServerConfig implements LanguageServerConfig {
     YamlLanguageServerConfig.yamlLanguageServer = yamlLanguageServer;
   }
 
-  public void onLSPRoxyInitialized(LanguageServerInitializedEvent event) {
+  public void onLanguageServerInitialized(LanguageServerInitializedEvent event) {
 
     try {
       Map<String, String> preferences =
