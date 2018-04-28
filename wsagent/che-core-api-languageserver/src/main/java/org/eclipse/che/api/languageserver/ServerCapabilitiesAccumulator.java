@@ -38,6 +38,7 @@ public class ServerCapabilitiesAccumulator implements BinaryOperator<ServerCapab
     }
   }
 
+  /** @author Thomas Mäder */
   private static class ServerCapabilitiesOverlay {
     private ServerCapabilities left;
     private ServerCapabilities right;

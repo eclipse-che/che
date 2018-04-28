@@ -69,11 +69,13 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
   public Map<String, LanguageServerConfig> getAll() {
     Workspace workspace = workspaceProvider.get(workspaceId);
     if (workspace == null) {
+      LOG.error("Can't get workspace");
       return ImmutableMap.of();
     }
 
     Runtime runtime = workspace.getRuntime();
     if (runtime == null) {
+      LOG.error("Can't get runtime");
       return ImmutableMap.of();
     }
 

@@ -91,6 +91,8 @@ import org.slf4j.LoggerFactory;
  * Json RPC API for the textDoc
  *
  * <p>Dispatches onto the {@link LanguageServerInitializer}.
+ *
+ * @author Thomas Mäder
  */
 @Singleton
 public class TextDocumentService {

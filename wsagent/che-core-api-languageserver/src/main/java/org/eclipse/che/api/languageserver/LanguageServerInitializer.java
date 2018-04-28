@@ -204,7 +204,7 @@ class LanguageServerInitializer {
         LanguageServer languageServer = languageServerRegistry.get(id);
         InitializeParams initializeParams = initializeParamsProvider.get(id);
         InitializeResult initializeResult =
-            languageServer.initialize(initializeParams).get(5, SECONDS);
+            languageServer.initialize(initializeParams).get(30, SECONDS);
 
         LanguageServerInitializedEvent event =
             new LanguageServerInitializedEvent(id, languageServer);

@@ -43,7 +43,7 @@ class FindId {
       Set<Pattern> patterns = entry.getValue();
 
       for (Pattern pattern : patterns) {
-        if (pattern.matcher(wsPath).lookingAt()) {
+        if (pattern.matcher(wsPath).matches()) {
           ids.add(id);
         }
       }
