@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
  * Implement <a
  * href="https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#workspace_didChangeWatchedFiles">DidChangeWatchedFiles
  * Notification</a>
+ *
+ * @author Yevhen Vydolob
  */
 @Singleton
 class LanguageServerFileWatcher {

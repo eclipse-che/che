@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This implementation provides communication to a process that runs a language server. Besides that
  * it also lazily starts the language server process.
+ *
+ * @author Dmytro Kulieshov
  */
 public class ProcessCommunicationProvider implements CommunicationProvider {
   private static final Logger LOG = LoggerFactory.getLogger(ProcessCommunicationProvider.class);

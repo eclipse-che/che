@@ -10,7 +10,11 @@
  */
 package org.eclipse.che.api.languageserver;
 
-/** Language service service utilities */
+/**
+ * Language service service utilities
+ *
+ * @author Dmytro Kulieshov
+ */
 public class LanguageServiceUtils {
 
   private static final String PROJECTS = "/projects";

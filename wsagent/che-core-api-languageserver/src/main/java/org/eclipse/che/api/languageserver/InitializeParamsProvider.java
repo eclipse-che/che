@@ -47,7 +47,11 @@ import org.eclipse.lsp4j.WorkspaceEditCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Utility class that simplifies creation of a language server initialize parameters. */
+/**
+ * Utility class that simplifies creation of a language server initialize parameters.
+ *
+ * @author Dmytro Kulieshov
+ */
 @Singleton
 class InitializeParamsProvider {
   private static final Logger LOG = LoggerFactory.getLogger(InitializeParamsProvider.class);

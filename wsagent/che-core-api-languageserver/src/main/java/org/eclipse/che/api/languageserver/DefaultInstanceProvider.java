@@ -21,7 +21,11 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** The default way it is expected to construct language server instance */
+/**
+ * The default way it is expected to construct language server instance
+ *
+ * @author Dmytro Kulieshov
+ */
 public class DefaultInstanceProvider implements InstanceProvider {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultInstanceProvider.class);
 

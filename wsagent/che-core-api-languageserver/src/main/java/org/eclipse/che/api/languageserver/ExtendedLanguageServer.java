@@ -16,7 +16,12 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
-/** Language server wrapper extended with id and server capabilities */
+/**
+ * Language server wrapper extended with id and server capabilities
+ *
+ * @author Yevhen Vydolob
+ * @author Dmytro Kulieshov
+ */
 @Singleton
 class ExtendedLanguageServer {
   private final String id;

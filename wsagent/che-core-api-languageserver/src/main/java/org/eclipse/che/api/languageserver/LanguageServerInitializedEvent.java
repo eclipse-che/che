@@ -13,7 +13,11 @@ package org.eclipse.che.api.languageserver;
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-/** Event is published when language server instance is properly initialized and ready. */
+/**
+ * Event is published when language server instance is properly initialized and ready.
+ *
+ * @author Dmytro Kulieshov
+ */
 @EventOrigin("languageServer")
 public class LanguageServerInitializedEvent {
   private final String id;

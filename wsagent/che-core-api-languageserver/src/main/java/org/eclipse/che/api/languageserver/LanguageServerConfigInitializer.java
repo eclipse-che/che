@@ -28,7 +28,11 @@ import org.eclipse.che.api.languageserver.RegistryContainer.Registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Process all provided language server configuration and fill corresponding registries. */
+/**
+ * Process all provided language server configuration and fill corresponding registries.
+ *
+ * @author Dmytro Kulieshov
+ */
 @Singleton
 class LanguageServerConfigInitializer {
   private static final Logger LOG = LoggerFactory.getLogger(LanguageServerConfigInitializer.class);

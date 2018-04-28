@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This implementation provides communication to a socket that corresponds to a server that runs a
  * language server. Besides that it also lazily establishes a socket connection.
+ *
+ * @author Dmytro Kulieshov
  */
 class SocketCommunicationProvider implements CommunicationProvider {
   private static final Logger LOG = LoggerFactory.getLogger(SocketCommunicationProvider.class);

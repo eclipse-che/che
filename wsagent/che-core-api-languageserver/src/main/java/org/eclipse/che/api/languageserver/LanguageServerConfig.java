@@ -24,6 +24,7 @@ import org.eclipse.lsp4j.services.LanguageServer;
  *
  * @see LanguageServerConfigProvider
  * @see LanguageServerConfigInitializer
+ * @author Dmytro Kulieshov
  */
 public interface LanguageServerConfig {
 

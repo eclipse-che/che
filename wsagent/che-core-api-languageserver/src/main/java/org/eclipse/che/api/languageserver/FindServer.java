@@ -20,7 +20,11 @@ import org.eclipse.che.api.languageserver.RegistryContainer.Registry;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-/** Utility class that simplifies finding of language server instances */
+/**
+ * Utility class that simplifies finding of language server instances
+ *
+ * @author Dmytro Kulieshov
+ */
 @Singleton
 class FindServer {
   private final FindId findId;

@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
  * input/output streams). The example of of such use case is a custom language server instance
  * provider and the language server server that runs in the same virtual machine and does not use
  * input/output streams for communication.
+ *
+ * @author Dmytro Kulieshov
  */
 public class EmptyCommunicationProvider implements CommunicationProvider {
   private static final Logger LOG = LoggerFactory.getLogger(EmptyCommunicationProvider.class);

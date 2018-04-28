@@ -19,7 +19,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.RegistryContainer.Registry;
 
-/** Utility class that simplifies finding language server id. */
+/**
+ * Utility class that simplifies finding language server id.
+ *
+ * @author Dmytro Kulieshov
+ */
 @Singleton
 class FindId {
   private final Registry<Set<Pattern>> patterns;

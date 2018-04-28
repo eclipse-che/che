@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
  * Manages the whole language server initialization process that includes process launch/socket
  * connection establishing, language server instance creation and initialization, language server
  * capabilities accumulation.
+ *
+ * @author Dmytro Kulieshov
  */
 @Singleton
 class LanguageServerInitializer {

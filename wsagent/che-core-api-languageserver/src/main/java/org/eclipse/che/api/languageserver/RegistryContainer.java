@@ -26,7 +26,11 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-/** Instance contains all language server internal registries. */
+/**
+ * Instance contains all language server internal registries.
+ *
+ * @author Dmytro Kulieshov
+ */
 @Singleton
 class RegistryContainer {
   final Registry<String> idRegistry = new Registry<>();

@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Language server service that handles JSON-RPC requests related to language server initialization
  * and matching.
+ *
+ * @author Dmytro Kulieshov
  */
 @Singleton
 class LanguageServerService {

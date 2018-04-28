@@ -15,6 +15,8 @@ import java.util.Map;
 /**
  * Provides a map of language server configurations, where the key is the language server id and the
  * value is the configuration itself.
+ *
+ * @author Dmytro Kulieshov
  */
 public interface LanguageServerConfigProvider {
   /**

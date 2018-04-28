@@ -16,6 +16,8 @@ import javax.inject.Singleton;
 
 /**
  * Provides all language server configuration that is configured via <code>Guice</code> map binder.
+ *
+ * @author Dmytro Kulieshov
  */
 @Singleton
 class GuiceConfigProvider implements LanguageServerConfigProvider {

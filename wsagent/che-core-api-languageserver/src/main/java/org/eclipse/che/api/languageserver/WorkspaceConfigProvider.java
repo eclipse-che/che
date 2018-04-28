@@ -45,6 +45,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides all language server configuration that is defined within the workspace configuration.
+ *
+ * @author Dmytro Kulieshov
  */
 @Singleton
 class WorkspaceConfigProvider implements LanguageServerConfigProvider {
