@@ -48,13 +48,15 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
   public PlainJavaPageViewImpl() {
     rootElement = ourUiBinder.createAndBindUi(this);
 
-    browseSourceBtn.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            delegate.onBrowseSourceButtonClicked();
-          }
-        });
+//    browseSourceBtn.addClickHandler(
+//        new ClickHandler() {
+//          @Override
+//          public void onClick(ClickEvent event) {
+//            delegate.onBrowseSourceButtonClicked();
+//          }
+//        });
+    browseSourceBtn.setEnabled(false);
+    sourceFolderField.setEnabled(false);
 
     browseLibBtn.addClickHandler(
         new ClickHandler() {

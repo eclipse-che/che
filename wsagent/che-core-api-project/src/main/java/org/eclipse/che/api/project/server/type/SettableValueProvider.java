@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server.type;
 
 /** @author gazarenkov */
+@Deprecated
 public abstract class SettableValueProvider implements ValueProvider {
 
   @Override
