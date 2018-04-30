@@ -44,18 +44,18 @@ echo
 
 HELP="
 --help - script help menu
---project | -p - OpenShift namespace to deploy Che (defaults to eclipse-che)
+--project | -p - OpenShift namespace to deploy Che (defaults to eclipse-che).  Example: --project=myproject
 --multiuser - Deploy che in multiuser mode
 --no-pull - IfNotPresent pull policy for Che server deployment
 --rolling - Rolling update strategy (Recreate is the default one). With Rolling strategy Che server pvc and volume aren't created
 --wait-che - Track Che deployment progress until pod is healthy
 --debug - Deploy Che in a debug mode, create and expose debug route
---image-che - Override default Che image. Example --image-che=org/repo:tag. Tag is mandatory!
+--image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
 CHE_IMAGE_TAG - Set che-server image tag, defaults to "nightly"
-CHE_INFRA_OPENSHIFT_PROJECT - namespace for workspace objects (defaults to eclipse-che). A separate ws namespace can be used only if username/password or token is provided
+CHE_INFRA_OPENSHIFT_PROJECT - namespace for workspace objects (defaults to current namespace of Che pod (CHE_OPENSHIFT_PROJECT which defaults to eclipse-che)). It can be overriden with -p|--project param. A separate ws namespace can be used only if username/password or token is provided
 CHE_INFRA_KUBERNETES_USERNAME - OpenShift username to create workspace objects with. Not used by default (service account is used instead)
 CHE_INFRA_KUBERNETES_PASSWORD - OpenShift password
 CHE_INFRA_KUBERNETES_OAUTH__TOKEN - OpenShift token to create workspace objects with. Not used by default (service account is used instead)
@@ -379,7 +379,7 @@ ${CHE_VAR_ARRAY}"
     printInfo "Che successfully deployed and will be soon available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
     exposeDebugService
     if [ "${WAIT_FOR_CHE}" == "true" ]; then
-    wait_for_che
+      wait_for_che
     fi
 }
 
