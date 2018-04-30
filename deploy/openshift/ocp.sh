@@ -204,7 +204,7 @@ parse_args() {
     --run-ocp - run ocp cluster
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
-    --multiuser - deploy che in multiuser mode
+    --multiuser - deploy Che in multiuser mode
     --no-pull - IfNotPresent pull policy for Che server deployment
     --rolling - rolling update strategy (Recreate is the default one)
     --wait-che - track Che deployment progress until pod is healthy
