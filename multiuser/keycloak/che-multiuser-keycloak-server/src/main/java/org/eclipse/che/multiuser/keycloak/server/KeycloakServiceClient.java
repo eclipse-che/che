@@ -15,6 +15,9 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_
 
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.impl.DefaultClaims;
 import java.io.IOException;
@@ -210,13 +213,19 @@ public class KeycloakServiceClient {
 
   /** Converts key=value&foo=bar string into json */
   private static String toJson(String source) {
-    Map<String, String> queryPairs = new HashMap<>();
-    Arrays.stream(source.split("&"))
+    Map<String, String> queryPairs;
+    try {
+        queryPairs = gson.<Map<String, String>>fromJson(source, Map.class);
+    } catch (JsonSyntaxException notJsonException) {
+        queryPairs = new HashMap<>();
+        Map<String, String> pairsToFill = queryPairs;
+        Arrays.stream(source.split("&"))
         .forEach(
             p -> {
               int delimiterIndex = p.indexOf("=");
-              queryPairs.put(p.substring(0, delimiterIndex), p.substring(delimiterIndex + 1));
+              pairsToFill.put(p.substring(0, delimiterIndex), p.substring(delimiterIndex + 1));
             });
+    }
     return gson.toJson(queryPairs);
   }
 }
