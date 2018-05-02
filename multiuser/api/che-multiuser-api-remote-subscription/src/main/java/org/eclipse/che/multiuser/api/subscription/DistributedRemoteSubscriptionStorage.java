@@ -81,8 +81,7 @@ public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionS
     Lock lock = lockService.getLock(method);
     lock.lock();
     try {
-      Set<RemoteSubscriptionContext> existing =
-          subscriptions.get(method);
+      Set<RemoteSubscriptionContext> existing = subscriptions.get(method);
       if (existing == null) {
         return;
       }
