@@ -10,15 +10,32 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 
-/** @author Sergii Leshchenko */
-public interface CheApiEnvVarProvider extends EnvVarProvider {
+/**
+ * CHE_API endpoint var provided. For all currently supported infrastructures, it reuses {@link
+ * CheApiInternalEnvVarProvider} to provide the value.
+ *
+ * @deprecated this class shall soon be removed, as this variable is provided only for backward
+ *     compatibility
+ * @author Sergii Leshchenko
+ * @author Mykhailo Kuznietsov
+ */
+@Deprecated
+public class CheApiEnvVarProvider implements EnvVarProvider {
 
-  /** Env variable for machine that contains url of Che API */
-  String API_ENDPOINT_URL_VARIABLE = "CHE_API";
+  /** Che API url */
+  public static final String CHE_API_VARIABLE = "CHE_API";
+
+  private final CheApiInternalEnvVarProvider cheApiInternalEnvVarProvider;
+
+  @Inject
+  public CheApiEnvVarProvider(CheApiInternalEnvVarProvider cheApiInternalEnvVarProvider) {
+    this.cheApiInternalEnvVarProvider = cheApiInternalEnvVarProvider;
+  }
 
   /**
    * Returns Che API environment variable which should be injected into machines.
@@ -26,5 +43,7 @@ public interface CheApiEnvVarProvider extends EnvVarProvider {
    * @param runtimeIdentity which may be needed to evaluate environment variable value
    */
   @Override
-  Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException;
+  public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
+    return Pair.of(CHE_API_VARIABLE, cheApiInternalEnvVarProvider.get(runtimeIdentity).second);
+  }
 }
