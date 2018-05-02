@@ -347,10 +347,10 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Override
   public synchronized RegisteredProject move(String srcWsPath, String dstWsPath, boolean overwrite)
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-    fsManager.move(srcWsPath, dstWsPath);
-
     RegisteredProject oldProjectConfig =
         projectConfigRegistry.remove(srcWsPath).orElseThrow(IllegalStateException::new);
+
+    fsManager.move(srcWsPath, dstWsPath);
 
     String dstName = nameOf(dstWsPath);
     NewProjectConfig newProjectConfig =

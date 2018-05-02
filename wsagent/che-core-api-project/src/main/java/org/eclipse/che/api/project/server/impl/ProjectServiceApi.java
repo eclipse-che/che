@@ -65,6 +65,7 @@ import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectService;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -227,7 +228,11 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     if (projectManager.isRegistered(wsPath)) {
-      projectManager.delete(wsPath);
+      projectManager
+          .delete(wsPath)
+          .map(RegisteredProject::getPath)
+          .map(ProjectDeletedEvent::new)
+          .ifPresent(eventService::publish);
     } else {
       fsManager.delete(wsPath);
     }
