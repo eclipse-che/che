@@ -96,8 +96,7 @@ public class MavenWorkspace {
         new MavenProjectListener() {
           @Override
           public void projectResolved(
-              MavenProject project, MavenProjectModifications modifications) {
-          }
+              MavenProject project, MavenProjectModifications modifications) {}
 
           @Override
           public void projectUpdated(
