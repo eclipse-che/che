@@ -23,5 +23,7 @@ public class WorkspaceActivityModule extends AbstractModule {
     bind(WorkspaceActivityService.class);
     bind(WorkspaceActivityManager.class);
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
+    bind(JpaWorkspaceActivityDao.RemoveExpirationsBeforeWorkspaceRemovedEventSubscriber.class)
+        .asEagerSingleton();
   }
 }
