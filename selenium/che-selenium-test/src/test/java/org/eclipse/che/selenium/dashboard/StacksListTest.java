@@ -34,9 +34,9 @@ public class StacksListTest {
 
   private static final String NEW_STACK_NAME = generate("", 8);
 
+  @Inject private StackDetails stackDetails;
   @Inject private Dashboard dashboard;
   @Inject private Stacks stacks;
-  @Inject private StackDetails stackDetails;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -69,7 +69,7 @@ public class StacksListTest {
     stacks.waitBuildStackFromRecipeButton();
     stacks.waitFilterStacksField();
 
-    // check all Stack list headers are present
+    // check that all Stack list headers are present
     ArrayList<String> headers = stacks.getStacksListHeaders();
     assertTrue(headers.contains("NAME"));
     assertTrue(headers.contains("DESCRIPTION"));
@@ -86,7 +86,7 @@ public class StacksListTest {
 
   @Test
   public void checkStacksSelectingByCheckbox() {
-    // select stack by checkbox and check it is selected
+    // select stacks by checkbox and check it is selected
     stacks.selectStackByCheckbox(NEW_STACK_NAME);
     assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
     stacks.selectStackByCheckbox(NEW_STACK_NAME);
@@ -124,11 +124,11 @@ public class StacksListTest {
   @Test
   public void checkStacksSorting() {
     ArrayList<String> stackNamesListBeforeSorting, stackNamesListAfterSorting;
+    // click on sort button to initialize it
+    stacks.clickOnSortStacksByNameButton();
 
     // get stacks names list and click on sort stacks button
     stackNamesListBeforeSorting = stacks.getStacksNamesList();
-    // TODO fix need to click on the sort button twice
-    stacks.clickOnSortStacksByNameButton();
     stacks.clickOnSortStacksByNameButton();
 
     // check that Stacks list reverted
@@ -143,7 +143,7 @@ public class StacksListTest {
   }
 
   @Test
-  public void checkActionButtons() {
+  public void checkStackActionButtons() {
     String stackName = generate("", 8);
     createStack(stackName);
     // delete stack by the Action delete stack button
