@@ -71,7 +71,7 @@ public class WorkspaceServiceTerminationTest {
     when(workspaceRuntimes.isAnyRunning()).thenAnswer(inv -> isAnyRunning.get());
 
     // one workspace is running
-    when(workspaceRuntimes.getRuntimesIds()).thenReturn(Collections.singleton(workspaceId));
+    when(workspaceRuntimes.getRunning()).thenReturn(Collections.singleton(workspaceId));
     when(workspaceRuntimes.getStatus(workspaceId)).thenReturn(status);
 
     when(runtimeInfrastructure.getIdentities()).thenReturn(Collections.emptySet());
@@ -95,7 +95,7 @@ public class WorkspaceServiceTerminationTest {
     String workspaceId = "workspace123";
 
     // one workspace is running
-    when(workspaceRuntimes.getRuntimesIds()).thenReturn(Collections.singleton(workspaceId));
+    when(workspaceRuntimes.getRunning()).thenReturn(Collections.singleton(workspaceId));
     when(workspaceRuntimes.getStatus(workspaceId)).thenReturn(WorkspaceStatus.RUNNING);
 
     when(workspaceRuntimes.isAnyInProgress())
@@ -114,7 +114,7 @@ public class WorkspaceServiceTerminationTest {
 
   @Test
   public void publishesStoppedWorkspaceStoppedEventsAsServiceItemStoppedEvents() throws Exception {
-    when(workspaceRuntimes.getRuntimesIds()).thenReturn(ImmutableSet.of("id1", "id2", "id3"));
+    when(workspaceRuntimes.getRunning()).thenReturn(ImmutableSet.of("id1", "id2", "id3"));
     doAnswer(
             inv -> {
               @SuppressWarnings("unchecked")

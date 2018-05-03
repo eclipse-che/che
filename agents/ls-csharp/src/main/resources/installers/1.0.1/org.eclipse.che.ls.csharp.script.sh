@@ -237,7 +237,10 @@ fi
 ### Install C# LS ###
 #####################
 
-curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}
+
+if [ ! -d "${LS_DIR}/node_modules" ]; then
+    curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}
+fi
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}

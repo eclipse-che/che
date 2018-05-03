@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Terminates workspace service. In case of full system shutdown or if current infra isn't support
+ * Terminates workspace service. In case of full system shutdown or if current infra doesn't support
  * workspaces recovery, it blocks starting new workspaces and stops all that already running. In
  * case of suspend and recovery support, blocks starting new workspaces and waits until all
  * workspaces that are currently in a starting/stopping state to finish this process and become
@@ -144,7 +144,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
   }
 
   private void stopRunningAndStartingWorkspacesAsync() {
-    for (String workspaceId : runtimes.getRuntimesIds()) {
+    for (String workspaceId : runtimes.getRunning()) {
       WorkspaceStatus status = runtimes.getStatus(workspaceId);
       if (status == WorkspaceStatus.RUNNING || status == WorkspaceStatus.STARTING) {
         try {
@@ -168,7 +168,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     private final AtomicInteger currentlyStopped;
 
     private WorkspaceStoppedEventsPropagator() {
-      this.totalRunning = runtimes.getRuntimesIds().size();
+      this.totalRunning = runtimes.getRunning().size();
       this.currentlyStopped = new AtomicInteger(0);
     }
 

@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.BRANCH
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.FORK_CREATED;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.NEW_COMMITS_PUSHED;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -38,6 +39,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
 import org.eclipse.che.selenium.pageobject.git.Git;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -111,10 +113,16 @@ public class PullRequestPluginWithForkTest {
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(FORK_CREATED);
     pullRequestPanel.waitStatusOk(BRANCH_PUSHED_ON_YOUR_FORK);
-    pullRequestPanel.waitMessage(PULL_REQUEST_CREATED);
+
+    try {
+      pullRequestPanel.waitMessage(PULL_REQUEST_CREATED);
+    } catch (TimeoutException te) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/9548");
+    }
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, dependsOnMethods = "createPullRequest")
   void updatePullRequest() throws Exception {
     editor.closeAllTabs();
     loader.waitOnClosed();

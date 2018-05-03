@@ -91,7 +91,6 @@ public class SystemTerminatorTest {
     verify(eventService).publish(new SuspendingSystemServiceEvent("service1"));
     verify(eventService).publish(new StoppingSystemServiceEvent("service1"));
     verify(eventService).publish(new SystemServiceStoppedEvent("service1"));
-    verify(eventService).publish(new SystemServiceSuspendedEvent("service1"));
     verify(eventService).publish(new SuspendingSystemServiceEvent("service2"));
     verify(eventService).publish(new SystemServiceSuspendedEvent("service2"));
   }
@@ -127,6 +126,26 @@ public class SystemTerminatorTest {
     new ServiceTerminator(eventService, terminations);
   }
 
+  @Test(
+    dataProvider = "sameNameTerminations",
+    expectedExceptions = RuntimeException.class,
+    expectedExceptionsMessageRegExp = "Duplicate termination found with service name .+"
+  )
+  public void shouldFailOnTerminationsWithSameServiceName(Set<ServiceTermination> terminations)
+      throws Exception {
+    new ServiceTerminator(eventService, terminations);
+  }
+
+  @Test(
+    dataProvider = "wrongDependencyTerminations",
+    expectedExceptions = RuntimeException.class,
+    expectedExceptionsMessageRegExp = "Unknown dependency found in termination .+"
+  )
+  public void shouldFailOnTerminationsWithUnexistingDeps(Set<ServiceTermination> terminations)
+      throws Exception {
+    new ServiceTerminator(eventService, terminations);
+  }
+
   @DataProvider(name = "dependableTerminations")
   public Object[][] dependableTerminations() {
     return new Object[][] {
@@ -154,6 +173,30 @@ public class SystemTerminatorTest {
             getServiceTerminationWithDependency("C", Collections.emptySet()),
             getServiceTerminationWithDependency("D", ImmutableSet.of("B")) // loop here
             )
+      }
+    };
+  }
+
+  @DataProvider(name = "sameNameTerminations")
+  public Object[][] sameNameTerminations() {
+    return new Object[][] {
+      {
+        ImmutableSet.of(
+            getServiceTerminationWithDependency("A", Collections.emptySet()),
+            getServiceTerminationWithDependency("C", Collections.emptySet()),
+            getServiceTerminationWithDependency("C", Collections.emptySet()))
+      }
+    };
+  }
+
+  @DataProvider(name = "wrongDependencyTerminations")
+  public Object[][] wrongDependencyTerminations() {
+    return new Object[][] {
+      {
+        ImmutableSet.of(
+            getServiceTerminationWithDependency("A", Collections.emptySet()),
+            // no such termination
+            getServiceTerminationWithDependency("C", ImmutableSet.of("B")))
       }
     };
   }

@@ -15,7 +15,7 @@ import org.eclipse.che.commons.lang.concurrent.StripedLocks;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 
 /**
- * Default implementation of {@link WorkspaceLockService} that is use {@link StripedLocks}.
+ * Default implementation of {@link WorkspaceLockService} that uses {@link StripedLocks}.
  *
  * @author Anton Korneta
  */

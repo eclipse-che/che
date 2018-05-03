@@ -13,7 +13,6 @@ package org.eclipse.che.api.core.notification;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiPredicate;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -73,11 +72,7 @@ public class RemoteSubscriptionManager {
 
   private void consumeUnSubscriptionRequest(
       String endpointId, EventSubscription eventSubscription) {
-    remoteSubscriptionStorage
-        .getByMethod(eventSubscription.getMethod())
-        .removeIf(
-            remoteSubscriptionContext ->
-                Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
+    remoteSubscriptionStorage.removeSubscription(eventSubscription.getMethod(), endpointId);
   }
 
   private <T> void transmit(String endpointId, String method, T event) {

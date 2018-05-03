@@ -28,24 +28,31 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -84,10 +91,12 @@ public class WorkspaceRuntimesTest {
 
   @Mock private WorkspaceLockService lockService;
 
-  @Mock WorkspaceStatusCache cache;
+  @Mock private WorkspaceStatusCache statuses;
 
   private RuntimeInfrastructure infrastructure;
+
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
+
   private WorkspaceRuntimes runtimes;
 
   @BeforeMethod
@@ -103,7 +112,7 @@ public class WorkspaceRuntimesTest {
             workspaceDao,
             dbInitializer,
             probeScheduler,
-            cache,
+            statuses,
             lockService);
   }
 
@@ -117,7 +126,7 @@ public class WorkspaceRuntimesTest {
         .thenReturn(new TestInternalRuntime(context, emptyMap(), WorkspaceStatus.STARTING));
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
     doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
-    when(cache.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
+    when(statuses.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
 
     // try recover
     runtimes.recoverOne(infrastructure, identity);
@@ -128,7 +137,11 @@ public class WorkspaceRuntimesTest {
     assertEquals(workspace.getStatus(), WorkspaceStatus.STARTING);
   }
 
-  @Test
+  @Test(
+    expectedExceptions = ServerException.class,
+    expectedExceptionsMessageRegExp =
+        "Workspace configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered"
+  )
   public void runtimeIsNotRecoveredIfNoWorkspaceFound() throws Exception {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     when(workspaceDao.get(identity.getWorkspaceId())).thenThrow(new NotFoundException("no!"));
@@ -139,7 +152,11 @@ public class WorkspaceRuntimesTest {
     assertFalse(runtimes.hasRuntime(identity.getWorkspaceId()));
   }
 
-  @Test
+  @Test(
+    expectedExceptions = ServerException.class,
+    expectedExceptionsMessageRegExp =
+        "Environment configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered"
+  )
   public void runtimeIsNotRecoveredIfNoEnvironmentFound() throws Exception {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     WorkspaceImpl workspace = mockWorkspace(identity);
@@ -151,7 +168,10 @@ public class WorkspaceRuntimesTest {
     assertFalse(runtimes.hasRuntime(identity.getWorkspaceId()));
   }
 
-  @Test
+  @Test(
+    expectedExceptions = ServerException.class,
+    expectedExceptionsMessageRegExp = "Couldn't recover runtime 'workspace123:my-env'. Error: oops!"
+  )
   public void runtimeIsNotRecoveredIfInfraPreparationFailed() throws Exception {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
@@ -181,7 +201,7 @@ public class WorkspaceRuntimesTest {
             workspaceDao,
             dbInitializer,
             probeScheduler,
-            cache,
+            statuses,
             lockService);
     localRuntimes.init();
     RuntimeIdentityDto identity =
@@ -192,7 +212,7 @@ public class WorkspaceRuntimesTest {
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
     when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
-    when(cache.remove(anyString())).thenReturn(WorkspaceStatus.RUNNING);
+    when(statuses.remove(anyString())).thenReturn(WorkspaceStatus.RUNNING);
 
     RuntimeStatusEvent event =
         DtoFactory.newDto(RuntimeStatusEvent.class)
@@ -211,6 +231,173 @@ public class WorkspaceRuntimesTest {
     assertNotNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));
     assertTrue(Boolean.valueOf(ws.getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME)));
     assertEquals(ws.getAttributes().get(ERROR_MESSAGE_ATTRIBUTE_NAME), error);
+  }
+
+  @Test
+  public void shouldInjectRuntime() throws Exception {
+    // given
+    WorkspaceImpl workspace = new WorkspaceImpl();
+    workspace.setId("ws123");
+    when(statuses.get("ws123")).thenReturn(WorkspaceStatus.RUNNING);
+
+    ImmutableMap<String, Machine> machines =
+        ImmutableMap.of("machine", new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING));
+
+    RuntimeIdentity identity = new RuntimeIdentityImpl("ws123", "my-env", "myId");
+    RuntimeContext context = mockContext(identity);
+    doReturn(context).when(infrastructure).prepare(eq(identity), any());
+
+    ConcurrentHashMap<String, InternalRuntime<?>> runtimesStorage = new ConcurrentHashMap<>();
+    runtimesStorage.put(
+        "ws123", new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING));
+    WorkspaceRuntimes localRuntimes =
+        new WorkspaceRuntimes(
+            runtimesStorage,
+            eventService,
+            ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
+            infrastructure,
+            sharedPool,
+            workspaceDao,
+            dbInitializer,
+            probeScheduler,
+            statuses,
+            lockService);
+
+    // when
+    localRuntimes.injectRuntime(workspace);
+
+    // then
+    assertEquals(workspace.getStatus(), WorkspaceStatus.RUNNING);
+    assertEquals(workspace.getRuntime(), new RuntimeImpl("my-env", machines, "myId"));
+  }
+
+  @Test
+  public void shouldRecoverRuntimeWhenThereIsNotCachedOneDuringInjecting() throws Exception {
+    // given
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    mockWorkspace(identity);
+
+    when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
+    RuntimeContext context = mockContext(identity);
+    doReturn(context).when(infrastructure).prepare(eq(identity), any());
+    ImmutableMap<String, Machine> machines =
+        ImmutableMap.of("machine", new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING));
+    when(context.getRuntime())
+        .thenReturn(new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING));
+    doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
+    when(statuses.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
+    doReturn(ImmutableSet.of(identity)).when(infrastructure).getIdentities();
+
+    // when
+    WorkspaceImpl workspace = new WorkspaceImpl();
+    workspace.setId("workspace123");
+    runtimes.injectRuntime(workspace);
+
+    // then
+    assertEquals(workspace.getStatus(), WorkspaceStatus.STARTING);
+    assertEquals(workspace.getRuntime(), new RuntimeImpl("my-env", machines, "myId"));
+  }
+
+  @Test
+  public void shouldNotInjectRuntimeIfThereIsNoCachedStatus() throws Exception {
+    // when
+    WorkspaceImpl workspace = new WorkspaceImpl();
+    workspace.setId("workspace123");
+    runtimes.injectRuntime(workspace);
+
+    // then
+    assertEquals(workspace.getStatus(), WorkspaceStatus.STOPPED);
+    assertNull(workspace.getRuntime());
+  }
+
+  @Test
+  public void shouldNotInjectRuntimeIfExceptionOccurredOnRuntimeFetching() throws Exception {
+    // given
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    mockWorkspace(identity);
+
+    when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
+    RuntimeContext context = mockContext(identity);
+    ImmutableMap<String, Machine> machines =
+        ImmutableMap.of("machine", new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING));
+    when(context.getRuntime())
+        .thenReturn(new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING));
+    doThrow(new InfrastructureException("error")).when(infrastructure).prepare(eq(identity), any());
+
+    // when
+    WorkspaceImpl workspace = new WorkspaceImpl();
+    workspace.setId("workspace123");
+    runtimes.injectRuntime(workspace);
+
+    // then
+    assertEquals(workspace.getStatus(), WorkspaceStatus.STOPPED);
+    assertNull(workspace.getRuntime());
+  }
+
+  @Test
+  public void shouldReturnWorkspaceStatus() {
+    // given
+    when(statuses.get("ws123")).thenReturn(WorkspaceStatus.STOPPING);
+
+    // when
+    WorkspaceStatus fetchedStatus = runtimes.getStatus("ws123");
+
+    // then
+    assertEquals(fetchedStatus, WorkspaceStatus.STOPPING);
+  }
+
+  @Test
+  public void shouldReturnStoppedWorkspaceStatusIfThereIsNotCachedValue() {
+    // given
+    when(statuses.get("ws123")).thenReturn(null);
+
+    // when
+    WorkspaceStatus fetchedStatus = runtimes.getStatus("ws123");
+
+    // then
+    assertEquals(fetchedStatus, WorkspaceStatus.STOPPED);
+  }
+
+  @Test
+  public void shouldReturnTrueIfThereIsCachedRuntimeStatusOnRuntimeExistenceChecking() {
+    // given
+    when(statuses.get("ws123")).thenReturn(WorkspaceStatus.STOPPING);
+
+    // when
+    boolean hasRuntime = runtimes.hasRuntime("ws123");
+
+    // then
+    assertTrue(hasRuntime);
+  }
+
+  @Test
+  public void shouldReturnFalseIfThereIsNoCachedRuntimeStatusOnRuntimeExistenceChecking() {
+    // given
+    when(statuses.get("ws123")).thenReturn(null);
+
+    // when
+    boolean hasRuntime = runtimes.hasRuntime("ws123");
+
+    // then
+    assertFalse(hasRuntime);
+  }
+
+  @Test
+  public void shouldReturnRuntimesIdsOfActiveWorkspaces() {
+    // given
+    when(statuses.asMap())
+        .thenReturn(
+            ImmutableMap.of(
+                "ws1", WorkspaceStatus.STARTING,
+                "ws2", WorkspaceStatus.RUNNING,
+                "ws3", WorkspaceStatus.STOPPING));
+
+    // when
+    Set<String> active = runtimes.getRunning();
+
+    // then
+    assertEquals(active.size(), 3);
+    assertTrue(active.containsAll(Arrays.asList("ws1", "ws2", "ws3")));
   }
 
   private RuntimeContext mockContext(RuntimeIdentity identity)
@@ -254,8 +441,7 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
-    public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment)
-        throws InfrastructureException {
+    public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment) {
       throw new UnsupportedOperationException();
     }
   }

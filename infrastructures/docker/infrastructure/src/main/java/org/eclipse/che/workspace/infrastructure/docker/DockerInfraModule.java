@@ -16,7 +16,8 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.infrastructure.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.infrastructure.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
@@ -60,7 +61,8 @@ public class DockerInfraModule extends AbstractModule {
     install(new DockerEnvironmentConvertersModule());
     install(new ContainerSystemSettingsProvisioningModule());
 
-    bind(CheApiEnvVarProvider.class).to(DockerCheApiEnvVarProvider.class);
+    bind(CheApiInternalEnvVarProvider.class).to(DockerCheApiInternalEnvVarProvider.class);
+    bind(CheApiExternalEnvVarProvider.class).to(DockerCheApiExternalEnvVarProvider.class);
 
     bind(RuntimeInfrastructure.class).to(DockerRuntimeInfrastructure.class);
 

@@ -260,9 +260,6 @@ init() {
   [ -z "$CHE_WORKSPACE_STORAGE" ] && export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
   [ -z "$CHE_WORKSPACE_STORAGE_CREATE_FOLDERS" ] && export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
 
-  #Recursively removes the legacy che-data/lib folder with agents inside(will be removed in future versions)
-  rm -rf ${CHE_DATA}/lib
-
   # Cleanup no longer in use stacks folder, accordance to a new loading policy.
   if [[ -d "${CHE_DATA}"/stacks ]];then
     rm -rf "${CHE_DATA}"/stacks

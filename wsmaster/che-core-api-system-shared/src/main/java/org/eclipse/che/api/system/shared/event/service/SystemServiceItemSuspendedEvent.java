@@ -17,7 +17,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 /**
  * See {@link EventType#SERVICE_ITEM_SUSPENDED} description.
  *
- * @author Max SHaposhnyk
+ * @author Max Shaposhnyk
  */
 public class SystemServiceItemSuspendedEvent extends SystemServiceEvent {
 

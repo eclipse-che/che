@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class KubernetesClientTermination implements ServiceTermination {
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesClientTermination.class);
+
   private KubernetesClientFactory kubernetesClientFactory;
 
   @Inject
