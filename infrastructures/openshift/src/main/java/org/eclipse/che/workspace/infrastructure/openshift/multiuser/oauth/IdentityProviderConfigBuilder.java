@@ -11,11 +11,14 @@
 package org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth;
 
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
+import com.google.inject.Provider;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.openshift.client.OpenShiftConfig;
+import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import java.util.Optional;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -33,12 +36,6 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 import org.eclipse.che.workspace.infrastructure.openshift.ConfigBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.Provider;
-
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.openshift.client.OpenShiftConfig;
-import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 
 /**
  * This class retrieves the OpenShift OAuth token of the current Che user, and injects it the
@@ -133,10 +130,11 @@ public class IdentityProviderConfigBuilder extends ConfigBuilder {
                 + "' identity provider",
             e);
         if (e.getMessage().endsWith("Invalid token.")) {
-          throw new InfrastructureException("Your session has expired. \nPlease "
-        + "<a href='javascript:location.reload();' target='_top'>"
-        + "login"
-        + "</a> to Che again to get access to your Openshift account");
+          throw new InfrastructureException(
+              "Your session has expired. \nPlease "
+                  + "<a href='javascript:location.reload();' target='_top'>"
+                  + "login"
+                  + "</a> to Che again to get access to your Openshift account");
         }
         throw new InfrastructureException(e.getMessage(), e);
       } catch (Exception e) {
