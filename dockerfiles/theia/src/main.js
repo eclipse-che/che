@@ -140,7 +140,7 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
         }
     }
 
-    if (!fs.existsSync(pluginPath + 'node_mudules') || !fs.existsSync(pluginPath + 'lib')) {
+    if (!fs.existsSync(pluginPath + 'node_modules') || !fs.existsSync(pluginPath + 'lib')) {
         try {
             console.log('Building plugin: ' + pluginName);
             cp.execSync(`cd ${pluginPath} && yarn`);
