@@ -99,7 +99,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Singleton
-  public static class RemoveExpirationsBeforeWorkspaceRemovedEventSubscriber
+  public static class RemoveExpirationBeforeWorkspaceRemovedEventSubscriber
       extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
 
     @Inject private EventService eventService;
