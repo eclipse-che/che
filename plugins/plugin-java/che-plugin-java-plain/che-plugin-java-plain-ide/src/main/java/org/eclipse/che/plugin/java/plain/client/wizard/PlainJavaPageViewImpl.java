@@ -31,7 +31,7 @@ import com.google.inject.Inject;
  */
 public class PlainJavaPageViewImpl implements PlainJavaPageView {
   private static PlainJavaPageViewImplUiBinder ourUiBinder =
-      GWT.create(PlainJavaPageViewImplUiBinder.class);
+          GWT.create(PlainJavaPageViewImplUiBinder.class);
 
   private final FlowPanel rootElement;
 
@@ -47,17 +47,16 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
   @Inject
   public PlainJavaPageViewImpl() {
     rootElement = ourUiBinder.createAndBindUi(this);
-
     browseSourceBtn.setEnabled(false);
     sourceFolderField.setEnabled(false);
 
     browseLibBtn.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            delegate.onBrowseLibraryButtonClicked();
-          }
-        });
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onBrowseLibraryButtonClicked();
+              }
+            });
   }
 
   @Override
@@ -106,7 +105,7 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
 
   @Override
   public void changeBrowseBtnVisibleState(boolean isVisible) {
-    browseSourceBtn.setVisible(isVisible);
+    browseSourceBtn.setVisible(false);
   }
 
   @Override
@@ -116,7 +115,7 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
 
   @Override
   public void changeSourceFolderFieldState(boolean isEnable) {
-    sourceFolderField.setEnabled(isEnable);
+    sourceFolderField.setReadOnly(true);
   }
 
   interface PlainJavaPageViewImplUiBinder extends UiBinder<FlowPanel, PlainJavaPageViewImpl> {}
