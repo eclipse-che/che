@@ -276,11 +276,11 @@ public class WsMasterModule extends AbstractModule {
     } else {
       bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     }
-    
+
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)) {
-        bind(ConfigBuilder.class).to(IdentityProviderConfigBuilder.class);
+      bind(ConfigBuilder.class).to(IdentityProviderConfigBuilder.class);
     }
-    
+
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
         "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
