@@ -123,7 +123,7 @@ function getExtraTheiaPlugins() {
 
 /**
  * Clones git repository and adds the plugin as local.
- * This is done becouse Theia requires npm package.json (not lerna) which is located, in some cases, in subdirectory of repository.
+ * This is done because Theia requires npm package.json (not lerna) which is located, in some cases, in subdirectory of repository.
  */
 function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
     const pluginPath = gitPluginsRoot + '/' + pluginName + '/';
