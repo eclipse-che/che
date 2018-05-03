@@ -61,6 +61,11 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
+import org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
@@ -110,6 +115,7 @@ public class CascadeRemovalTest {
   private ProfileDao profileDao;
   private WorkspaceDao workspaceDao;
   private SshDao sshDao;
+  private WorkspaceActivityDao workspaceActivityDao;
 
   /** Account and User are a root of dependency tree. */
   private AccountImpl account;
@@ -157,6 +163,7 @@ public class CascadeRemovalTest {
                             PreferenceEntity.class,
                             WorkspaceImpl.class,
                             WorkspaceConfigImpl.class,
+                            WorkspaceExpiration.class,
                             ProjectConfigImpl.class,
                             EnvironmentImpl.class,
                             MachineConfigImpl.class,
@@ -180,6 +187,10 @@ public class CascadeRemovalTest {
                 bind(String[].class)
                     .annotatedWith(Names.named("che.auth.reserved_user_names"))
                     .toInstance(new String[0]);
+
+                bind(Long.class)
+                    .annotatedWith(Names.named("che.limits.workspace.idle.timeout"))
+                    .toInstance(100000L);
                 bind(UserManager.class);
                 bind(AccountManager.class);
 
@@ -187,6 +198,7 @@ public class CascadeRemovalTest {
                 install(new AccountModule());
                 install(new SshJpaModule());
                 install(new WorkspaceJpaModule());
+                install(new WorkspaceActivityModule());
                 bind(WorkspaceManager.class);
 
                 RuntimeInfrastructure infra = mock(RuntimeInfrastructure.class);
@@ -202,7 +214,9 @@ public class CascadeRemovalTest {
                             mock(WorkspaceSharedPool.class),
                             mock(WorkspaceDao.class),
                             mock(DBInitializer.class),
-                            mock(ProbeScheduler.class)));
+                            mock(ProbeScheduler.class),
+                            new DefaultWorkspaceStatusCache(),
+                            new DefaultWorkspaceLockService()));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
@@ -220,6 +234,7 @@ public class CascadeRemovalTest {
     profileDao = injector.getInstance(ProfileDao.class);
     sshDao = injector.getInstance(SshDao.class);
     workspaceDao = injector.getInstance(WorkspaceDao.class);
+    workspaceActivityDao = injector.getInstance(WorkspaceActivityDao.class);
   }
 
   @AfterMethod
@@ -311,6 +326,11 @@ public class CascadeRemovalTest {
     workspaceDao.create(workspace1 = createWorkspace("workspace1", account));
     workspaceDao.create(workspace2 = createWorkspace("workspace2", account));
 
+    workspaceActivityDao.setExpiration(
+        new WorkspaceExpiration(workspace1.getId(), System.currentTimeMillis()));
+    workspaceActivityDao.setExpiration(
+        new WorkspaceExpiration(workspace2.getId(), System.currentTimeMillis()));
+
     sshDao.create(sshPair1 = createSshPair(user.getId(), "service", "name1"));
     sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
   }
@@ -318,6 +338,9 @@ public class CascadeRemovalTest {
   private void wipeTestData() throws Exception {
     sshDao.remove(sshPair1.getOwner(), sshPair1.getService(), sshPair1.getName());
     sshDao.remove(sshPair2.getOwner(), sshPair2.getService(), sshPair2.getName());
+
+    workspaceActivityDao.removeExpiration(workspace1.getId());
+    workspaceActivityDao.removeExpiration(workspace2.getId());
 
     workspaceDao.remove(workspace1.getId());
     workspaceDao.remove(workspace2.getId());
