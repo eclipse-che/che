@@ -16,7 +16,6 @@ import com.google.inject.persist.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -108,11 +107,6 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     @PostConstruct
     public void subscribe() {
       eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
-    }
-
-    @PreDestroy
-    public void unsubscribe() {
-      eventService.unsubscribe(this, BeforeWorkspaceRemovedEvent.class);
     }
 
     @Override
