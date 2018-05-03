@@ -10,15 +10,18 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import io.fabric8.kubernetes.client.Config;
 import javax.inject.Singleton;
-
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
-
-import io.fabric8.kubernetes.client.Config;
+import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.IdentityProviderConfigBuilder;
 
 /**
+ * This class allows customizing the OpenShift {@link Config} returned by the {@link
+ * OpenShiftClientFactory} according to the current context (workspace ID, current user).
+ *
  * @author David Festal
+ * @see IdentityProviderConfigBuilder
  */
 @Singleton
 public class ConfigBuilder {

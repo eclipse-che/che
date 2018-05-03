@@ -211,12 +211,15 @@ public class KeycloakServiceClient {
     }
   }
 
-  /** Converts key=value&foo=bar string into json */
+  /** Converts key=value&foo=bar string into json if necessary */
   private static String toJson(String source) {
     Map<String, String> queryPairs;
     try {
+        // Assume that the source is valid Json
         queryPairs = gson.<Map<String, String>>fromJson(source, Map.class);
     } catch (JsonSyntaxException notJsonException) {
+        // The source is not valid Json: let's see if
+        // it is in 'key=value&foo=bar' format
         queryPairs = new HashMap<>();
         Map<String, String> pairsToFill = queryPairs;
         Arrays.stream(source.split("&"))

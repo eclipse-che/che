@@ -58,10 +58,10 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftClientFactory.class);
 
   private final ConfigBuilder configBuilder;
-  
+
   @Inject
   public OpenShiftClientFactory(
-      ConfigBuilder configBuilder,                          
+      ConfigBuilder configBuilder,
       @Nullable @Named("che.infra.kubernetes.master_url") String masterUrl,
       @Nullable @Named("che.infra.kubernetes.username") String username,
       @Nullable @Named("che.infra.kubernetes.password") String password,
@@ -119,9 +119,9 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    */
   protected Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
       throws InfrastructureException {
-      return configBuilder.buildConfig(defaultConfig, workspaceId);
+    return configBuilder.buildConfig(defaultConfig, workspaceId);
   }
-  
+
   protected Interceptor buildKubernetesInterceptor(Config config) {
     final String oauthToken;
     if (Utils.isNotNullOrEmpty(config.getUsername())
