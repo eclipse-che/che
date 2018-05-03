@@ -16,8 +16,6 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.impl.DefaultClaims;
 import java.io.IOException;
@@ -82,7 +80,8 @@ public class KeycloakServiceClient {
    * @param redirectAfterLogin URL to return after login
    * @return URL to redirect client to perform account linking
    */
-  public String getAccountLinkingURL(Jwt token, String oauthProvider, String redirectAfterLogin) {
+  public String getAccountLinkingURL(
+      @SuppressWarnings("rawtypes") Jwt token, String oauthProvider, String redirectAfterLogin) {
 
     DefaultClaims claims = (DefaultClaims) token.getBody();
     final String clientId = claims.getAudience();
@@ -215,19 +214,19 @@ public class KeycloakServiceClient {
   private static String toJson(String source) {
     Map<String, String> queryPairs;
     try {
-        // Assume that the source is valid Json
-        queryPairs = gson.<Map<String, String>>fromJson(source, Map.class);
+      // Assume that the source is valid Json
+      queryPairs = gson.<Map<String, String>>fromJson(source, Map.class);
     } catch (JsonSyntaxException notJsonException) {
-        // The source is not valid Json: let's see if
-        // it is in 'key=value&foo=bar' format
-        queryPairs = new HashMap<>();
-        Map<String, String> pairsToFill = queryPairs;
-        Arrays.stream(source.split("&"))
-        .forEach(
-            p -> {
-              int delimiterIndex = p.indexOf("=");
-              pairsToFill.put(p.substring(0, delimiterIndex), p.substring(delimiterIndex + 1));
-            });
+      // The source is not valid Json: let's see if
+      // it is in 'key=value&foo=bar' format
+      queryPairs = new HashMap<>();
+      Map<String, String> pairsToFill = queryPairs;
+      Arrays.stream(source.split("&"))
+          .forEach(
+              p -> {
+                int delimiterIndex = p.indexOf("=");
+                pairsToFill.put(p.substring(0, delimiterIndex), p.substring(delimiterIndex + 1));
+              });
     }
     return gson.toJson(queryPairs);
   }
