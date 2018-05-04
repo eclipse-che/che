@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.nodejsdbg.server.parser;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
@@ -20,32 +20,32 @@ import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-/** @author Anatolii Bazko */
+/**
+ * @author Anatolii Bazko
+ * @author Igor Vinokur
+ */
 public class NodeJsBreakpointsParserTest {
 
   private NodeJsBreakpointsParser parser;
 
   @BeforeMethod
-  public void setUp() throws Exception {
+  public void setUp() {
     parser = new NodeJsBreakpointsParser();
   }
 
   @Test
-  public void testParseBreakpoints() throws Exception {
-    NodeJsOutput nodeJsOutput =
-        NodeJsOutput.of(
-            "{ breakpoints: \n"
-                + "   [ { number: 1,\n"
-                + "       line: 1,\n"
-                + "       column: null,\n"
-                + "       groupId: null,\n"
-                + "       active: true,\n"
-                + "       condition: null,\n"
-                + "       actual_locations: [Object],\n"
-                + "       type: 'scriptId',\n"
-                + "       script_id: '63' } ],\n"
-                + "  breakOnExceptions: false,\n"
-                + "  breakOnUncaughtExceptions: false }");
+  public void shouldParseNoBreakpointsOutput() {
+    NodeJsOutput nodeJsOutput = NodeJsOutput.of("No breakpoints yet");
+
+    assertTrue(parser.match(nodeJsOutput));
+
+    List<Breakpoint> breakpoints = parser.parse(nodeJsOutput).getAll();
+    assertTrue(breakpoints.isEmpty());
+  }
+
+  @Test
+  public void shouldParseBreakpoint() {
+    NodeJsOutput nodeJsOutput = NodeJsOutput.of("#0 node/app/app.js:7");
 
     assertTrue(parser.match(nodeJsOutput));
 
@@ -53,39 +53,31 @@ public class NodeJsBreakpointsParserTest {
     assertEquals(breakpoints.size(), 1);
 
     Breakpoint breakpoint = breakpoints.get(0);
-    assertEquals(breakpoint.getLocation().getLineNumber(), 2);
-    assertEquals(breakpoint.getLocation().getTarget(), "scriptId:63");
-    assertNull(breakpoint.getBreakpointConfiguration());
+    assertEquals(breakpoint.getLocation().getLineNumber(), 7);
+    assertEquals(breakpoint.getLocation().getTarget(), "node/app/app.js");
+    assertNotNull(breakpoint.getBreakpointConfiguration());
     assertTrue(breakpoint.isEnabled());
   }
 
   @Test
-  public void testParseBreakpointsWhenScriptIsNotLoaded() throws Exception {
-    NodeJsOutput nodeJsOutput =
-        NodeJsOutput.of(
-            "{ breakpoints: \n"
-                + "   [ { number: 1,\n"
-                + "       line: 1,\n"
-                + "       column: null,\n"
-                + "       groupId: null,\n"
-                + "       active: true,\n"
-                + "       condition: null,\n"
-                + "       actual_locations: [Object],\n"
-                + "       type: 'scriptRegExp',\n"
-                + "       script_regexp: '^(.*[\\\\/\\\\\\\\])?df3dfasdfs\\\\.js$' } ],"
-                + "  breakOnExceptions: false,\n"
-                + "  breakOnUncaughtExceptions: false }");
+  public void shouldParseSeveralBreakpoints() {
+    NodeJsOutput nodeJsOutput = NodeJsOutput.of("#0 node/app/app.js:1\n#1 node/app/app.js:7");
 
     assertTrue(parser.match(nodeJsOutput));
 
     List<Breakpoint> breakpoints = parser.parse(nodeJsOutput).getAll();
-    assertEquals(breakpoints.size(), 1);
+    assertEquals(breakpoints.size(), 2);
 
-    Breakpoint breakpoint = breakpoints.get(0);
-    assertEquals(breakpoint.getLocation().getLineNumber(), 2);
-    assertEquals(
-        breakpoint.getLocation().getTarget(), "scriptRegExp:^(.*[\\/\\\\])?df3dfasdfs\\.js$");
-    assertNull(breakpoint.getBreakpointConfiguration());
-    assertTrue(breakpoint.isEnabled());
+    Breakpoint breakpoint1 = breakpoints.get(0);
+    assertEquals(breakpoint1.getLocation().getLineNumber(), 1);
+    assertEquals(breakpoint1.getLocation().getTarget(), "node/app/app.js");
+    assertNotNull(breakpoint1.getBreakpointConfiguration());
+    assertTrue(breakpoint1.isEnabled());
+
+    Breakpoint breakpoint2 = breakpoints.get(1);
+    assertEquals(breakpoint2.getLocation().getLineNumber(), 7);
+    assertEquals(breakpoint2.getLocation().getTarget(), "node/app/app.js");
+    assertNotNull(breakpoint2.getBreakpointConfiguration());
+    assertTrue(breakpoint2.isEnabled());
   }
 }
