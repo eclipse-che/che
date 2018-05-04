@@ -39,7 +39,7 @@ public class DBTermination {
     this.emFactory = emFactory;
   }
 
-  /** Stops persistence service and closes JGroups command channel (if any) */
+  /** Stops {@link PersistService}. Any DB operations is impossible after that. */
   public void terminate() {
     try {
       LOG.info("Stopping persistence service.");
