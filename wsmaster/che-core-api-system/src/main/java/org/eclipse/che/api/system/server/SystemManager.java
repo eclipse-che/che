@@ -30,6 +30,7 @@ import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.eclipse.che.core.db.DBTermination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +47,16 @@ public class SystemManager {
   private final AtomicReference<SystemStatus> statusRef;
   private final EventService eventService;
   private final ServiceTerminator terminator;
+  private final DBTermination dbTermination;
 
   private final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
   @Inject
-  public SystemManager(ServiceTerminator terminator, EventService eventService) {
+  public SystemManager(
+      ServiceTerminator terminator, DBTermination dbTermination, EventService eventService) {
     this.terminator = terminator;
     this.eventService = eventService;
+    this.dbTermination = dbTermination;
     this.statusRef = new AtomicReference<>(RUNNING);
   }
 
@@ -152,6 +156,7 @@ public class SystemManager {
       shutdownLatch.await();
     } else {
       doSuspendServices();
+      dbTermination.terminate();
     }
   }
 }
