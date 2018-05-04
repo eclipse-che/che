@@ -64,6 +64,8 @@ public class Ide {
     menu.waitMenuItemIsEnabled(PROFILE_MENU);
   }
 
+
+
   @PreDestroy
   public void close() {
     seleniumWebDriver.quit();
