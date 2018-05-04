@@ -35,9 +35,10 @@ import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
+import org.eclipse.che.security.oauth.OAuthAuthenticationService;
 
 @Path("/oauth")
-public class KeycloakOAuthAuthenticationService {
+public class KeycloakOAuthAuthenticationService extends OAuthAuthenticationService {
   @Context UriInfo uriInfo;
 
   @Context SecurityContext security;

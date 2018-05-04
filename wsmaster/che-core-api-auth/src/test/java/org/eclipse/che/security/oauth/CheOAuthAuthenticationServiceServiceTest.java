@@ -43,7 +43,7 @@ import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class OAuthAuthenticationServiceTest {
+public class CheOAuthAuthenticationServiceServiceTest {
   @SuppressWarnings("unused")
   private EnvironmentFilter filter = new EnvironmentFilter();
 
@@ -53,7 +53,7 @@ public class OAuthAuthenticationServiceTest {
   @Mock protected OAuthAuthenticatorProvider providers;
   @Mock protected UriInfo uriInfo;
   @Mock protected SecurityContext security;
-  @InjectMocks OAuthAuthenticationService service;
+  @InjectMocks CheOAuthAuthenticationService service;
 
   @Filter
   public static class EnvironmentFilter implements RequestFilter {
