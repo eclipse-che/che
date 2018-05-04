@@ -2244,7 +2244,7 @@
           "goal": "Build"
         }
       }, {
-        "commandLine": "scl enable rh-maven33 'mvn compile vertx:run -f ${current.project.path}'",
+        "commandLine": "scl enable rh-maven33 'mvn compile vertx:run -f ${current.project.path} -Dvertx.disableDnsResolver=true'",
         "name": "run",
         "type": "custom",
         "attributes": {
@@ -2252,7 +2252,7 @@
           "goal": "Run"
         }
       }, {
-        "commandLine": "scl enable rh-maven33 'mvn compile vertx:debug -f ${current.project.path}'",
+        "commandLine": "scl enable rh-maven33 'mvn compile vertx:debug -f ${current.project.path} -Dvertx.disableDnsResolver=true'",
         "name": "debug",
         "type": "custom",
         "attributes": {
