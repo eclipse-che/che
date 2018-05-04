@@ -13,5 +13,10 @@ package org.eclipse.che.security.oauth;
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.rest.Service;
 
+/**
+ * Abstraction of OAuth authentication service.
+ *
+ * @author Mykhailo Kuznietsov
+ */
 @Path("/oauth")
 public abstract class OAuthAuthenticationService extends Service {}
