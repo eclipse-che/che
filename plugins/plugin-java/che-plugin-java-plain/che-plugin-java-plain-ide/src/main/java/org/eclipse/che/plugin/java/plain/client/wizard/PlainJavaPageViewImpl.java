@@ -31,11 +31,10 @@ import com.google.inject.Inject;
  */
 public class PlainJavaPageViewImpl implements PlainJavaPageView {
   private static PlainJavaPageViewImplUiBinder ourUiBinder =
-          GWT.create(PlainJavaPageViewImplUiBinder.class);
+      GWT.create(PlainJavaPageViewImplUiBinder.class);
 
   private final FlowPanel rootElement;
 
-  @UiField Style style;
   @UiField TextBox sourceFolderField;
   @UiField Button browseSourceBtn;
   @UiField TextBox libFolderField;
@@ -47,16 +46,16 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
   @Inject
   public PlainJavaPageViewImpl() {
     rootElement = ourUiBinder.createAndBindUi(this);
-    browseSourceBtn.setEnabled(false);
-    sourceFolderField.setEnabled(false);
+    browseSourceBtn.setVisible(false);
+    sourceFolderField.setReadOnly(true);
 
     browseLibBtn.addClickHandler(
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onBrowseLibraryButtonClicked();
-              }
-            });
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            delegate.onBrowseLibraryButtonClicked();
+          }
+        });
   }
 
   @Override
@@ -95,15 +94,6 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
   }
 
   @Override
-  public void showSourceFolderMissingIndicator(boolean doShow) {
-    if (doShow) {
-      sourceFolderField.addStyleName(style.inputError());
-    } else {
-      sourceFolderField.removeStyleName(style.inputError());
-    }
-  }
-
-  @Override
   public void changeBrowseBtnVisibleState(boolean isVisible) {
     browseSourceBtn.setVisible(false);
   }
@@ -119,8 +109,4 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
   }
 
   interface PlainJavaPageViewImplUiBinder extends UiBinder<FlowPanel, PlainJavaPageViewImpl> {}
-
-  interface Style extends CssResource {
-    String inputError();
-  }
 }

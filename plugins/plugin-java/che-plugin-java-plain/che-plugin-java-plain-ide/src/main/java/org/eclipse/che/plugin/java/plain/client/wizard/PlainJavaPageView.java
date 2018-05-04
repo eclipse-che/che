@@ -33,13 +33,6 @@ interface PlainJavaPageView extends View<PlainJavaPageView.ActionDelegate> {
   void setLibraryFolder(String value);
 
   /**
-   * Marks a field with information about source folder as empty.
-   *
-   * @param doShow <code>true</code> to show wrong border, <code>false</code> to hide it
-   */
-  void showSourceFolderMissingIndicator(boolean doShow);
-
-  /**
    * Sets whether Browse button is visible.
    *
    * @param isVisible <code>true</code> to show the object, <code>false</code> to hide it
