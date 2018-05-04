@@ -29,6 +29,16 @@ If you are interested in fixing issues and contributing directly to the code bas
 - [Coding guidelines](https://github.com/eclipse/che/wiki/Coding-Guidelines)
 - [Contributor license agreement](https://github.com/eclipse/che/wiki/Contributor-License-Agreement)
 
+### Che's repositories
+| Name        | Description  |
+| ----------- |-----|
+| [GitHub Plugin](https://github.com/eclipse/che-theia-github-plugin) | Contains plugin, that provides the support of GitHub VCS in Theia IDE.  |
+| [Java Plugin](https://github.com/eclipse/che-theia-java-plugin) | Plugin that provides Java language support inside Theia IDE. |
+| [SSH Plugin](https://github.com/eclipse/che-theia-ssh-plugin) | The SSH plugin, that allows to manage the SSH public/private key pairs stored in Che workspace. |
+| [Terminal Plugin](https://github.com/eclipse/che-theia-terminal-plugin) | Plugin, that brings terminal support to Theia IDE running inside Che, with ability to connect to the external server side. |
+| [Machines Plugin](https://github.com/eclipse/che-theia-machines-plugin)| The plugin, that adds the machines view in Theia IDE, that is running inside Che. |
+| [Hosted plugin manager](https://github.com/eclipse/che-theia-hosted-plugin-manager-extension)| Che specific plugin for Theia IDE, the aim of which is to take care about url changing and/or port forwarding caused by running Theia inside container |
+
 ### Feedback
 * **Support:** You can ask questions, report bugs, and request features using [GitHub issues](https://github.com/eclipse/che/issues).
 * **Public Chat:** Join the public [eclipse-che](https://mattermost.eclipse.org/eclipse/channels/eclipse-che) Mattermost channel to discuss with community and contributors.
