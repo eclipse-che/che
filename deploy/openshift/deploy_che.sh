@@ -105,7 +105,7 @@ case $key in
         exit 1
     ;;
     *)
-    echo "You've passed wrong arg."
+    echo "You've passed wrong arg '$key'."
     echo -e "$HELP"
     exit 1
     ;;

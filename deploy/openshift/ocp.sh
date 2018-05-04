@@ -286,7 +286,7 @@ parse_args() {
                exit 1
            ;;
            *)
-               echo "You've passed wrong arg."
+               echo "You've passed wrong arg '$i'."
                echo -e "$HELP"
                exit 1
            ;;
