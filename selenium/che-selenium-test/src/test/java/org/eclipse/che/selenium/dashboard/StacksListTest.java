@@ -53,7 +53,6 @@ public class StacksListTest {
 
   @AfterClass
   public void deleteCreatedStacks() {
-    // select created stacks by Bulk and delete
     dashboard.selectStacksItemOnDashboard();
     stacks.waitToolbarTitleName();
     stacks.selectAllStacksByBulk();
@@ -146,6 +145,7 @@ public class StacksListTest {
   public void checkStackActionButtons() {
     String stackName = generate("", 8);
     createStack(stackName);
+
     // delete stack by the Action delete stack button
     stacks.clickOnDeleteActionButton(stackName);
     stacks.clickOnDeleteDialogButton();
@@ -174,6 +174,7 @@ public class StacksListTest {
     stacks.clickOnAddStackButton();
     stackDetails.setStackName(stackName);
     stackDetails.clickOnSaveChangesButton();
+    stackDetails.waitToolbar(stackName);
     stackDetails.clickOnToAllStacksList();
 
     stacks.waitToolbarTitleName();
