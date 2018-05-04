@@ -110,7 +110,7 @@ public class RunPlainJavaProjectTest {
         "mockito-all-1.10.19.jar - /projects/" + PROJECT_NAME + "/store");
     configureClasspath.closeConfigureClasspathFormByIcon();
 
-    // check code assist when use library
+    // create the instance of the library
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
     codenvyEditor.waitActive();
     codenvyEditor.setCursorToLine(19);
@@ -118,13 +118,15 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.typeTextIntoEditor("Mockito mockito = new Mockito();");
     codenvyEditor.waitTextIntoEditor("Mockito mockito = new Mockito();");
     codenvyEditor.waitMarkerInPosition(ERROR, 19);
+
+    // check code assist
     codenvyEditor.launchPropositionAssistPanel();
     codenvyEditor.enterTextIntoFixErrorPropByDoubleClick("Import 'Mockito' (org.mockito)");
     codenvyEditor.waitTextIntoEditor("import org.mockito.Mockito;");
 
     createNewPackageAndJavaClass();
 
-    // check the code assist when create the instance of new Java class
+    // create the instance of new Java class
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
     codenvyEditor.waitActive();
     codenvyEditor.setCursorToLine(22);
@@ -132,6 +134,8 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.typeTextIntoEditor("A a = new A();");
     codenvyEditor.waitTextIntoEditor("A a = new A();");
     codenvyEditor.waitMarkerInPosition(ERROR, 22);
+
+    // check the code assist
     codenvyEditor.launchPropositionAssistPanel();
     codenvyEditor.enterTextIntoFixErrorPropByDoubleClick("Import 'A' (base.test)");
     codenvyEditor.waitErrorPropositionPanelClosed();
@@ -218,6 +222,8 @@ public class RunPlainJavaProjectTest {
 
   private void createNewPackageAndJavaClass() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src");
+
+    // create new package
     menu.runCommand(PROJECT, NEW, PACKAGE);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(NEW_PACKAGE);
@@ -225,6 +231,8 @@ public class RunPlainJavaProjectTest {
     askForValueDialog.waitFormToClose();
     projectExplorer.waitVisibilityByName(NEW_PACKAGE);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/base/test");
+
+    // create new java file
     menu.runCommand(PROJECT, NEW, JAVA_CLASS);
     askForValueDialog.waitNewJavaClassOpen();
     askForValueDialog.typeTextInFieldName("A");
