@@ -19,7 +19,7 @@ import org.eclipse.che.multiuser.keycloak.server.KeycloakConfigurationService;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakTokenValidator;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakUserManager;
 import org.eclipse.che.multiuser.keycloak.server.dao.KeycloakProfileDao;
-import org.eclipse.che.security.oauth.OAuthAuthenticationService;
+import org.eclipse.che.security.oauth.OAuthAPI;
 
 public class KeycloakModule extends AbstractModule {
   @Override
@@ -33,8 +33,6 @@ public class KeycloakModule extends AbstractModule {
     bind(ProfileDao.class).to(KeycloakProfileDao.class);
     bind(PersonalAccountUserManager.class).to(KeycloakUserManager.class);
 
-    bind(OAuthAuthenticationService.class)
-        .toProvider(OAuthAuthenticationServiceProvider.class)
-        .asEagerSingleton();
+    bind(OAuthAPI.class).toProvider(OAuthAPIProvider.class);
   }
 }
