@@ -305,10 +305,15 @@ public abstract class SeleniumTestHandler
                   : "";
 
           LOG.error("Test {} failed.{}", getCompletedTestLabel(result.getMethod()), errorDetails);
-
           LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
 
           testsWithFailure.put(result.getTestClass().getRealClass().getName(), result.getMethod());
+
+          captureScreenshot(result);
+          captureHtmlSource(result);
+          captureTestWorkspaceLogs(result);
+          storeWebDriverLogs(result);
+
           break;
 
         case ITestResult.SKIP:
@@ -317,11 +322,6 @@ public abstract class SeleniumTestHandler
 
         default:
       }
-
-      captureScreenshot(result);
-      captureHtmlSource(result);
-      captureTestWorkspaceLogs(result);
-      storeWebDriverLogs(result);
     }
   }
 
