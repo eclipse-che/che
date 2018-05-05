@@ -143,7 +143,7 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
   }
 
   private boolean isCoordinatesCompleted() {
-    return !getAttribute(SOURCE_FOLDER).isEmpty();
+    return true;
   }
 
   private void updateView() {

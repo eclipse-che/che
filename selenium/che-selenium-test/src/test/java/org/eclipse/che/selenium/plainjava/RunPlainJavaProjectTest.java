@@ -18,14 +18,15 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.PACKAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.UPDATE_PROJECT_CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeFolder.SOURCE_FOLDER;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -116,7 +117,7 @@ public class RunPlainJavaProjectTest {
     askForValueDialog.waitFormToClose();
     projectExplorer.waitVisibilityByName(NEW_PACKAGE);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/base/test");
-    menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, JAVA_CLASS);
+    menu.runCommand(PROJECT, NEW, JAVA_CLASS);
     loader.waitOnClosed();
     askForValueDialog.waitNewJavaClassOpen();
     askForValueDialog.typeTextInFieldName("A");
@@ -200,15 +201,17 @@ public class RunPlainJavaProjectTest {
     loader.waitOnClosed();
     projectWizard.clickNextButton();
 
-    // set source folder
+    // set project as plain java
     projectWizard.waitOpenProjectConfigForm();
-    projectWizard.clickBrowseButton(Wizard.TypeFolder.SOURCE_FOLDER);
-    configureClasspath.waitSelectPathFormIsOpen();
-    configureClasspath.openItemInSelectPathForm(nameApp);
-    configureClasspath.waitItemInSelectPathForm("src");
-    configureClasspath.selectItemInSelectPathForm("src");
-    configureClasspath.clickOkBtnSelectPathForm();
-    projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
+    projectWizard.clickSaveButton();
+    projectWizard.waitCloseProjectConfigForm();
+
+    menu.runCommand(PROJECT, UPDATE_PROJECT_CONFIGURATION);
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.selectTypeProject(typeProject);
+    loader.waitOnClosed();
+    projectWizard.clickNextButton();
+    projectWizard.waitExpTextInSourceFolder("src", SOURCE_FOLDER);
 
     // set library folder
     projectWizard.clickBrowseButton(Wizard.TypeFolder.LIBRARY_FOLDER);
