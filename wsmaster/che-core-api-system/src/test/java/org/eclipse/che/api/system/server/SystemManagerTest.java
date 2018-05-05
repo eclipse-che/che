@@ -60,6 +60,13 @@ public class SystemManagerTest {
   }
 
   @Test
+  public void servicesAreSuspended() throws Exception {
+    systemManager.suspendServices();
+
+    verifySuspendCompleted();
+  }
+
+  @Test
   public void servicesAreStopped() throws Exception {
     systemManager.stopServices();
 
@@ -84,11 +91,20 @@ public class SystemManagerTest {
   public void shutdownStopsServicesIfNotStopped() throws Exception {
     systemManager.shutdown();
 
-    verifyShutdownCompleted();
+    verifySuspendCompleted();
   }
 
   private void verifyShutdownCompleted() throws InterruptedException {
     verify(terminator, timeout(2000)).terminateAll();
+    verifyEvents();
+  }
+
+  private void verifySuspendCompleted() throws InterruptedException {
+    verify(terminator, timeout(2000)).suspendAll();
+    verifyEvents();
+  }
+
+  private void verifyEvents() {
     verify(eventService, times(2)).publish(eventsCaptor.capture());
     Iterator<SystemStatusChangedEventDto> eventsIt = eventsCaptor.getAllValues().iterator();
     assertEquals(

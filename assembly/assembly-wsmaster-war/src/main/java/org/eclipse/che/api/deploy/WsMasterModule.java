@@ -44,6 +44,10 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.WorkspaceLockService;
+import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
@@ -142,6 +146,8 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+    bind(WorkspaceLockService.class).to(DefaultWorkspaceLockService.class);
+    bind(WorkspaceStatusCache.class).to(DefaultWorkspaceStatusCache.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
     install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
     bind(org.eclipse.che.api.logger.LoggerService.class);
@@ -274,7 +280,9 @@ public class WsMasterModule extends AbstractModule {
       Map<String, String> persistenceProperties, String infrastructure) {
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-      install(new ReplicationModule(persistenceProperties));
+      // Replication is disabled until closing JPA JChannel issue won't be fixed
+      // install(new ReplicationModule(persistenceProperties));
+      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     } else {
       bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     }
