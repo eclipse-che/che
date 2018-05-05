@@ -71,6 +71,7 @@ public class GenericsTest {
 
   @Test
   public void testGenerics2() throws Exception {
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
 

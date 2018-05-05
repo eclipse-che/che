@@ -67,6 +67,7 @@ public class TestAnnotationsTest {
 
   @Test
   public void testAnnotation1() throws Exception {
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
 

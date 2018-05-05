@@ -77,6 +77,7 @@ public class RenameTypeTest {
         ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();

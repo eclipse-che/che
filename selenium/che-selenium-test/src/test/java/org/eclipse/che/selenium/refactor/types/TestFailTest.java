@@ -73,6 +73,7 @@ public class TestFailTest {
 
     ide.open(workspace);
 
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();

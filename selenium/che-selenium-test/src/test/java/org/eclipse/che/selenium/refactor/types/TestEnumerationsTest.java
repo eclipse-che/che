@@ -69,6 +69,7 @@ public class TestEnumerationsTest {
 
   @Test
   public void testEnum1() throws Exception {
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();

@@ -62,6 +62,7 @@ public class IllegalTypeNameTest {
 
   @Test
   public void illegalTypeName4() throws Exception {
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
 
