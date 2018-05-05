@@ -9,13 +9,14 @@
 
 FROM node:8-alpine
 # build dependencies requireed to compile a custom Theia
-RUN apk add --no-cache make gcc g++ python git openssh bash
+RUN apk add --no-cache make gcc g++ python git openssh bash supervisor
 WORKDIR /home/theia
 # build Theia with all extensions to persist yarn cache in the image and
 # have default Theia build in the workspace in case no plugins are requested
 ADD https://raw.githubusercontent.com/theia-ide/theia-apps/master/theia-full-docker/latest.package.json /home/theia/package.json
 ADD theia-default-package.json /home/default/theia/package.json
 ADD src/add-extensions.js /home/default
+ADD supervisord.conf /etc/
 RUN node /home/default/add-extensions.js \
     che-theia-ssh-extension:https://github.com/eclipse/che-theia-ssh-plugin.git \
     && rm /home/default/add-extensions.js
@@ -31,4 +32,4 @@ EXPOSE 3000
 ARG GITHUB_TOKEN
 ENV USE_LOCAL_GIT=true \
     GITHUB_TOKEN=${GITHUB_TOKEN}
-ENTRYPOINT ["node", "/theia_launcher/theia_launcher.js"]
+ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
