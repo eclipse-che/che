@@ -10,19 +10,14 @@
  */
 package org.eclipse.che.core.db;
 
-import static org.eclipse.che.api.system.shared.SystemStatus.READY_TO_SHUTDOWN;
-
 import com.google.inject.Inject;
 import com.google.inject.persist.PersistService;
 import java.lang.reflect.Field;
 import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.internal.sessions.coordination.jgroups.JGroupsRemoteConnection;
-import org.eclipse.persistence.sessions.coordination.TransportManager;
+import org.eclipse.persistence.sessions.coordination.CommandManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,26 +30,24 @@ import org.slf4j.LoggerFactory;
 public class DBTermination {
 
   private static final Logger LOG = LoggerFactory.getLogger(DBTermination.class);
+  private PersistService persistService;
+  private EntityManagerFactory emFactory;
 
   @Inject
-  public DBTermination(
-      EventService eventService, PersistService persistService, EntityManagerFactory emFactory) {
-    eventService.subscribe(
-        new EventSubscriber<SystemStatusChangedEventDto>() {
-          @Override
-          public void onEvent(SystemStatusChangedEventDto event) {
-            if (READY_TO_SHUTDOWN.equals(event.getStatus())) {
-              try {
-                LOG.info("Stopping persistence service.");
-                fixJChannelClosing(emFactory);
-                persistService.stop();
-              } catch (RuntimeException ex) {
-                LOG.error("Failed to stop persistent service. Cause: " + ex.getMessage());
-              }
-            }
-          }
-        },
-        SystemStatusChangedEventDto.class);
+  public DBTermination(PersistService persistService, EntityManagerFactory emFactory) {
+    this.persistService = persistService;
+    this.emFactory = emFactory;
+  }
+
+  /** Stops {@link PersistService}. Any DB operations is impossible after that. */
+  public void terminate() {
+    try {
+      LOG.info("Stopping persistence service.");
+      fixJChannelClosing(emFactory);
+      persistService.stop();
+    } catch (RuntimeException ex) {
+      LOG.error("Failed to stop persistent service. Cause: " + ex.getMessage());
+    }
   }
 
   /**
@@ -68,9 +61,13 @@ public class DBTermination {
   private void fixJChannelClosing(EntityManagerFactory emFactory) {
     try {
       final AbstractSession session = emFactory.unwrap(AbstractSession.class);
-      final TransportManager transportManager = session.getCommandManager().getTransportManager();
+      CommandManager commandManager = session.getCommandManager();
+      if (commandManager == null) {
+        // not cluster mode
+        return;
+      }
       final JGroupsRemoteConnection conn =
-          (JGroupsRemoteConnection) transportManager.getConnectionToLocalHost();
+          (JGroupsRemoteConnection) commandManager.getTransportManager().getConnectionToLocalHost();
       final Field isLocal = conn.getClass().getDeclaredField("isLocal");
       isLocal.setAccessible(true);
       isLocal.set(conn, false);
