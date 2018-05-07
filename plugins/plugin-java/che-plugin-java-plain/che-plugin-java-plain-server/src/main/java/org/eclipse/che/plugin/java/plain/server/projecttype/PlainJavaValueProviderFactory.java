@@ -39,12 +39,8 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
 @Singleton
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
 
-  //  private final ProjectManager projectManager;
-
   @Inject
-  public PlainJavaValueProviderFactory(/*ProjectManager projectManager*/ ) {
-    //    this.projectManager = projectManager;
-  }
+  public PlainJavaValueProviderFactory() {}
 
   @Override
   public ValueProvider newInstance(String wsPath) {
@@ -68,25 +64,6 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
       }
       return null;
     }
-
-    //    @Override
-    //    public void setValues(String attributeName, List<String> values) throws
-    // ValueStorageException {
-    //      Map<String, List<String>> attributes =
-    //          projectManager
-    //              .get(wsPath)
-    //              .orElseThrow(() -> new ValueStorageException("Can't get project"))
-    //              .getAttributes();
-    //
-    //      if (attributes.containsKey(attributeName)) {
-    //        attributes.put(
-    //            attributeName,
-    //            concat(values.stream(), attributes.get(attributeName).stream())
-    //                .collect(Collectors.toList()));
-    //      } else {
-    //        attributes.put(attributeName, values);
-    //      }
-    //    }
 
     private List<String> getOutputFolder() throws ValueStorageException {
       JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();

@@ -45,9 +45,6 @@ public class MavenProjectType extends ProjectTypeDef {
     addVariableDefinition(MavenAttributes.TEST_SOURCE_FOLDER, "", false, mavenValueProviderFactory);
     addVariableDefinition(MavenAttributes.RESOURCE_FOLDER, "", false, mavenValueProviderFactory);
 
-    //    setValueProviderFactory(SOURCE_FOLDER, mavenValueProviderFactory);
-    //    setValueProviderFactory(OUTPUT_FOLDER, mavenValueProviderFactory);
-
     addParent(JAVA_ID);
   }
 }

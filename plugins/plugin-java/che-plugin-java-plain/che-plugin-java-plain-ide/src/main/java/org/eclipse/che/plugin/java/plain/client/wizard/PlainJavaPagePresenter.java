@@ -69,7 +69,7 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
 
   @Override
   public boolean isCompleted() {
-    return isCoordinatesCompleted();
+    return true;
   }
 
   @Override
@@ -140,10 +140,6 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
   private void setAttribute(String attrId, List<String> value) {
     Map<String, List<String>> attributes = dataObject.getAttributes();
     attributes.put(attrId, value);
-  }
-
-  private boolean isCoordinatesCompleted() {
-    return true;
   }
 
   private void updateView() {
