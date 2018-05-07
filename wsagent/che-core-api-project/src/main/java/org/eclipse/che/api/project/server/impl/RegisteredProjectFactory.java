@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 public interface RegisteredProjectFactory {
 
-  RegisteredProject create(
+  RegisteredProjectImpl create(
       @Assisted("folder") String folder,
       @Assisted("config") ProjectConfig config,
       @Assisted("updated") boolean updated,

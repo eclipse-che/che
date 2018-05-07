@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.fs.server.impl.RootAwarePathTransformer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.search.SearcherTest.ContentBuilder;
 import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -53,9 +54,10 @@ public class FSLuceneSearcherTest {
     indexDirectory = Files.createTempDir();
     workspaceStorage = Files.createTempDir();
     excludePatterns = new HashSet<>();
-    pathTransformer = new RootAwarePathTransformer(workspaceStorage);
+    DummyProvider dummyRootProvider = new DummyProvider(workspaceStorage);
+    pathTransformer = new RootAwarePathTransformer(dummyRootProvider);
     searcher =
-        new LuceneSearcher(excludePatterns, indexDirectory, workspaceStorage, pathTransformer);
+        new LuceneSearcher(excludePatterns, indexDirectory, dummyRootProvider, pathTransformer);
     contentBuilder = new ContentBuilder(workspaceStorage.toPath());
   }
 
@@ -98,5 +100,12 @@ public class FSLuceneSearcherTest {
     List<String> paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();
     // then
     assertEquals(newArrayList("/folder/xxx.txt", "/folder/zzz.txt"), paths);
+  }
+
+  private static class DummyProvider extends RootDirPathProvider {
+
+    public DummyProvider(File file) {
+      this.rootFile = file;
+    }
   }
 }

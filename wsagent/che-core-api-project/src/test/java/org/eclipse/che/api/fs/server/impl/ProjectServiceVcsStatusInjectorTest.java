@@ -30,7 +30,7 @@ import java.util.Optional;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
 import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.mockito.ArgumentCaptor;

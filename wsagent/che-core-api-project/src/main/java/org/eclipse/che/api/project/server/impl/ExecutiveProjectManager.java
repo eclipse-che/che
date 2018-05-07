@@ -46,6 +46,7 @@ import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectQualifier;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 
 /**
  * Performs project related operations after project registry is synchronized and method parameters
@@ -206,7 +207,7 @@ public class ExecutiveProjectManager implements ProjectManager {
     projectConfigRegistry
         .getAll(wsPath)
         .stream()
-        .map(RegisteredProject::getPath)
+        .map(ProjectConfig::getPath)
         .forEach(projectConfigRegistry::remove);
 
     return projectConfigRegistry.remove(wsPath);
@@ -232,7 +233,7 @@ public class ExecutiveProjectManager implements ProjectManager {
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
     fsManager.copy(srcWsPath, dstWsPath);
 
-    RegisteredProject oldProjectConfig =
+    ProjectConfig oldProjectConfig =
         projectConfigRegistry.get(srcWsPath).orElseThrow(IllegalStateException::new);
 
     String newProjectName = dstWsPath.substring(dstWsPath.lastIndexOf(separator));
@@ -246,6 +247,8 @@ public class ExecutiveProjectManager implements ProjectManager {
             oldProjectConfig.getAttributes(),
             emptyMap(),
             oldProjectConfig.getSource());
+
+    ProjectConfig pc = newProjectConfig;
 
     RegisteredProject copiedProject = projectConfigRegistry.put(newProjectConfig, true, false);
     fireInitHandlers(copiedProject);
@@ -295,8 +298,9 @@ public class ExecutiveProjectManager implements ProjectManager {
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
           ForbiddenException {
 
-    RegisteredProject project =
-        get(wsPath).orElseThrow(() -> new NotFoundException("Can't find project"));
+    RegisteredProject project = projectConfigRegistry.getOrNull(wsPath);
+    if (project == null) throw new NotFoundException("Can't find project");
+    //        get(wsPath).orElseThrow(() -> new NotFoundException("Can't find project"));
 
     List<String> mixins = project.getMixins();
 

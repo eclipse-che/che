@@ -50,6 +50,7 @@ public interface ItemReference extends Hyperlinks {
 
   ItemReference withPath(String path);
 
+  @Override
   ItemReference withLinks(List<Link> links);
 
   /** Attributes */

@@ -10,11 +10,11 @@
  */
 package org.eclipse.che.plugin.testing.junit.server.junit4;
 
-import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.ExecutionException;
@@ -47,11 +47,11 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
 
   @Inject
   public JUnit4TestRunner(
-      @Named("che.user.workspaces.storage") String workspacePath,
+      RootDirPathProvider pathProvider,
       JavaTestFinder javaTestFinder,
       ProjectClasspathProvider classpathProvider) {
-    super(workspacePath, javaTestFinder);
-    this.workspacePath = workspacePath;
+    super(pathProvider.get(), javaTestFinder);
+    this.workspacePath = pathProvider.get();
     this.javaTestFinder = javaTestFinder;
     this.classpathProvider = classpathProvider;
   }

@@ -33,6 +33,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -41,7 +42,6 @@ import org.eclipse.che.api.languageserver.remote.RemoteLsLauncherProvider;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.lsp4j.MessageParams;
@@ -252,7 +252,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     }
 
     String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(filePath));
-    RegisteredProject project =
+    ProjectConfig project =
         projectManagerProvider
             .get()
             .getClosest(wsPath)

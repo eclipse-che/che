@@ -18,8 +18,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.function.Consumer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,7 +49,7 @@ public class FileWatcherEventHandlerTest {
   public void setUp() throws Exception {
     root = rootFolder.getRoot().toPath();
 
-    handler = new FileWatcherEventHandler(rootFolder.getRoot());
+    handler = new FileWatcherEventHandler(new DummyRootProvider(rootFolder.getRoot()));
   }
 
   @Test
@@ -124,5 +126,12 @@ public class FileWatcherEventHandlerTest {
     handler.handle(path, ENTRY_CREATE);
 
     verify(create).accept(toInternalPath(root, path));
+  }
+
+  private static class DummyRootProvider extends RootDirPathProvider {
+
+    public DummyRootProvider(File folder) {
+      this.rootFile = folder;
+    }
   }
 }

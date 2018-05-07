@@ -67,6 +67,7 @@ import org.eclipse.che.api.project.server.ProjectService;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 import org.eclipse.che.api.project.shared.dto.ItemReference;

@@ -22,6 +22,7 @@ import java.nio.file.PathMatcher;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,7 +67,7 @@ public class FileTreeWalkerTest {
   public void setUp() throws Exception {
     fileTreeWalker =
         new FileTreeWalker(
-            rootFolder.getRoot(),
+            new DummyRootProvider(rootFolder.getRoot()),
             directoryUpdateConsumers,
             directoryCreateConsumers,
             directoryDeleteConsumers,
@@ -219,5 +220,12 @@ public class FileTreeWalkerTest {
 
     fileTreeWalker.walk();
     verify(fileCreatedConsumerMock, never()).accept(file.toPath());
+  }
+
+  private static class DummyRootProvider extends RootDirPathProvider {
+
+    public DummyRootProvider(File folder) {
+      this.rootFile = folder;
+    }
   }
 }

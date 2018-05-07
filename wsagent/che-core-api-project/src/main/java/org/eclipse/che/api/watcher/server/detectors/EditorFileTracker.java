@@ -21,6 +21,8 @@ import com.google.common.hash.Hashing;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,12 +31,12 @@ import java.util.TimerTask;
 import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.shared.dto.event.FileStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type;
@@ -68,16 +70,16 @@ public class EditorFileTracker {
   private final FsManager fsManager;
   private final EventService eventService;
   private final EventSubscriber<FileTrackingOperationEvent> fileOperationEventSubscriber;
-  private File root;
+  private Path root;
 
   @Inject
   public EditorFileTracker(
-      @Named("che.user.workspaces.storage") File root,
+      RootDirPathProvider pathProvider,
       FileWatcherManager fileWatcherManager,
       RequestTransmitter transmitter,
       FsManager fsManager,
       EventService eventService) {
-    this.root = root;
+    this.root = Paths.get(pathProvider.get());
     this.fileWatcherManager = fileWatcherManager;
     this.transmitter = transmitter;
     this.fsManager = fsManager;
@@ -204,7 +206,7 @@ public class EditorFileTracker {
                 new TimerTask() {
                   @Override
                   public void run() {
-                    if (!Files.exists(FileWatcherUtils.toNormalPath(root.toPath(), it))) {
+                    if (!Files.exists(FileWatcherUtils.toNormalPath(root, it))) {
                       hashRegistry.remove(path + endpointId);
                       FileStateUpdateDto params =
                           newDto(FileStateUpdateDto.class).withPath(path).withType(DELETED);

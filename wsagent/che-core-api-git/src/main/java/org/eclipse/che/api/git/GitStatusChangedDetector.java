@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.PathTransformer;
@@ -39,7 +40,6 @@ import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
@@ -149,7 +149,7 @@ public class GitStatusChangedDetector implements EventSubscriber<StatusChangedEv
   private Consumer<String> transmitConsumer(String wsPath) {
     return id -> {
       try {
-        RegisteredProject project =
+        ProjectConfig project =
             projectManager
                 .getClosest(wsPath)
                 .orElseThrow(() -> new NotFoundException("Can't find a project"));

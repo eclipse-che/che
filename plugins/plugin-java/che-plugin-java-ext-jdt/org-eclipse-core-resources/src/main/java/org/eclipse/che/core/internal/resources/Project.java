@@ -14,7 +14,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;

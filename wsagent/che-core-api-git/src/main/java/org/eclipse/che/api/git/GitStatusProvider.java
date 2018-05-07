@@ -25,12 +25,12 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 
 /**
  * Git implementation of {@link VcsStatusProvider}.
@@ -61,7 +61,7 @@ public class GitStatusProvider implements VcsStatusProvider {
   @Override
   public VcsStatus getStatus(String wsPath) throws ServerException {
     try {
-      RegisteredProject project =
+      ProjectConfig project =
           projectManager
               .getClosest(wsPath)
               .orElseThrow(() -> new NotFoundException("Can't find project"));
@@ -90,7 +90,7 @@ public class GitStatusProvider implements VcsStatusProvider {
       throws ServerException {
     Map<String, VcsStatus> statusMap = new HashMap<>();
     try {
-      RegisteredProject project =
+      ProjectConfig project =
           projectManager
               .getClosest(absolutize(wsPath))
               .orElseThrow(() -> new NotFoundException("Can't find project"));

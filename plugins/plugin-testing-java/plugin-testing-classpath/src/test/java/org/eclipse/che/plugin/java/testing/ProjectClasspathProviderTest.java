@@ -14,8 +14,10 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Set;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -37,7 +39,11 @@ public class ProjectClasspathProviderTest {
 
   private static ResourcesPlugin RESOURCE_PLUGIN =
       new ResourcesPlugin(
-          "target/test-classes/index", PROJECTS_PATH, () -> null, () -> null, () -> null);
+          "target/test-classes/index",
+          new DummyProvider(new File(PROJECTS_PATH)),
+          () -> null,
+          () -> null,
+          () -> null);
 
   @Mock private IJavaProject javaProject;
 
@@ -45,7 +51,7 @@ public class ProjectClasspathProviderTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    classpathProvider = new ProjectClasspathProvider(PROJECTS_PATH);
+    classpathProvider = new ProjectClasspathProvider(new DummyProvider(new File(PROJECTS_PATH)));
   }
 
   @Test
@@ -133,5 +139,11 @@ public class ProjectClasspathProviderTest {
       when(result.getOutputLocation()).thenReturn(new Path(outputPath));
     }
     return result;
+  }
+
+  private static class DummyProvider extends RootDirPathProvider {
+    public DummyProvider(File file) {
+      this.rootFile = file;
+    }
   }
 }

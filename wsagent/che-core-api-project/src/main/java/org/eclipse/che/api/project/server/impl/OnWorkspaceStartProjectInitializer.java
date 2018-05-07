@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 
 @Singleton
@@ -59,7 +60,8 @@ public class OnWorkspaceStartProjectInitializer {
     firePostInitializationHandlers();
   }
 
-  private void initializeRegisteredProjects() throws ServerException {
+  private void initializeRegisteredProjects()
+      throws ServerException, NotFoundException, ConflictException {
     for (ProjectConfig projectConfig : projectSynchronizer.getAll()) {
       projectConfigRegistry.put(projectConfig, false, false);
     }
@@ -77,6 +79,7 @@ public class OnWorkspaceStartProjectInitializer {
       throws ServerException, ConflictException, NotFoundException, ForbiddenException {
 
     for (RegisteredProject project : projectConfigRegistry.getAll()) {
+
       if (project.getBaseFolder() == null) {
         continue;
       }

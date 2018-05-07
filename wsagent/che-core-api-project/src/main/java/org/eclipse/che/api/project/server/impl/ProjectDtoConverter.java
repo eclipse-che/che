@@ -21,9 +21,11 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.AttributeDto;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
+import org.eclipse.che.api.project.shared.dto.RegisteredProjectDto;
 import org.eclipse.che.api.project.shared.dto.ValueDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
@@ -93,8 +95,28 @@ public class ProjectDtoConverter {
         .withDescription(project.getDescription())
         .withSource(asDto(project.getSource()))
         .withAttributes(project.getAttributes())
-        .withType(project.getProjectType().getId())
-        .withMixins(new ArrayList<>(project.getMixinTypes().keySet()))
+        .withType(project.getType())
+        .withMixins(project.getMixins())
+        .withProblems(
+            project
+                .getProblems()
+                .stream()
+                .map(ProjectDtoConverter::asDto)
+                .collect(Collectors.toList()));
+  }
+
+  public static RegisteredProjectDto asRegisteredProjectDto(RegisteredProject project) {
+    return newDto(RegisteredProjectDto.class)
+        .withName(project.getName())
+        .withPath(project.getPath())
+        .withDescription(project.getDescription())
+        .withSource(asDto(project.getSource()))
+        .withAttributes(project.getAttributes())
+        .withType(project.getType())
+        .withMixins(project.getMixins())
+        .withBaseFolder(project.getBaseFolder())
+        .withDetected(project.isDetected())
+        .withSynced(project.isSynced())
         .withProblems(
             project
                 .getProblems()

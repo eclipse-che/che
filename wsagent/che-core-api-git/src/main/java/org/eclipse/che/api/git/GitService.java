@@ -35,6 +35,7 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.api.fs.server.FsManager;
@@ -90,7 +91,6 @@ import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -310,7 +310,7 @@ public class GitService {
   @DELETE
   @Path("repository")
   public void deleteRepository(@Context UriInfo uriInfo) throws ApiException {
-    RegisteredProject project =
+    ProjectConfig project =
         projectManager
             .get(projectPath)
             .orElseThrow(() -> new NotFoundException("Can't find project"));

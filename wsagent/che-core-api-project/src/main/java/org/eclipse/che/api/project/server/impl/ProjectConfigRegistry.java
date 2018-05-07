@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 
 @Singleton
 public class ProjectConfigRegistry {

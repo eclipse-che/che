@@ -24,13 +24,13 @@ import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopy;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyManager;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyUpdatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.EditorChangesDto;
 import org.eclipse.che.api.project.shared.dto.ServerError;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
@@ -213,7 +213,7 @@ public class JavaReconciler {
         case START:
           {
             String filePath = operation.getPath();
-            RegisteredProject project =
+            ProjectConfig project =
                 projectManager
                     .getClosest(filePath)
                     .orElseThrow(

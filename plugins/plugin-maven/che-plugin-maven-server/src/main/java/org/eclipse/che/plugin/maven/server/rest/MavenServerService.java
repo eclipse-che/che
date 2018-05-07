@@ -40,7 +40,6 @@ import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
@@ -111,10 +110,10 @@ public class MavenServerService {
       throws ServerException, NotFoundException, ForbiddenException {
     String projectWsPath = absolutize(projectPath);
 
-    RegisteredProject project =
-        projectManager
-            .get(projectWsPath)
-            .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
+    //    ProjectConfig project =
+    //        projectManager
+    //            .get(projectWsPath)
+    //            .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
 
     MavenServerWrapper mavenServer =
         wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
