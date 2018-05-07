@@ -39,13 +39,12 @@ public class Stacks {
     String TOOLBAR_ID = "Stacks";
     String DOCUMENTATION_LINK_XPATH = "//div[@che-link-title='Learn more.']/a";
     String ADD_STACK_BUTTON_ID = "add-item-button";
-    String BUILD_STACK_FROM_RECIPE_BUTTON_XPATH =
-        "//che-button-primary[@che-button-title='Build Stack From Recipe']";
+    String BUILD_STACK_FROM_RECIPE_BUTTON_ID = "import-item-button";
     String DELETE_STACK_BUTTON_ID = "delete-item-button";
     String DELETE_DIALOG_BUTTON_ID = "ok-dialog-button";
     String SEARCH_STACK_FIELD_XPATH = "//input[@ng-placeholder='Search']";
-    String STACKS_LIST_HEADER_XPATH = "//md-item[@class='noselect']//span";
-    String SORT_STACKS_BY_NAME_BUTTON_XPATH = "//span[contains(@class, 'header-sort-direction')]";
+    String STACKS_LIST_HEADERS_XPATH = "//div[@che-column-title]";
+    String SORT_STACKS_BY_NAME_BUTTON_ID = "sort-stacks-by-name-button";
     String BULK_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Stack list']";
     String NO_STACKS_FOUND_XPATH = "//span[text()='No stacks found.']";
     String STACK_ITEM_XPATH = "//div[contains(@class, 'stack-item-name')]";
@@ -75,7 +74,7 @@ public class Stacks {
   @FindBy(xpath = Locators.BULK_CHECKBOX_XPATH)
   WebElement bulkCheckbox;
 
-  @FindBy(xpath = Locators.BUILD_STACK_FROM_RECIPE_BUTTON_XPATH)
+  @FindBy(id = Locators.BUILD_STACK_FROM_RECIPE_BUTTON_ID)
   WebElement buildStackFromRecipeButton;
 
   @FindBy(id = Locators.DELETE_DIALOG_BUTTON_ID)
@@ -190,7 +189,7 @@ public class Stacks {
   public ArrayList<String> getStacksListHeaders() {
     ArrayList<String> titles = new ArrayList<>();
     List<WebElement> headers =
-        seleniumWebDriver.findElements(By.xpath(Locators.STACKS_LIST_HEADER_XPATH));
+        seleniumWebDriver.findElements(By.xpath(Locators.STACKS_LIST_HEADERS_XPATH));
     headers.forEach(
         header -> {
           titles.add(header.getText());
@@ -211,8 +210,7 @@ public class Stacks {
   }
 
   public void clickOnSortStacksByNameButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.SORT_STACKS_BY_NAME_BUTTON_XPATH));
-    WaitUtils.sleepQuietly(1);
+    seleniumWebDriverHelper.waitAndClick(By.id(Locators.SORT_STACKS_BY_NAME_BUTTON_ID));
   }
 
   public void waitDocumentationLink() {
