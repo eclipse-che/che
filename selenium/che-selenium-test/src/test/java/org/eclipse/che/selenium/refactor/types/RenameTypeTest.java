@@ -106,47 +106,47 @@ public class RenameTypeTest {
     testCase();
   }
 
-  @Test(priority = 1)
+  @Test
   public void test1() {
     testCase();
   }
 
-  @Test(priority = 2)
+  @Test
   public void test2() {
     testCase();
   }
 
-  @Test(priority = 3)
+  @Test
   public void test3() {
     testCase();
   }
 
-  @Test(priority = 4)
+  @Test
   public void test4() {
     testCase();
   }
 
-  @Test(priority = 5)
+  @Test
   public void test5() {
     testCase();
   }
 
-  @Test(priority = 6)
+  @Test
   public void test6() {
     testCase();
   }
 
-  @Test(priority = 7)
+  @Test
   public void test7() {
     testCase();
   }
 
-  @Test(priority = 8)
+  @Test
   public void test8() {
     testCase();
   }
 
-  @Test(priority = 9)
+  @Test
   public void test9() {
     testCase();
   }

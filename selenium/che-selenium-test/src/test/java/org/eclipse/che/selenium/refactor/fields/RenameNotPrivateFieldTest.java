@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.eclipse.che.selenium.refactor.Services;
 import org.openqa.selenium.Keys;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,6 +66,16 @@ public class RenameNotPrivateFieldTest {
         .expandSpringProjectNodes(PROJECT_NAME);
   }
 
+  @AfterMethod
+  public void closeForm() {
+    if (refactor.isWidgetOpened()) {
+      refactor.clickCancelButtonRefactorForm();
+    }
+    if (editor.isAnyTabsOpened()) {
+      editor.closeAllTabs();
+    }
+  }
+
   @Test
   public void checkRenameNotPrivateField0() throws Exception {
     setFieldsForTest("test0");
@@ -87,7 +98,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkRenameNotPrivateField1() throws Exception {
     setFieldsForTest("test1");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -106,7 +117,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 2)
+  @Test
   public void checkRenameNotPrivateField2() throws Exception {
     setFieldsForTest("test2");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -122,7 +133,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 3)
+  @Test
   public void checkRenameNotPrivateField3() throws Exception {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -140,7 +151,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 4)
+  @Test
   public void checkRenameNotPrivateField4() throws Exception {
     setFieldsForTest("test4");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -161,7 +172,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 5)
+  @Test
   public void checkRenameNotPrivateField5() throws Exception {
     setFieldsForTest("test5");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -182,7 +193,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 6)
+  @Test
   public void checkRenameNotPrivateField6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -204,7 +215,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 7)
+  @Test
   public void checkRenameNotPrivateField7() throws Exception {
     setFieldsForTest("test7");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -228,7 +239,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 8)
+  @Test
   public void checkRenameNotPrivateField8() throws Exception {
     setFieldsForTest("test8");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -252,7 +263,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 9)
+  @Test
   public void checkRenameNotPrivateField9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -273,7 +284,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 10)
+  @Test
   public void checkRenameNotPrivateField10() throws Exception {
     setFieldsForTest("test10");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -291,7 +302,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 11)
+  @Test
   public void checkRenameAnnotation24() throws Exception {
     setFieldsForTest("test24");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -308,7 +319,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 12)
+  @Test
   public void checkRenameAnnotation25() throws Exception {
     setFieldsForTest("test25");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -324,7 +335,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 13)
+  @Test
   public void checkBugFiveEightTwoOne26() throws Exception {
     setFieldsForTest("test26");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -340,7 +351,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 14)
+  @Test
   public void checkRenameDelegate28() throws Exception {
     setFieldsForTest("test28");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -358,7 +369,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 15)
+  @Test
   public void checkRenameEnumField31() throws Exception {
     setFieldsForTest("test31");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -379,7 +390,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 16)
+  @Test
   public void checkRenameGenerics32() throws Exception {
     setFieldsForTest("test32");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -400,7 +411,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 17)
+  @Test
   public void checkRenameGenerics33() throws Exception {
     setFieldsForTest("test33");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
@@ -421,7 +432,7 @@ public class RenameNotPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 18)
+  @Test
   public void checkRenameGenerics36() throws Exception {
     setFieldsForTest("test36");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
