@@ -44,7 +44,7 @@ public class Stacks {
     String DELETE_DIALOG_BUTTON_ID = "ok-dialog-button";
     String SEARCH_STACK_FIELD_XPATH = "//input[@ng-placeholder='Search']";
     String STACKS_LIST_HEADERS_XPATH = "//div[@che-column-title]";
-    String SORT_STACKS_BY_NAME_BUTTON_ID = "sort-stacks-by-name-button";
+    String SORT_STACKS_BY_NAME_ID = "sort-stacks-by-name";
     String BULK_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Stack list']";
     String NO_STACKS_FOUND_XPATH = "//span[text()='No stacks found.']";
     String STACK_ITEM_XPATH = "//div[contains(@class, 'stack-item-name')]";
@@ -210,7 +210,7 @@ public class Stacks {
   }
 
   public void clickOnSortStacksByNameButton() {
-    seleniumWebDriverHelper.waitAndClick(By.id(Locators.SORT_STACKS_BY_NAME_BUTTON_ID));
+    seleniumWebDriverHelper.waitAndClick(By.id(Locators.SORT_STACKS_BY_NAME_ID));
   }
 
   public void waitDocumentationLink() {
