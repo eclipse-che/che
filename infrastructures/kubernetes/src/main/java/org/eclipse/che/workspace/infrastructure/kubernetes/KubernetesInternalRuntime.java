@@ -628,19 +628,20 @@ public class KubernetesInternalRuntime<
         String reason = event.getReason();
         String message = event.getMessage();
         String podName = event.getPodName();
+        String workspaceId = getContext().getIdentity().getWorkspaceId();
+        LOG.error(
+            "Unrecoverable event occurred during workspace '{}' startup: {}, {}, {}",
+            workspaceId,
+            reason,
+            message,
+            podName);
         try {
           internalStop(emptyMap());
         } catch (InfrastructureException e) {
-          String workspaceId = getContext().getIdentity().getWorkspaceId();
-          LOG.error(
-              "Unrecoverable event occured during workspace '{}' startup: {}, {}, {}",
-              workspaceId,
-              reason,
-              message,
-              podName);
+          LOG.error("Error occurred during runtime '{}' stopping. {}", workspaceId, e.getMessage());
         } finally {
           eventPublisher.sendRuntimeStoppedEvent(
-              format("Unrecoverable event occured: '%s', '%s', '%s'", reason, message, podName),
+              format("Unrecoverable event occurred: '%s', '%s', '%s'", reason, message, podName),
               getContext().getIdentity());
         }
       }
