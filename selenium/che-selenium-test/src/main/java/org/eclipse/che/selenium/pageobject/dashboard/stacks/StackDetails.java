@@ -18,6 +18,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 public class StackDetails {
@@ -34,8 +35,11 @@ public class StackDetails {
     String TOOLBAR_XPATH_PATTERN = "//div[@che-title='%s']";
     String NEW_STACK_NAME = "deskname";
     String SAVE_CHANGES_BUTTON_NAME = "saveButton";
-    String TO_ALL_STACKS_LIST_BUTTON_XPATH = "//a[@title='All stacks']";
+    String ALL_STACKS_BUTTON_XPATH = "//a[@title='All stacks']";
   }
+
+  @FindBy(name = Locators.NEW_STACK_NAME)
+  WebElement stackNameField;
 
   public void waitToolbar(String stackName) {
     seleniumWebDriverHelper.waitVisibility(
@@ -43,20 +47,16 @@ public class StackDetails {
   }
 
   public void setStackName(String stackName) {
-    WebElement stackNameField =
-        seleniumWebDriverHelper.waitVisibility(By.name(Locators.NEW_STACK_NAME));
-    stackNameField.click();
-    stackNameField.clear();
-    stackNameField.sendKeys(stackName);
-    WaitUtils.sleepQuietly(1);
+    seleniumWebDriverHelper.waitAndClick(stackNameField);
+    seleniumWebDriverHelper.setValue(stackNameField, stackName);
   }
 
   public void clickOnSaveChangesButton() {
     seleniumWebDriverHelper.waitAndClick(By.name(Locators.SAVE_CHANGES_BUTTON_NAME));
   }
 
-  public void clickOnToAllStacksList() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.TO_ALL_STACKS_LIST_BUTTON_XPATH));
+  public void clickOnAllStacksButton() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ALL_STACKS_BUTTON_XPATH));
     WaitUtils.sleepQuietly(1);
   }
 }

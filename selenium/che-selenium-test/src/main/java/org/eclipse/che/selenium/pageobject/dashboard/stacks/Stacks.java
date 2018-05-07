@@ -11,8 +11,6 @@
 package org.eclipse.che.selenium.pageobject.dashboard.stacks;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -24,20 +22,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Stacks {
   private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
-  private final WebDriverWait redrawUiElementsTimeout;
 
   @Inject
   public Stacks(
       SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
-    this.redrawUiElementsTimeout =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -125,11 +119,9 @@ public class Stacks {
 
   public boolean isStackChecked(String workspaceName) {
     String attrValue =
-        redrawUiElementsTimeout
-            .until(
-                visibilityOfElementLocated(
-                    By.xpath(format(Locators.STACK_ITEM_CHECKBOX_XPATH_PATTERN, workspaceName))))
-            .getAttribute("aria-checked");
+        seleniumWebDriverHelper.waitVisibilityAndGetValue(
+            By.xpath(format(Locators.STACK_ITEM_CHECKBOX_XPATH_PATTERN, workspaceName)),
+            "aria-checked");
 
     return Boolean.parseBoolean(attrValue);
   }
@@ -144,12 +136,12 @@ public class Stacks {
         By.xpath(format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
   }
 
-  public Boolean isStackItemExists(String stackName) {
+  public Boolean isStackItemExisted(String stackName) {
     return seleniumWebDriverHelper.isVisible(
         By.xpath(format(Locators.STACK_ITEM_NAME_XPATH_PATTERN, stackName)));
   }
 
-  public Boolean isDuplicatedStackExists(String stackName) {
+  public Boolean isDuplicatedStackExisted(String stackName) {
     return seleniumWebDriverHelper.isVisible(
         By.xpath(format(Locators.STACK_ITEM_NAME_CONTAINS_XPATH_PATTERN, stackName)));
   }
@@ -188,9 +180,7 @@ public class Stacks {
   }
 
   public void typeToSearchInput(String value) {
-    seleniumWebDriverHelper.waitVisibility(searchStackField).clear();
-    searchStackField.sendKeys(value);
-    WaitUtils.sleepQuietly(1);
+    seleniumWebDriverHelper.setValue(searchStackField, value);
   }
 
   public void waitNoStacksFound() {

@@ -41,7 +41,6 @@ public class StacksListTest {
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createStack(NEW_STACK_NAME);
   }
 
   @BeforeMethod
@@ -76,7 +75,7 @@ public class StacksListTest {
     assertTrue(headers.contains("ACTIONS"));
 
     // check JAVA stack info
-    assertTrue(stacks.isStackItemExists(JAVA.getName()));
+    assertTrue(stacks.isStackItemExisted(JAVA.getName()));
     assertEquals(
         stacks.getStackDescription(JAVA.getName()),
         "Default Java Stack with JDK 8, Maven and Tomcat.");
@@ -85,6 +84,8 @@ public class StacksListTest {
 
   @Test
   public void checkStacksSelectingByCheckbox() {
+    createStack(NEW_STACK_NAME);
+
     // select stacks by checkbox and check it is selected
     stacks.selectStackByCheckbox(NEW_STACK_NAME);
     assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
@@ -104,20 +105,20 @@ public class StacksListTest {
 
     // search stacks by a full name
     stacks.typeToSearchInput(JAVA.getName());
-    assertTrue(stacks.isStackItemExists(JAVA.getName()));
-    assertTrue(stacks.isStackItemExists(JAVA_MYSQL.getName()));
-    assertFalse(stacks.isStackItemExists(BLANK.getName()));
+    assertTrue(stacks.isStackItemExisted(JAVA.getName()));
+    assertTrue(stacks.isStackItemExisted(JAVA_MYSQL.getName()));
+    assertFalse(stacks.isStackItemExisted(BLANK.getName()));
 
     stacks.typeToSearchInput(BLANK.getName());
-    assertTrue(stacks.isStackItemExists(BLANK.getName()));
-    assertFalse(stacks.isStackItemExists(JAVA.getName()));
-    assertFalse(stacks.isStackItemExists(JAVA_MYSQL.getName()));
+    assertTrue(stacks.isStackItemExisted(BLANK.getName()));
+    assertFalse(stacks.isStackItemExisted(JAVA.getName()));
+    assertFalse(stacks.isStackItemExisted(JAVA_MYSQL.getName()));
 
     // search stacks by a part name
     stacks.typeToSearchInput(BLANK.getName().substring(BLANK.getName().length() / 2));
-    assertTrue(stacks.isStackItemExists(BLANK.getName()));
-    assertFalse(stacks.isStackItemExists(JAVA.getName()));
-    assertFalse(stacks.isStackItemExists(JAVA_MYSQL.getName()));
+    assertTrue(stacks.isStackItemExisted(BLANK.getName()));
+    assertFalse(stacks.isStackItemExisted(JAVA.getName()));
+    assertFalse(stacks.isStackItemExisted(JAVA_MYSQL.getName()));
   }
 
   @Test
@@ -151,13 +152,13 @@ public class StacksListTest {
     stacks.clickOnDeleteDialogButton();
     dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", stackName));
     dashboard.waitNotificationIsClosed();
-    assertFalse(stacks.isStackItemExists(stackName));
+    assertFalse(stacks.isStackItemExisted(stackName));
 
     // create stack duplicate by Duplicate Stack button
     stacks.clickOnDuplicateStackButton(JAVA.getName());
-    assertTrue(stacks.isDuplicatedStackExists(JAVA.getName() + "-copy-"));
+    assertTrue(stacks.isDuplicatedStackExisted(JAVA.getName() + "-copy-"));
     stacks.clickOnDuplicateStackButton(BLANK.getName());
-    assertTrue(stacks.isDuplicatedStackExists(BLANK.getName() + "-copy-"));
+    assertTrue(stacks.isDuplicatedStackExisted(BLANK.getName() + "-copy-"));
   }
 
   private void deleteStack() {
@@ -175,7 +176,7 @@ public class StacksListTest {
     stackDetails.setStackName(stackName);
     stackDetails.clickOnSaveChangesButton();
     stackDetails.waitToolbar(stackName);
-    stackDetails.clickOnToAllStacksList();
+    stackDetails.clickOnAllStacksButton();
 
     stacks.waitToolbarTitleName();
     stacks.waitStackItem(stackName);
