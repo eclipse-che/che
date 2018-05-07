@@ -16,6 +16,7 @@ import static java.util.Arrays.asList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -92,7 +93,7 @@ public class SystemServicePermissionsFilterTest {
         .then()
         .statusCode(204);
 
-    verify(systemService).stop();
+    verify(systemService).stop(anyBoolean());
   }
 
   @Test
@@ -107,7 +108,7 @@ public class SystemServicePermissionsFilterTest {
         .then()
         .statusCode(403);
 
-    verify(systemService, never()).stop();
+    verify(systemService, never()).stop(anyBoolean());
   }
 
   @Test

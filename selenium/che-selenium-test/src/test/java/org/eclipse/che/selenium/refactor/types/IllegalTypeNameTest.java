@@ -10,13 +10,15 @@
  */
 package org.eclipse.che.selenium.refactor.types;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.testng.Assert.assertEquals;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -24,7 +26,6 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,10 +35,9 @@ import org.testng.annotations.Test;
  * @author Musienko Maxim
  */
 public class IllegalTypeNameTest {
-  private static final String NAME_OF_PROJECT =
-      NameGenerator.generate(IllegalTypeNameTest.class.getSimpleName(), 2);
+  private static final String PROJECT_NAME = generate("project", 4);
   private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
-      NAME_OF_PROJECT + "/src/main/java/renametype";
+      PROJECT_NAME + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -55,21 +55,23 @@ public class IllegalTypeNameTest {
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
-        NAME_OF_PROJECT,
+        PROJECT_NAME,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
   }
 
   @Test
   public void illegalTypeName4() throws Exception {
-    projectExplorer.waitVisibleItem(NAME_OF_PROJECT);
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.scrollToItemByPath(NAME_OF_PROJECT + "/pom.xml");
+
+    projectExplorer.scrollToItemByPath(PROJECT_NAME + "/pom.xml");
     loader.waitOnClosed();
     setFieldsForTest("testIllegalTypeName4");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
-    Assert.assertEquals(editor.getVisibleTextFromEditor(), contentFromInA);
+    assertEquals(editor.getVisibleTextFromEditor(), contentFromInA);
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.waitAndSelectItemByName("A.java");
   }

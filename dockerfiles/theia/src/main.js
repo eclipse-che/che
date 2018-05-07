@@ -91,7 +91,7 @@ function getTheiaPlugins() {
         return {};
     }
     const theiaPackageJson = require(`${theiaRoot}/package.json`);
-    return theiaPackageJson['dependencies'];
+    return theiaPackageJson['dependencies'] || {};
 }
 
 /** Returns extra Theia plugins which is set via THEIA_PLUGINS env variable */
@@ -123,7 +123,7 @@ function getExtraTheiaPlugins() {
 
 /**
  * Clones git repository and adds the plugin as local.
- * This is done becouse Theia requires npm package.json (not lerna) which is located, in most cases, in subdirectory of repository.
+ * This is done because Theia requires npm package.json (not lerna) which is located, in some cases, in subdirectory of repository.
  */
 function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
     const pluginPath = gitPluginsRoot + '/' + pluginName + '/';
@@ -140,6 +140,16 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
         }
     }
 
+    if (!fs.existsSync(pluginPath + 'node_modules') || !fs.existsSync(pluginPath + 'lib')) {
+        try {
+            console.log('Building plugin: ' + pluginName);
+            cp.execSync(`cd ${pluginPath} && yarn`);
+        } catch (error) {
+            console.error('Skipping ' + pluginName + ' plugin because of following error: ' + error);
+            return;
+        }
+    }
+
     const rootPackageJson = require(pluginPath + 'package.json');
     if (rootPackageJson['name'] === pluginName && !fs.existsSync(pluginPath + 'lerna.json')) {
         plugins[pluginName] = gitRepository;
@@ -151,15 +161,6 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
             if (fs.existsSync(packageJsonPath)) {
                 let packageJson = require(packageJsonPath);
                 if (packageJson['name'] === pluginName) {
-                    if (!fs.existsSync(pluginTargetDir + '/node_mudules') || !fs.existsSync(pluginTargetDir + '/lib')) {
-                        try {
-                            console.log('Building plugin: ' + pluginName);
-                            cp.execSync(`cd ${pluginTargetDir} && yarn`);
-                        } catch (error) {
-                            console.error('Skipping ' + pluginName + ' plugin because of following error: ' + error);
-                            return;
-                        }
-                    }
                     plugins[pluginName] = pluginTargetDir;
                     return;
                 }
