@@ -201,18 +201,6 @@ public class RunPlainJavaProjectTest {
     loader.waitOnClosed();
     projectWizard.clickNextButton();
 
-    // set project as plain java
-    projectWizard.waitOpenProjectConfigForm();
-    projectWizard.clickSaveButton();
-    projectWizard.waitCloseProjectConfigForm();
-
-    menu.runCommand(PROJECT, UPDATE_PROJECT_CONFIGURATION);
-    projectWizard.waitCreateProjectWizardForm();
-    projectWizard.selectTypeProject(typeProject);
-    loader.waitOnClosed();
-    projectWizard.clickNextButton();
-    projectWizard.waitExpTextInSourceFolder("src", SOURCE_FOLDER);
-
     // set library folder
     projectWizard.clickBrowseButton(Wizard.TypeFolder.LIBRARY_FOLDER);
     configureClasspath.openItemInSelectPathForm(nameApp);
@@ -225,5 +213,16 @@ public class RunPlainJavaProjectTest {
     projectWizard.waitCloseProjectConfigForm();
     projectExplorer.waitVisibilityByName(nameApp);
     loader.waitOnClosed();
+
+    // set project as plain java
+    menu.runCommand(PROJECT, UPDATE_PROJECT_CONFIGURATION);
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.selectTypeProject(typeProject);
+    loader.waitOnClosed();
+    projectWizard.clickNextButton();
+    projectWizard.waitExpTextInSourceFolder("src", SOURCE_FOLDER);
+    projectWizard.waitOpenProjectConfigForm();
+    projectWizard.clickSaveButton();
+    projectWizard.waitCloseProjectConfigForm();
   }
 }
