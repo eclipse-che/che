@@ -189,8 +189,8 @@ parameters:
   description: Che server Docker image. Defaults to docker.io/eclipse/che-server
   value: docker.io/eclipse/che-server
 - name: CHE_MULTIUSER
-  displayName: Single vs Multi User Che
-  description: False ie single user by default. Set to true
+  displayName: Che Multi-user flavor
+  description: False i.e. single user by default
   value: 'false'
 - name: OPENSHIFT_USERNAME
   displayName: OpenShift Username
@@ -202,16 +202,16 @@ parameters:
   displayName: OpenShift token
   description: OpenShift token to be used to create workspace objects. Must be set if username/password are impossible to use. Do not set if username/pass are provided!
 - name: PROTOCOL
-  displayName: https or http protocol
+  displayName: HTTP protocol
   description: Protocol to be used in Che communications
   value: http
 - name: WS_PROTOCOL
-  displayName: wss or ws
+  displayName: Websocket protocol
   description: Websocket protocol to be used in Che communications. Defaults to ws. Set to wss only if TLS is true and https protocol is defined
   value: ws
 - name: TLS
   displayName: HTTPS support
-  description: Turn on https support in Che
+  description: HTTPS support in Che
   value: 'false'
 - name: CHE_INFRA_OPENSHIFT_PROJECT
   displayName: OpenShift namespace to create workspace objects
