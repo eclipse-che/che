@@ -10,14 +10,14 @@
  */
 package org.eclipse.che.selenium.refactor.types;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+
 import com.google.inject.Inject;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -40,17 +40,15 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class TestFailTest {
   private static final Logger LOG = LoggerFactory.getLogger(TestEnumerationsTest.class);
-  private static final String NAME_OF_PROJECT =
-      NameGenerator.generate(TestFailTest.class.getSimpleName(), 3);
+  private static final String PROJECT_NAME = generate("project", 4);
   private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
-      NAME_OF_PROJECT + "/src/main/java/renametype";
+      PROJECT_NAME + "/src/main/java/renametype";
 
   private String renameItem = "B.java";
   private String pathToCurrentPackage;
   private Services services;
 
   @Inject private TestWorkspace workspace;
-  @Inject private DefaultTestUser defaultTestUser;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
@@ -70,14 +68,15 @@ public class TestFailTest {
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
-        NAME_OF_PROJECT,
+        PROJECT_NAME,
         ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
-    projectExplorer.waitVisibleItem(NAME_OF_PROJECT);
+
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
-    loader.waitOnClosed();
   }
 
   @BeforeMethod

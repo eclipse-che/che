@@ -151,7 +151,7 @@ deploy_che_to_ocp() {
   if [ "${DEPLOY_CHE}" == "true" ];then
     echo "Logging in to OpenShift cluster..."
     $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
-    ./deploy_che.sh
+    ${BASE_DIR}/deploy_che.sh
   fi
 }
 
@@ -286,7 +286,7 @@ parse_args() {
                exit 1
            ;;
            *)
-               echo "You've passed wrong arg."
+               echo "You've passed wrong arg '$i'."
                echo -e "$HELP"
                exit 1
            ;;
