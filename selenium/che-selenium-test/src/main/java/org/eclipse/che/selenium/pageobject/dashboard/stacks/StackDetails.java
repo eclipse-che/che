@@ -14,7 +14,6 @@ import static java.lang.String.format;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -57,6 +56,5 @@ public class StackDetails {
 
   public void clickOnAllStacksButton() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ALL_STACKS_BUTTON_XPATH));
-    WaitUtils.sleepQuietly(1);
   }
 }

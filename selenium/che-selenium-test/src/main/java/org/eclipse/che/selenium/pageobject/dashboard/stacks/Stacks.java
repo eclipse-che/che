@@ -118,7 +118,7 @@ public class Stacks {
 
   public boolean isStackChecked(String workspaceName) {
     String attrValue =
-        seleniumWebDriverHelper.waitVisibilityAndGetValue(
+        seleniumWebDriverHelper.waitVisibilityAndGetAttribute(
             By.xpath(format(Locators.STACK_ITEM_CHECKBOX_XPATH_PATTERN, workspaceName)),
             "aria-checked");
 
