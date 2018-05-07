@@ -33,12 +33,12 @@ import org.eclipse.che.security.oauth.OAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAuthenticationException;
 import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 
-public class KeycloakOAuthAPI implements OAuthAPI {
+public class DelegatedOAuthAPI implements OAuthAPI {
 
   private final KeycloakServiceClient keycloakServiceClient;
 
   @Inject
-  public KeycloakOAuthAPI(KeycloakServiceClient keycloakServiceClient) {
+  public DelegatedOAuthAPI(KeycloakServiceClient keycloakServiceClient) {
     this.keycloakServiceClient = keycloakServiceClient;
   }
 

@@ -35,14 +35,15 @@ public interface OAuthAPI {
           BadRequestException;
 
   Response callback(UriInfo uriInfo, List<String> errorValues)
-          throws NotFoundException, OAuthAuthenticationException, ForbiddenException;
+      throws NotFoundException, OAuthAuthenticationException, ForbiddenException;
 
-  Set<OAuthAuthenticatorDescriptor> getRegisteredAuthenticators(UriInfo uriInfo) throws ForbiddenException;
+  Set<OAuthAuthenticatorDescriptor> getRegisteredAuthenticators(UriInfo uriInfo)
+      throws ForbiddenException;
 
   OAuthToken getToken(String oauthProvider)
       throws NotFoundException, UnauthorizedException, ServerException, ForbiddenException,
           BadRequestException, ConflictException;
 
   void invalidateToken(String oauthProvider)
-          throws NotFoundException, UnauthorizedException, ServerException, ForbiddenException;
+      throws NotFoundException, UnauthorizedException, ServerException, ForbiddenException;
 }

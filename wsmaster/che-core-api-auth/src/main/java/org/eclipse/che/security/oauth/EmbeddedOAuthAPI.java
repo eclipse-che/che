@@ -39,8 +39,8 @@ import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CheOAuthAPI implements OAuthAPI {
-  private static final Logger LOG = LoggerFactory.getLogger(CheOAuthAPI.class);
+public class EmbeddedOAuthAPI implements OAuthAPI {
+  private static final Logger LOG = LoggerFactory.getLogger(EmbeddedOAuthAPI.class);
 
   @Inject
   @Named("che.auth.access_denied_error_page")

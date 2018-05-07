@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.multiuser.keycloak.server.oauth2.KeycloakOAuthAPI;
+import org.eclipse.che.multiuser.keycloak.server.oauth2.DelegatedOAuthAPI;
 import org.eclipse.che.security.oauth.CheOAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAPI;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class OAuthAPIProvider implements Provider<OAuthAPI> {
   private Injector injector;
 
   @Inject
-  public OAuthAPIProvider(@Nullable @Named("che.oauth.type") String oauthType, Injector injector) {
+  public OAuthAPIProvider(@Nullable @Named("che.oauth.service.mode") String oauthType, Injector injector) {
     this.oauthType = oauthType == null ? "" : oauthType;
     this.injector = injector;
   }
@@ -40,14 +40,14 @@ public class OAuthAPIProvider implements Provider<OAuthAPI> {
   @Override
   public OAuthAPI get() {
     switch (oauthType) {
-      case "che":
-        return injector.getInstance(CheOAuthAPI.class);
+      case "embedded":
+        return injector.getInstance(EmbeddedOAuthAPI.class);
       case "keycloak":
-        return injector.getInstance(KeycloakOAuthAPI.class);
+        return injector.getInstance(DelegatedOAuthAPI.class);
       default:
-        LOG.warn(
+        LOG.info(
             "Unknown value configured for OAuth authentication service type, using OAuthAuthenticationService by default");
-        return injector.getInstance(CheOAuthAPI.class);
+        return injector.getInstance(EmbeddedOAuthAPI.class);
     }
   }
 }

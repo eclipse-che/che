@@ -81,7 +81,7 @@ public class OAuthAuthenticationService extends Service {
   @GET
   @Path("callback")
   public Response callback(@QueryParam("errorValues") List<String> errorValues)
-          throws OAuthAuthenticationException, NotFoundException, ForbiddenException {
+      throws OAuthAuthenticationException, NotFoundException, ForbiddenException {
     return oAuthAPI.callback(uriInfo, errorValues);
   }
 
