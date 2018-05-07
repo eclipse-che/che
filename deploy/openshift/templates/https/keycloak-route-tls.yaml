@@ -14,8 +14,6 @@ spec:
   tls:
     insecureEdgeTerminationPolicy: Allow
     termination: edge
-  port:
-    targetPort: 5050
   to:
     kind: Service
     name: keycloak

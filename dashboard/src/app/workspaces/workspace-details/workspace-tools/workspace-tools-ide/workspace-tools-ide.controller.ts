@@ -13,7 +13,7 @@ import {IPackage, ISearchResults, NpmRegistry} from '../../../../../components/a
 import {IEnvironmentManagerMachine} from '../../../../../components/api/environment/environment-manager-machine';
 import {EnvironmentManager} from '../../../../../components/api/environment/environment-manager';
 
-const THEIA_PLUGINS = 'THEIA_PLUGINS';
+const THEIA_PLUGINS = 'THEIA_EXTENSIONS';
 const CUSTOM_PLUGIN_KEYWORD = 'custom-plugin';
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_DESCRIPTION_SEPARATOR = ':';

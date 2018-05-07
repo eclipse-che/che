@@ -49,27 +49,6 @@ public class PlainJavaValueProviderFactoryTest {
 
     registeredProject.getAttributes().put(SOURCE_FOLDER, Arrays.asList("src"));
 
-    //    plainJavaValueProviderFactory
-    //        .newInstance(PROJECT_PATH)
-    //        .setValues(SOURCE_FOLDER, singletonList("src"));
-
     verify(attributes).put(SOURCE_FOLDER, singletonList("src"));
   }
-
-  //  @Test
-  //  public void newValueOfAttributeShouldBeAdded() throws Exception {
-  //    when(projectManager.get(PROJECT_PATH)).thenReturn(Optional.of(registeredProject));
-  //    when(registeredProject.getAttributes()).thenReturn(attributes);
-  //    when(attributes.containsKey(SOURCE_FOLDER)).thenReturn(true);
-  //    when(attributes.get(SOURCE_FOLDER)).thenReturn(Arrays.asList("src1", "src2"));
-  //
-  //    plainJavaValueProviderFactory
-  //        .newInstance(PROJECT_PATH)
-  //        .setValues(SOURCE_FOLDER, singletonList("src3"));
-  //
-  //    verify(attributes).put(eq(SOURCE_FOLDER), captor.capture());
-  //
-  //    assertEquals(captor.getValue().size(), 3);
-  //    assertTrue(captor.getValue().containsAll(Arrays.asList("src1", "src2", "src3")));
-  //  }
 }
