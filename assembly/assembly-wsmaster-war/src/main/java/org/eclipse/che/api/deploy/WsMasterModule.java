@@ -82,7 +82,7 @@ import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
-import org.eclipse.che.security.oauth.CheOAuthAPI;
+import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAPI;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
@@ -267,7 +267,7 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
-    bind(OAuthAPI.class).to(CheOAuthAPI.class);
+    bind(OAuthAPI.class).to(EmbeddedOAuthAPI.class);
     bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());

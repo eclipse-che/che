@@ -27,18 +27,18 @@ import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik */
 @Listeners(value = MockitoTestNGListener.class)
-public class CheOAuthAPITest {
+public class EmbeddedOAuthAPITest {
 
   @Mock OAuthAuthenticatorProvider providers;
 
-  @InjectMocks CheOAuthAPI cheOAuthAPI;
+  @InjectMocks EmbeddedOAuthAPI embeddedOAuthAPI;
 
   @Test(
     expectedExceptions = NotFoundException.class,
     expectedExceptionsMessageRegExp = "Unsupported OAuth provider unknown"
   )
   public void shouldThrowExceptionIfNoSuchProviderFound() throws Exception {
-    cheOAuthAPI.getToken("unknown");
+    embeddedOAuthAPI.getToken("unknown");
   }
 
   @Test
@@ -50,7 +50,7 @@ public class CheOAuthAPITest {
 
     when(authenticator.getToken(anyString())).thenReturn(newDto(OAuthToken.class).withToken(token));
 
-    OAuthToken result = cheOAuthAPI.getToken(provider);
+    OAuthToken result = embeddedOAuthAPI.getToken(provider);
 
     assertEquals(result.getToken(), token);
   }

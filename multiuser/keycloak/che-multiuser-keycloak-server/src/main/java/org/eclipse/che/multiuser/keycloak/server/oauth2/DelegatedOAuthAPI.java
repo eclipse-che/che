@@ -21,7 +21,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -30,7 +29,6 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 import org.eclipse.che.security.oauth.OAuthAPI;
-import org.eclipse.che.security.oauth.OAuthAuthenticationException;
 import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 
 public class DelegatedOAuthAPI implements OAuthAPI {

@@ -16,7 +16,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.multiuser.keycloak.server.oauth2.DelegatedOAuthAPI;
-import org.eclipse.che.security.oauth.CheOAuthAPI;
+import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -39,6 +39,7 @@ import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** RESTful wrapper for OAuthAuthenticator. */
 public class EmbeddedOAuthAPI implements OAuthAPI {
   private static final Logger LOG = LoggerFactory.getLogger(EmbeddedOAuthAPI.class);
 
