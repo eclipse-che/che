@@ -31,7 +31,7 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 import org.eclipse.che.security.oauth.OAuthAPI;
 import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 
-/** */
+/** Implementation of {@link OAuthAPI} */
 public class DelegatedOAuthAPI implements OAuthAPI {
 
   private final KeycloakServiceClient keycloakServiceClient;
