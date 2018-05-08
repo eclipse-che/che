@@ -112,23 +112,23 @@ public class RenameStaticMethodsTest {
     doRefactoringWithKeys(13, 14, "k");
   }
 
-  @Test(priority = 1)
+  @Test
   public void test2() {
     doRefactoringWithKeys(13, 17, "k");
   }
 
-  @Test(priority = 2)
+  @Test
   public void test8() {
     doRefactorByWizard(13, 17, "k");
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 3)
+  @Test
   public void testFail5() {
     doRefactorByWizardWithExpectedWarningMessage(14, 24, "k", testsFail5ErrorMess);
   }
 
-  @Test(priority = 4)
+  @Test
   public void test11() throws Exception {
     contentFromOutB = getTextFromFile(resourcesOutB);
 
