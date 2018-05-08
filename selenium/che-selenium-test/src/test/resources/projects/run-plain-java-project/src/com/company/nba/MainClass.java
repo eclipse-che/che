@@ -8,14 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.type;
+package com.company.nba;
 
-/** @author gazarenkov */
-@Deprecated
-public abstract class SettableValueProvider implements ValueProvider {
+public class MainClass {
 
-  @Override
-  public final boolean isSettable() {
-    return true;
-  }
+    public static void main(String[] args) {
+	// write your code here
+	String string = "I love this game!";
+	System.out.println(string);
+	
+	
+    }
 }

@@ -95,7 +95,7 @@ public class FailPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 1)
+  @Test
   public void testFail4() throws Exception {
     setFieldsForTest("testfail4");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -114,7 +114,7 @@ public class FailPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 2)
+  @Test
   public void testFail6() throws Exception {
     setFieldsForTest("testfail6");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -135,7 +135,7 @@ public class FailPrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 3)
+  @Test
   public void testFail7() throws Exception {
     setFieldsForTest("testfail7");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");

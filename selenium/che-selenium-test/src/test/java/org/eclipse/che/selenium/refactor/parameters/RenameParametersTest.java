@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,6 +66,16 @@ public class RenameParametersTest {
     loader.waitOnClosed();
   }
 
+  @AfterMethod
+  public void closeForm() {
+    if (refactor.isWidgetOpened()) {
+      refactor.clickCancelButtonRefactorForm();
+    }
+    if (editor.isAnyTabsOpened()) {
+      editor.closeAllTabs();
+    }
+  }
+
   @Test
   public void checkRenameParameters0() throws Exception {
     setFieldsForTest("test0");
@@ -81,7 +92,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkRenameParameters3() throws Exception {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -101,7 +112,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 2)
+  @Test
   public void checkRenameParameters6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -115,7 +126,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 3)
+  @Test
   public void checkRenameParameters9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -129,7 +140,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 4)
+  @Test
   public void checkRenameParameters12() throws Exception {
     setFieldsForTest("test12");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -143,7 +154,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 5)
+  @Test
   public void checkRenameParameters15() throws Exception {
     setFieldsForTest("test15");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -168,7 +179,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 6)
+  @Test
   public void checkRenameParameters18() throws Exception {
     setFieldsForTest("test18");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -182,7 +193,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 7)
+  @Test
   public void checkRenameParameters21() throws Exception {
     setFieldsForTest("test21");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -196,7 +207,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 8)
+  @Test
   public void checkRenameParameters25() throws Exception {
     setFieldsForTest("test25");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -210,7 +221,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 9)
+  @Test
   public void checkRenameParameters28() throws Exception {
     setFieldsForTest("test28");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -227,7 +238,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 10)
+  @Test
   public void checkRenameParameters31() throws Exception {
     setFieldsForTest("test31");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -241,7 +252,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 11)
+  @Test
   public void checkRenameParameters33() throws Exception {
     setFieldsForTest("test33");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");

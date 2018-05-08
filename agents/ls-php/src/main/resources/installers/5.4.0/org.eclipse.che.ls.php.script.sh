@@ -128,7 +128,7 @@ fi
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
 
-if [ ! -d "${LS_DIR}" ]; then
+if [ ! -d "${LS_DIR}/php-language-server" ]; then
     curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
     echo "export LD_LIBRARY_PATH=${LS_DIR}/php7-minimal" > ${LS_LAUNCHER}
     echo "${LS_DIR}/php7-minimal/php -c ${LS_DIR}/php7-minimal/php.ini ${LS_DIR}/php-language-server/bin/php-language-server.php" >> ${LS_LAUNCHER}

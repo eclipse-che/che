@@ -122,7 +122,7 @@ public class PullRequestPluginWithForkTest {
     }
   }
 
-  @Test(priority = 1, dependsOnMethods = "createPullRequest")
+  @Test(priority = 1)
   void updatePullRequest() throws Exception {
     editor.closeAllTabs();
     loader.waitOnClosed();
