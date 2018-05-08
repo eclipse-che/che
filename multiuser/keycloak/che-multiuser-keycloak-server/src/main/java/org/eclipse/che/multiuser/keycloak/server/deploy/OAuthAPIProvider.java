@@ -47,8 +47,8 @@ public class OAuthAPIProvider implements Provider<OAuthAPI> {
         return injector.getInstance(DelegatedOAuthAPI.class);
       default:
         LOG.info(
-            "Unknown value configured for OAuth authentication service type, using OAuthAuthenticationService by default");
-        return injector.getInstance(EmbeddedOAuthAPI.class);
+            "Unknown value configured for OAuth authentication API, using DelegatedOAuthAPI by default");
+        return injector.getInstance(DelegatedOAuthAPI.class);
     }
   }
 }
