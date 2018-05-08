@@ -18,10 +18,11 @@ import {CheTypeResolver} from './project/che-type-resolver';
 import {CheJsonRpcWsagentApi} from './json-rpc/che-json-rpc-wsagent-api';
 import {WebsocketClient} from './json-rpc/websocket-client';
 
-interface IWorkspaceAgentData {
+export interface IWorkspaceAgentData {
   path: string;
   websocket: string;
   clientId: string;
+  machineToken: string;
 }
 
 /**
@@ -42,12 +43,14 @@ export class CheWorkspaceAgent {
   /**
    * Default constructor that is using resource
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, $websocket: any,
+  constructor($resource: ng.resource.IResourceService,
+              $q: ng.IQService,
+              $websocket: any,
               workspaceAgentData: IWorkspaceAgentData) {
     this.$resource = $resource;
     this.workspaceAgentData = workspaceAgentData;
 
-    this.project = new CheProject($resource, $q, this.workspaceAgentData.path);
+    this.project = new CheProject($resource, $q, this.workspaceAgentData.path, this.workspaceAgentData.machineToken);
     this.git = new CheGit($resource, this.workspaceAgentData.path);
     this.svn = new CheSvn($resource, this.workspaceAgentData.path);
     this.projectType = new CheProjectType($resource, $q, this.workspaceAgentData.path);
