@@ -148,20 +148,20 @@ public class StacksListTest {
   @Test
   public void checkStackActionButtons() {
     String stackName = generate("", 8);
-    createStack(stackName);
-
-    // delete stack by the Action delete stack button
-    stacks.clickOnDeleteActionButton(stackName);
-    stacks.clickOnDeleteDialogButton();
-    dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", stackName));
-    dashboard.waitNotificationIsClosed();
-    assertFalse(stacks.isStackItemExisted(stackName));
 
     // create stack duplicate by Duplicate Stack button
     stacks.clickOnDuplicateStackButton(JAVA.getName());
     assertTrue(stacks.isDuplicatedStackExisted(JAVA.getName() + "-copy-"));
     stacks.clickOnDuplicateStackButton(BLANK.getName());
     assertTrue(stacks.isDuplicatedStackExisted(BLANK.getName() + "-copy-"));
+
+    // delete stack by the Action delete stack button
+    createStack(stackName);
+    stacks.clickOnDeleteActionButton(stackName);
+    stacks.clickOnDeleteDialogButton();
+    dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", stackName));
+    dashboard.waitNotificationIsClosed();
+    assertFalse(stacks.isStackItemExisted(stackName));
   }
 
   private void deleteStack() {
