@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.mvp.View;
  * @author Dmitry Shnurenko
  */
 @ImplementedBy(TerminalViewImpl.class)
-interface TerminalView extends View<TerminalView.ActionDelegate> {
+public interface TerminalView extends View<TerminalView.ActionDelegate> {
 
   interface ActionDelegate {
 

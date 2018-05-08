@@ -1,44 +1,49 @@
-/**
- * ***************************************************************************** Copyright (c) 2017
- * Red Hat, Inc. All rights reserved. This program and the accompanying materials are made available
- * under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * <p>Contributors: Red Hat, Inc. - initial API and implementation
- * *****************************************************************************
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.console;
+package org.eclipse.che.ide.ext.java.client.console;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.console.OutputConsoleRenderer;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.console.BaseOutputRendererTest;
+import org.eclipse.che.ide.ext.java.client.JavaExtension;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 /**
- * JUnit test for Java/JavaScript stacktrace line detection in JavaOutputCustomizer.
+ * JUnit test for Java/JavaScript stacktrace line detection in JavaOutputRenderer.
  *
  * <p>See: CHE-15 - Java stacktrace support (From Platform to Che Workspace)
  *
  * @author Victor Rubezhny
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
+public class JavaOutputRendererTest extends BaseOutputRendererTest {
   @Mock AppContext appContext;
   @Mock EditorAgent editorAgent;
 
   @Before
   public void setUp() throws Exception {
-    OutputCustomizer outputCustomizer = new JavaOutputCustomizer(appContext, editorAgent);
-    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
+    OutputConsoleRenderer outputRenderer =
+        new JavaOutputRenderer(JavaExtension.JAVA_CATEGORY, appContext, editorAgent);
+    setupTestRenderers(outputRenderer, new OutputConsoleRenderer[] {outputRenderer});
   }
 
   /**
-   * Test for the detection of initial stacktrace lines in JavaOutputCustomizer. These lines are not
-   * to be customized, however these lines show an examples of beginning the StackTrace and might be
-   * used in future to set up the customizer properly.
+   * Test for the detection of initial stacktrace lines in JavaOutputRenderer. These lines are not
+   * to be rendered, however these lines show an examples of beginning the StackTrace and might be
+   * used in future to set up the renderer properly.
    *
    * @throws Exception
    */
@@ -52,30 +57,30 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
   }
 
   /**
-   * Test for the detection of informative stacktrace lines in JavaOutputCustomizer. These lines
-   * have an information on qualified path, file name and line number for an exception
+   * Test for the detection of informative stacktrace lines in JavaOutputRenderer. These lines have
+   * an information on qualified path, file name and line number for an exception
    *
    * @throws Exception
    */
   @Test
   public void testValuableStackTraceLines() throws Exception {
     testStackTraceLine(
-        JavaOutputCustomizer.class,
+        JavaOutputRenderer.class,
         "   at org.test.Junk.main(Junk.java:6)",
         "   at org.test.Junk.main(<a href='javascript:open(\"org.test.Junk.main\", \"Junk.java\", 6);'>Junk.java:6</a>)");
     testStackTraceLine(
-        JavaOutputCustomizer.class,
+        JavaOutputRenderer.class,
         "   at org.test.TrashClass.throwItThere(Junk.java:51)",
         "   at org.test.TrashClass.throwItThere(<a href='javascript:open(\"org.test.TrashClass.throwItThere\", \"Junk.java\", 51);'>Junk.java:51</a>)");
     testStackTraceLine(
-        JavaOutputCustomizer.class,
+        JavaOutputRenderer.class,
         "   at MyClass$ThrowInConstructor.<init>(MyClass.java:16)",
         "   at MyClass$ThrowInConstructor.<init>(<a href='javascript:open(\"MyClass$ThrowInConstructor.<init>\", \"MyClass.java\", 16);'>MyClass.java:16</a>)");
   }
 
   /**
-   * Test for the detection of other stacktrace lines in JavaOutputCustomizer. Other lines that can
-   * be a part of Stack Trace, however do not contain any useful information
+   * Test for the detection of other stacktrace lines in JavaOutputRenderer. Other lines that can be
+   * a part of Stack Trace, however do not contain any useful information
    *
    * @throws Exception
    */
@@ -86,7 +91,7 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
 
   /**
    * Test for the detection of non-stacktrace lines and parts of other kinds of stacktraces (not the
-   * Java ones) that must not be customized in JavaOutputCustomizer. Other lines that might occur in
+   * Java ones) that must not be rendered in JavaOutputRenderer. Other lines that might occur in
    * output console
    *
    * @throws Exception

@@ -511,7 +511,7 @@ public class ProcessesPanelPresenter extends BasePresenter
             TERMINAL_NODE, machineTreeNode, terminalName, resources.terminalTreeIcon(), null);
     addChildToMachineNode(terminalNode, machineTreeNode, activate);
 
-    final String terminalId = terminalNode.getId();
+    final String terminalId = "dev-machine";
     terminals.put(terminalId, newTerminal);
     view.addProcessNode(terminalNode);
     terminalWidget.asWidget().ensureDebugId(terminalName);
@@ -830,6 +830,10 @@ public class ProcessesPanelPresenter extends BasePresenter
               null)
           .show();
     }
+  }
+
+  public Map<String, TerminalPresenter> getTerminals() {
+    return terminals;
   }
 
   private ConfirmCallback getConfirmCloseConsoleCallback(

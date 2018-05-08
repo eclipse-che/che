@@ -143,7 +143,7 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} zypper install -y ${PACKAGES};
     }
-
+FF
     command -v nodejs >/dev/null 2>&1 || {
         ${SUDO} zypper ar http://download.opensuse.org/repositories/devel:/languages:/nodejs/openSUSE_13.1/ Node.js
         ${SUDO} zypper in nodejs

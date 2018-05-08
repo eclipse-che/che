@@ -16,7 +16,8 @@ import com.google.inject.assistedinject.Assisted;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.console.OutputConsoleRenderer;
+import org.eclipse.che.ide.api.console.OutputConsoleRendererRegistry;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -39,25 +40,21 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
   /** Follow output when printing text */
   private boolean followOutput = true;
 
-  private OutputCustomizer customizer = null;
+  private OutputConsoleRenderer renderer = null;
 
   @Inject
   public DefaultOutputConsole(
       OutputConsoleView view,
       MachineResources resources,
+      OutputConsoleRendererRegistry rendererRegistry,
       AppContext appContext,
-      EditorAgent editorAgent,
       @Assisted String title) {
     this.view = view;
     this.title = title;
     this.resources = resources;
     this.view.enableAutoScroll(true);
 
-    setCustomizer(
-        new CompoundOutputCustomizer(
-            new JavaOutputCustomizer(appContext, editorAgent),
-            new CSharpOutputCustomizer(appContext, editorAgent),
-            new CPPOutputCustomizer(appContext, editorAgent)));
+    initOutputConsoleRenderer(appContext, rendererRegistry);
 
     view.setDelegate(this);
 
@@ -80,9 +77,10 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
   public void printText(String text) {
     view.print(text, text.endsWith("\r"));
 
-    for (ActionDelegate actionDelegate : actionDelegates) {
-      actionDelegate.onConsoleOutput(this);
-    }
+    actionDelegates.forEach(
+        d -> {
+          d.onConsoleOutput(this);
+        });
   }
 
   /**
@@ -94,9 +92,10 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
   public void printText(String text, String color) {
     view.print(text, text.endsWith("\r"), color);
 
-    for (ActionDelegate actionDelegate : actionDelegates) {
-      actionDelegate.onConsoleOutput(this);
-    }
+    actionDelegates.forEach(
+        d -> {
+          d.onConsoleOutput(this);
+        });
   }
 
   /**
@@ -158,9 +157,10 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
 
   @Override
   public void downloadOutputsButtonClicked() {
-    for (ActionDelegate actionDelegate : actionDelegates) {
-      actionDelegate.onDownloadOutput(this);
-    }
+    actionDelegates.forEach(
+        d -> {
+          d.onDownloadOutput(this);
+        });
   }
 
   @Override
@@ -185,12 +185,20 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
   }
 
   @Override
-  public OutputCustomizer getCustomizer() {
-    return customizer;
+  public OutputConsoleRenderer getRenderer() {
+    return renderer;
   }
 
-  /** Sets up the text output customizer */
-  public void setCustomizer(OutputCustomizer customizer) {
-    this.customizer = customizer;
+  /** Sets up the text output renderer */
+  public void setRenderer(OutputConsoleRenderer renderer) {
+    this.renderer = renderer;
+  }
+
+  /*
+   * Initializes the renderer for the console output
+   */
+  private void initOutputConsoleRenderer(
+      AppContext appContext, OutputConsoleRendererRegistry rendererRegistry) {
+    // No renderers.
   }
 }

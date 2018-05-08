@@ -276,6 +276,15 @@ public interface Theme {
   /** Border of the project switcher in the command editor. */
   String getCommandEditorProjectSwitcherBorder();
 
+  /** Color of the renderers table's header in the command editor. */
+  String getCommandEditorRenderersTableHeaderColor();
+
+  /** Color of the renderers table's row in the command editor. */
+  String getCommandEditorRenderersTableRowColor();
+
+  /** Border of the renderer switcher in the command editor. */
+  String getCommandEditorRendererSwitcherBorder();
+
   /**
    * Background color of the {@link com.google.gwt.user.client.ui.DialogBox}
    *

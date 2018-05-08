@@ -1,23 +1,25 @@
-/**
- * ***************************************************************************** Copyright (c) 2017
- * Red Hat, Inc. All rights reserved. This program and the accompanying materials are made available
- * under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * <p>Contributors: Red Hat, Inc. - initial API and implementation
- * *****************************************************************************
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.console;
+package org.eclipse.che.plugin.csharp.ide.console;
 
 import static com.google.gwt.regexp.shared.RegExp.compile;
 
 import com.google.gwt.regexp.shared.RegExp;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.console.AbstractOutputRenderer;
 import org.eclipse.che.ide.resource.Path;
 
 /**
- * Output customizer adds an anchor link to the lines that match a .NET C# compilation error or
+ * Output renderer adds an anchor link to the lines that match a .NET C# compilation error or
  * warning message and a stack trace line pattern and installs the handler functions for the links.
  * The handler parses the stack trace line, searches for a candidate C# file to navigate to, opens
  * the found file in editor and reveals it to the required line and column (if available) according
@@ -25,33 +27,27 @@ import org.eclipse.che.ide.resource.Path;
  *
  * @author Victor Rubezhny
  */
-public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
+public class CSharpOutputRenderer extends AbstractOutputRenderer {
 
   private static final RegExp COMPILATION_ERROR_OR_WARNING =
       compile("(.+\\.(cs|CS)\\(\\d+,\\d+\\): (error|warning) .+: .+ \\[.+\\])");
   private static final RegExp LINE_AT = compile("(\\s+at .+ in .+\\.(cs|CS):line \\d+)");
 
   /**
-   * Constructs Compound Output Customizer Object
+   * Constructs Compound Output Renderer Object
    *
    * @param appContext
    * @param editorAgent
    */
-  public CSharpOutputCustomizer(AppContext appContext, EditorAgent editorAgent) {
-    super(appContext, editorAgent);
+  public CSharpOutputRenderer(String name, AppContext appContext, EditorAgent editorAgent) {
+    super(name, appContext, editorAgent);
 
     exportCompilationMessageAnchorClickHandlerFunction();
     exportStacktraceLineAnchorClickHandlerFunction();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-   * OutputCustomizer#canCustomize(java.lang.String)
-   */
   @Override
-  public boolean canCustomize(String text) {
+  public boolean canRender(String text) {
     return (COMPILATION_ERROR_OR_WARNING.exec(text) != null || LINE_AT.exec(text) != null);
   }
 
@@ -62,19 +58,19 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
    * OutputCustomizer#customize(java.lang.String)
    */
   @Override
-  public String customize(String text) {
+  public String render(String text) {
     if (COMPILATION_ERROR_OR_WARNING.exec(text) != null)
-      return customizeCompilationErrorOrWarning(text);
+      return renderCompilationErrorOrWarning(text);
 
-    if (LINE_AT.exec(text) != null) return customizeStacktraceLine(text);
+    if (LINE_AT.exec(text) != null) return renderStacktraceLine(text);
 
     return text;
   }
 
   /*
-   * Customizes a Compilation Error/Warning line
+   * Processes a Compilation Error/Warning line
    */
-  private String customizeCompilationErrorOrWarning(String text) {
+  private String renderCompilationErrorOrWarning(String text) {
     try {
       int end = text.indexOf("):"),
           openBracket = text.lastIndexOf("(", end),
@@ -110,9 +106,9 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
   }
 
   /*
-   * Customizes a Stacktrace line
+   * Processes a Stacktrace line
    */
-  private String customizeStacktraceLine(String text) {
+  private String renderStacktraceLine(String text) {
     try {
       int start = text.lastIndexOf(" in ") + " in ".length(), end = text.indexOf(":line ", start);
 
@@ -174,7 +170,7 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
   public native void exportCompilationMessageAnchorClickHandlerFunction() /*-{
         var that = this;
         $wnd.openCSCM = $entry(function(fileName,projectFile,lineNumber,columnNumber) {
-            that.@org.eclipse.che.ide.console.CSharpOutputCustomizer::handleCompilationMessageAnchorClick(*)(fileName,projectFile,lineNumber,columnNumber);
+            that.@org.eclipse.che.plugin.csharp.ide.console.CSharpOutputRenderer::handleCompilationMessageAnchorClick(*)(fileName,projectFile,lineNumber,columnNumber);
         });
     }-*/;
 
@@ -182,7 +178,7 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
   public native void exportStacktraceLineAnchorClickHandlerFunction() /*-{
         var that = this;
         $wnd.openCSSTL = $entry(function(fileName,lineNumber) {
-            that.@org.eclipse.che.ide.console.CSharpOutputCustomizer::handleStacktraceLineAnchorClick(*)(fileName,lineNumber);
+            that.@org.eclipse.che.plugin.csharp.ide.console.CSharpOutputRenderer::handleStacktraceLineAnchorClick(*)(fileName,lineNumber);
         });
     }-*/;
 }

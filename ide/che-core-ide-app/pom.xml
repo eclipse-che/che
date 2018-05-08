@@ -249,6 +249,7 @@
         </dependency>
     </dependencies>
     <build>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
         <resources>
             <resource>
                 <filtering>true</filtering>
@@ -349,19 +350,26 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/OutputCustomizer.java</exclude>
-                        <exclude>**/AbstractOutputCustomizer.java</exclude>
-                        <exclude>**/BaseOutputCustomizerTest.java</exclude>
-                        <exclude>**/JavaOutputCustomizer.java</exclude>
-                        <exclude>**/JavaOutputCustomizerTest.java</exclude>
-                        <exclude>**/CompoundOutputCustomizer.java</exclude>
-                        <exclude>**/CompoundOutputCustomizerTest.java</exclude>
-                        <exclude>**/CSharpOutputCustomizer.java</exclude>
-                        <exclude>**/CSharpOutputCustomizerTest.java</exclude>
-                        <exclude>**/CPPOutputCustomizer.java</exclude>
-                        <exclude>**/CPPOutputCustomizerTest.java</exclude>
+                        <!--  ??? no need this section ??? -->
                     </excludes>
                 </configuration>
+            </plugin>
+            <!-- Create the test jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

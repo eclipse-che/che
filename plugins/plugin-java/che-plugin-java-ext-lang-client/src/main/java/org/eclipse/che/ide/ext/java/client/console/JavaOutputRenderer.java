@@ -1,13 +1,14 @@
-/**
- * ***************************************************************************** Copyright (c) 2017
- * Red Hat, Inc. All rights reserved. This program and the accompanying materials are made available
- * under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * <p>Contributors: Red Hat, Inc. - initial API and implementation
- * *****************************************************************************
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.console;
+package org.eclipse.che.ide.ext.java.client.console;
 
 import static com.google.gwt.regexp.shared.RegExp.compile;
 
@@ -15,51 +16,41 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.console.AbstractOutputRenderer;
 import org.eclipse.che.ide.resource.Path;
 
 /**
- * Java customizer adds an anchor link to the lines that match a stack trace line pattern and
- * installs a handler function for the link. The handler parses the stack trace line, searches for
- * the candidate Java files to navigate to, opens the first file (of the found candidates) in editor
- * and reveals it to the required line according to the stack trace line information
+ * Java renderer adds an anchor link to the lines that match a stack trace line pattern and installs
+ * a handler function for the link. The handler parses the stack trace line, searches for the
+ * candidate Java files to navigate to, opens the first file (of the found candidates) in editor and
+ * reveals it to the required line according to the stack trace line information
  *
  * @author Victor Rubezhny
  */
-public class JavaOutputCustomizer extends AbstractOutputCustomizer {
+public class JavaOutputRenderer extends AbstractOutputRenderer {
 
   private static final RegExp LINE_AT = compile("(\\s+at .+\\(.+\\.java:\\d+\\))");
 
   /**
-   * Constructs Java Output Customizer Object
+   * Constructs Java Output Renderer Object
    *
+   * @param name
    * @param appContext
    * @param editorAgent
    */
-  public JavaOutputCustomizer(AppContext appContext, EditorAgent editorAgent) {
-    super(appContext, editorAgent);
+  public JavaOutputRenderer(String name, AppContext appContext, EditorAgent editorAgent) {
+    super(name, appContext, editorAgent);
 
     exportAnchorClickHandlerFunction();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-   * OutputCustomizer#canCustomize(java.lang.String)
-   */
   @Override
-  public boolean canCustomize(String text) {
+  public boolean canRender(String text) {
     return (LINE_AT.exec(text) != null);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-   * OutputCustomizer#customize(java.lang.String)
-   */
   @Override
-  public String customize(String text) {
+  public String render(String text) {
     MatchResult matcher = LINE_AT.exec(text);
     if (matcher != null) {
       try {
@@ -135,7 +126,7 @@ public class JavaOutputCustomizer extends AbstractOutputCustomizer {
   private native void exportAnchorClickHandlerFunction() /*-{
         var that = this;
         $wnd.open = $entry(function(qualifiedName,fileName,lineNumber) {
-            that.@org.eclipse.che.ide.console.JavaOutputCustomizer::handleAnchorClick(*)(qualifiedName,fileName,lineNumber);
+            that.@org.eclipse.che.ide.ext.java.client.console.JavaOutputRenderer::handleAnchorClick(*)(qualifiedName,fileName,lineNumber);
         });
     }-*/;
 }

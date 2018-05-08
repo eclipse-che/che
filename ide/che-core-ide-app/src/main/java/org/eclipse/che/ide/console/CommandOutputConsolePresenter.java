@@ -19,6 +19,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.eclipse.che.agent.exec.shared.dto.ProcessSubscribeResponseDto;
 import org.eclipse.che.agent.exec.shared.dto.event.ProcessDiedEventDto;
@@ -34,6 +35,8 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.command.exec.ProcessStartedEvent;
+import org.eclipse.che.ide.api.console.OutputConsoleRenderer;
+import org.eclipse.che.ide.api.console.OutputConsoleRendererRegistry;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.machine.MachineResources;
@@ -66,7 +69,7 @@ public class CommandOutputConsolePresenter
 
   private final List<ActionDelegate> actionDelegates = new ArrayList<>();
 
-  private OutputCustomizer outputCustomizer = null;
+  private OutputConsoleRenderer outputRenderer = null;
 
   @Inject
   public CommandOutputConsolePresenter(
@@ -78,6 +81,7 @@ public class CommandOutputConsolePresenter
       ExecAgentCommandManager execAgentCommandManager,
       @Assisted CommandImpl command,
       @Assisted String machineName,
+      OutputConsoleRendererRegistry rendererRegistry,
       AppContext appContext,
       EditorAgent editorAgent) {
     this.view = view;
@@ -88,11 +92,7 @@ public class CommandOutputConsolePresenter
     this.eventBus = eventBus;
     this.commandExecutor = commandExecutor;
 
-    setCustomizer(
-        new CompoundOutputCustomizer(
-            new JavaOutputCustomizer(appContext, editorAgent),
-            new CSharpOutputCustomizer(appContext, editorAgent),
-            new CPPOutputCustomizer(appContext, editorAgent)));
+    initOutputConsoleRenderer(appContext, command, rendererRegistry);
 
     view.setDelegate(this);
 
@@ -151,9 +151,10 @@ public class CommandOutputConsolePresenter
       String color = "red";
       view.print(text, carriageReturn, color);
 
-      for (ActionDelegate actionDelegate : actionDelegates) {
-        actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
-      }
+      actionDelegates.forEach(
+          d -> {
+            d.onConsoleOutput(CommandOutputConsolePresenter.this);
+          });
     };
   }
 
@@ -164,9 +165,10 @@ public class CommandOutputConsolePresenter
       boolean carriageReturn = stdOutMessage.endsWith("\r");
       view.print(stdOutMessage, carriageReturn);
 
-      for (ActionDelegate actionDelegate : actionDelegates) {
-        actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
-      }
+      actionDelegates.forEach(
+          d -> {
+            d.onConsoleOutput(CommandOutputConsolePresenter.this);
+          });
     };
   }
 
@@ -247,9 +249,10 @@ public class CommandOutputConsolePresenter
 
   @Override
   public void downloadOutputsButtonClicked() {
-    for (ActionDelegate actionDelegate : actionDelegates) {
-      actionDelegate.onDownloadOutput(this);
-    }
+    actionDelegates.forEach(
+        d -> {
+          d.onDownloadOutput(this);
+        });
   }
 
   @Override
@@ -283,12 +286,38 @@ public class CommandOutputConsolePresenter
   }
 
   @Override
-  public OutputCustomizer getCustomizer() {
-    return outputCustomizer;
+  public OutputConsoleRenderer getRenderer() {
+    return outputRenderer;
   }
 
-  /** Sets up the text output customizer */
-  public void setCustomizer(OutputCustomizer customizer) {
-    this.outputCustomizer = customizer;
+  /** Sets up the text output renderer */
+  public void setRenderer(OutputConsoleRenderer renderer) {
+    this.outputRenderer = renderer;
+  }
+
+  /*
+   * Initializes the renderer for the console output
+   */
+  private void initOutputConsoleRenderer(
+      AppContext appContext, CommandImpl command, OutputConsoleRendererRegistry rendererRegistry) {
+    List<OutputConsoleRenderer> renderers = new ArrayList<OutputConsoleRenderer>();
+    Set<String> commandRenderers = command.getOutputRenderers();
+
+    if (commandRenderers != null) {
+      commandRenderers.forEach(
+          t -> {
+            Set<OutputConsoleRenderer> appliedRenderers = rendererRegistry.getOutputRenderers(t);
+            if (appliedRenderers != null) {
+              renderers.addAll(appliedRenderers);
+            }
+          });
+    }
+
+    CompoundOutputRenderer compoundRenderer =
+        (renderers.size() > 0
+            ? new CompoundOutputRenderer(
+                renderers.toArray(new OutputConsoleRenderer[renderers.size()]))
+            : null);
+    setRenderer(compoundRenderer);
   }
 }

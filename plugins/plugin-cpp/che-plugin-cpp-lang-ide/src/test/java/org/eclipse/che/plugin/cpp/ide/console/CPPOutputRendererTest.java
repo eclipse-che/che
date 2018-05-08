@@ -1,42 +1,47 @@
-/**
- * ***************************************************************************** Copyright (c) 2017
- * Red Hat, Inc. All rights reserved. This program and the accompanying materials are made available
- * under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * <p>Contributors: Red Hat, Inc. - initial API and implementation
- * *****************************************************************************
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.console;
+package org.eclipse.che.plugin.cpp.ide.console;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.console.OutputConsoleRenderer;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.console.BaseOutputRendererTest;
+import org.eclipse.che.plugin.cpp.ide.CppExtension;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 /**
- * JUnit test for C/CPP Compilation Error/Warning line detection in CPPOutputCustomizer.
+ * JUnit test for C/CPP Compilation Error/Warning line detection in CPPOutputRenderer.
  *
  * <p>See: Issue #5565 - C/CPP compilation error/warning messages support #5565
  *
  * @author Victor Rubezhny
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class CPPOutputCustomizerTest extends BaseOutputCustomizerTest {
+public class CPPOutputRendererTest extends BaseOutputRendererTest {
   @Mock AppContext appContext;
   @Mock EditorAgent editorAgent;
 
   @Before
   public void setUp() throws Exception {
-    OutputCustomizer outputCustomizer = new CPPOutputCustomizer(appContext, editorAgent);
-    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
+    OutputConsoleRenderer outputRenderer =
+        new CPPOutputRenderer(CppExtension.C_CATEGORY, appContext, editorAgent);
+    setupTestRenderers(outputRenderer, new OutputConsoleRenderer[] {outputRenderer});
   }
 
   /**
-   * Test for the detection of initial Compilation Message lines in CPPOutputCustomizer. These lines
+   * Test for the detection of initial Compilation Message lines in CPPOutputRenderer. These lines
    * are not to be customized, however these lines show an examples of beginning of a compilation
    * message and might be used in future to set up the customizer properly.
    *
@@ -49,7 +54,7 @@ public class CPPOutputCustomizerTest extends BaseOutputCustomizerTest {
   }
 
   /**
-   * Test for the detection of Compilation Message lines in CPPOutputCustomizer. These lines have an
+   * Test for the detection of Compilation Message lines in CPPOutputRenderer. These lines have an
    * information on file relative path, project file path and line and column numbers for a
    * Compilation Error/Warning Message
    *
@@ -58,25 +63,25 @@ public class CPPOutputCustomizerTest extends BaseOutputCustomizerTest {
   @Test
   public void testValuableCompilationMessagesLines() throws Exception {
     testStackTraceLine(
-        CPPOutputCustomizer.class,
+        CPPOutputRenderer.class,
         "hello.cc:8:13: warning: division by zero [-Wdiv-by-zero]",
         "<a href='javascript:openCM(\"hello.cc\",8,13);'>hello.cc:8:13</a>: warning: division by zero [-Wdiv-by-zero]");
     testStackTraceLine(
-        CPPOutputCustomizer.class,
+        CPPOutputRenderer.class,
         "hello.cc:8:2: error: ‘Module’ was not declared in this scope",
         "<a href='javascript:openCM(\"hello.cc\",8,2);'>hello.cc:8:2</a>: error: ‘Module’ was not declared in this scope");
     testStackTraceLine(
-        CPPOutputCustomizer.class,
+        CPPOutputRenderer.class,
         "hello.cc:4:25: fatal error: module/Module: No such file or directory",
         "<a href='javascript:openCM(\"hello.cc\",4,25);'>hello.cc:4:25</a>: fatal error: module/Module: No such file or directory");
     testStackTraceLine(
-        CPPOutputCustomizer.class,
+        CPPOutputRenderer.class,
         "/projects/console-cc-simple/hello.cc:23: undefined reference to `Module::sayHello[abi:cxx11]()'",
         "<a href='javascript:openLM(\"/projects/console-cc-simple/hello.cc\",23);'>/projects/console-cc-simple/hello.cc:23</a>: undefined reference to `Module::sayHello[abi:cxx11]()'");
   }
 
   /**
-   * Test for the detection of other Compilation Message lines in CPPOutputCustomizer. Other lines
+   * Test for the detection of other Compilation Message lines in CPPOutputRenderer. Other lines
    * that can be a part of Compilation Message, however do not contain any useful information
    *
    * @throws Exception
@@ -91,7 +96,7 @@ public class CPPOutputCustomizerTest extends BaseOutputCustomizerTest {
 
   /**
    * Test for the detection of non-Compilation Message lines and parts of other kinds of stacktraces
-   * that must not be customized in CPPOutputCustomizer. Other lines that might occur in output
+   * that must not be customized in CPPOutputRenderer. Other lines that might occur in output
    * console
    *
    * @throws Exception

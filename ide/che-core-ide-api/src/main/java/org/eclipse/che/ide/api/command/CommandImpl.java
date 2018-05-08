@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.command;
 
 import static java.util.Collections.unmodifiableSet;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_OUTPUT_RENDERERS_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.json.JsonHelper;
 
 /** Data object for {@link Command}. */
 public class CommandImpl implements Command {
@@ -143,6 +145,22 @@ public class CommandImpl implements Command {
     getAttributes().put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, previewURL);
   }
 
+  /** Returns command's Output Renderers or empty {@code List} if none. */
+  public Set<String> getOutputRenderers() {
+    String renderers = getAttributes().get(COMMAND_OUTPUT_RENDERERS_ATTRIBUTE_NAME);
+
+    if (renderers != null && !renderers.isEmpty()) {
+      return JsonHelper.toSet(renderers);
+    }
+
+    return new HashSet<String>();
+  }
+
+  /** Sets command's Output Renderers. */
+  public void setOutputRenderers(Set<String> renderers) {
+    getAttributes().put(COMMAND_OUTPUT_RENDERERS_ATTRIBUTE_NAME, JsonHelper.toJson(renderers));
+  }
+
   /** Returns command's applicable context. */
   public ApplicableContext getApplicableContext() {
     return context;
@@ -201,6 +219,7 @@ public class CommandImpl implements Command {
 
     private boolean workspaceApplicable;
     private Set<String> projects;
+    private Set<String> outputRenderers = null;
 
     /** Creates new {@link ApplicableContext} which is workspace applicable. */
     public ApplicableContext() {
@@ -220,9 +239,22 @@ public class CommandImpl implements Command {
       this.projects = projects;
     }
 
+    /** Creates new {@link ApplicableContext} based on the provided data. */
+    public ApplicableContext(
+        boolean workspaceApplicable, Set<String> projects, Set<String> outputRenderers) {
+      this.workspaceApplicable = workspaceApplicable;
+      this.projects = projects;
+      this.outputRenderers = outputRenderers;
+    }
+
     /** Creates copy of the given {@code context}. */
     public ApplicableContext(ApplicableContext context) {
-      this(context.isWorkspaceApplicable(), new HashSet<>(context.getApplicableProjects()));
+      this(
+          context.isWorkspaceApplicable(),
+          new HashSet<>(context.getApplicableProjects()),
+          context.getApplicableOutputRenderers() == null
+              ? null
+              : new HashSet<>(context.getApplicableOutputRenderers()));
     }
 
     /**
@@ -252,6 +284,26 @@ public class CommandImpl implements Command {
       projects.remove(path);
     }
 
+    /** Adds applicable renderer. */
+    public void addOutputRenderer(String renderer) {
+      if (outputRenderers == null) {
+        outputRenderers = new HashSet<>();
+      }
+      outputRenderers.add(renderer);
+    }
+
+    /** Removes applicable project's path. */
+    public void removeOutputRenderer(String renderer) {
+      if (outputRenderers != null) {
+        outputRenderers.remove(renderer);
+      }
+    }
+
+    /** Returns <b>immutable</b> list of the names of the applicable output renderers or null. */
+    public Set<String> getApplicableOutputRenderers() {
+      return outputRenderers == null ? null : unmodifiableSet(outputRenderers);
+    }
+
     @Override
     public boolean equals(Object o) {
       if (this == o) {
@@ -265,12 +317,13 @@ public class CommandImpl implements Command {
       ApplicableContext other = (ApplicableContext) o;
 
       return workspaceApplicable == other.workspaceApplicable
-          && Objects.equals(projects, other.projects);
+          && Objects.equals(projects, other.projects)
+          && Objects.equals(outputRenderers, other.outputRenderers);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(workspaceApplicable, projects);
+      return Objects.hash(workspaceApplicable, projects, outputRenderers);
     }
   }
 }

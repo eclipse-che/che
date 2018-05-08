@@ -16,7 +16,9 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
@@ -29,6 +31,8 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.PromisableAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.terminal.TerminalPresenter;
 
 /**
  * Action for showing/hiding hidden files.
@@ -40,11 +44,13 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements PromisableAction {
 
   public static final String SHOW_HIDDEN_FILES_PARAM_ID = "showHiddenFiles";
+  private Provider<ProcessesPanelPresenter> terminalPresenter;
   private final AppContext appContext;
   private final ProjectExplorerPresenter projectExplorerPresenter;
 
   @Inject
   public ShowHiddenFilesAction(
+      Provider<ProcessesPanelPresenter> terminalPresenter,
       AppContext appContext,
       CoreLocalizationConstant localizationConstant,
       ProjectExplorerPresenter projectExplorerPresenter,
@@ -54,6 +60,7 @@ public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements 
         localizationConstant.actionShowHiddenFilesTitle(),
         localizationConstant.actionShowHiddenFilesDescription(),
         resources.showHiddenFiles());
+    this.terminalPresenter = terminalPresenter;
     this.appContext = appContext;
     this.projectExplorerPresenter = projectExplorerPresenter;
   }
@@ -65,8 +72,15 @@ public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements 
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    boolean isShow = projectExplorerPresenter.isShowHiddenFiles();
-    projectExplorerPresenter.showHiddenFiles(!isShow);
+    //    boolean isShow = projectExplorerPresenter.isShowHiddenFiles();
+    //    projectExplorerPresenter.showHiddenFiles(!isShow);
+    Map<String, TerminalPresenter> terminals = terminalPresenter.get().getTerminals();
+    TerminalPresenter terminalPresenter = terminals.get("dev-machine");
+    //    terminalPresenter.getWebSocket().send("{\"type\":\"data\",\"data\":\"\\r\"}");
+    //    {"type":"data","data":"\r"}
+    terminalPresenter
+        .getWebSocket()
+        .send("{\"type\":\"data\",\"data\":\"cd spr\\r mvn clean install\\r \"}");
   }
 
   @Override

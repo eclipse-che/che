@@ -72,6 +72,18 @@ public class Style {
     return theme.getCommandEditorProjectSwitcherBorder();
   }
 
+  public static String getCommandEditorRenderersTableHeaderColor() {
+    return theme.getCommandEditorRenderersTableHeaderColor();
+  }
+
+  public static String getCommandEditorRenderersTableRowColor() {
+    return theme.getCommandEditorRenderersTableRowColor();
+  }
+
+  public static String getCommandEditorRendererSwitcherBorder() {
+    return theme.getCommandEditorRendererSwitcherBorder();
+  }
+
   public static String getDialogContentBackground() {
     return theme.getDialogContentBackground();
   }

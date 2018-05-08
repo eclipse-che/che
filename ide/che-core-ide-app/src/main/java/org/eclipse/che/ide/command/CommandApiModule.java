@@ -35,6 +35,8 @@ import org.eclipse.che.ide.command.editor.page.name.NamePageView;
 import org.eclipse.che.ide.command.editor.page.name.NamePageViewImpl;
 import org.eclipse.che.ide.command.editor.page.project.ProjectsPageView;
 import org.eclipse.che.ide.command.editor.page.project.ProjectsPageViewImpl;
+import org.eclipse.che.ide.command.editor.page.renderer.RenderersPageView;
+import org.eclipse.che.ide.command.editor.page.renderer.RenderersPageViewImpl;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorView;
 import org.eclipse.che.ide.command.editor.page.text.PageWithTextEditorViewImpl;
 import org.eclipse.che.ide.command.execute.CommandExecutorImpl;
@@ -121,6 +123,7 @@ public class CommandApiModule extends AbstractGinModule {
     bind(NamePageView.class).to(NamePageViewImpl.class);
     bind(GoalPageView.class).to(GoalPageViewImpl.class);
     bind(ProjectsPageView.class).to(ProjectsPageViewImpl.class);
+    bind(RenderersPageView.class).to(RenderersPageViewImpl.class);
     bind(PageWithTextEditorView.class).to(PageWithTextEditorViewImpl.class);
 
     // toolbar
