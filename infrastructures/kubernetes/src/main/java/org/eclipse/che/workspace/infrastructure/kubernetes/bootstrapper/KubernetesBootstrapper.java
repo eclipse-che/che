@@ -134,7 +134,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   private void injectBootstrapper() throws InfrastructureException {
     final String mName = kubernetesMachine.getName();
     final RuntimeIdentityDto runtimeIdentityDto = DtoConverter.asDto(runtimeIdentity);
-    final BiConsumer<String, String> outputConsumer =
+    BiConsumer<String, String> outputConsumer =
         (stream, text) ->
             eventService.publish(
                 DtoFactory.newDto(MachineLogEvent.class)
@@ -143,6 +143,10 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
                     .withText(text)
                     .withTime(ZonedDateTime.now().format(ISO_OFFSET_DATE_TIME))
                     .withMachineName(mName));
+    outputConsumer =
+        outputConsumer.andThen(
+            (stream, text) -> LOG.error(">>>>>  Stream {} text {}", stream, text));
+
     LOG.debug("Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, mName);
     exec(outputConsumer, "mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
 
