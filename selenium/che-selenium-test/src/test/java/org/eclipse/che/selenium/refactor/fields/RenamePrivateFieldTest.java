@@ -102,7 +102,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkRenamePrivateField1() throws Exception {
     setFieldsForTest("test1");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -123,7 +123,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 2)
+  @Test
   public void checkRenamePrivateField2() throws Exception {
     setFieldsForTest("test2");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -144,7 +144,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 3)
+  @Test
   public void checkRenamePrivateField3() throws Exception {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -168,7 +168,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 4)
+  @Test
   public void checkRenamePrivateField4() throws Exception {
     setFieldsForTest("test4");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -192,7 +192,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 5)
+  @Test
   public void checkRenamePrivateField5() throws Exception {
     setFieldsForTest("test5");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -215,7 +215,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 6)
+  @Test
   public void checkRenamePrivateField6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -238,7 +238,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 7)
+  @Test
   public void checkRenamePrivateField7() throws Exception {
     setFieldsForTest("test7");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -261,7 +261,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 8)
+  @Test
   public void checkRenamePrivateField8() throws Exception {
     setFieldsForTest("test8");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -282,7 +282,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 9)
+  @Test
   public void checkRenamePrivateField9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -303,7 +303,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 10)
+  @Test
   public void checkRenamePrivateField10() throws Exception {
     setFieldsForTest("test10");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -327,7 +327,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 11)
+  @Test
   public void checkRenamePrivateField11() throws Exception {
     setFieldsForTest("test11");
     projectExplorer.openItemByPath(pathToCurrentPackage);
@@ -352,7 +352,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 12)
+  @Test
   public void checkRenameUnicode12() throws Exception {
     setFieldsForTest("test12");
     projectExplorer.openItemByPath(pathToCurrentPackage);

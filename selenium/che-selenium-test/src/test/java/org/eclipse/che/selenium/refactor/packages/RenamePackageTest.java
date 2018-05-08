@@ -312,7 +312,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkTest2() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2/fred");
@@ -415,7 +415,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("Textfile.txt");
   }
 
-  @Test(priority = 2)
+  @Test
   public void checkTest5() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test5/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test5/r/A.java");
@@ -443,7 +443,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 3)
+  @Test
   public void checkTest6() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test6/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test6/r/A.java");
@@ -568,7 +568,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("MyA");
   }
 
-  @Test(priority = 4)
+  @Test
   public void checkTestHierarchical10() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/m_y/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/m_y/pack/C.java");
@@ -594,7 +594,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("C");
   }
 
-  @Test(priority = 5)
+  @Test
   public void checkTestDisableImport11() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my_/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my_/pack/C.java");

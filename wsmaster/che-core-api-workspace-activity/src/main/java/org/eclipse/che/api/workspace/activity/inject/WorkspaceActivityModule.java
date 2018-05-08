@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.activity.inject;
 
 import com.google.inject.AbstractModule;
 import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao.RemoveExpirationBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityService;
@@ -23,5 +24,6 @@ public class WorkspaceActivityModule extends AbstractModule {
     bind(WorkspaceActivityService.class);
     bind(WorkspaceActivityManager.class);
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
+    bind(RemoveExpirationBeforeWorkspaceRemovedEventSubscriber.class).asEagerSingleton();
   }
 }

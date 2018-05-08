@@ -15,11 +15,15 @@ import static java.util.Objects.requireNonNull;
 import com.google.inject.persist.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 /**
  * JPA workspaces expiration times storage.
@@ -90,6 +94,24 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     if (expiration != null) {
       manager.remove(expiration);
       manager.flush();
+    }
+  }
+
+  @Singleton
+  public static class RemoveExpirationBeforeWorkspaceRemovedEventSubscriber
+      extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
+
+    @Inject private EventService eventService;
+    @Inject private WorkspaceActivityDao workspaceActivityDao;
+
+    @PostConstruct
+    public void subscribe() {
+      eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
+    }
+
+    @Override
+    public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+      workspaceActivityDao.removeExpiration(event.getWorkspace().getId());
     }
   }
 }
