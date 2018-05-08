@@ -29,9 +29,15 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 import org.eclipse.che.security.oauth.OAuthAPI;
+import org.eclipse.che.security.oauth.OAuthAuthenticationService;
 import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 
-/** Implementation of {@link OAuthAPI} */
+/**
+ * Implementation of functional API component for {@link OAuthAuthenticationService}, that uses
+ * {@link KeycloakServiceClient} for authenticating users through Keycloak Identity providers.
+ *
+ * @author Mykhailo Kuznietsov
+ */
 public class DelegatedOAuthAPI implements OAuthAPI {
 
   private final KeycloakServiceClient keycloakServiceClient;
@@ -75,8 +81,7 @@ public class DelegatedOAuthAPI implements OAuthAPI {
   }
 
   @Override
-  public void invalidateToken(String oauthProvider)
-      throws NotFoundException, UnauthorizedException, ServerException, ForbiddenException {
+  public void invalidateToken(String oauthProvider) throws ForbiddenException {
     throw new ForbiddenException("Method is not supported in this implementation of OAuth API");
   }
 

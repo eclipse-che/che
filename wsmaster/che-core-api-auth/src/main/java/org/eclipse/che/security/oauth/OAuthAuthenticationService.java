@@ -29,41 +29,23 @@ import org.eclipse.che.api.core.*;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** RESTful wrapper for OAuthAuthenticator. */
 @Path("oauth")
 public class OAuthAuthenticationService extends Service {
-  private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
-
   @Context protected UriInfo uriInfo;
   @Context protected SecurityContext security;
 
   @Inject private OAuthAPI oAuthAPI;
 
   /**
-   * Redirect request to OAuth provider site for authentication|authorization. Client request must
-   * contains set of required query parameters:
+   * Redirect request to OAuth provider site for authentication|authorization. Client must provide
+   * query parameters, that may or may not be required, depending on the active implementation of
+   * {@link OAuthAPI}.
    *
-   * <table>
-   * <tr><th>Name</th><th>Description</th><th>Mandatory</th><th>Default value</th></tr>
-   * <tr><td>oauth_provider</td><td>Name of OAuth provider. At the moment <tt>google</tt> and <tt>github</tt>
-   * supported</td><td>yes</td><td>none</td></tr>
-   * <tr><td>scope</td><td>Specify exactly what type of access needed. List of scopes dependents to OAuth provider.
-   * Requested scopes displayed at user authorization page at OAuth provider site. Check docs about scopes
-   * supported by
-   * suitable OAuth provider.</td><td>no</td><td>Empty list</td></tr>
-   * <tr><td>mode</td><td>Authentication mode. May be <tt>federated_login</tt> or <tt>token</tt>. If <tt>mode</tt>
-   * set
-   * as <tt>federated_login</tt> that parameters 'username' and 'password' added to redirect URL after successful
-   * user
-   * authentication. (see next parameter) In this case 'password' is temporary generated password. This password will
-   * be validated by FederatedLoginModule.</td><td>no</td><td>token</td></tr>
-   * <tr><td>redirect_after_login</td><td>URL for user redirection after successful
-   * authentication</td><td>yes</td><td>none</td></tr>
-   * </table>
-   *
+   * @param oauthProvider -
+   * @param redirectAfterLogin
+   * @param scopes - list
    * @return typically Response that redirect user for OAuth provider site
    */
   @GET
@@ -80,6 +62,7 @@ public class OAuthAuthenticationService extends Service {
 
   @GET
   @Path("callback")
+  /** Process OAuth callback */
   public Response callback(@QueryParam("errorValues") List<String> errorValues)
       throws OAuthAuthenticationException, NotFoundException, ForbiddenException {
     return oAuthAPI.callback(uriInfo, errorValues);
@@ -112,6 +95,11 @@ public class OAuthAuthenticationService extends Service {
     return oAuthAPI.getToken(oauthProvider);
   }
 
+  /**
+   * Invalidate OAuth token for user.
+   *
+   * @param oauthProvider OAuth provider name
+   */
   @DELETE
   @Path("token")
   public void invalidate(@Required @QueryParam("oauth_provider") String oauthProvider)
