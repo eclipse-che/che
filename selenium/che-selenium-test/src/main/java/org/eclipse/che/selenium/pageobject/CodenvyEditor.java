@@ -2017,6 +2017,11 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(CONTEXT_MENU));
   }
 
+  /** Check if context menu is visible. */
+  public boolean isContextMenuPresent() {
+    return seleniumWebDriverHelper.isVisible(By.xpath(CONTEXT_MENU));
+  }
+
   /**
    * Clicks on {@code item} in context menu.
    *

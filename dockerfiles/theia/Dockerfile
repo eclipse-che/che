@@ -15,11 +15,11 @@ WORKDIR /home/theia
 # have default Theia build in the workspace in case no plugins are requested
 ADD https://raw.githubusercontent.com/theia-ide/theia-apps/master/theia-full-docker/latest.package.json /home/theia/package.json
 ADD theia-default-package.json /home/default/theia/package.json
-ADD src/add-native-plugins.js /home/default
+ADD src/add-extensions.js /home/default
 ADD supervisord.conf /etc/
-RUN node /home/default/add-native-plugins.js \
+RUN node /home/default/add-extensions.js \
     che-theia-ssh-extension:https://github.com/eclipse/che-theia-ssh-plugin.git \
-    && rm /home/default/add-native-plugins.js
+    && rm /home/default/add-extensions.js
 RUN cd /home/theia && \
     yarn && \
     yarn theia build && \

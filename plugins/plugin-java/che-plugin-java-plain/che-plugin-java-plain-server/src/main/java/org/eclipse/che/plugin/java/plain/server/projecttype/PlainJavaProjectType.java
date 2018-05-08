@@ -36,9 +36,8 @@ public class PlainJavaProjectType extends ProjectTypeDef {
       MediaTypesExcludeMatcher mediaTypesExcludeMatcher) {
     super(JAVAC, JAVAC_PROJECT_NAME, true, false, true);
 
-    setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);
-    setValueProviderFactory(OUTPUT_FOLDER, valueProviderFactory);
-
+    addVariableDefinition(SOURCE_FOLDER, "java src folder", true, valueProviderFactory);
+    addVariableDefinition(OUTPUT_FOLDER, "java output folder", true, valueProviderFactory);
     addVariableDefinition(LIBRARY_FOLDER, "java library folder", false);
 
     addParent(JAVA_ID);

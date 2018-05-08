@@ -28,7 +28,6 @@
             <class name="org.eclipse.che.selenium.editor.autocomplete.OpenDeclarationTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
-            <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FileStructureBaseOperationTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.NavigateToFileTest"/>

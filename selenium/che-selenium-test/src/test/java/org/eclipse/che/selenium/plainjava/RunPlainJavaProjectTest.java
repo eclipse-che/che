@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.plainjava;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.JAVA_CLASS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
@@ -24,8 +25,12 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -49,7 +54,6 @@ import org.testng.annotations.Test;
 public class RunPlainJavaProjectTest {
   private static final String PROJECT_NAME = NameGenerator.generate("RunningPlainJavaProject", 4);
   private static final String NEW_PACKAGE = "base.test";
-  private static final String CLONE_URI = "https://github.com/iedexmain1/plainJavaProject.git";
   private static final String NAME_COMMAND = "startApp";
   private static final String COMMAND =
       "cd ${current.project.path}\n"
@@ -61,6 +65,7 @@ public class RunPlainJavaProjectTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
   @Inject private DefaultTestUser productUser;
+  @Inject private TestGitHubRepository testRepo;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor codenvyEditor;
   @Inject private ConfigureClasspath configureClasspath;
@@ -73,8 +78,20 @@ public class RunPlainJavaProjectTest {
   @Inject private Loader loader;
   @Inject private Menu menu;
 
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
+
   @BeforeClass
   public void prepare() throws Exception {
+    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/run-plain-java-project").getPath());
+    testRepo.addContent(entryPath);
+
     ide.open(ws);
   }
 
@@ -82,8 +99,7 @@ public class RunPlainJavaProjectTest {
   public void checkRunPlainJavaProject() {
     // import the project and configure
     projectExplorer.waitProjectExplorer();
-    importPlainJavaApp(CLONE_URI, PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
-    loader.waitOnClosed();
+    importPlainJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
 
     // check library into configure classpath form
     projectExplorer.quickExpandWithJavaScript();
@@ -95,41 +111,32 @@ public class RunPlainJavaProjectTest {
         "mockito-all-1.10.19.jar - /projects/" + PROJECT_NAME + "/store");
     configureClasspath.closeConfigureClasspathFormByIcon();
 
-    // expand the project and use library
+    // create the instance of the library
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
     codenvyEditor.waitActive();
-    codenvyEditor.setCursorToLine(9);
+    codenvyEditor.setCursorToLine(19);
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("Mockito mockito = new Mockito();");
     codenvyEditor.waitTextIntoEditor("Mockito mockito = new Mockito();");
-    codenvyEditor.waitMarkerInPosition(ERROR, 9);
+    codenvyEditor.waitMarkerInPosition(ERROR, 19);
+
+    // check code assist
     codenvyEditor.launchPropositionAssistPanel();
     codenvyEditor.enterTextIntoFixErrorPropByDoubleClick("Import 'Mockito' (org.mockito)");
     codenvyEditor.waitTextIntoEditor("import org.mockito.Mockito;");
 
-    // Create new java class into new package
-    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src");
-    menu.runCommand(PROJECT, NEW, PACKAGE);
-    askForValueDialog.waitFormToOpen();
-    askForValueDialog.typeAndWaitText(NEW_PACKAGE);
-    askForValueDialog.clickOkBtn();
-    askForValueDialog.waitFormToClose();
-    projectExplorer.waitVisibilityByName(NEW_PACKAGE);
-    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/base/test");
-    menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, JAVA_CLASS);
-    loader.waitOnClosed();
-    askForValueDialog.waitNewJavaClassOpen();
-    askForValueDialog.typeTextInFieldName("A");
-    askForValueDialog.clickOkBtnNewJavaClass();
-    askForValueDialog.waitNewJavaClassClose();
-    projectExplorer.waitItem(PROJECT_NAME + "/src/base/test/A.java");
+    createNewPackageAndJavaClass();
+
+    // create the instance of new Java class
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
     codenvyEditor.waitActive();
-    codenvyEditor.setCursorToLine(12);
+    codenvyEditor.setCursorToLine(22);
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("A a = new A();");
     codenvyEditor.waitTextIntoEditor("A a = new A();");
-    codenvyEditor.waitMarkerInPosition(ERROR, 12);
+    codenvyEditor.waitMarkerInPosition(ERROR, 22);
+
+    // check the code assist
     codenvyEditor.launchPropositionAssistPanel();
     codenvyEditor.enterTextIntoFixErrorPropByDoubleClick("Import 'A' (base.test)");
     codenvyEditor.waitErrorPropositionPanelClosed();
@@ -137,13 +144,10 @@ public class RunPlainJavaProjectTest {
 
     // open the 'Commands Explorer' and choose java command
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    loader.waitOnClosed();
     commandsExplorer.openCommandsExplorer();
     commandsExplorer.waitCommandExplorerIsOpened();
     commandsExplorer.clickAddCommandButton(RUN_GOAL);
-    loader.waitOnClosed();
     commandsExplorer.chooseCommandTypeInContextMenu(JAVA_TYPE);
-    loader.waitOnClosed();
     commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
     commandsEditor.waitActive();
     commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
@@ -161,7 +165,6 @@ public class RunPlainJavaProjectTest {
 
     // check not starting application
     commandsEditor.clickOnRunButton();
-    loader.waitOnClosed();
     consoles.waitExpectedTextIntoConsole(CONSOLE_MESS);
 
     // add the folder 'bin'
@@ -175,40 +178,26 @@ public class RunPlainJavaProjectTest {
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText("bin");
     askForValueDialog.clickOkBtn();
-    loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/bin");
 
     // check starting application
     commandsEditor.selectTabByName(NAME_COMMAND);
     commandsEditor.waitActiveTabFileName(NAME_COMMAND);
     commandsEditor.clickOnRunButton();
-    loader.waitOnClosed();
     consoles.waitExpectedTextIntoConsole("I love this game!");
 
-    // check the 'bin' folder that contains compiling classes
+    // check the 'bin' folder contains compiling classes
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PROJECT_NAME + "/bin/com/company/nba/MainClass.class");
     projectExplorer.waitItem(PROJECT_NAME + "/bin/base/test/A.class");
   }
 
   private void importPlainJavaApp(String url, String nameApp, String typeProject) {
-    loader.waitOnClosed();
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
     importFromLocation.waitAndTypeImporterAsGitInfo(url, nameApp);
     projectWizard.waitCreateProjectWizardForm();
     projectWizard.selectTypeProject(typeProject);
-    loader.waitOnClosed();
     projectWizard.clickNextButton();
-
-    // set source folder
-    projectWizard.waitOpenProjectConfigForm();
-    projectWizard.clickBrowseButton(Wizard.TypeFolder.SOURCE_FOLDER);
-    configureClasspath.waitSelectPathFormIsOpen();
-    configureClasspath.openItemInSelectPathForm(nameApp);
-    configureClasspath.waitItemInSelectPathForm("src");
-    configureClasspath.selectItemInSelectPathForm("src");
-    configureClasspath.clickOkBtnSelectPathForm();
-    projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
 
     // set library folder
     projectWizard.clickBrowseButton(Wizard.TypeFolder.LIBRARY_FOLDER);
@@ -218,9 +207,37 @@ public class RunPlainJavaProjectTest {
     configureClasspath.clickOkBtnSelectPathForm();
     projectWizard.waitExpTextInSourceFolder("store", Wizard.TypeFolder.LIBRARY_FOLDER);
     projectWizard.clickSaveButton();
-    loader.waitOnClosed();
     projectWizard.waitCloseProjectConfigForm();
     projectExplorer.waitVisibilityByName(nameApp);
-    loader.waitOnClosed();
+
+    // check that srs folder has been set properly
+    menu.runCommand(PROJECT, CONFIGURATION);
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.selectTypeProject(typeProject);
+    projectWizard.clickNextButton();
+    projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
+    projectWizard.clickSaveButton();
+    projectWizard.waitCloseProjectConfigForm();
+  }
+
+  private void createNewPackageAndJavaClass() {
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src");
+
+    // create new package
+    menu.runCommand(PROJECT, NEW, PACKAGE);
+    askForValueDialog.waitFormToOpen();
+    askForValueDialog.typeAndWaitText(NEW_PACKAGE);
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
+    projectExplorer.waitVisibilityByName(NEW_PACKAGE);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/base/test");
+
+    // create new java file
+    menu.runCommand(PROJECT, NEW, JAVA_CLASS);
+    askForValueDialog.waitNewJavaClassOpen();
+    askForValueDialog.typeTextInFieldName("A");
+    askForValueDialog.clickOkBtnNewJavaClass();
+    askForValueDialog.waitNewJavaClassClose();
+    projectExplorer.waitItem(PROJECT_NAME + "/src/base/test/A.java");
   }
 }

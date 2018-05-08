@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
 import static java.util.Collections.singletonList;
-import static java.util.stream.Stream.concat;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
@@ -21,10 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.type.SettableValueProvider;
+import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -43,19 +39,15 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
 @Singleton
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
 
-  private final ProjectManager projectManager;
-
   @Inject
-  public PlainJavaValueProviderFactory(ProjectManager projectManager) {
-    this.projectManager = projectManager;
-  }
+  public PlainJavaValueProviderFactory() {}
 
   @Override
   public ValueProvider newInstance(String wsPath) {
     return new PlainJavaValueProvider(wsPath);
   }
 
-  private class PlainJavaValueProvider extends SettableValueProvider {
+  private class PlainJavaValueProvider extends ReadonlyValueProvider {
 
     private String wsPath;
 
@@ -71,24 +63,6 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
         return getOutputFolder();
       }
       return null;
-    }
-
-    @Override
-    public void setValues(String attributeName, List<String> values) throws ValueStorageException {
-      Map<String, List<String>> attributes =
-          projectManager
-              .get(wsPath)
-              .orElseThrow(() -> new ValueStorageException("Can't get project"))
-              .getAttributes();
-
-      if (attributes.containsKey(attributeName)) {
-        attributes.put(
-            attributeName,
-            concat(values.stream(), attributes.get(attributeName).stream())
-                .collect(Collectors.toList()));
-      } else {
-        attributes.put(attributeName, values);
-      }
     }
 
     private List<String> getOutputFolder() throws ValueStorageException {
