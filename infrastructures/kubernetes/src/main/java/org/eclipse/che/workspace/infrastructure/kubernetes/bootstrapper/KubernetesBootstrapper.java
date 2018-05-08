@@ -132,22 +132,21 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   }
 
   private void injectBootstrapper() throws InfrastructureException {
-    LOG.info("TESTING BOOTSTRAPPER");
+    LOG.info("TESTING BOOTSTRAPPER 2");
     final String mName = kubernetesMachine.getName();
     final RuntimeIdentityDto runtimeIdentityDto = DtoConverter.asDto(runtimeIdentity);
     BiConsumer<String, String> outputConsumer =
-        (stream, text) ->
-            eventService.publish(
-                DtoFactory.newDto(MachineLogEvent.class)
-                    .withRuntimeId(runtimeIdentityDto)
-                    .withStream(stream)
-                    .withText(text)
-                    .withTime(ZonedDateTime.now().format(ISO_OFFSET_DATE_TIME))
-                    .withMachineName(mName));
-    outputConsumer =
-        outputConsumer.andThen(
-            (stream, text) ->
-                LOG.error(">>>>>  Stream {} text {} machine {}", stream, text, mName));
+        (stream, text) -> {
+          LOG.error(">>>>>1  Stream {} text {} machine {}", stream, text, mName);
+          eventService.publish(
+              DtoFactory.newDto(MachineLogEvent.class)
+                  .withRuntimeId(runtimeIdentityDto)
+                  .withStream(stream)
+                  .withText(text)
+                  .withTime(ZonedDateTime.now().format(ISO_OFFSET_DATE_TIME))
+                  .withMachineName(mName));
+          LOG.error(">>>>>2  Stream {} text {} machine {}", stream, text, mName);
+        };
 
     LOG.debug("Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, mName);
     exec(outputConsumer, "mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
