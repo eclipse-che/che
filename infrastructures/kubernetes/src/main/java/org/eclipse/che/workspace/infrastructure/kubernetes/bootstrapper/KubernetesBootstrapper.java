@@ -132,6 +132,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   }
 
   private void injectBootstrapper() throws InfrastructureException {
+    LOG.info("TESTING BOOTSTRAPPER");
     final String mName = kubernetesMachine.getName();
     final RuntimeIdentityDto runtimeIdentityDto = DtoConverter.asDto(runtimeIdentity);
     BiConsumer<String, String> outputConsumer =
