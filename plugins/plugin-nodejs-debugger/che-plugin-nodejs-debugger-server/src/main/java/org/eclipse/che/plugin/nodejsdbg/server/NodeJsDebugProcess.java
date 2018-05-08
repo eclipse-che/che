@@ -66,7 +66,7 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
   }
 
   public static NodeJsDebugProcess start(String file) throws NodeJsDebuggerException {
-    return new NodeJsDebugProcess("debug> ", "debug", "--debug-brk", file);
+    return new NodeJsDebugProcess("debug> ", "inspect", "--inspect-brk", file);
   }
 
   private Process initializeNodeJsDebugProcess(String[] options) throws NodeJsDebuggerException {
