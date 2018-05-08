@@ -105,6 +105,11 @@ public class ProjectDtoConverter {
                 .collect(Collectors.toList()));
   }
 
+  /**
+   * Converts abstract RegisteredProject to RegisteredProjectDto
+   * @param project RegisteredProject
+   * @return RegisteredProjectDto
+   */
   public static RegisteredProjectDto asRegisteredProjectDto(RegisteredProject project) {
     return newDto(RegisteredProjectDto.class)
         .withName(project.getName())
@@ -117,6 +122,7 @@ public class ProjectDtoConverter {
         .withBaseFolder(project.getBaseFolder())
         .withDetected(project.isDetected())
         .withSynced(project.isSynced())
+        .withPersistableAttributes(project.getPersistableAttributes())
         .withProblems(
             project
                 .getProblems()
@@ -125,6 +131,11 @@ public class ProjectDtoConverter {
                 .collect(Collectors.toList()));
   }
 
+  /**
+   * Converts abstract ProjectConfig to ProjectConfigDto
+   * @param project ProjectConfig
+   * @return ProjectConfigDto
+   */
   public static ProjectConfigDto asDto(ProjectConfig project) {
     return newDto(ProjectConfigDto.class)
         .withName(project.getName())

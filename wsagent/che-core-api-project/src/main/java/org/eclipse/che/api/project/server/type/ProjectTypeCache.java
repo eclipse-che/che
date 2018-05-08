@@ -26,7 +26,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 public class ProjectTypeCache {
 
   private FsManager fsManager;
-  ProjectTypeRegistry projectTypeRegistry;
+  private ProjectTypeRegistry projectTypeRegistry;
 
   @Inject
   public ProjectTypeCache(ProjectTypeRegistry projectTypeRegistry, FsManager fsManager) {
@@ -39,7 +39,7 @@ public class ProjectTypeCache {
     for (ProjectTypeDef projectType : projectTypeRegistry.getProjectTypes()) {
       ProjectTypeDto projectTypeDto = ProjectDtoConverter.asDto(projectType);
       String json = DtoFactory.getInstance().toJson(projectTypeDto);
-      fsManager.createFile("/.che/tmp/projectTypes/" + projectType.getId(), json, false, true);
+      fsManager.createFile("/.che/tmp/projectTypes/" + projectType.getId(), json, true, true);
     }
   }
 }

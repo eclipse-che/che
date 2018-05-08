@@ -16,7 +16,14 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-/** @author gazarenkov */
+/**
+ * Provides path for projects root directory using:
+ * env variable 'CHE_PROJECTS_ROOT' (which is set by workspace API == "project" volume configured)
+ * if not - uses 'che.user.workspaces.storage' property
+ * otherwise - default with '/project' directory (backward comptible solution)
+ *
+ * @author gazarenkov
+ * */
 @Singleton
 public class RootDirPathProvider implements Provider<String> {
 

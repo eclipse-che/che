@@ -19,9 +19,9 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Data transfer object (DTO) for creating of project.
+ * Project data transfer object
  *
- * @author Roman Nikitenko
+ * @author gazarenkov
  */
 @DTO
 public interface RegisteredProjectDto extends RegisteredProject, ProjectConfigDto {
