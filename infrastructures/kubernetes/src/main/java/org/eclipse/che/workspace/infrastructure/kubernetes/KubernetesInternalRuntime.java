@@ -332,8 +332,10 @@ public class KubernetesInternalRuntime<
               getContext().getIdentity(), machineName, MachineStatus.FAILED);
         } catch (InfrastructureException e) {
           LOG.error(
-              "Unable to update status of the machine '%s:%s'. Cause: %s",
-              getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+              "Unable to update status of the machine '{}:{}'. Cause: {}",
+              getContext().getIdentity().getWorkspaceId(),
+              machineName,
+              e.getMessage());
         }
         eventPublisher.sendFailedEvent(machineName, ex.getMessage(), getContext().getIdentity());
       }
@@ -366,8 +368,10 @@ public class KubernetesInternalRuntime<
             getContext().getIdentity(), machineName, MachineStatus.RUNNING);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the machine '%s:%s'. Cause: %s",
-            getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+            "Unable to update status of the machine '{}:{}'. Cause: {}",
+            getContext().getIdentity().getWorkspaceId(),
+            machineName,
+            e.getMessage());
       }
       eventPublisher.sendRunningEvent(machineName, getContext().getIdentity());
     };
@@ -574,8 +578,11 @@ public class KubernetesInternalRuntime<
         eventPublisher.sendServerRunningEvent(machineName, serverRef, url, identity);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '%s:%s:%s'. Cause: %s",
-            identity.getWorkspaceId(), machineName, serverRef, e.getMessage());
+            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            identity.getWorkspaceId(),
+            machineName,
+            serverRef,
+            e.getMessage());
       }
     }
   }
@@ -608,8 +615,11 @@ public class KubernetesInternalRuntime<
         }
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '%s:%s:%s'. Cause: %s",
-            identity.getWorkspaceId(), machineName, serverName, e.getMessage());
+            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            identity.getWorkspaceId(),
+            machineName,
+            serverName,
+            e.getMessage());
       }
     }
   }
