@@ -31,6 +31,7 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 import org.eclipse.che.security.oauth.OAuthAPI;
 import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 
+/** */
 public class DelegatedOAuthAPI implements OAuthAPI {
 
   private final KeycloakServiceClient keycloakServiceClient;
@@ -60,8 +61,8 @@ public class DelegatedOAuthAPI implements OAuthAPI {
 
   @Override
   public OAuthToken getToken(String oauthProvider)
-      throws ForbiddenException, BadRequestException, NotFoundException,
-          ServerException, UnauthorizedException {
+      throws ForbiddenException, BadRequestException, NotFoundException, ServerException,
+          UnauthorizedException {
     try {
       KeycloakTokenResponse response =
           keycloakServiceClient.getIdentityProviderToken(oauthProvider);
@@ -75,7 +76,7 @@ public class DelegatedOAuthAPI implements OAuthAPI {
 
   @Override
   public void invalidateToken(String oauthProvider)
-          throws NotFoundException, UnauthorizedException, ServerException, ForbiddenException {
+      throws NotFoundException, UnauthorizedException, ServerException, ForbiddenException {
     throw new ForbiddenException("Method is not supported in this implementation of OAuth API");
   }
 
@@ -85,8 +86,8 @@ public class DelegatedOAuthAPI implements OAuthAPI {
   }
 
   @Override
-  public Set<OAuthAuthenticatorDescriptor> getRegisteredAuthenticators(UriInfo uriInfo) throws ForbiddenException {
+  public Set<OAuthAuthenticatorDescriptor> getRegisteredAuthenticators(UriInfo uriInfo)
+      throws ForbiddenException {
     throw new ForbiddenException("Method is not supported in this implementation of OAuth API");
   }
-
 }

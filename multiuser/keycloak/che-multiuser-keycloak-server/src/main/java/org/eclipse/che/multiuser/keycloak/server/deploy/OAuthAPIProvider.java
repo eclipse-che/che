@@ -32,7 +32,8 @@ public class OAuthAPIProvider implements Provider<OAuthAPI> {
   private Injector injector;
 
   @Inject
-  public OAuthAPIProvider(@Nullable @Named("che.oauth.service.mode") String oauthType, Injector injector) {
+  public OAuthAPIProvider(
+      @Nullable @Named("che.oauth.service.mode") String oauthType, Injector injector) {
     this.oauthType = oauthType == null ? "" : oauthType;
     this.injector = injector;
   }
