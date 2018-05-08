@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MY
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -25,11 +26,13 @@ import java.util.Collections;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.StackDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
+import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/** @author Skoryk Serhii */
 public class StacksListTest {
 
   private static final String NEW_STACK_NAME = generate("", 8);
@@ -177,8 +180,13 @@ public class StacksListTest {
     stackDetails.clickOnSaveChangesButton();
     stackDetails.waitToolbar(stackName);
     stackDetails.clickOnAllStacksButton();
-
     stacks.waitToolbarTitleName();
-    stacks.waitStackItem(stackName);
+
+    try {
+      stacks.waitStackItem(stackName);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/9648", ex);
+    }
   }
 }
