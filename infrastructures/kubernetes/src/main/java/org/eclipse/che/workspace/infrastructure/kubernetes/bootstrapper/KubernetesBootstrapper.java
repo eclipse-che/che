@@ -145,7 +145,8 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
                     .withMachineName(mName));
     outputConsumer =
         outputConsumer.andThen(
-            (stream, text) -> LOG.error(">>>>>  Stream {} text {}", stream, text));
+            (stream, text) ->
+                LOG.error(">>>>>  Stream {} text {} machine {}", stream, text, mName));
 
     LOG.debug("Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, mName);
     exec(outputConsumer, "mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
