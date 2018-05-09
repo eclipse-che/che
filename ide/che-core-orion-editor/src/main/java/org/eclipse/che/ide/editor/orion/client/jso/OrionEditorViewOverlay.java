@@ -37,4 +37,8 @@ public class OrionEditorViewOverlay extends JavaScriptObject {
   public final native void setReadonly(final boolean readonly) /*-{
         this.readonly = readonly;
     }-*/;
+
+  public final native void showTooltip() /*-{
+        this.commandRegistry.findCommand("orion.edit.showTooltip").callback();
+    }-*/;
 }
