@@ -652,6 +652,10 @@ public class OrionEditorWidget extends Composite
     getEditor().hideTooltip();
   }
 
+  public void showTooltip() {
+    editorViewOverlay.showTooltip();
+  }
+
   @Override
   public MarkerRegistration addMarker(final TextRange range, final String className) {
     final OrionAnnotationOverlay annotation = OrionAnnotationOverlay.create();
