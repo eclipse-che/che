@@ -15,14 +15,10 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Paths;
-import org.eclipse.che.JavadocUrlProvider;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.jdt.rest.UrlContextProvider;
 import org.eclipse.che.plugin.java.server.refactoring.RefactoringManager;
 import org.eclipse.che.plugin.java.server.rest.JavaFormatterService;
 import org.eclipse.che.plugin.java.server.rest.JavaNavigationService;
-import org.eclipse.che.plugin.java.server.rest.JavadocService;
-import org.eclipse.che.plugin.java.server.rest.JavadocUrlProviderImpl;
 import org.eclipse.che.plugin.java.server.rest.RefactoringService;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -34,7 +30,6 @@ public class JdtGuiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(JavadocService.class);
     bind(JavaNavigationService.class);
     bind(JavaFormatterService.class);
     bind(ResourcesPlugin.class).asEagerSingleton();
@@ -42,9 +37,6 @@ public class JdtGuiceModule extends AbstractModule {
     bind(FileBuffersPlugin.class).asEagerSingleton();
     bind(RefactoringManager.class).asEagerSingleton();
     bind(RefactoringService.class);
-
-    bind(JavadocUrlProvider.class).to(JavadocUrlProviderImpl.class);
-    requestStaticInjection(UrlContextProvider.class);
   }
 
   @Provides

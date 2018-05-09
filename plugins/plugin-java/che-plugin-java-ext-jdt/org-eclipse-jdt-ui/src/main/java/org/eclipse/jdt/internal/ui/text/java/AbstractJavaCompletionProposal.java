@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.io.IOException;
 import java.io.InputStream;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.jdt.javadoc.HTMLPrinter;
 import org.eclipse.che.jface.text.DocumentCommand;
 import org.eclipse.che.jface.text.ITextViewer;
 import org.eclipse.che.jface.text.contentassist.ICompletionProposalExtension;
@@ -545,10 +544,9 @@ public abstract class AbstractJavaCompletionProposal
    */
   public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
     if (getProposalInfo() != null) {
-      String info = getProposalInfo().getInfo(monitor);
+      String info = "";
       if (info != null && info.length() > 0) {
         StringBuffer buffer = new StringBuffer();
-        HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
 
         buffer.append(info);
 
@@ -569,7 +567,6 @@ public abstract class AbstractJavaCompletionProposal
           JavaPlugin.log(e);
         }
 
-        HTMLPrinter.addPageEpilog(buffer);
         info = buffer.toString();
 
         return new JavadocBrowserInformationControlInput(info);
