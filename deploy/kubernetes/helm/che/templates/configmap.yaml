@@ -40,9 +40,19 @@ data:
   CHE_INFRA_KUBERNETES_TLS__SECRET: ""
 {{- end }}
 {{- if .Values.global.multiuser }}
-  CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId }}
+{{- end }}
+{{- if .Values.global.multiuser }}
+  CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
+{{- end }}
+#define CHE_KEYCLOAK_OIDC__PROVIDER  if in multiuser mode,
+#and .Values.global.cheDedicatedKeycloak is defined as false
+{{- if (and .Values.global.multiuser (and (not (empty .Values.global.cheDedicatedKeycloak)) (not .Values.global.cheDedicatedKeycloak))) }}
+  CHE_KEYCLOAK_OIDC__PROVIDER: {{ .Values.customOidcProvider }}
+{{- end }}
+{{- if and .Values.global.multiuser .Values.customOidcUsernameClaim }}
+  CHE_KEYCLOAK_USERNAME__CLAIM: {{ .Values.customOidcUsernameClaim }}
 {{- end }}
   CHE_INFRA_KUBERNETES_NAMESPACE: ""
   CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"

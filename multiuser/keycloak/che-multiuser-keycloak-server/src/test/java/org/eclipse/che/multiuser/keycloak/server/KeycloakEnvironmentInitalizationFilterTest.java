@@ -58,6 +58,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
 
   @Mock private SignatureKeyManager keyManager;
   @Mock private KeycloakUserManager userManager;
+  @Mock private KeycloakSettings keycloakSettings;
   @Mock private RequestTokenExtractor tokenExtractor;
   @Mock private PermissionChecker permissionChecker;
   @Mock private FilterChain chain;
@@ -75,7 +76,8 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
     filter =
-        new KeycloakEnvironmentInitalizationFilter(userManager, tokenExtractor, permissionChecker);
+        new KeycloakEnvironmentInitalizationFilter(
+            userManager, tokenExtractor, permissionChecker, keycloakSettings);
     filter.signatureKeyManager = keyManager;
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
     when(keyManager.getKeyPair()).thenReturn(kp);
