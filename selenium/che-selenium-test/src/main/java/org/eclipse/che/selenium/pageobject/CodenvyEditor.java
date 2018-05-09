@@ -208,7 +208,7 @@ public class CodenvyEditor {
     String DEBUGGER_BREAKPOINT_CONDITION =
         "//div[@class='breakpoint %s condition' and text()='%d']";
     String DEBUGGER_BREAKPOINT_DISABLED = "//div[@class='breakpoint disabled' and text()='%d']";
-    String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
+    String JAVA_DOC_POPUP = "//div[contains(@class, 'textviewTooltip')]";
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
@@ -1583,13 +1583,9 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(JAVA_DOC_POPUP));
   }
 
-  /**
-   * Waits until {@code expectedText} is present in javadoc's popup body, and switches to parent
-   * frame.
-   */
+  /** Waits until {@code expectedText} is present in javadoc's popup body */
   public void checkTextToBePresentInJavaDocPopUp(String expectedText) {
     waitTextInJavaDoc(expectedText);
-    seleniumWebDriver.switchTo().parentFrame();
   }
 
   /**
@@ -1607,13 +1603,10 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  waitAvailabilityAndSwitchToJavaDocFrame();
-
                   if (waitAndCheckTextPresenceInJavaDoc(expectedText)) {
                     return true;
                   }
 
-                  seleniumWebDriver.switchTo().parentFrame();
                   return false;
                 });
   }
@@ -1623,25 +1616,14 @@ public class CodenvyEditor {
    *
    * <p>Note! {@link SeleniumWebDriver} should be switched to the javadoc frame.
    *
-   * <p>Please use {@link CodenvyEditor#waitAvailabilityAndSwitchToJavaDocFrame()} method for
-   * switching to javadoc frame.
-   *
    * @param expectedText text which should be present in javadoc body
    * @return true - if {@code expectedText} is present in javadoc body, false - if not
    */
   public boolean waitAndCheckTextPresenceInJavaDoc(String expectedText) {
     return seleniumWebDriverHelper
-        .waitVisibility(By.tagName("body"))
+        .waitVisibility(By.xpath(JAVA_DOC_POPUP))
         .getText()
         .contains(expectedText);
-  }
-
-  /**
-   * Waits until frame, which contains javadoc popup, is available and switches the {@link
-   * SeleniumWebDriver} to it.
-   */
-  public void waitAvailabilityAndSwitchToJavaDocFrame() {
-    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
   }
 
   /**
