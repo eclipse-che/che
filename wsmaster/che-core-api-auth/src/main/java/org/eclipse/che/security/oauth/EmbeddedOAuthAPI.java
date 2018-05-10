@@ -89,13 +89,18 @@ public class EmbeddedOAuthAPI implements OAuthAPI {
   @Override
   public Set<OAuthAuthenticatorDescriptor> getRegisteredAuthenticators(UriInfo uriInfo) {
     Set<OAuthAuthenticatorDescriptor> result = new HashSet<>();
-    final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().clone().path(getClass());
+    final UriBuilder uriBuilder =
+        uriInfo.getBaseUriBuilder().clone().path(OAuthAuthenticationService.class);
     for (String name : providers.getRegisteredProviderNames()) {
       final List<Link> links = new LinkedList<>();
       links.add(
           LinksHelper.createLink(
               HttpMethod.GET,
-              uriBuilder.clone().path(getClass(), "authenticate").build().toString(),
+              uriBuilder
+                  .clone()
+                  .path(OAuthAuthenticationService.class, "authenticate")
+                  .build()
+                  .toString(),
               null,
               null,
               "Authenticate URL",
