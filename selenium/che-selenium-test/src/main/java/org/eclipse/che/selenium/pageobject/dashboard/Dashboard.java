@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
@@ -52,6 +53,7 @@ public class Dashboard {
   private final LoginPage loginPage;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final boolean isMultiuser;
 
   @Inject
@@ -63,6 +65,7 @@ public class Dashboard {
       LoginPage loginPage,
       TestWebElementRenderChecker testWebElementRenderChecker,
       TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
       @Named("che.multiuser") boolean isMultiuser) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
@@ -71,6 +74,7 @@ public class Dashboard {
     this.loginPage = loginPage;
     this.testWebElementRenderChecker = testWebElementRenderChecker;
     this.testKeycloakSettingsServiceClient = testKeycloakSettingsServiceClient;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.isMultiuser = isMultiuser;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -143,6 +147,14 @@ public class Dashboard {
 
   @FindBy(xpath = Locators.LICENSE_NAG_MESSAGE_XPATH)
   WebElement licenseNagMessage;
+
+  public int getWorkspacesCountInWorkspacesItem() {
+    return Integer.parseInt(
+        seleniumWebDriverHelper
+            .waitVisibilityAndGetText(workspacesItem)
+            .replace("Workspaces\n (", "")
+            .replace(")", ""));
+  }
 
   /** wait button with drop dawn icon (left top corner) */
   public void waitDashboardToolbarTitle() {

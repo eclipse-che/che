@@ -50,6 +50,7 @@ public class WorkspacesListTest {
   private String workspaceName1 = generate("wksp-", 5);
   private String workspaceName2 = generate("wksp-", 5);
   private String workspaceName3 = generate("wksp-", 5);
+  private static final int EXPECTED_WORKSPACES_COUNT = 2;
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
@@ -104,17 +105,22 @@ public class WorkspacesListTest {
   }
 
   @Test
+  public void shouldDisplayElements() {
+    Assert.assertEquals(EXPECTED_WORKSPACES_COUNT, dashboard.getWorkspacesCountInWorkspacesItem());
+
+    dashboard.selectWorkspacesItemOnDashboard();
+
+    workspaces.waitToolbarTitleName();
+    workspaces.waitDocumentationLink();
+    workspaces.waitAddWorkspaceButton();
+    workspaces.waitSearchWorkspaceByNameField();
+    checkAllHeadersPresence();
+
+    workspaces.getWorkspaceListHeaders();
+  }
+
+  @Test
   public void checkWorkspacesList() {
-
-
-
-
-
-
-
-
-
-
     // check UI views of workspaces list
     workspaces.waitToolbarTitleName();
     workspaces.waitDocumentationLink();
@@ -265,5 +271,14 @@ public class WorkspacesListTest {
 
     workspaceDetails.waitToolbarTitleName(name);
     workspaceDetails.checkStateOfWorkspace(STOPPED);
+  }
+
+  private void checkAllHeadersPresence() {
+    ArrayList<String> headers = workspaces.getWorkspaceListHeaders();
+    assertTrue(headers.contains("NAME"));
+    assertTrue(headers.contains("RAM"));
+    assertTrue(headers.contains("PROJECTS"));
+    assertTrue(headers.contains("STACK"));
+    assertTrue(headers.contains("ACTIONS"));
   }
 }
