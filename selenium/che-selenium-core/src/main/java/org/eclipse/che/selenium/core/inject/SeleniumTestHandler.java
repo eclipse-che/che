@@ -46,11 +46,11 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.constant.TestBrowser;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverFactory;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -89,6 +89,8 @@ public abstract class SeleniumTestHandler
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
+  @Inject private SeleniumWebDriverFactory seleniumWebDriverFactory;
+
   @Inject
   @Named("tests.screenshots_dir")
   private String screenshotsDir;
@@ -106,22 +108,6 @@ public abstract class SeleniumTestHandler
   private String workspaceLogsDir;
 
   @Inject private PageObjectsInjector pageObjectsInjector;
-
-  @Inject
-  @Named("sys.browser")
-  private TestBrowser browser;
-
-  @Inject
-  @Named("sys.driver.port")
-  private String webDriverPort;
-
-  @Inject
-  @Named("sys.grid.mode")
-  private boolean gridMode;
-
-  @Inject
-  @Named("sys.driver.version")
-  private String webDriverVersion;
 
   @Inject
   @Named("github.username")
@@ -225,7 +211,7 @@ public abstract class SeleniumTestHandler
   private void checkWebDriverSessionCreation() {
     SeleniumWebDriver seleniumWebDriver = null;
     try {
-      seleniumWebDriver = new SeleniumWebDriver(browser, webDriverPort, gridMode, webDriverVersion);
+      seleniumWebDriver = seleniumWebDriverFactory.create();
     } finally {
       Optional.ofNullable(seleniumWebDriver)
           .ifPresent(SeleniumWebDriver::quit); // finish webdriver session

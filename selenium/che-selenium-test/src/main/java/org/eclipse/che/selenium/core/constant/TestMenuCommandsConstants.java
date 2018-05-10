@@ -21,6 +21,7 @@ public interface TestMenuCommandsConstants {
     String STOP_WORKSPACE = WORKSPACE_MENU_PREFIX + "stopWorkspace";
     String CREATE_FACTORY = WORKSPACE_MENU_PREFIX + "configureFactoryAction";
     String STOP = WORKSPACE_MENU_PREFIX + "stopWorkspace";
+    String DOWNLOAD_AS_ZIP = "gwt-debug-topmenu/Workspace/downloadWsAsZipAction";
   }
 
   interface Project {

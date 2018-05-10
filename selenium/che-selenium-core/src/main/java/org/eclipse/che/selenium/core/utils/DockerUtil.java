@@ -10,11 +10,15 @@
  */
 package org.eclipse.che.selenium.core.utils;
 
+import static java.lang.String.format;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
+import java.nio.file.Path;
 import javax.inject.Singleton;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
+import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,5 +47,26 @@ public class DockerUtil {
     }
 
     return false;
+  }
+
+  public void copy(String containerId, Path pathInsideContainer, Path copyTo) throws IOException {
+    String copyCommand =
+        format("docker cp %1$s:%2$s %3$s", containerId, pathInsideContainer, copyTo);
+
+    processAgent.execute(copyCommand);
+  }
+
+  public String findGridNodeContainerByIp(String Ip) throws ProcessAgentException {
+    String getContainerIdCommand =
+        format(
+            "docker ps -q --filter='name=selenium_chromenode*' | xargs docker inspect --format '{{ .Id }} {{ .NetworkSettings.Networks.selenium_selenium_grid_internal.IPAddress }}' | grep %s | awk 'NR>0 {print $1;}'",
+            Ip);
+    return processAgent.execute(getContainerIdCommand);
+  }
+
+  public void delete(String gridNodeContainerId, Path pathToDelete) throws ProcessAgentException {
+    String deleteInsideContainer =
+        format("docker exec -i %s sh -c 'rm -fr %s'", gridNodeContainerId, pathToDelete);
+    processAgent.execute(deleteInsideContainer);
   }
 }
