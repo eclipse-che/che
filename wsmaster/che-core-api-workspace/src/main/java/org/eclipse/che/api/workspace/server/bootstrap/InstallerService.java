@@ -10,19 +10,17 @@
  */
 package org.eclipse.che.api.workspace.server.bootstrap;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
-import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.InstallerStatusEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.eclipse.che.api.workspace.shared.Constants.BOOTSTRAPPER_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_STATUS_CHANGED_METHOD;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import static org.eclipse.che.api.workspace.shared.Constants.*;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.InstallerStatusEvent;
 
 /**
  * Defines a JSON-RPC service for handling bootstrapper statuses and installer statuses/output.
@@ -34,8 +32,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.*;
 public class InstallerService {
 
   private final EventService eventService;
-
-  private static final Logger LOG = LoggerFactory.getLogger(InstallerService.class);
 
   @Inject
   public InstallerService(EventService eventService) {
@@ -67,20 +63,6 @@ public class InstallerService {
   }
 
   private <T> void handle(T event) {
-    if (event instanceof InstallerLogEvent) {
-      InstallerLogEvent e = (InstallerLogEvent) event;
-      RuntimeIdentityDto identity = e.getRuntimeId();
-      LOG.error(
-          "Installer {} machine {} owner {} env {} workspace {} stream {} text {} time {} ",
-          e.getInstaller(),
-          e.getMachineName(),
-          identity.getOwnerId(),
-          identity.getEnvName(),
-          identity.getWorkspaceId(),
-          e.getStream(),
-          e.getText(),
-          e.getTime());
-    }
     eventService.publish(event);
   }
 }
