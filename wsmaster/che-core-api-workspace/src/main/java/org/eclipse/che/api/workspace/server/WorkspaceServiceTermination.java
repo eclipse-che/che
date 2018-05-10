@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.system.server.CronThreadPullTermination;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemSuspendedEvent;
@@ -83,7 +84,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
 
   @Override
   public Set<String> getDependencies() {
-    return Collections.emptySet();
+    return Collections.singleton(CronThreadPullTermination.SERVICE_NAME);
   }
 
   /**
