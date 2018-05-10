@@ -45,12 +45,11 @@ public class ErrorMachineLogEventLogger implements EventSubscriber<MachineLogEve
     if (!isNullOrEmpty(stream) && "stderr".equalsIgnoreCase(stream) && !isNullOrEmpty(text)) {
       RuntimeIdentityDto identity = event.getRuntimeId();
       LOG.error(
-          "Machine {} error from owner {} env {} workspace {} stream {} text {} time {} ",
+          "Machine {} error from owner={} env={} workspace={} text={} time={} ",
           event.getMachineName(),
           identity.getOwnerId(),
           identity.getEnvName(),
           identity.getWorkspaceId(),
-          event.getStream(),
           event.getText(),
           event.getTime());
     }

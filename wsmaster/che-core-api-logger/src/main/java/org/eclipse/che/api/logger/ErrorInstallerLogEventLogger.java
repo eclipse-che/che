@@ -45,13 +45,12 @@ public class ErrorInstallerLogEventLogger implements EventSubscriber<InstallerLo
     if (stream != null && stream == InstallerLogEvent.Stream.STDERR && !isNullOrEmpty(text)) {
       RuntimeIdentityDto identity = event.getRuntimeId();
       LOG.error(
-          "Installer {} error from machine {} owner {} env {} workspace {} stream {} text {} time {} ",
+          "Installer {} error from machine={} owner={} env={} workspace={} text={} time={} ",
           event.getInstaller(),
           event.getMachineName(),
           identity.getOwnerId(),
           identity.getEnvName(),
           identity.getWorkspaceId(),
-          event.getStream(),
           event.getText(),
           event.getTime());
     }
