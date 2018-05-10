@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The goal of this class is it to catch all InstallerLogEvent events from error stream and dump
- * them to slf4j log.
+ * The goal of this class is to catch all InstallerLogEvent events from error stream and dump them
+ * to slf4j log.
  */
 @Singleton
 public class ErrorInstallerLogEventLogger implements EventSubscriber<InstallerLogEvent> {
