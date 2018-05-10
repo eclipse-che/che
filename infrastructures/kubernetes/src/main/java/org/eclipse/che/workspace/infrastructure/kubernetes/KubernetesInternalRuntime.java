@@ -428,7 +428,10 @@ public class KubernetesInternalRuntime<
     // namespace.pods().watch(new AbnormalStopHandler());
     namespace.pods().watchContainers(new MachineLogsPublisher());
     if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
-      namespace.pods().watchContainers(new UnrecoverableEventHanler());
+      // The handler for unrecoverable events is disabled because it has a bug that prevents start
+      // of workspaces after previous workspace start failure.
+      // See https://github.com/eclipse/che/issues/9542
+      // namespace.pods().watchContainers(new UnrecoverableEventHanler());
     }
 
     final KubernetesServerResolver serverResolver =
