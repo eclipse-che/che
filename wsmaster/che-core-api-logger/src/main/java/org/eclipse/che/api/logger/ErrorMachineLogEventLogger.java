@@ -31,21 +31,18 @@ public class ErrorMachineLogEventLogger implements EventSubscriber<MachineLogEve
 
   private static final Logger LOG = LoggerFactory.getLogger(ErrorMachineLogEventLogger.class);
 
-  @Inject private EventService eventService;
-
+  @Inject
   @PostConstruct
-  public void subscribe() {
+  public void subscribe(EventService eventService) {
     eventService.subscribe(this, MachineLogEvent.class);
   }
 
   @Override
   public void onEvent(MachineLogEvent event) {
-    String stream = event.getStream();
-    String text = event.getText();
-    if (!isNullOrEmpty(stream) && "stderr".equalsIgnoreCase(stream) && !isNullOrEmpty(text)) {
+    if ("stderr".equalsIgnoreCase(event.getStream()) && !isNullOrEmpty(event.getText())) {
       RuntimeIdentityDto identity = event.getRuntimeId();
       LOG.error(
-          "Machine {} error from owner={} env={} workspace={} text={} time={} ",
+          "Machine `{}` error from owner=`{}` env=`{}` workspace=`{}` text=`{}` time=`{}`",
           event.getMachineName(),
           identity.getOwnerId(),
           identity.getEnvName(),

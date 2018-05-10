@@ -31,21 +31,18 @@ public class ErrorInstallerLogEventLogger implements EventSubscriber<InstallerLo
 
   private static final Logger LOG = LoggerFactory.getLogger(ErrorInstallerLogEventLogger.class);
 
-  @Inject private EventService eventService;
-
+  @Inject
   @PostConstruct
-  public void subscribe() {
+  public void subscribe(EventService eventService) {
     eventService.subscribe(this, InstallerLogEvent.class);
   }
 
   @Override
   public void onEvent(InstallerLogEvent event) {
-    InstallerLogEvent.Stream stream = event.getStream();
-    String text = event.getText();
-    if (stream != null && stream == InstallerLogEvent.Stream.STDERR && !isNullOrEmpty(text)) {
+    if (event.getStream() == InstallerLogEvent.Stream.STDERR && !isNullOrEmpty(event.getText())) {
       RuntimeIdentityDto identity = event.getRuntimeId();
       LOG.error(
-          "Installer {} error from machine={} owner={} env={} workspace={} text={} time={} ",
+          "Installer `{}` error from machine=`{}` owner=`{}` env=`{}` workspace=`{}` text=`{}` time=`{}`",
           event.getInstaller(),
           event.getMachineName(),
           identity.getOwnerId(),
