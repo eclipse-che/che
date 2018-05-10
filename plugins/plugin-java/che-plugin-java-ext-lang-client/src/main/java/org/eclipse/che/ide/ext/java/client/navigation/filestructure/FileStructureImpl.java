@@ -44,6 +44,7 @@ import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.ide.util.input.SignalEventUtils;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Implementation of {@link FileStructure} view.
@@ -112,6 +113,7 @@ final class FileStructureImpl extends Window implements FileStructure {
   /** {@inheritDoc} */
   @Override
   public void setStructure(CompilationUnit compilationUnit, boolean showInheritedMembers) {
+    Log.info(getClass(), compilationUnit.toString());
     showInheritedLabel.setText(
         showInheritedMembers
             ? locale.hideInheritedMembersLabel()
