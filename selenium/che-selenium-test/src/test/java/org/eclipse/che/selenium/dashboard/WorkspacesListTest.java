@@ -12,16 +12,24 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -52,21 +60,41 @@ public class WorkspacesListTest {
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
+
+  private TestWorkspace blankWorkspace;
+  private TestWorkspace javaWorkspace;
 
   @BeforeClass
   public void setUp() throws Exception {
+    URL resource = getClass().getResource("/projects/defaultSpringProjectWithDifferentTypeOfFiles");
+
+    blankWorkspace = testWorkspaceProvider.createWorkspace(defaultTestUser, 2, DEFAULT);
+    javaWorkspace = testWorkspaceProvider.createWorkspace(defaultTestUser, 3, UBUNTU_JDK8);
+
+    blankWorkspace.await();
+    javaWorkspace.await();
+
+    testProjectServiceClient.importProject(
+        javaWorkspace.getId(), Paths.get(resource.toURI()), "web-java-spring", MAVEN_SPRING);
+
     dashboard.open();
 
-    createWorkspace(workspaceName1);
+    /*createWorkspace(workspaceName1);
     createWorkspace(workspaceName2);
-    createWorkspace(workspaceName3);
+    createWorkspace(workspaceName3);*/
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(workspaceName1, defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(javaWorkspace.getName(), defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(blankWorkspace.getName(), defaultTestUser.getName());
+
+    /*    workspaceServiceClient.delete(workspaceName1, defaultTestUser.getName());
     workspaceServiceClient.delete(workspaceName2, defaultTestUser.getName());
-    workspaceServiceClient.delete(workspaceName3, defaultTestUser.getName());
+    workspaceServiceClient.delete(workspaceName3, defaultTestUser.getName());*/
   }
 
   @BeforeMethod
@@ -77,6 +105,16 @@ public class WorkspacesListTest {
 
   @Test
   public void checkWorkspacesList() {
+
+
+
+
+
+
+
+
+
+
     // check UI views of workspaces list
     workspaces.waitToolbarTitleName();
     workspaces.waitDocumentationLink();
