@@ -15,10 +15,10 @@ import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.Test;
 
 /** @author Alexander Garagatyi */
@@ -30,7 +30,7 @@ public class WorkspaceFromOfficialUbuntuImageStartTest {
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private ToastLoader toastLoader;
-  @Inject private MachineTerminal terminal;
+  @Inject private CheTerminal terminal;
 
   public void ensureWorkspaceStartsFromOfficialUbuntuImage() throws Exception {
     ide.open(testWorkspace);
