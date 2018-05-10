@@ -12,7 +12,6 @@ package org.eclipse.che.api.logger;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
@@ -32,7 +31,6 @@ public class ErrorMachineLogEventLogger implements EventSubscriber<MachineLogEve
   private static final Logger LOG = LoggerFactory.getLogger(ErrorMachineLogEventLogger.class);
 
   @Inject
-  @PostConstruct
   public void subscribe(EventService eventService) {
     eventService.subscribe(this, MachineLogEvent.class);
   }
