@@ -186,7 +186,7 @@ public class StacksListTest {
       stacks.waitStackItem(stackName);
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9648", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/9523", ex);
     }
   }
 }

@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * Schedules workspace servers probes checks asynchronously.
  *
  * @author Alexander Garagatyi
+ * @author Sergii Leshchenko
  */
 @Singleton
 public class ProbeScheduler {
@@ -68,6 +70,7 @@ public class ProbeScheduler {
    * @param probes probes to check
    * @param probeResultConsumer consumer of {@link ProbeResult} instances produced on retrieving
    *     probe execution results
+   * @throws RejectedExecutionException when {@link ProbeScheduler} is terminated
    */
   public void schedule(WorkspaceProbes probes, Consumer<ProbeResult> probeResultConsumer) {
     probesFutures.putIfAbsent(probes.getWorkspaceId(), new ArrayList<>());
@@ -90,7 +93,7 @@ public class ProbeScheduler {
     tasks.forEach(task -> task.cancel(true));
   }
 
-  /** Terminates this probes if it's not terminated yet. */
+  /** Denies starting of new probes and terminates active one if scheduler not terminated yet. */
   public void shutdown() {
     if (!probesExecutor.isShutdown()) {
       probesExecutor.shutdown();
@@ -101,13 +104,16 @@ public class ProbeScheduler {
           LOG.info("Interrupt probe scheduler, wait 60s to stop");
           if (!probesExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
             LOG.error("Couldn't shutdown probe scheduler threads pool");
+          } else {
+            LOG.info("Probe scheduler threads pool is interrupted");
           }
+        } else {
+          LOG.info("Probe scheduler threads pool is shut down");
         }
       } catch (InterruptedException x) {
         probesExecutor.shutdownNow();
         Thread.currentThread().interrupt();
       }
-      LOG.info("Prode scheduler threads pool is terminated");
     }
   }
 
@@ -129,10 +135,7 @@ public class ProbeScheduler {
     List<ScheduledFuture> workspaceProbes =
         probesFutures.computeIfPresent(
             workspaceId,
-            (OldKey, scheduledFutures) -> {
-              if (scheduledFutures == null) {
-                scheduledFutures = new ArrayList<>();
-              }
+            (key, scheduledFutures) -> {
               scheduledFutures.add(scheduledFuture);
               return scheduledFutures;
             });

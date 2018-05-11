@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.hc.probe;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Singleton;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.system.server.ServiceTermination;
@@ -21,6 +22,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceServiceTermination;
  *
  * @author Sergii Leshchenko
  */
+@Singleton
 public class ProbeSchedulerTermination implements ServiceTermination {
   public static final String SERVICE_NAME = "ProbeScheduler";
 
@@ -32,7 +34,7 @@ public class ProbeSchedulerTermination implements ServiceTermination {
   }
 
   @Override
-  public void terminate() throws InterruptedException {
+  public void terminate() {
     probeScheduler.shutdown();
   }
 

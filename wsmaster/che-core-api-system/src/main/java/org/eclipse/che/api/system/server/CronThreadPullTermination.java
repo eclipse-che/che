@@ -42,7 +42,7 @@ public class CronThreadPullTermination implements ServiceTermination {
   }
 
   @Override
-  public void suspend() throws InterruptedException, UnsupportedOperationException {
+  public void suspend() throws InterruptedException {
     try {
       launcher.shutdown();
     } catch (RuntimeException ex) {
