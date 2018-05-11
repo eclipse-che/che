@@ -432,6 +432,18 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text from
+   * its {@code attribute} attribute.
+   *
+   * @param elementLocator locator of element from which attribute should be got
+   * @param attribute name of element attribute
+   * @return element text by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetAttribute(By elementLocator, String attribute) {
+    return waitVisibility(elementLocator).getAttribute(attribute);
+  }
+
+  /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
    * @param elementLocator element from which text should be got

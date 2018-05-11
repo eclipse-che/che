@@ -69,7 +69,7 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
 
   @Override
   public boolean isCompleted() {
-    return isCoordinatesCompleted();
+    return true;
   }
 
   @Override
@@ -84,7 +84,6 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
     }
 
     updateView();
-    validateCoordinates();
   }
 
   @Override
@@ -94,7 +93,6 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
     setAttribute(
         LIBRARY_FOLDER, Arrays.asList(view.getLibraryFolder().split(ATTRIBUTE_VALUE_SEPARATOR)));
 
-    validateCoordinates();
     updateDelegate.updateControls();
   }
 
@@ -144,10 +142,6 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
     attributes.put(attrId, value);
   }
 
-  private boolean isCoordinatesCompleted() {
-    return !getAttribute(SOURCE_FOLDER).isEmpty();
-  }
-
   private void updateView() {
     ProjectWizardMode wizardMode = ProjectWizardMode.parse(context.get(WIZARD_MODE_KEY));
     boolean isCreateWizard = wizardMode == CREATE;
@@ -174,9 +168,5 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig>
     return result.toString().isEmpty()
         ? result.toString()
         : result.delete(result.lastIndexOf(ATTRIBUTE_VALUE_SEPARATOR), result.length()).toString();
-  }
-
-  private void validateCoordinates() {
-    view.showSourceFolderMissingIndicator(view.getSourceFolder().isEmpty());
   }
 }

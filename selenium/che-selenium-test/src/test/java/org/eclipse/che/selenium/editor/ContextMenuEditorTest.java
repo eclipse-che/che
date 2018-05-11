@@ -167,7 +167,7 @@ public class ContextMenuEditorTest {
     editor.waitContextMenuIsNotPresent();
   }
 
-  @Test
+  @Test(priority = 1)
   public void checkUndoRedo() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.scrollToItemByPath(
@@ -193,7 +193,7 @@ public class ContextMenuEditorTest {
     editor.waitContextMenuIsNotPresent();
   }
 
-  @Test
+  @Test(priority = 2)
   public void checkClose() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.scrollToItemByPath(
@@ -209,7 +209,7 @@ public class ContextMenuEditorTest {
     editor.waitTabIsNotPresent("AppController");
   }
 
-  @Test
+  @Test(priority = 3)
   public void checkQuickDocumentation() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
@@ -226,7 +226,7 @@ public class ContextMenuEditorTest {
     editor.waitJavaDocPopUpClosed();
   }
 
-  @Test
+  @Test(priority = 4)
   public void checkQuickFix() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
@@ -247,7 +247,7 @@ public class ContextMenuEditorTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
   }
 
-  @Test
+  @Test(priority = 5)
   public void checkOpenDeclaration() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
@@ -261,7 +261,7 @@ public class ContextMenuEditorTest {
     editor.closeFileByNameWithSaving("ModelAndView");
   }
 
-  @Test
+  @Test(priority = 6)
   public void checkRefactoring() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/com/example/Test1.java");
@@ -292,7 +292,7 @@ public class ContextMenuEditorTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Zclass.java");
   }
 
-  @Test
+  @Test(priority = 7)
   public void checkNaviFileStructure() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
@@ -315,7 +315,7 @@ public class ContextMenuEditorTest {
     editor.waitSpecifiedValueForLineAndChar(25, 25);
   }
 
-  @Test
+  @Test(priority = 8)
   public void checkFind() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(

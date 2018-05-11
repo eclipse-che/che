@@ -272,7 +272,7 @@ public class KubernetesInternalRuntimeTest {
     verify(pods).create(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    verify(namespace.pods(), times(2)).watchContainers(any());
+    // verify(namespace.pods(), times(2)).watchContainers(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(

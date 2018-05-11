@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.plainjava;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.JAVA_CLASS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
@@ -198,16 +199,6 @@ public class RunPlainJavaProjectTest {
     projectWizard.selectTypeProject(typeProject);
     projectWizard.clickNextButton();
 
-    // set source folder
-    projectWizard.waitOpenProjectConfigForm();
-    projectWizard.clickBrowseButton(Wizard.TypeFolder.SOURCE_FOLDER);
-    configureClasspath.waitSelectPathFormIsOpen();
-    configureClasspath.openItemInSelectPathForm(nameApp);
-    configureClasspath.waitItemInSelectPathForm("src");
-    configureClasspath.selectItemInSelectPathForm("src");
-    configureClasspath.clickOkBtnSelectPathForm();
-    projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
-
     // set library folder
     projectWizard.clickBrowseButton(Wizard.TypeFolder.LIBRARY_FOLDER);
     configureClasspath.openItemInSelectPathForm(nameApp);
@@ -218,6 +209,15 @@ public class RunPlainJavaProjectTest {
     projectWizard.clickSaveButton();
     projectWizard.waitCloseProjectConfigForm();
     projectExplorer.waitVisibilityByName(nameApp);
+
+    // check that srs folder has been set properly
+    menu.runCommand(PROJECT, CONFIGURATION);
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.selectTypeProject(typeProject);
+    projectWizard.clickNextButton();
+    projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
+    projectWizard.clickSaveButton();
+    projectWizard.waitCloseProjectConfigForm();
   }
 
   private void createNewPackageAndJavaClass() {
