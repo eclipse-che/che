@@ -23,9 +23,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,16 +83,54 @@ public class ProbeScheduler {
   }
 
   /**
+   * Schedules provided {@link WorkspaceProbes} when a workspace becomes {@link
+   * WorkspaceStatus#RUNNING}.
+   *
+   * <p>Note that probes scheduling will be canceled when {@link #cancel(String)} is called or when
+   * a workspace becomes {@link WorkspaceStatus#STOPPING} or {@link WorkspaceStatus#STOPPED}.
+   *
+   * @param probes probes to schedule
+   * @param probeResultConsumer consumer of {@link ProbeResult} instances produced on retrieving
+   *     probe execution results
+   * @param statusSupplier supplier to retrieve workspace status. Scheduling will be delayed if
+   *     {@link RuntimeException} is thrown
+   * @see #schedule(WorkspaceProbes, Consumer)
+   */
+  public void schedule(
+      WorkspaceProbes probes,
+      Consumer<ProbeResult> probeResultConsumer,
+      Supplier<WorkspaceStatus> statusSupplier) {
+    DelayedSchedulingTask task =
+        new DelayedSchedulingTask(statusSupplier, probes, probeResultConsumer);
+
+    // scheduleWithFixedDelay is used in favor of scheduleAtFixedRate because in case of big amount
+    // of scheduled probes start time of tasks may shift and this may lead to a situation when
+    // another probeConfig is needed immediately after the previous one is finished which doesn't
+    // seem a good thing
+    ScheduledFuture scheduledFuture =
+        probesExecutor.scheduleWithFixedDelay(task, 10L, 10L, TimeUnit.SECONDS);
+
+    probesFutures.compute(
+        probes.getWorkspaceId(),
+        (key, scheduledFutures) -> {
+          List<ScheduledFuture> target = scheduledFutures;
+          if (target == null) {
+            target = new ArrayList<>();
+          }
+          target.add(scheduledFuture);
+          return target;
+        });
+  }
+
+  /**
    * Dismisses following and if possible current executions of probes of a workspace with a
    * specified ID.
    */
   public void cancel(String workspaceId) {
     List<ScheduledFuture> tasks = probesFutures.remove(workspaceId);
-    if (tasks == null) {
-      return;
+    if (tasks != null) {
+      tasks.forEach(task -> task.cancel(true));
     }
-
-    tasks.forEach(task -> task.cancel(true));
   }
 
   /** Denies starting of new probes and terminates active one if scheduler not terminated yet. */
@@ -213,6 +253,49 @@ public class ProbeScheduler {
 
     public void cancel() {
       cancelled.set(true);
+    }
+  }
+
+  private class DelayedSchedulingTask implements Runnable {
+    private final String workspaceId;
+    private final Supplier<WorkspaceStatus> statusSupplier;
+    private final WorkspaceProbes probes;
+    private final Consumer<ProbeResult> probeResultConsumer;
+
+    DelayedSchedulingTask(
+        Supplier<WorkspaceStatus> statusSupplier,
+        WorkspaceProbes probes,
+        Consumer<ProbeResult> probeResultConsumer) {
+      this.workspaceId = probes.getWorkspaceId();
+      this.statusSupplier = statusSupplier;
+      this.probes = probes;
+      this.probeResultConsumer = probeResultConsumer;
+    }
+
+    @Override
+    public void run() {
+      WorkspaceStatus status;
+
+      try {
+        status = statusSupplier.get();
+      } catch (RuntimeException e) {
+        // delay
+        return;
+      }
+
+      switch (status) {
+        case STARTING:
+          // delay
+          return;
+        case RUNNING:
+          ProbeScheduler.this.cancel(workspaceId);
+          schedule(probes, probeResultConsumer);
+          return;
+        case STOPPED:
+        case STOPPING:
+        default:
+          ProbeScheduler.this.cancel(workspaceId);
+      }
     }
   }
 
