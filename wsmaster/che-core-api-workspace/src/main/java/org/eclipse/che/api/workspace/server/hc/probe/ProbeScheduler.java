@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -26,14 +27,19 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Schedules workspace servers probes checks asynchronously.
  *
  * @author Alexander Garagatyi
+ * @author Sergii Leshchenko
  */
 @Singleton
 public class ProbeScheduler {
+  private static final Logger LOG = LoggerFactory.getLogger(ProbeScheduler.class);
+
   private final ScheduledThreadPoolExecutor probesExecutor;
   /**
    * Use single thread for a scheduling of tasks interruption by timeout. Single thread can be used
@@ -64,6 +70,7 @@ public class ProbeScheduler {
    * @param probes probes to check
    * @param probeResultConsumer consumer of {@link ProbeResult} instances produced on retrieving
    *     probe execution results
+   * @throws RejectedExecutionException when {@link ProbeScheduler} is terminated
    */
   public void schedule(WorkspaceProbes probes, Consumer<ProbeResult> probeResultConsumer) {
     probesFutures.putIfAbsent(probes.getWorkspaceId(), new ArrayList<>());
@@ -86,6 +93,30 @@ public class ProbeScheduler {
     tasks.forEach(task -> task.cancel(true));
   }
 
+  /** Denies starting of new probes and terminates active one if scheduler not terminated yet. */
+  public void shutdown() {
+    if (!probesExecutor.isShutdown()) {
+      probesExecutor.shutdown();
+      try {
+        LOG.info("Shutdown probe scheduler, wait 30s to stop normally");
+        if (!probesExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+          probesExecutor.shutdownNow();
+          LOG.info("Interrupt probe scheduler, wait 60s to stop");
+          if (!probesExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+            LOG.error("Couldn't shutdown probe scheduler threads pool");
+          } else {
+            LOG.info("Probe scheduler threads pool is interrupted");
+          }
+        } else {
+          LOG.info("Probe scheduler threads pool is shut down");
+        }
+      } catch (InterruptedException x) {
+        probesExecutor.shutdownNow();
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+
   private void schedule(
       String workspaceId, ProbeFactory probeFactory, Consumer<ProbeResult> probeResultConsumer) {
     ProbeConfig probeConfig = probeFactory.getProbeConfig();
@@ -104,10 +135,7 @@ public class ProbeScheduler {
     List<ScheduledFuture> workspaceProbes =
         probesFutures.computeIfPresent(
             workspaceId,
-            (OldKey, scheduledFutures) -> {
-              if (scheduledFutures == null) {
-                scheduledFutures = new ArrayList<>();
-              }
+            (key, scheduledFutures) -> {
               scheduledFutures.add(scheduledFuture);
               return scheduledFutures;
             });
