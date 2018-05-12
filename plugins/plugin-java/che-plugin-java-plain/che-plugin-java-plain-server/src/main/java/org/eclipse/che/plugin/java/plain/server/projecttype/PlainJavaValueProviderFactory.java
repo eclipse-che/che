@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.java.plain.server.projecttype;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
@@ -21,11 +20,8 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
-import java.util.Map;
 import org.eclipse.che.api.fs.server.PathTransformer;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.type.SettableValueProvider;
+import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -44,8 +40,8 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
   private final JavaLanguageServerExtensionService extensionService;
 
   @Inject
- public PlainJavaValueProviderFactory(PathTransformer transformer,
-      JavaLanguageServerExtensionService extensionService) {
+  public PlainJavaValueProviderFactory(
+      PathTransformer transformer, JavaLanguageServerExtensionService extensionService) {
     this.transformer = transformer;
     this.extensionService = extensionService;
   }
