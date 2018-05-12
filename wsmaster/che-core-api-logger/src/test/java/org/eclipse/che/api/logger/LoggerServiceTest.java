@@ -76,7 +76,7 @@ public class LoggerServiceTest {
         DtoFactory.getInstance().createDtoFromJson(response.body().print(), LoggerDto.class);
     assertNotNull(remoteLoggerDto);
     assertEquals(remoteLoggerDto.getName(), "ROOT");
-    assertEquals(remoteLoggerDto.getLevel(), "DEBUG");
+    assertEquals(remoteLoggerDto.getLevel(), "INFO");
   }
 
   @Test
@@ -109,7 +109,7 @@ public class LoggerServiceTest {
 
     assertEquals(response.getStatusCode(), 200);
     List<LoggerDto> loggers = unwrapDtoList(response, LoggerDto.class);
-    LoggerDto rootLoggerDto = newDto(LoggerDto.class).withName("ROOT").withLevel("DEBUG");
+    LoggerDto rootLoggerDto = newDto(LoggerDto.class).withName("ROOT").withLevel("INFO");
     assertTrue(loggers.contains(rootLoggerDto));
   }
 
