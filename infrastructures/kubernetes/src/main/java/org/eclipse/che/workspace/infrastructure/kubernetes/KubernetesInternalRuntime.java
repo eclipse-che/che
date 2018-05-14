@@ -43,7 +43,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -53,6 +52,7 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -548,14 +548,41 @@ public class KubernetesInternalRuntime<
     }
   }
 
-  public void startServersCheckers() throws InfrastructureException {
-    for (Entry<String, ? extends Machine> machineEntry : getMachines().entrySet()) {
+  /**
+   * Schedules server checkers.
+   *
+   * <p>Note that if the runtime is {@link WorkspaceStatus#RUNNING} then checkers will be scheduled
+   * immediately. If the runtime is {@link WorkspaceStatus#STARTING} then checkers will be scheduled
+   * when it becomes {@link WorkspaceStatus#RUNNING}. If runtime has any another status then
+   * checkers won't be scheduled at all.
+   *
+   * @throws InfrastructureException when any exception occurred
+   */
+  public void scheduleServersCheckers() throws InfrastructureException {
+    WorkspaceStatus status = getStatus();
+
+    if (status != WorkspaceStatus.RUNNING && status != WorkspaceStatus.STARTING) {
+      return;
+    }
+
+    ServerLivenessHandler consumer = new ServerLivenessHandler();
+    WorkspaceProbes probes =
+        probesFactory.getProbes(getContext().getIdentity(), getInternalMachines());
+
+    if (status == WorkspaceStatus.RUNNING) {
+      probeScheduler.schedule(probes, consumer);
+    } else {
+      // Workspace is starting it is needed to start servers checkers when it becomes RUNNING
       probeScheduler.schedule(
-          probesFactory.getProbes(
-              getContext().getIdentity(),
-              machineEntry.getKey(),
-              machineEntry.getValue().getServers()),
-          new ServerLivenessHandler());
+          probes,
+          consumer,
+          () -> {
+            try {
+              return getStatus();
+            } catch (InfrastructureException e) {
+              throw new RuntimeException(e.getMessage());
+            }
+          });
     }
   }
 
@@ -661,9 +688,10 @@ public class KubernetesInternalRuntime<
     }
 
     /**
-     * @param ContainerEvent
-     * @return true if event reason or message matches one of the comma separated values defined in
-     *     'che.infra.kubernetes.workspace_unrecoverable_events',false otherwise
+     * Returns true if event reason or message matches one of the comma separated values defined in
+     * 'che.infra.kubernetes.workspace_unrecoverable_events',false otherwise
+     *
+     * @param event event to check
      */
     private boolean isUnrecoverable(ContainerEvent event) {
       boolean isUnrecoverable = false;

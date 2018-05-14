@@ -46,6 +46,8 @@ export class ProjectMetadataController {
    */
   /* tslint:disable */
   private templateName: string;
+
+  private projectForm: ng.IFormController;
   /* tslint:enable */
   /**
    * Callback to check uniqueness of project name.

@@ -1,8 +1,6 @@
 <div class="project-metadata">
-  <form name="projectMetadataForm">
-
     <!-- Project name -->
-    <che-input-box che-form="projectMetadataForm"
+    <che-input-box che-form="projectMetadataController.projectForm"
                    che-name="projectName"
                    che-label-name="Project Name"
                    che-place-holder="Name of the project"
@@ -22,7 +20,7 @@
     </che-input-box>
 
     <!-- Project description -->
-    <che-input-box che-form="projectMetadataForm"
+    <che-input-box che-form="projectMetadataController.projectForm"
                    che-name="projectDescription"
                    che-label-name="Description"
                    che-place-holder="Description of the project"
@@ -37,7 +35,7 @@
 
     <!-- Git URL -->
     <div ng-if="projectMetadataController.template.source.type==='git'">
-      <che-input-box che-form="projectMetadataForm"
+      <che-input-box che-form="projectMetadataController.projectForm"
                      che-name="projectGitURL"
                      che-label-name="Repository URL"
                      che-place-holder="Url of the git repository"
@@ -65,6 +63,4 @@
                      required>
       </che-input-box>
     </div>
-
-  </form>
 </div>

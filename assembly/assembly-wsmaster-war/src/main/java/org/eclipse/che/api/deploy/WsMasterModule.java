@@ -146,7 +146,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
     install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
-    bind(org.eclipse.che.api.logger.LoggerService.class);
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
@@ -202,6 +201,7 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
     install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+    install(new org.eclipse.che.api.logger.deploy.LoggerModule());
 
     final Multibinder<MessageBodyAdapter> adaptersMultibinder =
         Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);

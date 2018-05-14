@@ -42,6 +42,8 @@ export class EditProjectController {
    */
   private projectOnRemove: () => void;
 
+  private editProjectForm: ng.IFormController;
+
   /**
    * Default constructor that is using resource injection
    */
@@ -84,4 +86,12 @@ export class EditProjectController {
     return this.editProjectService.checkEditingProgress() === null;
   }
 
+  /**
+   * Returns <code>true</code> if input data is invalid.
+   *
+   * @returns {boolean}
+   */
+  isInvalid(): boolean {
+    return this.editProjectForm && Object.keys(this.editProjectForm.$error).length > 0;
+  }
 }

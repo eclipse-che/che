@@ -1,8 +1,9 @@
-<ng-form name="editProjectForm"
+<ng-form name="editProjectController.editProjectForm"
          class="edit-project">
 
   <project-metadata template="editProjectController.projectTemplate"
                     template-name="{{editProjectController.projectTemplate.name}}"
+                    project-form="editProjectController.editProjectForm"
                     is-project-name-unique="editProjectController.isProjectNameUnique({name: name})"></project-metadata>
 
   <md-divider></md-divider>
@@ -21,7 +22,7 @@
                               ng-click="editProjectController.projectTemplateOnCancel()"></che-button-cancel-flat>
       <che-button-primary che-button-title="Save"
                           name="saveButton"
-                          ng-disabled="editProjectForm.$invalid || editProjectController.disableSaveAndCancelButtons()"
+                          ng-disabled="editProjectController.isInvalid() || editProjectController.disableSaveAndCancelButtons()"
                           ng-click="editProjectController.projectTemplateOnSave()"></che-button-primary>
     </div>
   </div>
