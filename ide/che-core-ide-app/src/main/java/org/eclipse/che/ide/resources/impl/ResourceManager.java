@@ -541,17 +541,22 @@ public final class ResourceManager {
               return ps.move(
                       source.getLocation(), destination.parent(), destination.lastSegment(), force)
                   .thenPromise(
-                      ignored ->
+                      ignored2 ->
                           findResource(destination)
-                              .then(
-                                  (Function<Optional<Resource>, Resource>)
-                                      movedResource -> {
-                                        if (movedResource.isPresent()) {
-                                          return movedResource.get();
-                                        }
+                              .thenPromise(
+                                  movedResource -> {
+                                    if (movedResource.isPresent()) {
+                                      eventBus.fireEvent(
+                                          new ResourceChangedEvent(
+                                              new ResourceDeltaImpl(
+                                                  movedResource.get(),
+                                                  source,
+                                                  ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
+                                      return promises.resolve(movedResource.get());
+                                    }
 
-                                        throw new IllegalStateException("Resource not found");
-                                      }));
+                                    throw new IllegalStateException("Resource not found");
+                                  }));
             });
   }
 
