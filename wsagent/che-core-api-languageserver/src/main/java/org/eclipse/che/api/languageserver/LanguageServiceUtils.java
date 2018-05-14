@@ -13,6 +13,9 @@ package org.eclipse.che.api.languageserver;
 /**
  * Language service service utilities
  *
+ * @author Thomas Mäder
+ * @author Vitalii Parfonov
+ * @author Yevhen Vydolob
  * @author Dmytro Kulieshov
  */
 public class LanguageServiceUtils {
@@ -32,19 +35,19 @@ public class LanguageServiceUtils {
     return uri.startsWith(FILE_PROJECTS) ? uri.substring("file://".length()) : uri;
   }
 
-  static boolean truish(Boolean b) {
+  public static boolean truish(Boolean b) {
     return b != null && b;
   }
 
-  static boolean isProjectUri(String path) {
+  public static boolean isProjectUri(String path) {
     return path.startsWith(FILE_PROJECTS);
   }
 
-  static boolean isStartWithProject(String path) {
+  public static boolean isStartWithProject(String path) {
     return path.startsWith(PROJECTS);
   }
 
-  static String prefixProject(String path) {
+  public static String prefixProject(String path) {
     return path.startsWith(PROJECTS) ? path : PROJECTS + path;
   }
 }
