@@ -332,8 +332,10 @@ public class KubernetesInternalRuntime<
               getContext().getIdentity(), machineName, MachineStatus.FAILED);
         } catch (InfrastructureException e) {
           LOG.error(
-              "Unable to update status of the machine '%s:%s'. Cause: %s",
-              getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+              "Unable to update status of the machine '{}:{}'. Cause: {}",
+              getContext().getIdentity().getWorkspaceId(),
+              machineName,
+              e.getMessage());
         }
         eventPublisher.sendFailedEvent(machineName, ex.getMessage(), getContext().getIdentity());
       }
@@ -366,8 +368,10 @@ public class KubernetesInternalRuntime<
             getContext().getIdentity(), machineName, MachineStatus.RUNNING);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the machine '%s:%s'. Cause: %s",
-            getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+            "Unable to update status of the machine '{}:{}'. Cause: {}",
+            getContext().getIdentity().getWorkspaceId(),
+            machineName,
+            e.getMessage());
       }
       eventPublisher.sendRunningEvent(machineName, getContext().getIdentity());
     };
@@ -428,7 +432,10 @@ public class KubernetesInternalRuntime<
     // namespace.pods().watch(new AbnormalStopHandler());
     namespace.pods().watchContainers(new MachineLogsPublisher());
     if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
-      namespace.pods().watchContainers(new UnrecoverableEventHanler());
+      // The handler for unrecoverable events is disabled because it has a bug that prevents start
+      // of workspaces after previous workspace start failure.
+      // See https://github.com/eclipse/che/issues/9542
+      // namespace.pods().watchContainers(new UnrecoverableEventHanler());
     }
 
     final KubernetesServerResolver serverResolver =
@@ -571,8 +578,11 @@ public class KubernetesInternalRuntime<
         eventPublisher.sendServerRunningEvent(machineName, serverRef, url, identity);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '%s:%s:%s'. Cause: %s",
-            identity.getWorkspaceId(), machineName, serverRef, e.getMessage());
+            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            identity.getWorkspaceId(),
+            machineName,
+            serverRef,
+            e.getMessage());
       }
     }
   }
@@ -605,8 +615,11 @@ public class KubernetesInternalRuntime<
         }
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '%s:%s:%s'. Cause: %s",
-            identity.getWorkspaceId(), machineName, serverName, e.getMessage());
+            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            identity.getWorkspaceId(),
+            machineName,
+            serverName,
+            e.getMessage());
       }
     }
   }
@@ -628,19 +641,20 @@ public class KubernetesInternalRuntime<
         String reason = event.getReason();
         String message = event.getMessage();
         String podName = event.getPodName();
+        String workspaceId = getContext().getIdentity().getWorkspaceId();
+        LOG.error(
+            "Unrecoverable event occurred during workspace '{}' startup: {}, {}, {}",
+            workspaceId,
+            reason,
+            message,
+            podName);
         try {
           internalStop(emptyMap());
         } catch (InfrastructureException e) {
-          String workspaceId = getContext().getIdentity().getWorkspaceId();
-          LOG.error(
-              "Unrecoverable event occured during workspace '{}' startup: {}, {}, {}",
-              workspaceId,
-              reason,
-              message,
-              podName);
+          LOG.error("Error occurred during runtime '{}' stopping. {}", workspaceId, e.getMessage());
         } finally {
           eventPublisher.sendRuntimeStoppedEvent(
-              format("Unrecoverable event occured: '%s', '%s', '%s'", reason, message, podName),
+              format("Unrecoverable event occurred: '%s', '%s', '%s'", reason, message, podName),
               getContext().getIdentity());
         }
       }

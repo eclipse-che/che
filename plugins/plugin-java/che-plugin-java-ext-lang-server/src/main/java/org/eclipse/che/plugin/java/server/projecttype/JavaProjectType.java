@@ -11,8 +11,6 @@
 package org.eclipse.che.plugin.java.server.projecttype;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.CONTAINS_JAVA_FILES;
-import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
-import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -32,7 +30,5 @@ public class JavaProjectType extends ProjectTypeDef {
     addConstantDefinition(Constants.LANGUAGE, "language", "java");
     addVariableDefinition(Constants.LANGUAGE_VERSION, "java version", true, jpFactory);
     addVariableDefinition(CONTAINS_JAVA_FILES, "contains java files", true, jpFactory);
-    addVariableDefinition(SOURCE_FOLDER, "java source folder", true, jpFactory);
-    addVariableDefinition(OUTPUT_FOLDER, "java output folder", false, jpFactory);
   }
 }

@@ -14,7 +14,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -35,7 +34,6 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
 
   private final FlowPanel rootElement;
 
-  @UiField Style style;
   @UiField TextBox sourceFolderField;
   @UiField Button browseSourceBtn;
   @UiField TextBox libFolderField;
@@ -47,14 +45,8 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
   @Inject
   public PlainJavaPageViewImpl() {
     rootElement = ourUiBinder.createAndBindUi(this);
-
-    browseSourceBtn.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            delegate.onBrowseSourceButtonClicked();
-          }
-        });
+    browseSourceBtn.setVisible(false);
+    sourceFolderField.setReadOnly(true);
 
     browseLibBtn.addClickHandler(
         new ClickHandler() {
@@ -101,17 +93,8 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
   }
 
   @Override
-  public void showSourceFolderMissingIndicator(boolean doShow) {
-    if (doShow) {
-      sourceFolderField.addStyleName(style.inputError());
-    } else {
-      sourceFolderField.removeStyleName(style.inputError());
-    }
-  }
-
-  @Override
   public void changeBrowseBtnVisibleState(boolean isVisible) {
-    browseSourceBtn.setVisible(isVisible);
+    browseSourceBtn.setVisible(false);
   }
 
   @Override
@@ -121,12 +104,8 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
 
   @Override
   public void changeSourceFolderFieldState(boolean isEnable) {
-    sourceFolderField.setEnabled(isEnable);
+    sourceFolderField.setReadOnly(true);
   }
 
   interface PlainJavaPageViewImplUiBinder extends UiBinder<FlowPanel, PlainJavaPageViewImpl> {}
-
-  interface Style extends CssResource {
-    String inputError();
-  }
 }

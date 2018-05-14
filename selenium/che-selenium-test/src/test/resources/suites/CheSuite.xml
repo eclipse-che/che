@@ -60,6 +60,7 @@
           <class name="org.eclipse.che.selenium.dashboard.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfSubOrganizationTest"/>

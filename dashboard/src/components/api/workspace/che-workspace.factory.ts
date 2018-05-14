@@ -10,7 +10,7 @@
  */
 'use strict';
 
-import {CheWorkspaceAgent} from '../che-workspace-agent';
+import {CheWorkspaceAgent, IWorkspaceAgentData} from '../che-workspace-agent';
 import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
 import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
@@ -212,13 +212,14 @@ export class CheWorkspace {
       return this.workspaceAgents.get(workspaceId);
     }
 
-    let runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
+    const runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
     if (runtimeConfig) {
-      let machines = runtimeConfig.machines;
+      const machineToken = runtimeConfig.machineToken;
+      const machines = runtimeConfig.machines;
       let wsAgentLink: any;
       let wsAgentWebocketLink: any;
       Object.keys(machines).forEach((key: string) => {
-        let machine = machines[key];
+        const machine = machines[key];
         if (machine.servers[WS_AGENT_HTTP_LINK]) {
           wsAgentLink = machine.servers[WS_AGENT_HTTP_LINK];
         }
@@ -227,12 +228,13 @@ export class CheWorkspace {
         }
       });
 
-      let workspaceAgentData = {
+      const workspaceAgentData: IWorkspaceAgentData = {
         path: wsAgentLink.url,
         websocket: wsAgentWebocketLink.url,
-        clientId: this.cheJsonRpcMasterApi.getClientId()
+        clientId: this.cheJsonRpcMasterApi.getClientId(),
+        machineToken: machineToken
       };
-      let wsagent: CheWorkspaceAgent = new CheWorkspaceAgent(this.$resource, this.$q, this.$websocket, workspaceAgentData);
+      const wsagent: CheWorkspaceAgent = new CheWorkspaceAgent(this.$resource, this.$q, this.$websocket, workspaceAgentData);
       this.workspaceAgents.set(workspaceId, wsagent);
       return wsagent;
     }

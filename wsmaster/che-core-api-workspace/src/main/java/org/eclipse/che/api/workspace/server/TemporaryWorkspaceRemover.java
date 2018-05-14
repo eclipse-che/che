@@ -14,7 +14,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.Pages;
@@ -49,7 +48,6 @@ public class TemporaryWorkspaceRemover {
     }
   }
 
-  @PreDestroy
   void shutdown() {
     try {
       removeTemporaryWs();
