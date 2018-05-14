@@ -11,12 +11,99 @@
 'use strict';
 import {CheRecipeTypes} from '../../../components/api/recipe/che-recipe-types';
 
+export interface ICheRecipeService {
+  /**
+   * Returns true if the recipe type is scalable.
+   *
+   * @param {string} recipeType
+   * @returns {boolean}
+   */
+  isScalable(recipeType: string): boolean;
+  /**
+   * Returns true if the recipe type is scalable.
+   *
+   * @param {che.IRecipe} recipe
+   * @returns {boolean}
+   */
+  isScalable(recipe: che.IRecipe): boolean;
+  /**
+   * Returns true if the environment's recipe type is kubernetes.
+   *
+   * @param {string} recipeType
+   * @returns {boolean}
+   */
+  isKubernetes(recipeType: string): boolean;
+  /**
+   * Returns true if the environment's recipe type is kubernetes.
+   *
+   * @param {che.IRecipe} recipe
+   * @returns {boolean}
+   */
+  isKubernetes(recipe: che.IRecipe): boolean;
+  /**
+   * Returns true if the environment's recipe type is compose.
+   *
+   * @param {string} recipeType
+   * @returns {boolean}
+   */
+  isCompose(recipeType: string): boolean;
+  /**
+   * Returns true if the environment's recipe type is compose.
+   *
+   * @param {che.IRecipe} recipe
+   * @returns {boolean}
+   */
+  isCompose(recipe: che.IRecipe): boolean;
+  /**
+   * Returns true if the environment's recipe type is openshift.
+   *
+   * @param {string} recipeType
+   * @returns {boolean}
+   */
+  isOpenshift(recipeType: string): boolean;
+  /**
+   * Returns true if the environment's recipe type is openshift.
+   *
+   * @param {che.IRecipe} recipe
+   * @returns {boolean}
+   */
+  isOpenshift(recipe: che.IRecipe): boolean;
+  /**
+   * Returns true if the environment's recipe type is dockerfile.
+   *
+   * @param {string} recipeType
+   * @returns {boolean}
+   */
+  isDockerfile(recipeType: string): boolean;
+  /**
+   * Returns true if the environment's recipe type is dockerfile.
+   *
+   * @param {che.IRecipe} recipe
+   * @returns {boolean}
+   */
+  isDockerfile(recipe: che.IRecipe): boolean;
+  /**
+   * Returns true if the environment's recipe type is dockerimage.
+   *
+   * @param {string} recipeType
+   * @returns {boolean}
+   */
+  isDockerimage(recipeType: string): boolean;
+  /**
+   * Returns true if the environment's recipe type is dockerimage.
+   *
+   * @param {che.IRecipe} recipe
+   * @returns {boolean}
+   */
+  isDockerimage(recipe: che.IRecipe): boolean;
+}
+
 /**
  * This class is handling the data for environment's recipe.
  *
  * @author Oleksii Orel
  */
-export class CheRecipeService {
+export class CheRecipeService implements ICheRecipeService {
 
   static $inject = ['$log'];
 
@@ -32,92 +119,69 @@ export class CheRecipeService {
     this.$log = $log;
   }
 
-  /**
-   * Returns true if the recipe type is scalable.
-   *
-   * @param {che.IRecipe} recipe
-   * @returns {boolean}
-   */
-  isScalable(recipe: che.IRecipe): boolean {
-    return this.isCompose(recipe) || this.isKubernetes(recipe) || this.isOpenshift(recipe);
+  isScalable(recipeType: string): boolean;
+  isScalable(recipe: che.IRecipe): boolean;
+  isScalable(arg: any): boolean {
+    return this.isCompose(arg) || this.isKubernetes(arg) || this.isOpenshift(arg);
   }
 
-  /**
-   * Returns true if the recipe type is a supported type.
-   *
-   * @param {che.IRecipe} recipe
-   * @returns {boolean}
-   */
-  isSupportedType(recipe: che.IRecipe): boolean {
-    const recipeType = this.getRecipeType(recipe);
-    if (recipeType === null) {
-      return false;
+  isKubernetes(recipeType: string): boolean;
+  isKubernetes(recipe: che.IRecipe): boolean;
+  isKubernetes(arg: any): boolean {
+    if (typeof arg === 'string') {
+      return <string>arg === CheRecipeTypes.KUBERNETES;
     }
-    return CheRecipeTypes.getValues().indexOf(recipeType) !== -1;
+    return this.getRecipeType(<che.IRecipe>arg) === CheRecipeTypes.KUBERNETES;
   }
 
-  /**
-   * Returns true if the environment's recipe type is kubernetes.
-   *
-   * @param {che.IRecipe} recipe
-   * @returns {boolean}
-   */
-  isKubernetes(recipe: che.IRecipe): boolean {
-    return this.getRecipeType(recipe) === CheRecipeTypes.KUBERNETES;
+  isOpenshift(recipeType: string): boolean;
+  isOpenshift(recipe: che.IRecipe): boolean;
+  isOpenshift(arg: any): boolean {
+    if (typeof arg === 'string') {
+      return <string>arg === CheRecipeTypes.OPENSHIFT;
+    }
+    return this.getRecipeType(<che.IRecipe>arg) === CheRecipeTypes.OPENSHIFT;
   }
 
-  /**
-   * Returns true if the environment's recipe type is openshift.
-   *
-   * @param {che.IRecipe} recipe
-   * @returns {boolean}
-   */
-  isOpenshift(recipe: che.IRecipe): boolean {
-    return this.getRecipeType(recipe) === CheRecipeTypes.OPENSHIFT;
+  isCompose(recipeType: string): boolean;
+  isCompose(recipe: che.IRecipe): boolean;
+  isCompose(arg: any): boolean {
+    if (typeof arg === 'string') {
+      return <string>arg === CheRecipeTypes.COMPOSE;
+    }
+    return this.getRecipeType(<che.IRecipe>arg) === CheRecipeTypes.COMPOSE;
   }
 
-  /**
-   * Returns true if the environment's recipe type is compose.
-   *
-   * @param {che.IRecipe} recipe
-   * @returns {boolean}
-   */
-  isCompose(recipe: che.IRecipe): boolean {
-    return this.getRecipeType(recipe) === CheRecipeTypes.COMPOSE;
+  isDockerfile(recipeType: string): boolean;
+  isDockerfile(recipe: che.IRecipe): boolean;
+  isDockerfile(arg: any): boolean {
+    if (typeof arg === 'string') {
+      return <string>arg === CheRecipeTypes.DOCKERFILE;
+    }
+    return this.getRecipeType(<che.IRecipe>arg) === CheRecipeTypes.DOCKERFILE;
   }
 
-  /**
-   * Returns true if the environment's recipe type is dockerfile.
-   *
-   * @param {che.IRecipe} recipe
-   * @returns {boolean}
-   */
-  isDockerfile(recipe: che.IRecipe): boolean {
-    return this.getRecipeType(recipe) === CheRecipeTypes.DOCKERFILE;
-  }
-
-  /**
-   * Returns true if the environment's recipe type is dockerimage.
-   *
-   * @param {che.IRecipe} recipe
-   * @returns {boolean}
-   */
-  isDockerimage(recipe: che.IRecipe): boolean {
-    return this.getRecipeType(recipe) === CheRecipeTypes.DOCKERIMAGE;
+  isDockerimage(recipeType: string): boolean;
+  isDockerimage(recipe: che.IRecipe): boolean;
+  isDockerimage(arg: any): boolean {
+    if (typeof arg === 'string') {
+      return <string>arg === CheRecipeTypes.DOCKERIMAGE;
+    }
+    return this.getRecipeType(<che.IRecipe>arg) === CheRecipeTypes.DOCKERIMAGE;
   }
 
   /**
    * Gets recipe type.
    *
    * @param {che.IRecipe} recipe
-   * @returns {string|null}
+   * @returns {string}
    */
   getRecipeType(recipe: che.IRecipe): string {
-    if (!recipe || !recipe.type || !angular.isString(recipe.type)) {
+    if (!recipe || !recipe.type) {
       this.$log.error('Unable to find the recipe type');
       return null;
     }
-    return recipe.type.toLowerCase();
+    return recipe.type;
   }
 
 }
