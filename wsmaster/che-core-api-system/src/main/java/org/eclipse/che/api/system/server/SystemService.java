@@ -19,10 +19,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import javax.inject.Inject;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
@@ -53,8 +55,13 @@ public class SystemService extends Service {
     @ApiResponse(code = 204, message = "The system is preparing to stop"),
     @ApiResponse(code = 409, message = "Stop has been already called")
   })
-  public void stop() throws ConflictException {
-    manager.stopServices();
+  public void stop(@QueryParam("shutdown") @DefaultValue("false") boolean shutdown)
+      throws ConflictException {
+    if (shutdown) {
+      manager.stopServices();
+    } else {
+      manager.suspendServices();
+    }
   }
 
   @GET

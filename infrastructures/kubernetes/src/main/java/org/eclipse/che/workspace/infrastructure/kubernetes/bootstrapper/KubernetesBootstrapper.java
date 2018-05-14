@@ -150,7 +150,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     exec(
         outputConsumer,
         "curl",
-        "-sSo",
+        "-fsSo",
         BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE,
         bootstrapperBinaryUrl);
     exec(outputConsumer, "chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);

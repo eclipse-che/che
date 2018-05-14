@@ -238,8 +238,8 @@ export class ImportGithubProjectController {
    * @param {string} token
    */
   openGithubPopup(token: string): void {
-    // given URL http://example.com - returns port => 80, which causes wrong redirect URL value:
-    let port = this.$location.port() === 80 ? '' : ':' + this.$location.port();
+    // given URL http://example.com - returns port => 80 (or 443 with https), which causes wrong redirect URL value:
+    let port = (this.$location.port() === 80 || this.$location.port() === 443) ? '' : ':' + this.$location.port();
     const redirectUrl = this.$location.protocol() + '://'
       + this.$location.host()
       + port

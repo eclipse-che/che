@@ -1,0 +1,8 @@
+{
+  "id": "org.eclipse.che.ls.php",
+  "version": "5.4.0",
+  "name": "PHP language server",
+  "description": "PHP intellisense https://github.com/felixfbecker/php-language-server",
+  "dependencies": [],
+  "properties": {}
+}

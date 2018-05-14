@@ -25,7 +25,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class FactoriesListTest {
-
   private static final String FACTORY1_NAME = generate("factory1", 4);
   private static final String FACTORY2_NAME = generate("factory2", 4);
   private static final String FACTORY3_NAME = generate("factory3", 4);

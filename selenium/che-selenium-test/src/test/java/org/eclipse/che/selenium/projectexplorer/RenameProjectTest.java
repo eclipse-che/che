@@ -69,8 +69,8 @@ public class RenameProjectTest {
     askForValueDialog.waitFormToClose();
 
     // Wait that project renamed and folder has project type
-    projectExplorer.waitItem(NEW_PROJECT_NAME);
     try {
+      projectExplorer.waitItem(NEW_PROJECT_NAME);
       projectExplorer.waitItemInvisibility(PROJECT_NAME);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved

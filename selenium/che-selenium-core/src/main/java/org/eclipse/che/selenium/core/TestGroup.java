@@ -17,4 +17,5 @@ public interface TestGroup {
   String OPENSHIFT = "openshift";
   String DOCKER = "docker";
   String GITHUB = "github";
+  String OSIO = "osio";
 }

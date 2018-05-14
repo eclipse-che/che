@@ -21,12 +21,15 @@ import java.util.Objects;
 public class ContainerEvent {
   private final String podName;
   private final String containerName;
+  private final String reason;
   private final String message;
   private final String time;
 
-  public ContainerEvent(String podName, String containerName, String message, String time) {
+  public ContainerEvent(
+      String podName, String containerName, String reason, String message, String time) {
     this.podName = podName;
     this.containerName = containerName;
+    this.reason = reason;
     this.message = message;
     this.time = time;
   }
@@ -39,6 +42,11 @@ public class ContainerEvent {
   /** Returns container name which produced event. */
   public String getContainerName() {
     return containerName;
+  }
+
+  /** Returns the reason of the event. */
+  public String getReason() {
+    return reason;
   }
 
   /** Returns the contents of the event. */
@@ -62,13 +70,14 @@ public class ContainerEvent {
     ContainerEvent that = (ContainerEvent) o;
     return Objects.equals(podName, that.podName)
         && Objects.equals(containerName, that.containerName)
+        && Objects.equals(reason, that.reason)
         && Objects.equals(message, that.message)
         && Objects.equals(time, that.time);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(podName, containerName, message, time);
+    return Objects.hash(podName, containerName, reason, message, time);
   }
 
   @Override
@@ -79,6 +88,9 @@ public class ContainerEvent {
         + '\''
         + ", containerName='"
         + containerName
+        + '\''
+        + ", reason='"
+        + reason
         + '\''
         + ", message='"
         + message

@@ -67,6 +67,11 @@ public class Account {
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hash(login, email, firstName, lastName);
+  }
+
+  @Override
   public String toString() {
     return format(
         "%s{login=%s, email=%s, firstName=%s, lastName=%s}",

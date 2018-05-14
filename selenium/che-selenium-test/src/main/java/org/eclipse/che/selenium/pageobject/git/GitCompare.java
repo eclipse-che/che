@@ -10,23 +10,21 @@
  */
 package org.eclipse.che.selenium.pageobject.git;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -36,91 +34,103 @@ public class GitCompare {
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   public GitCompare(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
-    String COMPARE_BRANCH_FORM = "gwt-debug-git-compare-branch-mainForm";
+    String COMPARE_BRANCH_FORM_ID = "gwt-debug-git-compare-branch-mainForm";
     String ID_PREFIX_BRANCH = "gwt-debug-git-compare-branch-";
-    String BRANCH_COMPARE_BUTTON = "git-compare-branch-compare";
-    String COMPARE_BRANCH_CLOSE_BTN = "git-compare-branch-close";
-    String MAIN_FORM_COMPARE = "//button[@id='git-compare-close-btn']/ancestor::table";
-    String LEFT_COMPARE_EDITOR = "gwt-debug-compareParentDiv_left_editor_id";
-    String LEFT_COMPARE_STATUS =
+    String BRANCH_COMPARE_BUTTON_ID = "git-compare-branch-compare";
+    String COMPARE_BRANCH_CLOSE_BTN_ID = "git-compare-branch-close";
+    String MAIN_FORM_COMPARE_XPATH = "//button[@id='git-compare-close-btn']/ancestor::table";
+    String LEFT_COMPARE_EDITOR_ID = "gwt-debug-compareParentDiv_left_editor_id";
+    String LEFT_COMPARE_STATUS_XPATH =
         "//div[@id='gwt-debug-compareParentDiv_left_status_id' and text()='%s']";
-    String RIGHT_COMPARE_EDITOR = "gwt-debug-compareParentDiv_right_editor_id";
-    String COMPARE_CLOSE_BUTTON = "git-compare-close-btn";
-    String COMPARE_REVISION_FORM = "gwt-debug-git-compare-revision-window";
-    String REVISION_ITEM =
+    String RIGHT_COMPARE_EDITOR_ID = "gwt-debug-compareParentDiv_right_editor_id";
+    String NEXT_DIFF_BUTTON_ID = "git-compare-next-diff-btn";
+    String PREVIOUS_DIFF_BUTTON_ID = "git-compare-prev-diff-btn";
+    String COMPARE_CLOSE_BUTTON_ID = "git-compare-close-btn";
+    String COMPARE_REVISION_FORM_ID = "gwt-debug-git-compare-revision-window";
+    String REVISION_ITEM_XPATH =
         "//table[@id='gwt-debug-git-compare-revision-window']//tr[@__gwt_row='%s']";
-    String REVISION_COMPARE_BUTTON = "git-compare-revision-compare";
-    String REVISION_CLOSE_BUTTON = "git-compare-revision-close";
-    String GROUP_GIT_COMPARE_FORM = "//table[@title='Git Compare']";
-    String PATH_TO_FILE_COMPARE =
+    String REVISION_COMPARE_BUTTON_ID = "git-compare-revision-compare";
+    String REVISION_CLOSE_BUTTON_ID = "git-compare-revision-close";
+    String GROUP_GIT_COMPARE_FORM_XPATH = "//table[@title='Git Compare']";
+    String PATH_TO_FILE_COMPARE_XPATH =
         "//div[@id='gwt-debug-git-compare-window-changed-files']//div[text()='%s']";
-    String GROUP_COMPARE_TEXT_AREA = "gwt-debug-git-compare-window-changed-files";
-    String GROUP_COMPARE_CLOSE_BTN = "git-compare-btn-close";
-    String GROUP_GIT_COMPARE_BTN = "git-compare-btn-compare";
+    String GROUP_COMPARE_TEXT_AREA_ID = "gwt-debug-git-compare-window-changed-files";
+    String GROUP_COMPARE_CLOSE_BTN_ID = "git-compare-btn-close";
+    String GROUP_GIT_COMPARE_BTN_ID = "git-compare-btn-compare";
   }
 
-  @FindBy(id = Locators.COMPARE_BRANCH_FORM)
+  @FindBy(id = Locators.COMPARE_BRANCH_FORM_ID)
   WebElement compareBranchForm;
 
-  @FindBy(id = Locators.BRANCH_COMPARE_BUTTON)
+  @FindBy(id = Locators.BRANCH_COMPARE_BUTTON_ID)
   WebElement gitCompareBranchBtn;
 
-  @FindBy(id = Locators.COMPARE_BRANCH_CLOSE_BTN)
+  @FindBy(id = Locators.COMPARE_BRANCH_CLOSE_BTN_ID)
   WebElement gitCompareBranchCloseBtn;
 
-  @FindBy(xpath = Locators.MAIN_FORM_COMPARE)
+  @FindBy(xpath = Locators.MAIN_FORM_COMPARE_XPATH)
   WebElement mainFormCompare;
 
-  @FindBy(id = Locators.LEFT_COMPARE_EDITOR)
+  @FindBy(id = Locators.LEFT_COMPARE_EDITOR_ID)
   WebElement leftCompareEditor;
 
-  @FindBy(id = Locators.RIGHT_COMPARE_EDITOR)
+  @FindBy(id = Locators.RIGHT_COMPARE_EDITOR_ID)
   WebElement rightCompareEditor;
 
-  @FindBy(id = Locators.COMPARE_CLOSE_BUTTON)
+  @FindBy(id = Locators.COMPARE_CLOSE_BUTTON_ID)
   WebElement compareCloseBtn;
 
-  @FindBy(id = Locators.COMPARE_REVISION_FORM)
+  @FindBy(id = Locators.COMPARE_REVISION_FORM_ID)
   WebElement compareRevisionForm;
 
-  @FindBy(id = Locators.REVISION_COMPARE_BUTTON)
+  @FindBy(id = Locators.REVISION_COMPARE_BUTTON_ID)
   WebElement compareRevisionBtn;
 
-  @FindBy(id = Locators.REVISION_CLOSE_BUTTON)
+  @FindBy(id = Locators.REVISION_CLOSE_BUTTON_ID)
   WebElement closeRevisionBtn;
+
+  @FindBy(id = Locators.NEXT_DIFF_BUTTON_ID)
+  WebElement nextDiffButton;
+
+  @FindBy(id = Locators.PREVIOUS_DIFF_BUTTON_ID)
+  WebElement previousDiffButton;
 
   /** wait the main form 'Git Compare' is open */
   public void waitGitCompareFormIsOpen() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(mainFormCompare));
+    seleniumWebDriverHelper.waitVisibility(mainFormCompare);
   }
 
   /** wait the main form 'Git Compare' is closed */
   public void waitGitCompareFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.MAIN_FORM_COMPARE)));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.MAIN_FORM_COMPARE_XPATH));
   }
 
-  /** get text from left editor of the 'Git Compare' */
-  public String getTextFromLeftEditorCompare() {
-    return leftCompareEditor.getText();
+  /** click on the 'Next' button in the git compare form */
+  public void clickOnNextDiffButton() {
+    seleniumWebDriverHelper.waitAndClick(nextDiffButton);
+    waitGitCompareFormIsOpen();
   }
 
-  /** get text from right editor of the 'Git Compare' */
-  public String getTextFromRightEditorCompare() {
-    return rightCompareEditor.getText();
+  /** click on the 'Previous' button in the git compare form */
+  public void clickOnPreviousDiffButton() {
+    seleniumWebDriverHelper.waitAndClick(previousDiffButton);
+    waitGitCompareFormIsOpen();
   }
 
   /**
@@ -129,10 +139,25 @@ public class GitCompare {
    * @param expText expected value
    */
   public void waitExpectedTextIntoLeftEditor(String expText) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> getTextFromLeftEditorCompare().contains(expText));
+    seleniumWebDriverHelper.waitTextPresence(leftCompareEditor, expText);
+  }
+
+  /**
+   * wait expected text is not present into left editor of the 'Git Compare'
+   *
+   * @param expText expected value
+   */
+  public void waitTextNotPresentIntoLeftEditor(String expText) {
+    seleniumWebDriverHelper.waitTextIsNotPresented(leftCompareEditor, expText);
+  }
+
+  /**
+   * wait expected text into right editor of the 'Git Compare'
+   *
+   * @param expText expected value
+   */
+  public void waitExpectedTextIntoRightEditor(String expText) {
+    seleniumWebDriverHelper.waitTextPresence(rightCompareEditor, expText);
   }
 
   /**
@@ -141,15 +166,12 @@ public class GitCompare {
    * @param expText expected value
    */
   public void waitTextNotPresentIntoRightEditor(String expText) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> !(getTextFromRightEditorCompare().contains(expText)));
+    seleniumWebDriverHelper.waitTextIsNotPresented(rightCompareEditor, expText);
   }
 
   /** set focus on the left compare editor */
   public void setFocusOnLeftCompareEditor() {
-    leftCompareEditor.click();
+    seleniumWebDriverHelper.waitAndClick(leftCompareEditor);
   }
 
   /**
@@ -158,10 +180,8 @@ public class GitCompare {
    * @param status is expected line and column position. For example: 'Line 2 : Column 1'
    */
   public void waitLineAndColumnInLeftCompare(String status) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.presenceOfElementLocated(
-                By.xpath(String.format(Locators.LEFT_COMPARE_STATUS, status))));
+    seleniumWebDriverHelper.waitPresence(
+        By.xpath(String.format(Locators.LEFT_COMPARE_STATUS_XPATH, status)));
   }
 
   /**
@@ -187,32 +207,31 @@ public class GitCompare {
   /**
    * type text to git compare form
    *
-   * @param text
+   * @param text text which should be typed
    */
   public void typeTextIntoGitCompareEditor(String text) {
-    loader.waitOnClosed();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
-    loader.waitOnClosed();
   }
 
   /** click on the 'Close' git compare button */
   public void clickOnCompareCloseButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(compareCloseBtn))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(compareCloseBtn, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** wait the 'Compare with branch' form is open */
   public void waitCompareBranchIsOpen() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(compareBranchForm));
+    seleniumWebDriverHelper.waitVisibility(compareBranchForm);
+  }
+
+  /** click on the 'Close' button into 'Compare with branch' form */
+  public void clickOnCloseBranchCompareButton() {
+    seleniumWebDriverHelper.waitAndClick(gitCompareBranchCloseBtn);
+    waitCompareBranchIsClosed();
   }
 
   /** wait the 'Compare with branch' form is closed */
   public void waitCompareBranchIsClosed() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.COMPARE_BRANCH_FORM)));
+    seleniumWebDriverHelper.waitInvisibility(By.id(Locators.COMPARE_BRANCH_FORM_ID));
   }
 
   /**
@@ -221,75 +240,55 @@ public class GitCompare {
    * @param branchName is name of the branch
    */
   public void selectBranchIntoCompareBranchForm(String branchName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.id(Locators.ID_PREFIX_BRANCH + branchName)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.id(Locators.ID_PREFIX_BRANCH + branchName), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** click on the 'Compare' button into Compare with branch' form */
   public void clickOnBranchCompareButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(gitCompareBranchBtn))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(gitCompareBranchBtn, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** wait the 'Compare with revision' form is open */
   public void waitCompareRevisionIsOpen() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(compareRevisionForm));
+    seleniumWebDriverHelper.waitVisibility(compareRevisionForm);
   }
 
   /** wait the 'Compare with revision' form is closed */
   public void waitCompareRevisionIsClosed() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.COMPARE_REVISION_FORM)));
+    seleniumWebDriverHelper.waitInvisibility(By.id(Locators.COMPARE_REVISION_FORM_ID));
   }
 
   /**
    * select a revision with specified number into the 'Compare with revision' form numbers start
    * with 0
    *
-   * @param revision
+   * @param revision value of revision
    */
   public void selectRevisionIntoCompareRevisionForm(int revision) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.REVISION_ITEM, Integer.toString(revision)))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(String.format(Locators.REVISION_ITEM_XPATH, Integer.toString(revision))),
+        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** click on the 'Compare' button into 'Compare with revision' form */
   public void clickOnRevisionCompareButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(compareRevisionBtn))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(compareRevisionBtn, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** click on the 'Close' button into 'Compare with revision' form */
   public void clickOnCloseRevisionButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(closeRevisionBtn))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(closeRevisionBtn, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** wait the group 'Git Compare' form is open */
   public void waitGroupGitCompareIsOpen() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(Locators.GROUP_GIT_COMPARE_FORM)));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.GROUP_GIT_COMPARE_FORM_XPATH));
   }
 
   /** wait the group 'Git Compare' form is closed */
   public void waitGroupGitCompareIsClosed() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath(Locators.GROUP_GIT_COMPARE_FORM)));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.GROUP_GIT_COMPARE_FORM_XPATH));
   }
 
   /**
@@ -298,16 +297,7 @@ public class GitCompare {
    * @param expText is expected value
    */
   public void waitExpTextInGroupGitCompare(String expText) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until((WebDriver driver) -> getTextFromGroupGitCompare().contains(expText));
-  }
-
-  /** get text from the group 'Git Compare' form */
-  public String getTextFromGroupGitCompare() {
-    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(By.id(Locators.GROUP_COMPARE_TEXT_AREA)))
-        .getText();
+    seleniumWebDriverHelper.waitTextPresence(By.id(Locators.GROUP_COMPARE_TEXT_AREA_ID), expText);
   }
 
   /**
@@ -316,25 +306,20 @@ public class GitCompare {
    * @param name name of the item
    */
   public void selectChangedFile(String name) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.PATH_TO_FILE_COMPARE, name))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(String.format(Locators.PATH_TO_FILE_COMPARE_XPATH, name)),
+        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** click on the 'Compare' button into group 'Git Compare' form */
   public void clickOnGroupCompareButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.GROUP_GIT_COMPARE_BTN)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.id(Locators.GROUP_GIT_COMPARE_BTN_ID), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** click on the 'Close' button into group 'Git Compare' form */
   public void clickOnGroupCloseButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(By.id(Locators.GROUP_COMPARE_CLOSE_BTN)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.id(Locators.GROUP_COMPARE_CLOSE_BTN_ID), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 }

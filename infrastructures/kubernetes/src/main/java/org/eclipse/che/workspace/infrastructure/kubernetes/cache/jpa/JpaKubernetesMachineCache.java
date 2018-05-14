@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.inject.persist.Transactional;
@@ -56,7 +57,7 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
     }
   }
 
-  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  @Transactional(rollbackOn = InfrastructureException.class)
   @Override
   public Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
@@ -73,20 +74,20 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
     }
   }
 
-  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  @Transactional(rollbackOn = InfrastructureException.class)
   @Override
   public KubernetesServerImpl getServer(
       RuntimeIdentity runtimeIdentity, String machineName, String serverName)
       throws InfrastructureException {
     try {
+      String workspaceId = runtimeIdentity.getWorkspaceId();
       KubernetesServerImpl server =
           managerProvider
               .get()
-              .find(
-                  KubernetesServerImpl.class,
-                  new ServerId(runtimeIdentity.getWorkspaceId(), machineName, serverName));
+              .find(KubernetesServerImpl.class, new ServerId(workspaceId, machineName, serverName));
       if (server == null) {
-        throw new InfrastructureException("Server with name '" + serverName + "' was not found");
+        throw new InfrastructureException(
+            format("Server with name '%s' was not found", serverName));
       }
       return server;
     } catch (RuntimeException e) {
@@ -113,8 +114,7 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
       ServerStatus newStatus)
       throws InfrastructureException {
     try {
-      return doUpdateServerStatus(
-          runtimeIdentity.getWorkspaceId(), machineName, serverName, newStatus);
+      return doUpdateServerStatus(runtimeIdentity, machineName, serverName, newStatus);
     } catch (RuntimeException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -149,7 +149,7 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
     em.flush();
   }
 
-  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  @Transactional
   protected void doUpdateMachineStatus(String workspaceId, String machineName, MachineStatus status)
       throws InfrastructureException {
     EntityManager entityManager = managerProvider.get();
@@ -158,7 +158,8 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
         entityManager.find(KubernetesMachineImpl.class, new MachineId(workspaceId, machineName));
 
     if (machine == null) {
-      throw new InfrastructureException("Can't update machine status");
+      throw new InfrastructureException(
+          format("Machine '%s:%s' was not found", workspaceId, machineName));
     }
 
     machine.setStatus(status);
@@ -166,18 +167,16 @@ public class JpaKubernetesMachineCache implements KubernetesMachineCache {
     entityManager.flush();
   }
 
-  @Transactional
+  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
   protected boolean doUpdateServerStatus(
-      String workspaceId, String machineName, String serverName, ServerStatus status) {
+      RuntimeIdentity runtimeIdentity, String machineName, String serverName, ServerStatus status)
+      throws InfrastructureException {
     EntityManager entityManager = managerProvider.get();
 
-    KubernetesServerImpl server =
-        entityManager.find(
-            KubernetesServerImpl.class, new ServerId(workspaceId, machineName, serverName));
+    KubernetesServerImpl server = getServer(runtimeIdentity, machineName, serverName);
 
     if (server.getStatus() != status) {
       server.setStatus(status);
-
       entityManager.flush();
       return true;
     }

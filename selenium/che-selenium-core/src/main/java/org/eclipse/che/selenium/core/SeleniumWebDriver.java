@@ -185,45 +185,12 @@ public class SeleniumWebDriver
         return doCreateDriver(webDriverUrl);
       } catch (WebDriverException e) {
         if (i++ >= MAX_ATTEMPTS) {
-          String tip = getWebDriverInitTip();
-          LOG.error(format("%s.%s", e.getMessage(), tip), e);
-          throw new RuntimeException(format("Web driver initialization failed.%s", tip), e);
+          throw e;
         }
       }
 
       sleepQuietly(DELAY_IN_SECONDS);
     }
-  }
-
-  private String getWebDriverInitTip() {
-    if (!gridMode && browser.equals(TestBrowser.GOOGLE_CHROME)) {
-      return getGoogleChromeTip();
-    }
-
-    return "";
-  }
-
-  private String getGoogleChromeTip() {
-    try {
-      URL webDriverNotes =
-          new URL(
-              String.format(
-                  "http://chromedriver.storage.googleapis.com/%s/notes.txt", webDriverVersion));
-      String supportedVersions = readSupportedVersionInfoForGoogleDriver(webDriverNotes);
-      if (supportedVersions != null) {
-        return format(
-            "%n(Tip: there is Chrome Driver v.%s used, and it requires local Google Chrome of v.%s)",
-            webDriverVersion, supportedVersions);
-      }
-    } catch (java.io.IOException e) {
-      LOG.warn(
-          "It's impossible to read info about versions of browser which Chrome Driver supports.",
-          e);
-    }
-
-    return format(
-        "%n(Tip: check manually if local Google Chrome browser supported by Chrome Driver v.%s at official site)",
-        webDriverVersion);
   }
 
   /**
@@ -276,6 +243,16 @@ public class SeleniumWebDriver
     }
 
     RemoteWebDriver driver = new RemoteWebDriver(webDriverUrl, capability);
+    if (driver.getErrorHandler().isIncludeServerErrors()
+        && driver.getCapabilities().getCapability("message") != null) {
+      String errorMessage =
+          format(
+              "Web driver creation error occurred: %s",
+              driver.getCapabilities().getCapability("message"));
+      LOG.error(errorMessage);
+      throw new RuntimeException(errorMessage);
+    }
+
     driver.manage().window().setSize(new Dimension(1920, 1080));
 
     return driver;

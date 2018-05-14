@@ -432,6 +432,18 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text from
+   * its {@code attribute} attribute.
+   *
+   * @param elementLocator locator of element from which attribute should be got
+   * @param attribute name of element attribute
+   * @return element text by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetAttribute(By elementLocator, String attribute) {
+    return waitVisibility(elementLocator).getAttribute(attribute);
+  }
+
+  /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
    * @param elementLocator element from which text should be got
@@ -672,6 +684,37 @@ public class SeleniumWebDriverHelper {
    */
   public void waitTextPresence(By elementLocator, String expectedText) {
     waitTextPresence(elementLocator, expectedText, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until specified {@code element} does not contain the specified
+   * {@code expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should not be presented
+   * @param timeout waiting time in seconds
+   */
+  public void waitTextIsNotPresented(WebElement element, String expectedText, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> !(waitVisibilityAndGetText(element).contains(expectedText)));
+  }
+
+  /**
+   * Waits until {@link WebElement} which defined by {@code element} does not contain the specified
+   * {@code expectedText}.
+   *
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
+   *
+   * @param element element which should be checked
+   * @param expectedText text which should not be presented
+   */
+  public void waitTextIsNotPresented(WebElement element, String expectedText) {
+    waitTextIsNotPresented(element, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**

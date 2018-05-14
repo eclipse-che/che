@@ -106,7 +106,7 @@ public class RenamePrivateMethodTest {
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 1)
+  @Test
   public void test2() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -118,7 +118,7 @@ public class RenamePrivateMethodTest {
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 2)
+  @Test
   public void test10() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -130,7 +130,7 @@ public class RenamePrivateMethodTest {
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 3)
+  @Test
   public void test11() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -142,7 +142,7 @@ public class RenamePrivateMethodTest {
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 4)
+  @Test
   public void test12() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -154,7 +154,7 @@ public class RenamePrivateMethodTest {
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 5)
+  @Test
   public void test23() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -166,7 +166,7 @@ public class RenamePrivateMethodTest {
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 6)
+  @Test
   public void testAnon0() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -178,7 +178,7 @@ public class RenamePrivateMethodTest {
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
-  @Test(priority = 7)
+  @Test
   public void testFail5() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");

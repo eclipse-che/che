@@ -38,15 +38,18 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class ToastLoader {
   private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final ProjectExplorer projectExplorer;
   private final Loader loader;
 
   @Inject
   public ToastLoader(
       SeleniumWebDriver seleniumWebDriver,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
+      ProjectExplorer projectExplorer,
       Loader loader) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.projectExplorer = projectExplorer;
     this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -65,6 +68,10 @@ public class ToastLoader {
   /** wait appearance toast loader widget */
   public void waitToastLoaderIsOpen() {
     seleniumWebDriverHelper.waitVisibility(mainForm, UPDATING_PROJECT_TIMEOUT_SEC);
+  }
+
+  public Boolean isToastLoaderOpened() {
+    return seleniumWebDriverHelper.isVisible(mainForm);
   }
 
   /**
@@ -197,5 +204,14 @@ public class ToastLoader {
     loader.waitOnClosed();
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.TOAST_LOADER_BUTTON_XPATH_PATTERN, buttonName)));
+  }
+
+  public void waitToastLoaderAndClickStartButton() {
+    projectExplorer.waitProjectExplorer();
+    try {
+      seleniumWebDriverHelper.waitInvisibility(mainForm, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      clickOnToastLoaderButton("Start");
+    }
   }
 }

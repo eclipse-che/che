@@ -325,6 +325,7 @@ public class KubernetesPods {
                       new ContainerEvent(
                           podName,
                           containerName,
+                          event.getReason(),
                           event.getMessage(),
                           event.getMetadata().getCreationTimestamp());
                   containerEventsHandlers.forEach(h -> h.handle(containerEvent));
@@ -346,7 +347,7 @@ public class KubernetesPods {
   }
 
   /** Stops watching the pods inside Kubernetes namespace. */
-  void stopWatch() {
+  public void stopWatch() {
     try {
       if (podWatch != null) {
         podWatch.close();

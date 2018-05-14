@@ -21,7 +21,7 @@ import {CheProject} from '../../../../../components/api/che-project';
  */
 export class ProjectDetailsController {
 
-  static $inject = ['$scope', '$log', '$route', '$location', '$timeout', 'cheAPI', 'confirmDialogService', 'cheNotification', 'lodash'];
+  static $inject = ['$scope', '$log', '$route', '$location', '$timeout', '$q', 'cheAPI', 'confirmDialogService', 'cheNotification', 'lodash'];
 
   private $log: ng.ILogService;
   private cheNotification: CheNotification;
@@ -29,6 +29,7 @@ export class ProjectDetailsController {
   private $location: ng.ILocationService;
   private lodash: any;
   private $timeout: ng.ITimeoutService;
+  private $q: ng.IQService;
   private confirmDialogService: ConfirmDialogService;
 
   private namespace: string;
@@ -51,6 +52,7 @@ export class ProjectDetailsController {
               $route: ng.route.IRouteService,
               $location: ng.ILocationService,
               $timeout: ng.ITimeoutService,
+              $q: ng.IQService,
               cheAPI: CheAPI,
               confirmDialogService: ConfirmDialogService,
               cheNotification: CheNotification,
@@ -61,6 +63,7 @@ export class ProjectDetailsController {
     this.$location = $location;
     this.lodash = lodash;
     this.$timeout = $timeout;
+    this.$q = $q;
     this.confirmDialogService =  confirmDialogService;
 
     this.namespace = $route.current.params.namespace;
@@ -106,9 +109,13 @@ export class ProjectDetailsController {
     }
 
     this.cheAPI.getWorkspace().fetchStatusChange(this.workspace.id, 'RUNNING').then(() => {
-      return this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id);
+      return this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id).catch((error: any) => {
+        if (error.status === 304) {
+          return this.$q.when();
+        }
+        return this.$q.reject(error);
+      });
     }).then(() => {
-
       this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspace.id).getProject();
 
       if (this.projectService.getProjectDetailsByKey(this.projectPath)) {

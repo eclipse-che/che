@@ -57,8 +57,8 @@ public class SystemManager {
   }
 
   /**
-   * Stops some of the system services preparing system to lighter shutdown. System status is
-   * changed from {@link SystemStatus#RUNNING} to {@link SystemStatus#PREPARING_TO_SHUTDOWN}.
+   * Stops some of the system services preparing system to full shutdown. System status is changed
+   * from {@link SystemStatus#RUNNING} to {@link SystemStatus#PREPARING_TO_SHUTDOWN}.
    *
    * @throws ConflictException when system status is different from running
    */
@@ -75,6 +75,28 @@ public class SystemManager {
                 .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
                 .build());
     exec.execute(ThreadLocalPropagateContext.wrap(this::doStopServices));
+    exec.shutdown();
+  }
+
+  /**
+   * Suspends some of the system services preparing system to lighter shutdown. System status is
+   * changed from {@link SystemStatus#RUNNING} to {@link SystemStatus#PREPARING_TO_SHUTDOWN}.
+   *
+   * @throws ConflictException when system status is different from running
+   */
+  public void suspendServices() throws ConflictException {
+    if (!statusRef.compareAndSet(RUNNING, PREPARING_TO_SHUTDOWN)) {
+      throw new ConflictException(
+          "System shutdown has been already called, system status: " + statusRef.get());
+    }
+    ExecutorService exec =
+        Executors.newSingleThreadExecutor(
+            new ThreadFactoryBuilder()
+                .setDaemon(false)
+                .setNameFormat("SuspendSystemServicesPool")
+                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                .build());
+    exec.execute(ThreadLocalPropagateContext.wrap(this::doSuspendServices));
     exec.shutdown();
   }
 
@@ -105,13 +127,31 @@ public class SystemManager {
     }
   }
 
+  /** Synchronously stops corresponding services. */
+  private void doSuspendServices() {
+    LOG.info("Preparing system to shutdown");
+    eventService.publish(asDto(new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN)));
+    try {
+      terminator.suspendAll();
+      statusRef.set(READY_TO_SHUTDOWN);
+      eventService.publish(
+          asDto(new SystemStatusChangedEvent(PREPARING_TO_SHUTDOWN, READY_TO_SHUTDOWN)));
+      LOG.info("System is ready to shutdown");
+    } catch (InterruptedException x) {
+      LOG.error("Interrupted while waiting for system service to shutdown components");
+      Thread.currentThread().interrupt();
+    } finally {
+      shutdownLatch.countDown();
+    }
+  }
+
   @PreDestroy
   @VisibleForTesting
   void shutdown() throws InterruptedException {
     if (!statusRef.compareAndSet(RUNNING, PREPARING_TO_SHUTDOWN)) {
       shutdownLatch.await();
     } else {
-      doStopServices();
+      doSuspendServices();
     }
   }
 }

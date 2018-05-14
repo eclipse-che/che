@@ -15,7 +15,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -74,10 +73,8 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
             projectFactory.create(workspaceId, runtimeState.getNamespace()),
             getEnvironment().getWarnings());
 
-    if (runtime.getStatus() != WorkspaceStatus.RUNNING
-        || runtime.getStatus() != WorkspaceStatus.STOPPED) {
-      runtime.startServersCheckers();
-    }
+    runtime.scheduleServersCheckers();
+
     return runtime;
   }
 }

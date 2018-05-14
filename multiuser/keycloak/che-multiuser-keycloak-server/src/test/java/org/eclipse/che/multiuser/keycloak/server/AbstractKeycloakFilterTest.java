@@ -65,6 +65,13 @@ public class AbstractKeycloakFilterTest {
             .compact();
 
     when(signatureKeyManager.getKeyPair()).thenReturn(keyPair);
+    when(request.getRequestURI()).thenReturn(null);
+  }
+
+  @Test
+  public void testShouldSkipAuthWhenRetrievingOIDCKeycloakJsFile() {
+    when(request.getRequestURI()).thenReturn("https://localhost:8080/api/keycloak/OIDCKeycloak.js");
+    assertTrue(abstractKeycloakFilter.shouldSkipAuthentication(request, null));
   }
 
   @Test

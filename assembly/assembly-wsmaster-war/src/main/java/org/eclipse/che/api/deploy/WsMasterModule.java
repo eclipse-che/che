@@ -44,12 +44,18 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.WorkspaceLockService;
+import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.ProjectsVolumeForWsAgentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariableProvider;
@@ -140,9 +146,10 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+    bind(WorkspaceLockService.class).to(DefaultWorkspaceLockService.class);
+    bind(WorkspaceStatusCache.class).to(DefaultWorkspaceStatusCache.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
     install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
-    bind(org.eclipse.che.api.logger.LoggerService.class);
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
@@ -153,6 +160,8 @@ public class WsMasterModule extends AbstractModule {
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(CheApiEnvVarProvider.class);
+    envVarProviders.addBinding().to(CheApiInternalEnvVarProvider.class);
+    envVarProviders.addBinding().to(CheApiExternalEnvVarProvider.class);
     envVarProviders.addBinding().to(MachineTokenEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceIdEnvVarProvider.class);
 
@@ -196,6 +205,7 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
     install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+    install(new org.eclipse.che.api.logger.deploy.LoggerModule());
 
     final Multibinder<MessageBodyAdapter> adaptersMultibinder =
         Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
@@ -206,9 +216,17 @@ public class WsMasterModule extends AbstractModule {
 
     // system components
     install(new SystemModule());
-    Multibinder.newSetBinder(binder(), ServiceTermination.class)
+    Multibinder<ServiceTermination> terminationMultiBinder =
+        Multibinder.newSetBinder(binder(), ServiceTermination.class);
+    terminationMultiBinder
         .addBinding()
         .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
+    terminationMultiBinder
+        .addBinding()
+        .to(org.eclipse.che.api.system.server.CronThreadPullTermination.class);
+    terminationMultiBinder
+        .addBinding()
+        .to(org.eclipse.che.api.workspace.server.hc.probe.ProbeSchedulerTermination.class);
 
     final Map<String, String> persistenceProperties = new HashMap<>();
     persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");
@@ -270,7 +288,9 @@ public class WsMasterModule extends AbstractModule {
       Map<String, String> persistenceProperties, String infrastructure) {
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-      install(new ReplicationModule(persistenceProperties));
+      // Replication is disabled until closing JPA JChannel issue won't be fixed
+      // install(new ReplicationModule(persistenceProperties));
+      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     } else {
       bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     }

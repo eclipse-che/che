@@ -64,9 +64,20 @@ public class WorkspaceProbesFactory {
    */
   public WorkspaceProbes getProbes(RuntimeIdentity runtimeId, Runtime runtime)
       throws InfrastructureException {
+    return getProbes(runtimeId, runtime.getMachines());
+  }
+
+  /**
+   * Get {@link WorkspaceProbes} for servers of the specified machines
+   *
+   * @throws InfrastructureException when the operation fails
+   */
+  public WorkspaceProbes getProbes(
+      RuntimeIdentity runtimeId, Map<String, ? extends Machine> machines)
+      throws InfrastructureException {
     List<ProbeFactory> factories = new ArrayList<>();
     try {
-      for (Entry<String, ? extends Machine> entry : runtime.getMachines().entrySet()) {
+      for (Entry<String, ? extends Machine> entry : machines.entrySet()) {
         fillProbes(runtimeId, entry.getKey(), factories, entry.getValue().getServers());
       }
     } catch (MalformedURLException e) {

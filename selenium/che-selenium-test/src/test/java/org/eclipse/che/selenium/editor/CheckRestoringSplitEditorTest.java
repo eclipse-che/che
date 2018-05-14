@@ -95,6 +95,7 @@ public class CheckRestoringSplitEditorTest {
 
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
+    loader.waitOnClosed();
     projectExplorer.waitVisibilityByName(javaClassName);
 
     notificationsPopupPanel.waitPopupPanelsAreClosed();

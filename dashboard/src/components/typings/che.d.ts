@@ -359,6 +359,7 @@ declare namespace che {
     };
     owner: string;
     warnings: IWorkspaceWarning[];
+    machineToken?: string;
   }
 
   export interface IWorkspaceWarning {
