@@ -11,15 +11,18 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.PYTHON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_PYTHON3_SIMPLE;
+import static org.openqa.selenium.Keys.F4;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
@@ -34,7 +37,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -43,6 +45,8 @@ import org.testng.annotations.Test;
 public class CheckMainFeatureForPythonLanguageTest {
   private static final String PROJECT_NAME = "console-python3-simple";
   private static final String WORKSPACE_NAME = generate("python", 4);
+  private static final String PYTHON_FILE_NAME = "main.py";
+  private static final String PYTHON_MODULE_NAME = "myModule";
   private static final String LS_INIT_MESSAGE =
       "Initialized Language Server org.eclipse.che.plugin.python.languageserver on project file:///projects/console-python3-simple";
   private static final String PYTHON_CLASS =
@@ -53,7 +57,7 @@ public class CheckMainFeatureForPythonLanguageTest {
           + "def function(self):\n"
           + "\tprint(\"This is a message inside the class.\")";
 
-  private static final String PYTHON_METHOD = "def add(a, b):\n" + "return a + b";
+  private static final String PYTHON_METHOD = "def add(a, b):\n return a + b";
 
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -62,11 +66,9 @@ public class CheckMainFeatureForPythonLanguageTest {
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private MachineTerminal terminal;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ToastLoader toastLoader;
   @Inject private Consoles consoles;
   @Inject private Menu menu;
@@ -104,83 +106,86 @@ public class CheckMainFeatureForPythonLanguageTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/main.py");
-    editor.waitTabIsPresent("main.py");
+    editor.waitTabIsPresent(PYTHON_FILE_NAME);
 
     consoles.selectProcessByTabName("dev-machine");
-    System.out.println(consoles.getVisibleTextFromCommandConsole());
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
   @Test(priority = 1)
   public void checkErrorMessages() {
-    editor.selectTabByName("main.py");
+    editor.selectTabByName(PYTHON_FILE_NAME);
+    editor.deleteAllContent();
+    editor.typeTextIntoEditor("");
     editor.waitAllMarkersInvisibility(ERROR);
 
-    //     editor.goToPosition(1, 3);
     editor.typeTextIntoEditor("p");
     editor.waitMarkerInPosition(ERROR, 1);
-    // editor.goToPosition(1, 3);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    // TODO remove added text
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
   @Test(priority = 2)
   public void checkErrorMessages2() {
-    editor.selectTabByName("main.py");
+    editor.selectTabByName(PYTHON_FILE_NAME);
     editor.deleteAllContent();
     editor.typeTextIntoEditor(PYTHON_CLASS);
     editor.waitAllMarkersInvisibility(ERROR);
     editor.typeTextIntoEditor("\n");
 
-    editor.waitMarkerInPosition(WARNING, 7);
+    editor.waitMarkerInPosition(WARNING, editor.getPositionVisible()); // 7
     // TODO check for "W293 blank line contains whitespace" message in WARNING marker
 
   }
 
-  @Test(priority = 3)
-  public void checkAutocomplete() {
+  @Test(priority = 2)
+  public void checkPythonLsAutocomplete() {
+    editor.selectTabByName(PYTHON_FILE_NAME);
+    editor.deleteAllContent();
+    editor.typeTextIntoEditor(PYTHON_CLASS);
+
     editor.typeTextIntoEditor("\n");
     editor.typeTextIntoEditor("myobjectx = MyClass()");
     editor.typeTextIntoEditor("\n");
     editor.typeTextIntoEditor("myobjectx.");
-    editor.launchAutocomplete();
+    editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("function");
     editor.waitTextIntoAutocompleteContainer("var");
     editor.waitTextIntoAutocompleteContainer("variable");
     // TODO check autocomplete
-    editor.removeLineAndAllAfterIt(9);
+    editor.removeLineAndAllAfterIt(editor.getPositionVisible()); // 8
     //    editor.enterAutocompleteProposal("Build() ");
   }
 
-  @Test(priority = 3)
-  public void checkFindDefinition() {
-    createFile("myModule.py");
+  @Test(priority = 2)
+  public void checkPythonLsFindDefinition() {
+    createFile(PYTHON_MODULE_NAME);
 
+    editor.selectTabByName(PYTHON_MODULE_NAME);
     editor.typeTextIntoEditor(PYTHON_METHOD);
-    editor.clickOnCloseFileIcon("myModule.py");
+    editor.clickOnCloseFileIcon(PYTHON_MODULE_NAME);
 
-    editor.selectTabByName("main.py");
-    editor.setCursorToLine(9);
-    editor.typeTextIntoEditor("var2 = myModule.add(100, 200)");
+    editor.selectTabByName(PYTHON_FILE_NAME);
+    editor.deleteAllContent();
+    // editor.setCursorToLine(9);
+    editor.typeTextIntoEditor("import myModule\n");
+    editor.typeTextIntoEditor(PYTHON_CLASS);
+    editor.typeTextIntoEditor("\nvar2 = myModule.add(100, 200)");
 
-    editor.goToCursorPositionVisible(9, 26);
-    menu.runCommand(Assistant.ASSISTANT, Assistant.FIND_DEFINITION);
-    editor.waitTabIsPresent("myModule.py");
-    editor.clickOnCloseFileIcon("myModule.py");
+    editor.goToCursorPositionVisible(editor.getPositionVisible(), 27);
+    menu.runCommand(Assistant.ASSISTANT, FIND_DEFINITION);
+    editor.waitTabIsPresent(PYTHON_MODULE_NAME);
+    editor.clickOnCloseFileIcon(PYTHON_MODULE_NAME);
 
     // TODO repeat steps with F4 button
-    editor.goToCursorPositionVisible(9, 26);
-    editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("myModule.py");
+    editor.goToCursorPositionVisible(editor.getPositionVisible(), 27);
+    editor.typeTextIntoEditor(F4.toString());
+    editor.waitTabIsPresent(PYTHON_MODULE_NAME);
   }
 
   private void createFile(String fileName) {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Project.PROJECT,
-        TestMenuCommandsConstants.Project.New.NEW,
-        TestMenuCommandsConstants.Project.New.FILE);
+    menu.runCommand(PROJECT, NEW, FILE);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(fileName);
     askForValueDialog.clickOkBtn();
