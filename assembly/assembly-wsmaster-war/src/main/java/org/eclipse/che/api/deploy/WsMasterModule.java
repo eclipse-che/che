@@ -86,6 +86,8 @@ import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
+import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
+import org.eclipse.che.security.oauth.OAuthAPI;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
@@ -137,6 +139,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.UserService.class);
     bind(org.eclipse.che.api.user.server.ProfileService.class);
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
+    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
     MapBinder<String, String> stacks =
         MapBinder.newMapBinder(
@@ -278,7 +281,7 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
-    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+    bind(OAuthAPI.class).to(EmbeddedOAuthAPI.class);
     bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
