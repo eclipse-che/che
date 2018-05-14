@@ -34,7 +34,7 @@ public class OAuthAPIProvider implements Provider<OAuthAPI> {
   @Inject
   public OAuthAPIProvider(
       @Nullable @Named("che.oauth.service_mode") String oauthType, Injector injector) {
-    this.oauthType = oauthType == null ? "" : oauthType;
+    this.oauthType = oauthType;
     this.injector = injector;
   }
 
@@ -43,12 +43,11 @@ public class OAuthAPIProvider implements Provider<OAuthAPI> {
     switch (oauthType) {
       case "embedded":
         return injector.getInstance(EmbeddedOAuthAPI.class);
-      case "keycloak":
+      case "delegated":
         return injector.getInstance(DelegatedOAuthAPI.class);
       default:
-        LOG.info(
-            "Unknown value configured for OAuth authentication API, using DelegatedOAuthAPI by default");
-        return injector.getInstance(DelegatedOAuthAPI.class);
+        throw new RuntimeException(
+            "Unknown value configured for \"che.oauth.service_mode\", must be either \"embedded\", or \"delegated\"");
     }
   }
 }
