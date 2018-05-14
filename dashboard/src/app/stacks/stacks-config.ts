@@ -24,6 +24,8 @@ import {ImportStackService} from './stack-details/import-stack.service';
 import {StackValidationService} from './stack-details/stack-validation.service';
 import {RecipeEditorController} from './list-stacks/build-stack/recipe-editor/recipe-editor.controller';
 import {RecipeEditorDirective} from './list-stacks/build-stack/recipe-editor/recipe-editor.directive';
+import {ImportStackController} from './stack-details/import-stack.controller';
+import {CheStack} from '../../components/api/che-stack.factory';
 
 /**
  * @ngdoc controller
@@ -43,6 +45,7 @@ export class StacksConfig {
     register.directive('listComponents', ListComponents);
 
     register.controller('StackController', StackController);
+    register.controller('ImportStackController', ImportStackController);
     register.controller('EditComponentDialogController', EditComponentDialogController);
     register.controller('SelectTemplateController', SelectTemplateController);
     register.filter('samplesTagFilter', SamplesTagFilter.filter);
@@ -61,13 +64,54 @@ export class StacksConfig {
         controller: 'ListStacksController',
         controllerAs: 'listStacksController'
       })
+        .accessWhen('/stack/create', {
+          title: () => {
+            return 'create';
+          },
+          templateUrl: 'app/stacks/stack-details/stack.html',
+          controller: 'ImportStackController',
+          controllerAs: 'stackController',
+          resolve: {
+            initData: ['cheStack', (cheStack: CheStack) => {
+              return cheStack.fetchStacks().then(() => {
+                const stack = cheStack.getStackTemplate();
+                return {stack};
+              });
+            }]
+          }
+        })
+        .accessWhen('/stack/import', {
+          title: () => {
+            return 'create';
+          },
+          templateUrl: 'app/stacks/stack-details/stack.html',
+          controller: 'ImportStackController',
+          controllerAs: 'stackController',
+          resolve: {
+            initData: ['cheStack', 'importStackService', (cheStack: CheStack, importStackService: ImportStackService) => {
+              return cheStack.fetchStacks().then(() => {
+                const stack = importStackService.getStack();
+                return {stack};
+              });
+            }]
+          }
+        })
         .accessWhen('/stack/:stackId', {
           title: (params: any) => {
             return params.stackId;
           },
           templateUrl: 'app/stacks/stack-details/stack.html',
           controller: 'StackController',
-          controllerAs: 'stackController'
+          controllerAs: 'stackController',
+          resolve: {
+            initData: ['$route', 'cheStack', ($route: ng.route.IRouteService, cheStack: CheStack) => {
+              return cheStack.fetchStacks().then(() => {
+                const {stackId} = $route.current.params;
+                const stack = cheStack.getStackById(stackId);
+                return {stackId, stack};
+              });
+            }]
+          }
         });
     }]);
   }
