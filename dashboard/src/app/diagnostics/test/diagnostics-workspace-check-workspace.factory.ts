@@ -11,8 +11,9 @@
 'use strict';
 import {DiagnosticCallback} from '../diagnostic-callback';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
-import {CheWebsocket, MessageBus} from '../../../components/api/che-websocket.factory';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
+import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
+import {CheJsonRpcWsagentApi} from '../../../components/api/json-rpc/che-json-rpc-wsagent-api';
 
 /**
  * Ability to tests a running workspace.
@@ -20,7 +21,7 @@ import {CheBranding} from '../../../components/branding/che-branding.factory';
  */
 export class DiagnosticsRunningWorkspaceCheck {
 
-  static $inject = ['$q', 'lodash', 'cheWebsocket', 'cheWorkspace', '$resource', '$location', 'cheBranding'];
+  static $inject = ['$q', 'lodash', 'cheWorkspace', 'cheJsonRpcApi', '$resource', '$location', 'cheBranding'];
 
   /**
    * Q service for creating delayed promises.
@@ -31,6 +32,11 @@ export class DiagnosticsRunningWorkspaceCheck {
    * Workspace API used to grab details.
    */
   private cheWorkspace;
+
+  /**
+   * JSON RPC API factory.
+   */
+  private cheJsonRpcApi: CheJsonRpcApi;
 
   /**
    * Lodash utility.
@@ -48,11 +54,6 @@ export class DiagnosticsRunningWorkspaceCheck {
   private $location: ng.ILocationService;
 
   /**
-   * Websocket handling.
-   */
-  private cheWebsocket: CheWebsocket;
-
-  /**
    * Branding info.
    */
   private cheBranding: CheBranding;
@@ -60,12 +61,12 @@ export class DiagnosticsRunningWorkspaceCheck {
   /**
    * Default constructor
    */
-  constructor($q: ng.IQService, lodash: any, cheWebsocket: CheWebsocket, cheWorkspace: CheWorkspace,
+  constructor($q: ng.IQService, lodash: any, cheWorkspace: CheWorkspace, cheJsonRpcApi: CheJsonRpcApi,
               $resource: ng.resource.IResourceService, $location: ng.ILocationService, cheBranding: CheBranding) {
     this.$q = $q;
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
-    this.cheWebsocket = cheWebsocket;
+    this.cheJsonRpcApi = cheJsonRpcApi;
     this.cheBranding = cheBranding;
     this.$resource = $resource;
     this.$location = $location;
@@ -123,33 +124,22 @@ export class DiagnosticsRunningWorkspaceCheck {
    */
   checkWebSocketWsAgent(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
     let machineToken: string = diagnosticCallback.getShared('machineToken');
+    let clientId: string = diagnosticCallback.getShared('clientId');
 
-    let wsAgentSocketWebLink = this.getWsAgentURL(diagnosticCallback).replace('http', 'ws') + '/ws';
+    let wsAgentSocketWebLink = this.getWsAgentWebsocket(diagnosticCallback);
     if (machineToken) {
       wsAgentSocketWebLink += '?token=' + machineToken;
     }
 
-    let wsAgentRemoteBus: MessageBus = this.cheWebsocket.getRemoteBus(wsAgentSocketWebLink);
-    diagnosticCallback.setMessageBus(wsAgentRemoteBus);
+    let callback = (message: any) => {
+      diagnosticCallback.success('Websocket Agent Message received');
+    };
 
+    let cheJsonRpcWsagentApi:  CheJsonRpcWsagentApi = this.cheJsonRpcApi.getJsonRpcWsagentApi(wsAgentSocketWebLink);
     try {
-      // define callback
-      let callback = (message: any) => {
-        if (!message) {
-          diagnosticCallback.getMessageBus().unsubscribe('pong');
-          diagnosticCallback.success('Websocket Agent Message received');
-          wsAgentRemoteBus.datastream.close(true);
-        }
-      };
-
-      // subscribe to the event
-      diagnosticCallback.subscribeChannel('pong', callback);
-
+      cheJsonRpcWsagentApi.connect(wsAgentSocketWebLink, clientId).then(callback);
       // default fallback if no answer in 5 seconds
-      diagnosticCallback.delayError('No reply of websocket test after 5 seconds. Websocket is failing to connect to ' + wsAgentSocketWebLink, 5000);
-
-      // send the message
-      diagnosticCallback.getMessageBus().ping();
+      diagnosticCallback.delayError('No reply of websocket test after 5 seconds. Websocket is failing to connect to ' + wsAgentSocketWebLink, 15000);
 
     } catch (error) {
       diagnosticCallback.error('Unable to connect with websocket to ' + wsAgentSocketWebLink + ': ' + error);
@@ -165,7 +155,6 @@ export class DiagnosticsRunningWorkspaceCheck {
    * @returns {Promise}
    */
   callSCM(diagnosticCallback: DiagnosticCallback, wsAgentHRef: string, errorInsteadOfFailure: boolean): ng.IPromise<any> {
-
     let uriWsAgent: string = wsAgentHRef + '/';
     let machineToken: string = diagnosticCallback.getShared('machineToken');
     if (machineToken) {
@@ -225,6 +214,37 @@ export class DiagnosticsRunningWorkspaceCheck {
     }
 
     return devMachine.servers['wsagent/http'].url;
+  }
+
+  /**
+   * Utility method used to get Workspace Agent websocket endpoint from a callback shared data
+   * @param {DiagnosticCallback} diagnosticCallback
+   * @returns {string}
+   */
+  getWsAgentWebsocket(diagnosticCallback: DiagnosticCallback): string {
+    let workspace: che.IWorkspace = diagnosticCallback.getShared('workspace');
+
+    let errMessage: string = 'Workspace has no runtime: unable to test workspace not started';
+    let runtime: any = workspace.runtime;
+    if (!runtime) {
+      diagnosticCallback.error(errMessage);
+      throw errMessage;
+    }
+
+    const devMachine = Object.keys(runtime.machines).map((machineName: string) => {
+      return runtime.machines[machineName];
+    }).find((machine: any) => {
+      return Object.keys(machine.servers).some((serverName: string) => {
+        return serverName === 'wsagent/ws';
+      });
+    });
+
+    if (!devMachine) {
+      diagnosticCallback.error(errMessage);
+      throw errMessage;
+    }
+
+    return devMachine.servers['wsagent/ws'].url;
   }
 
 }
