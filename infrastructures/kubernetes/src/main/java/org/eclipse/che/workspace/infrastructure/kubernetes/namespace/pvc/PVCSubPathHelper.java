@@ -143,7 +143,7 @@ public class PVCSubPathHelper {
       pods.create(pod);
       final Pod finished = pods.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
       if (POD_PHASE_FAILED.equals(finished.getStatus().getPhase())) {
-        LOG.error("Job command '%s' execution is failed.", Arrays.toString(command));
+        LOG.error("Job command '{}' execution is failed.", Arrays.toString(command));
       }
     } catch (InfrastructureException ex) {
       LOG.error(
