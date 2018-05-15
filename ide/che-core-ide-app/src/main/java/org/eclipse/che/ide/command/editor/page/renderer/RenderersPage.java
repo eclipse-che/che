@@ -100,6 +100,9 @@ public class RenderersPage extends AbstractCommandEditorPage
     }
 
     ApplicableContext context = editedCommand.getApplicableContext();
+    if (context.getApplicableOutputRenderers() == null) {
+      return false;
+    }
 
     return !(applicableRenderersInitial.equals(context.getApplicableOutputRenderers()));
   }

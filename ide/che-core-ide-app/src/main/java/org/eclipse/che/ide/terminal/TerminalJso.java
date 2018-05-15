@@ -20,7 +20,7 @@ import org.eclipse.che.api.promises.client.Operation;
  * @author Evgen Vidolob
  * @author Alexander Andrienko
  */
-public class TerminalJso extends JavaScriptObject {
+class TerminalJso extends JavaScriptObject {
   protected TerminalJso() {}
 
   public static native TerminalJso create(
@@ -56,10 +56,6 @@ public class TerminalJso extends JavaScriptObject {
 
   public final native void write(String data) /*-{
         this.write(data);
-    }-*/;
-
-  public final native void writeln(String data) /*-{
-        this.writeln(data);
     }-*/;
 
   public final native void focus() /*-{

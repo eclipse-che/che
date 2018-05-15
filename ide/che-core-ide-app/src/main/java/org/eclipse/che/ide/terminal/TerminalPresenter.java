@@ -63,7 +63,6 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private TerminalStateListener terminalStateListener;
   private int width;
   private int height;
-  private WebSocket webSocket;
 
   @Inject
   public TerminalPresenter(
@@ -112,7 +111,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                                     "Machine "
                                         + machine.getName()
                                         + " doesn't provide terminal server."));
-                webSocket = connectToTerminal(agentURLModifier.modify(terminalServer.getUrl()));
+                connectToTerminal(agentURLModifier.modify(terminalServer.getUrl()));
               })
           .catchError(
               arg -> {
@@ -124,10 +123,6 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                 reconnect();
               });
     }
-  }
-
-  public WebSocket getWebSocket() {
-    return webSocket;
   }
 
   private void reconnect() {
@@ -144,7 +139,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     }
   }
 
-  private WebSocket connectToTerminal(@NotNull String wsUrl) {
+  private void connectToTerminal(@NotNull String wsUrl) {
     countRetry--;
 
     socket = WebSocket.create(wsUrl);
@@ -195,7 +190,6 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
             }
           }
         });
-    return socket;
   }
 
   /** Sends 'close' message on server side to stop terminal. */
@@ -253,9 +247,5 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   /** Listener that will be called when a terminal state changed. */
   public interface TerminalStateListener {
     void onExit();
-  }
-
-  public TerminalJso getTerminal() {
-    return terminal;
   }
 }
