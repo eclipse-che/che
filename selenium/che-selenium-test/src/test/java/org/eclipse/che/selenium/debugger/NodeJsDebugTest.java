@@ -85,6 +85,8 @@ public class NodeJsDebugTest {
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editorPageObj.waitTabFileWithSavedStatus(APP_FILE);
     editorPageObj.waitActive();
+    debugPanel.waitDebugHighlightedText("/*");
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("var greetings = require(\"./greetings.js\");");
     checkDebugStepsFeatures();
     checkEvaluationFeatures();

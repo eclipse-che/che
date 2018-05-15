@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.system.server.CronThreadPullTermination;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemSuspendedEvent;
@@ -61,6 +62,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
   private final WorkspaceRuntimes runtimes;
   private final RuntimeInfrastructure runtimeInfrastructure;
   private final EventService eventService;
+  private final TemporaryWorkspaceRemover workspaceRemover;
 
   @Inject
   public WorkspaceServiceTermination(
@@ -68,12 +70,14 @@ public class WorkspaceServiceTermination implements ServiceTermination {
       WorkspaceSharedPool sharedPool,
       WorkspaceRuntimes runtimes,
       RuntimeInfrastructure runtimeInfrastructure,
-      EventService eventService) {
+      EventService eventService,
+      TemporaryWorkspaceRemover workspaceRemover) {
     this.manager = manager;
     this.sharedPool = sharedPool;
     this.runtimes = runtimes;
     this.runtimeInfrastructure = runtimeInfrastructure;
     this.eventService = eventService;
+    this.workspaceRemover = workspaceRemover;
   }
 
   @Override
@@ -83,7 +87,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
 
   @Override
   public Set<String> getDependencies() {
-    return Collections.emptySet();
+    return Collections.singleton(CronThreadPullTermination.SERVICE_NAME);
   }
 
   /**
@@ -103,6 +107,10 @@ public class WorkspaceServiceTermination implements ServiceTermination {
       sharedPool.shutdown();
     } finally {
       eventService.unsubscribe(propagator);
+    }
+    try {
+      workspaceRemover.shutdown();
+    } catch (Exception ignored) {
     }
   }
 
@@ -128,6 +136,10 @@ public class WorkspaceServiceTermination implements ServiceTermination {
       sharedPool.shutdown();
     } finally {
       eventService.unsubscribe(propagator);
+    }
+    try {
+      workspaceRemover.shutdown();
+    } catch (Exception ignored) {
     }
   }
 
