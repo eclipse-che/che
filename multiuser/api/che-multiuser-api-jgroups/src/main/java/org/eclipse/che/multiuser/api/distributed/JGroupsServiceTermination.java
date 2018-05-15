@@ -16,6 +16,8 @@ import com.google.inject.Singleton;
 import java.util.Set;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.WorkspaceServiceTermination;
+import org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceStatusCache;
+import org.eclipse.che.multiuser.api.distributed.lock.JGroupsWorkspaceLockService;
 import org.eclipse.che.multiuser.api.distributed.subscription.DistributedRemoteSubscriptionStorage;
 
 /**
@@ -26,31 +28,39 @@ import org.eclipse.che.multiuser.api.distributed.subscription.DistributedRemoteS
 @Singleton
 public class JGroupsServiceTermination implements ServiceTermination {
 
-    private final DistributedRemoteSubscriptionStorage remoteSubscriptionStorage;
+  private final JGroupsWorkspaceLockService workspaceLockService;
+  private final JGroupsWorkspaceStatusCache workspaceStatusCache;
+  private final DistributedRemoteSubscriptionStorage remoteSubscriptionStorage;
 
-    @Inject
-    public JGroupsServiceTermination(
-            DistributedRemoteSubscriptionStorage remoteSubscriptionStorage) {
-        this.remoteSubscriptionStorage = remoteSubscriptionStorage;
-    }
+  @Inject
+  public JGroupsServiceTermination(
+      JGroupsWorkspaceLockService workspaceLockService,
+      JGroupsWorkspaceStatusCache workspaceStatusCache,
+      DistributedRemoteSubscriptionStorage remoteSubscriptionStorage) {
+    this.workspaceLockService = workspaceLockService;
+    this.workspaceStatusCache = workspaceStatusCache;
+    this.remoteSubscriptionStorage = remoteSubscriptionStorage;
+  }
 
-    @Override
-    public void terminate() {
-        suspend();
-    }
+  @Override
+  public void terminate() {
+    suspend();
+  }
 
-    @Override
-    public void suspend() {
-        remoteSubscriptionStorage.shutdown();
-    }
+  @Override
+  public void suspend() {
+    workspaceLockService.shutdown();
+    workspaceStatusCache.shutdown();
+    remoteSubscriptionStorage.shutdown();
+  }
 
-    @Override
-    public String getServiceName() {
-        return "ReplicationService";
-    }
+  @Override
+  public String getServiceName() {
+    return "ReplicationService";
+  }
 
-    @Override
-    public Set<String> getDependencies() {
-        return ImmutableSet.of(WorkspaceServiceTermination.SERVICE_NAME);
-    }
+  @Override
+  public Set<String> getDependencies() {
+    return ImmutableSet.of(WorkspaceServiceTermination.SERVICE_NAME);
+  }
 }

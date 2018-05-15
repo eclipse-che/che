@@ -11,10 +11,15 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.util.Map;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
-import org.eclipse.che.multiuser.api.subscription.DistributedRemoteSubscriptionStorage;
+import org.eclipse.che.api.system.server.ServiceTermination;
+import org.eclipse.che.api.workspace.server.WorkspaceLockService;
+import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
+import org.eclipse.che.multiuser.api.distributed.JGroupsServiceTermination;
+import org.eclipse.che.multiuser.api.distributed.subscription.DistributedRemoteSubscriptionStorage;
 import org.eclipse.persistence.config.CacheCoordinationProtocol;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 
@@ -37,6 +42,16 @@ public class ReplicationModule extends AbstractModule {
     persistenceProperties.put(
         PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, JGROUPS_CONF_FILE);
     bindConstant().annotatedWith(Names.named("jgroups.config.file")).to(JGROUPS_CONF_FILE);
+
     bind(RemoteSubscriptionStorage.class).to(DistributedRemoteSubscriptionStorage.class);
+
+    bind(WorkspaceLockService.class)
+        .to(org.eclipse.che.multiuser.api.distributed.lock.JGroupsWorkspaceLockService.class);
+    bind(WorkspaceStatusCache.class)
+        .to(org.eclipse.che.multiuser.api.distributed.cache.JGroupsWorkspaceStatusCache.class);
+
+    Multibinder.newSetBinder(binder(), ServiceTermination.class)
+        .addBinding()
+        .to(JGroupsServiceTermination.class);
   }
 }

@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
-import org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
@@ -44,8 +43,6 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
-import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
@@ -150,8 +147,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
-    bind(WorkspaceLockService.class).to(DefaultWorkspaceLockService.class);
-    bind(WorkspaceStatusCache.class).to(DefaultWorkspaceStatusCache.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
     install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
 
@@ -284,7 +279,13 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(OAuthAPI.class).to(EmbeddedOAuthAPI.class);
-    bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+
+    bind(RemoteSubscriptionStorage.class)
+        .to(org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage.class);
+    bind(WorkspaceLockService.class)
+        .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService.class);
+    bind(WorkspaceStatusCache.class)
+        .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
   }
@@ -293,11 +294,14 @@ public class WsMasterModule extends AbstractModule {
       Map<String, String> persistenceProperties, String infrastructure) {
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-      // Replication is disabled until closing JPA JChannel issue won't be fixed
-      // install(new ReplicationModule(persistenceProperties));
-      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+      install(new ReplicationModule(persistenceProperties));
     } else {
-      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+      bind(RemoteSubscriptionStorage.class)
+          .to(org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage.class);
+      bind(WorkspaceLockService.class)
+          .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService.class);
+      bind(WorkspaceStatusCache.class)
+          .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
     }
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
