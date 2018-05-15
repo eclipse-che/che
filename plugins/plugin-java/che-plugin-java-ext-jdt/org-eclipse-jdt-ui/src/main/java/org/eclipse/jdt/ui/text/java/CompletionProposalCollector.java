@@ -50,8 +50,6 @@ import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal
 import org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalContextInformation;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavadocInlineTagCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavadocLinkTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
@@ -424,8 +422,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
         return createPackageProposal(proposal);
       case CompletionProposal.TYPE_REF:
         return createTypeProposal(proposal);
-      case CompletionProposal.JAVADOC_TYPE_REF:
-        return createJavadocLinkTypeProposal(proposal);
       case CompletionProposal.FIELD_REF:
       case CompletionProposal.JAVADOC_FIELD_REF:
       case CompletionProposal.JAVADOC_VALUE_REF:
@@ -454,8 +450,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
       case CompletionProposal.JAVADOC_BLOCK_TAG:
       case CompletionProposal.JAVADOC_PARAM_REF:
         return createJavadocSimpleProposal(proposal);
-      case CompletionProposal.JAVADOC_INLINE_TAG:
-        return createJavadocInlineTagProposal(proposal);
       case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
       default:
         return null;
@@ -804,14 +798,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
     return proposal;
   }
 
-  private IJavaCompletionProposal createJavadocInlineTagProposal(
-      CompletionProposal javadocProposal) {
-    LazyJavaCompletionProposal proposal =
-        new JavadocInlineTagCompletionProposal(javadocProposal, getInvocationContext());
-    adaptLength(proposal, javadocProposal);
-    return proposal;
-  }
-
   private IJavaCompletionProposal createKeywordProposal(CompletionProposal proposal) {
     String completion = String.valueOf(proposal.getCompletion());
     int start = proposal.getReplaceStart();
@@ -894,13 +880,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
   private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
     LazyJavaCompletionProposal proposal =
         new LazyJavaTypeCompletionProposal(typeProposal, getInvocationContext());
-    adaptLength(proposal, typeProposal);
-    return proposal;
-  }
-
-  private IJavaCompletionProposal createJavadocLinkTypeProposal(CompletionProposal typeProposal) {
-    LazyJavaCompletionProposal proposal =
-        new JavadocLinkTypeCompletionProposal(typeProposal, getInvocationContext());
     adaptLength(proposal, typeProposal);
     return proposal;
   }

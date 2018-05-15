@@ -15,8 +15,6 @@ import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedPositi
 import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.RegionImpl;
 
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedModeModel;
-import org.eclipse.che.jdt.JavadocFinder;
-import org.eclipse.che.jdt.javadoc.HTMLPrinter;
 import org.eclipse.che.jdt.javaeditor.HasLinkedModel;
 import org.eclipse.che.jface.text.ITextViewer;
 import org.eclipse.che.jface.text.contentassist.ICompletionProposal;
@@ -434,9 +432,6 @@ public class TemplateProposal
       IDocument document = new Document(templateBuffer.getString());
       IndentUtil.indentLines(document, new LineRange(0, document.getNumberOfLines()), null, null);
       StringBuffer buffer = new StringBuffer();
-      HTMLPrinter.insertPageProlog(buffer, 0, JavadocFinder.getStyleSheet());
-      HTMLPrinter.addParagraph(buffer, document.get());
-      HTMLPrinter.addPageEpilog(buffer);
       return buffer.toString();
 
     } catch (BadLocationException e) {
