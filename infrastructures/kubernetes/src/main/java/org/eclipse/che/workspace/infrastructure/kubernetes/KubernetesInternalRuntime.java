@@ -22,10 +22,12 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,6 +74,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.Conta
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.ContainerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
@@ -432,10 +435,8 @@ public class KubernetesInternalRuntime<
     // namespace.pods().watch(new AbnormalStopHandler());
     namespace.pods().watchContainers(new MachineLogsPublisher());
     if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
-      // The handler for unrecoverable events is disabled because it has a bug that prevents start
-      // of workspaces after previous workspace start failure.
-      // See https://github.com/eclipse/che/issues/9542
-      // namespace.pods().watchContainers(new UnrecoverableEventHanler());
+      Map<String, Pod> pods = getContext().getEnvironment().getPods();
+      namespace.pods().watchContainers(new UnrecoverableEventHanler(pods));
     }
 
     final KubernetesServerResolver serverResolver =
@@ -654,37 +655,74 @@ public class KubernetesInternalRuntime<
   /** Listens container's events and terminates workspace if unrecoverable event occurs. */
   public class UnrecoverableEventHanler implements ContainerEventHandler {
     private List<String> events;
+    private Map<String, Pod> workspacePods;
+    private Date handlerInitialization;
 
-    public UnrecoverableEventHanler() {
+    public UnrecoverableEventHanler(Map<String, Pod> workspacePods) {
       this.events =
           Strings.isNullOrEmpty(unrecoverableEvents)
               ? Collections.EMPTY_LIST
               : Arrays.asList(unrecoverableEvents.split(","));
+      this.workspacePods = workspacePods;
+      this.handlerInitialization = new Date();
     }
 
+    /*
+     * Event is considered to be unrecoverable if it belongs to one of the workspace pods
+     * and 'lastTimestamp' of the event is *after* the time of handler initialization
+     */
     @Override
     public void handle(ContainerEvent event) {
-      if (isUnrecoverable(event)) {
+      if (isWorkspaceEvent(event)
+          && happenedAfterHandlerInitialization(event)
+          && isUnrecoverable(event)) {
         String reason = event.getReason();
         String message = event.getMessage();
-        String podName = event.getPodName();
         String workspaceId = getContext().getIdentity().getWorkspaceId();
         LOG.error(
             "Unrecoverable event occurred during workspace '{}' startup: {}, {}, {}",
             workspaceId,
             reason,
             message,
-            podName);
+            event.getPodName());
         try {
           internalStop(emptyMap());
         } catch (InfrastructureException e) {
           LOG.error("Error occurred during runtime '{}' stopping. {}", workspaceId, e.getMessage());
         } finally {
           eventPublisher.sendRuntimeStoppedEvent(
-              format("Unrecoverable event occurred: '%s', '%s', '%s'", reason, message, podName),
+              format(
+                  "Unrecoverable event occurred: '%s', '%s', '%s'",
+                  reason, message, event.getPodName()),
               getContext().getIdentity());
         }
       }
+    }
+
+    /** Returns true if event belongs to one of the workspace pods, false otherwise */
+    private boolean isWorkspaceEvent(ContainerEvent event) {
+      String podName = event.getPodName();
+      return workspacePods.containsKey(podName);
+    }
+
+    /**
+     * Returns true if 'lastTimestamp' of the event is *after* the time of the handler
+     * initialization
+     */
+    private boolean happenedAfterHandlerInitialization(ContainerEvent event) {
+      String eventLastTimestamp = event.getLastTimestamp();
+      Date eventLastTimestampDate = convertEventTimestampToDate(eventLastTimestamp);
+      return eventLastTimestampDate != null && eventLastTimestampDate.after(handlerInitialization);
+    }
+
+    private Date convertEventTimestampToDate(String timestamp) {
+      Date date = null;
+      try {
+        date = ContainerEvents.convertEventTimestampToDate(timestamp);
+      } catch (ParseException e) {
+        LOG.error("Error occurred during parsing the event timestamp '{}'", timestamp);
+      }
+      return date;
     }
 
     /**
@@ -728,7 +766,10 @@ public class KubernetesInternalRuntime<
           if (machine.getPodName().equals(podName)
               && machine.getContainerName().equals(containerName)) {
             eventPublisher.sendMachineLogEnvent(
-                entry.getKey(), event.getMessage(), event.getTime(), getContext().getIdentity());
+                entry.getKey(),
+                event.getMessage(),
+                event.getCreationTimeStamp(),
+                getContext().getIdentity());
             return;
           }
         }
