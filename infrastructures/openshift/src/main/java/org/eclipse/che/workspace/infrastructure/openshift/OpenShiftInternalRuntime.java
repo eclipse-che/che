@@ -12,10 +12,12 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.common.base.Strings;
 import com.google.inject.assistedinject.Assisted;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
@@ -100,7 +102,8 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
 
     project.pods().watchContainers(new MachineLogsPublisher());
     if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
-      project.pods().watchContainers(new UnrecoverableEventHanler());
+      Map<String, Pod> pods = getContext().getEnvironment().getPods();
+      project.pods().watchContainers(new UnrecoverableEventHanler(pods));
     }
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
