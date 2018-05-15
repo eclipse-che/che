@@ -12,7 +12,6 @@
 import {DiagnosticsWebsocketWsMaster} from './test/diagnostics-websocket-wsmaster.factory';
 import {DiagnosticCallback} from './diagnostic-callback';
 import {DiagnosticsWorkspaceStartCheck} from './test/diagnostics-workspace-start-check.factory';
-import {CheWebsocket} from '../../components/api/che-websocket.factory';
 import {DiagnosticsRunningWorkspaceCheck} from './test/diagnostics-workspace-check-workspace.factory';
 import {DiagnosticPart} from './diagnostic-part';
 import {DiagnosticPartState} from './diagnostic-part-state';
@@ -26,7 +25,7 @@ import {CheBranding} from '../../components/branding/che-branding.factory';
  */
 export class DiagnosticsController {
 
-  static $inject = ['$log', '$q', 'lodash', '$timeout', 'diagnosticsWebsocketWsMaster', 'cheWebsocket', 'cheBranding', 'diagnosticsRunningWorkspaceCheck', 'diagnosticsWorkspaceStartCheck'];
+  static $inject = ['$log', '$q', 'lodash', '$timeout', 'diagnosticsWebsocketWsMaster', 'cheBranding', 'diagnosticsRunningWorkspaceCheck', 'diagnosticsWorkspaceStartCheck'];
 
   /**
    * Promise service handling.
@@ -52,11 +51,6 @@ export class DiagnosticsController {
    * Instance of checker for workspace
    */
   private diagnosticsWorkspaceStartCheck: DiagnosticsWorkspaceStartCheck;
-
-  /**
-   * Websocket library.
-   */
-  private cheWebsocket: CheWebsocket;
 
   /**
    * Angular timeout service.
@@ -124,7 +118,6 @@ export class DiagnosticsController {
   constructor($log: ng.ILogService, $q: ng.IQService, lodash: any,
               $timeout: ng.ITimeoutService,
               diagnosticsWebsocketWsMaster: DiagnosticsWebsocketWsMaster,
-              cheWebsocket: CheWebsocket,
               cheBranding: CheBranding,
               diagnosticsRunningWorkspaceCheck: DiagnosticsRunningWorkspaceCheck,
               diagnosticsWorkspaceStartCheck: DiagnosticsWorkspaceStartCheck) {
@@ -136,7 +129,6 @@ export class DiagnosticsController {
     this.diagnosticsWorkspaceStartCheck = diagnosticsWorkspaceStartCheck;
     this.diagnosticsRunningWorkspaceCheck = diagnosticsRunningWorkspaceCheck;
     this.parts = new Array<DiagnosticPart>();
-    this.cheWebsocket = cheWebsocket;
     this.sharedMap = new Map<string, any>();
     this.cheBranding = cheBranding;
     this.isLogDisplayed = false;
@@ -222,7 +214,7 @@ export class DiagnosticsController {
    * @returns {DiagnosticCallback} the newly callback
    */
   public newItem(text: string, diagnosticPart: DiagnosticPart): DiagnosticCallback {
-    let callback: DiagnosticCallback = new DiagnosticCallback(this.$q, this.cheWebsocket, this.$timeout, text, this.sharedMap, this, diagnosticPart);
+    let callback: DiagnosticCallback = new DiagnosticCallback(this.$q, this.$timeout, text, this.sharedMap, this, diagnosticPart);
     diagnosticPart.addCallback(callback);
     return callback;
   }
