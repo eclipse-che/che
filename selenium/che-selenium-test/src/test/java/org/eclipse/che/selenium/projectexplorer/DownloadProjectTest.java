@@ -120,14 +120,9 @@ public class DownloadProjectTest {
     // when
     menu.runCommand(WORKSPACE, DOWNLOAD_AS_ZIP);
 
-    WaitUtils.sleepQuietly(5); // TODO
-
     // then
-    assertEquals(
-        downloadedFileUtil
-            .getPackageFileList(seleniumWebDriver.getSessionId(), DOWNLOADED_PROJECTS_PACKAGE_NAME)
-            .toString(),
-        expectedPackageFileList.toString());
+    String downloadedFileUtil = getPackageFileList(DOWNLOADED_PROJECTS_PACKAGE_NAME);
+    assertEquals(downloadedFileUtil, expectedPackageFileList.toString());
   }
 
   @Test
@@ -150,14 +145,9 @@ public class DownloadProjectTest {
     projectExplorer.openContextMenuByPathSelectedItem(TEST_PROJECT_1);
     projectExplorer.clickOnItemInContextMenu(ContextMenuFirstLevelItems.DOWNLOAD);
 
-    WaitUtils.sleepQuietly(5); // TODO
-
     // then
     assertEquals(
-        downloadedFileUtil
-            .getPackageFileList(
-                seleniumWebDriver.getSessionId(), DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME)
-            .toString(),
+        getPackageFileList(DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME),
         expectedPackageFileList.toString());
 
     // when
@@ -165,14 +155,9 @@ public class DownloadProjectTest {
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.DOWNLOAD_AS_ZIP);
 
-    WaitUtils.sleepQuietly(5); // TODO
-
     // then
     assertEquals(
-        downloadedFileUtil
-            .getPackageFileList(
-                seleniumWebDriver.getSessionId(), DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME)
-            .toString(),
+        getPackageFileList(DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME),
         expectedPackageFileList.toString());
   }
 
@@ -195,15 +180,9 @@ public class DownloadProjectTest {
     projectExplorer.openContextMenuByPathSelectedItem(pathToTestDirectory);
     projectExplorer.clickOnItemInContextMenu(ContextMenuFirstLevelItems.DOWNLOAD);
 
-    WaitUtils.sleepQuietly(5); // TODO
-
     // then
-    assertEquals(
-        downloadedFileUtil
-            .getPackageFileList(
-                seleniumWebDriver.getSessionId(), DOWNLOADED_TEST_DIRECTORY_PACKAGE_NAME)
-            .toString(),
-        expectedPackageFileList.toString());
+    String packageFileList = getPackageFileList(DOWNLOADED_TEST_DIRECTORY_PACKAGE_NAME);
+    assertEquals(packageFileList, expectedPackageFileList.toString());
   }
 
   @Test
@@ -219,12 +198,32 @@ public class DownloadProjectTest {
     projectExplorer.openContextMenuByPathSelectedItem(pathToTestFile);
     projectExplorer.clickOnItemInContextMenu(ContextMenuFirstLevelItems.DOWNLOAD);
 
-    WaitUtils.sleepQuietly(5); // TODO
-
     // then
-    assertEquals(
-        downloadedFileUtil.getDownloadedFileContent(
-            seleniumWebDriver.getSessionId(), TEST_FILE_NAME),
-        testFileContent);
+    String downloadedFileContent = getDownloadedFileContent(TEST_FILE_NAME);
+    assertEquals(downloadedFileContent, testFileContent);
+  }
+
+  private String getDownloadedFileContent(String testFileName) throws IOException {
+    try {
+      return downloadedFileUtil.getDownloadedFileContent(
+          seleniumWebDriver.getSessionId(), testFileName);
+    } catch (IOException e) {
+      WaitUtils.sleepQuietly(2);
+      return downloadedFileUtil.getDownloadedFileContent(
+          seleniumWebDriver.getSessionId(), testFileName);
+    }
+  }
+
+  private String getPackageFileList(String downloadedTestProject1PackageName) throws IOException {
+    try {
+      return downloadedFileUtil
+          .getPackageFileList(seleniumWebDriver.getSessionId(), downloadedTestProject1PackageName)
+          .toString();
+    } catch (IOException e) {
+      WaitUtils.sleepQuietly(2);
+      return downloadedFileUtil
+          .getPackageFileList(seleniumWebDriver.getSessionId(), downloadedTestProject1PackageName)
+          .toString();
+    }
   }
 }
