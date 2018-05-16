@@ -296,7 +296,7 @@ createNewProject() {
   ${OC_BINARY} new-project "${CHE_OPENSHIFT_PROJECT}" > /dev/null
   OUT=$?
   if [ ${OUT} -eq 1 ]; then
-    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a short while or pick a different project name -p myProject"
+    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a short while or pick a different project name -p=myProject"
     exit ${OUT}
   else
     printInfo "Namespace \"${CHE_OPENSHIFT_PROJECT}\" successfully created"
