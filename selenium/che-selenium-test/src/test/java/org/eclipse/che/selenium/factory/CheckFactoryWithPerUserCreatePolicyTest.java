@@ -79,7 +79,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
               CheckFactoryWithPerUserCreatePolicyTest.class.getSimpleName(),
               testFactory.getWorkspaceStatusAssociatedWithFactory(),
               "Current workspace status for %s is: %s"));
-      fail("Known issue https://github.com/eclipse/che/issues/8799");
+      fail("Known issue https://github.com/eclipse/che/issues/8798");
     }
     projectExplorer.waitProjectExplorer();
 

@@ -12,6 +12,7 @@
 
 import {CheJsonRpcMasterApi} from './che-json-rpc-master-api';
 import {WebsocketClient} from './websocket-client';
+import {CheJsonRpcWsagentApi} from './che-json-rpc-wsagent-api';
 
 /**
  * This class manages the api connection through JSON RPC.
@@ -26,7 +27,6 @@ export class CheJsonRpcApi {
   private $websocket: any;
   private $log: ng.ILogService;
   private jsonRpcApiConnection: Map<string, CheJsonRpcMasterApi>;
-
   private $timeout: ng.ITimeoutService;
 
   /**
@@ -53,4 +53,11 @@ export class CheJsonRpcApi {
      return cheJsonRpcMasterApi;
    }
   }
+
+  getJsonRpcWsagentApi(entrypoint: string): CheJsonRpcWsagentApi {
+    let websocketClient = new WebsocketClient(this.$websocket, this.$q);
+    let cheJsonRpcWsagentApi: CheJsonRpcWsagentApi = new CheJsonRpcWsagentApi(websocketClient);
+    return cheJsonRpcWsagentApi;
+  }
+
 }

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -120,7 +121,7 @@ public class WorkspaceProjects {
 
   public void waitProjectDetailsPage() {
     try {
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+      new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
           .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_PROJECT)));
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
