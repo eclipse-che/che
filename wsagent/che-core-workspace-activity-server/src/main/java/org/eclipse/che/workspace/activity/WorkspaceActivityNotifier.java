@@ -68,6 +68,7 @@ public class WorkspaceActivityNotifier {
       activeDuringThreshold.set(true);
     } else {
       Thread activityRequestThread = new Thread(this::notifyActivity);
+      activityRequestThread.setName("WorkspaceActivityRequestThread");
       activityRequestThread.setDaemon(true);
       activityRequestThread.start();
 
