@@ -93,7 +93,7 @@ public class DownloadedIntoGridFileUtilImpl implements DownloadedFileUtil {
         getGridNodeContainerId(webDriverSessionId),
         get(downloadDir, downloadedFileName),
         tempDirectory);
-    String content = FileUtils.readFileToString(get(downloadDir, downloadedFileName).toFile());
+    String content = FileUtils.readFileToString(tempDirectory.resolve(downloadedFileName).toFile());
 
     FileUtils.deleteQuietly(tempDirectory.toFile());
 
