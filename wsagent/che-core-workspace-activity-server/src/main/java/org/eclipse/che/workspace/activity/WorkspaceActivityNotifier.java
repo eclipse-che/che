@@ -75,10 +75,17 @@ public class WorkspaceActivityNotifier {
   }
 
   private void notifyActivity() {
-    try {
-      httpJsonRequestFactory.fromUrl(apiEndpoint + "/activity/" + wsId).usePutMethod().request();
-    } catch (Exception e) {
-      LOG.error("Cannot notify master about workspace " + wsId + " activity", e);
-    }
+    new Thread(
+            () -> {
+              try {
+                httpJsonRequestFactory
+                    .fromUrl(apiEndpoint + "/activity/" + wsId)
+                    .usePutMethod()
+                    .request();
+              } catch (Exception e) {
+                LOG.error("Cannot notify master about workspace " + wsId + " activity", e);
+              }
+            })
+        .start();
   }
 }
