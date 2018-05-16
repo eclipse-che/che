@@ -66,6 +66,7 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
  * Guice module per suite.
  *
  * @author Anatolii Bazko
+ * @author Dmytro Nochevnov
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
 
@@ -130,7 +131,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
           format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
     }
 
-    boolean gridMode = new Boolean(System.getProperty("grid.mode"));
+    boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
     if (gridMode) {
       bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtilImpl.class);
     } else {

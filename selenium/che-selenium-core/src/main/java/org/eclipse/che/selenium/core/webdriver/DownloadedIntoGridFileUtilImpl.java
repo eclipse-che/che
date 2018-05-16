@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core.webdriver;
 import static com.google.common.io.Files.createTempDir;
 import static java.lang.String.format;
 import static java.nio.file.Paths.get;
+import static java.util.Arrays.stream;
 import static org.eclipse.che.commons.lang.ZipUtils.unzip;
 
 import com.google.inject.Inject;
@@ -100,8 +101,18 @@ public class DownloadedIntoGridFileUtilImpl implements DownloadedFileUtil {
   }
 
   @Override
-  public void removeDownloadedFile(String webDriverSessionId, String filename) throws IOException {
-    dockerUtil.delete(getGridNodeContainerId(webDriverSessionId), get(downloadDir, filename));
+  public void removeDownloadedFiles(String webDriverSessionId, String... filenames)
+      throws IOException {
+    String gridNodeContainerId = getGridNodeContainerId(webDriverSessionId);
+    stream(filenames)
+        .forEach(
+            filename -> {
+              try {
+                dockerUtil.delete(gridNodeContainerId, get(downloadDir, filename));
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
   }
 
   public String getGridNodeContainerId(String sessionId) throws IOException {

@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core.webdriver;
 import static com.google.common.io.Files.createTempDir;
 import static java.nio.file.Files.deleteIfExists;
 import static java.nio.file.Paths.*;
+import static java.util.Arrays.stream;
 import static org.eclipse.che.commons.lang.ZipUtils.unzip;
 
 import com.google.inject.Inject;
@@ -67,7 +68,15 @@ public class DownloadedLocallyFileUtilImpl implements DownloadedFileUtil {
   }
 
   @Override
-  public void removeDownloadedFile(String webDriverSessionId, String filename) throws IOException {
-    deleteIfExists(get(downloadDir, filename));
+  public void removeDownloadedFiles(String webDriverSessionId, String... filenames) {
+    stream(filenames)
+        .forEach(
+            filename -> {
+              try {
+                deleteIfExists(get(downloadDir, filename));
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
   }
 }

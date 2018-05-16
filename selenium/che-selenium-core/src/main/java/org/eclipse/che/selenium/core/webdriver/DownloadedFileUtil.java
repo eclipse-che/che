@@ -44,7 +44,7 @@ public interface DownloadedFileUtil {
    * Removes downloaded file.
    *
    * @param webDriverSessionId ID of web driver session which holds downloaded file
-   * @param filename downloaded file name
+   * @param filenames downloaded file name
    */
-  void removeDownloadedFile(String webDriverSessionId, String filename) throws IOException;
+  void removeDownloadedFiles(String webDriverSessionId, String... filenames) throws IOException;
 }
