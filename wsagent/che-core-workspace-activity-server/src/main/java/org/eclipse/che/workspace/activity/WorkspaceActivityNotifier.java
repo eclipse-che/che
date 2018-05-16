@@ -62,7 +62,10 @@ public class WorkspaceActivityNotifier {
     if (currentTime < (lastUpdateTime + threshold)) {
       activeDuringThreshold.set(true);
     } else {
-      notifyActivity();
+      Thread activityRequestThread = new Thread(this::notifyActivity);
+      activityRequestThread.setDaemon(true);
+      activityRequestThread.start();
+
       lastUpdateTime = currentTime;
     }
   }
@@ -75,17 +78,10 @@ public class WorkspaceActivityNotifier {
   }
 
   private void notifyActivity() {
-    new Thread(
-            () -> {
-              try {
-                httpJsonRequestFactory
-                    .fromUrl(apiEndpoint + "/activity/" + wsId)
-                    .usePutMethod()
-                    .request();
-              } catch (Exception e) {
-                LOG.error("Cannot notify master about workspace " + wsId + " activity", e);
-              }
-            })
-        .start();
+    try {
+      httpJsonRequestFactory.fromUrl(apiEndpoint + "/activity/" + wsId).usePutMethod().request();
+    } catch (Exception e) {
+      LOG.error("Cannot notify master about workspace " + wsId + " activity", e);
+    }
   }
 }
