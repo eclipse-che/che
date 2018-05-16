@@ -29,15 +29,18 @@ If you are interested in fixing issues and contributing directly to the code bas
 - [Coding guidelines](https://github.com/eclipse/che/wiki/Coding-Guidelines)
 - [Contributor license agreement](https://github.com/eclipse/che/wiki/Contributor-License-Agreement)
 
-### Che's repositories
-| Name        | Description  |
+### Ecosystem
+The next generation of Eclipse Che is going to be built from multiple components and plugins (learn more in [the roadmap](https://github.com/eclipse/che/wiki/Roadmap) on the wiki). This list provides links to those components and plugins.
+
+| Project        | Description  |
 | ----------- |-----|
-| [GitHub Plugin](https://github.com/eclipse/che-theia-github-plugin) | Contains plugin, that provides the support of GitHub VCS in Theia IDE.  |
-| [Java Plugin](https://github.com/eclipse/che-theia-java-plugin) | Plugin that provides Java language support inside Theia IDE. |
-| [SSH Plugin](https://github.com/eclipse/che-theia-ssh-plugin) | The SSH plugin, that allows to manage the SSH public/private key pairs stored in Che workspace. |
-| [Terminal Plugin](https://github.com/eclipse/che-theia-terminal-plugin) | Plugin, that brings terminal support to Theia IDE running inside Che, with ability to connect to the external server side. |
-| [Machines Plugin](https://github.com/eclipse/che-theia-machines-plugin)| The plugin, that adds the machines view in Theia IDE, that is running inside Che. |
-| [Hosted plugin manager](https://github.com/eclipse/che-theia-hosted-plugin-manager-extension)| Che specific plugin for Theia IDE, the aim of which is to take care about url changing and/or port forwarding caused by running Theia inside container |
+| [Theia-IDE](https://github.com/theia-ide/theia) | Theia IDE integrated in Che.  |
+| [GitHub Plugin](https://github.com/eclipse/che-theia-github-plugin) | GitHub VCS support.  |
+| [Java Plugin](https://github.com/eclipse/che-theia-java-plugin) | Java language support. |
+| [SSH Plugin](https://github.com/eclipse/che-theia-ssh-plugin) | SSH public/private key pairs management. |
+| [Terminal Plugin](https://github.com/eclipse/che-theia-terminal-plugin) | Terminal plugin. |
+| [Machines Plugin](https://github.com/eclipse/che-theia-machines-plugin)| Workspace's containers controller plugin. |
+| [Hosted plugin manager](https://github.com/eclipse/che-theia-hosted-plugin-manager-extension)| IDE hosting handler for url changing and port forwarding. |
 
 ### Feedback
 * **Support:** You can ask questions, report bugs, and request features using [GitHub issues](https://github.com/eclipse/che/issues).
