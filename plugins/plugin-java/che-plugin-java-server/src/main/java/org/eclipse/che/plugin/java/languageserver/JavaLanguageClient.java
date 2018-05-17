@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
+import java.util.concurrent.CompletableFuture;
+import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
+import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 
 public interface JavaLanguageClient {
   /**
@@ -28,4 +31,7 @@ public interface JavaLanguageClient {
    */
   @JsonNotification("language/progressReport")
   void sendProgressReport(ProgressReport report);
+
+  @JsonRequest("workspace/executeClientCommand")
+  CompletableFuture<Object> executeClientCommand(ExecuteCommandParams params);
 }
