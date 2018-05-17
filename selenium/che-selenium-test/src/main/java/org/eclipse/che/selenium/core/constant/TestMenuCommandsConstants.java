@@ -21,6 +21,7 @@ public interface TestMenuCommandsConstants {
     String STOP_WORKSPACE = WORKSPACE_MENU_PREFIX + "stopWorkspace";
     String CREATE_FACTORY = WORKSPACE_MENU_PREFIX + "configureFactoryAction";
     String STOP = WORKSPACE_MENU_PREFIX + "stopWorkspace";
+    String DOWNLOAD_AS_ZIP = WORKSPACE_MENU_PREFIX + "downloadWsAsZipAction";
   }
 
   interface Project {
@@ -33,6 +34,7 @@ public interface TestMenuCommandsConstants {
     String CONFIGURE_CLASSPATH = PROJECT_MENU_PREFIX + "projectProperties";
     String SHOW_HIDE_HIDDEN_FILES = PROJECT_MENU_PREFIX + "showHideHiddenFiles";
     String UPDATE_PROJECT_CONFIGURATION = PROJECT_MENU_PREFIX + "projectConfiguration";
+    String DOWNLOAD_AS_ZIP = PROJECT_MENU_PREFIX + "downloadAsZipAction";
 
     interface New {
       String NEW = PROJECT_MENU_PREFIX + "newGroup";

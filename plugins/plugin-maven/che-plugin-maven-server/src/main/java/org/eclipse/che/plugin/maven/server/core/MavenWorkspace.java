@@ -88,17 +88,15 @@ public class MavenWorkspace {
           @Override
           public void onEvent(ProjectDeletedEvent event) {
             IProject project = workspaceProvider.get().getRoot().getProject(event.getProjectPath());
-            manager.delete(Collections.singletonList(project));
+            manager.delete(
+                Collections.singletonList(project)); // check if project exists and remove if not
           }
         });
     manager.addListener(
         new MavenProjectListener() {
           @Override
           public void projectResolved(
-              MavenProject project, MavenProjectModifications modifications) {
-            //                communication.sendUpdateMassage(Collections.emptySet(),
-            // Collections.emptyList());
-          }
+              MavenProject project, MavenProjectModifications modifications) {}
 
           @Override
           public void projectUpdated(
@@ -162,9 +160,11 @@ public class MavenWorkspace {
     removed.forEach(
         project -> {
           try {
-            projectManagerProvider
-                .get()
-                .removeType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
+            if (project.getProject().exists()) {
+              projectManagerProvider
+                  .get()
+                  .removeType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
+            }
           } catch (ServerException
               | ForbiddenException
               | ConflictException

@@ -70,7 +70,7 @@ public class NodeJsDebugTest {
     ide.open(ws);
   }
 
-  @Test(priority = 0)
+  @Test
   public void debugNodeJsTest()
       throws ExecutionException, JsonParseException, InterruptedException {
     String nameOfDebugCommand = "check_node_js_debug";
@@ -85,6 +85,8 @@ public class NodeJsDebugTest {
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editorPageObj.waitTabFileWithSavedStatus(APP_FILE);
     editorPageObj.waitActive();
+    debugPanel.waitDebugHighlightedText("/*");
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("var greetings = require(\"./greetings.js\");");
     checkDebugStepsFeatures();
     checkEvaluationFeatures();

@@ -10,11 +10,15 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.Pages.DEFAULT_PAGE_SIZE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,11 +26,13 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -34,27 +40,32 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class TemporaryWorkspaceRemoverTest {
 
-  static final int COUNT_OF_WORKSPACES = 150;
+  private static final int COUNT_OF_WORKSPACES = 150;
 
   @Mock private WorkspaceDao workspaceDao;
+  @Mock private WorkspaceRuntimes runtimes;
 
   @InjectMocks private TemporaryWorkspaceRemover remover;
 
   @Test
-  public void shouldRemoveTemporaryWorkspaces() throws Exception {
+  public void shouldRemoveStoppedTemporaryWorkspaces() throws Exception {
+    doReturn(WorkspaceStatus.STOPPED).when(runtimes).getStatus(any());
     when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
         .thenReturn(
             new Page<>(
-                createEntities(DEFAULT_PAGE_SIZE), 0, DEFAULT_PAGE_SIZE, COUNT_OF_WORKSPACES))
+                createStoppedWorkspaces(DEFAULT_PAGE_SIZE),
+                0,
+                DEFAULT_PAGE_SIZE,
+                COUNT_OF_WORKSPACES))
         .thenReturn(
             new Page<>(
-                createEntities(DEFAULT_PAGE_SIZE),
+                createStoppedWorkspaces(DEFAULT_PAGE_SIZE),
                 DEFAULT_PAGE_SIZE,
                 DEFAULT_PAGE_SIZE,
                 COUNT_OF_WORKSPACES))
         .thenReturn(
             new Page<>(
-                createEntities(DEFAULT_PAGE_SIZE),
+                createStoppedWorkspaces(DEFAULT_PAGE_SIZE),
                 DEFAULT_PAGE_SIZE * 2,
                 DEFAULT_PAGE_SIZE,
                 COUNT_OF_WORKSPACES));
@@ -63,10 +74,30 @@ public class TemporaryWorkspaceRemoverTest {
     verify(workspaceDao, times(COUNT_OF_WORKSPACES)).remove(anyString());
   }
 
-  private List<WorkspaceImpl> createEntities(int number) {
+  @Test(dataProvider = "activeWorkspaceStatuses")
+  public void shouldNotRemoveActiveWorkspace(WorkspaceStatus status) throws Exception {
+    WorkspaceImpl workspace = new WorkspaceImpl("ws123", null, null);
+    when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
+    doReturn(status).when(runtimes).getStatus("ws123");
+
+    remover.removeTemporaryWs();
+
+    verify(workspaceDao, never()).remove(anyString());
+  }
+
+  @DataProvider
+  public Object[][] activeWorkspaceStatuses() {
+    return new Object[][] {
+      {WorkspaceStatus.STOPPING}, {WorkspaceStatus.RUNNING}, {WorkspaceStatus.STARTING}
+    };
+  }
+
+  private List<WorkspaceImpl> createStoppedWorkspaces(int number) {
     List<WorkspaceImpl> wsList = new ArrayList<>();
     for (int i = 0; i < number; i++) {
-      wsList.add(new WorkspaceImpl("id" + i, null, null));
+      String wsId = "id" + i;
+      wsList.add(new WorkspaceImpl(wsId, null, null));
     }
     return wsList;
   }

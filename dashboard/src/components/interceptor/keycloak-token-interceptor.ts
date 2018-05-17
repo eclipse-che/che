@@ -48,6 +48,10 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
       return config;
     }
 
+    if (config.headers.Authorization) {
+      return config;
+    }
+
     if (this.keycloak && this.keycloak.token) {
       let deferred = this.$q.defer();
       this.keycloak.updateToken(5).success(() => {

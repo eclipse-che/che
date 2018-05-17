@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
-import org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
@@ -44,8 +43,6 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
-import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
@@ -69,6 +66,7 @@ import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
+import org.eclipse.che.core.db.DBTermination;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
@@ -86,6 +84,8 @@ import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
+import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
+import org.eclipse.che.security.oauth.OAuthAPI;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
@@ -137,6 +137,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.UserService.class);
     bind(org.eclipse.che.api.user.server.ProfileService.class);
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
+    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
     MapBinder<String, String> stacks =
         MapBinder.newMapBinder(
@@ -146,11 +147,8 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
-    bind(WorkspaceLockService.class).to(DefaultWorkspaceLockService.class);
-    bind(WorkspaceStatusCache.class).to(DefaultWorkspaceStatusCache.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
     install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
-    bind(org.eclipse.che.api.logger.LoggerService.class);
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
@@ -206,6 +204,7 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
     install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+    install(new org.eclipse.che.api.logger.deploy.LoggerModule());
 
     final Multibinder<MessageBodyAdapter> adaptersMultibinder =
         Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
@@ -216,9 +215,18 @@ public class WsMasterModule extends AbstractModule {
 
     // system components
     install(new SystemModule());
-    Multibinder.newSetBinder(binder(), ServiceTermination.class)
+    Multibinder<ServiceTermination> terminationMultiBinder =
+        Multibinder.newSetBinder(binder(), ServiceTermination.class);
+    terminationMultiBinder
         .addBinding()
         .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
+    terminationMultiBinder
+        .addBinding()
+        .to(org.eclipse.che.api.system.server.CronThreadPullTermination.class);
+    terminationMultiBinder
+        .addBinding()
+        .to(org.eclipse.che.api.workspace.server.hc.probe.ProbeSchedulerTermination.class);
+    bind(DBTermination.class);
 
     final Map<String, String> persistenceProperties = new HashMap<>();
     persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");
@@ -270,8 +278,14 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
-    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
-    bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+    bind(OAuthAPI.class).to(EmbeddedOAuthAPI.class);
+
+    bind(RemoteSubscriptionStorage.class)
+        .to(org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage.class);
+    bind(WorkspaceLockService.class)
+        .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService.class);
+    bind(WorkspaceStatusCache.class)
+        .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
   }
@@ -280,11 +294,14 @@ public class WsMasterModule extends AbstractModule {
       Map<String, String> persistenceProperties, String infrastructure) {
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-      // Replication is disabled until closing JPA JChannel issue won't be fixed
-      // install(new ReplicationModule(persistenceProperties));
-      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+      install(new ReplicationModule(persistenceProperties));
     } else {
-      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
+      bind(RemoteSubscriptionStorage.class)
+          .to(org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage.class);
+      bind(WorkspaceLockService.class)
+          .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService.class);
+      bind(WorkspaceStatusCache.class)
+          .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
     }
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,

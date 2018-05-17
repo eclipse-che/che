@@ -9,8 +9,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWebsocket} from '../../../components/api/che-websocket.factory';
 import {DiagnosticCallback} from '../diagnostic-callback';
+import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
+import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
+import {CheAPI} from '../../../components/api/che-api.factory';
 
 /**
  * Test for launching websocket connection to the workspace master
@@ -18,12 +20,10 @@ import {DiagnosticCallback} from '../diagnostic-callback';
  */
 export class DiagnosticsWebsocketWsMaster {
 
-  static $inject = ['cheWebsocket', '$timeout'];
+  static $inject = ['cheAPI', 'cheJsonRpcApi', '$timeout'];
 
-  /**
-   * Websocket handling.
-   */
-  private cheWebsocket: CheWebsocket;
+  private jsonRpcMasterApi: CheJsonRpcMasterApi;
+  private wsMasterLocation: string;
 
   /**
    * Timeout handling.
@@ -33,8 +33,9 @@ export class DiagnosticsWebsocketWsMaster {
   /**
    * Default constructor
    */
-  constructor(cheWebsocket: CheWebsocket, $timeout: ng.ITimeoutService) {
-    this.cheWebsocket = cheWebsocket;
+  constructor(cheAPI: CheAPI, cheJsonRpcApi: CheJsonRpcApi, $timeout: ng.ITimeoutService) {
+    this.wsMasterLocation = cheAPI.getWorkspace().getJsonRpcApiLocation();
+    this.jsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.wsMasterLocation);
     this.$timeout = $timeout;
   }
 
@@ -44,27 +45,19 @@ export class DiagnosticsWebsocketWsMaster {
    * @returns {ng.IPromise<any>} when test is finished
    */
   start(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
-
-    try {
+   try {
       // define callback
       let callback = (message: any) => {
-        if (!message) {
-          diagnosticCallback.getMessageBus().unsubscribe('pong');
-          diagnosticCallback.success('Websocket message received');
-        }
+        diagnosticCallback.success('Websocket message received');
       };
 
-      // subscribe to the event
-      diagnosticCallback.subscribeChannel('pong', callback);
-
-      // default fallback if no answer in 5 seconds
-      diagnosticCallback.delayError('No reply of websocket test after 5 seconds. Websocket is failing to connect to ' + this.cheWebsocket.wsUrl, 5000);
-
-      // send the message
-      diagnosticCallback.getMessageBus().ping();
-
+     this.jsonRpcMasterApi.connect(this.wsMasterLocation).then(() => {
+        this.jsonRpcMasterApi.fetchClientId().then(callback);
+       // default fallback if no answer in 5 seconds
+       diagnosticCallback.delayError('No reply of websocket test after 5 seconds. Websocket is failing to connect to ' + this.wsMasterLocation, 5000);
+     });
     } catch (error) {
-      diagnosticCallback.error('Unable to connect with websocket to ' + this.cheWebsocket.wsUrl + ': ' + error);
+      diagnosticCallback.error('Unable to connect with websocket to ' + this.wsMasterLocation + ': ' + error);
     }
     return diagnosticCallback.getPromise();
   }

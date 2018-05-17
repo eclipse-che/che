@@ -77,20 +77,24 @@ public class DeleteProjectsTest {
 
   @BeforeMethod
   public void clearTerminalOutput() {
+    if (askDialog.isOpened()) {
+      askDialog.clickOkBtn();
+      askDialog.waitFormToClose();
+      loader.waitOnClosed();
+    }
     consoles.clickOnClearOutputButton();
     consoles.waitExpectedTextIntoConsole("", 20);
   }
 
   @Test
   public void shouldDeleteProjectByContextMenu() {
-    projectExplorer.waitItem(PROJECT_NAMES.get(0));
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAMES.get(0));
     projectExplorer.clickOnItemInContextMenu(DELETE);
     acceptDeletion(PROJECT_NAMES.get(0));
     checkErrorMessageNotPresentInConsole();
   }
 
-  @Test(priority = 1)
+  @Test
   public void shouldDeleteProjectByMenuFile() {
     projectExplorer.waitItem(PROJECT_NAMES.get(1));
     projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(1));
@@ -99,7 +103,7 @@ public class DeleteProjectsTest {
     checkErrorMessageNotPresentInConsole();
   }
 
-  @Test(priority = 2)
+  @Test
   public void shouldDeleteOpenedProjectByMenuFile() {
     projectExplorer.waitItem(PROJECT_NAMES.get(3));
     projectExplorer.openItemByPath(PROJECT_NAMES.get(3));
@@ -112,7 +116,7 @@ public class DeleteProjectsTest {
     checkErrorMessageNotPresentInConsole();
   }
 
-  @Test(priority = 3)
+  @Test
   public void shouldDeleteOpenedProjectFromContextMenu() {
     projectExplorer.waitItem(PROJECT_NAMES.get(4));
     projectExplorer.openItemByPath(PROJECT_NAMES.get(4));
