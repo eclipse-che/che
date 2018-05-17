@@ -19,7 +19,6 @@ import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.By.id;
 import static org.openqa.selenium.By.tagName;
 import static org.openqa.selenium.By.xpath;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.testng.Assert.assertEquals;
 
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -58,8 +57,8 @@ public class DebugPanel {
   private final Loader loader;
   private final CodenvyEditor editor;
   private final CommandsExplorer commandsExplorer;
-  private final ActionsFactory actionsFactory;
   private final WebDriverWaitFactory webDriverWaitFactory;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   public DebugPanel(
@@ -67,14 +66,15 @@ public class DebugPanel {
       Loader loader,
       CodenvyEditor editor,
       CommandsExplorer commandsExplorer,
-      ActionsFactory actionsFactory,
-      WebDriverWaitFactory webDriverWaitFactory) {
+      WebDriverWaitFactory webDriverWaitFactory,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.editor = editor;
     this.commandsExplorer = commandsExplorer;
-    this.actionsFactory = actionsFactory;
     this.webDriverWaitFactory = webDriverWaitFactory;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -190,10 +190,7 @@ public class DebugPanel {
   public void waitBreakPointsPanelIsEmpty() {
     webDriverWaitFactory
         .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (WebDriver webDriver) -> {
-              return breakpointPanel.getText().isEmpty();
-            });
+        .until((WebDriver webDriver) -> breakpointPanel.getText().isEmpty());
   }
 
   /** Wait while the Variables panel appears */
@@ -533,126 +530,73 @@ public class DebugPanel {
       String fileName, int lineNumber, BreakpointConfiguration breakpointConfiguration) {
     String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
 
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(xpath(breakpointItem)));
-
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .contextClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
-        .build()
-        .perform();
-
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU_CONFIGURE_BREAKPOINT)))
-        .click();
+    seleniumWebDriverHelper.waitAndContextClick(
+        xpath(breakpointItem), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitAndClick(
+        id(BreakpointsPanel.CONTEXT_MENU_CONFIGURE_BREAKPOINT), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
 
     if (breakpointConfiguration.isConditionEnabled()) {
-      seleniumWebDriver
-          .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(
-              visibilityOfElementLocated(
-                  xpath(BreakpointConfigurationWindow.BREAKPOINT_CONDITION_ENABLED)))
-          .click();
+      seleniumWebDriverHelper.waitAndClick(
+          xpath(BreakpointConfigurationWindow.BREAKPOINT_CONDITION_ENABLED),
+          REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
 
-      seleniumWebDriver
-          .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(
-              visibilityOfElementLocated(
-                  xpath(BreakpointConfigurationWindow.BREAKPOINT_CONDITION_TEXT)))
-          .sendKeys(breakpointConfiguration.getCondition());
+      seleniumWebDriverHelper.waitAndSendKeysTo(
+          xpath(BreakpointConfigurationWindow.BREAKPOINT_CONDITION_TEXT),
+          breakpointConfiguration.getCondition(),
+          REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     }
 
     if (breakpointConfiguration.getSuspendPolicy() != null) {
       switch (breakpointConfiguration.getSuspendPolicy()) {
         case ALL:
-          seleniumWebDriver
-              .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-              .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_ALL)))
-              .click();
+          seleniumWebDriverHelper.waitAndClick(
+              xpath(BreakpointConfigurationWindow.SUSPEND_ALL), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
           break;
+
         case THREAD:
-          seleniumWebDriver
-              .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-              .until(
-                  visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_THREAD)))
-              .click();
+          seleniumWebDriverHelper.waitAndClick(
+              xpath(BreakpointConfigurationWindow.SUSPEND_THREAD), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
           break;
+
         default:
-          seleniumWebDriver
-              .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-              .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.SUSPEND_NONE)))
-              .click();
+          seleniumWebDriverHelper.waitAndClick(
+              xpath(BreakpointConfigurationWindow.SUSPEND_NONE), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
           break;
       }
     }
 
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(xpath(BreakpointConfigurationWindow.APPLY_BTN)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        xpath(BreakpointConfigurationWindow.APPLY_BTN), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void navigateToBreakpoint(String fileName, int lineNumber) {
     String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
-
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(xpath(breakpointItem)));
-
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .doubleClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
-        .build()
-        .perform();
+    seleniumWebDriverHelper.waitVisibility(xpath(breakpointItem), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.doubleClick(xpath(breakpointItem));
   }
 
   public void disableBreakpoint(String fileName, int lineNumber) {
     String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
-
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(xpath(breakpointItem)));
-
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .contextClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
-        .build()
-        .perform();
-
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU_DISABLE_BREAKPOINT)))
-        .click();
+    seleniumWebDriverHelper.waitAndContextClick(
+        xpath(breakpointItem), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitAndClick(
+        id(BreakpointsPanel.CONTEXT_MENU_DISABLE_BREAKPOINT), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void deleteBreakpoint(String fileName, int lineNumber) {
     String breakpointItem = format(BreakpointsPanel.BREAKPOINT_ITEM, fileName + ":" + lineNumber);
-
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(xpath(breakpointItem)));
-
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .contextClick(seleniumWebDriver.findElement(xpath(breakpointItem)))
-        .build()
-        .perform();
-
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(id(BreakpointsPanel.CONTEXT_MENU_DELETE_BREAKPOINT)))
-        .click();
+    seleniumWebDriverHelper.waitAndContextClick(
+        xpath(breakpointItem), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitAndClick(
+        id(BreakpointsPanel.CONTEXT_MENU_DELETE_BREAKPOINT), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public List<String> getAllBreakpoints() {
-    return Stream.of(
-            seleniumWebDriver
-                .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-                .until(visibilityOfElementLocated(id(BreakpointsPanel.ID)))
-                .getText()
-                .split("\n"))
+    String breakpointsPanelContent =
+        seleniumWebDriverHelper.waitVisibilityAndGetText(
+            id(BreakpointsPanel.ID), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+
+    return Stream.of(breakpointsPanelContent.split("\n"))
         .filter(s -> !s.equals("?"))
         .collect(Collectors.toList());
   }
@@ -660,27 +604,26 @@ public class DebugPanel {
   public void waitBreakpointState(
       String filePath, int lineNumber, BreakpointState state, boolean conditional) {
 
-    String brkClass = "breakpoint";
+    String breakpointClass = "breakpoint";
     switch (state) {
       case ACTIVE:
-        brkClass += " active";
+        breakpointClass += " active";
         break;
       case INACTIVE:
-        brkClass += " inactive";
+        breakpointClass += " inactive";
         break;
       default:
-        brkClass += " disabled";
+        breakpointClass += " disabled";
     }
 
+    String breakpointXPath =
+        format(
+            "//div[@id='gwt-debug-debugger-breakpointsPanel']//div[@id='%s' and @class='%s']",
+            filePath + ":" + lineNumber, breakpointClass);
+
     WebElement webElement =
-        seleniumWebDriver
-            .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                visibilityOfElementLocated(
-                    xpath(
-                        format(
-                            "//div[@id='gwt-debug-debugger-breakpointsPanel']//div[@id='%s' and @class='%s']",
-                            filePath + ":" + lineNumber, brkClass))));
+        seleniumWebDriverHelper.waitVisibility(
+            xpath(breakpointXPath), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
 
     if (conditional) {
       assertEquals(webElement.getText(), "?");
@@ -688,21 +631,17 @@ public class DebugPanel {
   }
 
   public void waitThreadNotSuspendedHolderVisible() {
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(id(FramesPanel.THREAD_NOT_SUSPENDED_HOLDER)));
+    seleniumWebDriverHelper.waitVisibility(
+        id(FramesPanel.THREAD_NOT_SUSPENDED_HOLDER), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void waitThreadNotSuspendedHolderHidden() {
-    seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(invisibilityOfElementLocated(id(FramesPanel.THREAD_NOT_SUSPENDED_HOLDER)));
+    seleniumWebDriverHelper.waitInvisibility(
+        id(FramesPanel.THREAD_NOT_SUSPENDED_HOLDER), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public String getExecutionPoint() {
-    return seleniumWebDriver
-        .wait(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(id(Locators.EXECUTION_POINT)))
-        .getText();
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(
+        id(Locators.EXECUTION_POINT), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 }
