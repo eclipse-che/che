@@ -56,6 +56,7 @@ public class LanguageServerExtension {
   @Inject
   public LanguageServerExtension(
       LanguageRegexesInitializer languageRegexesInitializer,
+      LanguageDescriptionInitializer languageDescriptionInitializer,
       EventBus eventBus,
       AppContext appContext,
       ShowMessageJsonRpcReceiver showMessageJsonRpcReceiver,
@@ -63,13 +64,15 @@ public class LanguageServerExtension {
     eventBus.addHandler(
         WsAgentServerRunningEvent.TYPE,
         e -> {
-          languageRegexesInitializer.start();
+          languageRegexesInitializer.initialize();
+          languageDescriptionInitializer.initialize();
           showMessageJsonRpcReceiver.subscribe();
           publishDiagnosticsReceiver.subscribe();
         });
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
-      languageRegexesInitializer.start();
+      languageRegexesInitializer.initialize();
+      languageDescriptionInitializer.initialize();
       showMessageJsonRpcReceiver.subscribe();
       publishDiagnosticsReceiver.subscribe();
     }

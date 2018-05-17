@@ -31,6 +31,7 @@ public class LanguageDescriptionInitializer {
   private final OrionHoverRegistrant orionHoverRegistrant;
   private final OrionOccurrencesRegistrant orionOccurrencesRegistrant;
   private final OccurrencesProvider occurrencesProvider;
+  private final Set<LanguageDescription> languageDescriptions;
   private final HoverProvider hoverProvider;
 
   @Inject
@@ -39,17 +40,17 @@ public class LanguageDescriptionInitializer {
       OrionHoverRegistrant orionHoverRegistrant,
       OrionOccurrencesRegistrant orionOccurrencesRegistrant,
       HoverProvider hoverProvider,
-      OccurrencesProvider occurrencesProvider) {
+      OccurrencesProvider occurrencesProvider,
+      Set<LanguageDescription> languageDescriptions) {
     this.contentTypeRegistrant = contentTypeRegistrant;
     this.orionHoverRegistrant = orionHoverRegistrant;
     this.orionOccurrencesRegistrant = orionOccurrencesRegistrant;
     this.hoverProvider = hoverProvider;
     this.occurrencesProvider = occurrencesProvider;
+    this.languageDescriptions = languageDescriptions;
   }
 
-  @Inject
-  void initialize(Set<LanguageDescription> languageDescriptions) {
-
+  void initialize() {
     JsArrayString contentTypes = JsArrayString.createArray().cast();
 
     for (LanguageDescription languageDescription : languageDescriptions) {

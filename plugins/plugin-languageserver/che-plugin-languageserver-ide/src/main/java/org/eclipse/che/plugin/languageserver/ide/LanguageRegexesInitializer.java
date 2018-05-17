@@ -49,7 +49,7 @@ public class LanguageRegexesInitializer {
     this.fileTypeRegistry = fileTypeRegistry;
   }
 
-  void start() {
+  void initialize() {
     languageServerServiceClient
         .getLanguageRegexes()
         .then(
