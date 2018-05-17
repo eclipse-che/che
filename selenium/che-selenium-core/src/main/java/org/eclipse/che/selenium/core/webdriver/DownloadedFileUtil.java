@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * This is set of methods to work with files which are downloaded into WebDriver.
+ * This is set of methods to work with files which are downloaded by WebDriver.
  *
  * @author Dmytro Nochevnov
  */

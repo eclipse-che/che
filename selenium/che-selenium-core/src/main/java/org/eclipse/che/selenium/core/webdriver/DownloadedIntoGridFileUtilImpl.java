@@ -39,7 +39,8 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.utils.DockerUtil;
 
 /**
- * This is set of methods to work with files which are downloaded into WebDriver.
+ * This is set of methods which operate with files which are downloaded by WebDriver which is
+ * running inside the Docker container.
  *
  * @author Dmytro Nochevnov
  */

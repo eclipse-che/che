@@ -29,7 +29,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 
 /**
- * This is set of methods to work with files which are downloaded into WebDriver.
+ * This is set of methods which operate with files which are downloaded by WebDriver which is
+ * running locally.
  *
  * @author Dmytro Nochevnov
  */

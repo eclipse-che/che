@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.projectexplorer;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.DOWNLOAD_AS_ZIP;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
@@ -25,9 +26,9 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -47,6 +48,8 @@ public class DownloadProjectTest {
 
   private static final String TEST_FILE_NAME = "README.md";
   private static final String TEST_DIRECTORY_NAME = "src";
+
+  private static final int MAX_ATTEMPTS = 5;
 
   private static final URL PROJECT_SOURCES =
       DownloadProjectTest.class.getResource("/projects/ProjectWithDifferentTypeOfFiles");
@@ -121,8 +124,8 @@ public class DownloadProjectTest {
     menu.runCommand(WORKSPACE, DOWNLOAD_AS_ZIP);
 
     // then
-    String downloadedFileUtil = getPackageFileList(DOWNLOADED_PROJECTS_PACKAGE_NAME);
-    assertEquals(downloadedFileUtil, expectedPackageFileList.toString());
+    assertEquals(
+        getPackageFileList(DOWNLOADED_PROJECTS_PACKAGE_NAME), expectedPackageFileList.toString());
   }
 
   @Test
@@ -151,6 +154,9 @@ public class DownloadProjectTest {
         expectedPackageFileList.toString());
 
     // when
+    downloadedFileUtil.removeDownloadedFiles(
+        seleniumWebDriver.getSessionId(), DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME);
+
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.DOWNLOAD_AS_ZIP);
@@ -204,26 +210,33 @@ public class DownloadProjectTest {
   }
 
   private String getDownloadedFileContent(String testFileName) throws IOException {
-    try {
-      return downloadedFileUtil.getDownloadedFileContent(
-          seleniumWebDriver.getSessionId(), testFileName);
-    } catch (IOException e) {
-      WaitUtils.sleepQuietly(2);
-      return downloadedFileUtil.getDownloadedFileContent(
-          seleniumWebDriver.getSessionId(), testFileName);
+    IOException lastException = null;
+    for (int i = 0; i < MAX_ATTEMPTS; i++) {
+      try {
+        return downloadedFileUtil.getDownloadedFileContent(
+            seleniumWebDriver.getSessionId(), testFileName);
+      } catch (IOException e) {
+        lastException = e;
+        sleepQuietly(TestTimeoutsConstants.MINIMUM_SEC);
+      }
     }
+
+    throw lastException;
   }
 
   private String getPackageFileList(String downloadedTestProject1PackageName) throws IOException {
-    try {
-      return downloadedFileUtil
-          .getPackageFileList(seleniumWebDriver.getSessionId(), downloadedTestProject1PackageName)
-          .toString();
-    } catch (IOException e) {
-      WaitUtils.sleepQuietly(2);
-      return downloadedFileUtil
-          .getPackageFileList(seleniumWebDriver.getSessionId(), downloadedTestProject1PackageName)
-          .toString();
+    IOException lastException = null;
+    for (int i = 0; i < MAX_ATTEMPTS; i++) {
+      try {
+        return downloadedFileUtil
+            .getPackageFileList(seleniumWebDriver.getSessionId(), downloadedTestProject1PackageName)
+            .toString();
+      } catch (IOException e) {
+        lastException = e;
+        sleepQuietly(TestTimeoutsConstants.MINIMUM_SEC);
+      }
     }
+
+    throw lastException;
   }
 }
