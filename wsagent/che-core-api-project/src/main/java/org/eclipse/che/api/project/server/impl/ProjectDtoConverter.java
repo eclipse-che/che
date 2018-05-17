@@ -107,6 +107,7 @@ public class ProjectDtoConverter {
 
   /**
    * Converts abstract RegisteredProject to RegisteredProjectDto
+   *
    * @param project RegisteredProject
    * @return RegisteredProjectDto
    */
@@ -133,6 +134,7 @@ public class ProjectDtoConverter {
 
   /**
    * Converts abstract ProjectConfig to ProjectConfigDto
+   *
    * @param project ProjectConfig
    * @return ProjectConfigDto
    */

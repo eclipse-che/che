@@ -16,8 +16,9 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 /**
  * Describes current state of project
+ *
  * @author gazarenkov
- * */
+ */
 public interface RegisteredProject extends ProjectConfig {
 
   /**
@@ -36,13 +37,14 @@ public interface RegisteredProject extends ProjectConfig {
   String getBaseFolder();
 
   /**
-   * @return name-value map of persistable (as opposed to provided) attributes
-   * configured for the project
+   * @return name-value map of persistable (as opposed to provided) attributes configured for the
+   *     project
    */
   Map<String, List<String>> getPersistableAttributes();
 
   /**
    * Sets 'synchronized with Workspace storage' flag
+   *
    * @param synced true if synced
    */
   void setSynced(boolean synced);

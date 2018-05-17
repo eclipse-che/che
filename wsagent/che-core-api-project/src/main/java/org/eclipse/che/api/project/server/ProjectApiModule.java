@@ -18,6 +18,7 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.impl.CreateBaseProjectTypeHandler;
+import org.eclipse.che.api.project.server.impl.InmemoryProjectRegistry;
 import org.eclipse.che.api.project.server.impl.OnWorkspaceStartProjectInitializer;
 import org.eclipse.che.api.project.server.impl.ProjectConfigRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectHandlerRegistry;
@@ -58,7 +59,6 @@ public class ProjectApiModule extends AbstractModule {
     bind(ProjectTypeService.class);
 
     bind(OnWorkspaceStartProjectInitializer.class);
-    bind(ProjectConfigRegistry.class);
     bind(ProjectImporterRegistry.class);
     bind(ProjectHandlerRegistry.class);
 
@@ -70,7 +70,7 @@ public class ProjectApiModule extends AbstractModule {
     bind(ProjectQualifier.class).to(SimpleProjectQualifier.class);
     bind(ProjectTypeResolver.class).to(SimpleProjectTypeResolver.class);
 
-    //    bind(ProjectTypeCache.class);
+    bind(ProjectConfigRegistry.class).to(InmemoryProjectRegistry.class);
 
     newSetBinder(binder(), ProjectImporter.class).addBinding().to(ZipProjectImporter.class);
 

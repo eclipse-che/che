@@ -45,7 +45,6 @@ public class ProjectListeners {
   private final File workspace;
   private final ProjectManager projectRegistry;
   private final ProjectTypeRegistry projectTypeRegistry;
-  //  private final PathTransformer pathTransformer;
 
   @Inject
   public ProjectListeners(
@@ -53,11 +52,9 @@ public class ProjectListeners {
       EventService eventService,
       ProjectManager projectRegistry,
       ProjectTypeRegistry projectTypeRegistry) {
-    //      PathTransformer pathTransformer) {
     this.projectRegistry = projectRegistry;
     this.projectTypeRegistry = projectTypeRegistry;
     workspace = new File(pathProvider.get());
-    //    this.pathTransformer = pathTransformer;
     eventService.subscribe(new ProjectCreated());
     eventService.subscribe(
         new EventSubscriber<ProjectItemModifiedEvent>() {

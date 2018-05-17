@@ -24,11 +24,6 @@ public class RootAwarePathTransformer implements PathTransformer {
 
   private final Path root;
 
-  //  @Inject
-  //  public RootAwarePathTransformer(@Named("che.user.workspaces.storage") File root) {
-  //    this.root = root.toPath().normalize().toAbsolutePath();
-  //  }
-
   @Inject
   public RootAwarePathTransformer(RootDirPathProvider rootProvider) {
     this.root = Paths.get(rootProvider.get());

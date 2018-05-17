@@ -39,7 +39,6 @@ public class FileWatcherManagerTest {
   @Mock FileWatcherByPathMatcher fileWatcherByPathMatcher;
   @Mock FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
   @Mock FileWatcherService service;
-  // @Mock RootDirPathProvider rootDirPathProvider;
 
   FileWatcherManager manager;
 
@@ -53,7 +52,6 @@ public class FileWatcherManagerTest {
     manager =
         new SimpleFileWatcherManager(
             new DummyRootProvider(rootFolder.getRoot()),
-            //            rootFolder.getRoot(),
             fileWatcherByPathValue,
             fileWatcherByPathMatcher,
             fileWatcherExcludePatternsRegistry);
