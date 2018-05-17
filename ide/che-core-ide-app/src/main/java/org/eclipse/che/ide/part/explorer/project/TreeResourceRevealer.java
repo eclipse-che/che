@@ -10,12 +10,9 @@
  */
 package org.eclipse.che.ide.part.explorer.project;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
 import static java.util.Arrays.copyOf;
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
-import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -24,22 +21,15 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
-import org.eclipse.che.ide.resources.reveal.RevealResourceEvent.RevealResourceHandler;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
-import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent.PostLoadHandler;
 
 /**
  * Search node handler, perform searching specified node in the tree by storable value. For example
@@ -88,28 +78,14 @@ public class TreeResourceRevealer {
 
     eventBus.addHandler(
         RevealResourceEvent.getType(),
-        new RevealResourceHandler() {
-          @Override
-          public void onRevealResource(final RevealResourceEvent event) {
+        event ->
             queue.thenPromise(
-                new Function<Void, Promise<Void>>() {
-                  @Override
-                  public Promise<Void> apply(Void ignored) throws FunctionException {
-                    return reveal(
+                ignored ->
+                    reveal(
                             event.getLocation(),
                             event.isSelectionRequired(),
                             event.isFocusRequired())
-                        .catchError(
-                            new Function<PromiseError, Void>() {
-                              @Override
-                              public Void apply(PromiseError arg) throws FunctionException {
-                                return null;
-                              }
-                            });
-                  }
-                });
-          }
-        });
+                        .catchError((Function<PromiseError, Void>) arg -> null)));
   }
 
   /**
@@ -144,18 +120,8 @@ public class TreeResourceRevealer {
   public Promise<Node> reveal(
       final Path path, final boolean select, final boolean isFocusRequired) {
     return queue.thenPromise(
-        new Function<Void, Promise<Node>>() {
-          @Override
-          public Promise<Node> apply(Void ignored) throws FunctionException {
-            return createFromAsyncRequest(
-                new RequestCall<Node>() {
-                  @Override
-                  public void makeCall(AsyncCallback<Node> callback) {
-                    reveal(path, select, isFocusRequired, callback);
-                  }
-                });
-          }
-        });
+        ignored ->
+            createFromAsyncRequest(callback -> reveal(path, select, isFocusRequired, callback)));
   }
 
   protected void reveal(
@@ -169,45 +135,52 @@ public class TreeResourceRevealer {
 
     Scheduler.get()
         .scheduleFixedDelay(
-            new Scheduler.RepeatingCommand() {
-              @Override
-              public boolean execute() {
-                if (tree.getNodeLoader().isBusy()) {
-                  return true;
+            () -> {
+              if (tree.getNodeLoader().isBusy()) {
+                return true;
+              }
+
+              ResourceNode nodeByPath = getNodeByPath(path);
+              if (nodeByPath != null) {
+
+                if (select) {
+                  TreeResourceRevealer.this.isFocusRequired = isFocusRequired;
+
+                  if (toSelect == null) {
+                    toSelect = new Node[] {nodeByPath};
+                  } else {
+                    final int index = toSelect.length;
+                    toSelect = copyOf(toSelect, index + 1);
+                    toSelect[index] = nodeByPath;
+                  }
+
+                  selectTask.delay(200);
                 }
 
-                final Optional<ResourceNode> optRoot = getRootResourceNode(path);
-
-                if (!optRoot.isPresent()) {
-                  callback.onFailure(new IllegalStateException());
-                  return false;
-                }
-
-                final ResourceNode root = optRoot.get();
-
-                if (root.getData().getLocation().equals(path)) {
-                  callback.onSuccess(root);
-                  return false;
-                }
-
-                expandToPath(root, path, select, isFocusRequired)
-                    .then(
-                        new Operation<ResourceNode>() {
-                          @Override
-                          public void apply(ResourceNode node) throws OperationException {
-                            callback.onSuccess(node);
-                          }
-                        })
-                    .catchError(
-                        new Operation<PromiseError>() {
-                          @Override
-                          public void apply(PromiseError arg) throws OperationException {
-                            callback.onFailure(arg.getCause());
-                          }
-                        });
-
+                callback.onSuccess(nodeByPath);
                 return false;
               }
+
+              ResourceNode root = getRootResourceNode(path);
+
+              if (root == null) {
+                callback.onFailure(new IllegalStateException());
+                return false;
+              }
+
+              if (root.getData().getLocation().equals(path)) {
+                callback.onSuccess(root);
+                return false;
+              }
+
+              expandToPath(root, path, select, isFocusRequired)
+                  .then(callback::onSuccess)
+                  .catchError(
+                      arg -> {
+                        callback.onFailure(arg.getCause());
+                      });
+
+              return false;
             },
             500);
   }
@@ -218,12 +191,7 @@ public class TreeResourceRevealer {
       final boolean select,
       final boolean isFocusRequired) {
     return createFromAsyncRequest(
-        new RequestCall<ResourceNode>() {
-          @Override
-          public void makeCall(final AsyncCallback<ResourceNode> callback) {
-            expand(root, path, select, isFocusRequired, callback);
-          }
-        });
+        callback -> expand(root, path, select, isFocusRequired, callback));
   }
 
   protected void expand(
@@ -257,58 +225,58 @@ public class TreeResourceRevealer {
     handler[0] =
         tree.getNodeLoader()
             .addPostLoadHandler(
-                new PostLoadHandler() {
-                  @Override
-                  public void onPostLoad(PostLoadEvent event) {
-                    if (!event.getRequestedNode().equals(parent)) {
+                event -> {
+                  if (!event.getRequestedNode().equals(parent)) {
+                    return;
+                  }
+
+                  if (handler[0] != null) {
+                    // Do not remove the handler immediately to not to lose 'loadChildren' events
+                    // that were fired after the children request.
+                    Scheduler.get()
+                        .scheduleFixedDelay(
+                            () -> {
+                              handler[0].removeHandler();
+                              return false;
+                            },
+                            1000);
+                  }
+
+                  final List<Node> children =
+                      tree.getNodeStorage().getChildren(event.getRequestedNode());
+
+                  for (Node child : children) {
+                    if (child instanceof ResourceNode
+                        && ((ResourceNode) child).getData().getLocation().isPrefixOf(segment)) {
+                      expand((ResourceNode) child, segment, select, isFocusRequired, callback);
                       return;
                     }
-
-                    if (handler[0] != null) {
-                      // Do not remove the handler immediately to not to lose 'loadChildren' events
-                      // that were fired after the children request.
-                      Scheduler.get()
-                          .scheduleFixedDelay(
-                              () -> {
-                                handler[0].removeHandler();
-                                return false;
-                              },
-                              1000);
-                    }
-
-                    final List<Node> children =
-                        tree.getNodeStorage().getChildren(event.getRequestedNode());
-
-                    for (Node child : children) {
-                      if (child instanceof ResourceNode
-                          && ((ResourceNode) child).getData().getLocation().isPrefixOf(segment)) {
-                        expand((ResourceNode) child, segment, select, isFocusRequired, callback);
-                        return;
-                      }
-                    }
-
-                    callback.onFailure(new IllegalStateException("Not found"));
                   }
+
+                  callback.onFailure(new IllegalStateException("Not found"));
                 });
 
     tree.getNodeLoader().loadChildren(parent);
   }
 
-  private Optional<ResourceNode> getRootResourceNode(Path path) {
-    for (Node root : tree.getRootNodes()) {
-      if (!(root instanceof ResourceNode)) {
-        continue;
-      }
+  private ResourceNode getNodeByPath(Path path) {
+    return (ResourceNode)
+        tree.getNodeStorage()
+            .getAll()
+            .stream()
+            .filter(node -> node instanceof ResourceNode)
+            .filter(node -> ((ResourceNode) node).getData().getLocation().equals(path))
+            .findFirst()
+            .orElse(null);
+  }
 
-      final Path rootPath = ((ResourceNode) root).getData().getLocation();
-
-      if (!rootPath.isPrefixOf(path)) {
-        continue;
-      }
-
-      return of((ResourceNode) root);
-    }
-
-    return absent();
+  private ResourceNode getRootResourceNode(Path path) {
+    return (ResourceNode)
+        tree.getRootNodes()
+            .stream()
+            .filter(node -> node instanceof ResourceNode)
+            .filter(node -> ((ResourceNode) node).getData().getLocation().isPrefixOf(path))
+            .findFirst()
+            .orElse(null);
   }
 }
