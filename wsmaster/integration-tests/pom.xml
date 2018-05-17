@@ -23,7 +23,14 @@
     <packaging>pom</packaging>
     <name>Integration Tests :: Parent</name>
     <modules>
-        <module>postgresql-tck</module>
         <module>cascade-removal</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <modules>
+                <module>postgresql-tck</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
