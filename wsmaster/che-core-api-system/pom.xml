@@ -86,7 +86,7 @@
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-schedule</artifactId>
         </dependency>
-          <dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-db</artifactId>
         </dependency>
