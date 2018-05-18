@@ -215,6 +215,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   /** The editor's error state. */
   private EditorState errorState;
 
+  private int topLine;
   private boolean delayedFocus;
   private boolean isFocused;
   private BreakpointRenderer breakpointRenderer;
@@ -781,6 +782,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   @Override
+  public int getTopLine() {
+    return isFocused ? getTopVisibleLine() : topLine;
+  }
+
+  @Override
   public int getTopVisibleLine() {
     return editorWidget.getTopVisibleLine();
   }
@@ -888,6 +894,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   public void editorLostFocus() {
     this.editorView.updateInfoPanelUnfocused(this.document.getLineCount());
     this.isFocused = false;
+    this.topLine = getTopVisibleLine();
     if (isDirty() && autoSaveMode.isActivated()) {
       doSave();
     }
@@ -896,7 +903,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   @Override
   public void editorGotFocus() {
     this.isFocused = true;
-    this.editorView.updateInfoPanelPosition(this.document.getCursorPosition());
+
+    Scheduler.get().scheduleDeferred(() -> firePropertyChange(PROP_FOCUSED));
+    editorView.updateInfoPanelPosition(this.document.getCursorPosition());
   }
 
   @Override

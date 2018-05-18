@@ -37,6 +37,9 @@ public interface EditorPartPresenter extends PartPresenter {
   /** The property id for editor input changed. */
   int PROP_INPUT = 0x102;
 
+  /** The property id for state when editor has got focus. */
+  int PROP_FOCUSED = 0x103;
+
   /**
    * Initializes this editor with the given input.
    *

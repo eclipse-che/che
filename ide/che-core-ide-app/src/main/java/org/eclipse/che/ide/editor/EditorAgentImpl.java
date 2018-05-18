@@ -13,11 +13,11 @@ package org.eclipse.che.ide.editor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Boolean.parseBoolean;
+import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_FOCUSED;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -65,6 +66,7 @@ import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -521,7 +523,7 @@ public class EditorAgentImpl
       file.put("EDITOR_PROVIDER", openedEditorsToProviders.get(part));
       if (part instanceof TextEditor) {
         file.put("CURSOR_OFFSET", ((TextEditor) part).getCursorOffset());
-        file.put("TOP_VISIBLE_LINE", ((TextEditor) part).getTopVisibleLine());
+        file.put("TOP_VISIBLE_LINE", ((TextEditor) part).getTopLine());
       }
       if (partStack.getActivePart().equals(part)) {
         file.put("ACTIVE", true);
@@ -663,58 +665,43 @@ public class EditorAgentImpl
     final boolean active = file.hasKey("ACTIVE") && file.getBoolean("ACTIVE");
 
     final EditorProvider provider = editorRegistry.findEditorProviderById(providerId);
-    if (provider instanceof AsyncEditorProvider) {
-      ((AsyncEditorProvider) provider)
-          .createEditor(resourceFile)
-          .then(
-              editor -> {
-                restoreInitEditor(
-                        resourceFile,
-                        callback,
-                        fileTypeRegistry.getFileTypeByFile(resourceFile),
-                        editor,
-                        provider,
-                        editorPartStack)
-                    .then(
-                        arg -> {
-                          if (active) {
-                            activeEditors.put(editor, editorPartStack);
-                          }
-                          openCallback.onSuccess(null);
-                        });
-              });
-    } else {
-      EditorPartPresenter editor = provider.getEditor();
-      restoreInitEditor(
-              resourceFile,
-              callback,
-              fileTypeRegistry.getFileTypeByFile(resourceFile),
-              editor,
-              provider,
-              editorPartStack)
-          .then(
-              arg -> {
-                if (active) {
-                  activeEditors.put(editor, editorPartStack);
-                }
-                openCallback.onSuccess(null);
-              });
-    }
+
+    createEditorPart(provider, resourceFile)
+        .then(
+            editor -> {
+              restoreInitEditor(resourceFile, editor, editorPartStack, callback)
+                  .then(
+                      arg -> {
+                        if (active) {
+                          activeEditors.put(editor, editorPartStack);
+                        }
+                        openCallback.onSuccess(null);
+                      });
+              finalizeInit(resourceFile, editor, provider);
+            });
+  }
+
+  private Promise<EditorPartPresenter> createEditorPart(
+      EditorProvider provider, VirtualFile resourceFile) {
+    return provider instanceof AsyncEditorProvider
+        ? ((AsyncEditorProvider) provider).createEditor(resourceFile)
+        : promiseProvider.resolve(provider.getEditor());
   }
 
   private Promise<Void> restoreInitEditor(
-      final VirtualFile file,
-      final OpenEditorCallback openEditorCallback,
-      FileType fileType,
-      final EditorPartPresenter editor,
-      EditorProvider editorProvider,
-      EditorPartStack editorPartStack) {
+      VirtualFile file,
+      EditorPartPresenter editor,
+      EditorPartStack editorPartStack,
+      OpenEditorCallback openEditorCallback) {
     return AsyncPromiseHelper.createFromAsyncRequest(
         (AsyncCallback<Void> promiseCallback) -> {
           OpenEditorCallback initializeCallback =
               new OpenEditorCallbackImpl() {
                 @Override
                 public void onEditorOpened(EditorPartPresenter editor) {
+                  new ActivatingEditorPartObserver(
+                      editor, activatedEditor -> openEditorCallback.onEditorActivated(editor));
+
                   editorPartStack.addPart(editor);
 
                   openedEditors.add(editor);
@@ -722,7 +709,6 @@ public class EditorAgentImpl
 
                   promiseCallback.onSuccess(null);
                   openEditorCallback.onEditorOpened(editor);
-                  openEditorCallback.onEditorActivated(editor);
 
                   eventBus.fireEvent(new EditorOpenedEvent(file, editor));
                   eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
@@ -742,8 +728,8 @@ public class EditorAgentImpl
                 }
               };
 
+          FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
           editor.init(new EditorInputImpl(fileType, file), initializeCallback);
-          finalizeInit(file, editor, editorProvider);
         });
   }
 
@@ -805,6 +791,33 @@ public class EditorAgentImpl
     }
   }
 
+  private static class ActivatingEditorPartObserver {
+    private final EditorPartPresenter editorPart;
+    private final PropertyListener focusedPropertyListener;
+
+    ActivatingEditorPartObserver(
+        EditorPartPresenter editorPart, Consumer<EditorPartPresenter> consumer) {
+      this.editorPart = editorPart;
+      this.focusedPropertyListener =
+          (source, propId) -> {
+            if (propId == PROP_FOCUSED) {
+              destroy();
+
+              if (consumer != null) {
+                consumer.accept(editorPart);
+              }
+            }
+          };
+      editorPart.addPropertyListener(focusedPropertyListener);
+    }
+
+    private void destroy() {
+      if (editorPart != null && focusedPropertyListener != null) {
+        editorPart.removePropertyListener(focusedPropertyListener);
+      }
+    }
+  }
+
   private static class RestoreStateEditorCallBack extends OpenEditorCallbackImpl {
     private final int cursorOffset;
     private final int topLine;
@@ -825,7 +838,7 @@ public class EditorAgentImpl
     @Override
     public void onEditorActivated(EditorPartPresenter editor) {
       if (editor instanceof TextEditor) {
-        Scheduler.get().scheduleDeferred(() -> ((TextEditor) editor).setTopLine(topLine));
+        ((TextEditor) editor).setTopLine(topLine);
       }
     }
   }
