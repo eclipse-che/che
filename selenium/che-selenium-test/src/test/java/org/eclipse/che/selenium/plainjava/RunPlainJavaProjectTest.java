@@ -108,7 +108,7 @@ public class RunPlainJavaProjectTest {
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.waitExpectedTextJarsAndFolderArea(
-        "mockito-all-1.10.19.jar - /projects/" + PROJECT_NAME + "/store");
+        "testLibrary.jar - /projects/" + PROJECT_NAME + "/store");
     configureClasspath.closeConfigureClasspathFormByIcon();
 
     // create the instance of the library
