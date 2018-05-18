@@ -101,6 +101,7 @@ public class ImportWizardFormTest {
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private Dashboard dashboard;
   @Inject private KeycloakFederatedIdentitiesPage keycloakFederatedIdentitiesPage;
+  @Inject private TestGitHubRepository testRepo;
   @Inject private TestGitHubRepository keepDirectoryRepo;
   @Inject private TestGitHubRepository importBranchRepo;
   @Inject private TestGitHubRepository multimoduleRepo;
@@ -144,7 +145,9 @@ public class ImportWizardFormTest {
 
   @Test
   public void shouldLoginToGitHubAndImportProject() throws Exception {
-    currentProjectName = "AngularJS";
+    initRepoForLoginToGithubAndImportProject();
+
+    currentProjectName = testRepo.getName();
 
     // init repos for tests
     initRepoForKeepDirectoryTest();
@@ -526,6 +529,10 @@ public class ImportWizardFormTest {
         projectName + "/my-lib/src/test/java/hello", "SayHelloTest.java");
 
     editor.waitActive();
+  }
+
+  private void initRepoForLoginToGithubAndImportProject() throws IOException {
+    testRepo.addContent(Paths.get(getClass().getResource("/projects/testRepo").getPath()));
   }
 
   private void initRepoForKeepDirectoryTest() throws IOException {
