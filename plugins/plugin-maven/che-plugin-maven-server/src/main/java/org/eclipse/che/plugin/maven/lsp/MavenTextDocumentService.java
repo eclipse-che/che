@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.maven.lsp;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.CodeLens;
@@ -40,9 +42,11 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
+@Singleton
 public class MavenTextDocumentService implements TextDocumentService {
   private PomReconciler reconciler;
 
+  @Inject
   public MavenTextDocumentService(PomReconciler reconciler) {
     this.reconciler = reconciler;
   }

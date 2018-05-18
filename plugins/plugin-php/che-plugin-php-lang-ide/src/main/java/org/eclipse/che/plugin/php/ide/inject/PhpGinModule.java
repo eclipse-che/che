@@ -10,14 +10,17 @@
  */
 package org.eclipse.che.plugin.php.ide.inject;
 
+import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
+
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
+import org.eclipse.che.plugin.php.ide.PhpLanguageDescriptionProvider;
 import org.eclipse.che.plugin.php.ide.PhpResources;
 import org.eclipse.che.plugin.php.ide.project.PhpProjectWizardRegistrar;
 import org.eclipse.che.plugin.php.shared.Constants;
@@ -29,9 +32,13 @@ public class PhpGinModule extends AbstractGinModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class)
+    newSetBinder(binder(), ProjectWizardRegistrar.class)
         .addBinding()
         .to(PhpProjectWizardRegistrar.class);
+
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(PhpLanguageDescriptionProvider.class);
   }
 
   @Provides
