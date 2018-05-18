@@ -94,7 +94,8 @@ public class AskDialog {
    * @param expectedText expected text in widget
    */
   public void containsText(final String expectedText) {
-    seleniumWebDriverHelper.waitText(warning_Text, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitTextContains(
+        warning_Text, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
