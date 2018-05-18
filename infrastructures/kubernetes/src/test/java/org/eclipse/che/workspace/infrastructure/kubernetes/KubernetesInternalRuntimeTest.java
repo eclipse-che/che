@@ -278,7 +278,7 @@ public class KubernetesInternalRuntimeTest {
     verify(pods).create(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    // verify(namespace.pods(), times(2)).watchContainers(any());
+    verify(namespace.pods(), times(2)).watchContainers(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -511,23 +511,6 @@ public class KubernetesInternalRuntimeTest {
             getCurrentTimestampWithOneHourShiftAhead());
     unrecoverableEventHanler.handle(regularEvent);
     // 'internalStop' is NOT expected to be called and namespace cleanup will not be triggered
-    verify(namespace, never()).cleanUp();
-  }
-
-  @Test
-  public void testHandleUnrecoverableEventWhichHappenedInPast() throws Exception {
-    final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
-    final ContainerEvent regularEvent =
-        mockContainerEvent(
-            WORKSPACE_POD_NAME,
-            "Pulling",
-            "pulling image",
-            EVENT_CREATION_TIMESTAMP,
-            EVENT_LAST_TIMESTAMP_IN_PAST);
-    unrecoverableEventHanler.handle(regularEvent);
-    // 'internalStop' is NOT expected to be called since unrecoverable event had happened in the
-    // past. Namespace cleanup will not be triggered
     verify(namespace, never()).cleanUp();
   }
 
