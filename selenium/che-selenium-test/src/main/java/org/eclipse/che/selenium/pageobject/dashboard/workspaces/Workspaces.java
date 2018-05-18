@@ -17,15 +17,16 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -40,13 +41,21 @@ public class Workspaces {
   private final SeleniumWebDriver seleniumWebDriver;
   private final WebDriverWait redrawUiElementsTimeout;
   private final Dashboard dashboard;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWaitFactory webDriverWaitFactory;
 
   @Inject
-  public Workspaces(SeleniumWebDriver seleniumWebDriver, Dashboard dashboard) {
+  public Workspaces(
+      SeleniumWebDriver seleniumWebDriver,
+      Dashboard dashboard,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     this.dashboard = dashboard;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -73,6 +82,8 @@ public class Workspaces {
     String WORKSPACE_ITEM_ADD_PROJECT_BUTTON =
         "//div[@id='ws-name-%s']//span[@name='add-project-button']";
     String WORKSPACE_LIST_HEADER = "//md-item[@class='noselect']//span";
+    String WORKSPACE_LIST_ITEM =
+        "(//div[@class='workspace-name-clip']/parent::div/parent::div/parent::div)[%s]";
   }
 
   public interface Statuses {
@@ -159,6 +170,13 @@ public class Workspaces {
         .click();
   }
 
+  public boolean isBulkCheckboxChecked() {
+    return seleniumWebDriverHelper
+        .waitVisibility(By.xpath("//md-checkbox[@aria-label='Workspace list']"))
+        .getAttribute("class")
+        .contains("md-checked");
+  }
+
   public boolean isWorkspaceChecked(String workspaceName) {
     String attrValue =
         redrawUiElementsTimeout
@@ -215,6 +233,22 @@ public class Workspaces {
         .until(
             visibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_ADD_PROJECT_BUTTON, workspaceName))))
+        .click();
+  }
+
+  public void clickOnRamButton() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath("//div[@che-column-title='RAM']/div")).click();
+  }
+
+  public void clickOnProjectsButton() {
+    seleniumWebDriverHelper
+        .waitVisibility(By.xpath("//div[@che-column-title='Projects']/div"))
+        .click();
+  }
+
+  public void clickOnStackButton() {
+    seleniumWebDriverHelper
+        .waitVisibility(By.xpath("//div[@che-column-title='Stack']/div"))
         .click();
   }
 
@@ -278,8 +312,17 @@ public class Workspaces {
   }
 
   public void clickOnDeleteWorkspacesBtn() {
+    waitDeleteWorkspaceBtn().click();
+  }
+
+  public WebElement waitDeleteWorkspaceBtn() {
     dashboard.waitNotificationIsClosed();
-    redrawUiElementsTimeout.until(visibilityOf(deleleWorkspaceButton)).click();
+    return seleniumWebDriverHelper.waitVisibility(deleleWorkspaceButton);
+  }
+
+  public void waitDeleteWorkspaceBtnDisappearance() {
+    dashboard.waitNotificationIsClosed();
+    seleniumWebDriverHelper.waitInvisibility(deleleWorkspaceButton);
   }
 
   /** Click on the delete/remove button in the dialog window */
@@ -299,5 +342,76 @@ public class Workspaces {
         });
 
     return titles;
+  }
+
+  public int getVisibleWorkspacesCount() {
+    return seleniumWebDriverHelper
+        .waitVisibilityOfAllElements(
+            By.xpath("//div[@class='workspace-name-clip']/parent::div/parent::div/parent::div"))
+        .size();
+  }
+
+  public String getFullListItemName(int index) {
+    String itemXpath = String.format(Locators.WORKSPACE_LIST_ITEM, index);
+    String fullNameXpath = itemXpath + "//div[@class='workspace-name-clip']";
+    return seleniumWebDriverHelper
+        .waitVisibility(By.xpath(fullNameXpath))
+        .getAttribute("id")
+        .replace("ws-full-name-", "");
+  }
+
+  public List<WorkspaceListItem> getVisibleWorkspaces() {
+    List<WorkspaceListItem> items = new ArrayList<>();
+
+    for (int i = 1; i <= getVisibleWorkspacesCount(); i++) {
+      String fullName = getFullListItemName(i);
+      String ownerName = Arrays.asList(fullName.split("/")).get(0);
+      String workspaceName = Arrays.asList(fullName.split("/")).get(1);
+      int ramCount =
+          Integer.parseInt(Arrays.asList(getWorkspaceRamValue(workspaceName).split(" ")).get(0));
+      int projectsCount = Integer.parseInt(getWorkspaceProjectsValue(workspaceName));
+      items.add(new WorkspaceListItem(ownerName, workspaceName, ramCount, projectsCount));
+    }
+
+    return items;
+  }
+
+  public static class WorkspaceListItem {
+    private String ownerName;
+    private String workspaceName;
+    private int ramAmount;
+    private int projectsAmount;
+
+    public WorkspaceListItem(
+        String ownerName, String workspaceName, int ramAmount, int projectsAmount) {
+      this.ownerName = ownerName;
+      this.workspaceName = workspaceName;
+      this.ramAmount = ramAmount;
+      this.projectsAmount = projectsAmount;
+    }
+
+    public String getOwnerName() {
+      return ownerName;
+    }
+
+    public String getWorkspaceName() {
+      return workspaceName;
+    }
+
+    public int getRamAmount() {
+      return ramAmount;
+    }
+
+    public int getProjectsAmount() {
+      return projectsAmount;
+    }
+
+    public boolean equals(Object obj) {
+      WorkspaceListItem itemForCompare = (WorkspaceListItem) obj;
+      return this.ownerName.equals(itemForCompare.ownerName)
+          && this.workspaceName.equals(itemForCompare.workspaceName)
+          && this.ramAmount == itemForCompare.ramAmount
+          && this.projectsAmount == itemForCompare.projectsAmount;
+    }
   }
 }
