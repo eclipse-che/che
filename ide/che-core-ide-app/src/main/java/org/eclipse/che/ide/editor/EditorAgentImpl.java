@@ -725,6 +725,7 @@ public class EditorAgentImpl
                   openEditorCallback.onEditorActivated(editor);
 
                   eventBus.fireEvent(new EditorOpenedEvent(file, editor));
+                  eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
                 }
 
                 @Override

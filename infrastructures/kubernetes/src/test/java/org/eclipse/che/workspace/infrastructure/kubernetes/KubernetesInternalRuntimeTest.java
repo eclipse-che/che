@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -593,6 +594,53 @@ public class KubernetesInternalRuntimeTest {
 
     // then
     assertFalse(runtimeStatesCache.get(internalRuntime.getContext().getIdentity()).isPresent());
+  }
+
+  @Test
+  public void shouldScheduleServerCheckersForRunningRuntime() throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(
+            internalRuntime.getContext().getIdentity(), "test", WorkspaceStatus.RUNNING));
+
+    // when
+    internalRuntime.scheduleServersCheckers();
+
+    // then
+    verify(probesScheduler).schedule(any(), any());
+  }
+
+  @Test
+  public void shouldScheduleServerCheckersForStartingRuntime() throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(
+            internalRuntime.getContext().getIdentity(), "test", WorkspaceStatus.STARTING));
+
+    // when
+    internalRuntime.scheduleServersCheckers();
+
+    // then
+    verify(probesScheduler).schedule(any(), any(), any());
+  }
+
+  @Test(dataProvider = "nonStartingRunningStatuses")
+  public void shouldNotScheduleServerCheckersIfRuntimeIsNotStartingOrRunning(WorkspaceStatus status)
+      throws Exception {
+    // given
+    runtimeStatesCache.putIfAbsent(
+        new KubernetesRuntimeState(internalRuntime.getContext().getIdentity(), "test", status));
+
+    // when
+    internalRuntime.scheduleServersCheckers();
+
+    // then
+    verifyZeroInteractions(probesScheduler);
+  }
+
+  @DataProvider(name = "nonStartingRunningStatuses")
+  public Object[][] nonStartingRunningStatuses() {
+    return new Object[][] {{WorkspaceStatus.STOPPED}, {WorkspaceStatus.STOPPING}};
   }
 
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {

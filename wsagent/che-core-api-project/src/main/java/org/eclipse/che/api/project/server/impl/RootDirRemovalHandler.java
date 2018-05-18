@@ -16,7 +16,9 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +35,18 @@ public class RootDirRemovalHandler {
   private final ProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final FileWatcherManager fileWatcherManager;
+  private final EventService eventService;
 
   @Inject
   public RootDirRemovalHandler(
       ProjectSynchronizer projectSynchronizer,
       ProjectConfigRegistry projectConfigRegistry,
-      FileWatcherManager fileWatcherManager) {
+      FileWatcherManager fileWatcherManager,
+      EventService eventService) {
     this.projectSynchronizer = projectSynchronizer;
     this.projectConfigRegistry = projectConfigRegistry;
     this.fileWatcherManager = fileWatcherManager;
+    this.eventService = eventService;
   }
 
   @PostConstruct
@@ -52,7 +57,17 @@ public class RootDirRemovalHandler {
   private void consumeDelete(String wsPath) {
     try {
       if (projectConfigRegistry.isRegistered(wsPath)) {
-        projectConfigRegistry.remove(wsPath);
+        projectConfigRegistry
+            .getAll(wsPath)
+            .stream()
+            .map(RegisteredProject::getPath)
+            .forEach(projectConfigRegistry::remove);
+
+        projectConfigRegistry
+            .remove(wsPath)
+            .map(RegisteredProject::getPath)
+            .map(ProjectDeletedEvent::new)
+            .ifPresent(eventService::publish);
         projectSynchronizer.synchronize();
       }
     } catch (ServerException e) {

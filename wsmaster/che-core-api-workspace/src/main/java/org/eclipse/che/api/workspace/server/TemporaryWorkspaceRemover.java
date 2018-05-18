@@ -18,12 +18,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.slf4j.Logger;
 
 /**
- * Removes temporary workspaces on server startup and shutdown.
+ * Removes stopped temporary workspaces on server startup and shutdown.
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
@@ -33,10 +34,12 @@ public class TemporaryWorkspaceRemover {
   private static final Logger LOG = getLogger(TemporaryWorkspaceRemover.class);
 
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceRuntimes runtimes;
 
   @Inject
-  public TemporaryWorkspaceRemover(WorkspaceDao workspaceDao) {
+  public TemporaryWorkspaceRemover(WorkspaceDao workspaceDao, WorkspaceRuntimes runtimes) {
     this.workspaceDao = workspaceDao;
+    this.runtimes = runtimes;
   }
 
   @PostConstruct
@@ -44,7 +47,7 @@ public class TemporaryWorkspaceRemover {
     try {
       removeTemporaryWs();
     } catch (ServerException e) {
-      LOG.warn("Unable to cleanup temporary workspaces on startup: " + e.getLocalizedMessage(), e);
+      LOG.warn("Unable to cleanup temporary workspaces on startup: " + e.getMessage(), e);
     }
   }
 
@@ -52,7 +55,7 @@ public class TemporaryWorkspaceRemover {
     try {
       removeTemporaryWs();
     } catch (ServerException e) {
-      LOG.warn("Unable to cleanup temporary workspaces on shutdown: " + e.getLocalizedMessage(), e);
+      LOG.warn("Unable to cleanup temporary workspaces on shutdown: " + e.getMessage(), e);
     }
   }
 
@@ -61,13 +64,16 @@ public class TemporaryWorkspaceRemover {
     for (WorkspaceImpl workspace :
         Pages.iterate(
             (maxItems, skipCount) -> workspaceDao.getWorkspaces(true, maxItems, skipCount))) {
-      try {
-        workspaceDao.remove(workspace.getId());
-      } catch (ServerException e) {
-        LOG.error(
-            "Unable to cleanup temporary workspace {}. Reason is {}",
-            workspace.getId(),
-            e.getLocalizedMessage());
+      WorkspaceStatus status = runtimes.getStatus(workspace.getId());
+      if (status == WorkspaceStatus.STOPPED) {
+        try {
+          workspaceDao.remove(workspace.getId());
+        } catch (ServerException e) {
+          LOG.error(
+              "Unable to cleanup temporary workspace {}. Reason is {}",
+              workspace.getId(),
+              e.getMessage());
+        }
       }
     }
   }

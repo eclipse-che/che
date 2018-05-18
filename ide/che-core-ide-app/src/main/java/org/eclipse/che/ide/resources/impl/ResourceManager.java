@@ -538,48 +538,25 @@ public final class ResourceManager {
                 deletedFilesController.add(source.getLocation().toString());
               }
 
-              return clientServerEventService
-                  .sendFileTrackingSuspendEvent()
+              return ps.move(
+                      source.getLocation(), destination.parent(), destination.lastSegment(), force)
                   .thenPromise(
-                      success -> {
-                        store.dispose(
-                            source.getLocation(), !source.isFile()); // TODO: need to be tested
+                      ignored2 ->
+                          findResource(destination)
+                              .thenPromise(
+                                  movedResource -> {
+                                    if (movedResource.isPresent()) {
+                                      eventBus.fireEvent(
+                                          new ResourceChangedEvent(
+                                              new ResourceDeltaImpl(
+                                                  movedResource.get(),
+                                                  source,
+                                                  ADDED | MOVED_FROM | MOVED_TO | DERIVED)));
+                                      return promises.resolve(movedResource.get());
+                                    }
 
-                        return ps.move(
-                                source.getLocation(),
-                                destination.parent(),
-                                destination.lastSegment(),
-                                force)
-                            .thenPromise(
-                                ignored ->
-                                    findResource(destination)
-                                        .then(
-                                            (Function<Optional<Resource>, Resource>)
-                                                movedResource -> {
-                                                  if (movedResource.isPresent()) {
-                                                    eventBus.fireEvent(
-                                                        new ResourceChangedEvent(
-                                                            new ResourceDeltaImpl(
-                                                                movedResource.get(),
-                                                                source,
-                                                                ADDED
-                                                                    | MOVED_FROM
-                                                                    | MOVED_TO
-                                                                    | DERIVED)));
-
-                                                    clientServerEventService
-                                                        .sendFileTrackingResumeEvent();
-
-                                                    return movedResource.get();
-                                                  }
-
-                                                  clientServerEventService
-                                                      .sendFileTrackingResumeEvent();
-
-                                                  throw new IllegalStateException(
-                                                      "Resource not found");
-                                                }));
-                      });
+                                    throw new IllegalStateException("Resource not found");
+                                  }));
             });
   }
 
