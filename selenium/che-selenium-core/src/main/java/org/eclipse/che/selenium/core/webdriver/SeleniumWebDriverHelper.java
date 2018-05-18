@@ -71,7 +71,7 @@ public class SeleniumWebDriverHelper {
   public void setValue(By elementLocator, String value) {
     waitVisibility(elementLocator).clear();
     waitValue(elementLocator, "");
-    sendKeysTo(elementLocator, value);
+    waitAndSendKeysTo(elementLocator, value);
     waitValue(elementLocator, value);
   }
 
@@ -86,7 +86,7 @@ public class SeleniumWebDriverHelper {
   public void setValue(WebElement webElement, String value) {
     waitVisibility(webElement).clear();
     waitValue(webElement, "");
-    sendKeysTo(webElement, value);
+    waitAndSendKeysTo(webElement, value);
     waitValue(webElement, value);
   }
 
@@ -101,7 +101,7 @@ public class SeleniumWebDriverHelper {
   public void setText(By elementLocator, String value) {
     waitVisibility(elementLocator).clear();
     waitText(elementLocator, "");
-    sendKeysTo(elementLocator, value);
+    waitAndSendKeysTo(elementLocator, value);
     waitText(elementLocator, value);
   }
 
@@ -116,7 +116,7 @@ public class SeleniumWebDriverHelper {
   public void setText(WebElement webElement, String value) {
     waitVisibility(webElement).clear();
     waitText(webElement, "");
-    sendKeysTo(webElement, value);
+    waitAndSendKeysTo(webElement, value);
     waitText(webElement, value);
   }
 
@@ -388,8 +388,20 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator locator of element in which {@code text} should be sent
    * @param text text for sending
    */
-  public void sendKeysTo(By elementLocator, String text) {
+  public void waitAndSendKeysTo(By elementLocator, String text) {
     waitVisibility(elementLocator).sendKeys(text);
+  }
+
+  /**
+   * Waits during {@code timeout} until {@link WebElement} with specified {@code elementLocator} is
+   * visible, and types text in it.
+   *
+   * @param elementLocator locator of element in which {@code text} should be sent
+   * @param text text for sending
+   * @param timeout waiting timeout in seconds
+   */
+  public void waitAndSendKeysTo(By elementLocator, String text, int timeout) {
+    waitVisibility(elementLocator, timeout).sendKeys(text);
   }
 
   /**
@@ -398,7 +410,7 @@ public class SeleniumWebDriverHelper {
    * @param webElement element in which {@code text} should be sent
    * @param text text for sending
    */
-  public void sendKeysTo(WebElement webElement, String text) {
+  public void waitAndSendKeysTo(WebElement webElement, String text) {
     waitVisibility(webElement).sendKeys(text);
   }
 
@@ -451,6 +463,18 @@ public class SeleniumWebDriverHelper {
    */
   public String waitVisibilityAndGetText(By elementLocator) {
     return waitVisibility(elementLocator).getText();
+  }
+
+  /**
+   * Waits visibility during {@code timeout} of {@link WebElement} with provided {@code
+   * elementLocator} and gets text.
+   *
+   * @param elementLocator element from which text should be got
+   * @param timeout waiting time in seconds
+   * @return element text by {@link WebElement#getText()}
+   */
+  public String waitVisibilityAndGetText(By elementLocator, int timeout) {
+    return waitVisibility(elementLocator, timeout).getText();
   }
 
   /**
@@ -789,6 +813,19 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Performs mouse's left button double click on element.
+   *
+   * @param elementLocator locator of element which should be double clicked
+   */
+  public void doubleClick(By elementLocator) {
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .doubleClick(seleniumWebDriver.findElement(elementLocator))
+        .build()
+        .perform();
+  }
+
+  /**
    * Moves cursor to {@link WebElement} with provided {@code elementLocator} and clicks once on it
    * by {@link org.openqa.selenium.interactions.Action}.
    *
@@ -846,6 +883,21 @@ public class SeleniumWebDriverHelper {
   public void moveCursorToAndContextClick(By elementLocator) {
     moveCursorTo(elementLocator);
     actionsFactory.createAction(seleniumWebDriver).contextClick().perform();
+  }
+
+  /**
+   * Wait during {@code timeout} on visibility on element located at {@code elementLocator} and then
+   * context click on it.
+   *
+   * @param elementLocator locator of element which should be context clicked on
+   * @param timeout waiting time in seconds
+   */
+  public void waitAndContextClick(By elementLocator, int timeout) {
+    waitVisibility(elementLocator, timeout);
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .contextClick(seleniumWebDriver.findElement(elementLocator))
+        .perform();
   }
 
   /**

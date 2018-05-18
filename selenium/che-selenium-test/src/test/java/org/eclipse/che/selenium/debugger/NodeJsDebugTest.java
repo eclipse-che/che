@@ -70,7 +70,7 @@ public class NodeJsDebugTest {
     ide.open(ws);
   }
 
-  @Test(priority = 0)
+  @Test
   public void debugNodeJsTest()
       throws ExecutionException, JsonParseException, InterruptedException {
     String nameOfDebugCommand = "check_node_js_debug";

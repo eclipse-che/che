@@ -10,19 +10,16 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -38,10 +35,15 @@ public class AskDialog {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public AskDialog(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public AskDialog(
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -59,22 +61,17 @@ public class AskDialog {
   WebElement warning_Text;
 
   public void clickOkBtn() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(okBtn))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(okBtn);
   }
 
   public void clickCancelBtn() {
     waitFormToOpen();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(cancelBtn))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(cancelBtn);
   }
 
   /** wait opening the confirmation form */
   public void waitFormToOpen() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(form));
+    seleniumWebDriverHelper.waitVisibility(form);
   }
 
   /**
@@ -87,8 +84,7 @@ public class AskDialog {
   }
 
   public void waitFormToClose() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(ASK_DIALOG_FORM_XPATH)));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(ASK_DIALOG_FORM_XPATH));
     loader.waitOnClosed();
   }
 
@@ -98,12 +94,7 @@ public class AskDialog {
    * @param expectedText expected text in widget
    */
   public void containsText(final String expectedText) {
-    new WebDriverWait(seleniumWebDriver, ATTACHING_ELEM_TO_DOM_SEC)
-        .until(ExpectedConditions.visibilityOf(warning_Text));
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> warning_Text.getText().contains(expectedText));
+    seleniumWebDriverHelper.waitText(warning_Text, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
@@ -152,5 +143,9 @@ public class AskDialog {
     clickCancelBtn();
     waitFormToClose();
     loader.waitOnClosed();
+  }
+
+  public boolean isOpened() {
+    return seleniumWebDriverHelper.isVisible(form);
   }
 }

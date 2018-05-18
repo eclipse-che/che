@@ -22,6 +22,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_RUNTIMES_ID_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -67,6 +68,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.eclipse.che.commons.subject.Subject;
@@ -96,6 +98,8 @@ public class WorkspaceRuntimes {
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
   private final ProbeScheduler probeScheduler;
+  // Unique identifier for this workspace runtimes
+  private final String workspaceRuntimesId;
 
   @VisibleForTesting
   WorkspaceRuntimes(
@@ -152,6 +156,7 @@ public class WorkspaceRuntimes {
           "Configured environment(s) are not supported by infrastructure: '{}'",
           notSupportedByInfra);
     }
+    workspaceRuntimesId = NameGenerator.generate("runtimes", 16);
   }
 
   @PostConstruct
@@ -303,6 +308,7 @@ public class WorkspaceRuntimes {
                   "Could not start workspace '%s' because its state is '%s'",
                   workspaceId, existingStatus));
         }
+        setRuntimesId(workspaceId);
         runtimes.put(workspaceId, runtime);
       }
       LOG.info(
@@ -416,6 +422,7 @@ public class WorkspaceRuntimes {
               "Could not stop workspace '%s' because its state is '%s'",
               workspaceId, newStatus == null ? STOPPED : newStatus));
     }
+    setRuntimesId(workspaceId);
 
     String stoppedBy =
         firstNonNull(
@@ -641,8 +648,8 @@ public class WorkspaceRuntimes {
   }
 
   /**
-   * Gets the list of workspaces ids which are currently starting or stopping. (their statuses are
-   * {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING})
+   * Gets the list of workspace id's which are currently starting or stopping on given node. (it's
+   * status is {@link WorkspaceStatus#STARTING} or {@link WorkspaceStatus#STOPPING})
    */
   public Set<String> getInProgress() {
     return statuses
@@ -651,6 +658,7 @@ public class WorkspaceRuntimes {
         .stream()
         .filter(e -> STARTING == e.getValue() || STOPPING == e.getValue())
         .map(Entry::getKey)
+        .filter(this::containsThisRuntimesId)
         .collect(toSet());
   }
 
@@ -663,7 +671,38 @@ public class WorkspaceRuntimes {
         .asMap()
         .entrySet()
         .stream()
-        .anyMatch(e -> STARTING == e.getValue() || STOPPING == e.getValue());
+        .filter(e -> STARTING == e.getValue() || STOPPING == e.getValue())
+        .map(Entry::getKey)
+        .anyMatch(this::containsThisRuntimesId);
+  }
+
+  private void setRuntimesId(String workspaceId) {
+    try {
+      final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+      workspace.getAttributes().put(WORKSPACE_RUNTIMES_ID_ATTRIBUTE, workspaceRuntimesId);
+      workspaceDao.update(workspace);
+    } catch (NotFoundException | ServerException | ConflictException ex) {
+      LOG.warn(
+          String.format(
+              "Cannot set runtimes id attribute for the workspace %s. Cause: %s",
+              workspaceId, ex.getMessage()));
+    }
+  }
+
+  /** Checks whether workspace with given id, related to this workspace runtimes. */
+  private boolean containsThisRuntimesId(String workspaceId) {
+    try {
+      final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+      if (workspaceRuntimesId.equals(
+          workspace.getAttributes().get(WORKSPACE_RUNTIMES_ID_ATTRIBUTE))) {
+        return true;
+      }
+    } catch (NotFoundException | ServerException ex) {
+      LOG.warn(
+          String.format(
+              "Failed to get processing workspace %s. Cause: %s", workspaceId, ex.getMessage()));
+    }
+    return false;
   }
 
   /**

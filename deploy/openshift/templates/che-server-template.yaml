@@ -172,7 +172,7 @@ objects:
           terminationMessagePolicy: File
         restartPolicy: Always
         serviceAccountName: che
-        terminationGracePeriodSeconds: 30
+        terminationGracePeriodSeconds: 360
     triggers:
     - type: ConfigChange
 

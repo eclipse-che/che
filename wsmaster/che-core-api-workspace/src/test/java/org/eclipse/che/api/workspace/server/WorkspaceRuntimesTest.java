@@ -92,6 +92,7 @@ public class WorkspaceRuntimesTest {
   @Mock private WorkspaceLockService lockService;
 
   @Mock private WorkspaceStatusCache statuses;
+
   private RuntimeInfrastructure infrastructure;
 
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
