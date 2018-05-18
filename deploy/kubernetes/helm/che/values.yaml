@@ -30,3 +30,5 @@ global:
     useCertManager: true
     useStaging: true
     secretName: che-tls
+  gitHubClientID: ""
+  gitHubClientSecret: ""
