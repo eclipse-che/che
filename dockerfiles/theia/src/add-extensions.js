@@ -23,6 +23,7 @@ givenExtensions.shift();
 givenExtensions.shift();
 
 if (givenExtensions.length > 0) {
+    cp.execSync(mkdir -p ${EXTENSIONS_DIR});
     addExtensions(parseExtensions(givenExtensions));
 }
 
