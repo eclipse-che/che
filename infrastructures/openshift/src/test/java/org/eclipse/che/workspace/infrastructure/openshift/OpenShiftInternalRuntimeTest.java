@@ -102,9 +102,9 @@ public class OpenShiftInternalRuntimeTest {
   private static final String ROUTE_HOST = "localhost";
   private static final String M1_NAME = POD_NAME + '/' + CONTAINER_NAME_1;
   private static final String M2_NAME = POD_NAME + '/' + CONTAINER_NAME_2;
-  private static final String EMPTY_UNRECOVERABLE_EVENTS = "";
-  private static final String UNRECOVERABLE_EVENTS =
-      "Failed Mount,Failed Scheduling,Failed to pull image";
+  private static final String[] EMPTY_UNRECOVERABLE_EVENTS = new String[0];
+  private static final String[] UNRECOVERABLE_EVENTS =
+      new String[] {"Failed Mount", "Failed Scheduling", "Failed to pull image"};
 
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
