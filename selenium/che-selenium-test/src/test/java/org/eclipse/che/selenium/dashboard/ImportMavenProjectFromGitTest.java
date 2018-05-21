@@ -15,8 +15,12 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
 
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
@@ -36,7 +40,7 @@ import org.testng.annotations.Test;
 public class ImportMavenProjectFromGitTest {
 
   private final String WORKSPACE = generate("ImtMvnPrjGit", 4);
-  private static final String PROJECT_NAME = "guess-project";
+  private String testProjectName;
 
   @Inject private Dashboard dashboard;
   @Inject private ProjectExplorer explorer;
@@ -48,9 +52,13 @@ public class ImportMavenProjectFromGitTest {
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
   @Inject private ToastLoader toastLoader;
+  @Inject private TestGitHubRepository testRepo;
 
   @BeforeClass
-  public void setUp() {
+  public void setUp() throws IOException {
+    Path entryPath = Paths.get(getClass().getResource("/projects/guess-project").getPath());
+    testRepo.addContent(entryPath);
+
     dashboard.open();
   }
 
@@ -61,11 +69,14 @@ public class ImportMavenProjectFromGitTest {
 
   @Test
   public void checkAbilityImportMavenProjectTest() throws ExecutionException, InterruptedException {
+    testProjectName = testRepo.getName();
+
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA.getId());
@@ -74,7 +85,7 @@ public class ImportMavenProjectFromGitTest {
     projectSourcePage.clickOnAddOrImportProjectButton();
 
     projectSourcePage.selectSourceTab(GIT);
-    projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
+    projectSourcePage.typeGitRepositoryLocation(testRepo.getHtmlUrl());
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
@@ -83,6 +94,6 @@ public class ImportMavenProjectFromGitTest {
 
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
-    explorer.waitItem(PROJECT_NAME);
+    explorer.waitItem(testProjectName);
   }
 }
