@@ -10,14 +10,19 @@
  */
 package org.eclipse.che.plugin.web.client.inject;
 
+import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
+
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
+import org.eclipse.che.plugin.web.client.CamelLanguageDescriptionProvider;
+import org.eclipse.che.plugin.web.client.JsonLanguageDescriptionProvider;
+import org.eclipse.che.plugin.web.client.TypeScriptLanguageDescriptionProvider;
 import org.eclipse.che.plugin.web.client.WebExtensionResource;
 import org.eclipse.che.plugin.web.client.typescript.TSProjectWizardRegistrar;
 
@@ -31,9 +36,20 @@ public class WebModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class)
+    newSetBinder(binder(), ProjectWizardRegistrar.class)
         .addBinding()
         .to(TSProjectWizardRegistrar.class);
+
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(TypeScriptLanguageDescriptionProvider.class);
+
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(JsonLanguageDescriptionProvider.class);
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(CamelLanguageDescriptionProvider.class);
   }
 
   @Provides

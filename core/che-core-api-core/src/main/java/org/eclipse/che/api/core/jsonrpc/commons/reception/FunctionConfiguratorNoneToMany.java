@@ -15,6 +15,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.slf4j.Logger;
 
@@ -57,5 +58,14 @@ public class FunctionConfiguratorNoneToMany<R> {
             + rClass);
 
     handlerManager.registerNoneToMany(method, rClass, function);
+  }
+
+  /**
+   * Define a supplier to be applied
+   *
+   * @param supplier supplier
+   */
+  public void withSupplier(Supplier<List<R>> supplier) {
+    withFunction(s -> supplier.get());
   }
 }

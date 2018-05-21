@@ -14,6 +14,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.slf4j.Logger;
 
@@ -55,5 +56,14 @@ public class FunctionConfiguratorNoneToOne<R> {
             + rClass);
 
     handlerManager.registerNoneToOne(method, rClass, function);
+  }
+
+  /**
+   * Define a supplier to be applied
+   *
+   * @param supplier supplier
+   */
+  public void withSupplier(Supplier<R> supplier) {
+    withFunction(s -> supplier.get());
   }
 }

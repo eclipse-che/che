@@ -10,46 +10,26 @@
  */
 package org.eclipse.che.plugin.web.inject;
 
-import static java.util.Arrays.asList;
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.web.shared.Constants;
-import org.eclipse.che.plugin.web.typescript.TSLSLauncher;
+import org.eclipse.che.plugin.web.typescript.TypeScriptLanguageServerConfig;
 import org.eclipse.che.plugin.web.typescript.TypeScriptProjectType;
 
 /** The module that contains configuration of the server side part of the Web plugin */
 @DynaModule
 public class WebModule extends AbstractModule {
-
-  private static final String[] EXTENSIONS = new String[] {Constants.TS_EXT};
-  private static final String MIME_TYPE = Constants.TS_MIME_TYPE;
-
   @Override
   protected void configure() {
-    Multibinder<ProjectTypeDef> projectTypeMultibinder =
-        Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
-    projectTypeMultibinder.addBinding().to(TypeScriptProjectType.class);
+    newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(TypeScriptProjectType.class);
 
-    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-        .addBinding()
-        .to(TSLSLauncher.class);
-    LanguageDescription description = new LanguageDescription();
-    description.setFileExtensions(asList(EXTENSIONS));
-    description.setLanguageId(Constants.TS_LANG);
-    description.setMimeType(MIME_TYPE);
-    description.setHighlightingConfiguration(
-        "[\n"
-            + "  {\"include\":\"orion.js\"},\n"
-            + "  {\"match\":\"\\\\b(?:constructor|declare|module)\\\\b\",\"name\" :\"keyword.operator.typescript\"},\n"
-            + "  {\"match\":\"\\\\b(?:any|boolean|number|string)\\\\b\",\"name\" : \"storage.type.typescript\"}\n"
-            + "]");
-    Multibinder.newSetBinder(binder(), LanguageDescription.class)
-        .addBinding()
-        .toInstance(description);
+    newMapBinder(binder(), String.class, LanguageServerConfig.class)
+        .addBinding("org.eclipse.che.plugin.web.typescript")
+        .to(TypeScriptLanguageServerConfig.class)
+        .asEagerSingleton();
   }
 }

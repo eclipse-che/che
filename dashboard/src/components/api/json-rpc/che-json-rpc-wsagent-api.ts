@@ -16,8 +16,6 @@ enum WsAgentChannels {
   IMPORT_PROJECT
 }
 
-const websocketWsAgentApi: string = '/wsagent';
-
 /**
  * Client API for workspace agent interactions.
  *
@@ -46,7 +44,13 @@ export class CheJsonRpcWsagentApi {
    * @returns {ng.IPromise<any>}
    */
   connect(entrypoint: string, clientId: string): ng.IPromise<any> {
-    return this.cheJsonRpcApi.connect(entrypoint + websocketWsAgentApi + '?clientId=' + clientId);
+    let clientParam = 'clientId=' + clientId;
+    if (/\?/.test(entrypoint) === false) {
+      clientParam = '?' + clientParam;
+    } else {
+      clientParam = '&' + clientParam;
+    }
+    return this.cheJsonRpcApi.connect(entrypoint + clientParam);
   }
 
   /**

@@ -60,6 +60,7 @@
           <class name="org.eclipse.che.selenium.dashboard.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfSubOrganizationTest"/>
@@ -232,6 +233,7 @@
           <class name="org.eclipse.che.selenium.projectexplorer.RenameProjectTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.ShowFileReferenceTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckDisplayingArtifactIdTest"/>
+          <class name="org.eclipse.che.selenium.projectexplorer.DownloadProjectTest"/>
           <class name="org.eclipse.che.selenium.refactor.fields.FailNotPrivateFieldTest"/>
           <class name="org.eclipse.che.selenium.refactor.fields.FailPrivateFieldTest"/>
           <class name="org.eclipse.che.selenium.refactor.fields.RenameNotPrivateFieldTest"/>

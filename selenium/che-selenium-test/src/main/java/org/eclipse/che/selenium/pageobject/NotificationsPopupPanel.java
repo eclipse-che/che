@@ -84,7 +84,7 @@ public class NotificationsPopupPanel {
    * @param timeout timeout defined by user
    */
   public void waitExpectedMessageOnProgressPanelAndClosed(final String message, final int timeout) {
-    seleniumWebDriverHelper.waitTextPresence(progressPopupPanel, message, timeout);
+    seleniumWebDriverHelper.waitTextContains(progressPopupPanel, message, timeout);
     waitProgressPopupPanelClose(timeout);
   }
 

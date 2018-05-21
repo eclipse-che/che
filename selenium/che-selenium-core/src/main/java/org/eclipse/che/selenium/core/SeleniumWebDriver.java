@@ -19,15 +19,17 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
-import javax.inject.Named;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
 import org.openqa.selenium.By;
@@ -67,7 +69,7 @@ public class SeleniumWebDriver
   private TestBrowser browser;
   private boolean gridMode;
   private String webDriverVersion;
-
+  private final String downloadDirectory;
   private final RemoteWebDriver driver;
 
   @Inject
@@ -75,10 +77,12 @@ public class SeleniumWebDriver
       @Named("sys.browser") TestBrowser browser,
       @Named("sys.driver.port") String webDriverPort,
       @Named("sys.grid.mode") boolean gridMode,
-      @Named("sys.driver.version") String webDriverVersion) {
+      @Named("sys.driver.version") String webDriverVersion,
+      @Named("tests.download_dir") String downloadDirectory) {
     this.browser = browser;
     this.gridMode = gridMode;
     this.webDriverVersion = webDriverVersion;
+    this.downloadDirectory = downloadDirectory;
 
     try {
       URL webDriverUrl =
@@ -179,6 +183,10 @@ public class SeleniumWebDriver
     return driver.getMouse();
   }
 
+  public String getSessionId() {
+    return driver.getSessionId().toString();
+  }
+
   private RemoteWebDriver createDriver(URL webDriverUrl) {
     for (int i = 1; ; ) {
       try {
@@ -231,9 +239,18 @@ public class SeleniumWebDriver
         options.addArguments("--no-sandbox");
         options.addArguments("--dns-prefetch-disable");
 
+        // set parameters required for automatic download capability
+        String downloadDirectory = "/tmp/";
+        Map<String, Object> chromePrefs = new HashMap<>();
+        chromePrefs.put("download.default_directory", downloadDirectory);
+        chromePrefs.put("download.prompt_for_download", false);
+        chromePrefs.put("plugins.plugins_disabled", "['Chrome PDF Viewer']");
+        options.setExperimentalOption("prefs", chromePrefs);
+
         capability = DesiredCapabilities.chrome();
         capability.setCapability(ChromeOptions.CAPABILITY, options);
         capability.setCapability(CapabilityType.LOGGING_PREFS, loggingPreferences);
+        capability.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
         break;
 
       default:
@@ -314,7 +331,7 @@ public class SeleniumWebDriver
     wait(timeout).until(frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
   }
 
-  public WebDriverWait wait(int timeOutInSeconds) {
+  private WebDriverWait wait(int timeOutInSeconds) {
     return new WebDriverWait(this, timeOutInSeconds);
   }
 }

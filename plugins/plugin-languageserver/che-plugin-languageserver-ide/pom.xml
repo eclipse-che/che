@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-languageserver-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.5.0-SNAPSHOT</version>
+        <version>6.6.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>che-plugin-languageserver-ide</artifactId>
@@ -221,6 +221,7 @@
                         <package>org.eclipse.lsp4j</package>
                         <package>org.eclipse.che.api.languageserver.shared.event</package>
                         <package>org.eclipse.che.api.languageserver.shared.model</package>
+                        <package>org.eclipse.che.api.languageserver.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls</genClassName>

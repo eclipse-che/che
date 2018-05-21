@@ -36,7 +36,8 @@ export class ProjectMetadata implements ng.IDirective {
     this.scope = {
       origTemplate: '=template',
       templateName: '@',
-      isProjectNameUnique: '&'
+      isProjectNameUnique: '&',
+      projectForm: '='
     };
   }
 

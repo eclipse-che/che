@@ -130,3 +130,9 @@ HOW TO of usage:
     Analyse tests results:
         ./selenium-tests.sh --compare-with-ci [BUILD NUMBER]
 ```
+
+Test development tips
+--------------------------------------
+It's impossible to use `@Test(dependsOnMethods)` to express dependency between the tests because it breaks parallel execution of test classes (an issue https://github.com/cbeust/testng/issues/1773).
+
+`@Test(priority)` can be used instead, and dependent test will be skipped if preceding test with higher priority from the same test class has failed.

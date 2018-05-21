@@ -51,6 +51,9 @@ import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFacto
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
+import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
+import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtilImpl;
+import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtilImpl;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -63,6 +66,7 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
  * Guice module per suite.
  *
  * @author Anatolii Bazko
+ * @author Dmytro Nochevnov
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
 
@@ -125,6 +129,13 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     } else {
       throw new RuntimeException(
           format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
+    }
+
+    boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
+    if (gridMode) {
+      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtilImpl.class);
+    } else {
+      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtilImpl.class);
     }
   }
 

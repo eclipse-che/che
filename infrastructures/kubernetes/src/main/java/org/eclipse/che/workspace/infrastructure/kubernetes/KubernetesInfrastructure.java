@@ -16,7 +16,6 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -66,8 +65,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   @Override
   protected KubernetesRuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment)
-      throws ValidationException, InfrastructureException {
+      RuntimeIdentity id, InternalEnvironment environment) throws InfrastructureException {
     final KubernetesEnvironment kubernetesEnvironment = asKubernetesEnv(environment);
 
     k8sEnvProvisioner.provision(kubernetesEnvironment, id);
@@ -76,7 +74,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   }
 
   private KubernetesEnvironment asKubernetesEnv(InternalEnvironment source)
-      throws ValidationException, InfrastructureException {
+      throws InfrastructureException {
     if (source instanceof KubernetesEnvironment) {
       return (KubernetesEnvironment) source;
     }

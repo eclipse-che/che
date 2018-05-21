@@ -379,7 +379,7 @@ public class CommandsEditor {
    * @param expectedText text which should be displayed
    */
   public void waitTextIntoNameCommandField(String expectedText) {
-    seleniumWebDriverHelper.waitValue(
+    seleniumWebDriverHelper.waitValueEqualsTo(
         nameCommandField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
@@ -389,7 +389,8 @@ public class CommandsEditor {
    * @param expectedText text which should be displayed
    */
   public void waitTextIntoGoalField(String expectedText) {
-    seleniumWebDriverHelper.waitText(nameGoalField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitTextEqualsTo(
+        nameGoalField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
@@ -469,7 +470,7 @@ public class CommandsEditor {
    * @param expectedText text which should be displayed
    */
   public void waitTextIntoSearchMacroField(String expectedText) {
-    seleniumWebDriverHelper.waitValue(
+    seleniumWebDriverHelper.waitValueEqualsTo(
         macrosInputField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 

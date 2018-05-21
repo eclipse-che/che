@@ -110,7 +110,7 @@ public class WorkingWithTerminalTest {
     }
   }
 
-  @Test(priority = 0)
+  @Test
   public void shouldLaunchCommandWithBigOutput() {
     // build the web java application
     projectExplorer.waitProjectExplorer();
@@ -130,7 +130,7 @@ public class WorkingWithTerminalTest {
     projectExplorer.waitItem(PROJECT_NAME + "/target/" + WAR_NAME);
   }
 
-  @Test(priority = 1)
+  @Test
   public void shouldAppearMCDialogs() {
     terminal.typeIntoTerminal("cd ~ && touch -f testfile.txt" + Keys.ENTER);
 
@@ -163,7 +163,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
   }
 
-  @Test(priority = 2)
+  @Test
   public void shouldScrollIntoTerminal() throws InterruptedException {
     openMC("/");
 
@@ -191,7 +191,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextIntoTerminal("bin");
   }
 
-  @Test(priority = 3)
+  @Test
   public void shouldResizeTerminal() {
     openMC("/");
 
@@ -228,7 +228,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
   }
 
-  @Test(priority = 4)
+  @Test
   public void shouldNavigateToMC() {
     openMC("/");
 
@@ -255,7 +255,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal(Keys.F10.toString());
   }
 
-  @Test(priority = 5)
+  @Test
   public void shouldCreateFileTest() {
     terminal.typeIntoTerminal("cd ~" + Keys.ENTER);
     terminal.typeIntoTerminal("ls" + Keys.ENTER);
@@ -270,7 +270,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextIntoTerminal("tomcat8");
   }
 
-  @Test(priority = 6)
+  @Test
   public void shouldCancelProcessByCtrlC() throws InterruptedException {
     terminal.typeIntoTerminal("cd /" + Keys.ENTER);
 
@@ -292,7 +292,7 @@ public class WorkingWithTerminalTest {
     }
   }
 
-  @Test(priority = 7)
+  @Test
   public void shouldBeClear() {
     terminal.typeIntoTerminal("cd / && ls -l" + Keys.ENTER);
 
@@ -304,7 +304,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextIntoTerminal("user@");
   }
 
-  @Test(priority = 8)
+  @Test
   public void shouldBeReset() {
     terminal.typeIntoTerminal("cd / && ls -l" + Keys.ENTER);
 
@@ -316,7 +316,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextIntoTerminal("user@");
   }
 
-  @Test(priority = 9)
+  @Test
   public void shouldTurnToNormalModeFromAlternativeScreenModeAndOtherwise() {
     // open MC - terminal will switch off from normal mode to alternative screen with text user
     // interface (pseudo user graphics).
@@ -334,7 +334,7 @@ public class WorkingWithTerminalTest {
     }
   }
 
-  @Test(priority = 10)
+  @Test
   public void shouldOpenMCHelpDialogAndUserMenuDialog() {
     openMC("/");
 
@@ -352,7 +352,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextNotPresentTerminal(MC_USER_MENU_DIALOG);
   }
 
-  @Test(priority = 11)
+  @Test
   public void shouldViewFolderIntoMC() {
     terminal.waitTerminalTab();
     consoles.clickOnMaximizePanelIcon();
@@ -369,14 +369,14 @@ public class WorkingWithTerminalTest {
     consoles.clickOnMaximizePanelIcon();
   }
 
-  @Test(priority = 12)
+  @Test
   public void closeTerminalByExitCommand() {
     terminal.waitTerminalConsole();
     terminal.typeIntoTerminal("exit" + Keys.ENTER);
     terminal.waitTerminalIsNotPresent(1);
   }
 
-  @Test(priority = 13)
+  @Test
   public void shouldEditFileIntoMCEdit() {
     openMC("/projects/" + PROJECT_NAME);
 
@@ -392,7 +392,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextIntoTerminal("<!-ome comment->");
   }
 
-  @Test(priority = 14)
+  @Test
   public void checkDeleteAction() throws InterruptedException {
     // if the bug exists -> the dialog appears and the terminal lose focus
     terminal.typeIntoTerminal(Keys.DELETE.toString());

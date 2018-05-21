@@ -14,6 +14,7 @@ import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDO
 import static org.eclipse.che.api.system.shared.SystemStatus.READY_TO_SHUTDOWN;
 import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,7 @@ import java.util.Iterator;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
+import org.eclipse.che.core.db.DBTermination;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -44,6 +46,8 @@ public class SystemManagerTest {
 
   @Mock private EventService eventService;
 
+  @Mock private DBTermination dbTermination;
+
   @Captor private ArgumentCaptor<SystemStatusChangedEventDto> eventsCaptor;
 
   private SystemManager systemManager;
@@ -51,12 +55,19 @@ public class SystemManagerTest {
   @BeforeMethod
   public void init() {
     MockitoAnnotations.initMocks(this);
-    systemManager = new SystemManager(terminator, eventService);
+    systemManager = new SystemManager(terminator, dbTermination, eventService);
   }
 
   @Test
   public void isRunningByDefault() {
     assertEquals(systemManager.getSystemStatus(), RUNNING);
+  }
+
+  @Test
+  public void servicesAreSuspended() throws Exception {
+    systemManager.suspendServices();
+
+    verifySuspendCompleted();
   }
 
   @Test
@@ -84,11 +95,25 @@ public class SystemManagerTest {
   public void shutdownStopsServicesIfNotStopped() throws Exception {
     systemManager.shutdown();
 
-    verifyShutdownCompleted();
+    verifySuspendCompleted();
+    verifyDBTerminated();
+  }
+
+  private void verifyDBTerminated() {
+    verify(dbTermination, atLeastOnce()).terminate();
   }
 
   private void verifyShutdownCompleted() throws InterruptedException {
     verify(terminator, timeout(2000)).terminateAll();
+    verifyEvents();
+  }
+
+  private void verifySuspendCompleted() throws InterruptedException {
+    verify(terminator, timeout(2000)).suspendAll();
+    verifyEvents();
+  }
+
+  private void verifyEvents() {
     verify(eventService, times(2)).publish(eventsCaptor.capture());
     Iterator<SystemStatusChangedEventDto> eventsIt = eventsCaptor.getAllValues().iterator();
     assertEquals(

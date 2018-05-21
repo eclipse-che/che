@@ -113,8 +113,6 @@ objects:
   metadata:
     name: keycloak
   spec:
-    port:
-      targetPort: 5050
     to:
       kind: Service
       name: keycloak

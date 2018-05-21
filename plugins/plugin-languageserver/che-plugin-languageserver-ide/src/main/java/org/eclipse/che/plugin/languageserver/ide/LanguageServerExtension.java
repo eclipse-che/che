@@ -55,7 +55,8 @@ public class LanguageServerExtension {
 
   @Inject
   public LanguageServerExtension(
-      LanguageServerFileTypeRegister languageServerFileTypeRegister,
+      LanguageRegexesInitializer languageRegexesInitializer,
+      LanguageDescriptionInitializer languageDescriptionInitializer,
       EventBus eventBus,
       AppContext appContext,
       ShowMessageJsonRpcReceiver showMessageJsonRpcReceiver,
@@ -63,13 +64,15 @@ public class LanguageServerExtension {
     eventBus.addHandler(
         WsAgentServerRunningEvent.TYPE,
         e -> {
-          languageServerFileTypeRegister.start();
+          languageRegexesInitializer.initialize();
+          languageDescriptionInitializer.initialize();
           showMessageJsonRpcReceiver.subscribe();
           publishDiagnosticsReceiver.subscribe();
         });
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
-      languageServerFileTypeRegister.start();
+      languageRegexesInitializer.initialize();
+      languageDescriptionInitializer.initialize();
       showMessageJsonRpcReceiver.subscribe();
       publishDiagnosticsReceiver.subscribe();
     }
@@ -156,7 +159,7 @@ public class LanguageServerExtension {
         FileEvent.TYPE,
         event -> {
           Path location = event.getFile().getLocation();
-          if (lsRegistry.getLanguageDescription(event.getFile()) == null) {
+          if (lsRegistry.getLanguageFilter(event.getFile()) == null) {
             return;
           }
           final TextDocumentIdentifier documentId =
@@ -209,7 +212,7 @@ public class LanguageServerExtension {
               documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
               documentItem.setText(text);
               documentItem.setLanguageId(
-                  lsRegistry.getLanguageDescription(event.getFile()).getLanguageId());
+                  lsRegistry.getLanguageFilter(event.getFile()).getLanguageId());
 
               DidOpenTextDocumentParams openEvent =
                   dtoFactory.createDto(DidOpenTextDocumentParams.class);
