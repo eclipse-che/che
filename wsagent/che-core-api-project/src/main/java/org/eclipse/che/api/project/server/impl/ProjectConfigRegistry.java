@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server.impl;
 
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.api.fs.server.WsPathUtils.SEPARATOR;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class ProjectConfigRegistry {
         projects
             .entrySet()
             .stream()
-            .filter(it -> it.getKey().startsWith(wsPath))
+            .filter(it -> it.getKey().startsWith(wsPath + SEPARATOR))
             .filter(it -> !it.getKey().equals(wsPath))
             .map(Entry::getValue)
             .collect(toSet());
