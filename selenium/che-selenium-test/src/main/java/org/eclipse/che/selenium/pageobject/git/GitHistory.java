@@ -86,7 +86,7 @@ public class GitHistory {
 
   /** wait appear text in history list */
   public void waitTextInHistoryList(final String expectedText) {
-    seleniumWebDriverHelper.waitTextPresence(
+    seleniumWebDriverHelper.waitTextContains(
         historyForm, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
@@ -101,7 +101,7 @@ public class GitHistory {
    * @param expectedContent
    */
   public void waitContentIntoHistoryEditor(final String expectedContent) {
-    seleniumWebDriverHelper.waitValuePresence(historyEditor, expectedContent);
+    seleniumWebDriverHelper.waitValueContains(historyEditor, expectedContent);
   }
 
   public void waitCommitInHistoryForm(String text) {

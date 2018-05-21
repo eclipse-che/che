@@ -327,7 +327,9 @@ public class KubernetesPods {
                           containerName,
                           event.getReason(),
                           event.getMessage(),
-                          event.getMetadata().getCreationTimestamp());
+                          event.getMetadata().getCreationTimestamp(),
+                          event.getLastTimestamp());
+
                   containerEventsHandlers.forEach(h -> h.handle(containerEvent));
                 }
               }
