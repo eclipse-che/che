@@ -180,9 +180,8 @@ export class DiagnosticsWorkspaceStartCheck {
               }
             },
             'recipe': {
-              'content': 'FROM openjdk:8-jre-alpine\nCMD tail -f /dev/null\n',
-              'contentType': 'text/x-dockerfile',
-              'type': 'dockerfile'
+              'content': 'eclipse/ubuntu_jdk8',
+              'type': 'dockerimage'
             }
           }
         },
