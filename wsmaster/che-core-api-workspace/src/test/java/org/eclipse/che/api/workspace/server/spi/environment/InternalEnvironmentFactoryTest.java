@@ -15,7 +15,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory.CHE_MACHINE_NAME_ENV_VAR;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_ENV_VAR;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
