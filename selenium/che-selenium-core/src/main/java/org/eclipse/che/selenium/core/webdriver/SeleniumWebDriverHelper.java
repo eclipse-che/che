@@ -70,9 +70,9 @@ public class SeleniumWebDriverHelper {
    */
   public void setValue(By elementLocator, String value) {
     waitVisibility(elementLocator).clear();
-    waitValue(elementLocator, "");
+    waitValueEqualsTo(elementLocator, "");
     waitAndSendKeysTo(elementLocator, value);
-    waitValue(elementLocator, value);
+    waitValueEqualsTo(elementLocator, value);
   }
 
   /**
@@ -85,9 +85,9 @@ public class SeleniumWebDriverHelper {
    */
   public void setValue(WebElement webElement, String value) {
     waitVisibility(webElement).clear();
-    waitValue(webElement, "");
+    waitValueEqualsTo(webElement, "");
     waitAndSendKeysTo(webElement, value);
-    waitValue(webElement, value);
+    waitValueEqualsTo(webElement, value);
   }
 
   /**
@@ -100,9 +100,9 @@ public class SeleniumWebDriverHelper {
    */
   public void setText(By elementLocator, String value) {
     waitVisibility(elementLocator).clear();
-    waitText(elementLocator, "");
+    waitTextEqualsTo(elementLocator, "");
     waitAndSendKeysTo(elementLocator, value);
-    waitText(elementLocator, value);
+    waitTextEqualsTo(elementLocator, value);
   }
 
   /**
@@ -115,9 +115,9 @@ public class SeleniumWebDriverHelper {
    */
   public void setText(WebElement webElement, String value) {
     waitVisibility(webElement).clear();
-    waitText(webElement, "");
+    waitTextEqualsTo(webElement, "");
     waitAndSendKeysTo(webElement, value);
-    waitText(webElement, value);
+    waitTextEqualsTo(webElement, value);
   }
 
   /**
@@ -489,14 +489,14 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
-   * elementLocator} by {@link WebElement#getAttribute(String)} is equivalent to provided {@code
+   * elementLocator} by {@link WebElement#getAttribute(String)} equals to provided {@code
    * expectedValue}.
    *
    * @param elementLocator locator of element in which text should be checked
    * @param expectedValue expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
-  public void waitValue(By elementLocator, String expectedValue, int timeout) {
+  public void waitValueEqualsTo(By elementLocator, String expectedValue, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -506,24 +506,24 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits until text extracted from {@link WebElement} with specified {@code elementLocator} by
-   * {@link WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
+   * {@link WebElement#getAttribute(String)} equals to provided {@code expectedValue}.
    *
    * @param elementLocator locator of element in which text should be checked
    * @param expectedValue expected text which should be present in the element
    */
-  public void waitValue(By elementLocator, String expectedValue) {
-    waitValue(elementLocator, expectedValue, DEFAULT_TIMEOUT);
+  public void waitValueEqualsTo(By elementLocator, String expectedValue) {
+    waitValueEqualsTo(elementLocator, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
    * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
-   * WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
+   * WebElement#getAttribute(String)} equals to provided {@code expectedValue}.
    *
    * @param webElement element in which text should be checked
    * @param expectedValue expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
-  public void waitValue(WebElement webElement, String expectedValue, int timeout) {
+  public void waitValueEqualsTo(WebElement webElement, String expectedValue, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -533,13 +533,13 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits until text extracted from specified {@code webElement} by {@link
-   * WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
+   * WebElement#getAttribute(String)} equals to provided {@code expectedValue}.
    *
    * @param webElement element in which text should be checked
    * @param expectedValue expected text which should be present in the element
    */
-  public void waitValue(WebElement webElement, String expectedValue) {
-    waitValue(webElement, expectedValue, DEFAULT_TIMEOUT);
+  public void waitValueEqualsTo(WebElement webElement, String expectedValue) {
+    waitValueEqualsTo(webElement, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -552,7 +552,7 @@ public class SeleniumWebDriverHelper {
    * @param expectedText text which should be presented
    * @param timeout waiting time in seconds
    */
-  public void waitValuePresence(WebElement element, String expectedText, int timeout) {
+  public void waitValueContains(WebElement element, String expectedText, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -568,8 +568,8 @@ public class SeleniumWebDriverHelper {
    * @param element element which should be checked
    * @param expectedText text which should be presented
    */
-  public void waitValuePresence(WebElement element, String expectedText) {
-    waitValuePresence(element, expectedText, DEFAULT_TIMEOUT);
+  public void waitValueContains(WebElement element, String expectedText) {
+    waitValueContains(element, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -582,8 +582,8 @@ public class SeleniumWebDriverHelper {
    * @param expectedText text which should be present
    * @param timeout waiting time in seconds
    */
-  public void waitValuePresence(By elementLocator, String expectedText, int timeout) {
-    waitValuePresence(waitVisibility(elementLocator, timeout), expectedText, timeout);
+  public void waitValueContains(By elementLocator, String expectedText, int timeout) {
+    waitValueContains(waitVisibility(elementLocator, timeout), expectedText, timeout);
   }
 
   /**
@@ -595,19 +595,19 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator locator of the element which should be checked
    * @param expectedText text which should be present
    */
-  public void waitValuePresence(By elementLocator, String expectedText) {
-    waitValuePresence(elementLocator, expectedText, DEFAULT_TIMEOUT);
+  public void waitValueContains(By elementLocator, String expectedText) {
+    waitValueContains(elementLocator, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
    * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
-   * elementLocator} by {@link WebElement#getText()} is equivalent to provided {@code expectedText}.
+   * elementLocator} by {@link WebElement#getText()} equals to provided {@code expectedText}.
    *
    * @param elementLocator locator of element in which text should be checked
    * @param expectedText expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
-  public void waitText(By elementLocator, String expectedText, int timeout) {
+  public void waitTextEqualsTo(By elementLocator, String expectedText, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -617,24 +617,24 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits until text extracted from {@link WebElement} with specified {@code elementLocator} by
-   * {@link WebElement#getText()} is equivalent to provided {@code expectedText}.
+   * {@link WebElement#getText()} equals to provided {@code expectedText}.
    *
    * @param elementLocator locator of element in which text should be checked
    * @param expectedText expected text which should be present in the element
    */
-  public void waitText(By elementLocator, String expectedText) {
-    waitText(elementLocator, expectedText, DEFAULT_TIMEOUT);
+  public void waitTextEqualsTo(By elementLocator, String expectedText) {
+    waitTextEqualsTo(elementLocator, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
    * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
-   * WebElement#getText()} is equivalent to provided {@code expectedText}.
+   * WebElement#getText()} equals to provided {@code expectedText}.
    *
    * @param webElement element in which text should be checked
    * @param expectedText expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
-  public void waitText(WebElement webElement, String expectedText, int timeout) {
+  public void waitTextEqualsTo(WebElement webElement, String expectedText, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -643,14 +643,14 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until text extracted from {@code webElement} by {@link WebElement#getText()} is
-   * equivalent to provided {@code expectedText}.
+   * Waits until text extracted from {@code webElement} by {@link WebElement#getText()} equals to
+   * provided {@code expectedText}.
    *
    * @param webElement element in which text should be checked
    * @param expectedText expected text which should be present in the element
    */
-  public void waitText(WebElement webElement, String expectedText) {
-    waitText(webElement, expectedText, DEFAULT_TIMEOUT);
+  public void waitTextEqualsTo(WebElement webElement, String expectedText) {
+    waitTextEqualsTo(webElement, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -663,7 +663,7 @@ public class SeleniumWebDriverHelper {
    * @param expectedText text which should be presented
    * @param timeout waiting time in seconds
    */
-  public void waitTextPresence(WebElement element, String expectedText, int timeout) {
+  public void waitTextContains(WebElement element, String expectedText, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -679,8 +679,8 @@ public class SeleniumWebDriverHelper {
    * @param element element which should be checked
    * @param expectedText text which should be presented
    */
-  public void waitTextPresence(WebElement element, String expectedText) {
-    waitTextPresence(element, expectedText, DEFAULT_TIMEOUT);
+  public void waitTextContains(WebElement element, String expectedText) {
+    waitTextContains(element, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -693,8 +693,8 @@ public class SeleniumWebDriverHelper {
    * @param expectedText text which should be presented
    * @param timeout waiting time in seconds
    */
-  public void waitTextPresence(By elementLocator, String expectedText, int timeout) {
-    waitTextPresence(waitVisibility(elementLocator, timeout), expectedText, timeout);
+  public void waitTextContains(By elementLocator, String expectedText, int timeout) {
+    waitTextContains(waitVisibility(elementLocator, timeout), expectedText, timeout);
   }
 
   /**
@@ -706,8 +706,8 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator locator of the element which should be checked
    * @param expectedText text which should be presented
    */
-  public void waitTextPresence(By elementLocator, String expectedText) {
-    waitTextPresence(elementLocator, expectedText, DEFAULT_TIMEOUT);
+  public void waitTextContains(By elementLocator, String expectedText) {
+    waitTextContains(elementLocator, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**

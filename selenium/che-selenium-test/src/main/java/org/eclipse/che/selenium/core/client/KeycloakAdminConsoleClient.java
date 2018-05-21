@@ -81,6 +81,11 @@ public class KeycloakAdminConsoleClient {
             processAgent.execute("echo $(docker ps | grep che_keycloak | cut -d ' ' -f1)");
         break;
     }
+
+    if (keycloakContainerId.trim().isEmpty()) {
+      throw new RuntimeException(
+          "Keycloak container is not found. Make sure that correct value is set for `CHE_INFRASTRUCTURE`.");
+    }
   }
 
   public TestUserImpl createUser(RemovableUserProvider testUserProvider) throws IOException {
