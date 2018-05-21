@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.PYTHON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.CONSOLE_PYTHON3_SIMPLE;
@@ -25,7 +26,6 @@ import static org.openqa.selenium.Keys.F4;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -45,7 +45,7 @@ public class CheckMainFeatureForPythonLanguageTest {
   private static final String PYTHON_FILE_NAME = "main.py";
   private static final String PYTHON_MODULE_FILE_NAME = "math.py";
   private static final String LS_INIT_MESSAGE =
-      "Initialized Language Server org.eclipse.che.plugin.python.languageserver on project file:///projects/console-python3-simple";
+      "Finished language servers initialization, file path '/console-python3-simple/main.py";
   private static final String PYTHON_CLASS =
       "class MyClass:\n"
           + "\tvar = 1\n"
@@ -54,7 +54,7 @@ public class CheckMainFeatureForPythonLanguageTest {
           + "def function(self):\n"
           + "\tprint(\"This is a message inside the class.\")";
 
-  @InjectTestWorkspace(template = WorkspaceTemplate.PYTHON)
+  @InjectTestWorkspace(template = PYTHON)
   private TestWorkspace workspace;
 
   @Inject private Ide ide;
@@ -85,8 +85,7 @@ public class CheckMainFeatureForPythonLanguageTest {
     editor.waitTabIsPresent(PYTHON_FILE_NAME);
 
     consoles.selectProcessByTabName("dev-machine");
-    System.out.println(consoles.getVisibleTextFromCommandConsole());
-    // consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
   @Test(priority = 1)
@@ -96,7 +95,6 @@ public class CheckMainFeatureForPythonLanguageTest {
     editor.typeTextIntoEditor(PYTHON_CLASS);
     editor.typeTextIntoEditor("\n");
     editor.waitMarkerInPosition(WARNING, editor.getPositionVisible());
-    // TODO check for "W293 blank line contains whitespace" message in WARNING marker
 
     editor.goToCursorPositionVisible(1, 1);
     editor.waitAllMarkersInvisibility(ERROR);
@@ -122,7 +120,6 @@ public class CheckMainFeatureForPythonLanguageTest {
     editor.waitTextIntoAutocompleteContainer("var");
     editor.waitTextIntoAutocompleteContainer("variable");
 
-    // TODO check autocomplete
     editor.enterAutocompleteProposal("function() ");
     editor.waitTextIntoEditor("print(object.function");
     editor.typeTextIntoEditor("())");
@@ -142,7 +139,6 @@ public class CheckMainFeatureForPythonLanguageTest {
     editor.selectTabByName(PYTHON_FILE_NAME);
     editor.deleteAllContent();
     editor.typeTextIntoEditor("import math\n");
-    // editor.typeTextIntoEditor(PYTHON_CLASS);
     editor.typeTextIntoEditor("\nvar2 = math.add(100, 200)");
 
     // check Find Definition feature from Assistant menu
