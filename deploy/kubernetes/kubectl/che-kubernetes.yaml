@@ -72,6 +72,7 @@ items:
     CHE_LOGS_APPENDERS_IMPL: "plaintext"
     CHE_INFRA_KUBERNETES_INGRESS_DOMAIN: "192.168.99.100.nip.io"
     CHE_INFRA_KUBERNETES_SERVER__STRATEGY: "default-host"
+    CHE_WORKSPACE_FEATURE_API: "http://feature-api-service:3000"
 - apiVersion: extensions/v1beta1
   kind: Ingress
   metadata:
@@ -269,6 +270,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_INFRA_KUBERNETES_SERVER__STRATEGY
+                name: che
+          - name: CHE_WORKSPACE_FEATURE_API
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_WORKSPACE_FEATURE_API
                 name: che
           image: eclipse/che-server:nightly
           imagePullPolicy: Always
