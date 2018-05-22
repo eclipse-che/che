@@ -66,12 +66,12 @@ class LanguageServerInitializer {
 
   @Inject
   public LanguageServerInitializer(
-          ServerCapabilitiesAccumulator serverCapabilitiesAccumulator,
-          RegistryContainer registryContainer,
-          FindId findId,
-          EventService eventService,
-          CheLanguageClientFactory cheLanguageClientFactory,
-          InitializeParamsProvider initializeParamsProvider) {
+      ServerCapabilitiesAccumulator serverCapabilitiesAccumulator,
+      RegistryContainer registryContainer,
+      FindId findId,
+      EventService eventService,
+      CheLanguageClientFactory cheLanguageClientFactory,
+      InitializeParamsProvider initializeParamsProvider) {
     this.executor = newCachedThreadPool(getFactory());
 
     this.eventService = eventService;
@@ -90,10 +90,10 @@ class LanguageServerInitializer {
 
   private static ThreadFactory getFactory() {
     return new ThreadFactoryBuilder()
-            .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-            .setNameFormat(LanguageServerInitializer.class.getSimpleName())
-            .setDaemon(true)
-            .build();
+        .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+        .setNameFormat(LanguageServerInitializer.class.getSimpleName())
+        .setDaemon(true)
+        .build();
   }
 
   /**
@@ -108,40 +108,40 @@ class LanguageServerInitializer {
    */
   CompletableFuture<ServerCapabilities> initialize(String wsPath) {
     return supplyAsync(
-            () -> {
-              LOG.info("Started language servers initialization, file path '{}'", wsPath);
+        () -> {
+          LOG.info("Started language servers initialization, file path '{}'", wsPath);
 
-              Set<ServerCapabilities> serverCapabilitiesSet =
-                      findId
-                              .byPath(wsPath)
-                              .stream()
-                              .map(this::initializeIOStreams)
-                              .filter(Objects::nonNull)
-                              .map(this::createServerInstance)
-                              .filter(Objects::nonNull)
-                              .map(this::initializeServerInstance)
-                              .filter(Objects::nonNull)
-                              .map(this::initialized)
-                              .filter(Objects::nonNull)
-                              .map(serverCapabilitiesRegistry::getOrNull)
-                              .filter(Objects::nonNull)
-                              .collect(toSet());
+          Set<ServerCapabilities> serverCapabilitiesSet =
+              findId
+                  .byPath(wsPath)
+                  .stream()
+                  .map(this::initializeIOStreams)
+                  .filter(Objects::nonNull)
+                  .map(this::createServerInstance)
+                  .filter(Objects::nonNull)
+                  .map(this::initializeServerInstance)
+                  .filter(Objects::nonNull)
+                  .map(this::initialized)
+                  .filter(Objects::nonNull)
+                  .map(serverCapabilitiesRegistry::getOrNull)
+                  .filter(Objects::nonNull)
+                  .collect(toSet());
 
-              LOG.info("Finished language servers initialization, file path '{}'", wsPath);
+          LOG.info("Finished language servers initialization, file path '{}'", wsPath);
 
-              LOG.debug("Calculating number of initialized servers and accumulating capabilities");
-              if (serverCapabilitiesSet.isEmpty()) {
-                String message = String.format("Could not initialize any server for '%s'", wsPath);
-                LOG.error(message);
-                LanguageServerException cause = new LanguageServerException(message);
-                throw new CompletionException(cause);
-              } else {
-                return serverCapabilitiesSet
-                        .stream()
-                        .reduce(new ServerCapabilities(), serverCapabilitiesAccumulator);
-              }
-            },
-            executor);
+          LOG.debug("Calculating number of initialized servers and accumulating capabilities");
+          if (serverCapabilitiesSet.isEmpty()) {
+            String message = String.format("Could not initialize any server for '%s'", wsPath);
+            LOG.error(message);
+            LanguageServerException cause = new LanguageServerException(message);
+            throw new CompletionException(cause);
+          } else {
+            return serverCapabilitiesSet
+                .stream()
+                .reduce(new ServerCapabilities(), serverCapabilitiesAccumulator);
+          }
+        },
+        executor);
   }
 
   private String initialized(String id) {
@@ -223,10 +223,10 @@ class LanguageServerInitializer {
         LanguageServer languageServer = languageServerRegistry.get(id);
         InitializeParams initializeParams = initializeParamsProvider.get(id);
         InitializeResult initializeResult =
-                languageServer.initialize(initializeParams).get(30, SECONDS);
+            languageServer.initialize(initializeParams).get(30, SECONDS);
 
         LanguageServerInitializedEvent event =
-                new LanguageServerInitializedEvent(id, languageServer);
+            new LanguageServerInitializedEvent(id, languageServer);
         eventService.publish(event);
         LOG.debug("Published a corresponding event: {}", event);
 
@@ -236,9 +236,9 @@ class LanguageServerInitializer {
         return serverCapabilitiesRegistry.add(id, initializeResult.getCapabilities());
       }
     } catch (LanguageServerException
-            | InterruptedException
-            | ExecutionException
-            | TimeoutException e) {
+        | InterruptedException
+        | ExecutionException
+        | TimeoutException e) {
       LOG.error("Can't initialize language server for '{}'", id, e);
     }
 
