@@ -115,6 +115,10 @@ public class TestGitHubRepository {
     return repoName;
   }
 
+  public String getFullName() {
+    return ghRepo.getFullName();
+  }
+
   public String getSha1(String branchName) throws IOException {
     return ghRepo.getBranch(branchName).getSHA1();
   }
