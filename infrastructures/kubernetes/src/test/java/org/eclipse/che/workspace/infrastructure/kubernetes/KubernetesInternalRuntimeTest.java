@@ -57,8 +57,10 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -111,6 +113,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.ContainerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.ArgumentCaptor;
@@ -132,17 +135,19 @@ public class KubernetesInternalRuntimeTest {
   private static final int INTERNAL_PORT = 4411;
 
   private static final String WORKSPACE_ID = "workspace123";
-  private static final String POD_NAME = "app";
+  private static final String WORKSPACE_POD_NAME = "app";
   private static final String INGRESS_NAME = "test-ingress";
   private static final String SERVICE_NAME = "test-service";
   private static final String POD_SELECTOR = "che.pod.name";
   private static final String CONTAINER_NAME_1 = "test1";
   private static final String CONTAINER_NAME_2 = "test2";
+  private static final String EVENT_CREATION_TIMESTAMP = "2018-05-15T16:17:54Z";
+  private static final String EVENT_LAST_TIMESTAMP_IN_PAST = "2018-05-15T16:18:54Z";
 
   private static final String INGRESS_HOST = "localhost";
 
-  private static final String M1_NAME = POD_NAME + '/' + CONTAINER_NAME_1;
-  private static final String M2_NAME = POD_NAME + '/' + CONTAINER_NAME_2;
+  private static final String M1_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_1;
+  private static final String M2_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_2;
 
   private static final String EMPTY_UNRECOVERABLE_EVENTS = "";
   private static final String UNRECOVERABLE_EVENTS =
@@ -244,7 +249,7 @@ public class KubernetesInternalRuntimeTest {
     final Map<String, Ingress> allIngresses = ImmutableMap.of(INGRESS_NAME, ingress);
     final Container container = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
-        ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container)));
+        ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container)));
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(any(), anyInt(), any())).thenReturn(ingress);
@@ -261,7 +266,7 @@ public class KubernetesInternalRuntimeTest {
   public void startsKubernetesEnvironment() throws Exception {
     final ImmutableMap<String, Pod> podsMap =
         ImmutableMap.of(
-            POD_NAME,
+            WORKSPACE_POD_NAME,
             mockPod(
                 ImmutableList.of(
                     mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
@@ -289,7 +294,7 @@ public class KubernetesInternalRuntimeTest {
   public void startsKubernetesEnvironmentWithoutUnrecoverableHandler() throws Exception {
     final ImmutableMap<String, Pod> podsMap =
         ImmutableMap.of(
-            POD_NAME,
+            WORKSPACE_POD_NAME,
             mockPod(
                 ImmutableList.of(
                     mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
@@ -335,7 +340,7 @@ public class KubernetesInternalRuntimeTest {
     final Container container1 = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1);
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
-        ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
+        ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(k8sEnv.getPods()).thenReturn(allPods);
     doThrow(InfrastructureException.class).when(bootstrapper).bootstrapAsync();
 
@@ -380,7 +385,7 @@ public class KubernetesInternalRuntimeTest {
     final Thread thread = Thread.currentThread();
     final ImmutableMap<String, Pod> podsMap =
         ImmutableMap.of(
-            POD_NAME,
+            WORKSPACE_POD_NAME,
             mockPod(
                 ImmutableList.of(
                     mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
@@ -414,8 +419,19 @@ public class KubernetesInternalRuntimeTest {
   public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
     final ContainerEvent out1 =
-        mockContainerEvent("Pulling", "pulling image", "07/07/2007 19:01:22");
-    final ContainerEvent out2 = mockContainerEvent("Pulled", "image pulled", "07/07/2007 19:08:53");
+        mockContainerEvent(
+            WORKSPACE_POD_NAME,
+            "Pulling",
+            "pulling image",
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
+    final ContainerEvent out2 =
+        mockContainerEvent(
+            WORKSPACE_POD_NAME,
+            "Pulled",
+            "image pulled",
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
     final ArgumentCaptor<MachineLogEvent> captor = ArgumentCaptor.forClass(MachineLogEvent.class);
 
     internalRuntime.doStartMachine(kubernetesServerResolver);
@@ -432,12 +448,14 @@ public class KubernetesInternalRuntimeTest {
   public void testHandleUnrecoverableEventByReason() throws Exception {
     final String unrecoverableEventReason = "Failed Mount";
     final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler();
+        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
     final ContainerEvent unrecoverableEvent =
         mockContainerEvent(
+            WORKSPACE_POD_NAME,
             unrecoverableEventReason,
             "Failed to mount volume 'claim-che-workspace'",
-            "07/07/2007 19:01:22");
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
     unrecoverableEventHanler.handle(unrecoverableEvent);
     // 'internalStop' expected to be called which triggers namespace cleanup
     verify(namespace).cleanUp();
@@ -448,30 +466,81 @@ public class KubernetesInternalRuntimeTest {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
     final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler();
+        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
     final ContainerEvent unrecoverableEvent =
-        mockContainerEvent("Pulling", unrecoverableEventMessage, "07/07/2007 19:01:22");
+        mockContainerEvent(
+            WORKSPACE_POD_NAME,
+            "Pulling",
+            unrecoverableEventMessage,
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
     unrecoverableEventHanler.handle(unrecoverableEvent);
     // 'internalStop' expected to be called which triggers namespace cleanup
     verify(namespace).cleanUp();
   }
 
   @Test
-  public void testHandleRegularEvent() throws Exception {
+  public void testDoNotHandleUnrecoverableEventFromNonWorkspacePod() throws Exception {
+    final String unrecoverableEventMessage =
+        "Failed to pull image eclipse/che-server:nightly-centos";
     final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler();
-    final ContainerEvent regularEvent =
-        mockContainerEvent("Pulling", "pulling image", "07/07/2007 19:01:22");
-    unrecoverableEventHanler.handle(regularEvent);
-    // 'internalStop' is NOT expected to be called, and namespace cleanup will not be triggered
+        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
+    final ContainerEvent unrecoverableEvent =
+        mockContainerEvent(
+            "NonWorkspacePod",
+            "Pulling",
+            unrecoverableEventMessage,
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
+    unrecoverableEventHanler.handle(unrecoverableEvent);
+    // 'internalStop' is NOT expected to be called since event does not belong to the workspace
+    // pod.Cleanup will not be triggered
     verify(namespace, never()).cleanUp();
   }
 
   @Test
-  public void testDoNotPublishForeignMachineOutput() {
+  public void testHandleRegularEvent() throws Exception {
+    final UnrecoverableEventHanler unrecoverableEventHanler =
+        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
+    final ContainerEvent regularEvent =
+        mockContainerEvent(
+            WORKSPACE_POD_NAME,
+            "Pulling",
+            "pulling image",
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
+    unrecoverableEventHanler.handle(regularEvent);
+    // 'internalStop' is NOT expected to be called and namespace cleanup will not be triggered
+    verify(namespace, never()).cleanUp();
+  }
+
+  @Test
+  public void testHandleUnrecoverableEventWhichHappenedInPast() throws Exception {
+    final UnrecoverableEventHanler unrecoverableEventHanler =
+        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
+    final ContainerEvent regularEvent =
+        mockContainerEvent(
+            WORKSPACE_POD_NAME,
+            "Pulling",
+            "pulling image",
+            EVENT_CREATION_TIMESTAMP,
+            EVENT_LAST_TIMESTAMP_IN_PAST);
+    unrecoverableEventHanler.handle(regularEvent);
+    // 'internalStop' is NOT expected to be called since unrecoverable event had happened in the
+    // past. Namespace cleanup will not be triggered
+    verify(namespace, never()).cleanUp();
+  }
+
+  @Test
+  public void testDoNotPublishForeignMachineOutput() throws ParseException {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
     final ContainerEvent out1 =
-        mockContainerEvent("Created", "folder created", "33/03/2033 19:01:06");
+        mockContainerEvent(
+            WORKSPACE_POD_NAME,
+            "Created",
+            "folder created",
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
 
     logsPublisher.handle(out1);
 
@@ -700,11 +769,13 @@ public class KubernetesInternalRuntimeTest {
   private static Pod mockPod(List<Container> containers) {
     final Pod pod = mock(Pod.class);
     final PodSpec spec = mock(PodSpec.class);
-    mockName(POD_NAME, pod);
+    mockName(WORKSPACE_POD_NAME, pod);
     when(spec.getContainers()).thenReturn(containers);
     when(pod.getSpec()).thenReturn(spec);
     when(pod.getMetadata().getLabels())
-        .thenReturn(ImmutableMap.of(POD_SELECTOR, POD_NAME, CHE_ORIGINAL_NAME_LABEL, POD_NAME));
+        .thenReturn(
+            ImmutableMap.of(
+                POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME));
     return pod;
   }
 
@@ -713,7 +784,7 @@ public class KubernetesInternalRuntimeTest {
     final ServiceSpec spec = mock(ServiceSpec.class);
     mockName(SERVICE_NAME, service);
     when(service.getSpec()).thenReturn(spec);
-    when(spec.getSelector()).thenReturn(ImmutableMap.of(POD_SELECTOR, POD_NAME));
+    when(spec.getSelector()).thenReturn(ImmutableMap.of(POD_SELECTOR, WORKSPACE_POD_NAME));
     final ServicePort sp1 =
         new ServicePortBuilder().withTargetPort(intOrString(EXPOSED_PORT_1)).build();
     final ServicePort sp2 =
@@ -761,13 +832,19 @@ public class KubernetesInternalRuntimeTest {
     return metadata;
   }
 
-  private static ContainerEvent mockContainerEvent(String reason, String message, String time) {
+  private static ContainerEvent mockContainerEvent(
+      String podName,
+      String reason,
+      String message,
+      String creationTimestamp,
+      String lastTimestamp) {
     final ContainerEvent event = mock(ContainerEvent.class);
-    when(event.getPodName()).thenReturn(POD_NAME);
+    when(event.getPodName()).thenReturn(podName);
     when(event.getContainerName()).thenReturn(CONTAINER_NAME_1);
     when(event.getReason()).thenReturn(reason);
     when(event.getMessage()).thenReturn(message);
-    when(event.getTime()).thenReturn(time);
+    when(event.getCreationTimeStamp()).thenReturn(creationTimestamp);
+    when(event.getLastTimestamp()).thenReturn(lastTimestamp);
     return event;
   }
 
@@ -775,8 +852,13 @@ public class KubernetesInternalRuntimeTest {
     return newDto(MachineLogEvent.class)
         .withRuntimeId(DtoConverter.asDto(IDENTITY))
         .withText(event.getMessage())
-        .withTime(event.getTime())
+        .withTime(event.getCreationTimeStamp())
         .withMachineName(event.getPodName() + '/' + event.getContainerName());
+  }
+
+  private String getCurrentTimestampWithOneHourShiftAhead() throws ParseException {
+    Date currentTimestampWithOneHourShiftAhead = new Date(new Date().getTime() + 3600 * 1000);
+    return ContainerEvents.convertDateToEventTimestamp(currentTimestampWithOneHourShiftAhead);
   }
 
   private static IntOrString intOrString(int port) {

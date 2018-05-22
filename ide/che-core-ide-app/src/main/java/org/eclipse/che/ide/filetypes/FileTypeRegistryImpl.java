@@ -51,7 +51,7 @@ public class FileTypeRegistryImpl implements FileTypeRegistry {
 
   @Override
   public FileType getFileTypeByFile(VirtualFile file) {
-    FileType fileType = getFileTypeByNamePattern(file.getName());
+    FileType fileType = getFileTypeByFileName(file.getName());
     if (fileType == unknownFileType) {
       fileType = getFileTypeByExtension(getFileExtension(file.getName()));
     }
@@ -72,7 +72,7 @@ public class FileTypeRegistryImpl implements FileTypeRegistry {
   }
 
   @Override
-  public FileType getFileTypeByNamePattern(String name) {
+  public FileType getFileTypeByFileName(String name) {
     if (!Strings.isNullOrEmpty(name)) {
       for (FileType type : fileTypes) {
         if (type.getNamePattern() != null) {
