@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
@@ -63,12 +62,12 @@ public class ProjectConfigurationAction extends AbstractPerspectiveAction {
 
     checkState(resources != null && resources.length == 1);
 
-    final Resource resource = resources[0];
+    final Resource project = resources[0].getProject();
 
-    checkState(resource instanceof Container);
+    checkState(project != null);
 
-    if (resource.getResourceType() == PROJECT) {
-      final MutableProjectConfig config = new MutableProjectConfig((Project) resource);
+    if (project.getResourceType() == PROJECT) {
+      final MutableProjectConfig config = new MutableProjectConfig((Project) project);
 
       projectWizard.show(config);
     }
@@ -77,16 +76,7 @@ public class ProjectConfigurationAction extends AbstractPerspectiveAction {
   @Override
   public void updateInPerspective(@NotNull ActionEvent event) {
     final Resource[] resources = appContext.getResources();
-
-    if (resources != null && resources.length == 1) {
-      final Resource resource = resources[0];
-
-      if (resource.getResourceType() == PROJECT) {
-        event.getPresentation().setEnabledAndVisible(true);
-        event.getPresentation().setText("Update Project Configuration...");
-      } else {
-        event.getPresentation().setEnabledAndVisible(false);
-      }
-    }
+    event.getPresentation().setText("Update Project Configuration...");
+    event.getPresentation().setEnabledAndVisible(resources != null && resources.length == 1);
   }
 }

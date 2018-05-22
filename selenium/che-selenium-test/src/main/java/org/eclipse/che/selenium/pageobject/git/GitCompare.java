@@ -139,7 +139,7 @@ public class GitCompare {
    * @param expText expected value
    */
   public void waitExpectedTextIntoLeftEditor(String expText) {
-    seleniumWebDriverHelper.waitTextPresence(leftCompareEditor, expText);
+    seleniumWebDriverHelper.waitTextContains(leftCompareEditor, expText);
   }
 
   /**
@@ -157,7 +157,7 @@ public class GitCompare {
    * @param expText expected value
    */
   public void waitExpectedTextIntoRightEditor(String expText) {
-    seleniumWebDriverHelper.waitTextPresence(rightCompareEditor, expText);
+    seleniumWebDriverHelper.waitTextContains(rightCompareEditor, expText);
   }
 
   /**
@@ -297,7 +297,7 @@ public class GitCompare {
    * @param expText is expected value
    */
   public void waitExpTextInGroupGitCompare(String expText) {
-    seleniumWebDriverHelper.waitTextPresence(By.id(Locators.GROUP_COMPARE_TEXT_AREA_ID), expText);
+    seleniumWebDriverHelper.waitTextContains(By.id(Locators.GROUP_COMPARE_TEXT_AREA_ID), expText);
   }
 
   /**
