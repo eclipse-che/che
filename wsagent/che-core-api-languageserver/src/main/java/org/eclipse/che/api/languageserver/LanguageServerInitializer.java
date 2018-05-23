@@ -32,6 +32,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
@@ -141,6 +142,7 @@ class LanguageServerInitializer {
         executor);
   }
 
+
   private String initializeIOStreams(String id) {
     try {
       LOG.debug("Initializing of IO streams for server '{}': started", id);
@@ -216,6 +218,7 @@ class LanguageServerInitializer {
         LOG.debug("Initializing of a language server instance for server '{}': finished", id);
 
         LOG.info("Initialized language server '{}'", id);
+        languageServer.initialized(new InitializedParams());//send initialized message, some LS required it
         return serverCapabilitiesRegistry.add(id, initializeResult.getCapabilities());
       }
     } catch (LanguageServerException
