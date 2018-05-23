@@ -142,7 +142,6 @@ class LanguageServerInitializer {
         executor);
   }
 
-
   private String initializeIOStreams(String id) {
     try {
       LOG.debug("Initializing of IO streams for server '{}': started", id);
@@ -218,7 +217,8 @@ class LanguageServerInitializer {
         LOG.debug("Initializing of a language server instance for server '{}': finished", id);
 
         LOG.info("Initialized language server '{}'", id);
-        languageServer.initialized(new InitializedParams());//send initialized message, some LS required it
+        languageServer.initialized(
+            new InitializedParams()); // send initialized message, some LS required it
         return serverCapabilitiesRegistry.add(id, initializeResult.getCapabilities());
       }
     } catch (LanguageServerException
