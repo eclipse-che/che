@@ -41,6 +41,8 @@ public final class Constants {
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
+  /** Name for environment variable of machine name */
+  public static final String CHE_MACHINE_NAME_ENV_VAR = "CHE_MACHINE_NAME";
   /**
    * Describes time when workspace was created. Should be set/read from {@link
    * Workspace#getAttributes}
