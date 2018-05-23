@@ -15,6 +15,7 @@ import {CheAgent} from '../../../../components/api/che-agent.factory';
 
 export interface IAgentItem extends che.IAgent {
   isEnabled: boolean;
+  isLatest: boolean;
 }
 
 /** List of the locked agents which shouldn't be switched by user */
@@ -71,7 +72,7 @@ export class MachineAgentsController {
   buildAgentsList(): void {
     const agents = this.cheAgent.getAgents();
     this.agentsList = agents.map((agentItem: IAgentItem) => {
-      this.checkEnabled(agentItem);
+      this.checkAgentLatestVersion(agentItem);
       return agentItem;
     });
   }
@@ -123,13 +124,8 @@ export class MachineAgentsController {
         agentItem.isEnabled = true;
         return;
       } else if (agentItem.id === id && (!version || version === LATEST)) {
-        let latestAgent = this.cheAgent.getAgent(id);
-        if (latestAgent && latestAgent.version === agentItem.version) {
-          agentItem.isEnabled = true;
-          return;
-        } else if (!latestAgent) {
-          this.fetchAgentLatestVersion(agentItem);
-        }
+        agentItem.isEnabled = agentItem.isLatest;
+        return;
       }
     }
 
@@ -141,9 +137,16 @@ export class MachineAgentsController {
    *
    * @param {IAgentItem} agentItem agent to check on latest version
    */
-  private fetchAgentLatestVersion(agentItem: IAgentItem): void {
-    this.cheAgent.fetchAgent(agentItem.id).then((agent: che.IAgent) => {
-      agentItem.isEnabled = agentItem.version === agent.version;
-    });
+  private checkAgentLatestVersion(agentItem: IAgentItem): void {
+    let latestAgent = this.cheAgent.getAgent(agentItem.id);
+    if (latestAgent && latestAgent.version === agentItem.version) {
+      agentItem.isLatest = true;
+      this.checkEnabled(agentItem);
+    } else if (!latestAgent) {
+      this.cheAgent.fetchAgent(agentItem.id).then((agent: che.IAgent) => {
+        agentItem.isLatest = agentItem.version === agent.version;
+        this.checkEnabled(agentItem);
+      });
+    }
   }
 }
