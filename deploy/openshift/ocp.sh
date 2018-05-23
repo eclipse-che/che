@@ -54,6 +54,9 @@ export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
 export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
+
+DEFAULT_WAIT_FOR_CHE=true
+export WAIT_FOR_CHE=${WAIT_FOR_CHE:-${DEFAULT_WAIT_FOR_CHE}}
 }
 
 test_dns_provider() {
@@ -208,7 +211,6 @@ parse_args() {
     --multiuser - deploy Che in multiuser mode
     --no-pull - IfNotPresent pull policy for Che server deployment
     --rolling - rolling update strategy (Recreate is the default one)
-    --wait-che - track Che deployment progress until pod is healthy
     --debug - deploy Che in a debug mode, create and expose debug route
     --image-che - override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
@@ -276,10 +278,6 @@ parse_args() {
            ;;
            --remove-che)
            shift
-           ;;
-           --wait-che)
-               export WAIT_FOR_CHE=true
-               shift
            ;;
            --help)
                echo -e "$HELP"
