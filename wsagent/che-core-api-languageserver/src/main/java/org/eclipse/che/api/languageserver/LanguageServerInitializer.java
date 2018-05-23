@@ -121,8 +121,6 @@ class LanguageServerInitializer {
                   .filter(Objects::nonNull)
                   .map(this::initializeServerInstance)
                   .filter(Objects::nonNull)
-                  .map(this::initialized)
-                  .filter(Objects::nonNull)
                   .map(serverCapabilitiesRegistry::getOrNull)
                   .filter(Objects::nonNull)
                   .collect(toSet());
@@ -144,19 +142,6 @@ class LanguageServerInitializer {
         executor);
   }
 
-  private String initialized(String id) {
-    try {
-      LOG.debug("Send Initialized message to the server '{}': started", id);
-      synchronized (idRegistry.get(id)) {
-        languageServerRegistry.get(id).initialized(new InitializedParams());
-        LOG.debug("Initializing of IO streams for server '{}': finished", id);
-        return id;
-      }
-    } catch (LanguageServerException e) {
-      LOG.error("Can't initialize IO streams for '{}'", id, e);
-    }
-    return null;
-  }
 
   private String initializeIOStreams(String id) {
     try {
@@ -233,6 +218,7 @@ class LanguageServerInitializer {
         LOG.debug("Initializing of a language server instance for server '{}': finished", id);
 
         LOG.info("Initialized language server '{}'", id);
+        languageServer.initialized(new InitializedParams());//send initialized message, some LS required it
         return serverCapabilitiesRegistry.add(id, initializeResult.getCapabilities());
       }
     } catch (LanguageServerException
