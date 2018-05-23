@@ -14,6 +14,8 @@ ARG THEIA_VERSION
 ENV USE_LOCAL_GIT=true \
     GITHUB_TOKEN=${GITHUB_TOKEN}
 
+RUN if [ -z "${THEIA_VERSION}" ]; then echo -e '\033[0;31m' Set up build argument 'THEIA_VERSION' '\033[0m'; exit 1; fi
+
 # build dependencies requireed to compile a custom Theia
 RUN apk add --no-cache make gcc g++ python git openssh bash supervisor jq
 WORKDIR /home/theia

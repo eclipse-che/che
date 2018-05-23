@@ -9,7 +9,11 @@
 #   Red Hat, Inc. - initial API and implementation
 set -e
 
-THEIA_VERSION="0.3.10"
+if [ -z "${THEIA_VERSION}" ]; then
+    echo '\033[0;31m Set up 'THEIA_VERSION' argument, please \033[0m';
+    exit 1;
+fi
+
 LATEST_VERSION="latest"
 PACKAGE_JSON_PATH="/home/default/theia/package.json"
 
@@ -26,4 +30,4 @@ for i in ${PACKAGES_FULL[@]}; do
 done
 
 # edit dev dependency version
-sed -i "s#\"@theia/cli\": \"latest\"#\"@theia/cli\": \"${THEIA_VERSION}\"#g" ${PACKAGE_JSON_PATH}
+sed -i "s#\"@theia/cli\": \"$LATEST_VERSION\"#\"@theia/cli\": \"${THEIA_VERSION}\"#g" ${PACKAGE_JSON_PATH}
