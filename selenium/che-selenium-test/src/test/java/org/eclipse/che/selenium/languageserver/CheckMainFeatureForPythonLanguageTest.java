@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
@@ -33,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -44,8 +44,9 @@ public class CheckMainFeatureForPythonLanguageTest {
   private static final String PROJECT_NAME = "console-python3-simple";
   private static final String PYTHON_FILE_NAME = "main.py";
   private static final String PYTHON_MODULE_FILE_NAME = "math.py";
+  private static final String PATH_TO_PYTHON_FILE = PROJECT_NAME + "/" + PYTHON_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      "Finished language servers initialization, file path '/console-python3-simple/main.py";
+      format("Finished language servers initialization, file path '/%s'", PATH_TO_PYTHON_FILE);
   private static final String PYTHON_CLASS =
       "class MyClass:\n"
           + "\tvar = 1\n"
@@ -61,7 +62,6 @@ public class CheckMainFeatureForPythonLanguageTest {
   @Inject private Menu menu;
   @Inject private Wizard wizard;
   @Inject private Consoles consoles;
-  @Inject private Dashboard dashboard;
   @Inject private CodenvyEditor editor;
   @Inject private CommandsPalette commandsPalette;
   @Inject private ProjectExplorer projectExplorer;
@@ -79,9 +79,9 @@ public class CheckMainFeatureForPythonLanguageTest {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectProjectAndCreate(CONSOLE_PYTHON3_SIMPLE, PROJECT_NAME);
 
-    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME + "/main.py");
+    projectExplorer.openItemByPath(PATH_TO_PYTHON_FILE);
     editor.waitTabIsPresent(PYTHON_FILE_NAME);
 
     consoles.selectProcessByTabName("dev-machine");
@@ -110,11 +110,15 @@ public class CheckMainFeatureForPythonLanguageTest {
     editor.deleteAllContent();
     editor.typeTextIntoEditor(PYTHON_CLASS);
 
+    // check warning marker message
     editor.typeTextIntoEditor("\n");
-    editor.goToPosition(editor.getPositionVisible(), 1);
-    editor.typeTextIntoEditor("object = MyClass()\nprint(object.");
+    editor.waitMarkerInPosition(WARNING, editor.getPositionVisible());
+    editor.moveToMarkerAndWaitAssistContent(WARNING);
+    editor.waitTextIntoAnnotationAssist("W293 blank line contains whitespace");
 
     // check contents of autocomplete container
+    editor.goToPosition(7, 1);
+    editor.typeTextIntoEditor("object = MyClass()\nprint(object.");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("function");
     editor.waitTextIntoAutocompleteContainer("var");
