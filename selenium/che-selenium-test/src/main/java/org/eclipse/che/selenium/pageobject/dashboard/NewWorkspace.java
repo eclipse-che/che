@@ -296,4 +296,8 @@ public class NewWorkspace {
                 By.xpath(format(Locators.ORGANIZATION_ITEM, organizationName))))
         .click();
   }
+
+  public void waitPageIsLoad() {
+    waitToolbar();
+  }
 }

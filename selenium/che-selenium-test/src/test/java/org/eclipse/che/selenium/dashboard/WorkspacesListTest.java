@@ -25,19 +25,19 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.*;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses;
 import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.*;
@@ -52,6 +52,7 @@ public class WorkspacesListTest {
   private static final int JAVA_WS_MB = 3072;
   private static final int BLANK_WS_PROJECTS_COUNT = 0;
   private static final int JAVA_WS_PROJECTS_COUNT = 1;
+  private static final String EXPECTED_DOCUMENTATION_PAGE_TITLE = "What Is a Che Workspace?";
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
@@ -65,6 +66,10 @@ public class WorkspacesListTest {
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private DocumentationPage documentationPage;
+  @Inject private WorkspaceOverview workspaceOverview;
 
   private TestWorkspace blankWorkspace;
   private TestWorkspace javaWorkspace;
@@ -115,10 +120,7 @@ public class WorkspacesListTest {
 
     dashboard.selectWorkspacesItemOnDashboard();
 
-    workspaces.waitToolbarTitleName();
-    workspaces.waitDocumentationLink();
-    workspaces.waitAddWorkspaceButton();
-    workspaces.waitSearchWorkspaceByNameField();
+    workspaces.waitPageIsLoad();
 
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
     assertEquals(
@@ -303,6 +305,35 @@ public class WorkspacesListTest {
 
   @Test(priority = 8)
   public void checkWorkspaceActions() {
+    String mainWindow = seleniumWebDriver.getWindowHandle();
+
+    workspaces.clickOnDocumentationLink();
+    seleniumWebDriverHelper.waitOpenedSomeWin();
+    seleniumWebDriverHelper.switchToNextWindow(mainWindow);
+
+    assertEquals(EXPECTED_DOCUMENTATION_PAGE_TITLE, documentationPage.getTitle());
+
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(mainWindow);
+
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitPageIsLoad();
+
+    seleniumWebDriver.navigate().back();
+
+    workspaces.waitPageIsLoad();
+
+    workspaces.clickOnWorkspaceListItem(
+        defaultTestUser.getName(), expectedBlankItem.getWorkspaceName());
+
+    workspaceOverview.checkNameWorkspace(expectedBlankItem.getWorkspaceName());
+
+    seleniumWebDriver.navigate().back();
+
+    workspaces.waitPageIsLoad();
+
+    workspaces.clickOnWorkspaceAddProjectButton(expectedJavaItem.getWorkspaceName());
+
     // open the Config page of the test workspace
     try {
       workspaces.clickOnWorkspaceConfigureButton(workspaceName1);

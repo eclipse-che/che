@@ -126,6 +126,13 @@ public class Workspaces {
             });
   }
 
+  public void waitPageIsLoad() {
+    waitToolbarTitleName();
+    waitDocumentationLink();
+    waitAddWorkspaceButton();
+    waitSearchWorkspaceByNameField();
+  }
+
   public void waitDocumentationLink() {
     redrawUiElementsTimeout.until(
         visibilityOfElementLocated(By.xpath(Locators.DOCUMENTATION_LINK)));
@@ -226,6 +233,11 @@ public class Workspaces {
             visibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_CONFIGURE_BUTTON, workspaceName))))
         .click();
+  }
+
+  public void clickOnWorkspaceListItem(String userName, String workspaceName) {
+    String itemId = String.format("ws-full-name-%s/%s", userName, workspaceName);
+    seleniumWebDriverHelper.waitAndClick(By.id(itemId));
   }
 
   public void clickOnWorkspaceAddProjectButton(String workspaceName) {
