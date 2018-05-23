@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.cpp.generator;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import javax.inject.Inject;
@@ -41,10 +42,13 @@ public class CProjectGenerator implements CreateProjectHandler {
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
 
-    fsManager.createDir(projectWsPath);
-    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(RESOURCE_NAME);
-    String wsPath = resolve(projectWsPath, FILE_NAME);
-    fsManager.createFile(wsPath, inputStream);
+    try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(RESOURCE_NAME)) {
+      fsManager.createDir(projectWsPath);
+      String wsPath = resolve(projectWsPath, FILE_NAME);
+      fsManager.createFile(wsPath, inputStream);
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
   }
 
   @Override
