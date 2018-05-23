@@ -43,7 +43,8 @@ import org.testng.annotations.Test;
 
 @Test(groups = {TestGroup.GITHUB, TestGroup.OSIO})
 public class ImportProjectFromGitHubTest {
-  private static final String WORKSPACE = generate("ImtMvnPrjFromGitHub", 4);
+  private static final String WORKSPACE =
+      generate(ImportProjectFromGitHubTest.class.getSimpleName(), 4);
 
   private String projectName;
   private String testRepoName;
