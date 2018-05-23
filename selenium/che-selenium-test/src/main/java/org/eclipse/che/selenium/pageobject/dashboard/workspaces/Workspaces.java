@@ -17,6 +17,8 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_RAM;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
 import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 import static org.testng.Assert.fail;
 
@@ -59,7 +61,7 @@ public class Workspaces {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  private interface Locators {
+  public interface Locators {
     String TOOLBAR = "Workspaces";
     String DOCUMENTATION_LINK = "//div[@che-link-title='Learn more.']/a";
     String ADD_WORKSPACE_BTN = "add-item-button";
@@ -81,6 +83,8 @@ public class Workspaces {
         "//div[@id='ws-name-%s']//a[@name='configure-workspace-button']";
     String WORKSPACE_ITEM_ADD_PROJECT_BUTTON =
         "//div[@id='ws-name-%s']//span[@name='add-project-button']";
+    String WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON =
+        "//div[@id='ws-name-%s']//*[@name='workspace-stop-start-button']/div";
     String WORKSPACE_LIST_HEADER = "//md-item[@class='noselect']//span";
     String WORKSPACE_LIST_ITEM =
         "(//div[@class='workspace-name-clip']/parent::div/parent::div/parent::div)[%s]";
@@ -197,9 +201,7 @@ public class Workspaces {
 
   public String getWorkspaceRamValue(String workspaceName) {
     return redrawUiElementsTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_RAM, workspaceName))))
+        .until(visibilityOfElementLocated(By.xpath(format(WORKSPACE_ITEM_RAM, workspaceName))))
         .getText();
   }
 
@@ -262,6 +264,15 @@ public class Workspaces {
     seleniumWebDriverHelper
         .waitVisibility(By.xpath("//div[@che-column-title='Stack']/div"))
         .click();
+  }
+
+  public void clickOnWorkspaceStopStartButton(String workspaceName) {
+    String buttonXpath = String.format(WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON, workspaceName);
+    seleniumWebDriverHelper.waitAndClick(By.xpath(buttonXpath));
+  }
+
+  public void moveCursorToWorkspaceRamSection(String workspaceName) {
+    seleniumWebDriverHelper.moveCursorTo(By.xpath(format(WORKSPACE_ITEM_RAM, workspaceName)));
   }
 
   public void selectWorkspaceItemName(String wsName) {

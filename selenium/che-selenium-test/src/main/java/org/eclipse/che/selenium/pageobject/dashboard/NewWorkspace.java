@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -36,11 +37,16 @@ public class NewWorkspace {
   private final SeleniumWebDriver seleniumWebDriver;
   private final WebDriverWait redrawUiElementsTimeout;
   private final ActionsFactory actionsFactory;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public NewWorkspace(SeleniumWebDriver seleniumWebDriver, ActionsFactory actionsFactory) {
+  public NewWorkspace(
+      SeleniumWebDriver seleniumWebDriver,
+      ActionsFactory actionsFactory,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.actionsFactory = actionsFactory;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
@@ -281,6 +287,10 @@ public class NewWorkspace {
     redrawUiElementsTimeout.until(visibilityOf(createWorkspaceButton)).click();
     waitWorkspaceIsCreatedDialogIsVisible();
     clickOnEditWorkspaceButton();
+  }
+
+  public void clickOnCreateButton() {
+    seleniumWebDriverHelper.waitAndClick(createWorkspaceButton);
   }
 
   public void openOrganizationsList() {

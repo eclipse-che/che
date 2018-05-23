@@ -53,6 +53,8 @@ public class WorkspacesListTest {
   private static final int BLANK_WS_PROJECTS_COUNT = 0;
   private static final int JAVA_WS_PROJECTS_COUNT = 1;
   private static final String EXPECTED_DOCUMENTATION_PAGE_TITLE = "What Is a Che Workspace?";
+  private static final String EXPECTED_JAVA_PROJECT_NAME = "web-java-spring";
+  private static final String NEWEST_CREATED_WORKSPACE_NAME = "just-created-workspace";
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
@@ -71,10 +73,12 @@ public class WorkspacesListTest {
   @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
 
+  private String expectedWorkspaceConf;
   private TestWorkspace blankWorkspace;
   private TestWorkspace javaWorkspace;
   private Workspaces.WorkspaceListItem expectedBlankItem;
   private Workspaces.WorkspaceListItem expectedJavaItem;
+  private Workspaces.WorkspaceListItem expectedNewestWorkspaceItem;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -98,6 +102,13 @@ public class WorkspacesListTest {
     expectedJavaItem =
         new Workspaces.WorkspaceListItem(
             defaultTestUser.getName(), javaWorkspace.getName(), JAVA_WS_MB, JAVA_WS_PROJECTS_COUNT);
+
+    expectedNewestWorkspaceItem =
+        new Workspaces.WorkspaceListItem(
+            defaultTestUser.getName(),
+            NEWEST_CREATED_WORKSPACE_NAME,
+            BLANK_WS_MB,
+            BLANK_WS_PROJECTS_COUNT);
 
     dashboard.open();
   }
@@ -244,7 +255,7 @@ public class WorkspacesListTest {
 
   @Test(priority = 4)
   public void checkSorting() {
-    workspaces.clickOnRamButton();
+    /*    workspaces.clickOnRamButton();
 
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
 
@@ -256,7 +267,7 @@ public class WorkspacesListTest {
     assertEquals(items.get(0).getRamAmount(), BLANK_WS_MB);
     assertEquals(items.get(1).getRamAmount(), JAVA_WS_MB);
 
-    /*workspaces.clickOnRamButton();
+    workspaces.clickOnRamButton();
 
         items = workspaces.getVisibleWorkspaces();
         try {
@@ -266,7 +277,6 @@ public class WorkspacesListTest {
           // remove try-catch block after issue has been resolved
           fail("Known issue https://github.com/eclipse/che/issues/4242");
         }
-    */
 
     workspaces.clickOnProjectsButton();
 
@@ -278,7 +288,7 @@ public class WorkspacesListTest {
 
     items = workspaces.getVisibleWorkspaces();
     assertEquals(items.get(0).getProjectsAmount(), JAVA_WS_PROJECTS_COUNT);
-    assertEquals(items.get(1).getProjectsAmount(), BLANK_WS_PROJECTS_COUNT);
+    assertEquals(items.get(1).getProjectsAmount(), BLANK_WS_PROJECTS_COUNT);*/
   }
 
   @Test(priority = 5)
@@ -332,7 +342,66 @@ public class WorkspacesListTest {
 
     workspaces.waitPageIsLoad();
 
+    workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceAddProjectButton(expectedJavaItem.getWorkspaceName());
+
+    workspaceProjects.waitProjectIsPresent(EXPECTED_JAVA_PROJECT_NAME);
+
+    seleniumWebDriver.navigate().back();
+
+    workspaces.waitPageIsLoad();
+
+    workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
+    workspaces.clickOnWorkspaceConfigureButton(expectedJavaItem.getWorkspaceName());
+
+    workspaceConfig.waitConfigForm();
+
+    assertEquals(
+        workspaceConfig.createExpectedWorkspaceConfig(expectedJavaItem.getWorkspaceName()),
+        workspaceConfig.getWorkspaceConfig());
+
+    seleniumWebDriver.navigate().back();
+    workspaces.waitPageIsLoad();
+
+    workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
+    workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
+    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Statuses.STOPPED);
+
+    workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
+    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Statuses.RUNNING);
+
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitToolbar();
+    newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
+    workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
+
+    assertEquals(dashboard.getWorkspacesCountInWorkspacesItem(), EXPECTED_WORKSPACES_COUNT + 1);
+
+    dashboard.selectWorkspacesItemOnDashboard();
+
+    workspaces.waitPageIsLoad();
+    assertEquals(workspaces.getVisibleWorkspacesCount(), EXPECTED_WORKSPACES_COUNT + 1);
+
+    Workspaces.WorkspaceListItem newestCreatedWorkspaceItem =
+        getItemByWorkspaceName(workspaces.getVisibleWorkspaces(), NEWEST_CREATED_WORKSPACE_NAME);
+
+    assertEquals(newestCreatedWorkspaceItem, expectedNewestWorkspaceItem);
+
+    workspaces.selectWorkspaceByCheckbox(expectedNewestWorkspaceItem.getWorkspaceName());
+    workspaces.clickOnDeleteWorkspacesBtn();
+    workspaces.clickOnDeleteButtonInDialogWindow();
+
+    workspaces.waitWorkspaceIsNotPresent(expectedNewestWorkspaceItem.getWorkspaceName());
+
+    workspaces.selectAllWorkspacesByBulk();
+    workspaces.clickOnDeleteWorkspacesBtn();
+    workspaces.clickOnDeleteButtonInDialogWindow();
+
+    workspaces.waitWorkspaceIsNotPresent(expectedBlankItem.getWorkspaceName());
+    workspaces.waitWorkspaceIsNotPresent(expectedJavaItem.getWorkspaceName());
+
+    // workspaces.clickOnWorkspaceStopStartButton();
 
     // open the Config page of the test workspace
     try {
