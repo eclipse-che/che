@@ -846,13 +846,9 @@ public final class ResourceManager {
       return getRemoteResources(container, DEPTH_ONE, true);
     }
 
-    final Optional<Resource[]> optChildren = store.get(container.getLocation());
+    Promise<Void> promise = loadAndRegisterResources(container.getLocation());
 
-    if (optChildren.isPresent()) {
-      return promises.resolve(optChildren.get());
-    } else {
-      return promises.resolve(NO_RESOURCES);
-    }
+    return promise.thenPromise(ignored -> promises.resolve(store.get(container.getLocation()).or(NO_RESOURCES)));
   }
 
   private Promise<Optional<Resource>> doFindResource(Path path) {
