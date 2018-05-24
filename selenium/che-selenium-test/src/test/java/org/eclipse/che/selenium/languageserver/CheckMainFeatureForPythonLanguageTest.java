@@ -25,6 +25,7 @@ import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.CONSOLE_PYT
 import static org.openqa.selenium.Keys.F4;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -49,11 +50,11 @@ public class CheckMainFeatureForPythonLanguageTest {
       format("Finished language servers initialization, file path '/%s'", PATH_TO_PYTHON_FILE);
   private static final String PYTHON_CLASS =
       "class MyClass:\n"
-          + "\tvar = 1\n"
-          + "variable = \"variable\"\n"
+          + "    var = 1\n"
+          + "    variable = \"variable\"\n"
           + "\n"
-          + "def function(self):\n"
-          + "\tprint(\"This is a message inside the class.\")";
+          + "    def function(self):\n"
+          + "        print(\"This is a message inside the class.\")";
 
   @InjectTestWorkspace(template = PYTHON)
   private TestWorkspace workspace;
@@ -66,6 +67,7 @@ public class CheckMainFeatureForPythonLanguageTest {
   @Inject private CommandsPalette commandsPalette;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private AskForValueDialog askForValueDialog;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -84,18 +86,25 @@ public class CheckMainFeatureForPythonLanguageTest {
     projectExplorer.openItemByPath(PATH_TO_PYTHON_FILE);
     editor.waitTabIsPresent(PYTHON_FILE_NAME);
 
+    // check python language sever initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
   @Test(priority = 1)
-  public void checkErrorMessages() {
+  public void checkMarkers() throws Exception {
     editor.selectTabByName(PYTHON_FILE_NAME);
     editor.deleteAllContent();
-    editor.typeTextIntoEditor(PYTHON_CLASS);
+    testProjectServiceClient.updateFile(workspace.getId(), PATH_TO_PYTHON_FILE, PYTHON_CLASS);
+
+    // check warning marker message
+    editor.goToPosition(6, 53);
     editor.typeTextIntoEditor("\n");
     editor.waitMarkerInPosition(WARNING, editor.getPositionVisible());
+    editor.moveToMarkerAndWaitAssistContent(WARNING);
+    editor.waitTextIntoAnnotationAssist("W293 blank line contains whitespace");
 
+    // check error marker message
     editor.goToCursorPositionVisible(1, 1);
     editor.waitAllMarkersInvisibility(ERROR);
     editor.typeTextIntoEditor("c");
@@ -105,18 +114,14 @@ public class CheckMainFeatureForPythonLanguageTest {
   }
 
   @Test(priority = 1)
-  public void checkAutocompleteFeature() {
+  public void checkAutocompleteFeature() throws Exception {
     editor.selectTabByName(PYTHON_FILE_NAME);
     editor.deleteAllContent();
-    editor.typeTextIntoEditor(PYTHON_CLASS);
-
-    // check warning marker message
-    editor.typeTextIntoEditor("\n");
-    editor.waitMarkerInPosition(WARNING, editor.getPositionVisible());
-    editor.moveToMarkerAndWaitAssistContent(WARNING);
-    editor.waitTextIntoAnnotationAssist("W293 blank line contains whitespace");
+    testProjectServiceClient.updateFile(workspace.getId(), PATH_TO_PYTHON_FILE, PYTHON_CLASS);
 
     // check contents of autocomplete container
+    editor.goToPosition(6, 53);
+    editor.typeTextIntoEditor("\n");
     editor.goToPosition(7, 1);
     editor.typeTextIntoEditor("object = MyClass()\nprint(object.");
     editor.launchAutocompleteAndWaitContainer();
