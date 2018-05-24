@@ -143,7 +143,6 @@ public class CheckMainFeatureForPythonLanguageTest {
     createFile(PYTHON_MODULE_FILE_NAME);
     editor.selectTabByName(PYTHON_MODULE_FILE_NAME);
     editor.typeTextIntoEditor("def add(a, b):\n return a + b");
-    editor.clickOnCloseFileIcon(PYTHON_MODULE_FILE_NAME);
 
     editor.selectTabByName(PYTHON_FILE_NAME);
     editor.deleteAllContent();
@@ -154,7 +153,7 @@ public class CheckMainFeatureForPythonLanguageTest {
     editor.goToPosition(editor.getPositionVisible(), 15);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitTabIsPresent(PYTHON_MODULE_FILE_NAME);
-    editor.clickOnCloseFileIcon(PYTHON_MODULE_FILE_NAME);
+    editor.closeFileByNameWithSaving(PYTHON_MODULE_FILE_NAME);
 
     // check Find Definition feature by pressing F4
     editor.goToPosition(editor.getPositionVisible(), 15);
