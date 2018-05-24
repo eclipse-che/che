@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
@@ -381,6 +382,15 @@ public class Workspaces {
         .waitVisibility(By.xpath(fullNameXpath))
         .getAttribute("id")
         .replace("ws-full-name-", "");
+  }
+
+  public Workspaces.WorkspaceListItem getWorkspaceListItemByWorkspaceName(
+      List<Workspaces.WorkspaceListItem> itemsList, String workspaceName) {
+    return itemsList
+        .stream()
+        .filter(item -> item.getWorkspaceName().equals(workspaceName))
+        .collect(Collectors.toList())
+        .get(0);
   }
 
   public List<WorkspaceListItem> getVisibleWorkspaces() {
