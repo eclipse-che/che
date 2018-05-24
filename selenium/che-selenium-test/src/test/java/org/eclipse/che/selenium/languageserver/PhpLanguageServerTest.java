@@ -78,7 +78,7 @@ public class PhpLanguageServerTest {
   }
 
   @Test()
-  public void shouldDoMainLanguageServerFeatures() {
+  public void checkMainFeaturesPhpLS() {
     String intitPhpLanguageServerMessage =
         String.format(
             "Finished language servers initialization, file path '/%s'", PATH_TO_INDEX_PHP);
