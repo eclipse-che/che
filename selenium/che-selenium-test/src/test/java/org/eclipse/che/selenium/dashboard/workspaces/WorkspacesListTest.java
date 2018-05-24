@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.dashboard;
+package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
@@ -275,7 +275,7 @@ public class WorkspacesListTest {
     seleniumWebDriver.switchTo().window(mainWindow);
 
     workspaces.clickOnAddWorkspaceBtn();
-    newWorkspace.waitPageIsLoad();
+    newWorkspace.waitPageLoad();
 
     seleniumWebDriver.navigate().back();
 

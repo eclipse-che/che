@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.dashboard.workspaceDetails;
+package org.eclipse.che.selenium.dashboard.workspaces.workspaceDetails;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -44,4 +44,6 @@ public class WorkspaceDetailsOverview {
 
   @BeforeClass
   public void setup() {}
+
+  public void checkNameField() {}
 }

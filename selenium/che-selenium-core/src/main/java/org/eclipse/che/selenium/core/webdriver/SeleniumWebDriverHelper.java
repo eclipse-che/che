@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.core.webdriver;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /** @author Ihor Okhrimenko */
 @Singleton
 public class SeleniumWebDriverHelper {
-  protected final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
+  protected final int DEFAULT_TIMEOUT = TestTimeoutsConstants.DEFAULT_TIMEOUT;
   protected final SeleniumWebDriver seleniumWebDriver;
   protected final WebDriverWaitFactory webDriverWaitFactory;
   protected final ActionsFactory actionsFactory;

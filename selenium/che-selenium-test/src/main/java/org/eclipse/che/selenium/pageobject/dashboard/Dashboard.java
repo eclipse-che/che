@@ -96,7 +96,7 @@ public class Dashboard {
     }
   }
 
-  private interface Locators {
+  public interface Locators {
     String DASHBOARD_TOOLBAR_TITLE = "navbar";
     String NAVBAR_NOTIFICATION_CONTAINER = "navbar-notification-container";
     String COLLAPSE_DASH_NAVBAR_BTN = "ide-iframe-button-link";
