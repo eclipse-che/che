@@ -14,8 +14,12 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.ZIP;
 
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -48,9 +52,13 @@ public class ImportProjectFromZipTest {
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
+  @Inject private TestGitHubRepository testRepo;
 
   @BeforeClass
-  public void setUp() {
+  public void setUp() throws IOException {
+    Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+    testRepo.addContent(entryPath);
+
     dashboard.open();
   }
 
@@ -61,11 +69,16 @@ public class ImportProjectFromZipTest {
 
   @Test
   public void importProjectFromZipTest() throws ExecutionException, InterruptedException {
+    String testRepoFullName = testRepo.getFullName();
+    String zipUrl =
+        String.format("%s/%s/%s", "https://github.com", testRepoFullName, "archive/master.zip");
+
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
@@ -73,8 +86,7 @@ public class ImportProjectFromZipTest {
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(ZIP);
-    projectSourcePage.typeZipLocation(
-        "https://github.com/iedexmain1/multimodule-project/archive/master.zip");
+    projectSourcePage.typeZipLocation(zipUrl);
     projectSourcePage.skipRootFolder();
     projectSourcePage.clickOnAddProjectButton();
 

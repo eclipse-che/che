@@ -198,8 +198,6 @@ public class WsMasterModule extends AbstractModule {
     install(new InstallerModule());
     binder().bind(new TypeLiteral<Set<Installer>>() {}).toProvider(InstallersProvider.class);
 
-    bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
-
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
