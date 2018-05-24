@@ -11,6 +11,7 @@
 'use strict';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import {ICommunicationClient} from './json-rpc-client';
+import { isatty } from 'tty';
 
 enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'machine/log',
@@ -38,38 +39,95 @@ const UNSUBSCRIBE: string = 'unsubscribe';
 export class CheJsonRpcMasterApi {
   private $log: ng.ILogService;
   private $timeout: ng.ITimeoutService;
+  private $interval: ng.IIntervalService;
+  private $q: ng.IQService;
   private cheJsonRpcApi: CheJsonRpcApiClient;
   private clientId: string;
+  private checkingInterval: ng.IPromise<any>;
+  private reconnectionAttemptTimeout: ng.IPromise<any>;
 
-  private maxReconnectionAttempts = 5;
+  private maxReconnectionAttempts = 100;
   private reconnectionAttemptNumber = 0;
   private reconnectionDelay = 30000;
+  private checkingDelay = 10000;
+  private fetchingClientIdTimeout = 5000;
 
-  constructor (client: ICommunicationClient,
-               entrypoint: string,
-               $log: ng.ILogService,
-               $timeout: ng.ITimeoutService) {
+  constructor(client: ICommunicationClient,
+              entrypoint: string,
+              $log: ng.ILogService,
+              $timeout: ng.ITimeoutService,
+              $interval: ng.IIntervalService,
+              $q: ng.IQService) {
     this.$log = $log;
     this.$timeout = $timeout;
+    this.$interval = $interval;
+    this.$q = $q;
 
-    client.addListener('open', () => this.onConnectionOpen());
+    client.addListener('open', () => this.onConnectionOpen(entrypoint));
     client.addListener('close', () => this.onConnectionClose(entrypoint));
 
     this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
     this.connect(entrypoint);
   }
 
-  onConnectionOpen(): void {
+  onConnectionOpen(entrypoint: string): void {
     if (this.reconnectionAttemptNumber !== 0) {
       this.$log.log('WebSocket connection is opened.');
     }
     this.reconnectionAttemptNumber = 0;
+
+    if (this.checkingInterval) {
+      this.$interval.cancel(this.checkingInterval);
+    }
+    if (this.reconnectionAttemptTimeout) {
+      this.$timeout.cancel(this.reconnectionAttemptTimeout);
+      this.reconnectionAttemptTimeout = undefined;
+    }
+
+    this.checkingInterval = this.$interval(() => {
+      if (this.reconnectionAttemptTimeout) {
+        return;
+      }
+
+      let isAlive = false;
+      const fetchClientPromise = this.fetchClientId().then(() => {
+        isAlive = true;
+        return isAlive;
+      }, (error: any) => {
+        this.$log.error(error);
+        isAlive = false;
+        return isAlive;
+      });
+
+      // this is timeout of fetchClientId request
+      const fetchClientTimeout = this.$timeout(() => {
+        return isAlive;
+      }, this.fetchingClientIdTimeout);
+
+      this.promisesRace([fetchClientPromise, fetchClientTimeout]).then((isAlive: boolean) => {
+        if (isAlive) {
+          return;
+        }
+
+        this.reconnect(entrypoint);
+      });
+
+    }, this.checkingDelay);
   }
 
   onConnectionClose(entrypoint: string): void {
+    this.reconnect(entrypoint);
+  }
+
+  reconnect(entrypoint: string): void {
     this.$log.warn('WebSocket connection is closed.');
     if (this.reconnectionAttemptNumber === this.maxReconnectionAttempts) {
       this.$log.warn('The maximum number of attempts to reconnect WebSocket has been reached.');
+
+      if (this.checkingInterval) {
+        this.$interval.cancel(this.checkingInterval);
+      }
+
       return;
     }
 
@@ -80,7 +138,7 @@ export class CheJsonRpcMasterApi {
     if (delay) {
       this.$log.warn(`WebSocket will be reconnected in ${delay} ms...`);
     }
-    this.$timeout(() => {
+    this.reconnectionAttemptTimeout = this.$timeout(() => {
       this.$log.warn(`WebSocket is reconnecting, attempt #${this.reconnectionAttemptNumber} out of ${this.maxReconnectionAttempts}...`);
       this.connect(entrypoint);
     }, delay);
@@ -287,5 +345,15 @@ export class CheJsonRpcMasterApi {
     let params = {method: method, scope: {}};
     params.scope[masterScope] = id;
     this.cheJsonRpcApi.unsubscribe(UNSUBSCRIBE, method, callback, params);
+  }
+
+  private promisesRace(promises: ng.IPromise<any>[]): ng.IPromise<any> {
+    const deferred = this.$q.defer();
+
+    promises.forEach((promise: ng.IPromise<any>) => {
+      promise.then(deferred.resolve, deferred.reject);
+    });
+
+    return deferred.promise;
   }
 }

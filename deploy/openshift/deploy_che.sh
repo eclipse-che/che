@@ -10,7 +10,7 @@
 #  ``` bash
 #   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/deploy/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   bash get-che.sh --wait-che
+#   bash get-che.sh
 #   ```
 #
 # For more deployment options: https://www.eclipse.org/che/docs/setup/openshift/index.html
@@ -48,7 +48,6 @@ HELP="
 --multiuser - Deploy che in multiuser mode
 --no-pull - IfNotPresent pull policy for Che server deployment
 --rolling - Rolling update strategy (Recreate is the default one). With Rolling strategy Che server pvc and volume aren't created
---wait-che - Track Che deployment progress until pod is healthy
 --debug - Deploy Che in a debug mode, create and expose debug route
 --image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
 ===================================
@@ -94,10 +93,6 @@ case $key in
     ;;
     --debug)
     CHE_DEBUG_SERVER=true
-    shift
-    ;;
-    --wait-che)
-    WAIT_FOR_CHE=true
     shift
     ;;
     --help)
@@ -202,7 +197,7 @@ wait_for_postgres() {
       available=$(${OC_BINARY} get dc postgres -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
       progressing=$(${OC_BINARY} get dc postgres -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
       timeout_in=$((end-SECONDS))
-      printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+      printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
       sleep ${POLLING_INTERVAL_SEC}
     done
     if [ "${progressing}" == "\"True\"" ]; then
@@ -217,7 +212,6 @@ wait_for_postgres() {
 }
 
 wait_for_keycloak() {
-
     printInfo "Wait for Keycloak pod booting..."
     available=$(${OC_BINARY} get dc keycloak -o=jsonpath={.status.conditions[0].status})
     progressing=$(${OC_BINARY} get dc keycloak -o=jsonpath={.status.conditions[1].status})
@@ -228,7 +222,7 @@ wait_for_keycloak() {
         available=$(${OC_BINARY} get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
         progressing=$(${OC_BINARY} get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
         timeout_in=$((end-SECONDS))
-        printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+        printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
         sleep ${POLLING_INTERVAL_SEC}
     done
     if [ "${progressing}" == "\"True\"" ]; then
@@ -248,22 +242,29 @@ wait_for_che() {
     DEPLOYMENT_TIMEOUT_SEC=300
     POLLING_INTERVAL_SEC=5
     end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
+
+    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
       available=$(${OC_BINARY} get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
       progressing=$(${OC_BINARY} get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
       timeout_in=$((end-SECONDS))
-      printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+      printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
       sleep ${POLLING_INTERVAL_SEC}
     done
-    if [ "${progressing}" == "\"True\"" ]; then
-      printInfo "Che successfully deployed and is available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
-    elif [ "${progressing}" == "False" ]; then
+
+    if [ "${progressing}" != "\"True\""  ]; then
       printError "Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
       exit 1
-    elif [ ${SECONDS} -lt ${end} ]; then
+
+    elif [ "${available}" != "\"True\""  ]; then
+      printError "Che successfully deployed but it is not available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
+      exit 1
+
+    elif [ ${SECONDS} -ge ${end} ]; then
       printError "Deployment timeout. Aborting."
       exit 1
     fi
+
+    printInfo "Che successfully deployed and is available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
 }
 
 createNewProject() {
@@ -376,10 +377,11 @@ ${CHE_VAR_ARRAY}"
       fi
     fi
     CHE_ROUTE=$(oc get route/che -o=jsonpath='{.spec.host}')
-    printInfo "Che successfully deployed and will be soon available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
     exposeDebugService
     if [ "${WAIT_FOR_CHE}" == "true" ]; then
       wait_for_che
+    else
+      printInfo "Che successfully deployed and will be soon available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
     fi
 }
 
