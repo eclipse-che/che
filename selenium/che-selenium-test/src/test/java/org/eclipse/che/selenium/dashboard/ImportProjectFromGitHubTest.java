@@ -20,8 +20,12 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
@@ -39,10 +43,11 @@ import org.testng.annotations.Test;
 
 @Test(groups = {TestGroup.GITHUB, TestGroup.OSIO})
 public class ImportProjectFromGitHubTest {
-  private static final String WORKSPACE = generate("ImtMvnPrjGitHub", 4);
-  private static final String GITHUB_PROJECT_NAME = "AngularJS";
+  private static final String WORKSPACE =
+      generate(ImportProjectFromGitHubTest.class.getSimpleName(), 4);
 
   private String projectName;
+  private String testRepoName;
   private String ideWin;
 
   @Inject
@@ -64,10 +69,12 @@ public class ImportProjectFromGitHubTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestGitHubRepository testRepo;
 
   @BeforeClass
-  public void setUp() {
-    projectName = gitHubUsername + "-" + GITHUB_PROJECT_NAME;
+  public void setUp() throws IOException {
+    Path entryPath = Paths.get(getClass().getResource("/projects/testRepo").getPath());
+    testRepo.addContent(entryPath);
 
     dashboard.open();
   }
@@ -79,6 +86,9 @@ public class ImportProjectFromGitHubTest {
 
   @Test
   public void checkAbilityImportProjectFromGithub() throws Exception {
+    testRepoName = testRepo.getName();
+    projectName = String.format("%s-%s", gitHubUsername, testRepoName);
+
     ideWin = seleniumWebDriver.getWindowHandle();
 
     dashboard.waitDashboardToolbarTitle();
@@ -98,7 +108,7 @@ public class ImportProjectFromGitHubTest {
     }
 
     assertTrue(projectSourcePage.isGithubProjectsListDisplayed());
-    projectSourcePage.selectProjectFromList(GITHUB_PROJECT_NAME);
+    projectSourcePage.selectProjectFromList(testRepoName);
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
