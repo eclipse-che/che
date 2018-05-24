@@ -277,9 +277,8 @@ public class NewWorkspace {
   }
 
   public void clickOnEditWorkspaceButton() {
-    seleniumWebDriverHelper
-            .waitAndClick(By.xpath(EDIT_WORKSPACE_DIALOG_BUTTON), ELEMENT_TIMEOUT_SEC);
-
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(EDIT_WORKSPACE_DIALOG_BUTTON), ELEMENT_TIMEOUT_SEC);
 
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(elementToBeClickable(By.xpath(Locators.EDIT_WORKSPACE_DIALOG_BUTTON)))

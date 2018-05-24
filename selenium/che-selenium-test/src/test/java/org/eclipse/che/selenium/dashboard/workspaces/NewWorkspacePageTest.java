@@ -24,11 +24,8 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
 
 public class NewWorkspacePageTest {
 
@@ -47,19 +44,16 @@ public class NewWorkspacePageTest {
   @Inject private WorkspaceOverview workspaceOverview;
 
   @BeforeClass
-    public void setup(){
-      dashboard.open();
-      dashboard.waitDashboardToolbarTitle();
-      dashboard.selectWorkspacesItemOnDashboard();
-      workspaces.waitPageIsLoad();
-      workspaces.clickOnAddWorkspaceBtn();
+  public void setup() {
+    dashboard.open();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.waitPageIsLoad();
+    workspaces.clickOnAddWorkspaceBtn();
   }
 
-    @Test
-    public void checkNameField(){
-      newWorkspace.waitPageLoad();
-
-      assertEquals(newWorkspace.getWorkspaceNameValue()
-    }
-
+  @Test
+  public void checkNameField() {
+    newWorkspace.waitPageLoad();
+  }
 }
