@@ -33,7 +33,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.*;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses;
 import org.testng.annotations.*;
@@ -50,14 +49,11 @@ public class WorkspacesListTest {
   private static final String NEWEST_CREATED_WORKSPACE_NAME = "just-created-workspace";
 
   @Inject private Dashboard dashboard;
-  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private WorkspaceProjects workspaceProjects;
   @Inject private WorkspaceConfig workspaceConfig;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private ProjectSourcePage projectSourcePage;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
@@ -66,7 +62,6 @@ public class WorkspacesListTest {
   @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
 
-  private String expectedWorkspaceConf;
   private TestWorkspace blankWorkspace;
   private TestWorkspace javaWorkspace;
   private Workspaces.WorkspaceListItem expectedBlankItem;
@@ -108,14 +103,9 @@ public class WorkspacesListTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testWorkspaceServiceClient.delete(javaWorkspace.getName(), defaultTestUser.getName());
-    testWorkspaceServiceClient.delete(blankWorkspace.getName(), defaultTestUser.getName());
-  }
-
-  @BeforeMethod
-  public void openWorkspacesPage() {
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
+    deleteIfWorkspaceExist(expectedJavaItem.getWorkspaceName());
+    deleteIfWorkspaceExist(expectedBlankItem.getWorkspaceName());
+    deleteIfWorkspaceExist(expectedNewestWorkspaceItem.getWorkspaceName());
   }
 
   @Test
@@ -359,5 +349,15 @@ public class WorkspacesListTest {
 
     workspaces.waitWorkspaceIsNotPresent(expectedBlankItem.getWorkspaceName());
     workspaces.waitWorkspaceIsNotPresent(expectedJavaItem.getWorkspaceName());
+  }
+
+  private void deleteIfWorkspaceExist(String workspaceName) throws Exception {
+    if (isWorkspaceExist(workspaceName)) {
+      testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
+    }
+  }
+
+  private boolean isWorkspaceExist(String workspaceName) throws Exception {
+    return testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName());
   }
 }
