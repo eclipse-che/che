@@ -9,7 +9,8 @@
         "@theia/git": "latest",
         "@theia/file-search": "latest",
         "@theia/markers": "latest",
-        "@theia/extension-manager": "latest"
+        "@theia/extension-manager": "latest",
+        "@theia/messages": "latest"
     },
     "devDependencies": {
         "@theia/cli": "latest"
