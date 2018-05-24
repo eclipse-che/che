@@ -848,7 +848,8 @@ public final class ResourceManager {
 
     Promise<Void> promise = loadAndRegisterResources(container.getLocation());
 
-    return promise.thenPromise(ignored -> promises.resolve(store.get(container.getLocation()).or(NO_RESOURCES)));
+    return promise.thenPromise(
+        ignored -> promises.resolve(store.get(container.getLocation()).or(NO_RESOURCES)));
   }
 
   private Promise<Optional<Resource>> doFindResource(Path path) {
