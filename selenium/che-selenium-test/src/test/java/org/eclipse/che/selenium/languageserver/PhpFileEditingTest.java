@@ -15,10 +15,8 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
 
 import com.google.inject.Inject;
-
 import java.net.URL;
 import java.nio.file.Paths;
-
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -41,108 +39,99 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class PhpFileEditingTest {
-    private static final Logger LOG               = LoggerFactory.getLogger(PhpFileEditingTest.class);
-    private static final String PROJECT           = "php-tests";
-    private static final String PATH_TO_INDEX_PHP = PROJECT + "/index.php";
-    private static final URL RESOURCE   = PhpFileEditingTest.class.getResource("/projects/plugins/DebuggerPlugin/php-tests");
+  private static final Logger LOG = LoggerFactory.getLogger(PhpFileEditingTest.class);
+  private static final String PROJECT = "php-tests";
+  private static final String PATH_TO_INDEX_PHP = PROJECT + "/index.php";
+  private static final URL RESOURCE =
+      PhpFileEditingTest.class.getResource("/projects/plugins/DebuggerPlugin/php-tests");
 
-    @InjectTestWorkspace(template = WorkspaceTemplate.ECLIPSE_PHP)
-    private TestWorkspace ws;
+  @InjectTestWorkspace(template = WorkspaceTemplate.ECLIPSE_PHP)
+  private TestWorkspace ws;
 
-    @Inject
-    private Ide ide;
+  @Inject private Ide ide;
 
-    @Inject
-    private ProjectExplorer          projectExplorer;
-    @Inject
-    private Loader                   loader;
-    @Inject
-    private DebugPanel               debugPanel;
-    @Inject
-    private PhpDebugConfig           debugConfig;
-    @Inject
-    private NotificationsPopupPanel  notificationPopup;
-    @Inject
-    private Menu                     menu;
-    @Inject
-    private CodenvyEditor            editor;
-    @Inject
-    private Consoles                 consoles;
-    @Inject
-    private TestProjectServiceClient testProjectServiceClient;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
+  @Inject private DebugPanel debugPanel;
+  @Inject private PhpDebugConfig debugConfig;
+  @Inject private NotificationsPopupPanel notificationPopup;
+  @Inject private Menu menu;
+  @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
-    @BeforeClass
-    public void setup() throws Exception {
-        testProjectServiceClient.importProject(
-                ws.getId(), Paths.get(RESOURCE.toURI()), PROJECT, ProjectTemplates.PHP);
+  @BeforeClass
+  public void setup() throws Exception {
+    testProjectServiceClient.importProject(
+        ws.getId(), Paths.get(RESOURCE.toURI()), PROJECT, ProjectTemplates.PHP);
 
-        // open IDE
-        ide.open(ws);
-        loader.waitOnClosed();
-        projectExplorer.waitItem(PROJECT);
-        notificationPopup.waitProgressPopupPanelClose();
+    // open IDE
+    ide.open(ws);
+    loader.waitOnClosed();
+    projectExplorer.waitItem(PROJECT);
+    notificationPopup.waitProgressPopupPanelClose();
 
-        // open project tree
-        projectExplorer.quickExpandWithJavaScript();
-        projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-        editor.waitActive();
-    }
+    // open project tree
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
+    editor.waitActive();
+  }
 
-    @Test
-    public void PhpFileEditingTest() {
-        String intitPhpLanguageServerMessage =
-                String.format(
-                        "Finished language servers initialization, file path '/%s'", PATH_TO_INDEX_PHP);
+  @Test
+  public void PhpFileEditingTest() {
+    String intitPhpLanguageServerMessage =
+        String.format(
+            "Finished language servers initialization, file path '/%s'", PATH_TO_INDEX_PHP);
 
-        consoles.waitExpectedTextIntoConsole(intitPhpLanguageServerMessage);
+    consoles.waitExpectedTextIntoConsole(intitPhpLanguageServerMessage);
 
-        checkCodeValidation();
-        checkAutocompletion();
-        checkCodeAssistant();
-        checkGoToDefenition();
-    }
+    checkCodeValidation();
+    checkAutocompletion();
+    checkCodeAssistant();
+    checkGoToDefenition();
+  }
 
-    private void checkGoToDefenition() {
-        editor.deleteCurrentLine();
+  private void checkGoToDefenition() {
+    editor.deleteCurrentLine();
 
-        editor.goToPosition(14, 9);
+    editor.goToPosition(14, 9);
 
-        menu.runCommand(ASSISTANT, FIND_DEFINITION);
-        editor.waitActiveTabFileName("lib.php");
-        editor.waitCursorPosition(14, 2);
-    }
+    menu.runCommand(ASSISTANT, FIND_DEFINITION);
+    editor.waitActiveTabFileName("lib.php");
+    editor.waitCursorPosition(14, 2);
+  }
 
-    private void checkCodeAssistant() {
-        editor.goToCursorPositionVisible(15, 7);
-        editor.typeTextIntoEditor(Keys.ENTER.toString());
-        editor.typeTextIntoEditor("e");
-        editor.launchAutocomplete();
-        editor.waitTextIntoAutocompleteContainer(
-                "expm1 float\nexp float\nerror_log bool\nexplode array\nexec string");
-    }
+  private void checkCodeAssistant() {
+    editor.goToCursorPositionVisible(15, 7);
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor("e");
+    editor.launchAutocomplete();
+    editor.waitTextIntoAutocompleteContainer(
+        "expm1 float\nexp float\nerror_log bool\nexplode array\nexec string");
+  }
 
-    private void checkAutocompletion() {
-        editor.goToCursorPositionVisible(13, 1);
-        editor.typeTextIntoEditor("$color = \"blue\";");
+  private void checkAutocompletion() {
+    editor.goToCursorPositionVisible(13, 1);
+    editor.typeTextIntoEditor("$color = \"blue\";");
 
-        editor.goToCursorPositionVisible(14, 22);
-        editor.typeTextIntoEditor(Keys.ENTER.toString());
-        editor.waitCursorPosition(15, 1);
+    editor.goToCursorPositionVisible(14, 22);
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.waitCursorPosition(15, 1);
 
-        editor.typeTextIntoEditor("$");
-        editor.launchAutocomplete();
-        editor.waitTextIntoEditor("$color = \"blue\";\necho sayHello(\"man\");\n$color\n?>", 3);
-        editor.closeAutocomplete();
-    }
+    editor.typeTextIntoEditor("$");
+    editor.launchAutocomplete();
+    editor.waitTextIntoEditor("$color = \"blue\";\necho sayHello(\"man\");\n$color\n?>", 3);
+    editor.closeAutocomplete();
+  }
 
-    private void checkCodeValidation() {
-        editor.goToPosition(14, 2);
-        editor.typeTextIntoEditor(" ");
-        editor.waitMarkerInPositionAndClick(ERROR_OVERVIEW, 14);
-        editor.waitTextInToolTipPopup("';' expected.");
+  private void checkCodeValidation() {
+    editor.goToPosition(14, 2);
+    editor.typeTextIntoEditor(" ");
+    editor.waitMarkerInPositionAndClick(ERROR_OVERVIEW, 14);
+    editor.waitTextInToolTipPopup("';' expected.");
 
-        editor.goToPosition(14, 3);
-        editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-        editor.waitAllMarkersInvisibility(ERROR_OVERVIEW);
-    }
+    editor.goToPosition(14, 3);
+    editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+    editor.waitAllMarkersInvisibility(ERROR_OVERVIEW);
+  }
 }
