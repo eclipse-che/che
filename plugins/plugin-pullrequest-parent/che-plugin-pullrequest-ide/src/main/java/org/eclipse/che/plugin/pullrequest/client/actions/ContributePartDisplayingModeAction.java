@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.ContributeResources;
@@ -66,8 +67,9 @@ public class ContributePartDisplayingModeAction extends AbstractPerspectiveActio
   public void actionPerformed(ActionEvent e) {
     ContributePartPresenter contributePartPresenter = contributePartPresenterProvider.get();
     PartPresenter activePart = workspaceAgent.getActivePart();
-    if (activePart != null && activePart instanceof ContributePartPresenter) {
-      workspaceAgent.hidePart(contributePartPresenter);
+    if (activePart instanceof ContributePartPresenter) {
+      PartStack toolingPartStack = workspaceAgent.getPartStack(TOOLING);
+      toolingPartStack.hide(true);
 
       EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
       if (activeEditor != null) {
