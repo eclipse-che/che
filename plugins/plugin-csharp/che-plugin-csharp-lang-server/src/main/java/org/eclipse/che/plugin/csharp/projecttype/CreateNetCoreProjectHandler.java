@@ -49,10 +49,13 @@ public class CreateNetCoreProjectHandler implements CreateProjectHandler {
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
 
-    fsManager.createDir(projectWsPath);
-    InputStream inputStream = new ByteArrayInputStream(getProjectContent());
-    String wsPath = resolve(projectWsPath, PROJECT_FILE_NAME);
-    fsManager.createFile(wsPath, inputStream);
+    try (InputStream inputStream = new ByteArrayInputStream(getProjectContent()); ) {
+      fsManager.createDir(projectWsPath);
+      String wsPath = resolve(projectWsPath, PROJECT_FILE_NAME);
+      fsManager.createFile(wsPath, inputStream);
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
   }
 
   private byte[] getProjectContent() {
