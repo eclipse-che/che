@@ -86,6 +86,7 @@ public interface TestMenuCommandsConstants {
     String ORGANIZE_IMPORTS = ASSISTANT_MENU_PREFIX + "organizeImports";
     String GENERATE_EFFECTIVE_POM = ASSISTANT_MENU_PREFIX + "getEffectivePom";
     String QUICK_FIX = ASSISTANT_MENU_PREFIX + "quickFix";
+    String FIND_DEFINITION = ASSISTANT_MENU_PREFIX + "LSFindDefinitionAction";
 
     interface Refactoring {
       String REFACTORING = ASSISTANT_MENU_PREFIX + "assistantRefactoringGroup";

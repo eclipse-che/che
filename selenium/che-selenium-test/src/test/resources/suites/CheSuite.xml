@@ -48,6 +48,7 @@
           <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
           <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
           <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCSharpLanguageTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForPythonLanguageTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
