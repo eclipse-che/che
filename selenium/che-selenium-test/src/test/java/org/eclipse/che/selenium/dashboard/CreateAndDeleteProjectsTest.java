@@ -17,7 +17,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Te
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 
 import com.google.inject.Inject;
-import java.util.concurrent.ExecutionException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -44,7 +43,8 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.OSIO)
 public class CreateAndDeleteProjectsTest {
 
-  private final String WORKSPACE = generate("workspace", 4);
+  private static final String WORKSPACE = generate("workspace", 4);
+  private static final String SECOND_PROJECT_NAME = WEB_JAVA_SPRING + "-1";
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
@@ -74,7 +74,7 @@ public class CreateAndDeleteProjectsTest {
   }
 
   @Test
-  public void createAndDeleteProjectTest() throws ExecutionException, InterruptedException {
+  public void createAndDeleteProjectTest() {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
@@ -88,12 +88,16 @@ public class CreateAndDeleteProjectsTest {
     projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.selectSample(CONSOLE_JAVA_SIMPLE);
     projectSourcePage.clickOnAddProjectButton();
+    projectSourcePage.clickOnAddOrImportProjectButton();
+    projectSourcePage.selectSample(WEB_JAVA_SPRING);
+    projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     String dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
 
+    explorer.waitItem(WEB_JAVA_SPRING);
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();
@@ -110,6 +114,7 @@ public class CreateAndDeleteProjectsTest {
     workspaceProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);
     workspaceProjects.clickOnDeleteProject();
     workspaceProjects.clickOnDeleteItInDialogWindow();
+    workspaceProjects.waitProjectIsPresent(SECOND_PROJECT_NAME);
     workspaceProjects.waitProjectIsNotPresent(WEB_JAVA_SPRING);
     workspaceProjects.openSettingsForProjectByName(CONSOLE_JAVA_SIMPLE);
     workspaceProjects.clickOnDeleteProject();
