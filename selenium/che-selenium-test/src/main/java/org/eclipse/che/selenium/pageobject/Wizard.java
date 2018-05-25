@@ -79,6 +79,7 @@ public class Wizard {
     String ASP_DOT_NET_WEB_SIMPLE = "dotnet-web-simple";
     String WEB_JAVA_PETCLINIC = "web-java-petclinic";
     String CONSOLE_CPP_SIMPLE = "console-cpp-simple";
+    String CONSOLE_PYTHON3_SIMPLE = "console-python3.5-simple";
   }
 
   public interface TypeFolder {

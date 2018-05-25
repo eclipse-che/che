@@ -55,9 +55,13 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
   public void onCreateProject(
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
-    fsManager.createDir(projectWsPath, true, true);
-    String wsPath = resolve(projectWsPath, README_FILE_NAME);
-    fsManager.createFile(wsPath, getReadmeContent());
+    try (InputStream inputStream = getReadmeContent()) {
+      fsManager.createDir(projectWsPath, true, true);
+      String wsPath = resolve(projectWsPath, README_FILE_NAME);
+      fsManager.createFile(wsPath, inputStream);
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
   }
 
   @Override
