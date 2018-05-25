@@ -14,7 +14,21 @@ import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.*;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ADD_OR_IMPORT_PROJECT_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ALL_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SELECTED_SUGGESTION_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.INCREMENT_MEMORY_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.MULTI_MACHINE_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.OPEN_IN_IDE_DIALOG_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ORGANIZATIONS_LIST_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.QUICK_START_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SINGLE_MACHINE_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_CREATE_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.WORKSPACE_CREATED_DIALOG;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +41,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -108,13 +121,13 @@ public class NewWorkspace {
   @FindBy(id = Locators.FILTER_STACK_INPUT)
   WebElement filterStackInput;
 
-  @FindBy(id = Locators.TOOLBAR_TITLE_ID)
+  @FindBy(id = TOOLBAR_TITLE_ID)
   WebElement toolbarTitle;
 
   @FindBy(id = Locators.WORKSPACE_NAME_INPUT)
   WebElement workspaceNameInput;
 
-  @FindBy(xpath = Locators.BOTTOM_CREATE_BUTTON_XPATH)
+  @FindBy(xpath = BOTTOM_CREATE_BUTTON_XPATH)
   WebElement bottomCreateWorkspaceButton;
 
   @FindBy(xpath = Locators.SEARCH_INPUT)
@@ -144,14 +157,7 @@ public class NewWorkspace {
   }
 
   public void waitErrorMessage(String message) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    seleniumWebDriverHelper
-                        .waitVisibilityAndGetText(By.id(ERROR_MESSAGE))
-                        .equals(message));
+    seleniumWebDriverHelper.waitTextEqualsTo(By.id(ERROR_MESSAGE), message);
   }
 
   public boolean isMachineExists(String machineName) {
@@ -242,15 +248,13 @@ public class NewWorkspace {
   }
 
   public void waitCreateWorkspaceButtonEnabled() {
-    webDriverWaitFactory
-        .get()
-        .until((ExpectedCondition<Boolean>) driver -> isCreateWorkspaceButtonEnabled());
+    seleniumWebDriverHelper.waitAttributeEqualsTo(
+        By.xpath(BOTTOM_CREATE_BUTTON_XPATH), "aria-disabled", "false");
   }
 
   public void waitCreateWorkspaceButtonDisabled() {
-    webDriverWaitFactory
-        .get()
-        .until((ExpectedCondition<Boolean>) driver -> !isCreateWorkspaceButtonEnabled());
+    seleniumWebDriverHelper.waitAttributeEqualsTo(
+        By.xpath(BOTTOM_CREATE_BUTTON_XPATH), "aria-disabled", "true");
   }
 
   public void clickOnAllStacksTab() {
