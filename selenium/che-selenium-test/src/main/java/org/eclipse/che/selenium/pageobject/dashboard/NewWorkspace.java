@@ -15,24 +15,25 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.*;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-/** @author Ann Shumilova */
+/**
+ * @author Ann Shumilova
+ * @author Ihor Okhrimenko
+ */
 @Singleton
 public class NewWorkspace {
 
@@ -40,18 +41,21 @@ public class NewWorkspace {
   private final WebDriverWait redrawUiElementsTimeout;
   private final ActionsFactory actionsFactory;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWaitFactory webDriverWaitFactory;
   private static final int DEFAULT_TIMEOUT = TestTimeoutsConstants.DEFAULT_TIMEOUT;
 
   @Inject
   public NewWorkspace(
       SeleniumWebDriver seleniumWebDriver,
       ActionsFactory actionsFactory,
-      SeleniumWebDriverHelper seleniumWebDriverHelper) {
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.webDriverWaitFactory = webDriverWaitFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -132,21 +136,22 @@ public class NewWorkspace {
   WebElement selectMultiMachineStacksTab;
 
   public void typeWorkspaceName(String name) {
-    redrawUiElementsTimeout.until(visibilityOf(workspaceNameInput));
-    workspaceNameInput.clear();
-    workspaceNameInput.sendKeys(name);
-    WaitUtils.sleepQuietly(1);
+    seleniumWebDriverHelper.setValue(workspaceNameInput, name);
   }
 
   public String getWorkspaceNameValue() {
-    return waitNameField().getAttribute("value");
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(workspaceNameInput);
   }
 
-  public boolean isWorkspaceNameErrorMessageEquals(String message) {
-    return redrawUiElementsTimeout
-        .until(visibilityOfElementLocated(By.id(Locators.ERROR_MESSAGE)))
-        .getText()
-        .equals(message);
+  public void waitErrorMessage(String message) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    seleniumWebDriverHelper
+                        .waitVisibilityAndGetText(By.id(ERROR_MESSAGE))
+                        .equals(message));
   }
 
   public boolean isMachineExists(String machineName) {
@@ -157,61 +162,45 @@ public class NewWorkspace {
   }
 
   public void clickOnIncrementMemoryButton(String machineName) {
-    redrawUiElementsTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.INCREMENT_MEMORY_BUTTON, machineName))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(INCREMENT_MEMORY_BUTTON, machineName)));
   }
 
   public void clickOnDecrementMemoryButton(String machineName) {
-    redrawUiElementsTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.DECREMENT_MEMORY_BUTTON, machineName))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.DECREMENT_MEMORY_BUTTON, machineName)));
   }
 
   public double getRAM(String machineName) {
-    String s =
-        seleniumWebDriver
-            .findElement(By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)))
-            .getAttribute("value");
-    return Double.parseDouble(s);
+    String amountOfRam =
+        seleniumWebDriverHelper.waitVisibilityAndGetValue(
+            By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)));
+    return Double.parseDouble(amountOfRam);
   }
 
   public void setMachineRAM(String machineName, double value) {
-    WebElement ramInput =
-        seleniumWebDriver.findElement(By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)));
-    ramInput.clear();
-    ramInput.sendKeys(Double.toString(value));
+    seleniumWebDriverHelper.setValue(
+        By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)), Double.toString(value));
   }
 
   public void clickOnFiltersButton() {
-    redrawUiElementsTimeout.until(visibilityOf(filtersStackButton)).click();
+    seleniumWebDriverHelper.waitAndClick(filtersStackButton);
   }
 
   public void typeToFiltersInput(String value) {
-    redrawUiElementsTimeout.until(visibilityOf(filterStackInput)).sendKeys(value);
+    seleniumWebDriverHelper.setValue(filterStackInput, value);
   }
 
   public String getTextFromFiltersInput() {
-    return filterStackInput.getAttribute("value");
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(filterStackInput);
   }
 
   public void clearSuggestions() {
-    WebElement webElement =
-        redrawUiElementsTimeout.until(
-            visibilityOfElementLocated(By.xpath(Locators.FILTER_SELECTED_SUGGESTION_BUTTON)));
-    webElement.click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath(FILTER_SELECTED_SUGGESTION_BUTTON));
   }
 
   public void selectFilterSuggestion(String suggestion) {
-    WebElement webElement =
-        redrawUiElementsTimeout.until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.FILTER_SUGGESTION_BUTTON, suggestion))));
-    webElement.click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.FILTER_SUGGESTION_BUTTON, suggestion)));
   }
 
   public void waitToolbar() {
@@ -219,20 +208,19 @@ public class NewWorkspace {
   }
 
   public void waitToolbar(int timeout) {
-    seleniumWebDriverHelper.waitVisibility(By.id(Locators.TOOLBAR_TITLE_ID), timeout);
+    seleniumWebDriverHelper.waitVisibility(By.id(TOOLBAR_TITLE_ID), timeout);
   }
 
   public String getTextFromSearchInput() {
-    return searchInput.getAttribute("value");
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(searchInput);
   }
 
   public void typeToSearchInput(String value) {
-    redrawUiElementsTimeout.until(visibilityOf(searchInput)).clear();
-    searchInput.sendKeys(value);
+    seleniumWebDriverHelper.setValue(searchInput, value);
   }
 
   public void clearTextInSearchInput() {
-    redrawUiElementsTimeout.until(visibilityOf(clearInput)).click();
+    seleniumWebDriverHelper.waitAndClick(clearInput);
   }
 
   public boolean isStackVisible(String stackName) {
@@ -243,65 +231,66 @@ public class NewWorkspace {
   }
 
   public void selectStack(String stackId) {
-    WebElement stack =
-        redrawUiElementsTimeout.until(
-            visibilityOfElementLocated(By.xpath(format(Locators.STACK_ROW_XPATH, stackId))));
-    actionsFactory.createAction(seleniumWebDriver).moveToElement(stack).perform();
-    stack.click();
+    seleniumWebDriverHelper.moveCursorToAndClick(
+        By.xpath(format(Locators.STACK_ROW_XPATH, stackId)));
   }
 
   public boolean isCreateWorkspaceButtonEnabled() {
-    return !Boolean.valueOf(bottomCreateWorkspaceButton.getAttribute("aria-disabled"));
+    return !Boolean.valueOf(
+        seleniumWebDriverHelper.waitVisibilityAndGetAttribute(
+            By.xpath(BOTTOM_CREATE_BUTTON_XPATH), "aria-disabled"));
+  }
+
+  public void waitCreateWorkspaceButtonEnabled() {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> isCreateWorkspaceButtonEnabled());
+  }
+
+  public void waitCreateWorkspaceButtonDisabled() {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> !isCreateWorkspaceButtonEnabled());
   }
 
   public void clickOnAllStacksTab() {
-    redrawUiElementsTimeout.until(visibilityOf(selectAllStacksTab)).click();
+    seleniumWebDriverHelper.waitAndClick(selectAllStacksTab);
   }
 
   public void clickOnQuickStartTab() {
-    redrawUiElementsTimeout.until(visibilityOf(selectQuickStartStacksTab)).click();
+    seleniumWebDriverHelper.waitAndClick(selectQuickStartStacksTab);
   }
 
   public void clickOnSingleMachineTab() {
-    redrawUiElementsTimeout.until(visibilityOf(selectSingleMachineStacksTab)).click();
+    seleniumWebDriverHelper.waitAndClick(selectSingleMachineStacksTab);
   }
 
   public void clickOnMultiMachineTab() {
-    redrawUiElementsTimeout.until(visibilityOf(selectMultiMachineStacksTab)).click();
+    seleniumWebDriverHelper.waitAndClick(selectMultiMachineStacksTab);
   }
 
-  public void waitWorkspaceIsCreatedDialogIsVisible() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.WORKSPACE_CREATED_DIALOG)));
-    WaitUtils.sleepQuietly(1);
+  public void waitWorkspaceCreatedDialogIsVisible() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
   }
 
   public void clickOnEditWorkspaceButton() {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(EDIT_WORKSPACE_DIALOG_BUTTON), ELEMENT_TIMEOUT_SEC);
-
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(elementToBeClickable(By.xpath(Locators.EDIT_WORKSPACE_DIALOG_BUTTON)))
-        .click();
   }
 
   public void clickOnOpenInIDEButton() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(elementToBeClickable(By.xpath(Locators.OPEN_IN_IDE_DIALOG_BUTTON)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath(OPEN_IN_IDE_DIALOG_BUTTON), ELEMENT_TIMEOUT_SEC);
   }
 
   public void clickOnCreateButtonAndOpenInIDE() {
-    WaitUtils.sleepQuietly(1);
-    redrawUiElementsTimeout.until(visibilityOf(bottomCreateWorkspaceButton)).click();
-    waitWorkspaceIsCreatedDialogIsVisible();
+    seleniumWebDriverHelper.waitAndClick(bottomCreateWorkspaceButton);
+    waitWorkspaceCreatedDialogIsVisible();
     clickOnOpenInIDEButton();
   }
 
   public void clickOnCreateButtonAndEditWorkspace() {
-    WaitUtils.sleepQuietly(1);
-    redrawUiElementsTimeout.until(visibilityOf(bottomCreateWorkspaceButton)).click();
-    waitWorkspaceIsCreatedDialogIsVisible();
+    seleniumWebDriverHelper.waitAndClick(bottomCreateWorkspaceButton);
+    waitWorkspaceCreatedDialogIsVisible();
     clickOnEditWorkspaceButton();
   }
 
@@ -310,17 +299,12 @@ public class NewWorkspace {
   }
 
   public void openOrganizationsList() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.id(Locators.ORGANIZATIONS_LIST_ID)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.id(ORGANIZATIONS_LIST_ID));
   }
 
   public void selectOrganizationFromList(String organizationName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.ORGANIZATION_ITEM, organizationName))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.ORGANIZATION_ITEM, organizationName)));
   }
 
   public WebElement waitTopCreateButton(int timeout) {
