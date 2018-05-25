@@ -238,7 +238,7 @@ parameters:
 - name: CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER
   displayName: Alias of the Openshift identity provider in Keycloak
   description: Alias of the Openshift identity provider registered in Keycloak, that should be used to create workspace OpenShift resources in Openshift namespaces owned by the current Che user.
-  value: ''
+  value: NULL
 - name: STRATEGY
   displayName: Update Strategy
   description: Che server update strategy. Defaults to Recreate. Use Rolling only if Che deployment does not use PVC
