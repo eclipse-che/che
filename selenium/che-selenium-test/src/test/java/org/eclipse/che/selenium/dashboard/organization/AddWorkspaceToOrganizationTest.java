@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationLi
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -114,6 +116,25 @@ public class AddWorkspaceToOrganizationTest {
   }
 
   @Test(priority = 1)
+  public void testCreatingWorkspacesFromOrganizationDetails() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsList();
+    organizationListPage.waitOrganizationInList(org1.getName());
+    organizationListPage.clickOnOrganization(org1.getName());
+
+    // try to open the Workspaces tab
+    try {
+      organizationPage.clickOnWorkspacesTab();
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/9817", ex);
+    }
+
+    // TODO add workspace creating after #9817 issue is fixed
+  }
+
+  @Test(priority = 1)
   public void testCreationOfWorkspaceByMember() {
     dashboard.logout();
     dashboard.open(testUser.getName(), testUser.getPassword());
@@ -122,7 +143,6 @@ public class AddWorkspaceToOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-
     organizationListPage.waitOrganizationInList(org2.getName());
 
     // create a workspace for org2 and its suborganization

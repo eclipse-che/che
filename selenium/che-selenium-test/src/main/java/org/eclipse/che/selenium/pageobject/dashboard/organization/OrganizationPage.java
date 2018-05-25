@@ -34,8 +34,6 @@ public class OrganizationPage {
   private interface Locators {
 
     String ORGANIZATION_TITLE_ID = "__organizationDetailsController_organizationName__";
-    String ORGANIZATION_TITLE_XPATH =
-        "//div[contains(@class, 'che-toolbar-title')]//span[text() = '%s']";
     String ORGANIZATION_NAME = "//input[@name = 'name']";
     String BACK_ICON = "//a[contains(@class, 'che-toolbar-breadcrumb')]/md-icon";
     String SAVE_BUTTON = "//div[contains(@class, 'save-button-placeholder')]//button";
@@ -44,11 +42,9 @@ public class OrganizationPage {
     String RUNNING_WORKSPACE_CAP = "//input[@name = 'runtimeCap']";
     String WORKSPACE_RAM_CAP = "//input[@name = 'workspaceRamCap']";
     String DELETE_ORG_BUTTON = "//button[contains(@class, 'che-button')]//span[text() = 'Delete']";
-    // todo: //span[text()='Delete'] to get Delete button only
     String DELETE_ORG_WIDGET_BUTTON =
         "//div[contains(@class,'che-confirm-dialog-notification')]//span";
     String SUB_ORGANIZATIONS_TAB = "//md-tab-item//span[contains(text(), 'Sub-Organizations')]";
-
     String ADD_SUB_ORGANIZATION_BUTTON =
         "//che-button-primary[@che-button-title =  'Add Sub-Organization']/a";
     String MEMBERS_TAB = "//md-tab-item//span[contains(text(), 'Members')]";
@@ -59,12 +55,10 @@ public class OrganizationPage {
         "//md-content[contains(@class, 'organization-member-list')]//div[contains(@class, 'che-list-header-column')]//span";
     String MEMBERS_LIST_ITEM_XPATH =
         "//md-content[contains(@class, 'organization-member-list')]//span[text() = '%s']";
-    //        String MEMBER_CHECKBOX =
-    // "//div[contains(@class,'che-list-item-checkbox-main')]/md-checkbox[contains(@aria-label,'member')]";
     String MEMBER_CHECKBOX = "//md-checkbox[contains(@aria-label,'member')]";
-    // todo: //span[text()='Delete'] to get Delete button only
     String DELETE_MEMBER_WIDGET_BUTTON = "//che-popup//button";
     String MEMBERS_SEARCH_FIELD = "//div[@class = 'che-list-search']//input";
+    String WORKSPACES_TAB = "//md-tab-item//span[contains(text(), 'Workspaces')]";
   }
 
   private final WebDriverWait redrawUiElementsTimeout;
@@ -124,6 +118,9 @@ public class OrganizationPage {
   @FindBy(xpath = Locators.MEMBERS_SEARCH_FIELD)
   WebElement membersSearchField;
 
+  @FindBy(xpath = Locators.WORKSPACES_TAB)
+  WebElement workspacesTab;
+
   @Inject
   public OrganizationPage(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
@@ -148,6 +145,10 @@ public class OrganizationPage {
 
   public void clickMembersTab() {
     redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(membersTab)).click();
+  }
+
+  public void clickOnWorkspacesTab() {
+    redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(workspacesTab)).click();
   }
 
   public void waitMembersList() {
