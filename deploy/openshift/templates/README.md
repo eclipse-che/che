@@ -255,7 +255,7 @@ To allow creating workspace OpenShift resources in personal OpenShift accounts, 
 - add the following parameters to the `oc new-app -f che-server-template.yaml` command:
 
 ```
-- p CHE_INFRA_OPENSHIFT_PROJECT=NULL -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=openshift-v3
+-p CHE_INFRA_OPENSHIFT_PROJECT=NULL -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=openshift-v3
 ```
 
 
