@@ -96,7 +96,7 @@ public class IdentityProviderConfigBuilderTest {
   @Mock private KeycloakTokenResponse tokenResponse;
 
   private EnvironmentContext context;
-  private IdentityProviderConfigBuilder configBuilder;
+  private IdentityProviderConfigFactory configBuilder;
   private Config defaultConfig;
 
   static {
@@ -121,7 +121,7 @@ public class IdentityProviderConfigBuilderTest {
     when(tokenResponse.getAccessToken()).thenReturn(ACCESS_TOKEN);
 
     configBuilder =
-        new IdentityProviderConfigBuilder(
+        new IdentityProviderConfigFactory(
             keycloakServiceClient,
             keycloakSettings,
             workspaceRuntimeProvider,
@@ -134,7 +134,7 @@ public class IdentityProviderConfigBuilderTest {
   public void testFallbackToDefaultConfigWhenProvideIsNull() throws Exception {
     when(keycloakServiceClient.getIdentityProviderToken(anyString())).thenReturn(tokenResponse);
     configBuilder =
-        new IdentityProviderConfigBuilder(
+        new IdentityProviderConfigFactory(
             keycloakServiceClient, keycloakSettings, workspaceRuntimeProvider, null, API_ENDPOINT);
     assertTrue(defaultConfig == configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID));
   }

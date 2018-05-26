@@ -56,11 +56,11 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftClientFactory.class);
 
-  private final ConfigBuilder configBuilder;
+  private final OpenShiftClientConfigFactory configBuilder;
 
   @Inject
   public OpenShiftClientFactory(
-      ConfigBuilder configBuilder,
+      OpenShiftClientConfigFactory configBuilder,
       @Nullable @Named("che.infra.kubernetes.master_url") String masterUrl,
       @Nullable @Named("che.infra.kubernetes.username") String username,
       @Nullable @Named("che.infra.kubernetes.password") String password,
@@ -115,7 +115,11 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   /**
    * Builds the Openshift {@link Config} object based on a default {@link Config} object and an
    * optional workspace Id.
+   *
+   * <p>This method overrides the one in the Kubernetes infrastructure to introduce an additional
+   * extension level by delegating to an {@link OpenShiftClientConfigFactory}
    */
+  @Override
   protected Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
       throws InfrastructureException {
     return configBuilder.buildConfig(defaultConfig, workspaceId);

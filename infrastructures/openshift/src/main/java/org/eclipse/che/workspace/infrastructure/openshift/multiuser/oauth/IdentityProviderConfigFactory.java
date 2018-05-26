@@ -33,7 +33,7 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakSettings;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
-import org.eclipse.che.workspace.infrastructure.openshift.ConfigBuilder;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,20 +52,21 @@ import org.slf4j.LoggerFactory;
  * @author David Festal
  */
 @Singleton
-public class IdentityProviderConfigBuilder extends ConfigBuilder {
+public class IdentityProviderConfigFactory extends OpenShiftClientConfigFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(IdentityProviderConfigBuilder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(IdentityProviderConfigFactory.class);
 
   private final String oauthIdentityProvider;
 
   private final KeycloakServiceClient keycloakServiceClient;
   private final KeycloakSettings keycloakSettings;
   private final Provider<WorkspaceRuntimes> workspaceRuntimeProvider;
+  private final String messageToLinkAccount;
 
   private String rootUrl;
 
   @Inject
-  public IdentityProviderConfigBuilder(
+  public IdentityProviderConfigFactory(
       KeycloakServiceClient keycloakServiceClient,
       KeycloakSettings keycloakSettings,
       Provider<WorkspaceRuntimes> workspaceRuntimeProvider,
@@ -84,13 +85,32 @@ public class IdentityProviderConfigBuilder extends ConfigBuilder {
     if (rootUrl.endsWith("/api")) {
       rootUrl = rootUrl.substring(0, rootUrl.length() - 4);
     }
+
+    String referrer_uri =
+        rootUrl.replace("http://", "http%3A%2F%2F").replace("https://", "https%3A%2F%2F")
+            + "%2Fdashboard%2F?redirect_fragment%3D%2Fworkspaces";
+
+    messageToLinkAccount =
+        "You should link your account with the <strong>"
+            + oauthIdentityProvider
+            + "</strong> \n"
+            + "identity provider by visiting the "
+            + "<a href='"
+            + keycloakSettings.get().get(AUTH_SERVER_URL_SETTING)
+            + "/realms/"
+            + keycloakSettings.get().get(REALM_SETTING)
+            + "/account/identity?referrer="
+            + keycloakSettings.get().get(CLIENT_ID_SETTING)
+            + "&referrer_uri="
+            + referrer_uri
+            + "' target='_blank' rel='noopener noreferrer'><strong>Federated Identities</strong></a> page of your Che account";
   }
 
   /**
    * Builds the Openshift {@link Config} object based on a default {@link Config} object and an
    * optional workspace Id.
    */
-  protected Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
+  public Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
       throws InfrastructureException {
     Subject subject = EnvironmentContext.getCurrent().getSubject();
 
@@ -122,7 +142,7 @@ public class IdentityProviderConfigBuilder extends ConfigBuilder {
       } catch (UnauthorizedException e) {
         LOG.error("cannot retrieve User Openshift token from the identity provider", e);
 
-        throw new InfrastructureException(getMessageToLinkAccount());
+        throw new InfrastructureException(messageToLinkAccount);
       } catch (BadRequestException e) {
         LOG.error(
             "cannot retrieve User Openshift token from the '"
@@ -147,25 +167,5 @@ public class IdentityProviderConfigBuilder extends ConfigBuilder {
       }
     }
     return defaultConfig;
-  }
-
-  private String getMessageToLinkAccount() {
-    String referrer_uri =
-        rootUrl.replace("http://", "http%3A%2F%2F").replace("https://", "https%3A%2F%2F")
-            + "%2Fdashboard%2F?redirect_fragment%3D%2Fworkspaces";
-
-    return "You should link your account with the <strong>"
-        + oauthIdentityProvider
-        + "</strong> \n"
-        + "identity provider by visiting the "
-        + "<a href='"
-        + keycloakSettings.get().get(AUTH_SERVER_URL_SETTING)
-        + "/realms/"
-        + keycloakSettings.get().get(REALM_SETTING)
-        + "/account/identity?referrer="
-        + keycloakSettings.get().get(CLIENT_ID_SETTING)
-        + "&referrer_uri="
-        + referrer_uri
-        + "' target='_blank' rel='noopener noreferrer'><strong>Federated Identities</strong></a> page of your Che account";
   }
 }
