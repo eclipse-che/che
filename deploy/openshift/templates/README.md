@@ -245,7 +245,7 @@ To allow creating workspace OpenShift resources in personal OpenShift accounts, 
 - configure the Openshift identity provider in Keycloak as described in the Admin Guide
 - install the Openshift console certificate in the Keycloak server (if it's self-signed) by:
     - retrieve the OpenShift console certificate into the `~/openshift.crt` file with this command:
-    `echo $(minishift ssh docker exec origin /bin/cat ./openshift.local.config/master/ca.crt) > ~/openshift.crt`
+    `minishift ssh docker exec origin /bin/cat ./openshift.local.config/master/ca.crt > ~/openshift.crt`
     - running the following command before all other commands:
 
 ```bash
