@@ -12,7 +12,11 @@ package org.eclipse.che.api.workspace.server;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +27,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.system.shared.dto.SystemServiceItemStoppedEventDto;
+import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -48,6 +53,8 @@ public class WorkspaceServiceTerminationTest {
 
   @Mock private WorkspaceRuntimes workspaceRuntimes;
 
+  @Mock private RuntimeInfrastructure runtimeInfrastructure;
+
   @InjectMocks private WorkspaceServiceTermination termination;
 
   @BeforeMethod
@@ -56,15 +63,18 @@ public class WorkspaceServiceTerminationTest {
   }
 
   @Test(dataProvider = "workspaceStoppedOnTerminationStatuses", timeOut = 1000L)
-  public void shutsDownWorkspaceService(WorkspaceStatus status) throws Exception {
+  public void shutsDownWorkspaceServiceIfFullShutdownRequested(WorkspaceStatus status)
+      throws Exception {
     String workspaceId = "workspace123";
 
     AtomicBoolean isAnyRunning = new AtomicBoolean(true);
     when(workspaceRuntimes.isAnyRunning()).thenAnswer(inv -> isAnyRunning.get());
 
     // one workspace is running
-    when(workspaceRuntimes.getRuntimesIds()).thenReturn(Collections.singleton(workspaceId));
+    when(workspaceRuntimes.getRunning()).thenReturn(Collections.singleton(workspaceId));
     when(workspaceRuntimes.getStatus(workspaceId)).thenReturn(status);
+
+    when(runtimeInfrastructure.getIdentities()).thenReturn(Collections.emptySet());
 
     // once stopped change the flag
     doAnswer(
@@ -80,8 +90,31 @@ public class WorkspaceServiceTerminationTest {
   }
 
   @Test
+  public void suspendsWorkspaceService() throws Exception {
+    AtomicBoolean isAnyRunning = new AtomicBoolean(true);
+    String workspaceId = "workspace123";
+
+    // one workspace is running
+    when(workspaceRuntimes.getRunning()).thenReturn(Collections.singleton(workspaceId));
+    when(workspaceRuntimes.getStatus(workspaceId)).thenReturn(WorkspaceStatus.RUNNING);
+
+    when(workspaceRuntimes.isAnyInProgress())
+        .thenAnswer(
+            inv -> {
+              boolean prev = isAnyRunning.get();
+              isAnyRunning.set(false);
+              return prev;
+            });
+    // do the actual termination
+    termination.suspend();
+    // verify checked progress workspaces
+    verify(workspaceRuntimes, atLeastOnce()).isAnyInProgress();
+    verify(workspaceManager, never()).stopWorkspace(anyString(), anyMap());
+  }
+
+  @Test
   public void publishesStoppedWorkspaceStoppedEventsAsServiceItemStoppedEvents() throws Exception {
-    when(workspaceRuntimes.getRuntimesIds()).thenReturn(ImmutableSet.of("id1", "id2", "id3"));
+    when(workspaceRuntimes.getRunning()).thenReturn(ImmutableSet.of("id1", "id2", "id3"));
     doAnswer(
             inv -> {
               @SuppressWarnings("unchecked")

@@ -11,11 +11,14 @@
 package org.eclipse.che.api.watcher.server.detectors;
 
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
+import static org.eclipse.che.api.fs.server.WsPathUtils.parentOf;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
+import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
@@ -49,11 +53,16 @@ public class ProjectTreeTracker {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager fileWatcherManager;
+  private final HiddenItemPathMatcher hiddenItemPathMatcher;
 
   @Inject
-  public ProjectTreeTracker(FileWatcherManager fileWatcherManager, RequestTransmitter transmitter) {
-    this.fileWatcherManager = fileWatcherManager;
+  public ProjectTreeTracker(
+      RequestTransmitter transmitter,
+      FileWatcherManager fileWatcherManager,
+      HiddenItemPathMatcher hiddenItemPathMatcher) {
     this.transmitter = transmitter;
+    this.fileWatcherManager = fileWatcherManager;
+    this.hiddenItemPathMatcher = hiddenItemPathMatcher;
   }
 
   @Inject
@@ -129,6 +138,10 @@ public class ProjectTreeTracker {
 
   private Consumer<String> getCreateOperation(String endpointId) {
     return it -> {
+      if (isExcluded(it)) {
+        return;
+      }
+
       if (timers.contains(it)) {
         timers.remove(it);
       } else {
@@ -150,6 +163,10 @@ public class ProjectTreeTracker {
 
   private Consumer<String> getDeleteOperation(String endpointId) {
     return it -> {
+      if (isExcluded(it)) {
+        return;
+      }
+
       timers.add(it);
       new Timer()
           .schedule(
@@ -171,5 +188,10 @@ public class ProjectTreeTracker {
               },
               1_000L);
     };
+  }
+
+  private boolean isExcluded(String path) {
+    String parentPath = parentOf(path);
+    return isRoot(parentPath) && hiddenItemPathMatcher.matches(Paths.get(path));
   }
 }

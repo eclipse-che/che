@@ -47,8 +47,7 @@ public class NodeJsDebugCommandsLibrary {
   private static final Pattern PROCESS_VERSION_COMMAND_OUTPUT_PATTERN =
       Pattern.compile("^'?(v|)[0-9\\.]+'?$");
   private static final Pattern PROCESS_PID_COMMAND_OUTPUT_PATTERN = Pattern.compile("^[0-9]+$");
-  private static final Pattern RUN_COMMAND_OUTPUT_PATTERN =
-      Pattern.compile("(break in.*|App is already running.*)");
+  private static final Pattern RUN_COMMAND_OUTPUT_PATTERN = Pattern.compile("Debugger attached.");
 
   private final NodeJsDebugProcess process;
   private final String name;

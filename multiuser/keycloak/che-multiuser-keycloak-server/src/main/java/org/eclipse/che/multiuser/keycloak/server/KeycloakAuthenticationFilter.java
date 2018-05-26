@@ -16,12 +16,15 @@ import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -75,10 +78,8 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       return;
     }
 
-    final String requestURI = request.getRequestURI();
     if (token == null) {
-      LOG.debug("No 'Authorization' header for {}", requestURI);
-      send403(res);
+      send403(res, "Authorization token is missed");
       return;
     }
 
@@ -104,12 +105,17 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
               .parseClaimsJws(token);
       LOG.debug("JWT = ", jwt);
       // OK, we can trust this JWT
-    } catch (SignatureException | IllegalArgumentException e) {
-      // don't trust the JWT!
-      LOG.error("Failed verifying the JWT token", e);
-      send403(res);
+    } catch (SignatureException
+        | IllegalArgumentException
+        | MalformedJwtException
+        | UnsupportedJwtException e) {
+      send403(res, "The specified token is not a valid. " + e.getMessage());
+      return;
+    } catch (ExpiredJwtException e) {
+      send403(res, "The specified token is expired");
       return;
     }
+
     request.setAttribute("token", jwt);
     chain.doFilter(req, res);
   }
@@ -138,8 +144,9 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
     return jwk.getPublicKey();
   }
 
-  private void send403(ServletResponse res) throws IOException {
+  private void send403(ServletResponse res, String message) throws IOException {
     HttpServletResponse response = (HttpServletResponse) res;
-    response.sendError(403);
+    response.getOutputStream().write(message.getBytes());
+    response.setStatus(403);
   }
 }

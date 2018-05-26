@@ -46,11 +46,14 @@ import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
+import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
+import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtilImpl;
+import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtilImpl;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -63,10 +66,10 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
  * Guice module per suite.
  *
  * @author Anatolii Bazko
+ * @author Dmytro Nochevnov
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
 
-  public static final String ADMIN = "admin";
   public static final String AUXILIARY = "auxiliary";
   public static final String DOCKER_INFRASTRUCTURE = "docker";
   public static final String OPENSHIFT_INFRASTRUCTURE = "openshift";
@@ -87,7 +90,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestUserServiceClient.class).to(CheTestUserServiceClient.class);
 
     bind(HttpJsonRequestFactory.class).to(TestUserHttpJsonRequestFactory.class);
-    bind(TestUserHttpJsonRequestFactory.class).to(CheTestDefaultUserHttpJsonRequestFactory.class);
+    bind(TestUserHttpJsonRequestFactory.class).to(CheTestDefaultHttpJsonRequestFactory.class);
 
     bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
     bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
@@ -126,6 +129,13 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     } else {
       throw new RuntimeException(
           format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
+    }
+
+    boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
+    if (gridMode) {
+      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtilImpl.class);
+    } else {
+      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtilImpl.class);
     }
   }
 

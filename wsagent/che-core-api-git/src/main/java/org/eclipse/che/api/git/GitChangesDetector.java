@@ -191,7 +191,8 @@ public class GitChangesDetector {
                 newDto(FileChangedEventDto.class)
                     .withPath(wsPath)
                     .withStatus(fileStatus)
-                    .withEditedRegions(gitConnection.getEditedRegions(itemPath)))
+                    .withEditedRegions(
+                        fileStatus == MODIFIED ? gitConnection.getEditedRegions(itemPath) : null))
             .sendAndSkipResult();
       } catch (GitCommitInProgressException | GitInvalidRepositoryException e) {
         // Silent ignore

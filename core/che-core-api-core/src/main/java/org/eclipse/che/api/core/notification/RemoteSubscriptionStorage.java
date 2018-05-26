@@ -20,7 +20,8 @@ import java.util.Set;
 public interface RemoteSubscriptionStorage {
 
   /**
-   * Returns all active subscriptions for the given method
+   * Returns all active subscriptions for the given method. It is recommended for implementations to
+   * return copy of the stored set, so this method should not be used for modifying operations.
    *
    * @param method Method name
    * @return active subscriptions to this method

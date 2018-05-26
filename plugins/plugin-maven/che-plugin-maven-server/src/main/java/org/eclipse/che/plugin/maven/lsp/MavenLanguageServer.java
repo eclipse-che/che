@@ -11,12 +11,12 @@
 package org.eclipse.che.plugin.maven.lsp;
 
 import java.util.concurrent.CompletableFuture;
-import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
@@ -27,13 +27,14 @@ import org.eclipse.lsp4j.services.WorkspaceService;
  *
  * @author Thomas Mäder
  */
+@Singleton
 public class MavenLanguageServer implements LanguageServer {
-  private MavenTextDocumentService textDocumentService;
-  private PomReconciler reconciler;
 
-  public MavenLanguageServer(LanguageClient client, PomReconciler reconciler) {
-    this.textDocumentService = new MavenTextDocumentService(reconciler);
-    this.reconciler = reconciler;
+  private final MavenTextDocumentService textDocumentService;
+
+  @Inject
+  public MavenLanguageServer(MavenTextDocumentService textDocumentService) {
+    this.textDocumentService = textDocumentService;
   }
 
   @Override
@@ -60,8 +61,4 @@ public class MavenLanguageServer implements LanguageServer {
 
   @Override
   public void exit() {}
-
-  public void reconcile(String pomPath, String projectPath) {
-    reconciler.reconcilePath(pomPath, projectPath);
-  }
 }

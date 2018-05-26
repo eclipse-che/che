@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_ENV_VAR;
+
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,6 +70,7 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
    *   <li>normalize servers port by adding default protocol in port if it is absent;
    *   <li>validate the environment machines;
    *   <li>invoke implementation specific method that should validate and parse recipe;
+   *   <li>ensure there are environment variables pointing to machine names;
    * </ul>
    *
    * @param sourceEnv the environment
@@ -93,6 +96,8 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
       } catch (InstallerException e) {
         throw new InfrastructureException(e);
       }
+
+      machineConfig.getEnv().put(CHE_MACHINE_NAME_ENV_VAR, machineEntry.getKey());
 
       machines.put(
           machineEntry.getKey(),

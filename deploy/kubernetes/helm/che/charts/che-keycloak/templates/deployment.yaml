@@ -45,7 +45,19 @@ spec:
           value: admin
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
+        - name: ROUTING_SUFFIX
+          value: {{ .Values.global.ingressDomain }}
+        - name: NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: PROTOCOL
+{{- if .Values.global.tls.enabled }}
+          value: "https"
+{{- else }}
+          value: "http"
+{{- end }}
+
         image: {{ .Values.image }}
+        command: ["/scripts/kc_realm_user.sh"]
         imagePullPolicy: Always
         name: keycloak
         livenessProbe:

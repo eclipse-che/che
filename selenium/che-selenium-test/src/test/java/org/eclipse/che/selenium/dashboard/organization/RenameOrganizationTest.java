@@ -21,8 +21,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.EditMode;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -58,9 +57,7 @@ public class RenameOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private EditMode editMode;
   @Inject private Dashboard dashboard;
-  @Inject private DefaultTestUser testUser;
-
-  @Inject private AdminTestUser adminTestUser;
+  @Inject private TestUser testUser;
 
   @BeforeClass
   public void setUp() throws Exception {

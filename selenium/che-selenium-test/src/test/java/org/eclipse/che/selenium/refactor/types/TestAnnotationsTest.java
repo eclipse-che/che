@@ -14,13 +14,15 @@ import static java.lang.String.format;
 import static java.nio.charset.Charset.forName;
 import static java.nio.file.Files.readAllLines;
 import static java.nio.file.Paths.get;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.net.URL;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -36,10 +38,9 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class TestAnnotationsTest {
-  private static final String NAME_OF_PROJECT =
-      NameGenerator.generate(TestAnnotationsTest.class.getSimpleName(), 4);
+  private static final String PROJECT_NAME = generate("project", 4);
   private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
-      NAME_OF_PROJECT + "/src/main/java/renametype";
+      PROJECT_NAME + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -59,24 +60,22 @@ public class TestAnnotationsTest {
   public void setup() throws Exception {
     URL resource = TestAnnotationsTest.this.getClass().getResource("/projects/RenameType");
     testProjectServiceClient.importProject(
-        workspace.getId(), get(resource.toURI()), NAME_OF_PROJECT, ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
   }
 
   @Test
   public void testAnnotation1() throws Exception {
-    projectExplorer.waitVisibleItem(NAME_OF_PROJECT);
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    loader.waitOnClosed();
+
     setFieldsForTest("testAnnotation1");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.waitAndSelectItem(pathToCurrentPackage + "/A.java");
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
-        TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
+    menu.runCommand(ASSISTANT, REFACTORING, RENAME);
 
     refactorPanel.typeAndWaitNewName("B.java");
     try {

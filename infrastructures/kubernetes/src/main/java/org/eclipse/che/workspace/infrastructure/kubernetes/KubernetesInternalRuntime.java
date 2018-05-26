@@ -22,10 +22,12 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,7 +45,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -53,6 +54,7 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -72,6 +74,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.Conta
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.ContainerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
@@ -332,8 +335,10 @@ public class KubernetesInternalRuntime<
               getContext().getIdentity(), machineName, MachineStatus.FAILED);
         } catch (InfrastructureException e) {
           LOG.error(
-              "Unable to update status of the machine '%s:%s'. Cause: %s",
-              getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+              "Unable to update status of the machine '{}:{}'. Cause: {}",
+              getContext().getIdentity().getWorkspaceId(),
+              machineName,
+              e.getMessage());
         }
         eventPublisher.sendFailedEvent(machineName, ex.getMessage(), getContext().getIdentity());
       }
@@ -366,8 +371,10 @@ public class KubernetesInternalRuntime<
             getContext().getIdentity(), machineName, MachineStatus.RUNNING);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the machine '%s:%s'. Cause: %s",
-            getContext().getIdentity().getWorkspaceId(), machineName, e.getMessage());
+            "Unable to update status of the machine '{}:{}'. Cause: {}",
+            getContext().getIdentity().getWorkspaceId(),
+            machineName,
+            e.getMessage());
       }
       eventPublisher.sendRunningEvent(machineName, getContext().getIdentity());
     };
@@ -428,7 +435,8 @@ public class KubernetesInternalRuntime<
     // namespace.pods().watch(new AbnormalStopHandler());
     namespace.pods().watchContainers(new MachineLogsPublisher());
     if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
-      namespace.pods().watchContainers(new UnrecoverableEventHanler());
+      Map<String, Pod> pods = getContext().getEnvironment().getPods();
+      namespace.pods().watchContainers(new UnrecoverableEventHanler(pods));
     }
 
     final KubernetesServerResolver serverResolver =
@@ -541,14 +549,41 @@ public class KubernetesInternalRuntime<
     }
   }
 
-  public void startServersCheckers() throws InfrastructureException {
-    for (Entry<String, ? extends Machine> machineEntry : getMachines().entrySet()) {
+  /**
+   * Schedules server checkers.
+   *
+   * <p>Note that if the runtime is {@link WorkspaceStatus#RUNNING} then checkers will be scheduled
+   * immediately. If the runtime is {@link WorkspaceStatus#STARTING} then checkers will be scheduled
+   * when it becomes {@link WorkspaceStatus#RUNNING}. If runtime has any another status then
+   * checkers won't be scheduled at all.
+   *
+   * @throws InfrastructureException when any exception occurred
+   */
+  public void scheduleServersCheckers() throws InfrastructureException {
+    WorkspaceStatus status = getStatus();
+
+    if (status != WorkspaceStatus.RUNNING && status != WorkspaceStatus.STARTING) {
+      return;
+    }
+
+    ServerLivenessHandler consumer = new ServerLivenessHandler();
+    WorkspaceProbes probes =
+        probesFactory.getProbes(getContext().getIdentity(), getInternalMachines());
+
+    if (status == WorkspaceStatus.RUNNING) {
+      probeScheduler.schedule(probes, consumer);
+    } else {
+      // Workspace is starting it is needed to start servers checkers when it becomes RUNNING
       probeScheduler.schedule(
-          probesFactory.getProbes(
-              getContext().getIdentity(),
-              machineEntry.getKey(),
-              machineEntry.getValue().getServers()),
-          new ServerLivenessHandler());
+          probes,
+          consumer,
+          () -> {
+            try {
+              return getStatus();
+            } catch (InfrastructureException e) {
+              throw new RuntimeException(e.getMessage());
+            }
+          });
     }
   }
 
@@ -571,8 +606,11 @@ public class KubernetesInternalRuntime<
         eventPublisher.sendServerRunningEvent(machineName, serverRef, url, identity);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '%s:%s:%s'. Cause: %s",
-            identity.getWorkspaceId(), machineName, serverRef, e.getMessage());
+            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            identity.getWorkspaceId(),
+            machineName,
+            serverRef,
+            e.getMessage());
       }
     }
   }
@@ -605,8 +643,11 @@ public class KubernetesInternalRuntime<
         }
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '%s:%s:%s'. Cause: %s",
-            identity.getWorkspaceId(), machineName, serverName, e.getMessage());
+            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            identity.getWorkspaceId(),
+            machineName,
+            serverName,
+            e.getMessage());
       }
     }
   }
@@ -614,42 +655,67 @@ public class KubernetesInternalRuntime<
   /** Listens container's events and terminates workspace if unrecoverable event occurs. */
   public class UnrecoverableEventHanler implements ContainerEventHandler {
     private List<String> events;
+    private Map<String, Pod> workspacePods;
 
-    public UnrecoverableEventHanler() {
+    public UnrecoverableEventHanler(Map<String, Pod> workspacePods) {
       this.events =
           Strings.isNullOrEmpty(unrecoverableEvents)
               ? Collections.EMPTY_LIST
               : Arrays.asList(unrecoverableEvents.split(","));
+      this.workspacePods = workspacePods;
     }
 
+    /*
+     * Event is considered to be unrecoverable if it belongs to one of the workspace pods
+     * and 'lastTimestamp' of the event is *after* the time of handler initialization
+     */
     @Override
     public void handle(ContainerEvent event) {
-      if (isUnrecoverable(event)) {
+      if (isWorkspaceEvent(event) && isUnrecoverable(event)) {
         String reason = event.getReason();
         String message = event.getMessage();
-        String podName = event.getPodName();
+        String workspaceId = getContext().getIdentity().getWorkspaceId();
+        LOG.error(
+            "Unrecoverable event occurred during workspace '{}' startup: {}, {}, {}",
+            workspaceId,
+            reason,
+            message,
+            event.getPodName());
         try {
           internalStop(emptyMap());
         } catch (InfrastructureException e) {
-          String workspaceId = getContext().getIdentity().getWorkspaceId();
-          LOG.error(
-              "Unrecoverable event occured during workspace '{}' startup: {}, {}, {}",
-              workspaceId,
-              reason,
-              message,
-              podName);
+          LOG.error("Error occurred during runtime '{}' stopping. {}", workspaceId, e.getMessage());
         } finally {
           eventPublisher.sendRuntimeStoppedEvent(
-              format("Unrecoverable event occured: '%s', '%s', '%s'", reason, message, podName),
+              format(
+                  "Unrecoverable event occurred: '%s', '%s', '%s'",
+                  reason, message, event.getPodName()),
               getContext().getIdentity());
         }
       }
     }
 
+    /** Returns true if event belongs to one of the workspace pods, false otherwise */
+    private boolean isWorkspaceEvent(ContainerEvent event) {
+      String podName = event.getPodName();
+      return workspacePods.containsKey(podName);
+    }
+
+    private Date convertEventTimestampToDate(String timestamp) {
+      Date date = null;
+      try {
+        date = ContainerEvents.convertEventTimestampToDate(timestamp);
+      } catch (ParseException e) {
+        LOG.error("Error occurred during parsing the event timestamp '{}'", timestamp);
+      }
+      return date;
+    }
+
     /**
-     * @param ContainerEvent
-     * @return true if event reason or message matches one of the comma separated values defined in
-     *     'che.infra.kubernetes.workspace_unrecoverable_events',false otherwise
+     * Returns true if event reason or message matches one of the comma separated values defined in
+     * 'che.infra.kubernetes.workspace_unrecoverable_events',false otherwise
+     *
+     * @param event event to check
      */
     private boolean isUnrecoverable(ContainerEvent event) {
       boolean isUnrecoverable = false;
@@ -686,7 +752,10 @@ public class KubernetesInternalRuntime<
           if (machine.getPodName().equals(podName)
               && machine.getContainerName().equals(containerName)) {
             eventPublisher.sendMachineLogEnvent(
-                entry.getKey(), event.getMessage(), event.getTime(), getContext().getIdentity());
+                entry.getKey(),
+                event.getMessage(),
+                event.getCreationTimeStamp(),
+                getContext().getIdentity());
             return;
           }
         }

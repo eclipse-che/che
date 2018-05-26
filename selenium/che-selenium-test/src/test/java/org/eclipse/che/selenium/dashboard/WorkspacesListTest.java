@@ -106,7 +106,7 @@ public class WorkspacesListTest {
 
   @Test
   public void checkWorkspaceSelectingByCheckbox() {
-    // select the test workspace by checkbox and select it is checked
+    // select the test workspace by checkbox and check it is selected
     try {
       workspaces.selectWorkspaceByCheckbox(workspaceName1);
     } catch (WebDriverException ex) {

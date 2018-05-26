@@ -16,14 +16,21 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.5.0-SNAPSHOT</version>
+        <version>6.6.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>integration-tests-parent</artifactId>
     <packaging>pom</packaging>
     <name>Integration Tests :: Parent</name>
     <modules>
-        <module>postgresql-tck</module>
         <module>cascade-removal</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <modules>
+                <module>postgresql-tck</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

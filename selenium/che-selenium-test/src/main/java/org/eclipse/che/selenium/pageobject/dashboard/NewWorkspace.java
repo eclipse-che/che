@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -197,7 +198,8 @@ public class NewWorkspace {
   }
 
   public void waitToolbar() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    // we need increased timeout here to prevent error on Eclipse Che on OCP
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(Locators.TOOLBAR_TITLE_ID)));
   }
 

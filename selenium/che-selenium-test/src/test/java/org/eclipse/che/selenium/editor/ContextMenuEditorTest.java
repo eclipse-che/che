@@ -37,6 +37,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.FindText;
@@ -45,6 +46,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -138,6 +140,18 @@ public class ContextMenuEditorTest {
     consoles.closeProcessesArea();
   }
 
+  @AfterMethod
+  public void closeContextMenuAndFileTabs() {
+    // insure context menu is closed
+    if (editor.isContextMenuPresent()) {
+      editor.clickOnItemInContextMenu(ContextMenuLocator.CLOSE);
+    }
+
+    if (editor.isAnyTabsOpened()) {
+      editor.closeAllTabs();
+    }
+  }
+
   @Test
   public void checkFormatContextMenu() {
     projectExplorer.waitVisibleItem(PROJECT_NAME);
@@ -156,6 +170,10 @@ public class ContextMenuEditorTest {
   @Test(priority = 1)
   public void checkUndoRedo() {
     projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.scrollToItemByPath(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+    projectExplorer.openItemByPath(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActive();
     editor.setCursorToLine(2);
     editor.waitActive();
@@ -178,6 +196,10 @@ public class ContextMenuEditorTest {
   @Test(priority = 2)
   public void checkClose() {
     projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.scrollToItemByPath(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+    projectExplorer.openItemByPath(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     loader.waitOnClosed();
     editor.waitActive();
     editor.openContextMenuInEditor();
@@ -228,6 +250,8 @@ public class ContextMenuEditorTest {
   @Test(priority = 5)
   public void checkOpenDeclaration() {
     projectExplorer.waitItem(PROJECT_NAME_2);
+    projectExplorer.openItemByPath(
+        PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.goToCursorPositionVisible(25, 13);
     editor.openContextMenuOnElementInEditor(" ModelAndView");
     editor.clickOnItemInContextMenu(OPEN_DECLARATION);

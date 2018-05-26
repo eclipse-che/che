@@ -15,63 +15,64 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.shared.model.LanguageRegex;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
-import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryJsonRpcClient;
-import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerServiceClient;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 /** @author Anatoliy Bazko */
 @Singleton
 public class LanguageServerRegistry {
-  private final LanguageServerRegistryJsonRpcClient jsonRpcClient;
   private LoaderFactory loaderFactory;
   private NotificationManager notificationManager;
 
-  private final Map<FileType, LanguageDescription> registeredFileTypes = new ConcurrentHashMap<>();
+  private final Map<FileType, LanguageRegex> registeredFileTypes = new ConcurrentHashMap<>();
   private final FileTypeRegistry fileTypeRegistry;
+  private final LanguageServerServiceClient languageServerServiceClient;
+  private final PromiseProvider promiseProvider;
 
   @Inject
   public LanguageServerRegistry(
-      EventBus eventBus,
       LoaderFactory loaderFactory,
       NotificationManager notificationManager,
-      LanguageServerRegistryJsonRpcClient jsonRpcClient,
-      LanguageServerRegistryServiceClient client,
-      FileTypeRegistry fileTypeRegistry) {
+      FileTypeRegistry fileTypeRegistry,
+      LanguageServerServiceClient languageServerServiceClient,
+      PromiseProvider promiseProvider) {
 
     this.loaderFactory = loaderFactory;
     this.notificationManager = notificationManager;
-    this.jsonRpcClient = jsonRpcClient;
     this.fileTypeRegistry = fileTypeRegistry;
+    this.languageServerServiceClient = languageServerServiceClient;
+    this.promiseProvider = promiseProvider;
   }
 
-  public Promise<ServerCapabilities> getOrInitializeServer(String projectPath, VirtualFile file) {
+  public Promise<ServerCapabilities> getOrInitializeServer(VirtualFile file) {
     // call initialize service
     final MessageLoader loader =
         loaderFactory.newLoader("Initializing Language Server for " + file.getName());
     loader.show();
-    return jsonRpcClient
-        .initializeServer(file.getLocation().toString())
-        .then(
-            (ServerCapabilities arg) -> {
+    String wsPath = file.getLocation().toString();
+    return languageServerServiceClient
+        .initialize(wsPath)
+        .thenPromise(
+            serverCapabilities -> {
               loader.hide();
-              return arg;
+              return promiseProvider.resolve(serverCapabilities);
             })
         .catchError(
-            arg -> {
+            promiseError -> {
               notificationManager.notify(
                   "Initializing Language Server for " + file.getName(),
-                  arg.getMessage(),
+                  promiseError.getMessage(),
                   FAIL,
                   EMERGE_MODE);
               loader.hide();
@@ -85,8 +86,7 @@ public class LanguageServerRegistry {
    * @param type
    * @param description
    */
-  public void registerFileType(FileType type, LanguageDescription description) {
-    fileTypeRegistry.registerFileType(type);
+  public void registerFileType(FileType type, LanguageRegex description) {
     registeredFileTypes.put(type, description);
   }
 
@@ -96,7 +96,7 @@ public class LanguageServerRegistry {
    * @param file
    * @return
    */
-  public LanguageDescription getLanguageDescription(VirtualFile file) {
+  public LanguageRegex getLanguageFilter(VirtualFile file) {
     FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
     if (fileType == null) {
       return null;

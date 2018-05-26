@@ -107,33 +107,33 @@ public class RenameVirtualMethodsTest {
     doRefactoringWithKeys(13, 19, "k");
   }
 
-  @Test(priority = 1)
+  @Test
   public void test11() {
     doRefactoringWithKeys(14, 10, "k");
   }
 
-  @Test(priority = 2)
+  @Test
   public void test25() {
     doRefactorByWizard(13, 10, "k");
   }
 
-  @Test(priority = 3)
+  @Test
   public void testEnum2() {
     doRefactoringWithKeys(29, 20, "get2ndPower");
   }
 
-  @Test(priority = 4)
+  @Test
   public void testFail35() {
     doRefactorByWizardWithClosingWarnMess(13, 10, "k");
   }
 
-  @Test(priority = 5)
+  @Test
   public void testGeneric2() {
     doRefactorByWizard(19, 20, "addIfPositive");
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
-  @Test(priority = 6)
+  @Test
   public void testVarArgs1() {
     doRefactorByWizard(25, 74, "runThes");
     editor.waitTextIntoEditor(contentFromOutA);

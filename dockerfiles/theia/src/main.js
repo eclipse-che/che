@@ -61,13 +61,13 @@ function isPluginsEqual(pls1, pls2) {
 }
 
 function copyDefaultTheiaBuild() {
-    cp.execSync(`cp -r ${defaultTheiaRoot}/node_modules ${theiaRoot} && cp -r ${defaultTheiaRoot}/src-gen ${theiaRoot} && cp -r ${defaultTheiaRoot}/lib ${theiaRoot} && cp ${defaultTheiaRoot}/yarn.lock ${defaultTheiaRoot}/package.json ${theiaRoot}`);
+    cp.execSync(`cp -r ${defaultTheiaRoot}/node_modules ${defaultTheiaRoot}/src-gen ${defaultTheiaRoot}/lib ${defaultTheiaRoot}/yarn.lock ${defaultTheiaRoot}/package.json ${theiaRoot}`);
 }
 
 function rebuildTheiaWithNewPluginsAndRun(newPlugins) {
-    let theiaPackageJson = require(`${theiaRoot}/package.json`);
+    const theiaPackageJson = require(`${theiaRoot}/package.json`);
     theiaPackageJson['dependencies'] = newPlugins;
-    fs.writeFileSync(`${theiaRoot}/package.json`, JSON.stringify(theiaPackageJson), 'utf8');
+    writeJsonToFile(`${theiaRoot}/package.json`, theiaPackageJson);
     cp.execSync(`rm -rf ${theiaRoot}/src-gen`);
 
     handleError(callYarn()
@@ -91,7 +91,7 @@ function getTheiaPlugins() {
         return {};
     }
     const theiaPackageJson = require(`${theiaRoot}/package.json`);
-    return theiaPackageJson['dependencies'];
+    return theiaPackageJson['dependencies'] || {};
 }
 
 /** Returns extra Theia plugins which is set via THEIA_PLUGINS env variable */
@@ -123,7 +123,7 @@ function getExtraTheiaPlugins() {
 
 /**
  * Clones git repository and adds the plugin as local.
- * This is done becouse Theia requires npm package.json (not lerna) which is located, in most cases, in subdirectory of repository.
+ * This is done because Theia requires npm package.json (not lerna) which is located, in some cases, in subdirectory of repository.
  */
 function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
     const pluginPath = gitPluginsRoot + '/' + pluginName + '/';
@@ -140,7 +140,20 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
         }
     }
 
-    const rootPackageJson = require(pluginPath + 'package.json');
+    const rootPackageJsonPath = pluginPath + 'package.json';
+    const rootPackageJson = require(rootPackageJsonPath);
+    optimizeRootPackageJson(rootPackageJsonPath, rootPackageJson);
+
+    if (!fs.existsSync(pluginPath + 'node_modules') || !fs.existsSync(pluginPath + 'lib')) {
+        try {
+            console.log('Building plugin: ' + pluginName);
+            cp.execSync(`cd ${pluginPath} && yarn`, {stdio:[0,1,2]});
+        } catch (error) {
+            console.error('Skipping ' + pluginName + ' plugin because of following error: ' + error);
+            return;
+        }
+    }
+
     if (rootPackageJson['name'] === pluginName && !fs.existsSync(pluginPath + 'lerna.json')) {
         plugins[pluginName] = gitRepository;
     } else {
@@ -151,15 +164,6 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
             if (fs.existsSync(packageJsonPath)) {
                 let packageJson = require(packageJsonPath);
                 if (packageJson['name'] === pluginName) {
-                    if (!fs.existsSync(pluginTargetDir + '/node_mudules') || !fs.existsSync(pluginTargetDir + '/lib')) {
-                        try {
-                            console.log('Building plugin: ' + pluginName);
-                            cp.execSync(`cd ${pluginTargetDir} && yarn`);
-                        } catch (error) {
-                            console.error('Skipping ' + pluginName + ' plugin because of following error: ' + error);
-                            return;
-                        }
-                    }
                     plugins[pluginName] = pluginTargetDir;
                     return;
                 }
@@ -167,6 +171,27 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
         }
         console.error(pluginName + ' is not valid plugin. Skipping.');
     }
+}
+
+// change root package json to optimize extension build time
+function optimizeRootPackageJson(packageJsonPath, packageJson) {
+    const workspaces = packageJson['workspaces'];
+    if (workspaces) {
+        var index = workspaces.indexOf("browser-app");
+        if (index > -1) {
+            workspaces.splice(index, 1);
+        }
+        var index = workspaces.indexOf("electron-app");
+        if (index > -1) {
+            workspaces.splice(index, 1);
+        }
+        writeJsonToFile(packageJsonPath, packageJson);
+    }
+}
+
+function writeJsonToFile(filePath, json) {
+    const content = JSON.stringify(json);
+    fs.writeFileSync(filePath, content, 'utf8');
 }
 
 function promisify(command, p) {
@@ -188,7 +213,7 @@ function callYarn() {
     return promisify('yarn', cp.spawn('yarn'));
 }
 function callBuild() {
-    return promisify('yarn theia build', cp.spawn('yarn', ['theia', 'build']));
+    return promisify('yarn theia build --mode development', cp.spawn('yarn', ['theia', 'build', '--mode', "development"]));
 }
 function callRun() {
     return promisify('yarn theia start', cp.spawn('yarn', ['theia', 'start', '/projects', '--hostname=0.0.0.0', "--port=" + THEIA_PORT]));

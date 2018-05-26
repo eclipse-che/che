@@ -83,7 +83,10 @@ public class DtoConverterTest {
         EnumSet.of(
             EventType.STATUS_CHANGED,
             EventType.STOPPING_SERVICE,
+            EventType.SUSPENDING_SERVICE,
             EventType.SERVICE_ITEM_STOPPED,
+            EventType.SERVICE_ITEM_SUSPENDED,
+            EventType.SERVICE_SUSPENDED,
             EventType.SERVICE_STOPPED);
     assertEquals(handled, EnumSet.allOf(EventType.class));
   }

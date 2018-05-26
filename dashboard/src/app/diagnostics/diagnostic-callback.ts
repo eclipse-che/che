@@ -10,7 +10,6 @@
  */
 import {DiagnosticItem} from './diagnostic-item';
 import {DiagnosticCallbackState} from './diagnostic-callback-state';
-import {MessageBus, CheWebsocket} from '../../components/api/che-websocket.factory';
 import {DiagnosticPart} from './diagnostic-part';
 import {DiagnosticsController} from './diagnostics.controller';
 
@@ -31,11 +30,6 @@ export class DiagnosticCallback {
   private $q: ng.IQService;
 
   /**
-   * Websocket API used to deal with websockets.
-   */
-  private cheWebsocket: CheWebsocket;
-
-  /**
    * Angular Timeout service
    */
   private $timeout: ng.ITimeoutService;
@@ -44,11 +38,6 @@ export class DiagnosticCallback {
    * defered object instance from q service
    */
   private defered: ng.IDeferred<any>;
-
-  /**
-   * List of all channels on which we're listening for websockets.
-   */
-  private listeningChannels: Array<string>;
 
   /**
    * All timeouts that we're starting as part of this callback. They need to be stopped at the end.
@@ -64,11 +53,6 @@ export class DiagnosticCallback {
    * Builder when a new sibling callback is required to be added/build.
    */
   private builder: DiagnosticsController;
-
-  /**
-   * Allow to override the messagebus (originally it's grabbing it from cheWebsocket service)
-   */
-  private messageBus: MessageBus;
 
   /**
    * Name of the callback.
@@ -89,12 +73,10 @@ export class DiagnosticCallback {
   /**
    * Constructor.
    */
-  constructor($q: ng.IQService, cheWebsocket: CheWebsocket, $timeout: ng.ITimeoutService, name: string, sharedMap: Map<string, any>, builder: any, diagnosticPart: DiagnosticPart) {
+  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, name: string, sharedMap: Map<string, any>, builder: any, diagnosticPart: DiagnosticPart) {
     this.$q = $q;
-    this.cheWebsocket = cheWebsocket;
     this.$timeout = $timeout;
     this.defered = $q.defer();
-    this.listeningChannels = new Array<string>();
     this.timeoutPromises = new Array<ng.IPromise<any>>();
     this.name = name;
     this.sharedMap = sharedMap;
@@ -192,26 +174,6 @@ export class DiagnosticCallback {
   }
 
   /**
-   * MessageBus used to connect with websockets.
-   * @returns {MessageBus}
-   */
-  public getMessageBus(): MessageBus {
-    if (this.messageBus) {
-      return this.messageBus;
-    } else {
-      return this.cheWebsocket.getBus();
-    }
-  }
-
-  /**
-   * Override the current messagebus
-   * @param {messageBus} messageBus
-   */
-  public setMessageBus(messageBus: MessageBus) {
-    this.messageBus = messageBus;
-  }
-
-  /**
    * Delay an error after a timeout. Allow to stop a test if there is no answer after some time.
    * @param {string} message
    * @param {number} delay the number of seconds to wait
@@ -233,27 +195,6 @@ export class DiagnosticCallback {
     this.timeoutPromises.push(promise);
   }
 
-  /**
-   * Subscribe on message bus channel
-   * @param {string} channel
-   * @param {any} callback
-   */
-  public subscribeChannel(channel: string, callback: any): void {
-    this.getMessageBus().subscribe(channel, callback);
-    this.listeningChannels.push(channel);
-  }
-
-  /**
-   * Unsubscribe from message bus channel
-   * @param {string} channel
-   */
-  public unsubscribeChannel(channel: string): void {
-    this.getMessageBus().unsubscribe(channel);
-    let index: number = this.listeningChannels.indexOf(channel);
-    if (index >= 0) {
-      delete this.listeningChannels[index];
-    }
-  }
 
   /**
    * Cleanup all resources (like current promises)
@@ -263,12 +204,6 @@ export class DiagnosticCallback {
       this.$timeout.cancel(promise);
     });
     this.timeoutPromises.length = 0;
-
-    this.listeningChannels.forEach((channel: string) => {
-      this.getMessageBus().unsubscribe(channel);
-    });
-    this.listeningChannels.length = 0;
-
   }
 
   /**

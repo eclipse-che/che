@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import javax.inject.Inject;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -72,33 +71,29 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
 
   @Override
   public Promise<EditorPartPresenter> createEditor(VirtualFile file) {
-    if (file instanceof File) {
-      File resource = (File) file;
-
-      Promise<ServerCapabilities> promise =
-          registry.getOrInitializeServer(resource.getProject().getPath(), file);
-      return promise.then(
-          new Function<ServerCapabilities, EditorPartPresenter>() {
-            @Override
-            public EditorPartPresenter apply(ServerCapabilities capabilities)
-                throws FunctionException {
-              if (editorBuilder == null) {
-                Log.debug(
-                    AbstractTextEditorProvider.class,
-                    "No builder registered for default editor type - giving up.");
-                return null;
-              }
-
-              final TextEditor editor = editorBuilder.buildEditor();
-              TextEditorConfiguration configuration =
-                  capabilities == null
-                      ? new DefaultTextEditorConfiguration()
-                      : editorConfigurationFactory.build(editor, capabilities);
-              editor.initialize(configuration);
-              return editor;
-            }
-          });
+    if (!(file instanceof File)) {
+      return null;
     }
-    return null;
+
+    return registry
+        .getOrInitializeServer(file)
+        .then(
+            (Function<ServerCapabilities, EditorPartPresenter>)
+                capabilities -> {
+                  if (editorBuilder == null) {
+                    Log.debug(
+                        AbstractTextEditorProvider.class,
+                        "No builder registered for default editor type - giving up.");
+                    return null;
+                  }
+
+                  final TextEditor editor = editorBuilder.buildEditor();
+                  TextEditorConfiguration configuration =
+                      capabilities == null
+                          ? new DefaultTextEditorConfiguration()
+                          : editorConfigurationFactory.build(editor, capabilities);
+                  editor.initialize(configuration);
+                  return editor;
+                });
   }
 }
