@@ -656,7 +656,6 @@ public class KubernetesInternalRuntime<
   public class UnrecoverableEventHanler implements ContainerEventHandler {
     private List<String> events;
     private Map<String, Pod> workspacePods;
-    private Date handlerInitialization;
 
     public UnrecoverableEventHanler(Map<String, Pod> workspacePods) {
       this.events =
@@ -664,7 +663,6 @@ public class KubernetesInternalRuntime<
               ? Collections.EMPTY_LIST
               : Arrays.asList(unrecoverableEvents.split(","));
       this.workspacePods = workspacePods;
-      this.handlerInitialization = new Date();
     }
 
     /*
@@ -673,9 +671,7 @@ public class KubernetesInternalRuntime<
      */
     @Override
     public void handle(ContainerEvent event) {
-      if (isWorkspaceEvent(event)
-          && happenedAfterHandlerInitialization(event)
-          && isUnrecoverable(event)) {
+      if (isWorkspaceEvent(event) && isUnrecoverable(event)) {
         String reason = event.getReason();
         String message = event.getMessage();
         String workspaceId = getContext().getIdentity().getWorkspaceId();
@@ -703,16 +699,6 @@ public class KubernetesInternalRuntime<
     private boolean isWorkspaceEvent(ContainerEvent event) {
       String podName = event.getPodName();
       return workspacePods.containsKey(podName);
-    }
-
-    /**
-     * Returns true if 'lastTimestamp' of the event is *after* the time of the handler
-     * initialization
-     */
-    private boolean happenedAfterHandlerInitialization(ContainerEvent event) {
-      String eventLastTimestamp = event.getLastTimestamp();
-      Date eventLastTimestampDate = convertEventTimestampToDate(eventLastTimestamp);
-      return eventLastTimestampDate != null && eventLastTimestampDate.after(handlerInitialization);
     }
 
     private Date convertEventTimestampToDate(String timestamp) {

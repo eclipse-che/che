@@ -13,6 +13,7 @@ import {ConfirmDialogService} from '../../../../../components/service/confirm-di
 import {CheNotification} from '../../../../../components/notification/che-notification.factory';
 import {CheAPI} from '../../../../../components/api/che-api.factory';
 import {CheProject} from '../../../../../components/api/che-project';
+import {CheWorkspaceAgent} from '../../../../../components/api/che-workspace-agent';
 
 /**
  * Controller for a project details
@@ -81,13 +82,14 @@ export class ProjectDetailsController {
       cheAPI.getWorkspace().fetchWorkspaceDetails(this.namespace + ':' + this.workspaceName).then(() => {
         this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspaceName);
         if (this.workspace && this.workspace.runtime) {
-         this.fetchProjectDetails();
+          this.fetchProjectDetails();
         } else {
           this.loading = false;
         }
       }, (error: any) => {
         this.cheNotification.showError(error.data.message ? error.data.message : 'Failed to get runtime of the project workspace.');
         this.$log.log('error', error);
+        this.loading = false;
       });
     } else {
       this.fetchProjectDetails();
@@ -113,10 +115,26 @@ export class ProjectDetailsController {
         if (error.status === 304) {
           return this.$q.when();
         }
+        const message = error.data && error.data.message ? error.data.message : 'Cannot fetch the workspace.';
+        this.cheNotification.showError(message);
         return this.$q.reject(error);
       });
     }).then(() => {
-      this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspace.id).getProject();
+      const workspace = this.cheAPI.getWorkspace().getWorkspaceById(this.workspace.id);
+      if (workspace.status !== 'RUNNING') {
+        const wsStatusMessage = 'Workspace is not running at the moment.';
+        this.cheNotification.showError(wsStatusMessage);
+        return this.$q.reject(wsStatusMessage);
+      }
+      const wsAgent = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspace.id);
+      if (!wsAgent) {
+        const wsAgentMessage = 'Cannot get a Workspace agent.';
+        this.cheNotification.showError(wsAgentMessage);
+        return this.$q.reject(wsAgentMessage);
+      }
+      return this.$q.when(wsAgent);
+    }).then((wsAgent: CheWorkspaceAgent) => {
+      this.projectService = wsAgent.getProject();
 
       if (this.projectService.getProjectDetailsByKey(this.projectPath)) {
         this.loading = false;
@@ -126,12 +144,11 @@ export class ProjectDetailsController {
           this.loading = false;
           this.updateProjectDetails();
         }, (error: any) => {
+          this.loading = false;
           if (error.status === 304) {
-            this.loading = false;
             this.updateProjectDetails();
           } else {
             this.$log.error(error);
-            this.loading = false;
             this.invalidProject = error.statusText + error.status;
           }
         });

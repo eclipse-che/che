@@ -32,8 +32,6 @@ public class CheWsAgentModule extends AbstractModule {
         .annotatedWith(Names.named("machine.token"))
         .toProvider(MachineTokenProvider.class);
 
-    bind(WsAgentAnalyticsAddresser.class);
-
     bind(String.class)
         .annotatedWith(Names.named("wsagent.endpoint"))
         .toProvider(WsAgentURLProvider.class);

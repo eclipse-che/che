@@ -52,6 +52,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FIL
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_LIST_BUTTON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_WITH_UNSAVED_STATUS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_RULER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TOOLTIP_TITLE_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.BLUE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.FOCUSED_DEFAULT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.GREEN;
@@ -69,11 +70,9 @@ import static org.openqa.selenium.Keys.HOME;
 import static org.openqa.selenium.Keys.LEFT_CONTROL;
 import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
@@ -202,6 +201,7 @@ public class CodenvyEditor {
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
+    String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
   }
 
   public enum TabActionLocator {
@@ -324,6 +324,9 @@ public class CodenvyEditor {
   @FindBy(xpath = ALL_TABS_XPATH)
   private WebElement someOpenedTab;
 
+  @FindBy(css = TOOLTIP_TITLE_CSS)
+  private WebElement tooltipTitle;
+
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
    *
@@ -347,9 +350,8 @@ public class CodenvyEditor {
   public String getVisibleTextFromEditor() {
     waitActive();
     List<WebElement> lines =
-        webDriverWaitFactory
-            .get(ELEMENT_TIMEOUT_SEC)
-            .until(presenceOfAllElementsLocatedBy(By.xpath(ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
+        seleniumWebDriverHelper.waitPresenceOfAllElements(
+            By.xpath(ORION_CONTENT_ACTIVE_EDITOR_XPATH), ELEMENT_TIMEOUT_SEC);
     return getTextFromOrionLines(lines);
   }
 
@@ -409,6 +411,15 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> getTextFromSplitEditor(indexOfEditor).contains(expectedText));
+  }
+
+  /**
+   * wait text in tooltip pop-up (after clicking or hovering warning/error marker)
+   *
+   * @param expectedText the expected text into tooltip pop-up
+   */
+  public void waitTextInToolTipPopup(String expectedText) {
+    seleniumWebDriverHelper.waitTextContains(tooltipTitle, expectedText);
   }
 
   /**
@@ -632,11 +643,7 @@ public class CodenvyEditor {
    * opened.
    */
   public void launchAutocompleteAndWaitContainer() {
-    loader.waitOnClosed();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    typeTextIntoEditor(SPACE.toString());
-    action.keyUp(CONTROL).perform();
+    launchAutocomplete();
     waitAutocompleteContainer();
   }
 
@@ -2123,13 +2130,8 @@ public class CodenvyEditor {
   }
 
   private List<WebElement> getAllTabsWithProvidedName(String tabName) {
-    return webDriverWaitFactory
-        .get()
-        .until(
-            visibilityOfAllElementsLocatedBy(
-                By.xpath(
-                    format(
-                        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']",
-                        tabName))));
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath(
+            format("//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']", tabName)));
   }
 }
