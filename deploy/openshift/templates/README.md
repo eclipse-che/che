@@ -238,3 +238,24 @@ IMPORTANT! Self-signed certificates aren't acceptable.
 Default credentials are `admin:admin`.
 Go to Clients, `che-public` client and edit **Valid Redirect URIs** and **Web Origins** URLs so that they use **https** protocol.
 You do not need to do that if you initially deploy Che with https support.
+
+## Creating workspace resources in personal OpenShift accounts
+
+To allow creating workspace OpenShift resources in personal OpenShift accounts, you should:
+- configure the Openshift identity provider in Keycloak as described in the Admin Guide
+- install the Openshift console certificate in the Keycloak server (if it's self-signed) by:
+    - retrieve the OpenShift console certificate into the `~/openshift.crt` file with this command:
+    `minishift ssh docker exec origin /bin/cat ./openshift.local.config/master/ca.crt > ~/openshift.crt`
+    - running the following command before all other commands:
+
+```bash
+    oc process -f multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat ~/openshift.crt)" | oc apply -f -
+```
+
+- add the following parameters to the `oc new-app -f che-server-template.yaml` command:
+
+```
+-p CHE_INFRA_OPENSHIFT_PROJECT=NULL -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=openshift-v3
+```
+
+
