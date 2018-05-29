@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.python.generator;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import javax.inject.Inject;
@@ -38,11 +39,14 @@ public class PythonProjectGenerator implements CreateProjectHandler {
   public void onCreateProject(
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
-    fsManager.createDir(projectWsPath);
-    InputStream inputStream =
-        getClass().getClassLoader().getResourceAsStream("files/default_python_content");
-    String wsPath = resolve(projectWsPath, "main.py");
-    fsManager.createFile(wsPath, inputStream);
+    try (InputStream inputStream =
+        getClass().getClassLoader().getResourceAsStream("files/default_python_content")) {
+      fsManager.createDir(projectWsPath);
+      String wsPath = resolve(projectWsPath, "main.py");
+      fsManager.createFile(wsPath, inputStream);
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
   }
 
   @Override

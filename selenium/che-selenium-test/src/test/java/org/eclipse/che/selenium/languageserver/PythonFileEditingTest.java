@@ -41,7 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class CheckMainFeatureForPythonLanguageTest {
+public class PythonFileEditingTest {
   private static final String PROJECT_NAME = "console-python3-simple";
   private static final String PYTHON_FILE_NAME = "main.py";
   private static final String PYTHON_MODULE_FILE_NAME = "math.py";

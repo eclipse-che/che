@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.php.projecttype;
 import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 
 import com.google.inject.Inject;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
@@ -37,11 +38,14 @@ public class PhpProjectGenerator implements CreateProjectHandler {
   public void onCreateProject(
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
-    fsManager.createDir(projectWsPath);
-    InputStream inputStream =
-        getClass().getClassLoader().getResourceAsStream("files/default_php_content");
-    String wsPath = resolve(projectWsPath, "hello.php");
-    fsManager.createFile(wsPath, inputStream);
+    try (InputStream inputStream =
+        getClass().getClassLoader().getResourceAsStream("files/default_php_content")) {
+      fsManager.createDir(projectWsPath);
+      String wsPath = resolve(projectWsPath, "hello.php");
+      fsManager.createFile(wsPath, inputStream);
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
   }
 
   @Override

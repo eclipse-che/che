@@ -19,6 +19,8 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
 
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
@@ -57,31 +59,34 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
 
-    List<String> sourceFolders;
-    if (attributes.containsKey(SOURCE_FOLDER) && !attributes.get(SOURCE_FOLDER).isEmpty()) {
-      sourceFolders = attributes.get(SOURCE_FOLDER).getList();
-    } else {
-      sourceFolders = singletonList(DEFAULT_SOURCE_FOLDER_VALUE);
+    try (InputStream inputStream =
+        getClass().getClassLoader().getResourceAsStream("files/main_class_content")) {
+      List<String> sourceFolders;
+      if (attributes.containsKey(SOURCE_FOLDER) && !attributes.get(SOURCE_FOLDER).isEmpty()) {
+        sourceFolders = attributes.get(SOURCE_FOLDER).getList();
+      } else {
+        sourceFolders = singletonList(DEFAULT_SOURCE_FOLDER_VALUE);
+      }
+
+      fsManager.createDir(projectWsPath);
+
+      String outputDirWsPath = resolve(projectWsPath, DEFAULT_OUTPUT_FOLDER_VALUE);
+      fsManager.createDir(outputDirWsPath);
+
+      String sourceDirWsPath = resolve(projectWsPath, sourceFolders.get(0));
+      fsManager.createDir(sourceDirWsPath);
+
+      String mainJavaWsPath = resolve(sourceDirWsPath, FILE_NAME);
+      fsManager.createFile(mainJavaWsPath, inputStream);
+
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectWsPath);
+      IJavaProject javaProject = JavaCore.create(project);
+
+      classpathBuilder.generateClasspath(
+          javaProject, sourceFolders, singletonList(DEFAULT_LIBRARY_FOLDER_VALUE));
+    } catch (IOException e) {
+      throw new ServerException(e);
     }
-
-    fsManager.createDir(projectWsPath);
-
-    String outputDirWsPath = resolve(projectWsPath, DEFAULT_OUTPUT_FOLDER_VALUE);
-    fsManager.createDir(outputDirWsPath);
-
-    String sourceDirWsPath = resolve(projectWsPath, sourceFolders.get(0));
-    fsManager.createDir(sourceDirWsPath);
-
-    String mainJavaWsPath = resolve(sourceDirWsPath, FILE_NAME);
-    fsManager.createFile(
-        mainJavaWsPath,
-        getClass().getClassLoader().getResourceAsStream("files/main_class_content"));
-
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectWsPath);
-    IJavaProject javaProject = JavaCore.create(project);
-
-    classpathBuilder.generateClasspath(
-        javaProject, sourceFolders, singletonList(DEFAULT_LIBRARY_FOLDER_VALUE));
   }
 
   @Override

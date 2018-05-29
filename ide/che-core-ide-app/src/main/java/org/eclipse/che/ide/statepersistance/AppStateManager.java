@@ -149,10 +149,22 @@ public class AppStateManager {
             stateComponentRegistry.get().getComponentById(key);
         if (stateComponent.isPresent()) {
           StateComponent component = stateComponent.get();
-          Log.debug(getClass(), "Restore state for the component ID: " + component.getId());
+          String componentId = component.getId();
+          Log.debug(getClass(), "Restore state for the component ID: " + componentId);
           sequentialRestore =
               sequentialRestore.thenPromise(
-                  ignored -> component.loadState(appState.getObject(key)));
+                  ignored ->
+                      component
+                          .loadState(appState.getObject(key))
+                          .catchError(
+                              arg -> {
+                                String error =
+                                    "Error is happened at restoring state for the component "
+                                        + componentId
+                                        + ": "
+                                        + arg.getMessage();
+                                Log.error(getClass(), error);
+                              }));
         }
       }
       return sequentialRestore;
