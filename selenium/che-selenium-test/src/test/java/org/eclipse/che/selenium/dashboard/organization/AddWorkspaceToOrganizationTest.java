@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -29,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationLi
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -65,7 +63,6 @@ public class AddWorkspaceToOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
-
   @Inject private TestUser adminTestUser;
   @Inject private TestUser testUser;
 
@@ -113,25 +110,13 @@ public class AddWorkspaceToOrganizationTest {
     checkNamespaceLink(org1.getName(), WORKSPACE_FOR_ADMIN_1);
     checkNamespaceLink(org2.getName(), WORKSPACE_FOR_ADMIN_2);
     checkNamespaceLink(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
-  }
 
-  @Test(priority = 1)
-  public void testCreatingWorkspacesFromOrganizationDetails() {
-    navigationBar.waitNavigationBar();
+    // check that created workspace exists in organization Workspaces tab
     navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitForOrganizationsList();
     organizationListPage.waitOrganizationInList(org1.getName());
     organizationListPage.clickOnOrganization(org1.getName());
-
-    // try to open the Workspaces tab
-    try {
-      organizationPage.clickOnWorkspacesTab();
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9817", ex);
-    }
-
-    // TODO add workspace creating after #9817 issue is fixed
+    organizationPage.clickOnWorkspacesTab();
+    workspaces.waitWorkspaceIsPresent(WORKSPACE_FOR_ADMIN_1);
   }
 
   @Test(priority = 1)
