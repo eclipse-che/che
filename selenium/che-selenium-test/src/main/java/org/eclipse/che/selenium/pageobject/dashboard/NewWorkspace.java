@@ -154,6 +154,10 @@ public class NewWorkspace {
                         .equals(message));
   }
 
+  public void waitErrorMessageDisappearance() {
+    seleniumWebDriverHelper.waitInvisibility(By.id(ERROR_MESSAGE));
+  }
+
   public boolean isMachineExists(String machineName) {
     return seleniumWebDriver
             .findElements(By.xpath(format(Locators.MACHINE_NAME, machineName)))
