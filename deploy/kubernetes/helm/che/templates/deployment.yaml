@@ -153,7 +153,7 @@ spec:
               key: CHE_INFRA_KUBERNETES_USERNAME
               name: che
 {{- if .Values.global.multiuser }}
-#Client_id should allways be supplied in multiuser scenario
+#Client_id should always be supplied in multiuser scenario
         - name: CHE_KEYCLOAK_CLIENT__ID
           valueFrom:
             configMapKeyRef:

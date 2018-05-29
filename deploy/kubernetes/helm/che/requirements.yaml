@@ -14,4 +14,3 @@ dependencies:
     repository: file://./charts/che-keycloak/
     version: 1.0.0
     condition: global.cheDedicatedKeycloak,global.multiuser
-

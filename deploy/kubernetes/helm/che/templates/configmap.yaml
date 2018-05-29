@@ -41,8 +41,6 @@ data:
 {{- end }}
 {{- if .Values.global.multiuser }}
   CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId }}
-{{- end }}
-{{- if .Values.global.multiuser }}
   CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
 {{- end }}
