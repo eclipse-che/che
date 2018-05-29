@@ -39,7 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class CheckMainFeatureForCSharpLanguageTest {
+public class CSharpFileEditingTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
   private final String COMMAND_NAME_FOR_RESTORE_LS = PROJECT_NAME + ": update dependencies";

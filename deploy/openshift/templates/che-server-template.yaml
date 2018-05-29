@@ -115,6 +115,8 @@ objects:
             value: "INFO"
           - name: CHE_KEYCLOAK_AUTH__SERVER__URL
             value: "${CHE_KEYCLOAK_AUTH__SERVER__URL}"
+          - name: CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER
+            value: "${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER}"
           - name: CHE_OAUTH_GITHUB_CLIENTID
             value: "${CHE_OAUTH_GITHUB_CLIENTID}"
           - name: CHE_OAUTH_GITHUB_CLIENTSECRET
@@ -233,6 +235,10 @@ parameters:
   displayName: Identity provider URL
   description: URL of a remote identity provider. Defaults to Keycloak bundled with Che multi user
   value: '${PROTOCOL}://keycloak-${NAMESPACE}.${ROUTING_SUFFIX}/auth'
+- name: CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER
+  displayName: Alias of the Openshift identity provider in Keycloak
+  description: Alias of the Openshift identity provider registered in Keycloak, that should be used to create workspace OpenShift resources in Openshift namespaces owned by the current Che user.
+  value: 'NULL'
 - name: STRATEGY
   displayName: Update Strategy
   description: Che server update strategy. Defaults to Recreate. Use Rolling only if Che deployment does not use PVC
