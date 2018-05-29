@@ -53,6 +53,12 @@ objects:
             value: "${ROUTING_SUFFIX}"
           - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
             value: "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}"
+          - name: OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE
+            valueFrom:
+              secretKeyRef:
+                key: ca.crt
+                name: openshift-identity-provider
+                optional: true
           image: '${IMAGE_KEYCLOAK}:${CHE_VERSION}'
           command: ["/scripts/kc_realm_user.sh"]
           imagePullPolicy: Always

@@ -27,6 +27,13 @@ if [ $KEYCLOAK_USER ] && [ $KEYCLOAK_PASSWORD ]; then
     /opt/jboss/keycloak/bin/add-user-keycloak.sh --user $KEYCLOAK_USER --password $KEYCLOAK_PASSWORD
 fi
 
+if [ "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" != "" ]; then
+    echo "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" > /scripts/openshift.cer
+    keytool -importcert -alias HOSTDOMAIN -keystore /scripts/openshift.jks -file /scripts/openshift.cer -storepass openshift -noprompt
+    keytool -importkeystore -srckeystore $JAVA_HOME/jre/lib/security/cacerts -destkeystore /scripts/openshift.jks -srcstorepass changeit -deststorepass openshift
+    /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
+fi
+
 echo "Starting Keycloak server..."
 
 /opt/jboss/keycloak/bin/standalone.sh -Dkeycloak.migration.action=import \
