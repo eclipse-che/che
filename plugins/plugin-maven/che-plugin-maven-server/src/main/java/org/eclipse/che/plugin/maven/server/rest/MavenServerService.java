@@ -102,12 +102,7 @@ public class MavenServerService {
   public String getEffectivePom(@QueryParam("projectpath") String projectPath)
       throws ServerException, NotFoundException, ForbiddenException {
     String projectWsPath = absolutize(projectPath);
-
-    //    ProjectConfig project =
-    //        projectManager
-    //            .get(projectWsPath)
-    //            .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
-
+    
     MavenServerWrapper mavenServer =
         wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
 
