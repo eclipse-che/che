@@ -77,7 +77,7 @@ init() {
       --dockerfile:*)
         DOCKERFILE="${1#*:}"
         shift ;;
-      --build-args:*)
+      --build-arg*:*)
         BUILD_ARGS_CSV="${1#*:}"
         prepare_build_args $BUILD_ARGS_CSV
         shift ;;
