@@ -43,6 +43,7 @@ public class InmemoryProjectRegistry implements ProjectConfigRegistry {
     return ImmutableSet.copyOf(projects.values());
   }
 
+  @Override
   public Set<RegisteredProject> getAll(String wsPath) {
     Set<RegisteredProject> children =
         projects

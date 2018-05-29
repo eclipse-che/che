@@ -284,9 +284,10 @@ public class ExecutiveProjectManager implements ProjectManager {
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
           ForbiddenException {
 
-    RegisteredProject project = projectConfigRegistry.getOrNull(wsPath);
-    if (project == null) throw new NotFoundException("Can't find project");
-    //        get(wsPath).orElseThrow(() -> new NotFoundException("Can't find project"));
+    RegisteredProject project =
+        projectConfigRegistry
+            .get(wsPath)
+            .orElseThrow(() -> new NotFoundException("Can't find project"));
 
     List<String> mixins = project.getMixins();
 

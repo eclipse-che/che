@@ -46,15 +46,10 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
   /** Registered path -> Path watch operation IDs */
   private final Map<Path, Set<Integer>> pathWatchRegistrations = new ConcurrentHashMap<>();
 
-  //  private final File root;
-
   private PathTransformer pathTransformer;
 
   @Inject
-  public FileWatcherByPathMatcher(
-      //      @Named("che.user.workspaces.storage") File root,
-      FileWatcherByPathValue watcher, PathTransformer pathTransformer) {
-    //    this.root = root;
+  public FileWatcherByPathMatcher(FileWatcherByPathValue watcher, PathTransformer pathTransformer) {
     this.watcher = watcher;
     this.pathTransformer = pathTransformer;
   }

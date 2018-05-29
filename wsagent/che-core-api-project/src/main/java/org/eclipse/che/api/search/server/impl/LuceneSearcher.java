@@ -104,7 +104,6 @@ public class LuceneSearcher implements Searcher {
   private static final String TEXT_FIELD = "text";
 
   private final Set<PathMatcher> excludePatterns;
-  //  private final File indexDirectory;
   private final PathTransformer pathTransformer;
 
   private final Path root;
@@ -130,7 +129,6 @@ public class LuceneSearcher implements Searcher {
       Files.createDirectories(indexDirectory.toPath());
     }
 
-    //    this.indexDirectory = indexDirectory;
     this.root = Paths.get(pathProvider.get());
     this.excludePatterns = excludePatterns;
     this.pathTransformer = pathTransformer;
