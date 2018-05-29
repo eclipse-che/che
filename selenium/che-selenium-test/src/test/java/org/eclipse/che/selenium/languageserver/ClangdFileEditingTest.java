@@ -40,7 +40,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class CheckMainFeatureForClangLanguageTest {
+public class ClangdFileEditingTest {
   private static final String PROJECT_NAME = "console-cpp-simple";
   private static final String HELLO_CC = "hello.cc";
   private static final String ISEVEN_H = "iseven.h";
