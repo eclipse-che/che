@@ -33,8 +33,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -89,9 +87,7 @@ public class ClangdFileEditingTest {
   @Inject private Menu menu;
   @Inject private Wizard wizard;
   @Inject private Consoles consoles;
-  @Inject private Dashboard dashboard;
   @Inject private CodenvyEditor editor;
-  @Inject private CommandsPalette commandsPalette;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
@@ -107,12 +103,12 @@ public class ClangdFileEditingTest {
 
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectProjectAndCreate(CONSOLE_CPP_SIMPLE, PROJECT_NAME);
-
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cc");
     editor.waitTabIsPresent("hello.cc");
 
+    // check clangd language sever initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
@@ -123,6 +119,7 @@ public class ClangdFileEditingTest {
     testProjectServiceClient.updateFile(
         workspace.getId(), PROJECT_NAME + "/" + HELLO_CC, HELLO_CC_CONTENT);
 
+    // check error marker message
     editor.goToCursorPositionVisible(5, 1);
     editor.waitMarkerInvisibility(ERROR, 5);
     editor.typeTextIntoEditor("c");
@@ -141,23 +138,10 @@ public class ClangdFileEditingTest {
     editor.goToPosition(7, 1);
     editor.deleteCurrentLineAndInsertNew();
     editor.typeTextIntoEditor("std::cou");
-    // editor.waitMarkerInPosition(ERROR, 7);
     editor.launchAutocompleteAndWaitContainer();
-
     editor.waitTextIntoAutocompleteContainer("cout ostream");
     editor.waitTextIntoAutocompleteContainer("wcout wostream");
-    editor.enterAutocompleteProposal("cou");
-    // TODO fix proposal selection from Autocompete
-    editor.enterAutocompleteProposal("ostream");
-    editor.waitTextIntoEditor("  std::cout");
-    editor.typeTextIntoEditor("<<\"Hello World!\";");
-    editor.typeTextIntoEditor(Keys.DELETE.toString() + Keys.DELETE.toString());
-    editor.waitAllMarkersInvisibility(ERROR);
-
-    commandsPalette.openCommandPalette();
-    commandsPalette.startCommandByDoubleClick(PROJECT_NAME + ":build and run");
-    consoles.waitTabNameProcessIsPresent(PROJECT_NAME + ":build and run");
-    consoles.waitExpectedTextIntoConsole("Hello World!");
+    editor.closeAutocomplete();
   }
 
   @Test(priority = 1)
