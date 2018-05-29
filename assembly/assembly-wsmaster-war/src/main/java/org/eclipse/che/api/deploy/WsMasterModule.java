@@ -90,8 +90,10 @@ import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
+import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.IdentityProviderConfigFactory;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
@@ -198,8 +200,6 @@ public class WsMasterModule extends AbstractModule {
     install(new InstallerModule());
     binder().bind(new TypeLiteral<Set<Installer>>() {}).toProvider(InstallersProvider.class);
 
-    bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
-
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
@@ -303,6 +303,11 @@ public class WsMasterModule extends AbstractModule {
       bind(WorkspaceStatusCache.class)
           .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
     }
+
+    if (OpenShiftInfrastructure.NAME.equals(infrastructure)) {
+      bind(OpenShiftClientConfigFactory.class).to(IdentityProviderConfigFactory.class);
+    }
+
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
         "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
