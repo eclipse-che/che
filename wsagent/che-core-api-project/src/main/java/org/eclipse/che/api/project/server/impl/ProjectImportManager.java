@@ -319,7 +319,8 @@ public class ProjectImportManager {
         projectConfigRegistry.put(newProjectConfig, true, false);
       }
 
-      return Optional.ofNullable(projectConfigRegistry.getOrNull(wsPath))
+      return projectConfigRegistry
+          .get(wsPath)
           .orElseThrow(() -> new ServerException("Unexpected error"));
     }
 
