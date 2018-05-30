@@ -238,15 +238,7 @@ public class PartStackPresenter
       workBenchPartController.setHidden(false);
     }
 
-    // Notify the part stack state has been changed.
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
-              }
-            });
+    notifyPartStackStateChanged();
 
     selectActiveTab(tab);
   }
@@ -321,7 +313,7 @@ public class PartStackPresenter
 
   @Override
   public void onHide() {
-    hide();
+    hide(true);
   }
 
   @Override
@@ -350,15 +342,7 @@ public class PartStackPresenter
       delegate.onMaximize(this);
     }
 
-    // Notify the part stack state has been changed.
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
-              }
-            });
+    notifyPartStackStateChanged();
   }
 
   @Override
@@ -388,15 +372,7 @@ public class PartStackPresenter
     activeTab = null;
     activePart = null;
 
-    // Notify the part stack state has been changed.
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
-              }
-            });
+    notifyPartStackStateChanged();
   }
 
   @Override
@@ -406,6 +382,11 @@ public class PartStackPresenter
 
   @Override
   public void hide() {
+    hide(false);
+  }
+
+  @Override
+  public void hide(boolean isUserAction) {
     // Update the view state.
     view.setMaximized(false);
 
@@ -435,15 +416,7 @@ public class PartStackPresenter
     activeTab = null;
     activePart = null;
 
-    // Notify the part stack state has been changed.
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
-              }
-            });
+    notifyPartStackStateChanged(isUserAction);
   }
 
   @Override
@@ -459,15 +432,7 @@ public class PartStackPresenter
       delegate.onRestore(this);
     }
 
-    // Notify the part stack state has been changed.
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
-              }
-            });
+    notifyPartStackStateChanged();
 
     if (activePart != null) {
       activePart.onOpen();
@@ -519,15 +484,7 @@ public class PartStackPresenter
       activeTab.select();
     }
 
-    // Notify the part stack state has been changed.
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                eventBus.fireEvent(new PartStackStateChangedEvent(PartStackPresenter.this));
-              }
-            });
+    notifyPartStackStateChanged();
   }
 
   /** {@inheritDoc} */
@@ -555,6 +512,25 @@ public class PartStackPresenter
   @Override
   public void onPartStackMenu(int mouseX, int mouseY) {
     partMenu.show(mouseX, mouseY);
+  }
+
+  /** Notify the Part Stack state has been changed. */
+  private void notifyPartStackStateChanged() {
+    notifyPartStackStateChanged(false);
+  }
+
+  /**
+   * Notify the Part Stack state has been changed.
+   *
+   * @param isUserInteraction pass {@code true} when hiding of the Part Stack is caused by user
+   *     action (user clicked 'Hide' button, for example) or {@code false} otherwise
+   */
+  private void notifyPartStackStateChanged(boolean isUserInteraction) {
+    Scheduler.get()
+        .scheduleDeferred(
+            () ->
+                eventBus.fireEvent(
+                    new PartStackStateChangedEvent(PartStackPresenter.this, isUserInteraction)));
   }
 
   /** Handles PartStack actions */
