@@ -151,10 +151,13 @@ public class AddWorkspaceToOrganizationTest {
   }
 
   private void createWorkspace(String organizationName, String workspaceName) {
-    dashboard.selectWorkspacesItemOnDashboard();
-    dashboard.waitToolbarTitleName("Workspaces");
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitOrganizationInList(organizationName);
+    organizationListPage.clickOnOrganization(organizationName);
+    organizationPage.clickOnWorkspacesTab();
+    organizationPage.clickOnAddWorkspaceBtn();
 
-    workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.openOrganizationsList();
     newWorkspace.selectOrganizationFromList(organizationName);

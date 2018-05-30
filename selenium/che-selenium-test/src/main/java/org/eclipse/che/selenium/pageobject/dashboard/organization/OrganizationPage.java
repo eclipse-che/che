@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.dashboard.organization;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -59,6 +60,8 @@ public class OrganizationPage {
     String DELETE_MEMBER_WIDGET_BUTTON = "//che-popup//button";
     String MEMBERS_SEARCH_FIELD = "//div[@class = 'che-list-search']//input";
     String WORKSPACES_TAB = "//md-tab-item//span[contains(text(), 'Workspaces')]";
+
+    String ADD_WORKSPACE_BTN = "//*[@che-button-title='Add Workspace']";
   }
 
   private final WebDriverWait redrawUiElementsTimeout;
@@ -346,5 +349,11 @@ public class OrganizationPage {
   private boolean isReadonly(WebElement element) {
     String readonly = element.getAttribute("readonly");
     return readonly == null ? false : readonly.equalsIgnoreCase("true");
+  }
+
+  public void clickOnAddWorkspaceBtn() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.ADD_WORKSPACE_BTN)))
+        .click();
   }
 }
