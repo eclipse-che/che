@@ -22,6 +22,7 @@ import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.CONSOLE_CPP
 import static org.openqa.selenium.Keys.F4;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
+@Test(groups = {TestGroup.DOCKER})
 public class ClangdFileEditingTest {
   private static final String PROJECT_NAME = "console-cpp-simple";
   private static final String HELLO_CC = "hello.cc";
