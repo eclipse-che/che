@@ -32,6 +32,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
@@ -425,5 +427,20 @@ public class NewWorkspace {
 
   public void waitPageLoad() {
     waitPageLoad(DEFAULT_TIMEOUT);
+  }
+
+  public List<String> getAvailableStacks() {
+    return seleniumWebDriverHelper
+        .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
+        .stream()
+        .map(webElement -> webElement.getAttribute("data-stack-id"))
+        .collect(Collectors.toList());
+  }
+
+  public void waitStacks(List<String> expectedStacks) {
+    expectedStacks.forEach(
+        stackId ->
+            seleniumWebDriverHelper.waitPresence(
+                By.xpath(format("//div[@data-stack-id='%s']", stackId))));
   }
 }

@@ -37,6 +37,23 @@ public class NewWorkspacePageTest {
       "wksp-ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
   private static final List<String> NOT_VALID_NAMES =
       Arrays.asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
+  private static List<String> EXPECTED_QUICK_START_STACK_LIST =
+      Arrays.asList(
+          "blank-default",
+          "java-default",
+          "dotnet-default",
+          "android-default",
+          "cpp-default",
+          "che-in-che",
+          "go-default",
+          "java-theia-openshift",
+          "node-default",
+          "openshift-default",
+          "openshift-sql",
+          "php-default",
+          "platformio",
+          "python-default",
+          "rails-default");
   private static final List<String> VALID_NAMES =
       Arrays.asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
 
@@ -104,8 +121,15 @@ public class NewWorkspacePageTest {
     checkValidNames();
   }
 
+  @Test(priority = 1)
   public void checkStackButtons() {
     newWorkspace.waitQuickStartButton();
+    newWorkspace.clickOnQuickStartButton();
+
+    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACK_LIST);
+
+
+
   }
 
   private void checkNotValidNames() {
