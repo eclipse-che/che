@@ -104,8 +104,21 @@ public interface PartStack extends Presenter {
   /** Shows the part stack. */
   void show();
 
-  /** Hides the part stack. */
+  /**
+   * Hides the Part Stack. Use {@link #hide(boolean)} when hiding of the Part Stack is caused by
+   * user action
+   */
   void hide();
+
+  /**
+   * Hides the Part Stack.
+   *
+   * @param isUserInteraction pass {@code true} when hiding of the Part Stack is caused by user
+   *     action (user clicked 'Hide' button, for example) or {@code false} otherwise
+   */
+  default void hide(boolean isUserInteraction) {
+    hide();
+  }
 
   /** Maximizes the part stack. */
   void maximize();

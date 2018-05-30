@@ -104,11 +104,8 @@ public class NewWorkspacePageTest {
     checkValidNames();
   }
 
-  public void checkStackButtons(){
+  public void checkStackButtons() {
     newWorkspace.waitQuickStartButton();
-
-
-
   }
 
   private void checkNotValidNames() {
