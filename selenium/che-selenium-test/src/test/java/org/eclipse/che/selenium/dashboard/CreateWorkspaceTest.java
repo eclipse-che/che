@@ -79,15 +79,12 @@ public class CreateWorkspaceTest {
 
     // type valid names and check that the Create button is enabled
     newWorkspace.typeWorkspaceName(MIN_VALID_WORKSPACE_NAME);
-
     newWorkspace.waitCreateWorkspaceButtonEnabled();
 
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
-
     newWorkspace.waitCreateWorkspaceButtonEnabled();
 
     newWorkspace.typeWorkspaceName(MAX_VALID_WORKSPACE_NAME);
-
     newWorkspace.waitCreateWorkspaceButtonEnabled();
   }
 
