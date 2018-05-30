@@ -21,14 +21,18 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.GET_LINKED_MODEL;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNOSTICS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_GET_RENAME_TYPE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_RENAME;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
+import static org.eclipse.che.ide.ext.java.shared.Constants.VALIDATE_RENAMED_NAME;
 
 import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
@@ -43,6 +47,7 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
@@ -51,11 +56,16 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
+import org.eclipse.che.jdt.ls.extension.api.dto.NameValidationStatus;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
+import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
+import org.eclipse.che.jdt.ls.extension.api.dto.RenamingElementInfo;
 import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
@@ -277,10 +287,70 @@ public class JavaLanguageExtensionServiceClient {
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
   }
 
+  /** Rename refactoring. */
+  public Promise<CheWorkspaceEdit> rename(RenameSettings renameSettings) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(REFACTORING_RENAME)
+                .paramsAsDto(renameSettings)
+                .sendAndReceiveResultAsDto(CheWorkspaceEdit.class, REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /** Returns type of Rename refactoring. */
+  public Promise<RenamingElementInfo> getRenameType(RenameSelectionParams renameSelection) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(REFACTORING_GET_RENAME_TYPE)
+                .paramsAsDto(renameSelection)
+                .sendAndReceiveResultAsDto(RenamingElementInfo.class, REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /** Validates new name. */
+  public Promise<NameValidationStatus> validateRenamedName(RenameSelectionParams renameSelection) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(VALIDATE_RENAMED_NAME)
+                .paramsAsDto(renameSelection)
+                .sendAndReceiveResultAsDto(NameValidationStatus.class, REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /** Returns linked model. */
+  public Promise<List<Range>> getLinkedModeModel(TextDocumentPositionParams linkedModelParams) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(GET_LINKED_MODEL)
+                .paramsAsDto(linkedModelParams)
+                .sendAndReceiveResultAsListOfDto(Range.class, REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
   /**
    * Organize imports in a file or in all files in the specific directory.
    *
-   * @param path the path to the file or to the directory
+   * @param organizeImports parameters of the import operation
    * @return {@link WorkspaceEdit} changes to apply
    */
   public Promise<OrganizeImportsResult> organizeImports(OrganizeImportParams organizeImports) {
