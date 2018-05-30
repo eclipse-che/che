@@ -278,4 +278,19 @@ public interface ContributeMessages extends Messages {
 
   @Key("action.switch.contribute.part.displaying.description")
   String switchContributePartDisplayingDescription();
+
+  /*
+   * Contribute part preferences
+   */
+  @Key("contribute.preferences.title")
+  String contributePreferencesTitle();
+
+  @Key("contribute.preferences.category")
+  String contributePreferencesCategory();
+
+  @Key("contribute.preferences.activateByProjectSelectionLabel")
+  String contributePreferencesActivateByProjectSelectionLabel();
+
+  @Key("contribute.preferences.notification.activatePart.text")
+  String contributePreferencesNotificationActivatePartText();
 }

@@ -24,4 +24,5 @@ public final class TestTimeoutsConstants {
   public static final int REDRAW_UI_ELEMENTS_TIMEOUT_SEC = 5 * MULTIPLE;
   public static final int ATTACHING_ELEM_TO_DOM_SEC = 3 * MULTIPLE;
   public static final int MINIMUM_SEC = MULTIPLE;
+  public static final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
 }
