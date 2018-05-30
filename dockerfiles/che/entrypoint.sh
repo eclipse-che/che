@@ -283,12 +283,10 @@ init() {
 add_cert_to_truststore() {
 
     if [ "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" != "" ]; then
-        if [ ! -f /data/openshift.crt ]; then
-            echo "Found a custom cert. Adding it to java trust store..."
-            echo "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" > /data/openshift.crt
-            echo yes | keytool -keystore /data/openshift.jks -importcert -alias HOSTDOMAIN -file /data/openshift.crt -storepass minishift
-        fi
-        export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/data/openshift.jks -Djavax.net.ssl.trustStorePassword=minishift"
+        echo "Found a custom cert. Adding it to java trust store..."
+        echo "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" > /home/user/openshift.crt
+        echo yes | keytool -keystore /home/user/openshift.jks -importcert -alias HOSTDOMAIN -file /home/user/openshift.crt -storepass minishift
+        export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/home/user/openshift.jks -Djavax.net.ssl.trustStorePassword=minishift"
     fi
 }
 
