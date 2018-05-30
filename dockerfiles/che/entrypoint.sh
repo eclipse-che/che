@@ -288,7 +288,7 @@ add_cert_to_truststore() {
             echo "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" > /data/openshift.crt
             echo yes | keytool -keystore /data/openshift.jks -importcert -alias HOSTDOMAIN -file /data/openshift.crt -storepass minishift
         fi
-            export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/data/openshift.jks -Djavax.net.ssl.trustStorePassword=minishift"
+        export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/data/openshift.jks -Djavax.net.ssl.trustStorePassword=minishift"
     fi
 }
 
