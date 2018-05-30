@@ -31,9 +31,13 @@ import org.eclipse.che.api.fs.server.WsPathUtils;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.RegisteredProjectDto;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class PersistingProjectRegistry implements ProjectConfigRegistry {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PersistingProjectRegistry.class);
 
   private final Map<String, RegisteredProject> projects = new ConcurrentHashMap<>();
 
@@ -149,8 +153,7 @@ public class PersistingProjectRegistry implements ProjectConfigRegistry {
         fsManager.createFile(filePath(project.getPath()), json, true, true);
 
       } catch (Exception e) {
-        // TODO
-        e.printStackTrace();
+        LOG.error(e.getMessage());
       }
     }
 
@@ -161,8 +164,7 @@ public class PersistingProjectRegistry implements ProjectConfigRegistry {
         return DtoFactory.getInstance().createDtoFromJson(json, RegisteredProjectDto.class);
 
       } catch (Exception e) {
-        // TODO
-        e.printStackTrace();
+        LOG.error(e.getMessage());
         return null;
       }
     }
@@ -175,8 +177,7 @@ public class PersistingProjectRegistry implements ProjectConfigRegistry {
         fsManager.delete(filePath(wsPath), true);
 
       } catch (Exception e) {
-        // TODO
-        e.printStackTrace();
+        LOG.error(e.getMessage());
       }
       return p;
     }
