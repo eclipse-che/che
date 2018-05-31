@@ -12,13 +12,13 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
@@ -69,7 +69,7 @@ public class ProjectsListener {
       return;
     }
 
-    String projectUri = prefixURI(event.getProjectPath());
+    String projectUri = LanguageServiceUtils.prefixURI(event.getProjectPath());
     UpdateWorkspaceParameters params =
         new UpdateWorkspaceParameters(singletonList(projectUri), emptyList());
     workspaceSynchronizer.syncronizerWorkspaceAsync(params);
@@ -80,7 +80,7 @@ public class ProjectsListener {
       return;
     }
 
-    String projectUri = prefixURI(event.getProjectPath());
+    String projectUri = LanguageServiceUtils.prefixURI(event.getProjectPath());
     UpdateWorkspaceParameters params =
         new UpdateWorkspaceParameters(emptyList(), singletonList(projectUri));
     workspaceSynchronizer.syncronizerWorkspaceAsync(params);

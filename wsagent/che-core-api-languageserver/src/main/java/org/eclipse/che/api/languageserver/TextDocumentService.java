@@ -13,6 +13,7 @@ package org.eclipse.che.api.languageserver;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.isStartWithProject;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixProject;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
@@ -20,8 +21,12 @@ import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePref
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removeUriScheme;
 
 import com.google.inject.Singleton;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,8 +45,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CommandDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionItemDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.DocumentHighlightDto;
@@ -53,9 +62,19 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.RenameResult
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
-import org.eclipse.che.api.languageserver.shared.model.*;
+import org.eclipse.che.api.languageserver.service.FileContentAccess;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
+import org.eclipse.che.api.languageserver.shared.model.RenameResult;
+import org.eclipse.che.api.languageserver.shared.model.SnippetParameters;
+import org.eclipse.che.api.languageserver.shared.model.SnippetResult;
+import org.eclipse.che.api.languageserver.shared.util.LinearRangeComparator;
 import org.eclipse.che.api.languageserver.util.LSOperation;
+import org.eclipse.che.api.languageserver.util.LineReader;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
+import org.eclipse.che.jdt.ls.extension.api.dto.LinearRange;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
@@ -101,11 +120,14 @@ public class TextDocumentService {
 
   private final FindServer findServer;
   private final RequestHandlerConfigurator requestHandler;
+  private FsManager fsManager;
 
   @Inject
-  public TextDocumentService(FindServer findServer, RequestHandlerConfigurator requestHandler) {
+  public TextDocumentService(
+      FindServer findServer, RequestHandlerConfigurator requestHandler, FsManager fsManager) {
     this.findServer = findServer;
     this.requestHandler = requestHandler;
+    this.fsManager = fsManager;
   }
 
   @PostConstruct
@@ -159,6 +181,20 @@ public class TextDocumentService {
     dtoToNothing("didClose", DidCloseTextDocumentParams.class, this::didClose);
     dtoToNothing("didOpen", DidOpenTextDocumentParams.class, this::didOpen);
     dtoToNothing("didSave", DidSaveTextDocumentParams.class, this::didSave);
+
+    requestHandler
+        .newConfiguration()
+        .methodName("textDocument/fileContent")
+        .paramsAsString()
+        .resultAsString()
+        .withFunction(this::getFileContent);
+
+    requestHandler
+        .newConfiguration()
+        .methodName("textDocument/snippets")
+        .paramsAsDto(SnippetParameters.class)
+        .resultAsListOfDto(SnippetResult.class)
+        .withFunction(this::getSnippets);
   }
 
   private List<CommandDto> codeAction(CodeActionParams params) {
@@ -734,7 +770,82 @@ public class TextDocumentService {
     } catch (IOException e) {
       LOG.error("Can't read file", e);
     }
-    return emptyList();
+    return Collections.emptyList();
+  }
+
+  private String getFileContent(String uri) {
+    try {
+      uri = prefixURI(uri);
+      Optional<ExtendedLanguageServer> serverOptional =
+          findServer
+              .byPath(uri)
+              .stream()
+              .filter(
+                  s -> {
+                    return s.getServer() instanceof FileContentAccess;
+                  })
+              .findFirst();
+      if (serverOptional.isPresent()) {
+        return ((FileContentAccess) serverOptional.get().getServer())
+            .getFileContent(uri)
+            .get(5000, TimeUnit.MILLISECONDS);
+      } else {
+        return null;
+      }
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  List<SnippetResult> getSnippets(SnippetParameters params) {
+    try {
+      String uri = params.getUri();
+      if (LanguageServiceUtils.isWorkspaceUri(uri)) {
+        uri = LanguageServiceUtils.workspaceURIToFileURI(uri);
+      }
+      Reader content = null;
+
+      if (LanguageServiceUtils.isProjectUri(uri)) {
+        String path = LanguageServiceUtils.removePrefixUri(uri);
+        String wsPath = absolutize(path);
+
+        if (fsManager.existsAsFile(wsPath)) {
+          content = new InputStreamReader(new BufferedInputStream(fsManager.read(wsPath)));
+        }
+      } else {
+        String fileContent = getFileContent(uri);
+        if (fileContent != null) {
+          content = new StringReader(fileContent);
+        }
+      }
+
+      if (content != null) {
+        ArrayList<LinearRange> ranges = new ArrayList<>(params.getRanges());
+        try {
+          List<SnippetResult> result = new ArrayList<>();
+          Collections.sort(ranges, LinearRangeComparator.INSTANCE);
+          LineReader lineReader = new LineReader(content);
+          for (LinearRange range : ranges) {
+            lineReader.readTo(range.getOffset());
+            String snippet = lineReader.getCurrentLine();
+            int offsetInLine = range.getOffset() - lineReader.getCurrentLineStartOffset();
+            int lengthInLine = Math.min(snippet.length() - offsetInLine, range.getLength());
+            LinearRange rangeInLine = new LinearRange(offsetInLine, lengthInLine);
+            result.add(
+                new SnippetResult(range, snippet, lineReader.getCurrentLineIndex(), rangeInLine));
+          }
+          return result;
+        } finally {
+          content.close();
+        }
+      } else {
+        LOG.error("did not find file " + params.getUri());
+        throw new JsonRpcException(-27000, "File not found for edit: " + params.getUri());
+      }
+    } catch (ServerException | NotFoundException | IOException | ConflictException e) {
+      LOG.error("error editing file", e);
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
   }
 
   private <P> void dtoToNothing(String name, Class<P> pClass, Consumer<P> consumer) {

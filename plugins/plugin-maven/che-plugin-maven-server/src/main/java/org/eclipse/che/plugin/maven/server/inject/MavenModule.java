@@ -26,7 +26,9 @@ import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeJsonRpcMessenger;
+import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServerConfig;
+import org.eclipse.che.plugin.maven.lsp.MavenTextDocumentService;
 import org.eclipse.che.plugin.maven.server.core.MavenJsonRpcCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenServerNotifier;
@@ -79,6 +81,9 @@ public class MavenModule extends AbstractModule {
 
     bind(MavenJsonRpcCommunication.class);
     bind(MavenArchetypeJsonRpcMessenger.class);
+
+    bind(MavenLanguageServer.class);
+    bind(MavenTextDocumentService.class);
 
     newMapBinder(binder(), String.class, LanguageServerConfig.class)
         .addBinding("org.eclipse.che.plugin.maven")

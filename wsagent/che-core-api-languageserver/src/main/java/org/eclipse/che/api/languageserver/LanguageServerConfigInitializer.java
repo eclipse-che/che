@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.LanguageServerConfig.CommunicationProvider;
@@ -59,8 +60,9 @@ class LanguageServerConfigInitializer {
     this.languageFilterRegistry = registryContainer.languageFilterRegistry;
   }
 
+  @PostConstruct
   void initialize() {
-    LOG.debug("Language server config processing: started");
+    LOG.info("Language server config processing: started");
     for (LanguageServerConfigProvider provider : providers) {
       Map<String, LanguageServerConfig> configs = provider.getAll();
       for (Entry<String, LanguageServerConfig> entry : configs.entrySet()) {

@@ -11,8 +11,6 @@
 package org.eclipse.che.plugin.java.languageserver;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.SEPARATOR;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.PROJECTS;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.extractProjectPath;
 import static org.eclipse.che.plugin.java.server.rest.JavaFormatterService.CHE_FOLDER;
 import static org.eclipse.che.plugin.java.server.rest.JavaFormatterService.CHE_FORMATTER_XML;
 
@@ -29,7 +27,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.che.api.fs.server.WsPathUtils;
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.LanguageServerException;
+import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.DocumentFormattingParams;
@@ -80,10 +79,10 @@ public class JavaTextDocumentServiceWraper {
 
   private void updateFormatterOptions(DocumentFormattingParams params, String fileUri)
       throws LanguageServerException {
-    String projectPath = WsPathUtils.absolutize(extractProjectPath(fileUri));
+    String projectPath = WsPathUtils.absolutize(LanguageServiceUtils.extractProjectPath(fileUri));
     String formatterPathSuffix = CHE_FOLDER + SEPARATOR + CHE_FORMATTER_XML;
     Path projectFormatterPath = Paths.get(projectPath, formatterPathSuffix);
-    Path wsFormatterPath = Paths.get(PROJECTS, formatterPathSuffix);
+    Path wsFormatterPath = Paths.get(LanguageServiceUtils.PROJECTS, formatterPathSuffix);
     if (Files.exists(projectFormatterPath)) {
       updateFormatterOptions(params, getFormatSettingsFromFile(projectFormatterPath.toFile()));
     } else if (Files.exists(wsFormatterPath)) {
