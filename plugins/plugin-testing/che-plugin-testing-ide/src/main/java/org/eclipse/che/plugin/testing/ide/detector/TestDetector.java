@@ -32,7 +32,6 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.editor.JavaReconsilerEvent;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 
@@ -73,7 +72,6 @@ public class TestDetector {
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
-    eventBus.addHandler(JavaReconsilerEvent.TYPE, event -> detectTests(event.getEditor()));
     eventBus.addHandler(
         ActivePartChangedEvent.TYPE,
         event -> analyzeActiveEditor(collectedExtensions, event.getActivePart()));
