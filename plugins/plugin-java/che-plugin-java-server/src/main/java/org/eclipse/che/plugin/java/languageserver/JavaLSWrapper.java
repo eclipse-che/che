@@ -35,8 +35,8 @@ public class JavaLSWrapper {
     Map<String, Object> initOptions = new HashMap<>();
     Map<String, String> extendedCapabilities = new HashMap<>();
     extendedCapabilities.put("progressReportProvider", "true");
+    extendedCapabilities.put("classFileContentsSupport", "true");
     initOptions.put("extendedClientCapabilities", extendedCapabilities);
-
     Map<String, String> settings = new HashMap<>();
     settings.put("java.configuration.updateBuildConfiguration", "automatic");
     initOptions.put("settings", settings);
