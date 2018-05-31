@@ -80,6 +80,9 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+    // Due to https://github.com/eclipse/che/issues/5814, recovering is not fully possible
+    // so infrastructure should not claim support of it.
+    // return containers.findIdentities();
     throw new UnsupportedOperationException("Runtimes tracking currently does not supported.");
   }
 
