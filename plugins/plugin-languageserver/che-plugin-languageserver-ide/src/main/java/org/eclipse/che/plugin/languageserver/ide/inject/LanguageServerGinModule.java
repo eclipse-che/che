@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.languageserver.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerAnnotationModelFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerCodeassistProcessorFactory;
@@ -43,5 +45,7 @@ public class LanguageServerGinModule extends AbstractGinModule {
 
     bind(PublishDiagnosticsReceiver.class).asEagerSingleton();
     bind(ShowMessageJsonRpcReceiver.class).asEagerSingleton();
+
+    GinMultibinder.newSetBinder(binder(), LanguageDescription.class);
   }
 }

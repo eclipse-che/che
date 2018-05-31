@@ -10,11 +10,16 @@
  */
 package org.eclipse.che.plugin.pullrequest.client;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
+import static org.eclipse.che.ide.api.parts.PartStack.State.HIDDEN;
+import static org.eclipse.che.ide.api.parts.PartStack.State.MINIMIZED;
+import static org.eclipse.che.ide.api.parts.PartStack.State.NORMAL;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
-import static org.eclipse.che.ide.statepersistance.AppStateConstants.HIDDEN_STATE;
+import static org.eclipse.che.plugin.pullrequest.client.preference.ContributePreferencePresenter.ACTIVATE_BY_PROJECT_SELECTION;
 import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME;
 import static org.eclipse.che.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_ID;
 
@@ -23,7 +28,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import elemental.json.JsonObject;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -34,6 +38,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStack.State;
 import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -41,7 +46,6 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.pullrequest.client.parts.contribute.ContributePartPresenter;
@@ -64,7 +68,7 @@ public class ContributionMixinProvider {
   private final EventBus eventBus;
   private final AppContext appContext;
   private final WorkspaceAgent workspaceAgent;
-  private final AppStateManager appStateManager;
+  private final PreferencesManager preferencesManager;
   private final ContributePartPresenter contributePart;
   private final WorkflowExecutor workflowExecutor;
   private final VcsServiceProvider vcsServiceProvider;
@@ -81,7 +85,7 @@ public class ContributionMixinProvider {
       EventBus eventBus,
       AppContext appContext,
       WorkspaceAgent workspaceAgent,
-      AppStateManager appStateManager,
+      PreferencesManager preferencesManager,
       ContributePartPresenter contributePart,
       WorkflowExecutor workflowExecutor,
       VcsServiceProvider vcsServiceProvider,
@@ -91,7 +95,7 @@ public class ContributionMixinProvider {
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.workspaceAgent = workspaceAgent;
-    this.appStateManager = appStateManager;
+    this.preferencesManager = preferencesManager;
     this.contributePart = contributePart;
     this.workflowExecutor = workflowExecutor;
     this.vcsServiceProvider = vcsServiceProvider;
@@ -112,7 +116,12 @@ public class ContributionMixinProvider {
 
   private void onPartStackStateChanged(PartStackStateChangedEvent event) {
     PartStack toolingPartStack = workspaceAgent.getPartStack(TOOLING);
-    if (event.getPartStack() != toolingPartStack || isPartStackHidden(toolingPartStack)) {
+    if (event.getPartStack() != toolingPartStack) {
+      return;
+    }
+
+    if (isPartStackHidden(toolingPartStack)) {
+      invalidateContext(lastSelected);
       return;
     }
 
@@ -124,9 +133,7 @@ public class ContributionMixinProvider {
 
   private void onSelectionChanged(Selection<?> selection) {
     WorkspaceStatus workspaceStatus = appContext.getWorkspace().getStatus();
-    if (RUNNING != workspaceStatus
-        || !isSupportedSelection(selection)
-        || isContributePartHiddenByUser()) {
+    if (RUNNING != workspaceStatus || !isSupportedSelection(selection) || !isActivationAllowed()) {
       return;
     }
 
@@ -250,7 +257,7 @@ public class ContributionMixinProvider {
 
   private boolean isPartStackHidden(PartStack partStack) {
     State partStackState = partStack.getPartStackState();
-    return partStackState == State.HIDDEN || partStackState == State.MINIMIZED;
+    return partStackState == HIDDEN || partStackState == MINIMIZED;
   }
 
   private boolean isSupportedSelection(Selection<?> selection) {
@@ -268,13 +275,18 @@ public class ContributionMixinProvider {
     return headElem == null || isResourceSelection || isHasDataWithResource;
   }
 
-  private boolean isContributePartHiddenByUser() {
-    JsonObject toolingPartStackState = appStateManager.getStateFor(TOOLING);
-    if (toolingPartStackState != null && toolingPartStackState.hasKey(HIDDEN_STATE)) {
-      return toolingPartStackState.getBoolean(HIDDEN_STATE);
+  private boolean isActivationAllowed() {
+    State toolingPartStackState = workspaceAgent.getPartStack(TOOLING).getPartStackState();
+    if (MINIMIZED == toolingPartStackState) {
+      return false;
     }
 
-    return false;
+    if (NORMAL == toolingPartStackState) {
+      return true;
+    }
+
+    String preference = preferencesManager.getValue(ACTIVATE_BY_PROJECT_SELECTION);
+    return isNullOrEmpty(preference) || parseBoolean(preference);
   }
 
   private void subscribeToSelectionChangedEvent() {

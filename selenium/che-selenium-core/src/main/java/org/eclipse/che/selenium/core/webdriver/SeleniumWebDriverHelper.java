@@ -452,7 +452,19 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetAttribute(By elementLocator, String attribute) {
-    return waitVisibility(elementLocator).getAttribute(attribute);
+    return waitVisibilityAndGetAttribute(elementLocator, attribute, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits visibility during {@code timeout} of {@link WebElement} with provided {@code
+   * elementLocator} and gets text from its {@code attribute} attribute.
+   *
+   * @param elementLocator locator of element from which attribute should be got
+   * @param attribute name of element attribute
+   * @return element text by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetAttribute(By elementLocator, String attribute, int timeout) {
+    return waitVisibility(elementLocator, timeout).getAttribute(attribute);
   }
 
   /**
@@ -1053,5 +1065,36 @@ public class SeleniumWebDriverHelper {
         break;
       }
     }
+  }
+
+  /**
+   * Waits during {@code timeout} until attribute with specified {@code attributeName} has {@code
+   * expectedValue}.
+   *
+   * @param elementLocator element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   * @param timeout waiting time
+   */
+  public void waitAttributeEqualsTo(
+      By elementLocator, String attributeName, String expectedValue, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    waitVisibilityAndGetAttribute(elementLocator, attributeName, timeout)
+                        .equals(expectedValue));
+  }
+
+  /**
+   * Waits until attribute with specified {@code attributeName} has {@code expectedValue}.
+   *
+   * @param elementLocator element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   */
+  public void waitAttributeEqualsTo(By elementLocator, String attributeName, String expectedValue) {
+    waitAttributeEqualsTo(elementLocator, attributeName, expectedValue, DEFAULT_TIMEOUT);
   }
 }
