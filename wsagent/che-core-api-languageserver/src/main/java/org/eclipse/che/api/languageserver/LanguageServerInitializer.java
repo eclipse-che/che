@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Kulieshov
  */
 @Singleton
-class LanguageServerInitializer {
+public class LanguageServerInitializer {
   private static Logger LOG = LoggerFactory.getLogger(LanguageServerInitializer.class);
 
   private final ExecutorService executor;
@@ -107,7 +107,7 @@ class LanguageServerInitializer {
    * @throws CompletionException if no server initialized throws {@link LanguageServerException}
    *     wrapped by {@link CompletionException}
    */
-  CompletableFuture<ServerCapabilities> initialize(String wsPath) {
+  public CompletableFuture<ServerCapabilities> initialize(String wsPath) {
     return supplyAsync(
         () -> {
           LOG.info("Started language servers initialization, file path '{}'", wsPath);
