@@ -32,10 +32,10 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.NewProjectConfigImpl;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.core.runtime.IPath;
@@ -94,7 +94,7 @@ public class ClasspathUpdaterService {
       throws IOException, ForbiddenException, ConflictException, NotFoundException, ServerException,
           BadRequestException {
     String wsPath = absolutize(projectWsPath);
-    RegisteredProject project =
+    ProjectConfig project =
         projectManager
             .get(wsPath)
             .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));

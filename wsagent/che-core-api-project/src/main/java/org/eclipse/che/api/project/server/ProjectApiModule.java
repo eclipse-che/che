@@ -18,6 +18,7 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.impl.CreateBaseProjectTypeHandler;
+import org.eclipse.che.api.project.server.impl.InmemoryProjectRegistry;
 import org.eclipse.che.api.project.server.impl.OnWorkspaceStartProjectInitializer;
 import org.eclipse.che.api.project.server.impl.ProjectConfigRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectHandlerRegistry;
@@ -25,8 +26,8 @@ import org.eclipse.che.api.project.server.impl.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.server.impl.ProjectSynchronizer;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.impl.RegisteredProjectFactory;
+import org.eclipse.che.api.project.server.impl.RegisteredProjectImpl;
 import org.eclipse.che.api.project.server.impl.RootDirCreationHandler;
 import org.eclipse.che.api.project.server.impl.RootDirRemovalHandler;
 import org.eclipse.che.api.project.server.impl.ValidatingProjectManager;
@@ -58,7 +59,6 @@ public class ProjectApiModule extends AbstractModule {
     bind(ProjectTypeService.class);
 
     bind(OnWorkspaceStartProjectInitializer.class);
-    bind(ProjectConfigRegistry.class);
     bind(ProjectImporterRegistry.class);
     bind(ProjectHandlerRegistry.class);
 
@@ -70,6 +70,8 @@ public class ProjectApiModule extends AbstractModule {
     bind(ProjectQualifier.class).to(SimpleProjectQualifier.class);
     bind(ProjectTypeResolver.class).to(SimpleProjectTypeResolver.class);
 
+    bind(ProjectConfigRegistry.class).to(InmemoryProjectRegistry.class);
+
     newSetBinder(binder(), ProjectImporter.class).addBinding().to(ZipProjectImporter.class);
 
     newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(BaseProjectType.class);
@@ -80,7 +82,7 @@ public class ProjectApiModule extends AbstractModule {
 
     install(
         new FactoryModuleBuilder()
-            .implement(ProjectConfig.class, RegisteredProject.class)
+            .implement(ProjectConfig.class, RegisteredProjectImpl.class)
             .build(RegisteredProjectFactory.class));
 
     install(

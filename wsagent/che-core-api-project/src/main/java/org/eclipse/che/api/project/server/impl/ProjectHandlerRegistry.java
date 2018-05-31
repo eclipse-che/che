@@ -18,7 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
-import org.eclipse.che.api.project.server.handlers.GetItemHandler;
 import org.eclipse.che.api.project.server.handlers.PostImportProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
@@ -29,7 +28,6 @@ public class ProjectHandlerRegistry {
 
   private final Map<String, CreateProjectHandler> createProjectHandlers = new HashMap<>();
   private final Map<String, PostImportProjectHandler> postImportProjectHandlers = new HashMap<>();
-  private final Map<String, GetItemHandler> getItemHandlers = new HashMap<>();
   private final Map<String, ProjectInitHandler> projectInitHandlers = new HashMap<>();
 
   @Inject
@@ -40,10 +38,10 @@ public class ProjectHandlerRegistry {
   public void register(@NotNull ProjectHandler handler) {
     if (handler instanceof CreateProjectHandler) {
       createProjectHandlers.put(handler.getProjectType(), (CreateProjectHandler) handler);
-    } else if (handler instanceof GetItemHandler) {
-      getItemHandlers.put(handler.getProjectType(), (GetItemHandler) handler);
+
     } else if (handler instanceof PostImportProjectHandler) {
       postImportProjectHandlers.put(handler.getProjectType(), (PostImportProjectHandler) handler);
+
     } else if (handler instanceof ProjectInitHandler) {
       projectInitHandlers.put(handler.getProjectType(), (ProjectInitHandler) handler);
     }
@@ -51,10 +49,6 @@ public class ProjectHandlerRegistry {
 
   public Optional<CreateProjectHandler> getCreateHandler(String projectType) {
     return Optional.ofNullable(createProjectHandlers.get(projectType));
-  }
-
-  public Optional<GetItemHandler> getGetItemHandler(String projectType) {
-    return Optional.ofNullable(getItemHandlers.get(projectType));
   }
 
   public Optional<PostImportProjectHandler> getPostImportHandler(String projectType) {
