@@ -12,16 +12,18 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.lang.reflect.Proxy;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.registry.DocumentFilter;
-import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.che.api.languageserver.LanguageServerConfig;
+import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -36,10 +38,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Mäder
  */
 @Singleton
-public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
+public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private static final Logger LOG = LoggerFactory.getLogger(JavaLanguageServerLauncher.class);
-
-  private static final LanguageServerDescription DESCRIPTION = createServerDescription();
 
   private final Path launchScript;
   private ProcessorJsonRpcCommunication processorJsonRpcCommunication;
@@ -48,36 +48,6 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
   public JavaLanguageServerLauncher(ProcessorJsonRpcCommunication processorJsonRpcCommunication) {
     this.processorJsonRpcCommunication = processorJsonRpcCommunication;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
-  }
-
-  @Override
-  public boolean isAbleToLaunch() {
-    return Files.exists(launchScript);
-  }
-
-  protected LanguageServer connectToLanguageServer(
-      final Process languageServerProcess, LanguageClient client) {
-    Object javaLangClient =
-        Proxy.newProxyInstance(
-            getClass().getClassLoader(),
-            new Class[] {LanguageClient.class, JavaLanguageClient.class},
-            new DynamicWrapper(this, client));
-
-    Launcher<JavaLanguageServer> launcher =
-        Launcher.createLauncher(
-            javaLangClient,
-            JavaLanguageServer.class,
-            languageServerProcess.getInputStream(),
-            languageServerProcess.getOutputStream());
-    launcher.startListening();
-    JavaLanguageServer proxy = launcher.getRemoteProxy();
-    LanguageServer wrapped =
-        (LanguageServer)
-            Proxy.newProxyInstance(
-                getClass().getClassLoader(),
-                new Class[] {LanguageServer.class, FileContentAccess.class},
-                new DynamicWrapper(new JavaLSWrapper(proxy), proxy));
-    return wrapped;
   }
 
   public void sendStatusReport(StatusReport report) {
@@ -94,36 +64,82 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
     processorJsonRpcCommunication.sendProgressNotification(report);
   }
 
-  protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
+  @Override
+  public RegexProvider getRegexpProvider() {
+    return new RegexProvider() {
+
+      @Override
+      public Map<String, String> getLanguageRegexes() {
+        HashMap<String, String> regex = new HashMap<>();
+        regex.put("java", "(^jdt://.*|^chelib://.*|.*\\.java|.*\\.class)");
+        return regex;
+      }
+
+      @Override
+      public Set<String> getFileWatchPatterns() {
+        Set<String> regex = new HashSet<>();
+        regex.add("glob:**/*.java");
+        regex.add("glob:**/pom.xml");
+        regex.add("glob:**/*.gradle");
+        regex.add("glob:**/.project");
+        regex.add("glob:**/.classpath");
+        regex.add("glob:**/settings/*.prefs");
+
+        return regex;
+      }
+    };
+  }
+
+  @Override
+  public CommunicationProvider getCommunicationProvider() {
     ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
     processBuilder.directory(launchScript.getParent().toFile());
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
-    try {
-      return processBuilder.start();
-    } catch (IOException e) {
-      throw new LanguageServerException("Can't start Java language server", e);
-    }
+    processBuilder.redirectError(Redirect.INHERIT);
+
+    return new ProcessCommunicationProvider(processBuilder, "Che-LS-JDT");
   }
 
-  public LanguageServerDescription getDescription() {
-    return DESCRIPTION;
+  @Override
+  public InstallerStatusProvider getInstallerStatusProvider() {
+    return new InstallerStatusProvider() {
+      @Override
+      public boolean isSuccessfullyInstalled() {
+        return launchScript.toFile().exists();
+      }
+
+      @Override
+      public String getCause() {
+        return isSuccessfullyInstalled() ? null : "Launch script file does not exist";
+      }
+    };
   }
 
-  private static LanguageServerDescription createServerDescription() {
-    LanguageServerDescription description =
-        new LanguageServerDescription(
-            "org.eclipse.che.plugin.java.languageserver",
-            Arrays.asList("javaSource", "javaClass"),
-            Arrays.asList(
-                new DocumentFilter(null, null, "jdt"), new DocumentFilter(null, null, "chelib")),
-            Arrays.asList(
-                "glob:**/*.java",
-                "glob:**/pom.xml",
-                "glob:**/*.gradle",
-                "glob:**/.project",
-                "glob:**/.classpath",
-                "glob:**/settings/*.prefs"));
-    return description;
+  @Override
+  public InstanceProvider getInstanceProvider() {
+    return new InstanceProvider() {
+
+      @Override
+      public LanguageServer get(LanguageClient client, InputStream in, OutputStream out) {
+        Object javaLangClient =
+            Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class[] {LanguageClient.class, JavaLanguageClient.class},
+                new DynamicWrapper(JavaLanguageServerLauncher.this, client));
+
+        Launcher<JavaLanguageServer> launcher =
+            Launcher.createLauncher(javaLangClient, JavaLanguageServer.class, in, out);
+        launcher.startListening();
+        JavaLanguageServer proxy = launcher.getRemoteProxy();
+        LanguageServer wrapped =
+            (LanguageServer)
+                Proxy.newProxyInstance(
+                    getClass().getClassLoader(),
+                    new Class[] {LanguageServer.class, FileContentAccess.class},
+                    new DynamicWrapper(new JavaLSWrapper(proxy), proxy));
+        return wrapped;
+      }
+    };
   }
 }
