@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
@@ -44,12 +43,11 @@ import org.testng.annotations.Test;
 public class CreateAndDeleteProjectsTest {
 
   private static final String WORKSPACE = generate("workspace", 4);
-  private static final String SECOND_PROJECT_NAME = WEB_JAVA_SPRING + "-1";
+  private static final String SECOND_WEB_JAVA_SPRING_PROJECT_NAME = WEB_JAVA_SPRING + "-1";
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private NavigationBar navigationBar;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private ProjectExplorer explorer;
@@ -93,18 +91,22 @@ public class CreateAndDeleteProjectsTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
+    // switch to the IDE and wait for workspace is ready to use
     String dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
 
+    // wait for project initializing
     explorer.waitItem(WEB_JAVA_SPRING);
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);
+    explorer.waitItem(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();
     explorer.waitDefinedTypeOfFolder(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
     explorer.waitDefinedTypeOfFolder(WEB_JAVA_SPRING, PROJECT_FOLDER);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
 
+    // delete projects from workspace detais page
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE);
@@ -114,8 +116,8 @@ public class CreateAndDeleteProjectsTest {
     workspaceProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);
     workspaceProjects.clickOnDeleteProject();
     workspaceProjects.clickOnDeleteItInDialogWindow();
-    workspaceProjects.waitProjectIsPresent(SECOND_PROJECT_NAME);
     workspaceProjects.waitProjectIsNotPresent(WEB_JAVA_SPRING);
+    workspaceProjects.waitProjectIsPresent(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
     workspaceProjects.openSettingsForProjectByName(CONSOLE_JAVA_SIMPLE);
     workspaceProjects.clickOnDeleteProject();
     workspaceProjects.clickOnDeleteItInDialogWindow();
