@@ -26,7 +26,7 @@ import org.eclipse.lsp4j.services.LanguageServer;
  * @author Dmytro Kulieshov
  */
 @Singleton
-class FindServer {
+public class FindServer {
   private final FindId findId;
   private final Registry<ServerCapabilities> serverCapabilities;
   private final Registry<LanguageServer> languageServers;
@@ -44,7 +44,7 @@ class FindServer {
    * @param wsPath absolute workspace path
    * @return set of language server instances
    */
-  Set<ExtendedLanguageServer> byPath(String wsPath) {
+  public Set<ExtendedLanguageServer> byPath(String wsPath) {
     return findId.byPath(wsPath).stream().map(this::byId).filter(Objects::nonNull).collect(toSet());
   }
 
@@ -54,7 +54,7 @@ class FindServer {
    * @param id language server id
    * @return language server instance or <code>null</code> if no sever found
    */
-  ExtendedLanguageServer byId(String id) {
+  public ExtendedLanguageServer byId(String id) {
     ServerCapabilities serverCapabilities = this.serverCapabilities.getOrNull(id);
     if (serverCapabilities == null) {
       return null;
