@@ -44,9 +44,7 @@ data:
   CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
 {{- end }}
-#define CHE_KEYCLOAK_OIDC__PROVIDER  if in multiuser mode,
-#and .Values.global.cheDedicatedKeycloak is defined as false
-{{- if (and .Values.global.multiuser (and (not (empty .Values.global.cheDedicatedKeycloak)) (not .Values.global.cheDedicatedKeycloak))) }}
+{{- if (and .Values.global.multiuser .Values.customOidcProvider) }}
   CHE_KEYCLOAK_OIDC__PROVIDER: {{ .Values.customOidcProvider }}
 {{- end }}
 {{- if and .Values.global.multiuser .Values.customOidcUsernameClaim }}

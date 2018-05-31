@@ -35,8 +35,8 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
 {{- end }}
-#wait for keycloak if in multiuser mode and .Values.global.cheDedicatedKeycloak true or not defined (default true)
-{{- if (and .Values.global.multiuser (or (empty .Values.global.cheDedicatedKeycloak) (.Values.global.cheDedicatedKeycloak) ))}}
+#wait for keycloak if in multiuser mode and .Values.customOidcProvider was not defined
+{{- if (and .Values.global.multiuser (not .Values.customOidcProvider)) }}
       - name: wait-for-keycloak
         image: alpine:3.5
         command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/keycloak`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
@@ -170,8 +170,7 @@ spec:
               key: CHE_KEYCLOAK_REALM
               name: che
 {{- end }}
-{{- if (and .Values.global.multiuser (and (not (empty .Values.global.cheDedicatedKeycloak)) (not .Values.global.cheDedicatedKeycloak))) }}
-#if keycloak is not used, alternative OpenIdConnect provider should be supplied
+{{- if (and .Values.global.multiuser .Values.customOidcProvider) }}
         - name: CHE_KEYCLOAK_OIDC__PROVIDER
           valueFrom:
             configMapKeyRef:
