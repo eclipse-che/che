@@ -80,6 +80,26 @@ public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
     return new HashMap<>(delegate);
   }
 
+  /**
+   * Subscribes status changes listener.
+   *
+   * @param listener listener instance that will receive status changed events
+   */
+  public void subscribe(StatusChangeListener listener) {
+    delegate.addNotifier(
+        new ReplicatedMapNotificationAdapter() {
+          @Override
+          public void entrySet(Object workspaceId, Object workspaceStatus) {
+            listener.statusChanged((String) workspaceId, (WorkspaceStatus) workspaceStatus);
+          }
+
+          @Override
+          public void entryRemoved(Object workspaceId) {
+            listener.statusChanged((String) workspaceId, WorkspaceStatus.STOPPED);
+          }
+        });
+  }
+
   /** Stops workspace status cache. */
   public void shutdown() {
     try {

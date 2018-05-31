@@ -63,6 +63,8 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -109,6 +111,9 @@ public class OpenShiftInternalRuntimeTest {
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
 
+  @Mock private StartSynchronizerFactory startSynchronizerFactory;
+  @Mock private StartSynchronizer startSynchronizer;
+
   @Mock private OpenShiftRuntimeContext context;
   @Mock private EventService eventService;
   @Mock private ServersCheckerFactory serverCheckerFactory;
@@ -137,6 +142,9 @@ public class OpenShiftInternalRuntimeTest {
   @BeforeMethod
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
+
+    when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
+
     internalRuntime =
         new OpenShiftInternalRuntime(
             13,
@@ -152,6 +160,7 @@ public class OpenShiftInternalRuntimeTest {
             mock(KubernetesSharedPool.class),
             runtimeStateCache,
             machinesCache,
+            startSynchronizerFactory,
             context,
             project,
             emptyList());
@@ -171,6 +180,7 @@ public class OpenShiftInternalRuntimeTest {
             mock(KubernetesSharedPool.class),
             runtimeStateCache,
             machinesCache,
+            startSynchronizerFactory,
             context,
             project,
             emptyList());

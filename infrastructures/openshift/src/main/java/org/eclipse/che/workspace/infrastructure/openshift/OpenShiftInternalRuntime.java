@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
@@ -61,6 +62,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       KubernetesSharedPool sharedPool,
       KubernetesRuntimeStateCache runtimesStatusesCache,
       KubernetesMachineCache machinesCache,
+      StartSynchronizerFactory startSynchronizerFactory,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -78,6 +80,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         sharedPool,
         runtimesStatusesCache,
         machinesCache,
+        startSynchronizerFactory,
         context,
         project,
         warnings);
