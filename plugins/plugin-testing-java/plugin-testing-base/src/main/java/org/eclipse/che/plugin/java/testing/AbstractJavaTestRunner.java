@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.java.testing;
 
 import static java.util.Collections.emptyList;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.io.IOException;
