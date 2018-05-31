@@ -12,7 +12,7 @@
 package org.eclipse.che.plugin.java.plain.server.rest;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
 
 import com.google.inject.Inject;
 import java.io.IOException;
