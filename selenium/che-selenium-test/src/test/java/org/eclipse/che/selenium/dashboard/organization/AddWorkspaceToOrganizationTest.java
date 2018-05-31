@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationLi
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -110,13 +112,6 @@ public class AddWorkspaceToOrganizationTest {
     checkNamespaceLink(org1.getName(), WORKSPACE_FOR_ADMIN_1);
     checkNamespaceLink(org2.getName(), WORKSPACE_FOR_ADMIN_2);
     checkNamespaceLink(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
-
-    // check that created workspace exists in organization Workspaces tab
-    navigationBar.clickOnMenu(ORGANIZATIONS);
-    organizationListPage.waitOrganizationInList(org1.getName());
-    organizationListPage.clickOnOrganization(org1.getName());
-    organizationPage.clickOnWorkspacesTab();
-    workspaces.waitWorkspaceIsPresent(WORKSPACE_FOR_ADMIN_1);
   }
 
   @Test(priority = 1)
@@ -148,6 +143,21 @@ public class AddWorkspaceToOrganizationTest {
     // check that the Namespace link in workspace details correct
     checkNamespaceLink(org2.getName(), WORKSPACE_FOR_MEMBER_1);
     checkNamespaceLink(suborgForMemberName, WORKSPACE_FOR_MEMBER_2);
+
+    // check that created workspace exists in organization Workspaces tab
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitOrganizationInList(org2.getName());
+    organizationListPage.clickOnOrganization(org2.getName());
+    organizationPage.clickOnWorkspacesTab();
+    workspaces.waitWorkspaceIsPresent(WORKSPACE_FOR_MEMBER_1);
+    workspaces.selectWorkspaceItemName(WORKSPACE_FOR_MEMBER_1);
+
+    try {
+      workspaceDetails.waitToolbarTitleName(WORKSPACE_FOR_MEMBER_1);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/9148", ex);
+    }
   }
 
   private void createWorkspace(String organizationName, String workspaceName) {
