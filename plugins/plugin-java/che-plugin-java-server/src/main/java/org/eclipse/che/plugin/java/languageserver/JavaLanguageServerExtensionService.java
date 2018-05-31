@@ -10,12 +10,11 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.fixJdtUri;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.fixJdtUri;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
@@ -65,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -79,10 +77,11 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
-import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
-import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.api.languageserver.ExtendedLanguageServer;
+import org.eclipse.che.api.languageserver.FindServer;
+import org.eclipse.che.api.languageserver.LanguageServerException;
+import org.eclipse.che.api.languageserver.LanguageServerInitializer;
+import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
@@ -106,18 +105,19 @@ import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateClasspathParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
+import org.eclipse.che.plugin.java.inject.JavaModule;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,21 +130,24 @@ public class JavaLanguageServerExtensionService {
   private static final int TIMEOUT = 10;
 
   private final Gson gson;
-  private final LanguageServerRegistry registry;
+  private final FindServer registry;
 
   private static final Logger LOG =
       LoggerFactory.getLogger(JavaLanguageServerExtensionService.class);
   private final RequestHandlerConfigurator requestHandler;
   private final ProjectManager projectManager;
   private final EventService eventService;
+  private final LanguageServerInitializer initializer;
 
   @Inject
   public JavaLanguageServerExtensionService(
-      LanguageServerRegistry registry,
+      FindServer registry,
+      LanguageServerInitializer languageServerInitializer,
       RequestHandlerConfigurator requestHandler,
       ProjectManager projectManager,
       EventService eventService) {
     this.registry = registry;
+    this.initializer = languageServerInitializer;
     this.requestHandler = requestHandler;
     this.projectManager = projectManager;
     this.eventService = eventService;
@@ -266,7 +269,7 @@ public class JavaLanguageServerExtensionService {
   public String getOutputDir(String projectPath) {
     checkLanguageServerInitialized();
 
-    String projectUri = prefixURI(projectPath);
+    String projectUri = LanguageServiceUtils.prefixURI(projectPath);
     Type type = new TypeToken<String>() {}.getType();
     return doGetOne(GET_OUTPUT_DIR_COMMAND, singletonList(projectUri), type);
   }
@@ -350,13 +353,13 @@ public class JavaLanguageServerExtensionService {
   public List<String> getSourceFolders(String projectPath) {
     checkLanguageServerInitialized();
 
-    String projectUri = prefixURI(projectPath);
+    String projectUri = LanguageServiceUtils.prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
     return doGetList(GET_SOURCE_FOLDERS, projectUri, type);
   }
 
   private void checkLanguageServerInitialized() {
-    if (!findInitializedLanguageServer().isPresent()) {
+    if (findInitializedLanguageServer() == null) {
       throw new IllegalStateException("Language server isn't initialized");
     }
   }
@@ -642,7 +645,7 @@ public class JavaLanguageServerExtensionService {
   /** Update jdt.ls workspace accordingly to added or removed projects. */
   public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
     if (updateWorkspaceParameters.getAddedProjectsUri().isEmpty()) {
-      if (!findInitializedLanguageServer().isPresent()) {
+      if (findInitializedLanguageServer() == null) {
         return new JobResult(
             Severity.OK,
             0,
@@ -676,7 +679,9 @@ public class JavaLanguageServerExtensionService {
                     projectManager.update(projectConfig);
                     eventService.publish(new ProjectUpdatedEvent(projectPath));
                   } catch (Exception e) {
-                    LOG.error(format("Failed to update project '%s' configuration", projectUri), e);
+                    LOG.error(
+                        String.format("Failed to update project '%s' configuration", projectUri),
+                        e);
                   }
                 }
               });
@@ -751,34 +756,24 @@ public class JavaLanguageServerExtensionService {
 
   private CompletableFuture<Object> executeCommand(String commandId, List<Object> parameters) {
     ExecuteCommandParams params = new ExecuteCommandParams(commandId, parameters);
-    try {
-      return getOrInitLanguageServer().getWorkspaceService().executeCommand(params);
-    } catch (LanguageServerException e) {
-      throw new IllegalStateException(e);
-    }
+    return initializer
+        .initialize(prefixURI("/init.java"))
+        .thenCompose(
+            (ServerCapabilities cap) -> {
+              ExtendedLanguageServer ls = findInitializedLanguageServer();
+              if (ls != null) {
+                return ls.getWorkspaceService().executeCommand(params);
+              } else {
+                CompletableFuture<Object> completedFuture = CompletableFuture.completedFuture(null);
+                completedFuture.completeExceptionally(
+                    new LanguageServerException("did not find language server"));
+                return completedFuture;
+              }
+            });
   }
 
-  private LanguageServer getOrInitLanguageServer() throws LanguageServerException {
-    Optional<InitializedLanguageServer> languageServer = findInitializedLanguageServer();
-    if (languageServer.isPresent()) {
-      return languageServer.get().getServer();
-    }
-
-    // fake class is used, it is required to find and init language server by its extension
-    registry.initialize(prefixURI("init.java"));
-
-    languageServer = findInitializedLanguageServer();
-    return languageServer
-        .orElseThrow(
-            () ->
-                new LanguageServerException(
-                    "Unexpected error. Language server not found after initialization."))
-        .getServer();
-  }
-
-  private Optional<InitializedLanguageServer> findInitializedLanguageServer() {
-    return registry.findServer(
-        server -> (server.getLauncher() instanceof JavaLanguageServerLauncher));
+  private ExtendedLanguageServer findInitializedLanguageServer() {
+    return registry.byId(JavaModule.LS_ID);
   }
 
   private void fixLocation(ExtendedSymbolInformation symbol) {
