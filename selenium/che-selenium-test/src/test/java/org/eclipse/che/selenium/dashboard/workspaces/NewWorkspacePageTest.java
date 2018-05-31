@@ -54,6 +54,43 @@ public class NewWorkspacePageTest {
           "platformio",
           "python-default",
           "rails-default");
+  private static List<String> EXPECTED_SINGLE_MACHINE_STACK_LIST =
+      Arrays.asList(
+          "blank-default",
+          "java-default",
+          "dotnet-default",
+          "android-default",
+          "cpp-default",
+          "centos",
+          "centos-go",
+          "nodejs4",
+          "wildfly-swarm",
+          "ceylon-java-javascript-dart-centos",
+          "debian",
+          "debianlsp",
+          "che-in-che",
+          "vert.x",
+          "go-default",
+          "hadoop-default",
+          "java-centos",
+          "java-debian",
+          "kotlin-default",
+          "node-default",
+          "openshift-default",
+          "php-default",
+          "php-gae",
+          "php5.6-default",
+          "platformio",
+          "python-default",
+          "python-2.7",
+          "python-gae",
+          "rails-default",
+          "selenium",
+          "spring-boot",
+          "tomee-default",
+          "ubuntu",
+          "zend");
+
   private static final List<String> VALID_NAMES =
       Arrays.asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
 
@@ -124,12 +161,10 @@ public class NewWorkspacePageTest {
   @Test(priority = 1)
   public void checkStackButtons() {
     newWorkspace.waitQuickStartButton();
-    newWorkspace.clickOnQuickStartButton();
-
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACK_LIST);
 
-
-
+    newWorkspace.clickOnSingleMachineButton();
+    newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACK_LIST);
   }
 
   private void checkNotValidNames() {

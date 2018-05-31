@@ -443,4 +443,17 @@ public class NewWorkspace {
             seleniumWebDriverHelper.waitPresence(
                 By.xpath(format("//div[@data-stack-id='%s']", stackId))));
   }
+
+  public int getAvailableStacksCount(){
+    return getAvailableStacks().size();
+  }
+
+  public void waitStacksNotPresent(List<String> stacksIdForChecking){
+
+
+
+
+    stacksIdForChecking.forEach(stackId -> seleniumWebDriverHelper);
+
+  }
 }
