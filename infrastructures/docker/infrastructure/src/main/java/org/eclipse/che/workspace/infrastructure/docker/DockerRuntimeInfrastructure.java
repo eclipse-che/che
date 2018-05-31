@@ -80,7 +80,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
-    return containers.findIdentities();
+    throw new UnsupportedOperationException("Runtimes tracking currently does not supported.");
   }
 
   private DockerEnvironment convertToDockerEnv(InternalEnvironment sourceEnv)
