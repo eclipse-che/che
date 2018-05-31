@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.inject;
 
+import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
 import static org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction.JAVA_ORGANIZE_IMPORT_ID;
 
 import com.google.gwt.inject.client.AbstractGinModule;
@@ -19,6 +20,7 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -80,7 +82,10 @@ public class JavaGinModule extends AbstractGinModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    install(new FormatterGinModule());
+
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(JavaLanguageDescriptionProvider.class);
 
     GinMapBinder<String, ProposalAction> proposalActionMapBinder =
         GinMapBinder.newMapBinder(binder(), String.class, ProposalAction.class);
