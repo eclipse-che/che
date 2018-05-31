@@ -10,12 +10,10 @@
  */
 package org.eclipse.che.plugin.java.inject;
 
-import static java.util.Arrays.asList;
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerJsonRpcMessenger;
@@ -25,31 +23,18 @@ import org.eclipse.che.plugin.java.languageserver.ProjectsListener;
 /** @author Anatolii Bazko */
 @DynaModule
 public class JavaModule extends AbstractModule {
-  public static final String JAVA_SOURCE = "javaSource";
-  public static final String JAVA_CLASS = "javaClass";
+
+  public static final String LS_ID = "org.eclipse.che.plugin.java.languageserver";
 
   @Override
   protected void configure() {
+    newMapBinder(binder(), String.class, LanguageServerConfig.class)
+        .addBinding(LS_ID)
+        .to(JavaLanguageServerLauncher.class)
+        .asEagerSingleton();
+
     bind(JavaLanguageServerJsonRpcMessenger.class).asEagerSingleton();
     bind(JavaLanguageServerExtensionService.class).asEagerSingleton();
     bind(ProjectsListener.class).asEagerSingleton();
-    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-        .addBinding()
-        .to(JavaLanguageServerLauncher.class);
-    LanguageDescription javaSource = new LanguageDescription();
-    javaSource.setFileExtensions(asList("java"));
-    javaSource.setLanguageId(JAVA_SOURCE);
-    javaSource.setMimeType("text/x-java-source");
-    Multibinder.newSetBinder(binder(), LanguageDescription.class)
-        .addBinding()
-        .toInstance(javaSource);
-
-    LanguageDescription javaClass = new LanguageDescription();
-    javaClass.setFileExtensions(asList("class"));
-    javaClass.setLanguageId(JAVA_CLASS);
-    javaClass.setMimeType("text/x-java-source");
-    Multibinder.newSetBinder(binder(), LanguageDescription.class)
-        .addBinding()
-        .toInstance(javaClass);
   }
 }

@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
@@ -44,7 +43,6 @@ import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
-import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 
@@ -61,7 +59,6 @@ public class MavenServerService {
   private final MavenWorkspace mavenWorkspace;
   private final EclipseWorkspaceProvider eclipseWorkspaceProvider;
   private final FsManager fsManager;
-  private final PomReconciler pomReconciler;
 
   @Inject private MavenProgressNotifier notifier;
 
@@ -77,15 +74,13 @@ public class MavenServerService {
       ProjectManager projectManager,
       MavenWorkspace mavenWorkspace,
       EclipseWorkspaceProvider eclipseWorkspaceProvider,
-      FsManager fsManager,
-      PomReconciler pomReconciler) {
+      FsManager fsManager) {
 
     this.wrapperManager = wrapperManager;
     this.projectManager = projectManager;
     this.mavenWorkspace = mavenWorkspace;
     this.eclipseWorkspaceProvider = eclipseWorkspaceProvider;
     this.fsManager = fsManager;
-    this.pomReconciler = pomReconciler;
   }
 
   /**
@@ -158,8 +153,5 @@ public class MavenServerService {
       @ApiParam(value = "The paths to pom.xml file which need to be reconciled")
           @QueryParam("pompath")
           String pomPath)
-      throws ForbiddenException, ConflictException, NotFoundException, ServerException {
-    String projectPath = new File(pomPath).getParent();
-    pomReconciler.reconcilePath(pomPath, projectPath);
-  }
+      throws ForbiddenException, ConflictException, NotFoundException, ServerException {}
 }

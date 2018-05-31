@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 import com.google.inject.Inject;
