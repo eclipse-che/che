@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4j.CodeLensParams;
@@ -44,12 +43,9 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 
 @Singleton
 public class MavenTextDocumentService implements TextDocumentService {
-  private PomReconciler reconciler;
 
   @Inject
-  public MavenTextDocumentService(PomReconciler reconciler) {
-    this.reconciler = reconciler;
-  }
+  public MavenTextDocumentService() {}
 
   @Override
   public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(
@@ -133,11 +129,7 @@ public class MavenTextDocumentService implements TextDocumentService {
   }
 
   @Override
-  public void didOpen(DidOpenTextDocumentParams params) {
-    String uri = params.getTextDocument().getUri();
-    String text = params.getTextDocument().getText();
-    reconciler.reconcileUri(uri, text);
-  }
+  public void didOpen(DidOpenTextDocumentParams params) {}
 
   @Override
   public void didChange(DidChangeTextDocumentParams params) {}
