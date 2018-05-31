@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -72,10 +71,6 @@ public class LanguageServerEditorProvider implements AsyncEditorProvider, Editor
 
   @Override
   public Promise<EditorPartPresenter> createEditor(VirtualFile file) {
-    if (!(file instanceof File)) {
-      return null;
-    }
-
     return registry
         .getOrInitializeServer(file)
         .then(
