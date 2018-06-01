@@ -28,7 +28,7 @@ import javax.inject.Singleton;
 @Singleton
 public class RootDirPathProvider implements Provider<String> {
 
-  private static String DEF = "/projects";
+  public static String DEF = "/projects";
 
   @Inject(optional = true)
   @Named("che.user.workspaces.storage")
@@ -45,6 +45,10 @@ public class RootDirPathProvider implements Provider<String> {
       path = DEF;
     }
 
-    return Paths.get(path).toAbsolutePath().toString();
+    if (!Paths.get(path).isAbsolute()) {
+      throw new IllegalArgumentException("Path to the project should declared as absolute path");
+    }
+
+    return path;
   }
 }
