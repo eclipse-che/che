@@ -846,10 +846,44 @@ public final class ResourceManager {
       return getRemoteResources(container, DEPTH_ONE, true);
     }
 
-    Promise<Void> promise = loadAndRegisterResources(container.getLocation());
+    Promise<Optional<Resource[]>> promise = promises.resolve(store.get(container.getLocation()));
 
     return promise.thenPromise(
-        ignored -> promises.resolve(store.get(container.getLocation()).or(NO_RESOURCES)));
+        children ->
+            ps.getTree(container.getLocation(), 1, true)
+                .thenPromise(
+                    loadedChildren -> {
+                      if (!children.isPresent()) {
+                        return promises.resolve(NO_RESOURCES);
+                      }
+
+                      Resource[] resources = children.get();
+
+                      if (resources.length == loadedChildren.getChildren().size()) {
+                        return promises.resolve(resources);
+                      } else {
+                        // situation, when we have outdated cached children
+                        java.util.Arrays.stream(resources)
+                            .forEach(outdated -> store.dispose(outdated.getLocation(), false));
+
+                        List<Resource> updated =
+                            new ArrayList<>(loadedChildren.getChildren().size());
+
+                        for (TreeElement nodeElement : loadedChildren.getChildren()) {
+                          ItemReference reference = nodeElement.getNode();
+                          Resource tempResource = newResourceFrom(reference);
+                          store.register(tempResource);
+
+                          if (tempResource.isProject()) {
+                            inspectProject(tempResource.asProject());
+                          }
+
+                          updated.add(tempResource);
+                        }
+
+                        return promises.resolve(updated.toArray(new Resource[updated.size()]));
+                      }
+                    }));
   }
 
   private Promise<Optional<Resource>> doFindResource(Path path) {
