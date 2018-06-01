@@ -341,7 +341,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(1)).stopWatch();
+      verify(namespace.pods(), times(2)).stopWatch();
     }
   }
 
@@ -383,7 +383,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(1)).stopWatch();
+      verify(namespace.pods(), times(2)).stopWatch();
     }
   }
 
@@ -459,7 +459,7 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testHandleUnrecoverableEventByReason() throws Exception {
     final String unrecoverableEventReason = "Failed Mount";
-    final UnrecoverableEventHanler unrecoverableEventHanler =
+    final UnrecoverableEventHanler unrecoverableEventHandler =
         internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
     final ContainerEvent unrecoverableEvent =
         mockContainerEvent(
@@ -468,16 +468,16 @@ public class KubernetesInternalRuntimeTest {
             "Failed to mount volume 'claim-che-workspace'",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHanler.handle(unrecoverableEvent);
-    // 'internalStop' expected to be called which triggers namespace cleanup
-    verify(namespace).cleanUp();
+    unrecoverableEventHandler.handle(unrecoverableEvent);
+
+    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
   }
 
   @Test
   public void testHandleUnrecoverableEventByMessage() throws Exception {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverableEventHanler unrecoverableEventHanler =
+    final UnrecoverableEventHanler unrecoverableEventHandler =
         internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
     final ContainerEvent unrecoverableEvent =
         mockContainerEvent(
@@ -486,9 +486,9 @@ public class KubernetesInternalRuntimeTest {
             unrecoverableEventMessage,
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHanler.handle(unrecoverableEvent);
-    // 'internalStop' expected to be called which triggers namespace cleanup
-    verify(namespace).cleanUp();
+    unrecoverableEventHandler.handle(unrecoverableEvent);
+
+    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
   }
 
   @Test
