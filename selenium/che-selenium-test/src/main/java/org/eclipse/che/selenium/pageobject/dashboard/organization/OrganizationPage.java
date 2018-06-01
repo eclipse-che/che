@@ -36,16 +36,6 @@ public class OrganizationPage {
   private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
-  @Inject
-  public OrganizationPage(
-      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.seleniumWebDriver = seleniumWebDriver;
-    this.redrawUiElementsTimeout =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
-    PageFactory.initElements(seleniumWebDriver, this);
-  }
-
   private interface Locators {
 
     String ORGANIZATION_TITLE_ID = "__organizationDetailsController_organizationName__";
@@ -133,6 +123,16 @@ public class OrganizationPage {
 
   @FindBy(xpath = Locators.WORKSPACES_TAB_XPATH)
   WebElement workspacesTab;
+
+  @Inject
+  public OrganizationPage(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.redrawUiElementsTimeout =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    PageFactory.initElements(seleniumWebDriver, this);
+  }
 
   public void waitOrganizationTitle(String name) {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
