@@ -62,6 +62,7 @@ import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -141,10 +142,7 @@ public class TextDocumentService {
         DocumentHighlight.class,
         this::documentHighlight);
     dtoToDto(
-        "completion",
-        TextDocumentPositionParams.class,
-        ExtendedCompletionListDto.class,
-        this::completion);
+        "completion", CompletionParams.class, ExtendedCompletionListDto.class, this::completion);
     dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
     dtoToDto(
         "signatureHelp",
@@ -192,13 +190,12 @@ public class TextDocumentService {
     return result;
   }
 
-  private ExtendedCompletionListDto completion(
-      TextDocumentPositionParams textDocumentPositionParams) {
-    TextDocumentIdentifier textDocument = textDocumentPositionParams.getTextDocument();
+  private ExtendedCompletionListDto completion(CompletionParams completionParams) {
+    TextDocumentIdentifier textDocument = completionParams.getTextDocument();
     String wsPath = textDocument.getUri();
     String uri = prefixURI(wsPath);
     textDocument.setUri(uri);
-    textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
+    completionParams.setUri(prefixURI(completionParams.getUri()));
 
     ExtendedCompletionListDto[] result = new ExtendedCompletionListDto[1];
     result[0] = new ExtendedCompletionListDto();
@@ -215,7 +212,7 @@ public class TextDocumentService {
           @Override
           public CompletableFuture<Either<List<CompletionItem>, CompletionList>> start(
               ExtendedLanguageServer element) {
-            return element.getTextDocumentService().completion(textDocumentPositionParams);
+            return element.getTextDocumentService().completion(completionParams);
           }
 
           @Override
@@ -404,7 +401,11 @@ public class TextDocumentService {
           public boolean handleResult(ExtendedLanguageServer element, Hover hover) {
             if (hover != null) {
               HoverDto hoverDto = new HoverDto(hover);
-              result.getContents().addAll(hoverDto.getContents());
+              if (hoverDto.getContents().isLeft()) {
+                result.getContents().getLeft().addAll(hoverDto.getContents().getLeft());
+              } else {
+                // result.getContents().getRight().
+              }
             }
             return true;
           }

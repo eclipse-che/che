@@ -14,11 +14,13 @@ import com.google.inject.assistedinject.Assisted;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.websocket.impl.BasicWebSocketMessageTransmitter;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.RegistrationParams;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.slf4j.Logger;
@@ -34,15 +36,18 @@ public class CheLanguageClient implements LanguageClient {
 
   private EventService eventService;
   private ShowMessageJsonRpcTransmitter transmitter;
+  private BasicWebSocketMessageTransmitter messageTransmitter;
   private String serverId;
 
   @Inject
   public CheLanguageClient(
       EventService eventService,
       ShowMessageJsonRpcTransmitter transmitter,
+      BasicWebSocketMessageTransmitter messageTransmitter,
       @Assisted String serverId) {
     this.eventService = eventService;
     this.transmitter = transmitter;
+    this.messageTransmitter = messageTransmitter;
     this.serverId = serverId;
   }
 
@@ -83,5 +88,18 @@ public class CheLanguageClient implements LanguageClient {
         LOG.debug(message.getMessage());
         break;
     }
+  }
+
+  @Override
+  public CompletableFuture<Void> registerCapability(RegistrationParams params) {
+    return CompletableFuture.completedFuture(null); // runAsync(
+    // () -> {
+    // LOG.debug(
+    //      "Che LanguageClient currently not support registeredCapability feature. Server sent:
+    // {}",
+    //    params.toString());
+    // }
+    // );
+
   }
 }

@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -145,7 +146,11 @@ public abstract class DtoGenerator {
       }
     }
 
-    allTypes = allTypes.stream().filter((cls) -> !cls.isInterface()).collect(Collectors.toSet());
+    allTypes =
+        allTypes
+            .stream()
+            .filter((cls) -> (!cls.isInterface() && !Modifier.isFinal(cls.getModifiers())))
+            .collect(Collectors.toSet());
 
     try (PrintWriter out = new PrintWriter(targetFile, "utf-8")) {
 

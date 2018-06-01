@@ -30,6 +30,10 @@ class ParamterInfoImpl implements ParameterInfo {
 
   @Override
   public Optional<String> getDocumentation() {
-    return Optional.fromNullable(dto.getDocumentation());
+    if (dto.getDocumentation().isLeft()) {
+      return Optional.fromNullable(dto.getDocumentation().getLeft());
+    }
+    //TODO: need to find solution for using markdown content @see org.eclipse.lsp4j.MarkupContent
+    return Optional.fromNullable(dto.getDocumentation().getRight().toString());
   }
 }

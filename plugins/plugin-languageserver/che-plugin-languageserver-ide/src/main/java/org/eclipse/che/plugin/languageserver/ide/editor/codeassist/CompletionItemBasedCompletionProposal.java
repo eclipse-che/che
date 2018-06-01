@@ -39,10 +39,13 @@ import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspa
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.InsertTextFormat;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 /**
  * @author Anatolii Bazko
@@ -103,12 +106,21 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
   }
 
   private Widget createAdditionalInfoWidget() {
-    String documentation = completionItem.getItem().getDocumentation();
-    if (documentation == null || documentation.trim().isEmpty()) {
-      documentation = "No documentation found.";
+    Either<String, MarkupContent> documentation = completionItem.getItem().getDocumentation();
+    String content;
+    if (documentation.isLeft()) {
+      content = documentation.getLeft();
+    } else {
+      MarkupContent markupContent = documentation.getRight();
+      if (MarkupKind.PLAINTEXT.equals(markupContent.getKind())) {
+        content = markupContent.getValue();
+      } else {
+        SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+        content = safeHtmlBuilder.appendHtmlConstant(markupContent.getValue()).toSafeHtml().asString();
+      }
     }
 
-    HTML widget = new HTML(documentation);
+    HTML widget = new HTML(content);
     widget.setWordWrap(true);
     widget.getElement().getStyle().setColor(theme.completionPopupItemTextColor());
     widget.getElement().getStyle().setFontSize(13, Style.Unit.PX);
