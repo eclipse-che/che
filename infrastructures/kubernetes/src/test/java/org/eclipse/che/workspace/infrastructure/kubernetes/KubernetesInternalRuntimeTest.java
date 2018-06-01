@@ -244,7 +244,8 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.services()).thenReturn(services);
     when(namespace.ingresses()).thenReturn(ingresses);
     when(namespace.pods()).thenReturn(pods);
-    when(bootstrapperFactory.create(any(), anyList(), any(), any())).thenReturn(bootstrapper);
+    when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
+        .thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
