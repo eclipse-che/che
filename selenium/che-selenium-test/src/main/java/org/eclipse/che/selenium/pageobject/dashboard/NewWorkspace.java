@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
@@ -33,16 +34,18 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -202,8 +205,50 @@ public class NewWorkspace {
     seleniumWebDriverHelper.setValue(filterStackInput, value);
   }
 
+  public void waitFiltersFormOpened() {
+    seleniumWebDriverHelper.waitVisibility(filterStackInput);
+  }
+
+  public void waitFiltersFormClosed() {
+    seleniumWebDriverHelper.waitInvisibility(filterStackInput);
+  }
+
   public String getTextFromFiltersInput() {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(filterStackInput);
+  }
+
+  public List<String> getFiltersSuggestions() {
+    return seleniumWebDriverHelper
+        .waitVisibilityOfAllElements(By.xpath("//div[@name='suggestionText']"))
+        .stream()
+        .map(webElement -> webElement.getText())
+        .collect(toList());
+  }
+
+  public void waitFiltersSuggestions(List<String> expectedSuggestions) {
+    expectedSuggestions.forEach(
+        item -> {
+          webDriverWaitFactory
+              .get()
+              .until((ExpectedCondition<Boolean>) driver -> getFiltersSuggestions().contains(item));
+        });
+  }
+
+  public WebElement getSelectedSuggestion() {
+    return seleniumWebDriverHelper
+        .waitVisibilityOfAllElements(By.xpath("//md-chip"))
+        .stream()
+        .filter(
+            webElement ->
+                webElement
+                    .getAttribute("class")
+                    .contains("stack-library-filter-suggestion-selected"))
+        .collect(toList())
+        .get(0);
+  }
+
+  public String getSelectedSuggestionName() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(getSelectedSuggestion());
   }
 
   public void clearSuggestions() {
@@ -434,7 +479,7 @@ public class NewWorkspace {
         .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
         .stream()
         .map(webElement -> webElement.getAttribute("data-stack-id"))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   public void waitStacks(List<String> expectedStacks) {
@@ -444,16 +489,42 @@ public class NewWorkspace {
                 By.xpath(format("//div[@data-stack-id='%s']", stackId))));
   }
 
-  public int getAvailableStacksCount(){
+  public int getAvailableStacksCount() {
     return getAvailableStacks().size();
   }
 
-  public void waitStacksNotPresent(List<String> stacksIdForChecking){
+  public void waitStacksNotPresent(List<String> stacksIdForChecking) {
+    stacksIdForChecking.forEach(
+        stackId ->
+            webDriverWaitFactory
+                .get()
+                .until(
+                    (ExpectedCondition<Boolean>)
+                        driver -> !getAvailableStacks().contains(stackId)));
+  }
 
+  public void waitStacksOrder(List<String> expectedOrder) {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> expectedOrder.equals(getAvailableStacks()));
+  }
 
+  public void clickNameButton() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//div[@che-column-title='Name']/div"));
+  }
 
+  public void clickOnTitlePlaceCoordinate() {
+    WebElement title = seleniumWebDriverHelper.waitPresence(By.id(TOOLBAR_TITLE_ID));
+    Point titleCoordinates = title.getLocation();
+    Dimension titleDimension = title.getSize();
 
-    stacksIdForChecking.forEach(stackId -> seleniumWebDriverHelper);
+    int titleWidthCentrCoordinate = titleCoordinates.getX() + (titleDimension.getWidth() / 2);
+    int titleHeightCentrCoordinate = titleCoordinates.getY() + (titleDimension.getHeight() / 2);
 
+    seleniumWebDriverHelper
+        .getAction()
+        .moveByOffset(titleWidthCentrCoordinate, titleHeightCentrCoordinate)
+        .click()
+        .perform();
   }
 }

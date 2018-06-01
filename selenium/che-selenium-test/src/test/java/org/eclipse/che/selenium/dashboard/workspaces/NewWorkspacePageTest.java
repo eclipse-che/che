@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
+import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.Arrays;
@@ -28,17 +30,22 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class NewWorkspacePageTest {
+  private static final int EXPECTED_QUICK_START_STACKS_COUNT = 15;
+  private static final int EXPECTED_SINGLE_MACHINE_STACKS_COUNT = 34;
+  private static final int EXPECTED_ALL_STACKS_COUNT = 39;
+  private static final int EXPECTED_MULTI_MACHINE_STACKS_COUNT = 5;
   private static final String EXPECTED_WORKSPACE_NAME_PREFIX = "wksp-";
   private static final String NAME_WITH_ONE_HUNDRED_SYMBOLS =
       "wksp-ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
   private static final List<String> NOT_VALID_NAMES =
-      Arrays.asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
-  private static List<String> EXPECTED_QUICK_START_STACK_LIST =
-      Arrays.asList(
+      asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
+  private static List<String> EXPECTED_QUICK_START_STACKS =
+      asList(
           "blank-default",
           "java-default",
           "dotnet-default",
@@ -54,8 +61,8 @@ public class NewWorkspacePageTest {
           "platformio",
           "python-default",
           "rails-default");
-  private static List<String> EXPECTED_SINGLE_MACHINE_STACK_LIST =
-      Arrays.asList(
+  private static List<String> EXPECTED_SINGLE_MACHINE_STACKS =
+      asList(
           "blank-default",
           "java-default",
           "dotnet-default",
@@ -91,8 +98,79 @@ public class NewWorkspacePageTest {
           "ubuntu",
           "zend");
 
+  private static final List<String> EXPECTED_ALL_STACKS =
+      Arrays.asList(
+          "blank-default",
+          "java-default",
+          "java-mysql",
+          "dotnet-default",
+          "android-default",
+          "cpp-default",
+          "centos",
+          "centos-go",
+          "nodejs4",
+          "wildfly-swarm",
+          "ceylon-java-javascript-dart-centos",
+          "debian",
+          "debianlsp",
+          "che-in-che",
+          "vert.x",
+          "go-default",
+          "hadoop-default",
+          "java-centos",
+          "java-debian",
+          "java-theia-docker",
+          "java-theia-openshift",
+          "java-centos-mysql",
+          "kotlin-default",
+          "node-default",
+          "openshift-default",
+          "openshift-sql",
+          "php-default",
+          "php-gae",
+          "php5.6-default",
+          "platformio",
+          "python-default",
+          "python-2.7",
+          "python-gae",
+          "rails-default",
+          "selenium",
+          "spring-boot",
+          "tomee-default",
+          "ubuntu",
+          "zend");
+
+  private static final List<String> EXPECTED_MULTI_MACHINE_STACKS =
+      asList(
+          "java-mysql",
+          "java-theia-docker",
+          "java-theia-openshift",
+          "java-centos-mysql",
+          "openshift-sql");
+
+  private static final List<String> EXPECTED_QUICK_START_STACKS_REVERSE_ORDER =
+      asList(
+          "blank-default",
+          "java-default",
+          "dotnet-default",
+          "rails-default",
+          "python-default",
+          "platformio",
+          "php-default",
+          "openshift-sql",
+          "openshift-default",
+          "node-default",
+          "java-theia-openshift",
+          "go-default",
+          "che-in-che",
+          "cpp-default",
+          "android-default");
+
+  private static final List<String> EXPECTED_FILTERS_SUGGESTIONS =
+      asList("JAVA", "JDK", "JAVA 1.8, THEIA");
+
   private static final List<String> VALID_NAMES =
-      Arrays.asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
+      asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
@@ -117,7 +195,7 @@ public class NewWorkspacePageTest {
     workspaces.clickOnAddWorkspaceBtn();
   }
 
-  @Test
+  // @Test
   public void checkNameField() {
     newWorkspace.waitPageLoad();
     assertEquals(
@@ -158,13 +236,67 @@ public class NewWorkspacePageTest {
     checkValidNames();
   }
 
-  @Test(priority = 1)
+  // @Test(priority = 1)
   public void checkStackButtons() {
     newWorkspace.waitQuickStartButton();
-    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACK_LIST);
+    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_QUICK_START_STACKS_COUNT);
 
     newWorkspace.clickOnSingleMachineButton();
-    newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACK_LIST);
+    newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
+    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_SINGLE_MACHINE_STACKS_COUNT);
+
+    newWorkspace.clickOnAllButton();
+    newWorkspace.waitStacks(EXPECTED_ALL_STACKS);
+    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_ALL_STACKS_COUNT);
+
+    newWorkspace.clickOnMultiMachineButton();
+    newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
+    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_MULTI_MACHINE_STACKS_COUNT);
+
+    newWorkspace.clickOnAllButton();
+    newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
+    newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
+    assertEquals(
+        newWorkspace.getAvailableStacksCount(),
+        EXPECTED_SINGLE_MACHINE_STACKS_COUNT + EXPECTED_MULTI_MACHINE_STACKS_COUNT);
+
+    newWorkspace.clickOnQuickStartButton();
+    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.clickNameButton();
+
+    try {
+      newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS_REVERSE_ORDER);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/5650", ex);
+    }
+
+    newWorkspace.clickNameButton();
+    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS);
+  }
+
+  @Test(priority = 2)
+  public void checkFiltersButton() {
+    /*newWorkspace.clickOnFiltersButton();
+    newWorkspace.waitFiltersFormOpened();
+    seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
+    newWorkspace.waitFiltersFormClosed();*/
+
+    newWorkspace.clickOnFiltersButton();
+    newWorkspace.waitFiltersFormOpened();
+    newWorkspace.clickOnTitlePlaceCoordinate();
+    newWorkspace.waitFiltersFormClosed();
+
+    newWorkspace.clickOnFiltersButton();
+    newWorkspace.waitFiltersFormOpened();
+    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.waitFiltersSuggestions(EXPECTED_FILTERS_SUGGESTIONS);
+
+    newWorkspace.getSelectedSuggestion();
+    newWorkspace.getSelectedSuggestionName();
+
+    newWorkspace.getFiltersSuggestions();
   }
 
   private void checkNotValidNames() {
