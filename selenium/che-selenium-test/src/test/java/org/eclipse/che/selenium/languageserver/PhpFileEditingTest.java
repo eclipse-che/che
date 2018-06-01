@@ -88,10 +88,10 @@ public class PhpFileEditingTest {
     checkCodeValidation();
     checkAutocompletion();
     checkCodeAssistant();
-    checkGoToDefenition();
+    checkGoToDefinition();
   }
 
-  private void checkGoToDefenition() {
+  private void checkGoToDefinition() {
     editor.deleteCurrentLine();
 
     editor.goToPosition(14, 9);
