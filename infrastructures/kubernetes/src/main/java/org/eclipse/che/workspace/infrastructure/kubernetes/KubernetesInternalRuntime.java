@@ -337,7 +337,11 @@ public class KubernetesInternalRuntime<
         bootstrapperFuture =
             bootstrapperFactory
                 .create(
-                    getContext().getIdentity(), machineConfig.getInstallers(), machine, namespace)
+                    getContext().getIdentity(),
+                    machineConfig.getInstallers(),
+                    machine,
+                    namespace,
+                    startSynchronizer)
                 .bootstrapAsync();
         toCancelFutures.add(bootstrapperFuture);
       } else {

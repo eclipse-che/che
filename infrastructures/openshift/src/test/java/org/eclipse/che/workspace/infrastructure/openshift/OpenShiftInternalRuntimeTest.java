@@ -192,7 +192,8 @@ public class OpenShiftInternalRuntimeTest {
     when(project.services()).thenReturn(services);
     when(project.routes()).thenReturn(routes);
     when(project.pods()).thenReturn(pods);
-    when(bootstrapperFactory.create(any(), anyList(), any(), any())).thenReturn(bootstrapper);
+    when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
+        .thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
