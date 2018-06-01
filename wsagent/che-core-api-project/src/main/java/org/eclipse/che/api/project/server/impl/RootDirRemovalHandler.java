@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

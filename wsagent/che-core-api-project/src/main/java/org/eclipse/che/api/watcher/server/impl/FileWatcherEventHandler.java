@@ -14,8 +14,8 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toInternalPath;
 
-import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,8 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +41,11 @@ public class FileWatcherEventHandler {
 
   private final Map<Path, Set<FileWatcherOperation>> operations = new ConcurrentHashMap<>();
 
-  private final File root;
+  private final Path root;
 
   @Inject
-  public FileWatcherEventHandler(@Named("che.user.workspaces.storage") File root) {
-    this.root = root;
+  public FileWatcherEventHandler(RootDirPathProvider pathProvider) {
+    this.root = Paths.get(pathProvider.get());
   }
 
   /**
@@ -110,7 +110,7 @@ public class FileWatcherEventHandler {
    */
   void handle(Path path, WatchEvent.Kind<?> kind) {
     Path dir = path.getParent();
-    String internalPath = toInternalPath(root.toPath(), path);
+    String internalPath = toInternalPath(root, path);
     Set<FileWatcherOperation> dirOperations = operations.get(dir);
     Set<FileWatcherOperation> itemOperations = operations.get(path);
 

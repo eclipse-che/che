@@ -12,10 +12,12 @@ package org.eclipse.che.api.watcher.server.impl;
 
 import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toNormalPath;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,12 +46,14 @@ public class FileWatcherManagerTest {
   @Mock Consumer<String> modify;
   @Mock Consumer<String> delete;
   @Mock PathMatcher pathMatcher;
+  @Mock RootDirPathProvider pathProvider;
 
   @Before
   public void setUp() throws Exception {
+    when(pathProvider.get()).thenReturn(rootFolder.getRoot().getPath());
     manager =
         new SimpleFileWatcherManager(
-            rootFolder.getRoot(),
+            pathProvider,
             fileWatcherByPathValue,
             fileWatcherByPathMatcher,
             fileWatcherExcludePatternsRegistry);

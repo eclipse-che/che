@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.infrastructure.docker.client.json.PortBinding;
@@ -65,11 +66,13 @@ public class ServersMapperTest {
             "server1",
                 new ServerImpl()
                     .withUrl("http://" + hostname + ":32080/no-slash-path")
-                    .withAttributes(ONE_ATTRIBUTE_MAP),
+                    .withAttributes(ONE_ATTRIBUTE_MAP)
+                    .withStatus(ServerStatus.UNKNOWN),
             "server2",
                 new ServerImpl()
                     .withUrl("http://" + hostname + ":32081/slash-path")
-                    .withAttributes(emptyMap()))
+                    .withAttributes(emptyMap())
+                    .withStatus(ServerStatus.UNKNOWN))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
@@ -80,11 +83,13 @@ public class ServersMapperTest {
             "server1",
                 new ServerImpl()
                     .withUrl("http://" + hostname + ":32080/http-endpoint")
-                    .withAttributes(emptyMap()),
+                    .withAttributes(emptyMap())
+                    .withStatus(ServerStatus.UNKNOWN),
             "server2",
                 new ServerImpl()
                     .withUrl("ws://" + hostname + ":32080/ws-endpoint")
-                    .withAttributes(ATTRIBUTES_MAP))
+                    .withAttributes(ATTRIBUTES_MAP)
+                    .withStatus(ServerStatus.UNKNOWN))
       },
       {
         ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
@@ -95,11 +100,13 @@ public class ServersMapperTest {
             "server1",
                 new ServerImpl()
                     .withUrl("http://" + hostname + ":32080/http-endpoint")
-                    .withAttributes(emptyMap()),
+                    .withAttributes(emptyMap())
+                    .withStatus(ServerStatus.UNKNOWN),
             "server2",
                 new ServerImpl()
                     .withUrl("ws://" + hostname + ":32080/ws-endpoint")
-                    .withAttributes(emptyMap()))
+                    .withAttributes(emptyMap())
+                    .withStatus(ServerStatus.UNKNOWN))
       },
       // ensure that ports that don't have matching server config are not shown as servers
       {
@@ -124,15 +131,18 @@ public class ServersMapperTest {
             "ws-master",
                 new ServerImpl()
                     .withUrl("http://" + hostname + ":32080/api")
-                    .withAttributes(emptyMap()),
+                    .withAttributes(emptyMap())
+                    .withStatus(ServerStatus.UNKNOWN),
             "exec-agent-api",
                 new ServerImpl()
                     .withUrl("http://" + hostname + ":32401/process")
-                    .withAttributes(ONE_ATTRIBUTE_MAP),
+                    .withAttributes(ONE_ATTRIBUTE_MAP)
+                    .withStatus(ServerStatus.UNKNOWN),
             "exec-agent-ws",
                 new ServerImpl()
                     .withUrl("ws://" + hostname + ":32401/connect")
-                    .withAttributes(ATTRIBUTES_MAP))
+                    .withAttributes(ATTRIBUTES_MAP)
+                    .withStatus(ServerStatus.UNKNOWN))
       },
       // mapping of internal servers
       {
@@ -143,7 +153,8 @@ public class ServersMapperTest {
             "ls-api",
             new ServerImpl()
                 .withUrl("tcp://" + machine + ":4401")
-                .withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP))
+                .withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP)
+                .withStatus(ServerStatus.UNKNOWN))
       }
     };
   }

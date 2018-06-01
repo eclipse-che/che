@@ -14,7 +14,6 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.exists;
 
 import com.google.inject.Inject;
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Iterator;
@@ -24,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.slf4j.Logger;
@@ -48,16 +46,10 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
   /** Registered path -> Path watch operation IDs */
   private final Map<Path, Set<Integer>> pathWatchRegistrations = new ConcurrentHashMap<>();
 
-  private final File root;
-
   private PathTransformer pathTransformer;
 
   @Inject
-  public FileWatcherByPathMatcher(
-      @Named("che.user.workspaces.storage") File root,
-      FileWatcherByPathValue watcher,
-      PathTransformer pathTransformer) {
-    this.root = root;
+  public FileWatcherByPathMatcher(FileWatcherByPathValue watcher, PathTransformer pathTransformer) {
     this.watcher = watcher;
     this.pathTransformer = pathTransformer;
   }

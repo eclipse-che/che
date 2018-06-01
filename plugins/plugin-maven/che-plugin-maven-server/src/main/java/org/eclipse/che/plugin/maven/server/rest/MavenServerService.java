@@ -35,7 +35,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
@@ -103,11 +102,6 @@ public class MavenServerService {
   public String getEffectivePom(@QueryParam("projectpath") String projectPath)
       throws ServerException, NotFoundException, ForbiddenException {
     String projectWsPath = absolutize(projectPath);
-
-    RegisteredProject project =
-        projectManager
-            .get(projectWsPath)
-            .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
 
     MavenServerWrapper mavenServer =
         wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);

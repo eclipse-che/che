@@ -344,6 +344,7 @@ public class NewWorkspace {
   }
 
   public void clickOnCreateButtonAndEditWorkspace() {
+    waitCreateWorkspaceButtonEnabled();
     seleniumWebDriverHelper.waitAndClick(bottomCreateWorkspaceButton);
     waitWorkspaceCreatedDialogIsVisible();
     clickOnEditWorkspaceButton();

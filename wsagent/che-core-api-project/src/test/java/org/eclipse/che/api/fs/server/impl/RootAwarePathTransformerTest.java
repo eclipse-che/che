@@ -14,9 +14,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.api.fs.server.WsPathUtils;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,7 +29,8 @@ public class RootAwarePathTransformerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    rootAwarePathTransformer = new RootAwarePathTransformer(Paths.get("/").toFile());
+    rootAwarePathTransformer =
+        new RootAwarePathTransformer(new DummyProvider(Paths.get("/").toFile()));
   }
 
   @Test
@@ -84,5 +87,12 @@ public class RootAwarePathTransformerTest {
 
     assertFalse(fsPath.isAbsolute());
     assertTrue(wsPath.startsWith(WsPathUtils.ROOT));
+  }
+
+  private static class DummyProvider extends RootDirPathProvider {
+
+    public DummyProvider(File file) {
+      this.rootFile = file;
+    }
   }
 }

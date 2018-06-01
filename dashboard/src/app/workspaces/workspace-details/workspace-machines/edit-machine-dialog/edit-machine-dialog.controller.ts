@@ -114,6 +114,11 @@ export class EditMachineDialogController {
       return;
     }
     this.environmentManager.setMemoryLimit(this.machine, this.machineRAM);
+    // update environment's machines
+    const machines = this.environmentManager.getMachines(this.copyEnvironment).map((machine: IEnvironmentManagerMachine) => {
+      return machine.name === this.machine.name ? this.machine : machine;
+    });
+    this.copyEnvironment = this.environmentManager.getEnvironment(this.copyEnvironment, machines);
     this.stringifyMachineRecipe();
   }
 

@@ -37,6 +37,7 @@ import org.eclipse.che.api.project.server.type.ProjectTypesFactory;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -45,7 +46,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  *
  * @author gazarenkov
  */
-public class RegisteredProject implements ProjectConfig {
+public class RegisteredProjectImpl implements RegisteredProject {
 
   private final List<ProjectProblem> problems;
   private final Map<String, Value> attributes;
@@ -67,7 +68,7 @@ public class RegisteredProject implements ProjectConfig {
    * @throws ServerException when path for project is undefined
    */
   @AssistedInject
-  public RegisteredProject(
+  public RegisteredProjectImpl(
       @Assisted("folder") String folder,
       @Assisted("config") @Nullable ProjectConfig config,
       @Assisted("updated") boolean updated,
@@ -210,24 +211,27 @@ public class RegisteredProject implements ProjectConfig {
    * @return whether this project is synchronized with Workspace storage On the other words this
    *     project is not updated
    */
+  @Override
   public boolean isSynced() {
     return !this.updated;
   }
 
   /** should be called after synchronization with Workspace storage */
-  public void setSync() {
-    this.updated = false;
+  public void setSynced(boolean synced) {
+    this.updated = !synced;
   }
 
   /**
    * @return whether this project is detected using Project Type resolver If so it should not be
    *     persisted to Workspace storage
    */
+  @Override
   public boolean isDetected() {
     return detected;
   }
 
   /** @return root folder or null */
+  @Override
   public String getBaseFolder() {
     return folder;
   }
