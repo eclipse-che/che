@@ -31,6 +31,7 @@ import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 
 /**
  * Preforms preliminary project manager method parameters validation and on success passes execution

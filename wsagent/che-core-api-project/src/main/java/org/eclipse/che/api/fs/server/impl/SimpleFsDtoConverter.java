@@ -20,11 +20,11 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.ProjectDtoConverter;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 
 @Singleton
@@ -54,7 +54,7 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
       length = null;
     }
 
-    RegisteredProject project = projectManager.getClosest(wsPath).orElse(null);
+    ProjectConfig project = projectManager.getClosest(wsPath).orElse(null);
 
     String type;
     if (projectManager.isRegistered(wsPath)) {

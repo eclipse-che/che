@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.fs.server.impl.RootAwarePathTransformer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.search.server.InvalidQueryException;
 import org.eclipse.che.api.search.server.OffsetData;
 import org.eclipse.che.api.search.server.QueryExecutionException;
@@ -74,9 +75,9 @@ public class SearcherTest {
     IoUtil.deleteRecursive(indexDirectory);
     workspaceStorage = Files.createTempDir();
     excludePatterns = Collections.emptySet();
-    pathTransformer = new RootAwarePathTransformer(workspaceStorage);
-    searcher =
-        new LuceneSearcher(excludePatterns, indexDirectory, workspaceStorage, pathTransformer);
+    DummyProvider rootProvider = new DummyProvider(workspaceStorage);
+    pathTransformer = new RootAwarePathTransformer(rootProvider);
+    searcher = new LuceneSearcher(excludePatterns, indexDirectory, rootProvider, pathTransformer);
     contentBuilder = new ContentBuilder(workspaceStorage.toPath());
   }
 
@@ -516,6 +517,13 @@ public class SearcherTest {
       this.lastUpdatedFile = Paths.get(this.root.toString(), name);
       this.lastUpdatedFile.toFile().delete();
       return this;
+    }
+  }
+
+  private static class DummyProvider extends RootDirPathProvider {
+
+    public DummyProvider(File file) {
+      this.rootFile = file;
     }
   }
 }
