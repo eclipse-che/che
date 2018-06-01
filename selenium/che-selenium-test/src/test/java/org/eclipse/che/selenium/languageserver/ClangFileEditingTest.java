@@ -34,12 +34,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class ClangdFileEditingTest {
+public class ClangFileEditingTest {
   private static final String PROJECT_NAME = "console-cpp-simple";
-  private static final String HELLO_CC = "hello.cc";
-  private static final String ISEVEN_H = "iseven.h";
-  private static final String ISEVEN_CPP = "iseven.cpp";
-  private static final String HELLO_CPP = "hello.cpp";
+  private static final String CPP_FILE_NAME = "hello.cc";
+  private static final String H_FILE_NAME = "iseven.h";
   private static final String LS_INIT_MESSAGE =
       "Finished language servers initialization, file path '/console-cpp-simple/hello.cc";
 
@@ -55,8 +53,7 @@ public class ClangdFileEditingTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource =
-        ClangdFileEditingTest.this.getClass().getResource("/projects/console-cpp-simple");
+    URL resource = ClangFileEditingTest.this.getClass().getResource("/projects/console-cpp-simple");
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CPP);
 
@@ -81,19 +78,20 @@ public class ClangdFileEditingTest {
   }
 
   private void checkCodeValidation() {
-    editor.selectTabByName(HELLO_CC);
+    editor.selectTabByName(CPP_FILE_NAME);
 
     // check error marker message
     editor.goToCursorPositionVisible(13, 1);
     editor.waitMarkerInvisibility(ERROR, 13);
     editor.typeTextIntoEditor("c");
     editor.waitMarkerInPosition(ERROR, 13);
+
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void checkAutocompleteFeature() {
-    editor.selectTabByName(HELLO_CC);
+    editor.selectTabByName(CPP_FILE_NAME);
 
     // check contents of autocomplete container
     editor.goToPosition(15, 1);
@@ -106,31 +104,27 @@ public class ClangdFileEditingTest {
   }
 
   private void checkFindDefinitionFeature() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/" + HELLO_CPP);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
     editor.waitActive();
 
     // check Find Definition feature from Assistant menu
     editor.goToPosition(20, 20);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
-    editor.waitTabIsPresent(ISEVEN_H);
-    editor.clickOnCloseFileIcon(ISEVEN_H);
+    editor.waitTabIsPresent(H_FILE_NAME);
+    editor.clickOnCloseFileIcon(H_FILE_NAME);
 
     // check Find Definition feature by pressing F4
     editor.goToPosition(20, 20);
     editor.typeTextIntoEditor(F4.toString());
-    editor.waitTabIsPresent(ISEVEN_H);
-
-    editor.clickOnCloseFileIcon(ISEVEN_H);
+    editor.waitTabIsPresent(H_FILE_NAME);
   }
 
   private void checkCodeFormatting() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/" + ISEVEN_CPP);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.cpp");
     editor.waitActive();
 
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FORMAT);
     editor.waitTextIntoEditor("int isEven(int x) { return x % 2 == 0; }");
-
-    editor.clickOnCloseFileIcon(ISEVEN_CPP);
   }
 }
