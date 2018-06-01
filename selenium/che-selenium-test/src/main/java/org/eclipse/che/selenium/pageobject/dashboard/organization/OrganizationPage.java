@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -31,11 +32,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class OrganizationPage {
 
+  private final WebDriverWait redrawUiElementsTimeout;
+  private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+
   private interface Locators {
 
     String ORGANIZATION_TITLE_ID = "__organizationDetailsController_organizationName__";
-    String ORGANIZATION_TITLE_XPATH =
-        "//div[contains(@class, 'che-toolbar-title')]//span[text() = '%s']";
     String ORGANIZATION_NAME = "//input[@name = 'name']";
     String BACK_ICON = "//a[contains(@class, 'che-toolbar-breadcrumb')]/md-icon";
     String SAVE_BUTTON = "//div[contains(@class, 'save-button-placeholder')]//button";
@@ -44,11 +47,9 @@ public class OrganizationPage {
     String RUNNING_WORKSPACE_CAP = "//input[@name = 'runtimeCap']";
     String WORKSPACE_RAM_CAP = "//input[@name = 'workspaceRamCap']";
     String DELETE_ORG_BUTTON = "//button[contains(@class, 'che-button')]//span[text() = 'Delete']";
-    // todo: //span[text()='Delete'] to get Delete button only
     String DELETE_ORG_WIDGET_BUTTON =
         "//div[contains(@class,'che-confirm-dialog-notification')]//span";
     String SUB_ORGANIZATIONS_TAB = "//md-tab-item//span[contains(text(), 'Sub-Organizations')]";
-
     String ADD_SUB_ORGANIZATION_BUTTON =
         "//che-button-primary[@che-button-title =  'Add Sub-Organization']/a";
     String MEMBERS_TAB = "//md-tab-item//span[contains(text(), 'Members')]";
@@ -59,16 +60,12 @@ public class OrganizationPage {
         "//md-content[contains(@class, 'organization-member-list')]//div[contains(@class, 'che-list-header-column')]//span";
     String MEMBERS_LIST_ITEM_XPATH =
         "//md-content[contains(@class, 'organization-member-list')]//span[text() = '%s']";
-    //        String MEMBER_CHECKBOX =
-    // "//div[contains(@class,'che-list-item-checkbox-main')]/md-checkbox[contains(@aria-label,'member')]";
     String MEMBER_CHECKBOX = "//md-checkbox[contains(@aria-label,'member')]";
-    // todo: //span[text()='Delete'] to get Delete button only
     String DELETE_MEMBER_WIDGET_BUTTON = "//che-popup//button";
     String MEMBERS_SEARCH_FIELD = "//div[@class = 'che-list-search']//input";
+    String WORKSPACES_TAB_XPATH = "//md-tab-item//span[contains(text(), 'Workspaces')]";
+    String ADD_WORKSPACE_BTN_XPATH = "//*[@che-button-title='Add Workspace']";
   }
-
-  private final WebDriverWait redrawUiElementsTimeout;
-  private final SeleniumWebDriver seleniumWebDriver;
 
   @FindBy(id = Locators.ORGANIZATION_TITLE_ID)
   WebElement organizationTitle;
@@ -124,11 +121,16 @@ public class OrganizationPage {
   @FindBy(xpath = Locators.MEMBERS_SEARCH_FIELD)
   WebElement membersSearchField;
 
+  @FindBy(xpath = Locators.WORKSPACES_TAB_XPATH)
+  WebElement workspacesTab;
+
   @Inject
-  public OrganizationPage(SeleniumWebDriver seleniumWebDriver) {
+  public OrganizationPage(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -148,6 +150,10 @@ public class OrganizationPage {
 
   public void clickMembersTab() {
     redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(membersTab)).click();
+  }
+
+  public void clickOnWorkspacesTab() {
+    seleniumWebDriverHelper.waitAndClick(workspacesTab);
   }
 
   public void waitMembersList() {
@@ -345,5 +351,9 @@ public class OrganizationPage {
   private boolean isReadonly(WebElement element) {
     String readonly = element.getAttribute("readonly");
     return readonly == null ? false : readonly.equalsIgnoreCase("true");
+  }
+
+  public void clickOnAddWorkspaceBtn() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ADD_WORKSPACE_BTN_XPATH));
   }
 }
