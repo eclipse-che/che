@@ -13,13 +13,13 @@ package org.eclipse.che.selenium.pageobject.dashboard.organization;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -31,6 +31,20 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 /** @author Sergey Skorik */
 @Singleton
 public class OrganizationPage {
+
+  private final WebDriverWait redrawUiElementsTimeout;
+  private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+
+  @Inject
+  public OrganizationPage(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.redrawUiElementsTimeout =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    PageFactory.initElements(seleniumWebDriver, this);
+  }
 
   private interface Locators {
 
@@ -59,13 +73,9 @@ public class OrganizationPage {
     String MEMBER_CHECKBOX = "//md-checkbox[contains(@aria-label,'member')]";
     String DELETE_MEMBER_WIDGET_BUTTON = "//che-popup//button";
     String MEMBERS_SEARCH_FIELD = "//div[@class = 'che-list-search']//input";
-    String WORKSPACES_TAB = "//md-tab-item//span[contains(text(), 'Workspaces')]";
-
-    String ADD_WORKSPACE_BTN = "//*[@che-button-title='Add Workspace']";
+    String WORKSPACES_TAB_XPATH = "//md-tab-item//span[contains(text(), 'Workspaces')]";
+    String ADD_WORKSPACE_BTN_XPATH = "//*[@che-button-title='Add Workspace']";
   }
-
-  private final WebDriverWait redrawUiElementsTimeout;
-  private final SeleniumWebDriver seleniumWebDriver;
 
   @FindBy(id = Locators.ORGANIZATION_TITLE_ID)
   WebElement organizationTitle;
@@ -121,16 +131,8 @@ public class OrganizationPage {
   @FindBy(xpath = Locators.MEMBERS_SEARCH_FIELD)
   WebElement membersSearchField;
 
-  @FindBy(xpath = Locators.WORKSPACES_TAB)
+  @FindBy(xpath = Locators.WORKSPACES_TAB_XPATH)
   WebElement workspacesTab;
-
-  @Inject
-  public OrganizationPage(SeleniumWebDriver seleniumWebDriver) {
-    this.seleniumWebDriver = seleniumWebDriver;
-    this.redrawUiElementsTimeout =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    PageFactory.initElements(seleniumWebDriver, this);
-  }
 
   public void waitOrganizationTitle(String name) {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
@@ -151,7 +153,7 @@ public class OrganizationPage {
   }
 
   public void clickOnWorkspacesTab() {
-    redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(workspacesTab)).click();
+    seleniumWebDriverHelper.waitAndClick(workspacesTab);
   }
 
   public void waitMembersList() {
@@ -352,8 +354,6 @@ public class OrganizationPage {
   }
 
   public void clickOnAddWorkspaceBtn() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.ADD_WORKSPACE_BTN)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ADD_WORKSPACE_BTN_XPATH));
   }
 }
