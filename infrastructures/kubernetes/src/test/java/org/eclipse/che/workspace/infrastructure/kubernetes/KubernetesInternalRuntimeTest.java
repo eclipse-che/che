@@ -341,7 +341,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(1)).stopWatch();
+      verify(namespace.pods(), times(2)).stopWatch();
     }
   }
 
@@ -383,7 +383,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(1)).stopWatch();
+      verify(namespace.pods(), times(2)).stopWatch();
     }
   }
 
@@ -469,8 +469,8 @@ public class KubernetesInternalRuntimeTest {
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
     unrecoverableEventHandler.handle(unrecoverableEvent);
-    // 'internalStop' expected to be called which triggers namespace cleanup
-    verify(namespace).cleanUp();
+
+    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
   }
 
   @Test
@@ -487,8 +487,8 @@ public class KubernetesInternalRuntimeTest {
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
     unrecoverableEventHandler.handle(unrecoverableEvent);
-    // 'internalStop' expected to be called which triggers namespace cleanup
-    verify(namespace).cleanUp();
+
+    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
   }
 
   @Test

@@ -730,17 +730,12 @@ public class KubernetesInternalRuntime<
             reason,
             message,
             event.getPodName());
-        try {
-          internalStop(emptyMap());
-        } catch (InfrastructureException e) {
-          LOG.error("Error occurred during runtime '{}' stopping. {}", workspaceId, e.getMessage());
-        } finally {
-          eventPublisher.sendRuntimeStoppedEvent(
-              format(
-                  "Unrecoverable event occurred: '%s', '%s', '%s'",
-                  reason, message, event.getPodName()),
-              getContext().getIdentity());
-        }
+
+        startSynchronizer.completeExceptionally(
+            new InfrastructureException(
+                format(
+                    "Unrecoverable event occurred: '%s', '%s', '%s'",
+                    reason, message, event.getPodName())));
       }
     }
 
