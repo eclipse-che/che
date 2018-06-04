@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
+import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -291,12 +293,46 @@ public class NewWorkspacePageTest {
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
     newWorkspace.typeToFiltersInput("j");
-    newWorkspace.waitFiltersSuggestions(EXPECTED_FILTERS_SUGGESTIONS);
+    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
 
-    newWorkspace.getSelectedSuggestion();
-    newWorkspace.getSelectedSuggestionName();
+    assertEquals(
+        newWorkspace.getSelectedFiltersSuggestionName(),
+        newWorkspace.getFiltersSuggestionsNames().get(0));
 
-    newWorkspace.getFiltersSuggestions();
+    seleniumWebDriverHelper.sendKeys(ARROW_DOWN.toString());
+    newWorkspace.waitSelectedFiltersSuggestion("JDK");
+
+    seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
+    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+
+    seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
+    newWorkspace.waitSelectedFiltersSuggestion("JAVA 1.8, THEIA");
+
+    newWorkspace.singleClickOnFiltersSuggestions("JAVA");
+    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+
+    newWorkspace.singleClickOnFiltersSuggestions("JDK");
+    newWorkspace.waitSelectedFiltersSuggestion("JDK");
+
+    newWorkspace.doubleClickOnFiltersSuggestion("JDK");
+    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+
+    newWorkspace.deleteLastTagFromInputTagsField();
+    newWorkspace.waitFiltersInputFieldIsEmpty();
+
+    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
+
+    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+    newWorkspace.doubleClickOnFiltersSuggestion("JAVA 1.8, THEIA");
+
+    newWorkspace.waitFiltersInputFieldTags(asList("JAVA 1.8, THEIA"));
+
+    newWorkspace.deleteTagByRemoveButton("JAVA 1.8, THEIA");
+    newWorkspace.waitFiltersInputFieldIsEmpty();
+
+    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
   }
 
   private void checkNotValidNames() {

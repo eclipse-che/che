@@ -130,7 +130,7 @@ public class CreateWorkspaceTest {
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.clickOnFiltersButton();
     newWorkspace.typeToFiltersInput("java");
-    newWorkspace.selectFilterSuggestion("JAVA");
+    newWorkspace.chooseFilterSuggestionByPlusButton("JAVA");
     assertTrue(newWorkspace.isStackVisible(JAVA.getId()));
     assertFalse(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
     newWorkspace.clickOnMultiMachineTab();
@@ -141,7 +141,7 @@ public class CreateWorkspaceTest {
     newWorkspace.clickOnFiltersButton();
     newWorkspace.clearSuggestions();
     newWorkspace.typeToFiltersInput("blank");
-    newWorkspace.selectFilterSuggestion("BLANK");
+    newWorkspace.chooseFilterSuggestionByPlusButton("BLANK");
     assertTrue(newWorkspace.isStackVisible(BLANK.getId()));
 
     // filter the Java-MySql stack
@@ -149,7 +149,7 @@ public class CreateWorkspaceTest {
     newWorkspace.clickOnFiltersButton();
     newWorkspace.clearSuggestions();
     newWorkspace.typeToFiltersInput("java 1");
-    newWorkspace.selectFilterSuggestion("JAVA 1.8, TOMCAT 8, MYSQL 5.7");
+    newWorkspace.chooseFilterSuggestionByPlusButton("JAVA 1.8, TOMCAT 8, MYSQL 5.7");
     assertTrue(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
     newWorkspace.clickOnSingleMachineTab();
     assertFalse(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));

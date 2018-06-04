@@ -21,6 +21,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SELECTED_SUGGESTION_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SUGGESTION_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.INCREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.MULTI_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.OPEN_IN_IDE_DIALOG_BUTTON;
@@ -30,10 +31,12 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.WORKSPACE_CREATED_DIALOG;
+import static org.openqa.selenium.Keys.BACK_SPACE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
@@ -205,6 +208,11 @@ public class NewWorkspace {
     seleniumWebDriverHelper.setValue(filterStackInput, value);
   }
 
+  public void deleteLastTagFromInputTagsField() {
+    seleniumWebDriverHelper.waitAndSendKeysTo(filterStackInput, BACK_SPACE.toString());
+    seleniumWebDriverHelper.sendKeys(BACK_SPACE.toString());
+  }
+
   public void waitFiltersFormOpened() {
     seleniumWebDriverHelper.waitVisibility(filterStackInput);
   }
@@ -217,7 +225,60 @@ public class NewWorkspace {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(filterStackInput);
   }
 
-  public List<String> getFiltersSuggestions() {
+  private List<WebElement> getTagsFromFiltersInputField() {
+    seleniumWebDriverHelper.waitPresence(
+        By.xpath("//div[@class='md-chip-content']/md-chip-template"));
+
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath("//div[@class='md-chip-content']/md-chip-template"));
+  }
+
+  private String getFiltersInputTagName(WebElement tag) {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(tag);
+  }
+
+  public List<String> getFiltersInputFieldTags() {
+    return getTagsFromFiltersInputField()
+        .stream()
+        .map(tag -> getFiltersInputTagName(tag))
+        .collect(Collectors.toList());
+  }
+
+  public void waitFiltersInputFieldIsEmpty() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath("//div[@class='md-chip-content']"));
+  }
+
+  public void waitFiltersInputFieldTags(List<String> expectedTags) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>) driver -> getFiltersInputFieldTags().equals(expectedTags));
+  }
+
+  public void deleteTagByRemoveButton(String tagName) {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(
+            format(
+                "//*[text()='%s']/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']",
+                tagName)));
+  }
+
+  public void waitTextContainsInFiltersInput(String expectedText) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> getTextFromFiltersInput().contains(expectedText));
+  }
+
+  public void waitTextEqualsInFiltersInput(String expectedText) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>) driver -> getTextFromFiltersInput().equals(expectedText));
+  }
+
+  public List<String> getFiltersSuggestionsNames() {
     return seleniumWebDriverHelper
         .waitVisibilityOfAllElements(By.xpath("//div[@name='suggestionText']"))
         .stream()
@@ -225,18 +286,23 @@ public class NewWorkspace {
         .collect(toList());
   }
 
-  public void waitFiltersSuggestions(List<String> expectedSuggestions) {
+  public List<WebElement> getFiltersSuggestions() {
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath("//md-chip"));
+  }
+
+  public void waitFiltersSuggestionsNames(List<String> expectedSuggestions) {
     expectedSuggestions.forEach(
         item -> {
           webDriverWaitFactory
               .get()
-              .until((ExpectedCondition<Boolean>) driver -> getFiltersSuggestions().contains(item));
+              .until(
+                  (ExpectedCondition<Boolean>)
+                      driver -> getFiltersSuggestionsNames().contains(item));
         });
   }
 
   public WebElement getSelectedSuggestion() {
-    return seleniumWebDriverHelper
-        .waitVisibilityOfAllElements(By.xpath("//md-chip"))
+    return getFiltersSuggestions()
         .stream()
         .filter(
             webElement ->
@@ -247,17 +313,41 @@ public class NewWorkspace {
         .get(0);
   }
 
-  public String getSelectedSuggestionName() {
+  public void waitSelectedFiltersSuggestion(String suggestionName) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> getSelectedFiltersSuggestionName().equals(suggestionName));
+  }
+
+  public String getSelectedFiltersSuggestionName() {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(getSelectedSuggestion());
+  }
+
+  public WebElement getFiltersSuggestionByName(String suggestionName) {
+    return seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format("//div[@name='suggestionText' and text()='%s']", suggestionName)));
+  }
+
+  public String getSuggestionName(WebElement suggestion) {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(suggestion);
   }
 
   public void clearSuggestions() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(FILTER_SELECTED_SUGGESTION_BUTTON));
   }
 
-  public void selectFilterSuggestion(String suggestion) {
-    seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(Locators.FILTER_SUGGESTION_BUTTON, suggestion)));
+  public void chooseFilterSuggestionByPlusButton(String suggestion) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(FILTER_SUGGESTION_BUTTON, suggestion)));
+  }
+
+  public void singleClickOnFiltersSuggestions(String suggestionName) {
+    seleniumWebDriverHelper.waitAndClick(getFiltersSuggestionByName(suggestionName));
+  }
+
+  public void doubleClickOnFiltersSuggestion(String suggestionName) {
+    seleniumWebDriverHelper.moveCursorToAndDoubleClick(getFiltersSuggestionByName(suggestionName));
   }
 
   public void waitToolbar() {
