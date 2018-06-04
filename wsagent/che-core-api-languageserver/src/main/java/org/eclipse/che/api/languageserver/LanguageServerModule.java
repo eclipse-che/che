@@ -27,12 +27,14 @@ public class LanguageServerModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(RegistryContainer.class).asEagerSingleton();
     bind(WorkspaceService.class).asEagerSingleton();
     bind(TextDocumentService.class).asEagerSingleton();
     bind(PublishDiagnosticsParamsJsonRpcTransmitter.class).asEagerSingleton();
     bind(ShowMessageJsonRpcTransmitter.class).asEagerSingleton();
     bind(LanguageServerConfigInitializer.class).asEagerSingleton();
     bind(LanguageServerService.class).asEagerSingleton();
+    bind(LanguageServerInitializer.class).asEagerSingleton();
 
     install(new FactoryModuleBuilder().build(CheLanguageClientFactory.class));
 

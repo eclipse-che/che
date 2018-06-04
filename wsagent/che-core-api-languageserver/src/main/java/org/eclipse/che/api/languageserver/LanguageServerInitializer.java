@@ -65,8 +65,11 @@ public class LanguageServerInitializer {
   private final Registry<Pair<InputStream, OutputStream>> ioStreamRegistry;
   private final Registry<CommunicationProvider> communicationProviderRegistry;
 
+  private LanguageServerConfigInitializer configInitializer;
+
   @Inject
   public LanguageServerInitializer(
+      LanguageServerConfigInitializer configInitializer,
       ServerCapabilitiesAccumulator serverCapabilitiesAccumulator,
       RegistryContainer registryContainer,
       FindId findId,
@@ -75,6 +78,7 @@ public class LanguageServerInitializer {
       InitializeParamsProvider initializeParamsProvider) {
     this.executor = newCachedThreadPool(getFactory());
 
+    this.configInitializer = configInitializer;
     this.eventService = eventService;
     this.cheLanguageClientFactory = cheLanguageClientFactory;
     this.initializeParamsProvider = initializeParamsProvider;
@@ -112,6 +116,7 @@ public class LanguageServerInitializer {
         () -> {
           LOG.info("Started language servers initialization, file path '{}'", wsPath);
 
+          configInitializer.initialize();
           Set<ServerCapabilities> serverCapabilitiesSet =
               findId
                   .byPath(wsPath)
