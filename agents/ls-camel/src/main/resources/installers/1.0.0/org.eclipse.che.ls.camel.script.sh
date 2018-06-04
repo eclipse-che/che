@@ -27,7 +27,7 @@ unset PACKAGES
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 
-AGENT_BINARIES_URI=https://github.com/camel-tooling/camel-language-server/releases/download/untagged-711bc43a03163d77702a/camel-lsp-server-1.0.0-SNAPSHOT.jar
+AGENT_BINARIES_URI=https://github.com/camel-tooling/camel-language-server/releases/download/1.0.0-SNAPSHOT/camel-lsp-server-1.0.0-SNAPSHOT.jar
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-camel
 LS_LAUNCHER=${LS_DIR}/launch.sh
