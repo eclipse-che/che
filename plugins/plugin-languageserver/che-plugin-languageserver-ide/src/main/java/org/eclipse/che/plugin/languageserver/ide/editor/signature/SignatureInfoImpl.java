@@ -36,7 +36,13 @@ class SignatureInfoImpl implements SignatureInfo {
 
   @Override
   public Optional<String> getDocumentation() {
-    return Optional.fromNullable(dto.getDocumentation());
+    String doc;
+    if (dto.getDocumentation().isLeft()) {
+      doc = dto.getDocumentation().getLeft();
+    } else {
+      doc = dto.getDocumentation().getRight().toString();
+    }
+    return Optional.fromNullable(doc);
   }
 
   @Override

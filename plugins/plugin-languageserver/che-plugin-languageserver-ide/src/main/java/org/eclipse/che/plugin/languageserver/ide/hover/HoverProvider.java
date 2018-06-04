@@ -30,6 +30,7 @@ import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClie
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkedString;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
@@ -95,14 +96,20 @@ public class HoverProvider implements OrionHoverHandler {
 
   private String renderContent(Hover hover) {
     List<String> contents = new ArrayList<>();
-    for (Either<String, MarkedString> dto : hover.getContents()) {
-      if (dto.isLeft()) {
-        // plain markdown text
-        contents.add(dto.getLeft());
-      } else {
-        contents.add(dto.getRight().getLanguage());
-        contents.add(dto.getRight().getValue());
+    Either<List<Either<String, MarkedString>>, MarkupContent> contentEither = hover.getContents();
+    if (contentEither.isLeft()) {
+      for (Either<String, MarkedString> dto : hover.getContents().getLeft()) {
+        if (dto.isLeft()) {
+          // plain markdown text
+          contents.add(dto.getLeft());
+        } else {
+          contents.add(dto.getRight().getLanguage());
+          contents.add(dto.getRight().getValue());
+        }
       }
+    } else {
+      String s = contentEither.getRight().toString();
+      contents.add(s);
     }
     return Joiner.on("\n\n").join(contents);
   }

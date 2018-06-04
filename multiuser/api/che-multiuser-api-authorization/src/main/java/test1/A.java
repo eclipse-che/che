@@ -1,1 +1,0 @@
-package test1; public class A <String>{	private String x; 	public String get() { return x; }}

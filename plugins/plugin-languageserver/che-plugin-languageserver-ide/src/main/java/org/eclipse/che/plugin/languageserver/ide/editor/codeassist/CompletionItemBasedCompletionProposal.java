@@ -116,7 +116,8 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
         content = markupContent.getValue();
       } else {
         SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
-        content = safeHtmlBuilder.appendHtmlConstant(markupContent.getValue()).toSafeHtml().asString();
+        content =
+            safeHtmlBuilder.appendHtmlConstant(markupContent.getValue()).toSafeHtml().asString();
       }
     }
 
