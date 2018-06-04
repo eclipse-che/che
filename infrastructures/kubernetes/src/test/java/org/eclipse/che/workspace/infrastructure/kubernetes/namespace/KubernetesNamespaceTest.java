@@ -33,7 +33,11 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
@@ -201,6 +205,33 @@ public class KubernetesNamespaceTest {
 
     verify(serviceAccountResource).get();
     verify(serviceAccountResource).watch(any());
+  }
+
+  @Test
+  public void testDeleteNonExistingPodBeforeWatch() {
+    System.out.println(
+        "Start the test of testDeleteNonExistingPodBeforeWatch testDeleteNonExistingPodBeforeWatch testDeleteNonExistingPodBeforeWatch");
+    final MixedOperation mixedOperation = mock(MixedOperation.class);
+    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
+    final PodResource podResource = mock(PodResource.class);
+    doReturn(mixedOperation).when(kubernetesClient).pods();
+    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(anyString())).thenReturn(podResource);
+
+    doReturn(Boolean.FALSE).when(podResource).delete();
+    Watch watch = mock(Watch.class);
+    doReturn(watch).when(podResource).watch(any());
+
+    try {
+      new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
+    } catch (InfrastructureException
+        | InterruptedException
+        | ExecutionException
+        | TimeoutException e) {
+      e.printStackTrace();
+    }
+
+    verify(watch).close();
   }
 
   private MetadataNested prepareCreateNamespaceRequest() {
