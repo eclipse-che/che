@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.editor.filetype;
 
 import com.google.inject.Singleton;
 import java.util.List;
+import javax.inject.Inject;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -23,12 +24,19 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class MultipleMethodFileIdentifier implements FileTypeIdentifier {
 
-  private final FileNameFileTypeIdentifier fileNameFileTypeIdentifier =
-      new FileNameFileTypeIdentifier();
-  private final ExtensionFileTypeIdentifier extensionFileTypeIdentifier =
-      new ExtensionFileTypeIdentifier();
-  private final FirstLineFileTypeIdentifier firstLineFileTypeIdentifier =
-      new FirstLineFileTypeIdentifier();
+  private final FileNameFileTypeIdentifier fileNameFileTypeIdentifier;
+  private final ExtensionFileTypeIdentifier extensionFileTypeIdentifier;
+  private final FirstLineFileTypeIdentifier firstLineFileTypeIdentifier;
+
+  @Inject
+  public MultipleMethodFileIdentifier(
+      FileNameFileTypeIdentifier fileNameFileTypeIdentifier,
+      ExtensionFileTypeIdentifier extensionFileTypeIdentifier,
+      FirstLineFileTypeIdentifier firstLineFileTypeIdentifier) {
+    this.fileNameFileTypeIdentifier = fileNameFileTypeIdentifier;
+    this.extensionFileTypeIdentifier = extensionFileTypeIdentifier;
+    this.firstLineFileTypeIdentifier = firstLineFileTypeIdentifier;
+  }
 
   public void registerNewExtension(String extension, List<String> contentTypes) {
     extensionFileTypeIdentifier.registerNewExtension(extension, contentTypes);
