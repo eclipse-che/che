@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.editor.filetype;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.inject.Singleton;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /**
@@ -20,6 +21,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
  *
  * @author "Mickaël Leduque"
  */
+@Singleton
 public class FileNameFileTypeIdentifier implements FileTypeIdentifier {
 
   @Override
