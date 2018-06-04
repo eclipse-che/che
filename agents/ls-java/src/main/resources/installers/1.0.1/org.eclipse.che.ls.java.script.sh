@@ -131,8 +131,10 @@ WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
 ## Evaluate variables now that prefix is defined
 eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
 
+echo Downloading java LS
 curl -sL ${DOWNLOAD_AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
+echo writing start script to ${LS_LAUNCHER}
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4  -Declipse.product=org.eclipse.jdt.ls.core.product -noverify -Xmx1G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4410 -jar ${LS_DIR}/plugins/org.eclipse.equinox.launcher_1.5.0.v20180207-1446.jar -configuration ./config_linux -data ${LS_DIR}/data" > ${LS_LAUNCHER}
+echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4  -Declipse.product=org.eclipse.jdt.ls.core.product -noverify -Xmx1G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4410 -jar ${LS_DIR}/plugins/org.eclipse.equinox.launcher_1.5.0.v20180512-1130.jar -configuration ./config_linux -data ${LS_DIR}/data" > ${LS_LAUNCHER}
