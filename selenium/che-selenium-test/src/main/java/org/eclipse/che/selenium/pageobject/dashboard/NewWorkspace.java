@@ -256,11 +256,16 @@ public class NewWorkspace {
   }
 
   public void deleteTagByRemoveButton(String tagName) {
-    seleniumWebDriverHelper.waitVisibility(
+    seleniumWebDriverHelper.moveCursorToAndClick(
         By.xpath(
             format(
-                "//*[text()='%s']/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']",
+                "//div[text()='%s']/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']/i",
                 tagName)));
+    /*seleniumWebDriverHelper.waitAndClick(
+    By.xpath(
+        format(
+            "//*[text()='%s']/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']/i",
+            tagName)));*/
   }
 
   public void waitTextContainsInFiltersInput(String expectedText) {
@@ -617,5 +622,9 @@ public class NewWorkspace {
         .moveByOffset(titleWidthCentrCoordinate, titleHeightCentrCoordinate)
         .click()
         .perform();
+  }
+
+  public void clickOnInputFieldTag(String tagName) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format("//div[text()='%s']", tagName)));
   }
 }

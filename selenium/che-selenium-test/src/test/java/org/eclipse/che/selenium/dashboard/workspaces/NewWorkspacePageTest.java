@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,6 +47,7 @@ public class NewWorkspacePageTest {
       "wksp-ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
+  private static final List<String> EXPECTED_JDK_STACKS = asList("java-default", "che-in-che");
   private static List<String> EXPECTED_QUICK_START_STACKS =
       asList(
           "blank-default",
@@ -278,7 +280,7 @@ public class NewWorkspacePageTest {
     newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS);
   }
 
-  @Test(priority = 2)
+  //@Test(priority = 2)
   public void checkFiltersButton() {
     /*newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
@@ -333,7 +335,46 @@ public class NewWorkspacePageTest {
 
     newWorkspace.typeToFiltersInput("j");
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
+    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+    newWorkspace.chooseFilterSuggestionByPlusButton("JDK");
+    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+    newWorkspace.clickOnInputFieldTag("JDK");
+    seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
+    newWorkspace.waitFiltersInputFieldIsEmpty();
+
+    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
+    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+    newWorkspace.chooseFilterSuggestionByPlusButton("JAVA");
+    newWorkspace.waitFiltersInputFieldTags(asList("JAVA"));
+    newWorkspace.clickOnInputFieldTag("JAVA");
+    seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
+    newWorkspace.waitFiltersInputFieldIsEmpty();
+    newWorkspace.deleteLastTagFromInputTagsField();
+
+    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+    seleniumWebDriverHelper.sendKeys(Keys.TAB.toString());
+    newWorkspace.waitSelectedFiltersSuggestion("JDK");
+    seleniumWebDriverHelper.sendKeys(Keys.ENTER.toString());
+    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+    newWorkspace.clickOnTitlePlaceCoordinate();
+    newWorkspace.waitFiltersFormClosed();
+
+    newWorkspace.getAvailableStacks();
+    newWorkspace.waitStacks(EXPECTED_JDK_STACKS);
+
+    newWorkspace.clickOnFiltersButton();
+    newWorkspace.waitFiltersFormOpened();
+    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+    newWorkspace.deleteLastTagFromInputTagsField();
+    newWorkspace.waitFiltersInputFieldIsEmpty();
+    newWorkspace.clickOnTitlePlaceCoordinate();
+    newWorkspace.waitFiltersFormClosed();
+    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
   }
+
+
 
   private void checkNotValidNames() {
     NOT_VALID_NAMES.forEach(
