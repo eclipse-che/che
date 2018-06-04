@@ -14,7 +14,12 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.project.server.impl.ProjectDtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_PROGRESS;
-import static org.eclipse.che.api.project.shared.Constants.Services.*;
+import static org.eclipse.che.api.project.shared.Constants.Services.BAD_REQUEST;
+import static org.eclipse.che.api.project.shared.Constants.Services.CONFLICT;
+import static org.eclipse.che.api.project.shared.Constants.Services.FORBIDDEN;
+import static org.eclipse.che.api.project.shared.Constants.Services.NOT_FOUND;
+import static org.eclipse.che.api.project.shared.Constants.Services.SERVER_ERROR;
+import static org.eclipse.che.api.project.shared.Constants.Services.UNAUTHORIZED;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Collections;
@@ -24,15 +29,34 @@ import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.*;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
-import org.eclipse.che.api.project.shared.dto.service.*;
+import org.eclipse.che.api.project.shared.dto.service.CreateRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.CreateResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.DeleteRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.DeleteResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.GetRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.GetResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.ImportRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.ImportResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.RecognizeRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.RecognizeResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.UpdateRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.UpdateResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.VerifyRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.VerifyResponseDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 
@@ -82,7 +106,7 @@ public class ProjectJsonRpcServiceBackEnd {
           NotFoundException {
     String wsPath = request.getWsPath();
 
-    RegisteredProject registeredProject =
+    ProjectConfig registeredProject =
         projectManager
             .get(wsPath)
             .orElseThrow(() -> new NotFoundException("Can't find project: " + wsPath));

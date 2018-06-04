@@ -15,7 +15,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 
 import com.beust.jcommander.JCommander;
-import com.google.inject.name.Named;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +27,7 @@ import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.execution.CommandLine;
@@ -61,12 +61,12 @@ public class TestNGRunner extends AbstractJavaTestRunner {
 
   @Inject
   public TestNGRunner(
-      @Named("che.user.workspaces.storage") String workspacePath,
+      RootDirPathProvider pathProvider,
       JavaTestFinder javaTestFinder,
       ProjectClasspathProvider classpathProvider,
       TestNGSuiteUtil suiteUtil) {
-    super(workspacePath, javaTestFinder);
-    this.workspacePath = workspacePath;
+    super(pathProvider.get(), javaTestFinder);
+    this.workspacePath = pathProvider.get();
     this.javaTestFinder = javaTestFinder;
     this.classpathProvider = classpathProvider;
     this.suiteUtil = suiteUtil;

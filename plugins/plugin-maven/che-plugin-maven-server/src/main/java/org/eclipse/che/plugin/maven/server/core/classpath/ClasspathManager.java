@@ -12,10 +12,10 @@ package org.eclipse.che.plugin.maven.server.core.classpath;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenArtifactKey;
 import org.eclipse.che.maven.data.MavenRemoteRepository;
@@ -64,13 +64,13 @@ public class ClasspathManager {
 
   @Inject
   public ClasspathManager(
-      @Named("che.user.workspaces.storage") String workspacePath,
+      RootDirPathProvider pathProvider,
       MavenWrapperManager wrapperManager,
       MavenProjectManager projectManager,
       MavenTerminal terminal,
       MavenProgressNotifier notifier) {
 
-    this.workspacePath = workspacePath;
+    this.workspacePath = pathProvider.get();
     this.wrapperManager = wrapperManager;
     this.projectManager = projectManager;
     this.terminal = terminal;

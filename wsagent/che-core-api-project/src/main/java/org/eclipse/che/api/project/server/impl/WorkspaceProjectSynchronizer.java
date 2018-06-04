@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.slf4j.Logger;
@@ -116,7 +117,7 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
           add(config);
         }
 
-        project.setSync();
+        project.setSynced(true);
       }
     }
 

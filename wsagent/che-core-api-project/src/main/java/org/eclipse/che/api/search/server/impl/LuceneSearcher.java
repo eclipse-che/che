@@ -26,6 +26,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
 import org.apache.lucene.util.BytesRef;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.search.server.InvalidQueryException;
 import org.eclipse.che.api.search.server.OffsetData;
 import org.eclipse.che.api.search.server.QueryExecutionException;
@@ -102,10 +104,9 @@ public class LuceneSearcher implements Searcher {
   private static final String TEXT_FIELD = "text";
 
   private final Set<PathMatcher> excludePatterns;
-  private final File indexDirectory;
   private final PathTransformer pathTransformer;
 
-  private final File root;
+  private final Path root;
   private final IndexWriter luceneIndexWriter;
   private final SearcherManager searcherManager;
   private final Analyzer analyzer;
@@ -116,7 +117,7 @@ public class LuceneSearcher implements Searcher {
   public LuceneSearcher(
       @Named("vfs.index_filter_matcher") Set<PathMatcher> excludePatterns,
       @Named("vfs.local.fs_index_root_dir") File indexDirectory,
-      @Named("che.user.workspaces.storage") File root,
+      RootDirPathProvider pathProvider,
       PathTransformer pathTransformer)
       throws IOException {
 
@@ -128,8 +129,7 @@ public class LuceneSearcher implements Searcher {
       Files.createDirectories(indexDirectory.toPath());
     }
 
-    this.indexDirectory = indexDirectory;
-    this.root = root;
+    this.root = Paths.get(pathProvider.get());
     this.excludePatterns = excludePatterns;
     this.pathTransformer = pathTransformer;
     this.analyzer =
@@ -154,7 +154,7 @@ public class LuceneSearcher implements Searcher {
             () -> {
               try {
                 long start = System.currentTimeMillis();
-                add(root.toPath());
+                add(root);
                 LOG.info(
                     "Initial indexing complete after {} msec ", System.currentTimeMillis() - start);
               } finally {

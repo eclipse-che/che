@@ -123,12 +123,12 @@ public class WorkspaceServiceTermination implements ServiceTermination {
    */
   @Override
   public void suspend() throws InterruptedException, UnsupportedOperationException {
-    Preconditions.checkState(runtimes.refuseStart());
     try {
       runtimeInfrastructure.getIdentities();
     } catch (UnsupportedOperationException | InfrastructureException e) {
       throw new UnsupportedOperationException("Current infrastructure does not support suspend.");
     }
+    Preconditions.checkState(runtimes.refuseStart());
     WorkspaceSuspendedEventsPropagator propagator = new WorkspaceSuspendedEventsPropagator();
     eventService.subscribe(propagator);
     try {

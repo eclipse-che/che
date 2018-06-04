@@ -50,7 +50,7 @@ public class HidePartAction extends BaseAction implements ActivePartChangedHandl
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    activePartStack.hide();
+    activePartStack.hide(true);
   }
 
   @Override

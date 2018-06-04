@@ -12,8 +12,6 @@ package org.eclipse.che.api.project.server.impl;
 
 import static java.io.File.separator;
 import static java.util.Collections.emptyMap;
-import static java.util.Optional.empty;
-import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 
 import java.util.ArrayList;
@@ -37,7 +35,6 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.WsPathUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
@@ -46,6 +43,7 @@ import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectQualifier;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 
 /**
  * Performs project related operations after project registry is synchronized and method parameters
@@ -90,16 +88,7 @@ public class ExecutiveProjectManager implements ProjectManager {
 
   @Override
   public Optional<RegisteredProject> getClosest(String wsPath) {
-    while (!isRoot(wsPath)) {
-      Optional<RegisteredProject> registeredProject = projectConfigRegistry.get(wsPath);
-      if (registeredProject.isPresent()) {
-        return registeredProject;
-      } else {
-        wsPath = WsPathUtils.parentOf(wsPath);
-      }
-    }
-
-    return empty();
+    return projectConfigRegistry.getClosest(wsPath);
   }
 
   @Override
@@ -206,7 +195,7 @@ public class ExecutiveProjectManager implements ProjectManager {
     projectConfigRegistry
         .getAll(wsPath)
         .stream()
-        .map(RegisteredProject::getPath)
+        .map(ProjectConfig::getPath)
         .forEach(projectConfigRegistry::remove);
 
     return projectConfigRegistry.remove(wsPath);
@@ -232,7 +221,7 @@ public class ExecutiveProjectManager implements ProjectManager {
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
     fsManager.copy(srcWsPath, dstWsPath);
 
-    RegisteredProject oldProjectConfig =
+    ProjectConfig oldProjectConfig =
         projectConfigRegistry.get(srcWsPath).orElseThrow(IllegalStateException::new);
 
     String newProjectName = dstWsPath.substring(dstWsPath.lastIndexOf(separator));
@@ -296,7 +285,9 @@ public class ExecutiveProjectManager implements ProjectManager {
           ForbiddenException {
 
     RegisteredProject project =
-        get(wsPath).orElseThrow(() -> new NotFoundException("Can't find project"));
+        projectConfigRegistry
+            .get(wsPath)
+            .orElseThrow(() -> new NotFoundException("Can't find project"));
 
     List<String> mixins = project.getMixins();
 

@@ -92,6 +92,7 @@ public class ProjectSourcePage {
     String WEB_JAVA_SPRING = "web-java-spring";
     String CONSOLE_JAVA_SIMPLE = "console-java-simple";
     String WEB_JAVA_PETCLINIC = "web-java-petclinic";
+    String CONSOLE_PYTHON3_SIMPLE = "console-python3-simple";
   }
 
   @FindBy(id = Locators.ADD_OR_IMPORT_PROJECT_BUTTON)

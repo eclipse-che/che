@@ -10,11 +10,10 @@
 FROM node:8-alpine
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION
+ARG THEIA_VERSION=0.3.10
 ENV USE_LOCAL_GIT=true \
-    GITHUB_TOKEN=${GITHUB_TOKEN}
-
-RUN if [ -z "${THEIA_VERSION}" ]; then echo -e '\033[0;31m' Set up build argument 'THEIA_VERSION' '\033[0m'; exit 1; fi
+    GITHUB_TOKEN=${GITHUB_TOKEN} \
+    THEIA_VERSION=${THEIA_VERSION}
 
 # build dependencies requireed to compile a custom Theia
 RUN apk add --no-cache make gcc g++ python git openssh bash supervisor jq

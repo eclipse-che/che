@@ -8,6 +8,8 @@
 FROM jboss/keycloak-openshift:3.3.0.CR2-3
 ADD che /opt/jboss/keycloak/themes/che
 ADD . /scripts/
+ADD cli /scripts/cli
+
 USER root
 RUN chgrp -R 0 /scripts && \
     chmod -R g+rwX /scripts

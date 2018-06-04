@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.core.internal.resources.Workspace;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.internal.utils.Messages;
@@ -189,12 +190,12 @@ public class ResourcesPlugin {
   @Inject
   public ResourcesPlugin(
       @Named("che.jdt.workspace.index.dir") String indexPath,
-      @Named("che.user.workspaces.storage") String workspacePath,
+      RootDirPathProvider pathProvider,
       Provider<ProjectManager> projectManagerProvider,
       Provider<PathTransformer> pathTransformerProvider,
       Provider<FsManager> fsManagerProvider) {
     ResourcesPlugin.indexPath = indexPath;
-    ResourcesPlugin.workspacePath = workspacePath;
+    ResourcesPlugin.workspacePath = pathProvider.get();
     pluginId = "cheWsPlugin";
     EFS.setWsPath(workspacePath);
     workspace =

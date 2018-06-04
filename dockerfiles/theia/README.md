@@ -2,7 +2,10 @@
 
 ## Build image manually
 Example:
-docker build -t eclipse/che-theia:nightly --build-arg GITHUB_TOKEN={your token} --build-arg THEIA_VERSION=0.3.10 .
+using build script:
+./build.sh --build-args:GITHUB_TOKEN=$GITHUB_TOKEN,THEIA_VERSION=0.3.10 --tag:0.3.10-nightly
+with native docker:
+docker build -t eclipse/che-theia:0.3.10-nightly --build-arg GITHUB_TOKEN={your token} --build-arg THEIA_VERSION=0.3.10 .
 
 ## Theia version
 

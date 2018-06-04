@@ -14,14 +14,13 @@ import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import java.io.File;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
@@ -46,19 +45,16 @@ public class ProjectListeners {
   private final File workspace;
   private final ProjectManager projectRegistry;
   private final ProjectTypeRegistry projectTypeRegistry;
-  private final PathTransformer pathTransformer;
 
   @Inject
   public ProjectListeners(
-      @Named("che.user.workspaces.storage") String workspacePath,
+      RootDirPathProvider pathProvider,
       EventService eventService,
       ProjectManager projectRegistry,
-      ProjectTypeRegistry projectTypeRegistry,
-      PathTransformer pathTransformer) {
+      ProjectTypeRegistry projectTypeRegistry) {
     this.projectRegistry = projectRegistry;
     this.projectTypeRegistry = projectTypeRegistry;
-    workspace = new File(workspacePath);
-    this.pathTransformer = pathTransformer;
+    workspace = new File(pathProvider.get());
     eventService.subscribe(new ProjectCreated());
     eventService.subscribe(
         new EventSubscriber<ProjectItemModifiedEvent>() {

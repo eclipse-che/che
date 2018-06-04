@@ -19,8 +19,8 @@ import com.google.inject.Provider;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -70,7 +70,7 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
     }
 
     String wsPath = absolutize(javaProject.getPath().toOSString());
-    RegisteredProject project =
+    ProjectConfig project =
         projectRegistryProvider
             .get()
             .get(wsPath)

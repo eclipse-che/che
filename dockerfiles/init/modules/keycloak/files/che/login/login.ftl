@@ -4,7 +4,7 @@
         ${msg("loginTitle",(realm.displayName!''))}
     <#elseif section = "header">
         ${msg("loginTitleHtml",(realm.displayNameHtml!''))}
-    <#elseif section = "form">        
+    <#elseif section = "form">
         <#include "logo.ftl">
 
         <#if realm.password>
@@ -60,7 +60,7 @@
             <div id="kc-social-providers">
                 <ul>
                     <#list social.providers as p>
-                        <li><a href="${p.loginUrl}" id="zocial-${p.alias}" class="zocial ${p.providerId}"><div id="zocial-image-${p.providerId}"></div></a></li>
+                        <li><a href="${p.loginUrl}" id="zocial-${p.alias}" class="zocial ${p.providerId}"> <span class="text">${p.displayName}</span></a></li>
                     </#list>
                 </ul>
             </div>
