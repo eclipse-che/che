@@ -21,7 +21,6 @@ import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.NEW_CO
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.PULL_REQUEST_ISSUED;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.PULL_REQUEST_UPDATED;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -48,7 +47,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -144,13 +142,7 @@ public class PullRequestPluginTest {
     loader.waitOnClosed();
 
     // switch between projects
-    try {
-      pullRequestPanel.clickPullRequestBtn();
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9484", ex);
-    }
-
+    pullRequestPanel.clickPullRequestBtn();
     pullRequestPanel.waitRepoUrl(firstProjectUrl);
     pullRequestPanel.waitBranchName(MAIN_BRANCH);
     pullRequestPanel.waitProjectName(FIRST_PROJECT_NAME);
