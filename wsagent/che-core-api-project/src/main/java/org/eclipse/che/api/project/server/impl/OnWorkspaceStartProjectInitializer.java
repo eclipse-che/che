@@ -30,6 +30,7 @@ import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.notification.BeforeProjectInitializedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 
 @Singleton
