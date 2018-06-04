@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import javax.inject.Named;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
@@ -40,8 +40,8 @@ public class PHPUnitTestRunner implements TestRunner {
   private final PHPUnitTestEngine testEngine;
 
   @Inject
-  public PHPUnitTestRunner(@Named("che.user.workspaces.storage") File projectsRoot) {
-    testEngine = new PHPUnitTestEngine(projectsRoot);
+  public PHPUnitTestRunner(RootDirPathProvider pathProvider) {
+    testEngine = new PHPUnitTestEngine(new File(pathProvider.get()));
   }
 
   /** {@inheritDoc} */

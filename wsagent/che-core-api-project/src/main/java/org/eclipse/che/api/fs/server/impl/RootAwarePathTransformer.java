@@ -12,12 +12,12 @@ package org.eclipse.che.api.fs.server.impl;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
 
-import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 
 @Singleton
 public class RootAwarePathTransformer implements PathTransformer {
@@ -25,8 +25,8 @@ public class RootAwarePathTransformer implements PathTransformer {
   private final Path root;
 
   @Inject
-  public RootAwarePathTransformer(@Named("che.user.workspaces.storage") File root) {
-    this.root = root.toPath().normalize().toAbsolutePath();
+  public RootAwarePathTransformer(RootDirPathProvider rootProvider) {
+    this.root = Paths.get(rootProvider.get());
   }
 
   @Override

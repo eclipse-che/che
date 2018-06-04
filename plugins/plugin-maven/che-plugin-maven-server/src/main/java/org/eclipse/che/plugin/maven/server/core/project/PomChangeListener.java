@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.maven.server.core.project;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopy;
 import org.eclipse.che.api.editor.server.impl.EditorWorkingCopyManager;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.shared.dto.event.PomModifiedEventDto;
 import org.eclipse.che.commons.schedule.executor.ThreadPullLauncher;
@@ -52,11 +52,11 @@ public class PomChangeListener {
       EclipseWorkspaceProvider eclipseWorkspaceProvider,
       EditorWorkingCopyManager editorWorkingCopyManager,
       ThreadPullLauncher launcher,
-      @Named("che.user.workspaces.storage") String workspacePath) {
+      RootDirPathProvider pathProvider) {
     this.mavenWorkspace = mavenWorkspace;
     this.eclipseWorkspaceProvider = eclipseWorkspaceProvider;
     this.editorWorkingCopyManager = editorWorkingCopyManager;
-    this.workspacePath = workspacePath;
+    this.workspacePath = pathProvider.get();
 
     launcher.scheduleWithFixedDelay(this::updateProms, 20, 3, TimeUnit.SECONDS);
 

@@ -27,12 +27,12 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.NewProjectConfigImpl;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.slf4j.Logger;
 
 /** @author Vitalii Parfonov */
@@ -65,7 +65,7 @@ public class ContributionProjectTypeCleaner implements EventSubscriber<GitReposi
     try {
       ProjectManager projectManager = projectManagerProvider.get();
       projectManager.removeType(projectPath, CONTRIBUTION_PROJECT_TYPE_ID);
-      RegisteredProject project = projectManager.get(projectPath).get();
+      ProjectConfig project = projectManager.get(projectPath).get();
       Map<String, List<String>> attributes = project.getAttributes();
       attributes.remove(CONTRIBUTE_LOCAL_BRANCH_NAME);
       attributes.remove(CONTRIBUTE_TO_BRANCH_VARIABLE_NAME);

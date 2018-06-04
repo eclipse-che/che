@@ -33,6 +33,7 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.eclipse.che.api.search.server.SearchApiModule;
 import org.eclipse.che.api.watcher.server.FileWatcherApiModule;
@@ -68,7 +69,7 @@ public class ProjectApiUtils {
 
   /** Initialize project API for tests. */
   private static void init() throws Exception {
-    File root = new File("target/test-classes/workspace");
+    File root = new File("target/test-classes/workspace").getAbsoluteFile();
     File indexDir = new File("target/test-classes/workspace/index");
 
     Injector injector =
@@ -135,13 +136,15 @@ public class ProjectApiUtils {
     ProjectManager projectManager = injector.getInstance(ProjectManager.class);
     FsManager fsManager = injector.getInstance(FsManager.class);
     PathTransformer pathTransformer = injector.getInstance(PathTransformer.class);
+    RootDirPathProvider pathProvider = injector.getInstance(RootDirPathProvider.class);
 
     projectManager.setType("/test", "java", false);
 
     ResourcesPlugin resourcesPlugin =
         new ResourcesPlugin(
             indexDir.getAbsolutePath(),
-            root.getAbsolutePath(),
+            pathProvider,
+            // root.getAbsolutePath(),
             () -> projectManager,
             () -> pathTransformer,
             () -> fsManager);

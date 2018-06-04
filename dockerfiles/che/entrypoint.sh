@@ -280,6 +280,16 @@ init() {
   export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=$NETWORK_NAME"
 }
 
+add_cert_to_truststore() {
+
+    if [ "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" != "" ]; then
+        echo "Found a custom cert. Adding it to java trust store..."
+        echo "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" > /home/user/openshift.crt
+        echo yes | keytool -keystore /home/user/openshift.jks -importcert -alias HOSTDOMAIN -file /home/user/openshift.crt -storepass minishift
+        export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/home/user/openshift.jks -Djavax.net.ssl.trustStorePassword=minishift"
+    fi
+}
+
 get_che_data_from_host() {
   DEFAULT_DATA_HOST_PATH=/data
   CHE_SERVER_CONTAINER_ID=$(get_che_server_container_id)
@@ -339,6 +349,7 @@ trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
 init
 init_global_variables
 set_environment_variables
+add_cert_to_truststore
 
 # run che
 start_che_server &

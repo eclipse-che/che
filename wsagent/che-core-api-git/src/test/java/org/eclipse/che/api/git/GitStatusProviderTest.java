@@ -28,7 +28,7 @@ import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
