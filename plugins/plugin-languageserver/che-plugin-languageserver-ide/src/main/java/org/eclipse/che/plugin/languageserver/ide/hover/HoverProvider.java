@@ -108,8 +108,7 @@ public class HoverProvider implements OrionHoverHandler {
         }
       }
     } else {
-      String s = contentEither.getRight().toString();
-      contents.add(s);
+      contents.add(contentEither.getRight().getValue());
     }
     return Joiner.on("\n\n").join(contents);
   }

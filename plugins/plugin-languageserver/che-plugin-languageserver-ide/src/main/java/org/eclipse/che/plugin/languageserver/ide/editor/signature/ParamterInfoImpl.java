@@ -34,6 +34,6 @@ class ParamterInfoImpl implements ParameterInfo {
       return Optional.fromNullable(dto.getDocumentation().getLeft());
     }
     // TODO: need to find solution for using markdown content @see org.eclipse.lsp4j.MarkupContent
-    return Optional.fromNullable(dto.getDocumentation().getRight().toString());
+    return Optional.fromNullable(dto.getDocumentation().getRight().getValue());
   }
 }

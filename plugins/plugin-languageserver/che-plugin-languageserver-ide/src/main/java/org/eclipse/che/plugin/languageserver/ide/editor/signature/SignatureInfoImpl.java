@@ -40,7 +40,7 @@ class SignatureInfoImpl implements SignatureInfo {
     if (dto.getDocumentation().isLeft()) {
       doc = dto.getDocumentation().getLeft();
     } else {
-      doc = dto.getDocumentation().getRight().toString();
+      doc = dto.getDocumentation().getRight().getValue();
     }
     return Optional.fromNullable(doc);
   }

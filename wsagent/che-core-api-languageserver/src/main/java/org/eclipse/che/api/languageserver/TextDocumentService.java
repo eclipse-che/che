@@ -74,6 +74,7 @@ import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.SignatureHelp;
@@ -400,11 +401,13 @@ public class TextDocumentService {
           @Override
           public boolean handleResult(ExtendedLanguageServer element, Hover hover) {
             if (hover != null) {
-              HoverDto hoverDto = new HoverDto(hover);
-              if (hoverDto.getContents().isLeft()) {
-                result.getContents().getLeft().addAll(hoverDto.getContents().getLeft());
+              if (hover.getContents().isLeft()) {
+                List<Either<String, MarkedString>> left = hover.getContents().getLeft();
+                result.getContents().getLeft().addAll(left);
               } else {
-                // result.getContents().getRight().
+                // TODO: here we can't assume response from several servers MarkupContent will be
+                // replaced
+                result.getContents().getRight().setValue(hover.getContents().getRight().getValue());
               }
             }
             return true;
