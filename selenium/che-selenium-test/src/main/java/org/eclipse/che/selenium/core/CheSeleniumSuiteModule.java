@@ -55,11 +55,7 @@ import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
 import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtilImpl;
 import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtilImpl;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
-import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProviderImpl;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
+import org.eclipse.che.selenium.core.workspace.*;
 import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 
 /**
@@ -100,7 +96,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestWorkspaceAgentApiEndpointUrlProvider.class)
         .to(CheTestWorkspaceAgentApiEndpointUrlProvider.class);
 
-    bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
+    bind(TestWorkspaceProvider.class).to(CheTestWorkspaceProvider.class).asEagerSingleton();
     bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
 
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
