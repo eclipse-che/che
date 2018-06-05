@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameSettings.MachStrategy;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.jdt.ls.extension.api.MatchStrategy;
 
 /** @author Valeriy Svydenko */
 @Singleton
@@ -57,13 +57,13 @@ final class SimilarNamesConfigurationViewImpl extends Window
 
   /** {@inheritDoc} */
   @Override
-  public MachStrategy getMachStrategy() {
+  public MatchStrategy getMatchStrategy() {
     if (findExactNames.getValue()) {
-      return MachStrategy.EXACT;
+      return MatchStrategy.EXACT;
     } else if (findEmbeddedNames.getValue()) {
-      return MachStrategy.EMBEDDED;
+      return MatchStrategy.EMBEDDED;
     } else {
-      return MachStrategy.SUFFIX;
+      return MatchStrategy.SUFFIX;
     }
   }
 
