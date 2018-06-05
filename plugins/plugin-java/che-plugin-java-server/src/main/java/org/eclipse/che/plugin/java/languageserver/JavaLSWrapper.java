@@ -18,6 +18,8 @@ import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.WorkspaceClientCapabilities;
+import org.eclipse.lsp4j.WorkspaceEditCapabilities;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 public class JavaLSWrapper {
@@ -37,6 +39,13 @@ public class JavaLSWrapper {
     extendedCapabilities.put("progressReportProvider", "true");
     extendedCapabilities.put("classFileContentsSupport", "true");
     initOptions.put("extendedClientCapabilities", extendedCapabilities);
+
+    WorkspaceClientCapabilities workspaceClientCapabilities =
+        params.getCapabilities().getWorkspace();
+    WorkspaceEditCapabilities workspaceEditCapabilities = new WorkspaceEditCapabilities();
+    workspaceEditCapabilities.setResourceChanges(true);
+    workspaceClientCapabilities.setWorkspaceEdit(workspaceEditCapabilities);
+
     Map<String, String> settings = new HashMap<>();
     settings.put("java.configuration.updateBuildConfiguration", "automatic");
     initOptions.put("settings", settings);
@@ -47,6 +56,7 @@ public class JavaLSWrapper {
             result -> {
               result.getCapabilities().setDocumentSymbolProvider(false);
               result.getCapabilities().setReferencesProvider(false);
+              result.getCapabilities().setRenameProvider(false);
               return result;
             });
   }
