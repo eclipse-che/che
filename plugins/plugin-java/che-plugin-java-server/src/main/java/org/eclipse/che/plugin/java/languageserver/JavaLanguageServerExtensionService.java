@@ -24,13 +24,17 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.GET_LINKED_MODEL;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNOSTICS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_GET_RENAME_TYPE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_RENAME;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
+import static org.eclipse.che.ide.ext.java.shared.Constants.VALIDATE_RENAMED_NAME;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTERS_COMMAND;
@@ -48,6 +52,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_ENTRY_CO
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_SOURCE_FOLDERS;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.REIMPORT_MAVEN_PROJECTS_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.RENAME_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.UPDATE_PROJECT_CLASSPATH;
@@ -62,8 +67,10 @@ import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -86,6 +93,8 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.Severity;
+import org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange;
+import org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
@@ -95,9 +104,13 @@ import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
 import org.eclipse.che.jdt.ls.extension.api.dto.JobResult;
+import org.eclipse.che.jdt.ls.extension.api.dto.NameValidationStatus;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
+import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
+import org.eclipse.che.jdt.ls.extension.api.dto.RenamingElementInfo;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
@@ -111,9 +124,11 @@ import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSym
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
@@ -258,6 +273,34 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(JavaCoreOptions.class)
         .resultAsBoolean()
         .withFunction(this::updateJavaCoreOptions);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(REFACTORING_RENAME)
+        .paramsAsDto(RenameSettings.class)
+        .resultAsDto(CheWorkspaceEdit.class)
+        .withFunction(this::rename);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(REFACTORING_GET_RENAME_TYPE)
+        .paramsAsDto(RenameSelectionParams.class)
+        .resultAsDto(RenamingElementInfo.class)
+        .withFunction(this::getRenamingElementInfo);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(VALIDATE_RENAMED_NAME)
+        .paramsAsDto(RenameSelectionParams.class)
+        .resultAsDto(NameValidationStatus.class)
+        .withFunction(this::validateName);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(GET_LINKED_MODEL)
+        .paramsAsDto(TextDocumentPositionParams.class)
+        .resultAsListOfDto(Range.class)
+        .withFunction(this::getLinkedElements);
   }
 
   /**
@@ -598,6 +641,72 @@ public class JavaLanguageServerExtensionService {
   private JarEntry getLibraryEntry(String resourceUri) {
     Type type = new TypeToken<JarEntry>() {}.getType();
     return doGetOne(GET_LIBRARY_ENTRY_COMMAND, singletonList(fixJdtUri(resourceUri)), type);
+  }
+
+  private CheWorkspaceEdit rename(RenameSettings renameSettings) {
+    Type type = new TypeToken<CheWorkspaceEdit>() {}.getType();
+    String uri = renameSettings.getRenameParams().getTextDocument().getUri();
+    renameSettings.getRenameParams().getTextDocument().setUri(prefixURI(uri));
+
+    CheWorkspaceEdit cheWorkspaceEdit =
+        doGetOne(RENAME_COMMAND, singletonList(renameSettings), type);
+    List<CheResourceChange> resourceChanges = getResourceChanges(cheWorkspaceEdit);
+    cheWorkspaceEdit.setCheResourceChanges(resourceChanges);
+    cheWorkspaceEdit.setChanges(getTextChanges(cheWorkspaceEdit));
+    return cheWorkspaceEdit;
+  }
+
+  private List<CheResourceChange> getResourceChanges(CheWorkspaceEdit cheWorkspaceEdit) {
+    return cheWorkspaceEdit
+        .getCheResourceChanges()
+        .stream()
+        .peek(
+            each -> {
+              String current = each.getCurrent();
+              String newUri = each.getNewUri();
+              if (current != null) {
+                each.setCurrent(LanguageServiceUtils.removePrefixUri(current));
+              }
+              if (newUri != null) {
+                each.setNewUri(LanguageServiceUtils.removePrefixUri(newUri));
+              }
+            })
+        .collect(Collectors.toList());
+  }
+
+  private Map<String, List<TextEdit>> getTextChanges(CheWorkspaceEdit cheWorkspaceEdit) {
+    Map<String, List<TextEdit>> changes = new LinkedHashMap<>();
+    for (String uri : cheWorkspaceEdit.getChanges().keySet()) {
+      changes.put(
+          LanguageServiceUtils.removePrefixUri(uri), cheWorkspaceEdit.getChanges().get(uri));
+    }
+    return changes;
+  }
+
+  private RenamingElementInfo getRenamingElementInfo(RenameSelectionParams renameSelection) {
+    Type type = new TypeToken<RenamingElementInfo>() {}.getType();
+    String uri = renameSelection.getResourceUri();
+    renameSelection.setResourceUri(prefixURI(uri));
+
+    return doGetOne(Commands.GET_RENAME_TYPE_COMMAND, singletonList(renameSelection), type);
+  }
+
+  private NameValidationStatus validateName(RenameSelectionParams renameSelectionParams) {
+    Type type = new TypeToken<NameValidationStatus>() {}.getType();
+    String uri = renameSelectionParams.getResourceUri();
+    renameSelectionParams.setResourceUri(prefixURI(uri));
+
+    return doGetOne(
+        Commands.VALIDATE_RENAMED_NAME_COMMAND, singletonList(renameSelectionParams), type);
+  }
+
+  private List<Range> getLinkedElements(TextDocumentPositionParams textDocumentPositionParams) {
+    Type type = new TypeToken<List<Range>>() {}.getType();
+    String uri = textDocumentPositionParams.getTextDocument().getUri();
+    textDocumentPositionParams.getTextDocument().setUri(prefixURI(uri));
+
+    return doGetOne(
+        Commands.GET_LINKED_ELEMENTS_COMMAND, singletonList(textDocumentPositionParams), type);
   }
 
   private List<String> executeFindTestsCommand(

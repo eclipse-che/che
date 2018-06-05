@@ -57,6 +57,11 @@ public final class Constants {
   public static final String PROGRESS_OUTPUT_UNSUBSCRIBE = "progressOutput/unsubscribe";
   public static final String PROGRESS_OUTPUT_SUBSCRIBE = "progressOutput/subscribe";
 
+  public static final String REFACTORING_RENAME = "java/refactoringRename";
+  public static final String REFACTORING_GET_RENAME_TYPE = "java/refactoringGetRenameType";
+  public static final String VALIDATE_RENAMED_NAME = "java/validateRenamedName";
+  public static final String GET_LINKED_MODEL = "java/getLinkedModel";
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }

@@ -153,6 +153,10 @@
             <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
         </dependency>
@@ -317,6 +321,10 @@
                     <dtoPackages>
                         <dtoPackage>org.eclipse.che.jdt.ls.extension.api.dto</dtoPackage>
                     </dtoPackages>
+                    <classes>
+                        <class>org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange</class>
+                        <class>org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit</class>
+                    </classes>
                     <excludes>
                         <exclude>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</exclude>
                     </excludes>
