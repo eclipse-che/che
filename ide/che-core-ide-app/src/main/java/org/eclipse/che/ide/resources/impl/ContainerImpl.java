@@ -77,6 +77,11 @@ abstract class ContainerImpl extends ResourceImpl implements Container {
     return resourceManager.getContainer(getLocation().append(relativePath));
   }
 
+  @Override
+  public Promise<Optional<Resource>> getResource(Path relativePath) {
+    return resourceManager.getResource(getLocation().append(relativePath));
+  }
+
   /** {@inheritDoc} */
   @Override
   public Promise<Resource[]> getChildren(final boolean forceUpdate) {

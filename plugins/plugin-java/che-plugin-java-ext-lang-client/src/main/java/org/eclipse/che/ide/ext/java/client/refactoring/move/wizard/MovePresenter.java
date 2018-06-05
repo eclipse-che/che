@@ -41,6 +41,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
+import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringActionDelegate;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
 import org.eclipse.che.ide.ext.java.client.refactoring.preview.PreviewPresenter;
 import org.eclipse.che.ide.ext.java.client.refactoring.service.RefactoringServiceClient;
@@ -62,7 +63,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class MovePresenter implements MoveView.ActionDelegate {
+public class MovePresenter implements MoveView.ActionDelegate, RefactoringActionDelegate {
   private final MoveView view;
   private final RefactoringUpdater refactoringUpdater;
   private final EditorAgent editorAgent;
@@ -364,5 +365,11 @@ public class MovePresenter implements MoveView.ActionDelegate {
     view.showErrorMessage(arg);
     view.setEnableAcceptButton(false);
     view.setEnablePreviewButton(false);
+  }
+
+  @Override
+  public void closeWizard() {
+    view.close();
+    onCancelButtonClicked();
   }
 }
