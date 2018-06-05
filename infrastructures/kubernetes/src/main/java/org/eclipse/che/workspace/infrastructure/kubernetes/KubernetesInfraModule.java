@@ -28,6 +28,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
@@ -53,6 +54,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServer
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.MultiHostIngressExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.SingleHostIngressExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
 
 /** @author Sergii Leshchenko */
 public class KubernetesInfraModule extends AbstractModule {
@@ -116,5 +118,9 @@ public class KubernetesInfraModule extends AbstractModule {
 
     bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
     bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
+
+    MapBinder<String, WorkspaceNextApplier> wsNext =
+        MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
+    wsNext.addBinding(KubernetesEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
   }
 }

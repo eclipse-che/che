@@ -18,7 +18,14 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
 import java.util.regex.Pattern;
 
-/** @author andrew00x */
+/**
+ * Converts injected string value to an array of strings if such an array is requested by injection.
+ *
+ * <p>Entries of the array should be separated by a comma sign. Spaces around entries are trimmed.
+ * Supports injection from property files, environment variables and Java system properties.
+ *
+ * @author andrew00x
+ */
 public class StringArrayConverter extends AbstractModule implements TypeConverter {
   private static final Pattern PATTERN = Pattern.compile(" *, *");
 

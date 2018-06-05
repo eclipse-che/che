@@ -95,7 +95,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.UnrecoverableEventHanler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.UnrecoverableEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -149,9 +149,9 @@ public class KubernetesInternalRuntimeTest {
   private static final String M1_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_1;
   private static final String M2_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_2;
 
-  private static final String EMPTY_UNRECOVERABLE_EVENTS = "";
-  private static final String UNRECOVERABLE_EVENTS =
-      "Failed Mount,Failed Scheduling,Failed to pull image";
+  private static final String[] EMPTY_UNRECOVERABLE_EVENTS = new String[0];
+  private static final String[] UNRECOVERABLE_EVENTS =
+      new String[] {"Failed Mount", "Failed Scheduling", "Failed to pull image"};
 
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
@@ -447,8 +447,8 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testHandleUnrecoverableEventByReason() throws Exception {
     final String unrecoverableEventReason = "Failed Mount";
-    final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
+    final UnrecoverableEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
     final ContainerEvent unrecoverableEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
@@ -456,7 +456,7 @@ public class KubernetesInternalRuntimeTest {
             "Failed to mount volume 'claim-che-workspace'",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHanler.handle(unrecoverableEvent);
+    unrecoverableEventHandler.handle(unrecoverableEvent);
     // 'internalStop' expected to be called which triggers namespace cleanup
     verify(namespace).cleanUp();
   }
@@ -465,8 +465,8 @@ public class KubernetesInternalRuntimeTest {
   public void testHandleUnrecoverableEventByMessage() throws Exception {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
+    final UnrecoverableEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
     final ContainerEvent unrecoverableEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
@@ -474,7 +474,7 @@ public class KubernetesInternalRuntimeTest {
             unrecoverableEventMessage,
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHanler.handle(unrecoverableEvent);
+    unrecoverableEventHandler.handle(unrecoverableEvent);
     // 'internalStop' expected to be called which triggers namespace cleanup
     verify(namespace).cleanUp();
   }
@@ -483,8 +483,8 @@ public class KubernetesInternalRuntimeTest {
   public void testDoNotHandleUnrecoverableEventFromNonWorkspacePod() throws Exception {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
+    final UnrecoverableEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
     final ContainerEvent unrecoverableEvent =
         mockContainerEvent(
             "NonWorkspacePod",
@@ -492,7 +492,7 @@ public class KubernetesInternalRuntimeTest {
             unrecoverableEventMessage,
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHanler.handle(unrecoverableEvent);
+    unrecoverableEventHandler.handle(unrecoverableEvent);
     // 'internalStop' is NOT expected to be called since event does not belong to the workspace
     // pod.Cleanup will not be triggered
     verify(namespace, never()).cleanUp();
@@ -500,8 +500,8 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void testHandleRegularEvent() throws Exception {
-    final UnrecoverableEventHanler unrecoverableEventHanler =
-        internalRuntime.new UnrecoverableEventHanler(k8sEnv.getPods());
+    final UnrecoverableEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
     final ContainerEvent regularEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
@@ -509,7 +509,7 @@ public class KubernetesInternalRuntimeTest {
             "pulling image",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHanler.handle(regularEvent);
+    unrecoverableEventHandler.handle(regularEvent);
     // 'internalStop' is NOT expected to be called and namespace cleanup will not be triggered
     verify(namespace, never()).cleanUp();
   }

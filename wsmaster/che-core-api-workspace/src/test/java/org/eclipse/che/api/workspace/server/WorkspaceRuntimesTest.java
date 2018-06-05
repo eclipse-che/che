@@ -62,6 +62,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.core.db.DBInitializer;
@@ -93,6 +94,8 @@ public class WorkspaceRuntimesTest {
 
   @Mock private WorkspaceStatusCache statuses;
 
+  @Mock private WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
+
   private RuntimeInfrastructure infrastructure;
 
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
@@ -113,7 +116,9 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService);
+            lockService,
+            emptyMap(),
+            workspaceNextObjectsRetriever);
   }
 
   @Test
@@ -202,7 +207,9 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService);
+            lockService,
+            emptyMap(),
+            workspaceNextObjectsRetriever);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)
@@ -261,7 +268,9 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService);
+            lockService,
+            emptyMap(),
+            workspaceNextObjectsRetriever);
 
     // when
     localRuntimes.injectRuntime(workspace);
