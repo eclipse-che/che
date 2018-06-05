@@ -35,9 +35,7 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
@@ -208,7 +206,7 @@ public class KubernetesNamespaceTest {
   }
 
   @Test
-  public void testDeleteNonExistingPodBeforeWatch() {
+  public void testDeleteNonExistingPodBeforeWatch() throws Exception {
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
     final PodResource podResource = mock(PodResource.class);
@@ -220,14 +218,7 @@ public class KubernetesNamespaceTest {
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
-    try {
-      new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
-    } catch (InfrastructureException
-        | InterruptedException
-        | ExecutionException
-        | TimeoutException e) {
-      e.printStackTrace();
-    }
+    new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
 
     verify(watch).close();
   }
