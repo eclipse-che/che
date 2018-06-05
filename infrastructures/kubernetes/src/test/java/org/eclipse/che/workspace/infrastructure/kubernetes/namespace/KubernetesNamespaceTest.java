@@ -209,8 +209,6 @@ public class KubernetesNamespaceTest {
 
   @Test
   public void testDeleteNonExistingPodBeforeWatch() {
-    System.out.println(
-        "Start the test of testDeleteNonExistingPodBeforeWatch testDeleteNonExistingPodBeforeWatch testDeleteNonExistingPodBeforeWatch");
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
     final PodResource podResource = mock(PodResource.class);
