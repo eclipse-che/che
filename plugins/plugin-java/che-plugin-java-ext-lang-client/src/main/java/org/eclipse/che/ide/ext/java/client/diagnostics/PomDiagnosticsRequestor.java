@@ -32,7 +32,7 @@ public class PomDiagnosticsRequestor {
   @Inject
   public PomDiagnosticsRequestor(
       final EventBus eventBus,
-      DtoBuildHelper buildHelper,
+      final DtoBuildHelper buildHelper,
       final JavaLanguageExtensionServiceClient service) {
     eventBus.addHandler(
         EditorOpenedEvent.TYPE,
@@ -40,7 +40,7 @@ public class PomDiagnosticsRequestor {
           @Override
           public void onEditorOpened(EditorOpenedEvent event) {
             String uri = buildHelper.getUri(event.getFile());
-            if (uri.endsWith(POM_FILE)) {
+            if (!uri.endsWith(POM_FILE)) {
               return;
             }
             new Timer() {
