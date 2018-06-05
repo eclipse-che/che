@@ -11,10 +11,10 @@
 package org.eclipse.che.ide.ext.java.client.refactoring.preview;
 
 import com.google.inject.ImplementedBy;
+import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringPreview;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
 
 /**
@@ -26,13 +26,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
  */
 @ImplementedBy(PreviewViewImpl.class)
 interface PreviewView extends View<PreviewView.ActionDelegate> {
-  /**
-   * Sets tree of the changes.
-   *
-   * @param changes list of changes from the refactoring operation
-   */
-  void setTreeOfChanges(RefactoringPreview changes);
-
   /**
    * Set a title of the window.
    *
@@ -60,6 +53,13 @@ interface PreviewView extends View<PreviewView.ActionDelegate> {
   /** Show Preview panel with the special information. */
   void showDialog();
 
+  /**
+   * Sets tree of the changes.
+   *
+   * @param nodes changes from the refactoring operation
+   */
+  void setTreeOfChanges(Map<String, PreviewNode> nodes);
+
   interface ActionDelegate {
     /** Performs some actions in response to user's clicking on the 'Cancel' button. */
     void onCancelButtonClicked();
@@ -71,9 +71,9 @@ interface PreviewView extends View<PreviewView.ActionDelegate> {
     void onBackButtonClicked();
 
     /** Performs some actions in response to user's choosing some change. */
-    void onEnabledStateChanged(RefactoringPreview change);
+    void onEnabledStateChanged(PreviewNode change);
 
-    /** Performs some actions in response to user's selecting some change. */
-    void onSelectionChanged(RefactoringPreview change);
+    /** Performs some actions in response to user selected some change. */
+    void onSelectionChanged(PreviewNode selectedNode);
   }
 }

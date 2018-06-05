@@ -39,7 +39,7 @@ public class SimilarNamesConfigurationViewImplTest {
     when(view.findExactNames.getValue()).thenReturn(true);
     verify(locale).renameSimilarNamesConfigurationTitle();
 
-    assertEquals(RenameSettings.MachStrategy.EXACT, view.getMachStrategy());
+    assertEquals(RenameSettings.MachStrategy.EXACT, view.getMatchStrategy());
   }
 
   @Test
@@ -47,7 +47,7 @@ public class SimilarNamesConfigurationViewImplTest {
     when(view.findExactNames.getValue()).thenReturn(false);
     when(view.findEmbeddedNames.getValue()).thenReturn(true);
 
-    assertEquals(RenameSettings.MachStrategy.EMBEDDED, view.getMachStrategy());
+    assertEquals(RenameSettings.MachStrategy.EMBEDDED, view.getMatchStrategy());
   }
 
   @Test
@@ -56,6 +56,6 @@ public class SimilarNamesConfigurationViewImplTest {
     when(view.findEmbeddedNames.getValue()).thenReturn(false);
     when(view.findNameSuffixes.getValue()).thenReturn(true);
 
-    assertEquals(RenameSettings.MachStrategy.SUFFIX, view.getMachStrategy());
+    assertEquals(RenameSettings.MachStrategy.SUFFIX, view.getMatchStrategy());
   }
 }
