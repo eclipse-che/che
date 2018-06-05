@@ -15,6 +15,7 @@ import static java.util.concurrent.CompletableFuture.allOf;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.ObjectReference;
@@ -553,14 +554,19 @@ public class KubernetesPods {
     }
   }
 
-  private CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
+  @VisibleForTesting
+  CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
+    Watch toCloseOnException = null;
     try {
       final PodResource<Pod, DoneablePod> podResource =
           clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name);
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
       final Watch watch = podResource.watch(new DeleteWatcher(deleteFuture));
-
-      podResource.delete();
+      toCloseOnException = watch;
+      Boolean deleteSucceeded = podResource.delete();
+      if (deleteSucceeded == null || !deleteSucceeded) {
+        deleteFuture.complete(null);
+      }
       return deleteFuture.whenComplete(
           (v, e) -> {
             if (e != null) {
@@ -569,7 +575,15 @@ public class KubernetesPods {
             watch.close();
           });
     } catch (KubernetesClientException ex) {
+      if (toCloseOnException != null) {
+        toCloseOnException.close();
+      }
       throw new KubernetesInfrastructureException(ex);
+    } catch (Exception e) {
+      if (toCloseOnException != null) {
+        toCloseOnException.close();
+      }
+      throw e;
     }
   }
 
