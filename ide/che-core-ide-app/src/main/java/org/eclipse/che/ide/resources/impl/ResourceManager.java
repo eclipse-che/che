@@ -808,6 +808,10 @@ public final class ResourceManager {
             });
   }
 
+  protected Promise<Optional<Resource>> getResource(final Path absolutePath) {
+    return findResource(absolutePath);
+  }
+
   protected Promise<Optional<File>> getFile(final Path absolutePath) {
     final Optional<Resource> resourceOptional = store.getResource(absolutePath);
 
