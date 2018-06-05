@@ -48,12 +48,12 @@ import org.slf4j.LoggerFactory;
  * @author Musienko Maxim
  * @author Dmytro Nochevnov
  */
-public class TestWorkspaceServiceClient {
+public abstract class TestWorkspaceServiceClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestWorkspaceServiceClient.class);
 
-  private final TestApiEndpointUrlProvider apiEndpointProvider;
-  private final HttpJsonRequestFactory requestFactory;
+  protected final TestApiEndpointUrlProvider apiEndpointProvider;
+  protected final HttpJsonRequestFactory requestFactory;
 
   @Inject
   public TestWorkspaceServiceClient(
@@ -278,7 +278,7 @@ public class TestWorkspaceServiceClient {
     }
   }
 
-  private String getNameBasedUrl(String workspaceName, String username) {
+  protected String getNameBasedUrl(String workspaceName, String username) {
     return getBaseUrl() + "/" + username + "/" + workspaceName;
   }
 
