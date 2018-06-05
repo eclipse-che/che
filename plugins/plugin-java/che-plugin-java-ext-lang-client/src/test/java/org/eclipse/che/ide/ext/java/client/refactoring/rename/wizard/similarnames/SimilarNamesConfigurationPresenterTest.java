@@ -39,8 +39,8 @@ public class SimilarNamesConfigurationPresenterTest {
 
   @Test
   public void valueOfStrategyShouldBeReturned() throws Exception {
-    presenter.getMachStrategy();
+    presenter.getMatchStrategy();
 
-    verify(view).getMachStrategy();
+    verify(view).getMatchStrategy();
   }
 }

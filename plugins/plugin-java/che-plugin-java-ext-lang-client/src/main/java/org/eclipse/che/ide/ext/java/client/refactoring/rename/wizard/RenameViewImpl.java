@@ -32,9 +32,9 @@ import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.similarnames.SimilarNamesConfigurationPresenter;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.jdt.ls.extension.api.dto.NameValidationStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 
 /** @author Valeriy Svydenko */
 @Singleton
@@ -236,14 +236,14 @@ final class RenameViewImpl extends Window implements RenameView {
 
   /** {@inheritDoc} */
   @Override
-  public void showStatusMessage(RefactoringStatus status) {
+  public void showStatusMessage(NameValidationStatus status) {
     errorLabel.getElement().getStyle().setColor(Style.getMainFontColor());
     showMessage(status);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void showErrorMessage(RefactoringStatus status) {
+  public void showErrorMessage(NameValidationStatus status) {
     newName.addStyleName(javaResources.css().errorBorder());
     errorLabel.getElement().getStyle().setColor(Style.getErrorColor());
     showMessage(status);
@@ -312,9 +312,10 @@ final class RenameViewImpl extends Window implements RenameView {
     return patternField.getValue();
   }
 
-  private void showMessage(RefactoringStatus status) {
+  private void showMessage(NameValidationStatus status) {
     RefactoringStatusEntry statusEntry =
-        getEntryMatchingSeverity(status.getSeverity(), status.getEntries());
+        getEntryMatchingSeverity(
+            status.getRefactoringSeverity().getValue(), status.getRefactoringStatusEntries());
     if (statusEntry != null) {
       errorLabel.setText(statusEntry.getMessage());
     } else {
@@ -335,7 +336,7 @@ final class RenameViewImpl extends Window implements RenameView {
   private RefactoringStatusEntry getEntryMatchingSeverity(
       int severity, List<RefactoringStatusEntry> entries) {
     for (RefactoringStatusEntry entry : entries) {
-      if (entry.getSeverity() >= severity) return entry;
+      if (entry.getRefactoringSeverity().getValue() >= severity) return entry;
     }
     return null;
   }
