@@ -127,6 +127,25 @@ public interface Container extends Resource {
   Promise<Optional<Container>> getContainer(String relativePath);
 
   /**
+   * Returns the {@code Promise} with handle to the resource identified by the given path in this
+   * container.
+   *
+   * <p>The supplied path should represent relative path to resource.
+   *
+   * @param relativePath the path of the member resource
+   * @return the {@code Promise} with the handle of the member resource
+   * @throws IllegalStateException if during resource search failed has been occurred. Reasons
+   *     include:
+   *     <ul>
+   *       <li>Resource with path '/project_path' doesn't exists
+   *       <li>Resource with path '/project_path' isn't a project
+   *     </ul>
+   *
+   * @see #getFile(Path)
+   */
+  Promise<Optional<Resource>> getResource(Path relativePath);
+
+  /**
    * Returns the {@code Promise} with array of existing member resources (projects, folders and
    * files) in this resource, in particular order. Order is organized by alphabetic resource name
    * ignoring case.
