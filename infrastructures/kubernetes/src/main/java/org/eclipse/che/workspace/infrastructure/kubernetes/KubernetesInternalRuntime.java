@@ -13,8 +13,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -24,13 +24,12 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -95,7 +94,7 @@ public class KubernetesInternalRuntime<
 
   private final int workspaceStartTimeout;
   private final int ingressStartTimeout;
-  private final String unrecoverableEvents;
+  private final Set<String> unrecoverableEvents;
   private final ServersCheckerFactory serverCheckerFactory;
   private final KubernetesBootstrapperFactory bootstrapperFactory;
   private final ProbeScheduler probeScheduler;
@@ -111,7 +110,7 @@ public class KubernetesInternalRuntime<
   public KubernetesInternalRuntime(
       @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
       @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
-      @Named("che.infra.kubernetes.workspace_unrecoverable_events") String unrecoverableEvents,
+      @Named("che.infra.kubernetes.workspace_unrecoverable_events") String[] unrecoverableEvents,
       NoOpURLRewriter urlRewriter,
       KubernetesBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
@@ -131,7 +130,7 @@ public class KubernetesInternalRuntime<
     this.volumesStrategy = volumesStrategy;
     this.workspaceStartTimeout = workspaceStartTimeout;
     this.ingressStartTimeout = ingressStartTimeout;
-    this.unrecoverableEvents = unrecoverableEvents;
+    this.unrecoverableEvents = ImmutableSet.copyOf(unrecoverableEvents);
     this.probeScheduler = probeScheduler;
     this.probesFactory = probesFactory;
     this.namespace = namespace;
@@ -434,9 +433,9 @@ public class KubernetesInternalRuntime<
     // TODO https://github.com/eclipse/che/issues/7653
     // namespace.pods().watch(new AbnormalStopHandler());
     namespace.pods().watchContainers(new MachineLogsPublisher());
-    if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
+    if (!unrecoverableEvents.isEmpty()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      namespace.pods().watchContainers(new UnrecoverableEventHanler(pods));
+      namespace.pods().watchContainers(new UnrecoverableEventHandler(pods));
     }
 
     final KubernetesServerResolver serverResolver =
@@ -653,15 +652,10 @@ public class KubernetesInternalRuntime<
   }
 
   /** Listens container's events and terminates workspace if unrecoverable event occurs. */
-  public class UnrecoverableEventHanler implements ContainerEventHandler {
-    private List<String> events;
+  public class UnrecoverableEventHandler implements ContainerEventHandler {
     private Map<String, Pod> workspacePods;
 
-    public UnrecoverableEventHanler(Map<String, Pod> workspacePods) {
-      this.events =
-          Strings.isNullOrEmpty(unrecoverableEvents)
-              ? Collections.EMPTY_LIST
-              : Arrays.asList(unrecoverableEvents.split(","));
+    public UnrecoverableEventHandler(Map<String, Pod> workspacePods) {
       this.workspacePods = workspacePods;
     }
 
@@ -723,10 +717,10 @@ public class KubernetesInternalRuntime<
       String message = event.getMessage();
       // Consider unrecoverable if event reason 'equals' one of the property values e.g. "Failed
       // Mount"
-      if (events.contains(reason)) {
+      if (unrecoverableEvents.contains(reason)) {
         isUnrecoverable = true;
       } else {
-        for (String e : events) {
+        for (String e : unrecoverableEvents) {
           // Consider unrecoverable if event message 'startsWith' one of the property values e.g.
           // "Failed to pull image"
           if (message != null && message.startsWith(e)) {

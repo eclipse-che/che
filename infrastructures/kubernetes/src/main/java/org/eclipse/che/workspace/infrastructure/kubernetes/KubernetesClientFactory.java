@@ -19,7 +19,6 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.HttpClientUtils;
 import io.fabric8.kubernetes.client.utils.Utils;
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -32,11 +31,8 @@ import okhttp3.Dispatcher;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Sergii Leshchenko
@@ -44,8 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class KubernetesClientFactory {
-
-  private static final Logger LOG = LoggerFactory.getLogger(KubernetesClientFactory.class);
 
   /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
   private OkHttpClient httpClient;
@@ -92,7 +86,7 @@ public class KubernetesClientFactory {
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public KubernetesClient create(String workspaceId) throws InfrastructureException {
-    Config configForWorkspace = buildConfig(defaultConfig, workspaceId);
+    Config configForWorkspace = buildConfig(getDefaultConfig(), workspaceId);
 
     return create(configForWorkspace);
   }
@@ -106,7 +100,28 @@ public class KubernetesClientFactory {
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public KubernetesClient create() throws InfrastructureException {
-    return create(buildConfig(defaultConfig, null));
+    return create(buildConfig(getDefaultConfig(), null));
+  }
+
+  /**
+   * Shuts down the {@link KubernetesClient} by closing its connection pool. Typically should be
+   * called on application tear down.
+   */
+  public void shutdownClient() {
+    ConnectionPool connectionPool = httpClient.connectionPool();
+    Dispatcher dispatcher = httpClient.dispatcher();
+    ExecutorService executorService =
+        httpClient.dispatcher() != null ? httpClient.dispatcher().executorService() : null;
+
+    if (dispatcher != null) {
+      dispatcher.cancelAll();
+    }
+
+    if (connectionPool != null) {
+      connectionPool.evictAll();
+    }
+
+    Utils.shutdownExecutorService(executorService);
   }
 
   /** Retrieves the {@link OkHttpClient} instance shared by all Kubernetes clients. */
@@ -149,77 +164,50 @@ public class KubernetesClientFactory {
       configBuilder.withTrustCerts(doTrustCerts);
     }
 
-    Config config = configBuilder.build();
-    return config;
+    return configBuilder.build();
   }
 
   /**
-   * Builds the Kubernetes {@link Config} object based on a default {@link Config} object and an
-   * optional workspace Id.
+   * Builds the Kubernetes {@link Config} object based on a provided {@link Config} object and an
+   * optional workspace ID.
    */
-  protected Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
+  protected Config buildConfig(Config config, @Nullable String workspaceId)
       throws InfrastructureException {
-    return defaultConfig;
+    return config;
   }
 
   protected Interceptor buildKubernetesInterceptor(Config config) {
-    return new Interceptor() {
-      @Override
-      public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
-        if (isNotNullOrEmpty(config.getUsername()) && isNotNullOrEmpty(config.getPassword())) {
-          Request authReq =
-              chain
-                  .request()
-                  .newBuilder()
-                  .addHeader(
-                      "Authorization",
-                      Credentials.basic(config.getUsername(), config.getPassword()))
-                  .build();
-          return chain.proceed(authReq);
-        } else if (isNotNullOrEmpty(config.getOauthToken())) {
-          Request authReq =
-              chain
-                  .request()
-                  .newBuilder()
-                  .addHeader("Authorization", "Bearer " + config.getOauthToken())
-                  .build();
-          return chain.proceed(authReq);
-        }
-        return chain.proceed(request);
+    return chain -> {
+      Request request = chain.request();
+      if (isNotNullOrEmpty(config.getUsername()) && isNotNullOrEmpty(config.getPassword())) {
+        Request authReq =
+            chain
+                .request()
+                .newBuilder()
+                .addHeader(
+                    "Authorization", Credentials.basic(config.getUsername(), config.getPassword()))
+                .build();
+        return chain.proceed(authReq);
+      } else if (isNotNullOrEmpty(config.getOauthToken())) {
+        Request authReq =
+            chain
+                .request()
+                .newBuilder()
+                .addHeader("Authorization", "Bearer " + config.getOauthToken())
+                .build();
+        return chain.proceed(authReq);
       }
+      return chain.proceed(request);
     };
   }
 
   /**
-   * Shuts down the {@link KubernetesClient} by closing it's connection pool. Typically should be
-   * called on application tear down.
-   */
-  public void shutdownClient() {
-    ConnectionPool connectionPool = httpClient.connectionPool();
-    Dispatcher dispatcher = httpClient.dispatcher();
-    ExecutorService executorService =
-        httpClient.dispatcher() != null ? httpClient.dispatcher().executorService() : null;
-
-    if (dispatcher != null) {
-      dispatcher.cancelAll();
-    }
-
-    if (connectionPool != null) {
-      connectionPool.evictAll();
-    }
-
-    Utils.shutdownExecutorService(executorService);
-  }
-
-  /**
    * Creates instance of {@link KubernetesClient} that uses an {@link OkHttpClient} instance derived
-   * from the shared {@code httpClient} instance in which interceptors are overriden to authenticate
-   * with the credentials (user/password or Oauth token) contained in the {@code config} parameter.
-   *
-   * @throws InfrastructureException if any error occurs on client instance creation.
+   * from the shared {@code httpClient} instance in which interceptors are overridden to
+   * authenticate with the credentials (user/password or Oauth token) contained in the {@code
+   * config} parameter.
    */
-  private KubernetesClient create(Config config) throws InfrastructureException {
+  private KubernetesClient create(Config config) {
     OkHttpClient clientHttpClient =
         httpClient.newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();

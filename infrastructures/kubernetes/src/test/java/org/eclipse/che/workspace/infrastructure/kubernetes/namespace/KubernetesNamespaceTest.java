@@ -20,6 +20,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
@@ -33,9 +35,12 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
@@ -201,6 +206,69 @@ public class KubernetesNamespaceTest {
 
     verify(serviceAccountResource).get();
     verify(serviceAccountResource).watch(any());
+  }
+
+  @Test
+  public void testDeleteNonExistingPodBeforeWatch() throws Exception {
+    final MixedOperation mixedOperation = mock(MixedOperation.class);
+    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
+    final PodResource podResource = mock(PodResource.class);
+    doReturn(mixedOperation).when(kubernetesClient).pods();
+    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(anyString())).thenReturn(podResource);
+
+    doReturn(Boolean.FALSE).when(podResource).delete();
+    Watch watch = mock(Watch.class);
+    doReturn(watch).when(podResource).watch(any());
+
+    new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
+
+    verify(watch).close();
+  }
+
+  @Test
+  public void testDeletePodThrowingKubernetesClientExceptionShouldCloseWatch() throws Exception {
+    final MixedOperation mixedOperation = mock(MixedOperation.class);
+    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
+    final PodResource podResource = mock(PodResource.class);
+    doReturn(mixedOperation).when(kubernetesClient).pods();
+    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(anyString())).thenReturn(podResource);
+
+    doThrow(KubernetesClientException.class).when(podResource).delete();
+    Watch watch = mock(Watch.class);
+    doReturn(watch).when(podResource).watch(any());
+
+    try {
+      new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
+    } catch (KubernetesInfrastructureException e) {
+      assertTrue(e.getCause() instanceof KubernetesClientException);
+      verify(watch).close();
+      return;
+    }
+    fail("The exception should have been rethrown");
+  }
+
+  @Test
+  public void testDeletePodThrowingAnyExceptionShouldCloseWatch() throws Exception {
+    final MixedOperation mixedOperation = mock(MixedOperation.class);
+    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
+    final PodResource podResource = mock(PodResource.class);
+    doReturn(mixedOperation).when(kubernetesClient).pods();
+    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(anyString())).thenReturn(podResource);
+
+    doThrow(RuntimeException.class).when(podResource).delete();
+    Watch watch = mock(Watch.class);
+    doReturn(watch).when(podResource).watch(any());
+
+    try {
+      new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
+    } catch (RuntimeException e) {
+      verify(watch).close();
+      return;
+    }
+    fail("The exception should have been rethrown");
   }
 
   private MetadataNested prepareCreateNamespaceRequest() {
