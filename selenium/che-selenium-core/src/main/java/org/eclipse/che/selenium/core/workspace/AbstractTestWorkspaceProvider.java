@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
@@ -44,7 +44,7 @@ public abstract class AbstractTestWorkspaceProvider implements TestWorkspaceProv
   protected final int poolSize;
   protected final DefaultTestUser defaultUser;
   protected final int defaultMemoryGb;
-  protected final TestWorkspaceServiceClient testWorkspaceServiceClient;
+  protected final AbstractTestWorkspaceServiceClient testWorkspaceServiceClient;
   protected final WorkspaceDtoDeserializer workspaceDtoDeserializer;
   protected ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   protected ScheduledExecutorService executor;
@@ -56,7 +56,7 @@ public abstract class AbstractTestWorkspaceProvider implements TestWorkspaceProv
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
       DefaultTestUser defaultUser,
       WorkspaceDtoDeserializer workspaceDtoDeserializer,
-      TestWorkspaceServiceClient testWorkspaceServiceClient,
+      AbstractTestWorkspaceServiceClient testWorkspaceServiceClient,
       TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
     this.defaultUser = defaultUser;
     this.defaultMemoryGb = defaultMemoryGb;

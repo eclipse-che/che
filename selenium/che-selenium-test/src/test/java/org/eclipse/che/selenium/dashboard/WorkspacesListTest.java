@@ -20,7 +20,7 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -47,7 +47,7 @@ public class WorkspacesListTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private WorkspaceProjects workspaceProjects;
   @Inject private WorkspaceConfig workspaceConfig;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
