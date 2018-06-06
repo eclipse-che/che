@@ -289,12 +289,13 @@ public class ProjectServiceApi {
   /** Import project from specified source storage to specified location */
   public void importProject(
       String wsPath, boolean force, String clientId, SourceStorageDto sourceStorage)
-      throws ConflictException, ForbiddenException, UnauthorizedException, IOException,
-          ServerException, NotFoundException, BadRequestException {
+      throws ConflictException, ForbiddenException, UnauthorizedException, ServerException,
+          NotFoundException {
 
     wsPath = absolutize(wsPath);
 
     projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
+    eventService.publish(new ProjectCreatedEvent(wsPath));
   }
 
   /** Create file with specified path, name and content */
