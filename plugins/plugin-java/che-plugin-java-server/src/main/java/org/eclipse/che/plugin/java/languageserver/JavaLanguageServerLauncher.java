@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.InputStream;
@@ -18,14 +22,18 @@ import java.lang.ProcessBuilder.Redirect;
 import java.lang.reflect.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
+import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -43,10 +51,14 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
 
   private final Path launchScript;
   private ProcessorJsonRpcCommunication processorJsonRpcCommunication;
+  private ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter;
 
   @Inject
-  public JavaLanguageServerLauncher(ProcessorJsonRpcCommunication processorJsonRpcCommunication) {
+  public JavaLanguageServerLauncher(
+      ProcessorJsonRpcCommunication processorJsonRpcCommunication,
+      ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter) {
     this.processorJsonRpcCommunication = processorJsonRpcCommunication;
+    this.executeCliendCommandTransmitter = executeCliendCommandTransmitter;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
 
@@ -62,6 +74,21 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
    */
   public void sendProgressReport(ProgressReport report) {
     processorJsonRpcCommunication.sendProgressNotification(report);
+  }
+
+  public CompletableFuture<Object> executeClientCommand(ExecuteCommandParams params) {
+    return executeCliendCommandTransmitter.executeClientCommand(convertParams(params));
+  }
+
+  private ExecuteCommandParams convertParams(ExecuteCommandParams params) {
+    if (CLIENT_UPDATE_PROJECTS_CLASSPATH.equals(params.getCommand())) {
+      List<Object> fixedPathList = new ArrayList<>();
+      for (Object uri : params.getArguments()) {
+        fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
+      }
+      params.setArguments(fixedPathList);
+    }
+    return params;
   }
 
   @Override

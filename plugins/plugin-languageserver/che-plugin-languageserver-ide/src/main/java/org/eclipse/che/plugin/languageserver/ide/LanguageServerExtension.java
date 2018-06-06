@@ -40,6 +40,7 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAct
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.ide.rename.LSRenameAction;
+import org.eclipse.che.plugin.languageserver.ide.service.ExecuteClientCommandReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.PublishDiagnosticsReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.ShowMessageJsonRpcReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -63,7 +64,8 @@ public class LanguageServerExtension {
       EventBus eventBus,
       AppContext appContext,
       ShowMessageJsonRpcReceiver showMessageJsonRpcReceiver,
-      PublishDiagnosticsReceiver publishDiagnosticsReceiver) {
+      PublishDiagnosticsReceiver publishDiagnosticsReceiver,
+      ExecuteClientCommandReceiver executeClientCommandReceiver) {
     eventBus.addHandler(
         WsAgentServerRunningEvent.TYPE,
         e -> {
@@ -73,6 +75,7 @@ public class LanguageServerExtension {
           defaultHoverProviderInitializer.initialize();
           showMessageJsonRpcReceiver.subscribe();
           publishDiagnosticsReceiver.subscribe();
+          executeClientCommandReceiver.subscribe();
         });
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
@@ -82,6 +85,7 @@ public class LanguageServerExtension {
       defaultHoverProviderInitializer.initialize();
       showMessageJsonRpcReceiver.subscribe();
       publishDiagnosticsReceiver.subscribe();
+      executeClientCommandReceiver.subscribe();
     }
   }
 
