@@ -11,11 +11,19 @@
 
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
+import static org.openqa.selenium.Keys.*;
+import static org.openqa.selenium.Keys.SPACE;
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -29,51 +37,101 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class TypeScriptEditingTest {
-  private static final String PROJECT_NAME =
-      NameGenerator.generate(TypeScriptEditingTest.class.getSimpleName(), 4);
-  private static final String PATH_TO_GREETER_FILE = PROJECT_NAME + "/Greeter.ts";
-  private static final String PATH_TO_PRINT_TEST_FILE = PROJECT_NAME + "/printTest.ts";
+    private static final String PROJECT_NAME            =
+            NameGenerator.generate(TypeScriptEditingTest.class.getSimpleName(), 4);
+    private static final String PATH_TO_GREETER_FILE    = PROJECT_NAME + "/Greeter.ts";
+    private static final String PATH_TO_PRINT_TEST_FILE = PROJECT_NAME + "/printTest.ts";
 
-  @InjectTestWorkspace(template = ECLIPSE_NODEJS)
-  private TestWorkspace workspace;
+    @InjectTestWorkspace(template = ECLIPSE_NODEJS)
+    private TestWorkspace workspace;
 
-  @Inject private Ide ide;
-  @Inject private Menu menu;
-  @Inject private Wizard wizard;
-  @Inject private Consoles consoles;
-  @Inject private CodenvyEditor editor;
-  @Inject private CommandsPalette commandsPalette;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private AskForValueDialog askForValueDialog;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
+    @Inject
+    private Ide                      ide;
+    @Inject
+    private Menu                     menu;
+    @Inject
+    private Wizard                   wizard;
+    @Inject
+    private Consoles                 consoles;
+    @Inject
+    private CodenvyEditor            editor;
+    @Inject
+    private CommandsPalette          commandsPalette;
+    @Inject
+    private ProjectExplorer          projectExplorer;
+    @Inject
+    private AskForValueDialog        askForValueDialog;
+    @Inject
+    private TestProjectServiceClient testProjectServiceClient;
 
-  @BeforeClass
-  public void setUp() throws Exception {
-    URL resource = getClass().getResource("/projects/type-script-simple-project");
-    testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.NODE_JS);
-    ide.open(workspace);
-    projectExplorer.waitVisibleItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PATH_TO_GREETER_FILE);
-  }
+    @BeforeClass
+    public void setUp() throws Exception {
+        URL resource = getClass().getResource("/projects/type-script-simple-project");
+        testProjectServiceClient.importProject(
+                workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.NODE_JS);
+        ide.open(workspace);
 
-  @Test
-  public void checkMainFeaturesTypeScriptLS() {
+        projectExplorer.waitVisibleItem(PROJECT_NAME);
+        projectExplorer.quickExpandWithJavaScript();
+        projectExplorer.openItemByPath(PATH_TO_GREETER_FILE);
+    }
 
-    String intitTypeScriptLanguageServerMessage =
-        String.format(
-            "Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
+    @Test
+    public void checkMainFeaturesTypeScriptLS() {
+        String intitTypeScriptLanguageServerMessage =
+                String.format(
+                        "Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
 
-    consoles.waitExpectedTextIntoConsole(intitTypeScriptLanguageServerMessage);
-    editor.waitActive();
-    editor.goToPosition(13, 2);
-    editor.typeTextIntoEditor(Keys.SPACE.toString());
-  }
+        consoles.waitExpectedTextIntoConsole(intitTypeScriptLanguageServerMessage);
+        checkCodeValidation();
+        checkCodeAssistant();
+        checkGoToDefinition();
+    }
+
+    private void  checkCodeValidation(){
+        final int expectedValueOfErrorMarkers = 9;
+        editor.waitActive();
+        editor.goToPosition(13, 2);
+        editor.typeTextIntoEditor(SPACE.toString());
+        final int actualValueErrorMarkers = editor.getMarkersQuantity(ERROR);
+        assertEquals(actualValueErrorMarkers, expectedValueOfErrorMarkers,
+                     String.format("The expected value of errors marker should be %d but actual %d", expectedValueOfErrorMarkers,
+                                   actualValueErrorMarkers));
+        editor.waitMarkerInPositionAndMoveCursor(ERROR_OVERVIEW, 13);
+        editor.waitTextInToolTipPopup("Cannot find name 'c'");
+        editor.goToPosition(13, 2);
+        editor.typeTextIntoEditor(DELETE.toString());
+        editor.waitAllMarkersInvisibility(ERROR);
+
+
+    }
+
+    private void checkCodeAssistant(){
+        String textFromWholeCodeAssistantScope = "AbortController\nAbortSignal\nabstract\nActiveXObject\naddEventListener\nalert";
+        String textFromGreeterObject = "greet\ngreeting\ntestPrint";
+
+        editor.goToPosition(28, 36);
+        editor.launchAutocomplete();
+        editor.waitTextIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
+        editor.closeAutocomplete();
+        editor.typeTextIntoEditor(ENTER.toString());
+        editor.typeTextIntoEditor("greeter.");
+        editor.launchAutocomplete();
+        editor.waitTextIntoAutocompleteContainer(textFromGreeterObject);
+        editor.selectItemIntoAutocompleteAndPerformDoubleClick("greet");
+        editor.waitAllMarkersInvisibility(ERROR);
+    }
+
+    private void checkGoToDefinition(){
+        editor.goToPosition(24, 20);
+        menu.runCommand(ASSISTANT, FIND_DEFINITION);
+        editor.waitActiveTabFileName("testPrint.ts");
+        editor.waitCursorPosition(14, 6);
+    }
+
 }

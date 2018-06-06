@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-import {Print} from './printTest'
+import {Print} from './testPrint'
 
 class Greeter {
     greeting: string;

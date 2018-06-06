@@ -8,9 +8,9 @@
             "memoryLimitBytes": "desired_memory_value"
           },
           "installers": [
+            "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent",
             "org.eclipse.che.exec",
-            "org.eclipse.che.terminal",
             "org.eclipse.che.ls.js-ts"
           ],
           "servers": {
@@ -30,7 +30,7 @@
         }
       },
       "recipe": {
-        "content": "eclipse/node",
+        "location": "eclipse/node",
         "type": "dockerimage"
       }
     }
