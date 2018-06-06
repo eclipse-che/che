@@ -30,10 +30,10 @@ import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
@@ -57,7 +57,11 @@ import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
 import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtilImpl;
 import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtilImpl;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
-import org.eclipse.che.selenium.core.workspace.*;
+import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceProvider;
+import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 
 /**
@@ -101,9 +105,11 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
 
     bind(AbstractTestWorkspaceServiceClient.class).to(CheTestWorkspaceServiceClient.class);
+    //
+    // bind(TestWorkspaceServiceClientFactory.class).to(CheTestWorkspaceServiceClientFactory.class);
 
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
-    install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
+    install(new FactoryModuleBuilder().build(CheTestWorkspaceServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(TestUserServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(WebDriverLogsReaderFactory.class));
 

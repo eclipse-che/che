@@ -13,6 +13,9 @@ package org.eclipse.che.selenium.core.client;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
@@ -31,15 +34,17 @@ public class CheTestWorkspaceServiceClient extends AbstractTestWorkspaceServiceC
 
   private static final Logger LOG = LoggerFactory.getLogger(CheTestWorkspaceServiceClient.class);
 
+  @Inject
   public CheTestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider, HttpJsonRequestFactory requestFactory) {
     super(apiEndpointProvider, requestFactory);
   }
 
+  @AssistedInject
   public CheTestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      TestUser testUser) {
+      @Assisted TestUser testUser) {
     super(apiEndpointProvider, userHttpJsonRequestFactoryCreator, testUser);
   }
 

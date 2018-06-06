@@ -16,9 +16,6 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,18 +49,16 @@ public abstract class AbstractTestWorkspaceServiceClient {
   protected final TestApiEndpointUrlProvider apiEndpointProvider;
   protected final HttpJsonRequestFactory requestFactory;
 
-  @Inject
   public AbstractTestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpointProvider = apiEndpointProvider;
     this.requestFactory = requestFactory;
   }
 
-  @AssistedInject
   public AbstractTestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted TestUser testUser) {
+      TestUser testUser) {
     this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(testUser));
   }
 

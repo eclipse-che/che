@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 
@@ -32,7 +32,7 @@ public class CheTestWorkspaceProvider extends AbstractTestWorkspaceProvider {
       DefaultTestUser defaultUser,
       WorkspaceDtoDeserializer workspaceDtoDeserializer,
       CheTestWorkspaceServiceClient testWorkspaceServiceClient,
-      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
+      CheTestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
     super(
         poolSize,
         threads,
