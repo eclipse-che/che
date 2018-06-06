@@ -19,8 +19,8 @@ import com.google.inject.name.Named;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -44,7 +44,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private Events events;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient projectServiceClient;
   @Inject private DefaultTestUser testUser;
   @Inject private Dashboard dashboard;

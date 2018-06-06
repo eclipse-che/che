@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.core.client;
 import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.selenium.core.user.TestUser;
 
-/** @author Dmytro Nochevnov */
-public interface TestWorkspaceServiceClientFactory {
-  AbstractTestWorkspaceServiceClient create(@Assisted TestUser testUser);
+public interface CheTestWorkspaceServiceClientFactory extends TestWorkspaceServiceClientFactory {
+  @Override
+  CheTestWorkspaceServiceClient create(@Assisted TestUser testUser);
 }

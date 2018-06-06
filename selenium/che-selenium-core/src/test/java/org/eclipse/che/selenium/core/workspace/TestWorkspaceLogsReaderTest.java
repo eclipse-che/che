@@ -27,7 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader.LogInfo;
@@ -65,7 +65,7 @@ public class TestWorkspaceLogsReaderTest {
   @Spy private TestWorkspaceLogsReader testWorkspaceLogsReader;
 
   @Mock private TestWorkspace testWorkspace;
-  @Mock private TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Mock private CheTestWorkspaceServiceClient testWorkspaceServiceClient;
   @Mock private Logger log;
 
   @BeforeMethod
