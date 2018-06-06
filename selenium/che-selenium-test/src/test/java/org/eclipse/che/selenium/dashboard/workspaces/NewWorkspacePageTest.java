@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.dashboard.workspaces;
 import static java.util.Arrays.asList;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
+import static org.openqa.selenium.Keys.ESCAPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
@@ -35,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class NewWorkspacePageTest {
@@ -43,6 +46,10 @@ public class NewWorkspacePageTest {
   private static final int EXPECTED_ALL_STACKS_COUNT = 39;
   private static final int EXPECTED_MULTI_MACHINE_STACKS_COUNT = 5;
   private static final String EXPECTED_WORKSPACE_NAME_PREFIX = "wksp-";
+  private static final String MACHINE_NAME = "dev-machine";
+  private static final double MAX_RAM_VALUE = 100.0;
+  private static final double MIN_RAM_VALUE = 0.5;
+  private static final double RAM_CHANGE_STEP = 0.5;
   private static final String NAME_WITH_ONE_HUNDRED_SYMBOLS =
       "wksp-ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
   private static final List<String> NOT_VALID_NAMES =
@@ -170,6 +177,9 @@ public class NewWorkspacePageTest {
           "cpp-default",
           "android-default");
 
+  private static final List<String> EXPECTED_JAVA_STACKS =
+      asList("java-default", "android-default", "che-in-che", "java-theia-openshift");
+
   private static final List<String> EXPECTED_FILTERS_SUGGESTIONS =
       asList("JAVA", "JDK", "JAVA 1.8, THEIA");
 
@@ -189,17 +199,23 @@ public class NewWorkspacePageTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
+  @Inject private Stacks stacks;
 
   @BeforeClass
   public void setup() {
     dashboard.open();
+  }
+
+  @BeforeMethod
+  public void prepareToTestMethod() {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitToolbarTitleName();
     workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitPageLoad();
   }
 
-  // @Test
+  @Test
   public void checkNameField() {
     newWorkspace.waitPageLoad();
     assertEquals(
@@ -208,40 +224,41 @@ public class NewWorkspacePageTest {
     newWorkspace.typeWorkspaceName("");
 
     newWorkspace.waitErrorMessage("A name is required.");
-    newWorkspace.waitCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
     newWorkspace.typeWorkspaceName("wk");
 
     newWorkspace.waitErrorMessage("The name has to be more than 3 characters long.");
-    newWorkspace.waitCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
     newWorkspace.typeWorkspaceName("wks");
 
     newWorkspace.waitErrorMessageDisappearance();
-    newWorkspace.waitCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
     newWorkspace.typeWorkspaceName(NAME_WITH_ONE_HUNDRED_SYMBOLS);
 
     newWorkspace.waitErrorMessageDisappearance();
-    newWorkspace.waitCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
     newWorkspace.typeWorkspaceName(NAME_WITH_ONE_HUNDRED_SYMBOLS + "p");
 
     newWorkspace.waitErrorMessage("The name has to be less than 100 characters long.");
-    newWorkspace.waitCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
     newWorkspace.typeWorkspaceName(NAME_WITH_ONE_HUNDRED_SYMBOLS);
 
     newWorkspace.waitErrorMessageDisappearance();
-    newWorkspace.waitCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
     checkNotValidNames();
 
     checkValidNames();
   }
 
-  // @Test(priority = 1)
+  @Test
   public void checkStackButtons() {
+    newWorkspace.waitPageLoad();
     newWorkspace.waitQuickStartButton();
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
     assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_QUICK_START_STACKS_COUNT);
@@ -280,12 +297,13 @@ public class NewWorkspacePageTest {
     newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS);
   }
 
-  //@Test(priority = 2)
+  @Test
   public void checkFiltersButton() {
-    /*newWorkspace.clickOnFiltersButton();
+    newWorkspace.waitPageLoad();
+    newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
     seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
-    newWorkspace.waitFiltersFormClosed();*/
+    newWorkspace.waitFiltersFormClosed();
 
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
@@ -374,7 +392,97 @@ public class NewWorkspacePageTest {
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
   }
 
+  @Test
+  public void checkAddStackButton() {
+    newWorkspace.waitPageLoad();
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
+    newWorkspace.waitCreateStackDialogClosing();
 
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.clickOnTitlePlaceCoordinate();
+    newWorkspace.waitCreateStackDialogClosing();
+
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.closeCreateStackDialogByCloseButton();
+    newWorkspace.waitCreateStackDialogClosing();
+
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.clickOnNoButtonInCreateStackDialog();
+    newWorkspace.waitCreateStackDialogClosing();
+
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.clickOnYesButtonInCreateStackDialog();
+    stacks.waitToolbarTitleName();
+    seleniumWebDriver.navigate().back();
+    newWorkspace.waitPageLoad();
+  }
+
+  @Test
+  public void checkSearchField() {
+    newWorkspace.waitPageLoad();
+    newWorkspace.typeToSearchInput("Java");
+    newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+    newWorkspace.typeToSearchInput("");
+    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.typeToSearchInput("java");
+    newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+    newWorkspace.typeToSearchInput("");
+    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.typeToSearchInput("JAVA");
+    newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+    newWorkspace.typeToSearchInput("");
+    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+  }
+
+  @Test
+  public void checkRamSelection() {
+    newWorkspace.waitPageLoad();
+    newWorkspace.selectStack("java-default");
+    newWorkspace.waitStackSelected("java-default");
+    newWorkspace.waitRamValue(MACHINE_NAME, 2.0);
+    newWorkspace.typeToRamField("");
+    newWorkspace.waitRedRamFieldBorders();
+    newWorkspace.waitTopCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
+
+    newWorkspace.typeToRamField(Double.toString(MAX_RAM_VALUE));
+    newWorkspace.waitRedRamFieldBordersDisappearance();
+    newWorkspace.waitTopCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
+
+    newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE);
+
+    newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE - RAM_CHANGE_STEP);
+
+    newWorkspace.typeToRamField("");
+    newWorkspace.waitRedRamFieldBorders();
+    newWorkspace.waitTopCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
+
+    newWorkspace.typeToRamField(Double.toString(MIN_RAM_VALUE));
+    newWorkspace.waitRedRamFieldBordersDisappearance();
+    newWorkspace.waitTopCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
+    newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE);
+    newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE + RAM_CHANGE_STEP);
+
+    newWorkspace.clickAndHoldIncrementMemoryButton(MACHINE_NAME, 3);
+    newWorkspace.waitRamValueInSpecifiedRange(MACHINE_NAME, 3, MAX_RAM_VALUE);
+
+    double currentRamAmount = newWorkspace.getRAM(MACHINE_NAME);
+    newWorkspace.clickAndHoldDecrementMemoryButton(MACHINE_NAME, 3);
+    newWorkspace.waitRamValueInSpecifiedRange(MACHINE_NAME, MIN_RAM_VALUE, currentRamAmount - 2);
+  }
 
   private void checkNotValidNames() {
     NOT_VALID_NAMES.forEach(
@@ -382,13 +490,13 @@ public class NewWorkspacePageTest {
           newWorkspace.typeWorkspaceName("temporary");
 
           newWorkspace.waitErrorMessageDisappearance();
-          newWorkspace.waitCreateWorkspaceButtonEnabled();
+          newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
           newWorkspace.typeWorkspaceName(name);
 
           newWorkspace.waitErrorMessage(
               "The name should not contain special characters like space, dollar, etc. and should start and end only with digits, latin letters or underscores.");
-          newWorkspace.waitCreateWorkspaceButtonDisabled();
+          newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
         });
   }
 
@@ -398,12 +506,12 @@ public class NewWorkspacePageTest {
           newWorkspace.typeWorkspaceName("temporary");
 
           newWorkspace.waitErrorMessageDisappearance();
-          newWorkspace.waitCreateWorkspaceButtonEnabled();
+          newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
           newWorkspace.typeWorkspaceName(name);
 
           newWorkspace.waitErrorMessageDisappearance();
-          newWorkspace.waitCreateWorkspaceButtonEnabled();
+          newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
         });
   }
 }

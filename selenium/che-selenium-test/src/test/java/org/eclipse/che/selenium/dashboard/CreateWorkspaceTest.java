@@ -71,21 +71,21 @@ public class CreateWorkspaceTest {
     newWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
     newWorkspace.waitErrorMessage(WS_NAME_TOO_SHORT);
 
-    newWorkspace.waitCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
     newWorkspace.typeWorkspaceName(TOO_LONG_WORKSPACE_NAME);
     newWorkspace.waitErrorMessage(WS_NAME_TOO_LONG);
-    newWorkspace.waitCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
     // type valid names and check that the Create button is enabled
     newWorkspace.typeWorkspaceName(MIN_VALID_WORKSPACE_NAME);
-    newWorkspace.waitCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
-    newWorkspace.waitCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
     newWorkspace.typeWorkspaceName(MAX_VALID_WORKSPACE_NAME);
-    newWorkspace.waitCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
   }
 
   @Test

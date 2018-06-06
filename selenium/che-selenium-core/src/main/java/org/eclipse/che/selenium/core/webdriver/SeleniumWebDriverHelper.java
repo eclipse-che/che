@@ -32,6 +32,7 @@ import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -1096,5 +1097,28 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAttributeEqualsTo(By elementLocator, String attributeName, String expectedValue) {
     waitAttributeEqualsTo(elementLocator, attributeName, expectedValue, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Performs clicking and holding an {@code element} during specified {@code timeout}.
+   *
+   * @param element target element
+   * @param holdingTimeout time for element holding
+   */
+  public void clickAndHoldElementDuringTimeout(By element, int holdingTimeout) {
+    clickAndHoldElementDuringTimeout(waitVisibility(element), holdingTimeout);
+  }
+
+  /**
+   * Performs clicking and holding an {@code element} during specified {@code timeout}.
+   *
+   * @param element target element
+   * @param holdingTimeout time for element holding
+   */
+  public void clickAndHoldElementDuringTimeout(WebElement element, int holdingTimeout) {
+    Actions action = getAction();
+    action.clickAndHold(waitVisibility(element)).perform();
+    WaitUtils.sleepQuietly(holdingTimeout);
+    action.release(waitVisibility(element)).perform();
   }
 }
