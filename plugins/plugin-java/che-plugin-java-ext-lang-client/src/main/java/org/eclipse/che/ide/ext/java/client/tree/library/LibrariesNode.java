@@ -28,6 +28,8 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
+import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
+import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent.ProjectClasspathChangedHandler;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
@@ -39,7 +41,8 @@ import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 
 /** @author Vlad Zhukovskiy */
 @Beta
-public class LibrariesNode extends SyntheticNode<Path> implements ResourceChangedHandler {
+public class LibrariesNode extends SyntheticNode<Path>
+    implements ResourceChangedHandler, ProjectClasspathChangedHandler {
 
   private final JavaNodeFactory nodeFactory;
   private DtoFactory dtoFactory;
@@ -64,6 +67,7 @@ public class LibrariesNode extends SyntheticNode<Path> implements ResourceChange
     this.eventBus = eventBus;
 
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
+    eventBus.addHandler(ProjectClasspathChangedEvent.getType(), this);
   }
 
   @Override
@@ -107,6 +111,15 @@ public class LibrariesNode extends SyntheticNode<Path> implements ResourceChange
     final ResourceDelta delta = event.getDelta();
 
     if (delta.getKind() == UPDATED && delta.getResource().getLocation().equals(getData())) {
+      eventBus.fireEvent(new SyntheticNodeUpdateEvent(LibrariesNode.this));
+    }
+  }
+
+  @Override
+  public void onProjectClasspathChanged(ProjectClasspathChangedEvent event) {
+    final Path project = new Path(event.getProject());
+
+    if (getProject().equals(project)) {
       eventBus.fireEvent(new SyntheticNodeUpdateEvent(LibrariesNode.this));
     }
   }
