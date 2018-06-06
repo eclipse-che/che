@@ -26,9 +26,20 @@ spec:
     spec:
       initContainers:
 {{- if .Values.global.multiuser }}
-      - name: wait-for-postgres-and-keycloak
+      - name: wait-for-postgres
         image: alpine:3.5
-        command: ["sh", "-c", "apk --no-cache add curl jq ; pg_adresses_length=0 ; kc_adresses_length=0 ; until [ $pg_adresses_length -gt 0 -a $kc_adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; pg_adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/keycloak`; kc_adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"` ; done;"]
+        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+{{- end }}
+#wait for keycloak if in multiuser mode and .Values.customOidcProvider was not defined
+{{- if (and .Values.global.multiuser (not .Values.customOidcProvider)) }}
+      - name: wait-for-keycloak
+        image: alpine:3.5
+        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/keycloak`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
         env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -142,20 +153,35 @@ spec:
               key: CHE_INFRA_KUBERNETES_USERNAME
               name: che
 {{- if .Values.global.multiuser }}
-        - name: CHE_KEYCLOAK_AUTH__SERVER__URL
-          valueFrom:
-            configMapKeyRef:
-              key: CHE_KEYCLOAK_AUTH__SERVER__URL
-              name: che
+#Client_id should always be supplied in multiuser scenario
         - name: CHE_KEYCLOAK_CLIENT__ID
           valueFrom:
             configMapKeyRef:
               key: CHE_KEYCLOAK_CLIENT__ID
               name: che
+        - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_AUTH__SERVER__URL
+              name: che
         - name: CHE_KEYCLOAK_REALM
           valueFrom:
             configMapKeyRef:
               key: CHE_KEYCLOAK_REALM
+              name: che
+{{- end }}
+{{- if (and .Values.global.multiuser .Values.customOidcProvider) }}
+        - name: CHE_KEYCLOAK_OIDC__PROVIDER
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_OIDC__PROVIDER
+              name: che
+{{- end }}
+{{- if and .Values.global.multiuser .Values.customOidcUsernameClaim }}
+        - name: CHE_KEYCLOAK_USERNAME__CLAIM
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_USERNAME__CLAIM
               name: che
 {{- end }}
         - name: CHE_INFRA_KUBERNETES_TLS__ENABLED
