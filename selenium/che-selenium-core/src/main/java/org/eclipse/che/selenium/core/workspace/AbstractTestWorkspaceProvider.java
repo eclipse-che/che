@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.core.workspace;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
@@ -49,11 +47,10 @@ public abstract class AbstractTestWorkspaceProvider implements TestWorkspaceProv
   protected ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   protected ScheduledExecutorService executor;
 
-  @Inject
   protected AbstractTestWorkspaceProvider(
-      @Named("che.workspace_pool_size") String poolSize,
-      @Named("che.threads") int threads,
-      @Named("workspace.default_memory_gb") int defaultMemoryGb,
+      String poolSize,
+      int threads,
+      int defaultMemoryGb,
       DefaultTestUser defaultUser,
       WorkspaceDtoDeserializer workspaceDtoDeserializer,
       AbstractTestWorkspaceServiceClient testWorkspaceServiceClient,
