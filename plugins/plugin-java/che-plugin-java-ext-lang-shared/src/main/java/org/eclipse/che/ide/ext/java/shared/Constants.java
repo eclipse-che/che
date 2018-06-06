@@ -62,6 +62,12 @@ public final class Constants {
   public static final String VALIDATE_RENAMED_NAME = "java/validateRenamedName";
   public static final String GET_LINKED_MODEL = "java/getLinkedModel";
 
+  public static final String EXECUTE_CLIENT_COMMAND = "workspace/executeClientCommand";
+  public static final String EXECUTE_CLIENT_COMMAND_UNSUBSCRIBE =
+      "workspace/executeClientCommand/unsubscribe";
+  public static final String EXECUTE_CLIENT_COMMAND_SUBSCRIBE =
+      "workspace/executeClientCommand/subscribe";
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }
