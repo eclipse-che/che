@@ -12,18 +12,18 @@ package org.eclipse.che.api.project.server.impl;
 
 import static java.io.File.separator;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
@@ -31,19 +31,27 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
+import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectQualifier;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.RegisteredProject;
+import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Performs project related operations after project registry is synchronized and method parameters
@@ -51,25 +59,75 @@ import org.eclipse.che.api.project.shared.RegisteredProject;
  */
 @Singleton
 public class ExecutiveProjectManager implements ProjectManager {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ExecutiveProjectManager.class);
 
   private final FsManager fsManager;
   private final ProjectQualifier projectQualifier;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectHandlerRegistry projectHandlerRegistry;
-  private final ProjectImportManager projectImportManager;
+  private final HiddenItemPathMatcher hiddenItemPathMatcher;
+  private final FileWatcherManager fileWatcherManager;
+  private final EventService eventService;
+
+  private RemoteProjects remoteProjects;
 
   @Inject
   public ExecutiveProjectManager(
       FsManager fsManager,
-      ProjectConfigRegistry projectConfigRegistry,
+      RemoteProjects remoteProjects,
       ProjectHandlerRegistry projectHandlerRegistry,
       ProjectQualifier projectQualifier,
-      ProjectImportManager projectImportManager) {
+      EventService eventService,
+      RegisteredProjectFactory registeredProjectFactory,
+      HiddenItemPathMatcher hiddenItemPathMatcher,
+      FileWatcherManager fileWatcherManager) {
+    System.out.println("constructing epr secpmd");
     this.fsManager = fsManager;
-    this.projectConfigRegistry = projectConfigRegistry;
+    this.remoteProjects = remoteProjects;
+    this.projectConfigRegistry = new InmemoryProjectRegistry(registeredProjectFactory);
+    this.hiddenItemPathMatcher = hiddenItemPathMatcher;
+    this.fileWatcherManager = fileWatcherManager;
     this.projectHandlerRegistry = projectHandlerRegistry;
     this.projectQualifier = projectQualifier;
-    this.projectImportManager = projectImportManager;
+    this.eventService = eventService;
+  }
+
+  void initialize()
+      throws ServerException, ForbiddenException, ConflictException, NotFoundException {
+
+    LOGGER.info("initializing project manager");
+    for (ProjectConfig projectConfig : remoteProjects.getAll()) {
+      projectConfigRegistry.put(projectConfig, false, false);
+    }
+    for (String wsPath : fsManager.getDirWsPaths(ROOT)) {
+      if (!hiddenItemPathMatcher.matches(Paths.get(wsPath)) && !isRegistered(wsPath)) {
+        RegisteredProject project = projectConfigRegistry.putIfAbsent(wsPath, true, true);
+        fireInitHandlers(project);
+        eventService.publish(new ProjectInitializedEvent(project.getBaseFolder()));
+      }
+    }
+  }
+
+  void ensureExists(String wsPath) {
+    RegisteredProject existing = getOrNull(wsPath);
+    if (existing == null) {
+      projectConfigRegistry.putIfAbsent(wsPath, true, true);
+      eventService.publish(new ProjectCreatedEvent(wsPath));
+    } else {
+      projectConfigRegistry.put(existing, true, true);
+      eventService.publish(new ProjectUpdatedEvent(wsPath));
+    }
+  }
+
+  void ensureRemoved(String wsPath) {
+    projectConfigRegistry
+        .get(wsPath)
+        .ifPresent(
+            project -> {
+              eventService.publish(new PreProjectDeletedEvent(wsPath));
+              projectConfigRegistry.remove(wsPath);
+              eventService.publish(new ProjectDeletedEvent(wsPath));
+            });
   }
 
   @Override
@@ -107,22 +165,6 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
-      throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-          BadRequestException {
-    Set<RegisteredProject> projects = new HashSet<>();
-
-    for (Entry<ProjectConfig, Map<String, String>> entry : projectConfigs.entrySet()) {
-      ProjectConfig projectConfig = entry.getKey();
-      Map<String, String> options = entry.getValue();
-      RegisteredProject registeredProject = create(projectConfig, options);
-      projects.add(registeredProject);
-    }
-
-    return Collections.unmodifiableSet(projects);
-  }
-
-  @Override
   public RegisteredProject create(ProjectConfig projectConfig, Map<String, String> options)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
           BadRequestException {
@@ -147,44 +189,24 @@ public class ExecutiveProjectManager implements ProjectManager {
 
     RegisteredProject project = projectConfigRegistry.put(projectConfig, true, false);
     fireInitHandlers(project);
+    eventService.publish(new ProjectCreatedEvent(project.getPath()));
 
     return project;
-  }
-
-  @Override
-  public synchronized Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
-      throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-          BadRequestException {
-    Set<RegisteredProject> projects = new HashSet<>();
-
-    for (ProjectConfig projectConfig : projectConfigs) {
-      RegisteredProject registeredProject = update(projectConfig);
-      projects.add(registeredProject);
-    }
-
-    return Collections.unmodifiableSet(projects);
   }
 
   @Override
   public synchronized RegisteredProject update(ProjectConfig projectConfig)
-      throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-          BadRequestException {
+      throws ForbiddenException, ServerException, NotFoundException, ConflictException {
+    boolean existed = projectConfigRegistry.get(projectConfig.getPath()).isPresent();
     RegisteredProject project = projectConfigRegistry.put(projectConfig, true, false);
     fireInitHandlers(project);
-
-    return project;
-  }
-
-  @Override
-  public synchronized Set<RegisteredProject> deleteAll(Set<String> wsPaths)
-      throws ServerException, ForbiddenException, NotFoundException, ConflictException {
-    Set<RegisteredProject> projects = new HashSet<>();
-
-    for (String wsPath : wsPaths) {
-      delete(wsPath).ifPresent(projects::add);
+    if (existed) {
+      eventService.publish(new ProjectUpdatedEvent(projectConfig.getPath()));
+    } else {
+      eventService.publish(new ProjectCreatedEvent(projectConfig.getPath()));
     }
 
-    return Collections.unmodifiableSet(projects);
+    return project;
   }
 
   @Override
@@ -196,9 +218,21 @@ public class ExecutiveProjectManager implements ProjectManager {
         .getAll(wsPath)
         .stream()
         .map(ProjectConfig::getPath)
-        .forEach(projectConfigRegistry::remove);
-
-    return projectConfigRegistry.remove(wsPath);
+        .map(
+            path -> {
+              eventService.publish(new PreProjectDeletedEvent(path));
+              return path;
+            })
+        .map(projectConfigRegistry::remove)
+        .filter(Optional::isPresent)
+        .forEach(
+            (config) -> {
+              eventService.publish(new ProjectDeletedEvent(config.get().getPath()));
+            });
+    eventService.publish(new PreProjectDeletedEvent(wsPath));
+    Optional<RegisteredProject> deleted = projectConfigRegistry.remove(wsPath);
+    eventService.publish(new ProjectDeletedEvent(wsPath));
+    return deleted;
   }
 
   @Override
@@ -237,6 +271,7 @@ public class ExecutiveProjectManager implements ProjectManager {
             oldProjectConfig.getSource());
 
     RegisteredProject copiedProject = projectConfigRegistry.put(newProjectConfig, true, false);
+    eventService.publish(new ProjectCreatedEvent(dstWsPath));
     fireInitHandlers(copiedProject);
     return copiedProject;
   }
@@ -252,7 +287,9 @@ public class ExecutiveProjectManager implements ProjectManager {
       NewProjectConfig newProjectConfig =
           new NewProjectConfigImpl(
               wsPath, type, new ArrayList<>(), nameOf(wsPath), nameOf(wsPath), null, null, null);
-      return projectConfigRegistry.put(newProjectConfig, true, true);
+      RegisteredProject newProject = projectConfigRegistry.put(newProjectConfig, true, true);
+      eventService.publish(new ProjectCreatedEvent(wsPath));
+      return newProject;
     }
 
     List<String> newMixins = registeredProject.getMixins();
@@ -275,7 +312,7 @@ public class ExecutiveProjectManager implements ProjectManager {
             registeredProject.getAttributes(),
             null,
             registeredProject.getSource());
-
+    eventService.publish(new ProjectUpdatedEvent(wsPath));
     return projectConfigRegistry.put(newProjectConfig, true, registeredProject.isDetected());
   }
 
@@ -306,7 +343,7 @@ public class ExecutiveProjectManager implements ProjectManager {
               project.getSource());
 
       projectConfigRegistry.put(projectConfig, true, false);
-
+      eventService.publish(new ProjectUpdatedEvent(wsPath));
       return projectConfigRegistry.getOrNull(wsPath);
     }
 
@@ -324,6 +361,7 @@ public class ExecutiveProjectManager implements ProjectManager {
               project.getSource());
 
       projectConfigRegistry.put(projectConfig, true, false);
+      eventService.publish(new ProjectUpdatedEvent(wsPath));
 
       return projectConfigRegistry.getOrNull(wsPath);
     }
@@ -341,6 +379,7 @@ public class ExecutiveProjectManager implements ProjectManager {
     RegisteredProject oldProjectConfig =
         projectConfigRegistry.remove(srcWsPath).orElseThrow(IllegalStateException::new);
 
+    eventService.publish(new PreProjectDeletedEvent(srcWsPath));
     fsManager.move(srcWsPath, dstWsPath);
 
     String dstName = nameOf(dstWsPath);
@@ -357,46 +396,10 @@ public class ExecutiveProjectManager implements ProjectManager {
 
     RegisteredProject movedProject = projectConfigRegistry.put(newProjectConfig, true, false);
     fireInitHandlers(movedProject);
+    eventService.publish(new ProjectCreatedEvent(dstWsPath));
+    eventService.publish(new ProjectDeletedEvent(srcWsPath));
+
     return movedProject;
-  }
-
-  @Override
-  public RegisteredProject doImport(
-      NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException, BadRequestException {
-    return projectImportManager.doImport(projectConfig, rewrite, consumer);
-  }
-
-  @Override
-  public Set<RegisteredProject> doImport(
-      Set<? extends NewProjectConfig> newProjectConfigs,
-      boolean rewrite,
-      BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException, BadRequestException {
-    return projectImportManager.doImport(newProjectConfigs, rewrite, consumer);
-  }
-
-  @Override
-  public RegisteredProject doImport(
-      String wsPath,
-      SourceStorage sourceStorage,
-      boolean rewrite,
-      BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException {
-    return projectImportManager.doImport(wsPath, sourceStorage, rewrite, consumer);
-  }
-
-  @Override
-  public Set<RegisteredProject> doImport(
-      Map<String, SourceStorage> projectLocations,
-      boolean rewrite,
-      BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException {
-    return projectImportManager.doImport(projectLocations, rewrite, consumer);
   }
 
   @Override
@@ -422,5 +425,9 @@ public class ExecutiveProjectManager implements ProjectManager {
         hOptional.get().onProjectInitialized(registeredProject.getBaseFolder());
       }
     }
+  }
+
+  Optional<RegisteredProject> unregister(String wsPath) {
+    return projectConfigRegistry.remove(wsPath);
   }
 }

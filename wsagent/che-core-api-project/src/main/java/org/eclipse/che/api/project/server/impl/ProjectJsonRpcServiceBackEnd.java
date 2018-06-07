@@ -64,12 +64,16 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 public class ProjectJsonRpcServiceBackEnd {
 
   private final ProjectManager projectManager;
+  private final ProjectImportManager projectImportManager;
   private final RequestTransmitter requestTransmitter;
 
   @Inject
   public ProjectJsonRpcServiceBackEnd(
-      ProjectManager projectManager, RequestTransmitter requestTransmitter) {
+      ProjectManager projectManager,
+      ProjectImportManager projectImportManager,
+      RequestTransmitter requestTransmitter) {
     this.projectManager = projectManager;
+    this.projectImportManager = projectImportManager;
     this.requestTransmitter = requestTransmitter;
   }
 
@@ -121,7 +125,6 @@ public class ProjectJsonRpcServiceBackEnd {
   private CreateResponseDto createInternally(CreateRequestDto request)
       throws ServerException, ConflictException, ForbiddenException, BadRequestException,
           NotFoundException {
-    String wsPath = request.getWsPath();
     ProjectConfigDto projectConfig = request.getConfig();
     Map<String, String> options = request.getOptions();
 
@@ -136,9 +139,7 @@ public class ProjectJsonRpcServiceBackEnd {
   private UpdateResponseDto updateInternally(UpdateRequestDto request)
       throws ServerException, ConflictException, ForbiddenException, BadRequestException,
           NotFoundException {
-    String wsPath = request.getWsPath();
     ProjectConfigDto config = request.getConfig();
-    Map<String, String> options = request.getOptions();
 
     RegisteredProject registeredProject = projectManager.update(config);
     ProjectConfigDto projectConfigDto = asDto(registeredProject);
@@ -248,7 +249,7 @@ public class ProjectJsonRpcServiceBackEnd {
         };
 
     RegisteredProject registeredProject =
-        projectManager.doImport(wsPath, sourceStorage, false, consumer);
+        projectImportManager.doImport(wsPath, sourceStorage, false, consumer);
     ProjectConfigDto projectConfigDto = asDto(registeredProject);
     ImportResponseDto response = newDto(ImportResponseDto.class);
     response.setConfig(projectConfigDto);

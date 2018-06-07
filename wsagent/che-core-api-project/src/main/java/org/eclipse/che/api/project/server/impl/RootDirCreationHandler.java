@@ -23,27 +23,30 @@ import org.eclipse.che.api.watcher.server.FileWatcherManager;
 @Singleton
 public class RootDirCreationHandler {
   private final FileWatcherManager fileWatcherManager;
-  private final ProjectConfigRegistry projectConfigRegistry;
-  private HiddenItemPathMatcher hiddenItemPathMatcher;
+  private final HiddenItemPathMatcher hiddenItemPathMatcher;
+  private final ExecutiveProjectManager projectManager;
 
   @Inject
   public RootDirCreationHandler(
       FileWatcherManager fileWatcherManager,
-      ProjectConfigRegistry projectConfigRegistry,
+      ExecutiveProjectManager projectManager,
       HiddenItemPathMatcher hiddenItemPathMatcher) {
     this.fileWatcherManager = fileWatcherManager;
-    this.projectConfigRegistry = projectConfigRegistry;
+    this.projectManager = projectManager;
     this.hiddenItemPathMatcher = hiddenItemPathMatcher;
   }
 
   @PostConstruct
   private void registerOperation() {
-    fileWatcherManager.registerByPath(ROOT, this::consumeCreate, null, null);
-  }
-
-  private void consumeCreate(String wsPath) {
-    if (!hiddenItemPathMatcher.matches(Paths.get(wsPath))) {
-      projectConfigRegistry.putIfAbsent(wsPath, true, true);
-    }
+    // handle new unknown root dirs
+    fileWatcherManager.registerByPath(
+        ROOT,
+        (wsPath) -> {
+          if (!hiddenItemPathMatcher.matches(Paths.get(wsPath))) {
+            projectManager.ensureExists(wsPath);
+          }
+        },
+        null,
+        null);
   }
 }

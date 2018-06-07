@@ -51,21 +51,21 @@ import org.eclipse.che.api.project.shared.RegisteredProject;
 public class ProjectImportManager {
 
   private final FsManager fsManager;
-  private final ProjectSynchronizer projectSynchronizer;
-  private final ProjectConfigRegistry projectConfigRegistry;
+  private final ExecutiveProjectManager projectManager;
+  private final RemoteProjects remoteProjects;
   private final ProjectImporterRegistry projectImporterRegistry;
   private final ProjectHandlerRegistry projectHandlerRegistry;
 
   @Inject
   public ProjectImportManager(
       FsManager fsManager,
-      ProjectConfigRegistry projectConfigs,
-      ProjectSynchronizer projectSynchronizer,
+      ExecutiveProjectManager projectManager,
+      RemoteProjects remoteProjects,
       ProjectImporterRegistry projectImporterRegistry,
       ProjectHandlerRegistry projectHandlerRegistry) {
     this.fsManager = fsManager;
-    this.projectSynchronizer = projectSynchronizer;
-    this.projectConfigRegistry = projectConfigs;
+    this.projectManager = projectManager;
+    this.remoteProjects = remoteProjects;
     this.projectImporterRegistry = projectImporterRegistry;
     this.projectHandlerRegistry = projectHandlerRegistry;
   }
@@ -82,7 +82,7 @@ public class ProjectImportManager {
         throw new BadRequestException("Path for new project should be defined");
       }
 
-      if (projectConfigRegistry.getOrNull(wsPath) != null && !rewrite) {
+      if (projectManager.getOrNull(wsPath) != null && !rewrite) {
         throw new ConflictException("Project already registered: " + wsPath);
       }
     }
@@ -101,7 +101,7 @@ public class ProjectImportManager {
         for (RegisteredProject importedProject : importedProjects) {
           String path = importedProject.getPath();
           fsManager.delete(path);
-          projectConfigRegistry.remove(path);
+          projectManager.unregister(path);
         }
 
         throw e;
@@ -119,12 +119,11 @@ public class ProjectImportManager {
       throw new BadRequestException("Path for new project should be defined");
     }
 
-    if (projectConfigRegistry.getOrNull(wsPath) != null && !rewrite) {
+    if (projectManager.getOrNull(wsPath) != null && !rewrite) {
       throw new ConflictException("Project already registered: " + wsPath);
     }
 
-    fsManager.delete(wsPath);
-    projectConfigRegistry.remove(wsPath);
+    projectManager.delete(wsPath);
 
     if (isNullOrEmpty(projectConfig.getType())) {
       projectConfig.setType(BaseProjectType.ID);
@@ -150,7 +149,7 @@ public class ProjectImportManager {
           throw new ConflictException("Project type is not defined: " + projectWsPath);
         }
 
-        if (projectConfigRegistry.get(projectWsPath).isPresent()) {
+        if (projectManager.get(projectWsPath).isPresent()) {
           throw new ConflictException("Project config already exists for: " + projectWsPath);
         }
 
@@ -174,8 +173,7 @@ public class ProjectImportManager {
           fsManager.createDir(projectWsPath);
         }
 
-        RegisteredProject project = projectConfigRegistry.put(projectConfig, true, false);
-        projectSynchronizer.synchronize();
+        RegisteredProject project = projectManager.update(projectConfig);
         List<String> types = new ArrayList<>(project.getMixins());
         types.add(project.getType());
 
@@ -194,9 +192,7 @@ public class ProjectImportManager {
         | UnauthorizedException
         | ConflictException
         | NotFoundException e) {
-      fsManager.delete(wsPath);
-      projectConfigRegistry.remove(wsPath);
-      projectSynchronizer.synchronize();
+      projectManager.delete(wsPath);
 
       throw e;
     }
@@ -241,10 +237,8 @@ public class ProjectImportManager {
           | NotFoundException e) {
         for (RegisteredProject importedProject : importedProjects) {
           String path = importedProject.getPath();
-          fsManager.delete(path);
-          projectConfigRegistry.remove(path);
+          projectManager.delete(path);
         }
-        projectSynchronizer.synchronize();
 
         throw e;
       }
@@ -281,9 +275,7 @@ public class ProjectImportManager {
         | UnauthorizedException
         | ConflictException
         | NotFoundException e) {
-      fsManager.delete(wsPath);
-      projectConfigRegistry.remove(wsPath);
-      projectSynchronizer.synchronize();
+      projectManager.delete(wsPath);
 
       throw e;
     }
@@ -304,32 +296,25 @@ public class ProjectImportManager {
       throw new ServerException(e);
     }
 
-    if (projectSynchronizer
-        .getAll()
-        .stream()
-        .anyMatch(it -> Objects.equals(it.getPath(), wsPath))) {
+    if (remoteProjects.getAll().stream().anyMatch(it -> Objects.equals(it.getPath(), wsPath))) {
       Set<ProjectConfig> newProjectConfigs =
-          projectSynchronizer
+          remoteProjects
               .getAll()
               .stream()
               .filter(it -> wsPath.startsWith(it.getPath()))
               .collect(toSet());
 
       for (ProjectConfig newProjectConfig : newProjectConfigs) {
-        projectConfigRegistry.put(newProjectConfig, true, false);
+        projectManager.update(newProjectConfig);
       }
 
-      return projectConfigRegistry
-          .get(wsPath)
-          .orElseThrow(() -> new ServerException("Unexpected error"));
+      return projectManager.get(wsPath).orElseThrow(() -> new ServerException("Unexpected error"));
     }
 
     String name = wsPath.substring(wsPath.lastIndexOf(separator));
     NewProjectConfigImpl newProjectConfig =
         new NewProjectConfigImpl(wsPath, name, BaseProjectType.ID, sourceStorage);
-    RegisteredProject registeredProject = projectConfigRegistry.put(newProjectConfig, true, false);
-    projectSynchronizer.synchronize();
-    return registeredProject;
+    return projectManager.update(newProjectConfig);
   }
 
   private Supplier<LineConsumer> jsonRpcConsumer(

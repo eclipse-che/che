@@ -14,17 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
-import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 
 /** Facade for project related operations */
@@ -104,22 +100,6 @@ public interface ProjectManager {
           BadRequestException;
 
   /**
-   * Create all projects defined by specified configuration map
-   *
-   * @param projectConfigs map of project configurations and options
-   * @return
-   * @throws ConflictException is thrown if project is already registered, or project type is not
-   *     defined
-   * @throws ForbiddenException is thrown if an operation is forbidden
-   * @throws ServerException is thrown if an error happened during operation execution
-   * @throws NotFoundException is thrown if parent location does not exist
-   * @throws BadRequestException is thrown if project path is not defined
-   */
-  Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
-      throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-          BadRequestException;
-
-  /**
    * Update a project with a new configuration
    *
    * @param projectConfig project configuration
@@ -135,21 +115,6 @@ public interface ProjectManager {
           BadRequestException;
 
   /**
-   * Update all projects with new configurations
-   *
-   * @param projectConfigs project configuration set
-   * @return
-   * @throws ForbiddenException is thrown if an operation is forbidden
-   * @throws ServerException is thrown if an error happened during operation execution
-   * @throws NotFoundException is thrown if a project directory does not exist
-   * @throws ConflictException is thrown if a project does not exist
-   * @throws BadRequestException is thrown if project path is not defined
-   */
-  Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
-      throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-          BadRequestException;
-
-  /**
    * Delete the project denoted by the path
    *
    * @param wsPath absolute workspace path of a project
@@ -161,19 +126,6 @@ public interface ProjectManager {
    */
   Optional<RegisteredProject> delete(String wsPath)
       throws ServerException, ForbiddenException, NotFoundException, ConflictException;
-
-  /**
-   * Delete all projects denoted by the paths
-   *
-   * @param wsPaths set of absolute workspace paths
-   * @return
-   * @throws ServerException is thrown if an error happened during operation execution
-   * @throws ForbiddenException is thrown if an operation is forbidden
-   * @throws NotFoundException is thrown if a project directory does not exist
-   * @throws ConflictException is thrown if the item that the path denotes is not a project
-   */
-  Set<RegisteredProject> deleteAll(Set<String> wsPaths)
-      throws ServerException, ForbiddenException, ConflictException, NotFoundException;
 
   /**
    * Delete all projects
@@ -251,88 +203,6 @@ public interface ProjectManager {
   RegisteredProject removeType(String wsPath, String type)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
           ForbiddenException;
-
-  /**
-   * Import the project with specified configuration
-   *
-   * @param projectConfig project configuration
-   * @param rewrite rewrite on import project marker
-   * @param consumer json rpc message transmitter
-   * @return
-   * @throws ServerException
-   * @throws ForbiddenException
-   * @throws UnauthorizedException
-   * @throws ConflictException
-   * @throws NotFoundException
-   * @throws BadRequestException
-   */
-  RegisteredProject doImport(
-      NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException, BadRequestException;
-
-  /**
-   * Import all projects with specified configurations
-   *
-   * @param projectConfigs project configurations
-   * @param rewrite rewrite on import project marker
-   * @param consumer json rpc message transmitter
-   * @return
-   * @throws ServerException
-   * @throws ForbiddenException
-   * @throws UnauthorizedException
-   * @throws ConflictException
-   * @throws NotFoundException
-   * @throws BadRequestException
-   */
-  Set<RegisteredProject> doImport(
-      Set<? extends NewProjectConfig> projectConfigs,
-      boolean rewrite,
-      BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException, BadRequestException;
-
-  /**
-   * Import the project with specified locations
-   *
-   * @param projectLocations project locations
-   * @param rewrite rewrite on import project marker
-   * @param consumer json rpc message transmitter
-   * @return
-   * @throws ServerException
-   * @throws ForbiddenException
-   * @throws UnauthorizedException
-   * @throws ConflictException
-   * @throws NotFoundException
-   */
-  Set<RegisteredProject> doImport(
-      Map<String, SourceStorage> projectLocations,
-      boolean rewrite,
-      BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException;
-
-  /**
-   * Import the project with specified location
-   *
-   * @param wsPath absolute workspace path of a project
-   * @param sourceStorage project source storage
-   * @param rewrite rewrite on import project marker
-   * @param consumer json rpc message transmitter
-   * @return
-   * @throws ServerException
-   * @throws ForbiddenException
-   * @throws UnauthorizedException
-   * @throws ConflictException
-   * @throws NotFoundException
-   */
-  RegisteredProject doImport(
-      String wsPath,
-      SourceStorage sourceStorage,
-      boolean rewrite,
-      BiConsumer<String, String> consumer)
-      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-          NotFoundException;
 
   /**
    * Verify project regarding its type

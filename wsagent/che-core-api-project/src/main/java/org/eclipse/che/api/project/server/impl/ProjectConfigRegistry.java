@@ -20,7 +20,7 @@ import org.eclipse.che.api.project.shared.RegisteredProject;
  *
  * @author gazarenkov
  */
-public interface ProjectConfigRegistry {
+interface ProjectConfigRegistry {
 
   /** @return all the projects */
   Set<RegisteredProject> getAll();

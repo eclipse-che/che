@@ -64,8 +64,6 @@ import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectService;
-import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
-import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.RegisteredProject;
@@ -105,6 +103,7 @@ public class ProjectServiceApi {
   private final ServiceContext serviceContext;
 
   private final ProjectManager projectManager;
+  private ProjectImportManager projectImportManager;
   private final FsManager fsManager;
   private final FsDtoConverter fsDtoConverter;
   private final Searcher searcher;
@@ -118,6 +117,7 @@ public class ProjectServiceApi {
       @Assisted ServiceContext serviceContext,
       Searcher searcher,
       ProjectManager projectManager,
+      ProjectImportManager projectImportManager,
       FsManager fsManager,
       FsDtoConverter fsDtoConverter,
       EventService eventService,
@@ -126,6 +126,7 @@ public class ProjectServiceApi {
       RequestTransmitter transmitter) {
     this.serviceContext = serviceContext;
     this.projectManager = projectManager;
+    this.projectImportManager = projectImportManager;
     this.fsManager = fsManager;
     this.fsDtoConverter = fsDtoConverter;
     this.searcher = searcher;
@@ -175,8 +176,6 @@ public class ProjectServiceApi {
     ProjectConfigDto asDto = asDto(project);
     ProjectConfigDto injectedLinks = injectProjectLinks(asDto);
 
-    eventService.publish(new ProjectCreatedEvent(project.getPath()));
-
     return injectedLinks;
   }
 
@@ -186,7 +185,7 @@ public class ProjectServiceApi {
       throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException,
           UnauthorizedException, BadRequestException {
 
-    projectManager.doImport(
+    projectImportManager.doImport(
         new HashSet<>(projectConfigs), rewrite, jsonRpcImportConsumer(clientId));
 
     Set<RegisteredProject> registeredProjects = new HashSet<>(projectConfigs.size());
@@ -201,12 +200,6 @@ public class ProjectServiceApi {
             .map(ProjectDtoConverter::asDto)
             .map(this::injectProjectLinks)
             .collect(toSet());
-
-    registeredProjects
-        .stream()
-        .map(RegisteredProject::getPath)
-        .map(ProjectCreatedEvent::new)
-        .forEach(eventService::publish);
 
     return new ArrayList<>(result);
   }
@@ -229,11 +222,7 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     if (projectManager.isRegistered(wsPath)) {
-      projectManager
-          .delete(wsPath)
-          .map(RegisteredProject::getPath)
-          .map(ProjectDeletedEvent::new)
-          .ifPresent(eventService::publish);
+      projectManager.delete(wsPath);
     } else {
       fsManager.delete(wsPath);
     }
@@ -294,7 +283,7 @@ public class ProjectServiceApi {
 
     wsPath = absolutize(wsPath);
 
-    projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
+    projectImportManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
   }
 
   /** Create file with specified path, name and content */

@@ -18,18 +18,14 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.impl.CreateBaseProjectTypeHandler;
-import org.eclipse.che.api.project.server.impl.InmemoryProjectRegistry;
-import org.eclipse.che.api.project.server.impl.OnWorkspaceStartProjectInitializer;
-import org.eclipse.che.api.project.server.impl.ProjectConfigRegistry;
+import org.eclipse.che.api.project.server.impl.ExecutiveProjectManager;
 import org.eclipse.che.api.project.server.impl.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
-import org.eclipse.che.api.project.server.impl.ProjectSynchronizer;
 import org.eclipse.che.api.project.server.impl.RegisteredProjectFactory;
 import org.eclipse.che.api.project.server.impl.RegisteredProjectImpl;
-import org.eclipse.che.api.project.server.impl.RootDirCreationHandler;
-import org.eclipse.che.api.project.server.impl.RootDirRemovalHandler;
+import org.eclipse.che.api.project.server.impl.RemoteProjects;
 import org.eclipse.che.api.project.server.impl.ValidatingProjectManager;
 import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.eclipse.che.api.project.server.impl.ZipProjectImporter;
@@ -54,23 +50,19 @@ public class ProjectApiModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(RemoteProjects.class).asEagerSingleton();
     bind(ProjectService.class);
     bind(ProjectImportersService.class);
     bind(ProjectTypeService.class);
 
-    bind(OnWorkspaceStartProjectInitializer.class);
     bind(ProjectImporterRegistry.class);
     bind(ProjectHandlerRegistry.class);
 
-    bind(RootDirCreationHandler.class).asEagerSingleton();
-    bind(RootDirRemovalHandler.class).asEagerSingleton();
-
-    bind(ProjectManager.class).to(ValidatingProjectManager.class);
-    bind(ProjectSynchronizer.class).to(WorkspaceProjectSynchronizer.class);
+    bind(ProjectManager.class).to(ValidatingProjectManager.class).asEagerSingleton();
+    bind(ExecutiveProjectManager.class).asEagerSingleton();
+    bind(WorkspaceProjectSynchronizer.class);
     bind(ProjectQualifier.class).to(SimpleProjectQualifier.class);
     bind(ProjectTypeResolver.class).to(SimpleProjectTypeResolver.class);
-
-    bind(ProjectConfigRegistry.class).to(InmemoryProjectRegistry.class);
 
     newSetBinder(binder(), ProjectImporter.class).addBinding().to(ZipProjectImporter.class);
 
