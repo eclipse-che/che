@@ -15,11 +15,15 @@ cheImage: eclipse/che-server:nightly
 cheImagePullPolicy: Always
 cheKeycloakRealm: "che"
 cheKeycloakClientId: "che-public"
-
+#customOidcUsernameClaim: ""
+#customOidcProvider: ""
 
 global:
   cheNamespace: ""
   multiuser: false
+  #  This value can be passed if custom Oidc provider is used, and there is no need to deploy keycloak in multiuser mode
+  #  default (if empty) is true
+  #cheDedicatedKeycloak: false
   ingressDomain: 192.168.99.100.nip.io
   # See --annotations-prefix flag (https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md)
   ingressAnnotationsPrefix: "nginx."

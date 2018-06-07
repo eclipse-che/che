@@ -58,7 +58,7 @@ class LanguageServerFileWatcher {
   }
 
   @PostConstruct
-  private void subscribe() {
+  protected void subscribe() {
     eventService.subscribe(this::onServerInitialized, LanguageServerInitializedEvent.class);
   }
 
