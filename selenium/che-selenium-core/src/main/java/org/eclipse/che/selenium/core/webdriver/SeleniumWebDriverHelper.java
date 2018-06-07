@@ -20,6 +20,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAl
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
@@ -1120,5 +1121,19 @@ public class SeleniumWebDriverHelper {
     action.clickAndHold(waitVisibility(element)).perform();
     WaitUtils.sleepQuietly(holdingTimeout);
     action.release(waitVisibility(element)).perform();
+  }
+
+  /**
+   * Waits until {@code nestedElementLocator} is presented in the DOM and gets it.
+   *
+   * @param parentElement element which contains nested element
+   * @param nestedElementLocator relative path to nested element
+   * @return found element
+   */
+  public WebElement waitPresenceAndGetNestedElement(
+      WebElement parentElement, By nestedElementLocator) {
+    return webDriverWaitFactory
+        .get()
+        .until(presenceOfNestedElementLocatedBy(parentElement, nestedElementLocator));
   }
 }

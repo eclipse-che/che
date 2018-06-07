@@ -11,33 +11,44 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ADD_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ADD_OR_IMPORT_PROJECT_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ALL_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DECREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SELECTED_SUGGESTION_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SUGGESTION_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.GITHUG_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.GIT_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.INCREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.MULTI_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.OPEN_IN_IDE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ORGANIZATIONS_LIST_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.QUICK_START_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SAMPLES_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SINGLE_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.STACK_ROW_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.WORKSPACE_CREATED_DIALOG;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ZIP_BUTTON_ID;
 import static org.openqa.selenium.Keys.BACK_SPACE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -126,6 +137,15 @@ public class NewWorkspace {
     String SINGLE_MACHINE_BUTTON_ID = "single-machine-button";
     String MULTI_MACHINE_BUTTON_ID = "multi-machine-button";
     String ADD_OR_IMPORT_PROJECT_BUTTON_ID = "ADD_PROJECT";
+
+    // "Add or Import Project" form buttons
+    String SAMPLES_BUTTON_ID = "samples-button";
+    String BLANK_BUTTON_ID = "blank-button";
+    String GIT_BUTTON_ID = "git-button";
+    String GITHUG_BUTTON_ID = "github-button";
+    String ZIP_BUTTON_ID = "zip-button";
+    String ADD_BUTTON_ID = "add-project-button";
+    String CANCEL_BUTTON_ID = "cancel-button";
   }
 
   @FindBy(id = Locators.FILTERS_STACK_BUTTON)
@@ -160,7 +180,172 @@ public class NewWorkspace {
 
   @FindBy(id = Locators.SELECT_MULTI_MACHINE_STACKS_TAB)
   WebElement selectMultiMachineStacksTab;
+  ///////////////////////////// -----------------------------------------------
 
+  public WebElement waitAddOrImportProjectButton(int timeout) {
+    return seleniumWebDriverHelper.waitVisibility(By.id(ADD_OR_IMPORT_PROJECT_BUTTON_ID), timeout);
+  }
+
+  public WebElement waitAddOrImportProjectButton() {
+    return waitAddOrImportProjectButton(DEFAULT_TIMEOUT);
+  }
+
+  public void clickOnAddOrImportProjectButton() {
+    waitAddOrImportProjectButton().click();
+  }
+
+  public void clickOnSamplesButton() {
+    seleniumWebDriverHelper.waitAndClick(By.id(SAMPLES_BUTTON_ID));
+  }
+
+  public void clickOnBlankButton() {
+    seleniumWebDriverHelper.waitAndClick(By.id(BLANK_BUTTON_ID));
+  }
+
+  public void clickOnGitButton() {
+    seleniumWebDriverHelper.waitAndClick(By.id(GIT_BUTTON_ID));
+  }
+
+  public void clickOnGitHubButton() {
+    seleniumWebDriverHelper.waitAndClick(By.id(GITHUG_BUTTON_ID));
+  }
+
+  public void clickOnZipButton() {
+    seleniumWebDriverHelper.waitAndClick(By.id(ZIP_BUTTON_ID));
+  }
+
+  public void clickOnAddButtonInImportProjectForm() {
+    seleniumWebDriverHelper.waitAndClick(By.id(ADD_BUTTON_ID));
+  }
+
+  public void clickOnCancelButtonInImportProjectForm() {
+    seleniumWebDriverHelper.waitAndClick(By.id(CANCEL_BUTTON_ID));
+  }
+
+  public void waitAddOrImportFormOpened() {
+    seleniumWebDriverHelper.waitAllVisibilityBy(
+        asList(
+            By.id(SAMPLES_BUTTON_ID),
+            By.id(BLANK_BUTTON_ID),
+            By.id(GIT_BUTTON_ID),
+            By.id(GITHUG_BUTTON_ID),
+            By.id(ZIP_BUTTON_ID),
+            By.id(ADD_BUTTON_ID),
+            By.id(CANCEL_BUTTON_ID)));
+  }
+
+  public void waitAddOrImportFormClosed() {
+    seleniumWebDriverHelper.waitAllInvisibilityBy(
+        asList(
+            By.id(SAMPLES_BUTTON_ID),
+            By.id(BLANK_BUTTON_ID),
+            By.id(GIT_BUTTON_ID),
+            By.id(GITHUG_BUTTON_ID),
+            By.id(ZIP_BUTTON_ID),
+            By.id(ADD_BUTTON_ID),
+            By.id(CANCEL_BUTTON_ID)));
+  }
+
+  private void waitHeaderButtonInImportProjectFormSelected(String buttonId) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    seleniumWebDriverHelper
+                        .waitVisibilityAndGetAttribute(By.id(buttonId), "class")
+                        .contains("che-toggle-button-enabled"));
+  }
+
+  public void waitSamplesButtonSelected() {
+    waitHeaderButtonInImportProjectFormSelected(SAMPLES_BUTTON_ID);
+  }
+
+  public void waitBlankButtonSelected() {
+    waitHeaderButtonInImportProjectFormSelected(BLANK_BUTTON_ID);
+  }
+
+  public void waitGitButtonSelected() {
+    waitHeaderButtonInImportProjectFormSelected(GIT_BUTTON_ID);
+  }
+
+  public void waitGitHubButtonSelected() {
+    waitHeaderButtonInImportProjectFormSelected(GITHUG_BUTTON_ID);
+  }
+
+  public void waitZipButtonSelected() {
+    waitHeaderButtonInImportProjectFormSelected(ZIP_BUTTON_ID);
+  }
+
+  private void waitAddOrCancelButtonDisabled(String buttonId, boolean state) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    seleniumWebDriverHelper
+                        .waitVisibilityAndGetAttribute(
+                            By.xpath(format("//che-button-primary[@id='%s']/button", buttonId)),
+                            "aria-disabled")
+                        .equals(Boolean.toString(state)));
+  }
+
+  public void waitAddButtonInImportProjectFormDisabled() {
+    waitAddOrCancelButtonDisabled(ADD_BUTTON_ID, true);
+  }
+
+  public void waitCancelButtonInImportProjectFormDisabled() {
+    waitAddOrCancelButtonDisabled(CANCEL_BUTTON_ID, true);
+  }
+
+  public void waitAddButtonInImportProjectFormEnabled() {
+    waitAddOrCancelButtonDisabled(ADD_BUTTON_ID, false);
+  }
+
+  public void waitCancelButtonInImportProjectFormEnabled() {
+    waitAddOrCancelButtonDisabled(CANCEL_BUTTON_ID, false);
+  }
+
+  private List<WebElement> getSamples() {
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath("//div[@class='add-import-project-sources']//md-item"));
+  }
+
+  private String getSampleName(WebElement samplesItem) {
+    WebElement nestedElement =
+        seleniumWebDriverHelper.waitPresenceAndGetNestedElement(
+            samplesItem, By.xpath("//span[contains(@class, 'che-list-item-name')]"));
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(nestedElement);
+  }
+
+  private String getSampleDescription(WebElement samplesItem) {
+    WebElement nestedElement =
+        seleniumWebDriverHelper.waitPresenceAndGetNestedElement(
+            samplesItem, By.xpath("//span[contains(@class, 'che-list-item-secondary')]"));
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(nestedElement);
+  }
+
+  private Map<String, String> getSamplesNamesAndDescriptions() {
+    return getSamples()
+        .stream()
+        .collect(
+            toMap(element -> getSampleName(element), element -> getSampleDescription(element)));
+  }
+
+  public Set<String> getSamplesNames() {
+    return getSamplesNamesAndDescriptions().keySet();
+  }
+
+  public String getSampleDescription(String sampleName) {
+    return getSamplesNamesAndDescriptions().get(sampleName);
+  }
+
+  // item name //div[@class='add-import-project-sources']//md-item//span[contains(@class,
+  // 'che-list-item-name')]
+  // item description //div[@class='add-import-project-sources']//md-item//span[contains(@class,
+  // 'che-list-item-secondary')]
+
+  ///////////////////////////// -----------------------------------------------
   public void typeWorkspaceName(String name) {
     seleniumWebDriverHelper.setValue(workspaceNameInput, name);
   }
@@ -590,18 +775,6 @@ public class NewWorkspace {
 
   public void clickOnMultiMachineButton() {
     waitMultiMachineButton().click();
-  }
-
-  public WebElement waitAddOrImportProjectButton(int timeout) {
-    return seleniumWebDriverHelper.waitVisibility(By.id(ADD_OR_IMPORT_PROJECT_BUTTON_ID), timeout);
-  }
-
-  public WebElement waitAddOrImportProjectButton() {
-    return waitAddOrImportProjectButton(DEFAULT_TIMEOUT);
-  }
-
-  public void clickOnAddOrImportProjectButton() {
-    waitAddOrImportProjectButton().click();
   }
 
   public void waitBottomCreateButton(int timeout) {

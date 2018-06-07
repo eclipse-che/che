@@ -25,6 +25,8 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AddOrImportProjectFormTest {
@@ -44,6 +46,28 @@ public class AddOrImportProjectFormTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private Stacks stacks;
 
+  @BeforeClass
+  public void setup() {
+    dashboard.open();
+  }
+
+  @BeforeMethod
+  public void prepareToTestMethod() {
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.waitToolbarTitleName();
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitPageLoad();
+  }
+
   @Test
-  public void checkOfCheckboxes() {}
+  public void checkOfCheckboxes() {
+    newWorkspace.waitPageLoad();
+    newWorkspace.selectStack("java-default");
+    newWorkspace.clickOnAddOrImportProjectButton();
+    newWorkspace.waitAddOrImportFormOpened();
+    // newWorkspace.waitSamplesButtonSelected();
+    newWorkspace.getSamplesNames();
+    newWorkspace.getSampleDescription("console-java-simple");
+  }
 }
