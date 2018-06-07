@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -90,6 +91,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
@@ -156,8 +158,10 @@ public class KubernetesInternalRuntimeTest {
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
 
-  @Mock private KubernetesRuntimeContext<KubernetesEnvironment> context;
   @Mock private EventService eventService;
+  @Mock private StartSynchronizerFactory startSynchronizerFactory;
+  private StartSynchronizer startSynchronizer;
+  @Mock private KubernetesRuntimeContext<KubernetesEnvironment> context;
   @Mock private ServersCheckerFactory serverCheckerFactory;
   @Mock private ServersChecker serversChecker;
   @Mock private KubernetesBootstrapperFactory bootstrapperFactory;
@@ -190,6 +194,9 @@ public class KubernetesInternalRuntimeTest {
     runtimeStatesCache = new MapBasedRuntimeStateCache();
     machinesCache = new MapBasedMachinesCache();
 
+    startSynchronizer = spy(new StartSynchronizer(eventService, IDENTITY));
+    when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
+
     internalRuntime =
         new KubernetesInternalRuntime<>(
             13,
@@ -205,6 +212,7 @@ public class KubernetesInternalRuntimeTest {
             new KubernetesSharedPool(),
             runtimeStatesCache,
             machinesCache,
+            startSynchronizerFactory,
             context,
             namespace,
             emptyList());
@@ -224,6 +232,7 @@ public class KubernetesInternalRuntimeTest {
             new KubernetesSharedPool(),
             runtimeStatesCache,
             machinesCache,
+            startSynchronizerFactory,
             context,
             namespace,
             emptyList());
@@ -235,7 +244,8 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.services()).thenReturn(services);
     when(namespace.ingresses()).thenReturn(ingresses);
     when(namespace.pods()).thenReturn(pods);
-    when(bootstrapperFactory.create(any(), anyList(), any(), any())).thenReturn(bootstrapper);
+    when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
+        .thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
@@ -331,7 +341,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(1)).stopWatch();
+      verify(namespace.pods(), times(2)).stopWatch();
     }
   }
 
@@ -373,13 +383,15 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(1)).stopWatch();
+      verify(namespace.pods(), times(2)).stopWatch();
     }
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Kubernetes environment start was interrupted"
+    expectedExceptions = RuntimeStartInterruptedException.class,
+    expectedExceptionsMessageRegExp =
+        "Runtime start for identity 'workspace: workspace123, "
+            + "environment: env1, ownerId: id1' is interrupted"
   )
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
@@ -457,8 +469,8 @@ public class KubernetesInternalRuntimeTest {
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
     unrecoverableEventHandler.handle(unrecoverableEvent);
-    // 'internalStop' expected to be called which triggers namespace cleanup
-    verify(namespace).cleanUp();
+
+    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
   }
 
   @Test
@@ -475,8 +487,8 @@ public class KubernetesInternalRuntimeTest {
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
     unrecoverableEventHandler.handle(unrecoverableEvent);
-    // 'internalStop' expected to be called which triggers namespace cleanup
-    verify(namespace).cleanUp();
+
+    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
   }
 
   @Test
@@ -616,7 +628,7 @@ public class KubernetesInternalRuntimeTest {
 
   @Test(
     expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = "The environment must be running",
+    expectedExceptionsMessageRegExp = "The environment must be running or starting",
     dataProvider = "nonRunningStatuses"
   )
   public void shouldThrowExceptionWhenTryToMakeNonRunningNorStartingRuntimeAsStopping(

@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -625,10 +624,10 @@ public class KubernetesPods {
 
   private class ExecWatchdog implements ExecListener {
 
-    private final CountDownLatch latch;
+    private final CompletableFuture<Void> completionFuture;
 
     private ExecWatchdog() {
-      this.latch = new CountDownLatch(1);
+      this.completionFuture = new CompletableFuture<>();
     }
 
     @Override
@@ -636,18 +635,22 @@ public class KubernetesPods {
 
     @Override
     public void onFailure(Throwable t, Response response) {
-      latch.countDown();
+      completionFuture.completeExceptionally(t);
     }
 
     @Override
     public void onClose(int code, String reason) {
-      latch.countDown();
+      completionFuture.complete(null);
     }
 
     public void wait(long timeout, TimeUnit timeUnit)
         throws InterruptedException, InfrastructureException {
-      boolean isDone = latch.await(timeout, timeUnit);
-      if (!isDone) {
+      try {
+        completionFuture.get(timeout, timeUnit);
+      } catch (ExecutionException e) {
+        throw new InfrastructureException(
+            "Error occured while executing command in pod: " + e.getMessage(), e);
+      } catch (TimeoutException e) {
         throw new InfrastructureException("Timeout reached while execution of command");
       }
     }
