@@ -655,6 +655,66 @@
     }
   },
   {
+    "scope": "general",
+    "tags": [
+      "Java 1.8",
+      "Pony"
+    ],
+    "creator": "che",
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "contentType": "text/x-dockerfile",
+            "type": "dockerfile",
+            "content": "FROM eclipse/stack-base:ubuntu\n\nRUN sudo add-apt-repository -y ppa:ponylang/ponylang\nRUN sudo apt-get update\nRUN sudo apt-get install -y ponyc\n\nEXPOSE 8080\n"
+          },
+          "machines": {
+            "PONY-MACHINE": {
+              "env": {},
+              "volumes": {},
+              "installers": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.terminal"
+              ],
+              "servers": {},
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          }
+        }
+      },
+      "defaultEnv": "default",
+      "projects": [],
+      "commands": [
+        {
+          "commandLine": "mkdir -p ${current.project.path}/build && rm -rf ${current.project.path}/build/* && ponyc ${current.project.path} -o ${current.project.path}/build && ${current.project.path}/build/${editor.current.project.name}",
+          "name": "run",
+          "type": "custom",
+          "attributes": {}
+        }
+      ],
+      "name": "default",
+      "links": []
+    },
+    "components": [
+      {
+        "version": "0.22.5",
+        "name": "Pony"
+      }
+    ],
+    "name": "Pony",
+    "creator": "ide",
+    "description": "Default Pony Stack with 0.22.5",
+    "id": "pony-default",
+    "stackIcon": {
+      "name": "type-pony.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "go-default",
     "creator": "ide",
     "name": "Go",
