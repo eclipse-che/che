@@ -89,8 +89,8 @@ public abstract class TestWorkspaceLogsReader {
     try {
       Files.createDirectories(testLogsDirectory.getParent());
 
-      // execute command to copy logs from workspace container to the workspaceLogsDir
-      processAgent.execute(
+      // process command to copy logs from workspace container to the workspaceLogsDir
+      processAgent.process(
           getReadLogsCommand(workspaceId, testLogsDirectory, logInfo.getLocationInsideWorkspace()));
     } catch (Exception e) {
       log.warn(

@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client;
+package org.eclipse.che.selenium.core.client.keycloak;
 
 import static java.lang.String.format;
 

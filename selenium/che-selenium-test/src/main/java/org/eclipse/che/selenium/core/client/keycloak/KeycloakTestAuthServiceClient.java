@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client;
+package org.eclipse.che.selenium.core.client.keycloak;
 
 import static com.google.common.io.BaseEncoding.base64;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -34,7 +34,8 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.selenium.core.client.KeycloakToken.TokenDetails;
+import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
+import org.eclipse.che.selenium.core.client.keycloak.KeycloakToken.TokenDetails;
 import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

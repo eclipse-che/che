@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
-import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.client.keycloak.KeycloakAdminConsoleClient;
 import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

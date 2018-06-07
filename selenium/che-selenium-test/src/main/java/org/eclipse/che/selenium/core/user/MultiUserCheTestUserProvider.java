@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.core.user;
 import com.google.inject.Inject;
 import java.io.IOException;
 import javax.annotation.PreDestroy;
-import org.eclipse.che.selenium.core.client.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.client.keycloak.KeycloakAdminConsoleClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.TestUserProvider;
 import org.slf4j.Logger;
