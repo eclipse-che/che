@@ -34,6 +34,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 /** @author David Festal */
 public class ImagePullSecretProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
+  static final String SECRET_NAME = "workspace-private-registries";
+
   private final UserSpecificDockerRegistryCredentialsProvider
       userSpecificDockerRegistryCredentialsProvider;
   private final KubernetesClientFactory clientFactory;
@@ -55,6 +57,10 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
       throws InfrastructureException {
 
     AuthConfigs authConfigs = userSpecificDockerRegistryCredentialsProvider.getCredentials();
+    if (authConfigs.getConfigs().isEmpty()) {
+      return;
+    }
+
     Gson gson = new Gson();
 
     Base64.Encoder encoder = Base64.getEncoder();
@@ -105,7 +111,7 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
               .addToData(".dockercfg", encodedConfig)
               .withType("kubernetes.io/dockercfg")
               .withNewMetadata()
-              .withName("workspace-private-registries")
+              .withName(SECRET_NAME)
               .endMetadata()
               .build();
 
@@ -126,10 +132,7 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
     pod.getSpec()
         .setImagePullSecrets(
             ImmutableList.<LocalObjectReference>builder()
-                .add(
-                    new LocalObjectReferenceBuilder()
-                        .withName("workspace-private-registries")
-                        .build())
+                .add(new LocalObjectReferenceBuilder().withName(SECRET_NAME).build())
                 .addAll(imagePullSecrets)
                 .build());
   }
