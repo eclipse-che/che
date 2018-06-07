@@ -23,6 +23,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DECREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
@@ -146,6 +147,8 @@ public class NewWorkspace {
     String ZIP_BUTTON_ID = "zip-button";
     String ADD_BUTTON_ID = "add-project-button";
     String CANCEL_BUTTON_ID = "cancel-button";
+
+    String CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE = "sample-%s";
   }
 
   @FindBy(id = Locators.FILTERS_STACK_BUTTON)
@@ -253,7 +256,10 @@ public class NewWorkspace {
             (ExpectedCondition<Boolean>)
                 driver ->
                     seleniumWebDriverHelper
-                        .waitVisibilityAndGetAttribute(By.id(buttonId), "class")
+                        .waitVisibilityAndGetAttribute(
+                            By.xpath(
+                                format("//che-toggle-joined-button[@id='%s']/button", buttonId)),
+                            "class")
                         .contains("che-toggle-button-enabled"));
   }
 
@@ -285,8 +291,7 @@ public class NewWorkspace {
                 driver ->
                     seleniumWebDriverHelper
                         .waitVisibilityAndGetAttribute(
-                            By.xpath(format("//che-button-primary[@id='%s']/button", buttonId)),
-                            "aria-disabled")
+                            By.xpath(format("//*[@id='%s']/button", buttonId)), "aria-disabled")
                         .equals(Boolean.toString(state)));
   }
 
@@ -312,17 +317,11 @@ public class NewWorkspace {
   }
 
   private String getSampleName(WebElement samplesItem) {
-    WebElement nestedElement =
-        seleniumWebDriverHelper.waitPresenceAndGetNestedElement(
-            samplesItem, By.xpath("//span[contains(@class, 'che-list-item-name')]"));
-    return seleniumWebDriverHelper.waitVisibilityAndGetText(nestedElement);
+    return asList(seleniumWebDriverHelper.waitVisibilityAndGetText(samplesItem).split("\n")).get(0);
   }
 
   private String getSampleDescription(WebElement samplesItem) {
-    WebElement nestedElement =
-        seleniumWebDriverHelper.waitPresenceAndGetNestedElement(
-            samplesItem, By.xpath("//span[contains(@class, 'che-list-item-secondary')]"));
-    return seleniumWebDriverHelper.waitVisibilityAndGetText(nestedElement);
+    return asList(seleniumWebDriverHelper.waitVisibilityAndGetText(samplesItem).split("\n")).get(1);
   }
 
   private Map<String, String> getSamplesNamesAndDescriptions() {
@@ -340,10 +339,42 @@ public class NewWorkspace {
     return getSamplesNamesAndDescriptions().get(sampleName);
   }
 
-  // item name //div[@class='add-import-project-sources']//md-item//span[contains(@class,
-  // 'che-list-item-name')]
-  // item description //div[@class='add-import-project-sources']//md-item//span[contains(@class,
-  // 'che-list-item-secondary')]
+  public void waitSamplesWithDescriptions(Map<String, String> expectedSamplesWithDescriptions) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> expectedSamplesWithDescriptions.equals(getSamplesNamesAndDescriptions()));
+  }
+
+  public void clickOnSampleCheckbox(String sampleName) {
+    String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
+
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format("//*[@id='%s']/md-checkbox/div", checkboxId)));
+  }
+
+  private void waitSampleCheckboxState(String sampleName, boolean state) {
+    String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
+    String locator = format("//div[@id='%s']/md-checkbox", checkboxId);
+
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    seleniumWebDriverHelper
+                        .waitVisibilityAndGetAttribute(By.xpath(locator), "aria-checked")
+                        .equals(Boolean.toString(state)));
+  }
+
+  public void waitSampleCheckboxEnabled(String sampleName) {
+    waitSampleCheckboxState(sampleName, true);
+  }
+
+  public void waitSampleCheckboxDisabled(String sampleName) {
+    waitSampleCheckboxState(sampleName, false);
+  }
 
   ///////////////////////////// -----------------------------------------------
   public void typeWorkspaceName(String name) {

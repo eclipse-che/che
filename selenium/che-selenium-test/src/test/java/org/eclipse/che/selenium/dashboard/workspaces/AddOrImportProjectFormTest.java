@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import java.util.Map;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -30,6 +32,19 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AddOrImportProjectFormTest {
+
+  private static final String SPRING_SAMPLE_NAME = "web-java-spring";
+  private static final String CHE_SAMPLE_NAME = "che-in-che";
+  private static final String CONSOLE_SAMPLE_NAME = "console-java-simple";
+
+  private static final Map<String, String> EXPECTED_SAMPLES_WITH_DESCRIPTIONS =
+      ImmutableMap.of(
+          SPRING_SAMPLE_NAME,
+          "A basic example using Spring servlets. The app returns values entered into a submit form.",
+          CHE_SAMPLE_NAME,
+          "The Eclipse Che source code. Build Che-in-Che.",
+          CONSOLE_SAMPLE_NAME,
+          "A hello world Java application.");
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
@@ -66,8 +81,58 @@ public class AddOrImportProjectFormTest {
     newWorkspace.selectStack("java-default");
     newWorkspace.clickOnAddOrImportProjectButton();
     newWorkspace.waitAddOrImportFormOpened();
-    // newWorkspace.waitSamplesButtonSelected();
-    newWorkspace.getSamplesNames();
-    newWorkspace.getSampleDescription("console-java-simple");
+    newWorkspace.waitSamplesButtonSelected();
+    newWorkspace.waitSamplesWithDescriptions(EXPECTED_SAMPLES_WITH_DESCRIPTIONS);
+    waitAllCheckboxesDisabled();
+    newWorkspace.waitCancelButtonInImportProjectFormDisabled();
+    newWorkspace.waitAddButtonInImportProjectFormDisabled();
+
+    newWorkspace.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
+    newWorkspace.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
+    newWorkspace.waitCancelButtonInImportProjectFormEnabled();
+    newWorkspace.waitAddButtonInImportProjectFormEnabled();
+
+    newWorkspace.clickOnCancelButtonInImportProjectForm();
+    newWorkspace.waitSampleCheckboxDisabled(CONSOLE_SAMPLE_NAME);
+
+    newWorkspace.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
+    newWorkspace.waitSampleCheckboxEnabled(CHE_SAMPLE_NAME);
+    newWorkspace.waitCancelButtonInImportProjectFormEnabled();
+    newWorkspace.waitAddButtonInImportProjectFormEnabled();
+
+    newWorkspace.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
+    newWorkspace.waitSampleCheckboxDisabled(CHE_SAMPLE_NAME);
+    newWorkspace.waitCancelButtonInImportProjectFormDisabled();
+    newWorkspace.waitAddButtonInImportProjectFormDisabled();
+
+    clickOnEachCheckbox();
+    waitAllCheckboxesEnabled();
+    newWorkspace.waitCancelButtonInImportProjectFormEnabled();
+    newWorkspace.waitAddButtonInImportProjectFormEnabled();
+
+    newWorkspace.clickOnCancelButtonInImportProjectForm();
+    waitAllCheckboxesDisabled();
+    newWorkspace.waitCancelButtonInImportProjectFormDisabled();
+    newWorkspace.waitAddButtonInImportProjectFormDisabled();
+  }
+
+
+
+  private void waitAllCheckboxesDisabled() {
+    newWorkspace
+        .getSamplesNames()
+        .forEach(sampleName -> newWorkspace.waitSampleCheckboxDisabled(sampleName));
+  }
+
+  private void waitAllCheckboxesEnabled() {
+    newWorkspace
+        .getSamplesNames()
+        .forEach(sampleName -> newWorkspace.waitSampleCheckboxEnabled(sampleName));
+  }
+
+  private void clickOnEachCheckbox() {
+    newWorkspace
+        .getSamplesNames()
+        .forEach(sampleName -> newWorkspace.clickOnSampleCheckbox(sampleName));
   }
 }

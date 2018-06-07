@@ -20,7 +20,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAl
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
@@ -1134,6 +1133,8 @@ public class SeleniumWebDriverHelper {
       WebElement parentElement, By nestedElementLocator) {
     return webDriverWaitFactory
         .get()
-        .until(presenceOfNestedElementLocatedBy(parentElement, nestedElementLocator));
+        .until(
+            (ExpectedCondition<WebElement>)
+                driver -> waitVisibility(parentElement).findElement(nestedElementLocator));
   }
 }
