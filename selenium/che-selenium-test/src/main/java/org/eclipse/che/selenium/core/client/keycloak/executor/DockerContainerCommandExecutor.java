@@ -14,6 +14,7 @@ import static java.lang.String.format;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 
@@ -31,23 +32,24 @@ public class DockerContainerCommandExecutor implements KeycloakCommandExecutor {
   }
 
   @Override
-  public String execute(String command) throws ProcessAgentException {
+  public String execute(String command) throws IOException {
     if (keycloakContainerId == null || keycloakContainerId.trim().isEmpty()) {
       obtainKeycloakContainerId();
     }
 
-    String dockerCommand = format("docker exec -i %s sh -c '%s'", keycloakContainerId, command);
+    String dockerCommand =
+        format("docker exec -i %s sh -c 'keycloak/bin/kcadm.sh %s'", keycloakContainerId, command);
     return processAgent.process(dockerCommand);
   }
 
   private void obtainKeycloakContainerId() throws ProcessAgentException {
     // obtain id of keycloak docker container
     keycloakContainerId =
-            processAgent.process("echo $(docker ps | grep che_keycloak | cut -d ' ' -f1)");
+        processAgent.process("echo $(docker ps | grep che_keycloak | cut -d ' ' -f1)");
 
     if (keycloakContainerId.trim().isEmpty()) {
       throw new RuntimeException(
-              "Keycloak container is not found. Make sure that correct value is set for `CHE_INFRASTRUCTURE`, and product to test is run locally");
+          "Keycloak container is not found. Make sure that correct value is set for `CHE_INFRASTRUCTURE`, and product to test is run locally");
     }
   }
 }

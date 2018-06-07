@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core.client.keycloak.executor;
 
+import java.io.IOException;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 
 /**
@@ -26,5 +27,5 @@ public interface KeycloakCommandExecutor {
    * @return response of CLI command
    * @throws ProcessAgentException
    */
-  String execute(String command) throws ProcessAgentException;
+  String execute(String command) throws IOException;
 }

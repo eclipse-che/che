@@ -90,7 +90,7 @@ public class KeycloakAdminConsoleClient {
 
     String createUserCommand =
         format(
-            "keycloak/bin/kcadm.sh create users -r che -s username=%s -s enabled=true %s 2>&1",
+            "create users -r che -s username=%s -s enabled=true %s 2>&1",
             username, authPartOfCommand);
     String response = executor.execute(createUserCommand);
     if (!response.contains("Created new user with id ")) {
@@ -102,25 +102,23 @@ public class KeycloakAdminConsoleClient {
     try {
       String setTestUsersPermanentPasswordCommand =
           format(
-              "keycloak/bin/kcadm.sh set-password -r che --username %s --new-password %s %s 2>&1",
+              "set-password -r che --username %s --new-password %s %s 2>&1",
               username, password, authPartOfCommand);
       executor.execute(setTestUsersPermanentPasswordCommand);
 
       String setEmailCommand =
-          format(
-              "keycloak/bin/kcadm.sh update users/%s -r che --set email=%s %s 2>&1",
-              userId, email, authPartOfCommand);
+          format("update users/%s -r che --set email=%s %s 2>&1", userId, email, authPartOfCommand);
       executor.execute(setEmailCommand);
 
       String addUserRoleToUserCommand =
           format(
-              "keycloak/bin/kcadm.sh add-roles -r che --uusername %s --rolename user %s 2>&1",
+              "add-roles -r che --uusername %s --rolename user %s 2>&1",
               username, authPartOfCommand);
       executor.execute(addUserRoleToUserCommand);
 
       String addReadTokenRoleToUserCommand =
           format(
-              "keycloak/bin/kcadm.sh add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1",
+              "add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1",
               username, authPartOfCommand);
       executor.execute(addReadTokenRoleToUserCommand);
     } catch (IOException e) {
@@ -141,7 +139,7 @@ public class KeycloakAdminConsoleClient {
 
     String addReadTokenRoleToUserCommand =
         format(
-            "keycloak/bin/kcadm.sh add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1",
+            "add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1",
             adminTestUser.getName(), authPartOfCommand);
 
     try {
@@ -169,7 +167,7 @@ public class KeycloakAdminConsoleClient {
   private void delete(String userId, String username) throws IOException {
     String commandToDeleteUser =
         format(
-            "keycloak/bin/kcadm.sh delete users/%s -r che -s username=%s --no-config --server http://localhost:8080/auth --user %s --password %s --realm master 2>&1",
+            "delete users/%s -r che -s username=%s --no-config --server http://localhost:8080/auth --user %s --password %s --realm master 2>&1",
             userId,
             username,
             adminTestUserProvider.get().getName(),
