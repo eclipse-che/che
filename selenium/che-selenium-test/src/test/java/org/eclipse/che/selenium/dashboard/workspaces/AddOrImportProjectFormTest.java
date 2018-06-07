@@ -116,7 +116,17 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitAddButtonInImportProjectFormDisabled();
   }
 
+  @Test(priority = 1)
+  public void checkProjectSamples() {
+    newWorkspace.waitAddOrImportFormOpened();
+    newWorkspace.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
+    newWorkspace.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
+    newWorkspace.waitCancelButtonInImportProjectFormEnabled();
+    newWorkspace.waitAddButtonInImportProjectFormEnabled();
 
+    newWorkspace.clickOnAddButtonInImportProjectForm();
+    newWorkspace.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
+  }
 
   private void waitAllCheckboxesDisabled() {
     newWorkspace

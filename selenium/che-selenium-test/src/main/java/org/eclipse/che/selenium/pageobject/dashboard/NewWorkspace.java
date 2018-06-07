@@ -149,6 +149,8 @@ public class NewWorkspace {
     String CANCEL_BUTTON_ID = "cancel-button";
 
     String CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE = "sample-%s";
+    String PROJECT_TAB_BY_NAME_XPATH_TEMPLATE =
+        "//div[@class='%s']//span[text()='console-java-simple']";
   }
 
   @FindBy(id = Locators.FILTERS_STACK_BUTTON)
@@ -374,6 +376,52 @@ public class NewWorkspace {
 
   public void waitSampleCheckboxDisabled(String sampleName) {
     waitSampleCheckboxState(sampleName, false);
+  }
+
+  public void waitProjectTabAppearance(String tabName) {
+    seleniumWebDriverHelper.waitVisibility(By.id(tabName));
+  }
+
+  public void waitProjectTabDisappearance(String tabName) {
+    seleniumWebDriverHelper.waitInvisibility(By.id(tabName));
+  }
+
+  public void clickOnProjectTab(String tabName) {
+    seleniumWebDriverHelper.waitAndClick(By.id(tabName));
+  }
+
+  public void waitProjectOptionsForm() {}
+
+  private WebElement waitElementByNameAttribute(String nameAttribute) {
+    return seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format("//input[@name='%s']", nameAttribute)));
+  }
+
+  public WebElement waitProjectNameFieldInProjectOptionsForm() {
+    return waitElementByNameAttribute("projectName");
+  }
+
+  public void waitProjectNameFieldValueInProjectOptionsForm(String expectedValue) {
+    seleniumWebDriverHelper.waitValueEqualsTo(
+        waitProjectNameFieldInProjectOptionsForm(), expectedValue);
+  }
+
+  public WebElement waitDescriptionFieldInProjectOptionsForm() {
+    return waitElementByNameAttribute("projectDescription");
+  }
+
+  public void waitDescriptionFieldValueInProjectOptionsForm(String expectedValue) {
+    seleniumWebDriverHelper.waitValueEqualsTo(
+        waitDescriptionFieldInProjectOptionsForm(), expectedValue);
+  }
+
+  public WebElement waitRepositoryUrlFieldInProjectOptionsForm() {
+    return waitElementByNameAttribute("projectGitURL");
+  }
+
+  public void waitRepositoryUrlFieldValueInProjectOptionsForm(String expectedValue) {
+    seleniumWebDriverHelper.waitValueEqualsTo(
+        waitRepositoryUrlFieldInProjectOptionsForm(), expectedValue);
   }
 
   ///////////////////////////// -----------------------------------------------
