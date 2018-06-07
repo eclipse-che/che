@@ -115,6 +115,7 @@ public class KubernetesEnvironmentFactory
     Map<String, Service> services = new HashMap<>();
     boolean isAnyIngressPresent = false;
     boolean isAnyPVCPresent = false;
+
     for (HasMetadata object : list.getItems()) {
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
