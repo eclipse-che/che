@@ -13,8 +13,10 @@ package org.eclipse.che.ide.editor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Boolean.parseBoolean;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 
 import com.google.gwt.core.client.Scheduler;
@@ -74,6 +76,7 @@ import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
 import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -94,7 +97,8 @@ public class EditorAgentImpl
         ActivePartChangedHandler,
         SelectionChangedHandler,
         StateComponent,
-        WorkspaceStoppedEvent.Handler {
+        WorkspaceStoppedEvent.Handler,
+        WsAgentServerStoppedEvent.Handler {
 
   private final EventBus eventBus;
   private final WorkspaceAgent workspaceAgent;
@@ -146,6 +150,7 @@ public class EditorAgentImpl
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     eventBus.addHandler(SelectionChangedEvent.TYPE, this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+    eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, this);
   }
 
   @Override
@@ -803,6 +808,35 @@ public class EditorAgentImpl
     for (EditorPartPresenter editor : getOpenedEditors()) {
       closeEditor(editor);
     }
+  }
+
+  @Override
+  public void onWsAgentServerStopped(WsAgentServerStoppedEvent event) {
+    List<EditorPartPresenter> editorsToReadOnlyMode =
+        getOpenedEditors()
+            .stream()
+            .filter(
+                editor ->
+                    editor instanceof HasReadOnlyProperty
+                        && !((HasReadOnlyProperty) editor).isReadOnly())
+            .collect(toList());
+
+    if (editorsToReadOnlyMode.isEmpty()) {
+      return;
+    }
+
+    notificationManager.notify(
+        "", coreLocalizationConstant.messageSwitchEditorsInReadOnlyMode(), WARNING, EMERGE_MODE);
+
+    editorsToReadOnlyMode.forEach(
+        editor -> {
+          EditorTab editorTab = editorMultiPartStack.getTabByPart(editor);
+          if (editorTab != null) {
+            editorTab.setReadOnlyMark(true);
+          }
+
+          ((HasReadOnlyProperty) editor).setReadOnly(true);
+        });
   }
 
   private static class RestoreStateEditorCallBack extends OpenEditorCallbackImpl {
