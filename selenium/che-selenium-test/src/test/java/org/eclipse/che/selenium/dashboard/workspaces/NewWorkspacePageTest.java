@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -443,8 +444,8 @@ public class NewWorkspacePageTest {
   @Test
   public void checkRamSelection() {
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack("java-default");
-    newWorkspace.waitStackSelected("java-default");
+    newWorkspace.selectStack(JAVA);
+    newWorkspace.waitStackSelected(JAVA);
     newWorkspace.waitRamValue(MACHINE_NAME, 2.0);
     newWorkspace.typeToRamField("");
     newWorkspace.waitRedRamFieldBorders();

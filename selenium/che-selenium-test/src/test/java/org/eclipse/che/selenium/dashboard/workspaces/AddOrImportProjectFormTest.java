@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.util.Map;
@@ -78,7 +80,7 @@ public class AddOrImportProjectFormTest {
   @Test
   public void checkOfCheckboxes() {
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack("java-default");
+    newWorkspace.selectStack(JAVA);
     newWorkspace.clickOnAddOrImportProjectButton();
     newWorkspace.waitAddOrImportFormOpened();
     newWorkspace.waitSamplesButtonSelected();
@@ -118,7 +120,11 @@ public class AddOrImportProjectFormTest {
 
   @Test(priority = 1)
   public void checkProjectSamples() {
+    newWorkspace.waitPageLoad();
+    newWorkspace.selectStack(JAVA);
+    newWorkspace.clickOnAddOrImportProjectButton();
     newWorkspace.waitAddOrImportFormOpened();
+    newWorkspace.waitSamplesButtonSelected();
     newWorkspace.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
     newWorkspace.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
     newWorkspace.waitCancelButtonInImportProjectFormEnabled();

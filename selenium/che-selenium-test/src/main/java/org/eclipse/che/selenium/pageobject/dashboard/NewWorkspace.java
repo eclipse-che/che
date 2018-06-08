@@ -153,6 +153,59 @@ public class NewWorkspace {
         "//div[@class='%s']//span[text()='console-java-simple']";
   }
 
+  public enum StackId {
+    BLANK("blank-default"),
+    JAVA("java-default"),
+    JAVA_MYSQL("java-mysql"),
+    DOT_NET("dotnet-default"),
+    ANDROID("android-default"),
+    CPP("cpp-default"),
+    CENTOS_BLANK("centos"),
+    CENTOS_GO("centos-go"),
+    CENTOS_NODEJS("nodejs4"),
+    CENTOS_WILDFLY_SWARM("wildfly-swarm"),
+    CENTOS_WITH_JAVA_JAVASCRIPT("ceylon-java-javascript-dart-centos"),
+    DEBIAN("debian"),
+    DEBIAN_LSP("debianlsp"),
+    ECLIPSE_CHE("che-in-che"),
+    ECLIPSE_VERTX("vert.x"),
+    GO("go-default"),
+    HADOOP("hadoop-default"),
+    JAVA_CENTOS("java-centos"),
+    JAVA_DEBIAN("java-debian"),
+    JAVA_THEIA_DOCKER("java-theia-docker"),
+    JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
+    JAVA_MYSQL_CENTOS("java-centos-mysql"),
+    KOTLIN("kotlin-default"),
+    NODE("node-default"),
+    OPENSHIFT_DEFAULT("openshift-default"),
+    OPENSHIFT_SQL("openshift-sql"),
+    PHP("php-default"),
+    PHP_GAE("php-gae"),
+    PHP_5_6("php5.6-default"),
+    PLATFORMIO("platformio"),
+    PYTHON("python-default"),
+    PYTHON_2_7("python-2.7"),
+    PYTHON_GAE("python-gae"),
+    RAILS("rails-default"),
+    SELENIUM("selenium"),
+    SPRING_BOOT("spring-boot"),
+    TOMEE("tomee-default"),
+    UBUNTU("ubuntu"),
+    ZEND("zend");
+
+    private final String stackId;
+
+    StackId(String stackId) {
+      this.stackId = stackId;
+    }
+
+    @Override
+    public String toString() {
+      return this.stackId;
+    }
+  }
+
   @FindBy(id = Locators.FILTERS_STACK_BUTTON)
   WebElement filtersStackButton;
 
@@ -699,12 +752,15 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitAndClick(clearInput);
   }
 
-  public boolean isStackVisible(String stackName) {
-    return seleniumWebDriver.findElements(By.xpath(format(STACK_ROW_XPATH, stackName))).size() > 0;
+  public boolean isStackVisible(StackId stackId) {
+    return seleniumWebDriver
+            .findElements(By.xpath(format(STACK_ROW_XPATH, stackId.toString())))
+            .size()
+        > 0;
   }
 
-  public void selectStack(String stackId) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stackId)));
+  public void selectStack(StackId stackId) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stackId.toString())));
   }
 
   public boolean isCreateWorkspaceButtonEnabled() {
@@ -896,7 +952,7 @@ public class NewWorkspace {
         .collect(toList());
   }
 
-  public void waitStackSelected(String stackId) {
+  public void waitStackSelected(StackId stackId) {
     webDriverWaitFactory
         .get()
         .until(
@@ -906,7 +962,8 @@ public class NewWorkspace {
                       .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
                       .stream()
                       .filter(
-                          webElement -> webElement.getAttribute("data-stack-id").equals(stackId))
+                          webElement ->
+                              webElement.getAttribute("data-stack-id").equals(stackId.toString()))
                       .collect(Collectors.toList())
                       .get(0)
                       .getAttribute("class")
