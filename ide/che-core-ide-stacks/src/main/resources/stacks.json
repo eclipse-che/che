@@ -667,7 +667,7 @@
           "recipe": {
             "contentType": "text/x-dockerfile",
             "type": "dockerfile",
-            "content": "FROM eclipse/stack-base:ubuntu\n\nRUN sudo add-apt-repository -y ppa:ponylang/ponylang\nRUN sudo apt-get update\nRUN sudo apt-get install -y ponyc\n\nEXPOSE 8080\n"
+            "content": "FROM eclipse/stack-base:ubuntu\n\nENV PONY_PACKAGE_VERSION 0.1.3-0ppa1~xenial\n\nRUN sudo add-apt-repository -y ppa:ponylang/ponylang\nRUN sudo apt-get update\nRUN sudo apt-get install -y pony-stable=${PONY_PACKAGE_VERSION}\n\nEXPOSE 8080\n"
           },
           "machines": {
             "PONY-MACHINE": {
