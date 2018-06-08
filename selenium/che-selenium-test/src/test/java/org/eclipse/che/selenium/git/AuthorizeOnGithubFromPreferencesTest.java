@@ -107,7 +107,7 @@ public class AuthorizeOnGithubFromPreferencesTest {
       preferences.deleteSshKeyByHost(GITHUB_COM);
     }
 
-    preferences.clickOnCloseBtnAndWaitClosedForm();
+    preferences.closeForm();
   }
 
   @Test

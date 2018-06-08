@@ -955,8 +955,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Determines whether or not this element {@link WebElement} is selected (uses for checkboxes,
-   * radio buttons, etc.)
+   * Determines whether or not this element {@code webElement} is selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
    *
    * @param webElement element which should be selected
    * @return true if given element is selected
@@ -970,7 +971,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Determines whether or not this element {@link WebElement} is enabled
+   * Determines whether or not this element {@code webElement} is enabled.
    *
    * @param webElement element which should be enabled
    * @return true if given element is enabled
@@ -1125,8 +1126,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits for checking {@code timeout} until given {@link WebElement} is selected (uses for
-   * checkboxes, radio buttons, etc.)
+   * Waits until given {@code webElement} is selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
    *
    * @param webElement element which should be selected
    */
@@ -1135,8 +1137,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits for checking {@code timeout} until given {@link WebElement} is selected (uses for
-   * checkboxes, radio buttons, etc.)
+   * Waits during {@code timeout} until given {@code webElement} is selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
    *
    * @param webElement element which should be selected
    * @param timeout waiting time in seconds
@@ -1146,8 +1149,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits for checking {@code timeout} until given {@link WebElement} is not selected (uses for
-   * checkboxes, radio buttons, etc.)
+   * Waits until given {@code webElement} is not selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
    *
    * @param webElement element which should be not selected
    */
@@ -1156,8 +1160,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits for checking {@code timeout} until given {@link WebElement} is not selected (uses for
-   * checkboxes, radio buttons, etc.)
+   * Waits during {@code timeout} until given {@code webElement} is not selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
    *
    * @param webElement element which should be not selected
    * @param timeout waiting time in seconds

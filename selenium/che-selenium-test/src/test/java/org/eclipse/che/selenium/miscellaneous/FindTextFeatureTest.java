@@ -123,7 +123,7 @@ public class FindTextFeatureTest {
 
     //  Check that the Processes tab is opened
     if (!consoles.processesMainAreaIsOpen()) {
-      panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM);
+      panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM_ID);
     }
     consoles.clickOnProcessesButton();
 
@@ -248,7 +248,7 @@ public class FindTextFeatureTest {
     // Check that the Find Info panel state restored
     consoles.closeProcessesArea();
     findTextPage.waitFindInfoPanelIsClosed();
-    panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM);
+    panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM_ID);
     findTextPage.waitFindInfoPanelIsOpen();
 
     // Open 'SayHello.java' file and check cursor position

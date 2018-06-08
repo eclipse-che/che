@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ToolWindows.TOOL_WINDOWS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
-import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_RIGHT_BOTTOM;
+import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_RIGHT_BOTTOM_ID;
 import static org.eclipse.che.selenium.pageobject.Preferences.DropDownGitInformationMenu.CONTRIBUTE_PREFERENCES;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.testng.Assert.assertFalse;
@@ -54,7 +54,7 @@ public class ContributeTabTest {
   private static final String THIRD_PROJECT_NAME = "not-vcs-project";
   private static final String EXP_TEXT_NOT_VCS =
       "Project does not provide VCS, supported by contribution plugin.";
-  private static final String NOTIFICATION_MESS =
+  private static final String NOTIFICATION_MESSAGE =
       "To activate Contribute Panel by clicking on a project go to Profile -> Preferences -> Git -> Contribute";
 
   private String firstProjectUrl;
@@ -94,20 +94,15 @@ public class ContributeTabTest {
 
   @AfterMethod
   public void closeForm() {
-    try {
-      if (askDialog.isOpened()) {
-        askDialog.confirmAndWaitClosed();
-      }
-
-      if (preferences.isPreferencesFormOpened()) {
-        preferences.clickOnCloseButton();
-      }
-
-      preferences.waitPreferencesFormIsClosed();
-
-    } catch (Exception e) {
-      LOG.error(e.getLocalizedMessage(), e);
+    if (askDialog.isOpened()) {
+      askDialog.confirmAndWaitClosed();
     }
+
+    if (preferences.isPreferencesFormOpened()) {
+      preferences.clickOnCloseButton();
+    }
+
+    preferences.waitPreferencesFormIsClosed();
   }
 
   @Test
@@ -129,12 +124,12 @@ public class ContributeTabTest {
 
     // check the text when a project is not under VCS
     projectExplorer.waitAndSelectItem(THIRD_PROJECT_NAME);
-    pullRequestPanel.waitTetxNotVcsProject(EXP_TEXT_NOT_VCS);
+    pullRequestPanel.waitTextNotVcsProject(EXP_TEXT_NOT_VCS);
 
     // check the 'Contribute' checkbox is true by default
     openContributeTab();
     preferences.waitContributeCheckboxIsSelected();
-    preferences.clickOnCloseBtnAndWaitClosedForm();
+    preferences.closeForm();
   }
 
   @Test(priority = 1)
@@ -144,22 +139,22 @@ public class ContributeTabTest {
     preferences.setAndWaitStateContributeCheckbox(true);
     preferences.clickOnOkBtn();
 
-    assertFalse(preferences.saveButtonIsEnabled());
+    assertFalse(preferences.isSaveButtonIsEnabled());
 
     // check the 'Refresh button
     preferences.clickOnContributeCheckbox();
     preferences.waitContributeCheckboxIsNotSelected();
 
-    assertTrue(preferences.saveButtonIsEnabled());
+    assertTrue(preferences.isSaveButtonIsEnabled());
 
     preferences.clickRefreshButton();
     preferences.waitContributeCheckboxIsSelected();
 
     assertFalse(
-        preferences.saveButtonIsEnabled(),
+        preferences.isSaveButtonIsEnabled(),
         "Known issue https://github.com/eclipse/che/issues/9959");
 
-    preferences.clickOnCloseBtnAndWaitClosedForm();
+    preferences.closeForm();
   }
 
   @Test(priority = 1)
@@ -183,7 +178,7 @@ public class ContributeTabTest {
     pullRequestPanel.waitProjectName(SECOND_PROJECT_NAME);
 
     projectExplorer.waitAndSelectItem(THIRD_PROJECT_NAME);
-    pullRequestPanel.waitTetxNotVcsProject(EXP_TEXT_NOT_VCS);
+    pullRequestPanel.waitTextNotVcsProject(EXP_TEXT_NOT_VCS);
   }
 
   @Test(priority = 1)
@@ -194,8 +189,8 @@ public class ContributeTabTest {
     // change 'Contribute' to false by 'Hide' button
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
-    pullRequestPanel.clickHideButtonAndWaitClosePanel();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(NOTIFICATION_MESS);
+    pullRequestPanel.closePanelByHideButton();
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(NOTIFICATION_MESSAGE);
 
     openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();
@@ -206,8 +201,8 @@ public class ContributeTabTest {
     projectExplorer.waitAndSelectItem(SECOND_PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     pullRequestPanel.openOptionsMenu();
-    pullRequestPanel.clickContextHideButtonAndWAitClosedPanel();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(NOTIFICATION_MESS);
+    pullRequestPanel.closePanelFromContextMenu();
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(NOTIFICATION_MESSAGE);
 
     openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();
@@ -224,7 +219,7 @@ public class ContributeTabTest {
 
     openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();
-    preferences.clickOnCloseBtnAndWaitClosedForm();
+    preferences.closeForm();
   }
 
   @Test(priority = 1)
@@ -236,9 +231,9 @@ public class ContributeTabTest {
     pullRequestPanel.waitClosePanel();
 
     // open PR panel by the 'Panel Selector'
-    panelSelector.selectPanelTypeFromPanelSelector(LEFT_RIGHT_BOTTOM);
+    panelSelector.selectPanelTypeFromPanelSelector(LEFT_RIGHT_BOTTOM_ID);
     pullRequestPanel.waitOpenPanel();
-    pullRequestPanel.clickHideButtonAndWaitClosePanel();
+    pullRequestPanel.closePanelByHideButton();
 
     // open PR panel by the 'Contribute' action from the 'Assistant
     menu.runCommand(ASSISTANT, TOOL_WINDOWS, CONTRIBUTE_TOOL_WIDOWS);
@@ -247,7 +242,7 @@ public class ContributeTabTest {
     menu.runCommand(ASSISTANT, TOOL_WINDOWS, CONTRIBUTE_TOOL_WIDOWS);
     pullRequestPanel.waitClosePanel();
 
-    // open PR panel by hot key
+    // open PR panel from call the 'Contribute' by hot key (Ctrl + ALT + '6')
     preferences.callContributeActionByHotKey();
     pullRequestPanel.waitOpenPanel();
 
@@ -276,7 +271,7 @@ public class ContributeTabTest {
   private void setStateContributeChecboxAndCloseForm(boolean state) {
     preferences.setAndWaitStateContributeCheckbox(state);
     preferences.clickOnOkBtn();
-    preferences.clickOnCloseBtnAndWaitClosedForm();
+    preferences.closeForm();
   }
 
   private void openContributeTab() {

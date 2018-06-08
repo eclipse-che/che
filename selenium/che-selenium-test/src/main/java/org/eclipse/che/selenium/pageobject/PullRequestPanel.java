@@ -72,9 +72,9 @@ public class PullRequestPanel {
         "//div[text()='Repository']/parent::div//i[contains(@class,'fa-code-fork')]/following-sibling::div[text()='%s']";
     static final String URL_ITEM =
         "//div[text()='Repository']/parent::div//i[contains(@class,'fa-link')]/following-sibling::a[@href='%s']";
-    static final String MENU_BUTTON = "(//div[@id='gwt-debug-menuButton'])[position()=2]";
+    static final String MENU_BUTTON_XPATH = "(//div[@id='gwt-debug-menuButton'])[position()=2]";
     static final String CONTEXT_HIDE_BUTTON_ID = "gwt-debug-contextMenu/Hide";
-    static final String HIDE_BUTTON = "(//div[@id='gwt-debug-hideButton'])[position()=2]";
+    static final String HIDE_BUTTON_XPATH = "(//div[@id='gwt-debug-hideButton'])[position()=2]";
 
     private PullRequestLocators() {}
   }
@@ -122,10 +122,10 @@ public class PullRequestPanel {
   @FindBy(id = PullRequestLocators.OK_COMMIT_BTN)
   WebElement okCommitBtn;
 
-  @FindBy(xpath = PullRequestLocators.HIDE_BUTTON)
+  @FindBy(xpath = PullRequestLocators.HIDE_BUTTON_XPATH)
   WebElement hideButton;
 
-  @FindBy(xpath = PullRequestLocators.MENU_BUTTON)
+  @FindBy(xpath = PullRequestLocators.MENU_BUTTON_XPATH)
   WebElement menuButton;
 
   @FindBy(id = PullRequestLocators.CONTEXT_HIDE_BUTTON_ID)
@@ -146,7 +146,7 @@ public class PullRequestPanel {
    *
    * @param expText expected text which should be in the PR panel
    */
-  public void waitTetxNotVcsProject(String expText) {
+  public void waitTextNotVcsProject(String expText) {
     seleniumWebDriverHelper.waitTextEqualsTo(panel, expText);
   }
 
@@ -169,12 +169,12 @@ public class PullRequestPanel {
   }
 
   /** Click 'Create PR' button on the 'Pull Request' panel */
-  public void clickCreatePRBtn() {
+  public void clickCreatePullRequestButton() {
     seleniumWebDriverHelper.waitAndClick(createPRBtn);
   }
 
   /** Click 'Update PR' button on the 'Pull Request' panel */
-  public void clickUpdatePRBtn() {
+  public void clickUpdatePullRequestButton() {
     seleniumWebDriverHelper.waitAndClick(updatePRBtn, ELEMENT_TIMEOUT_SEC);
   }
 
@@ -222,7 +222,6 @@ public class PullRequestPanel {
    * @param project name of current project
    */
   public void waitProjectName(String project) {
-
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(String.format(PullRequestLocators.PROJECT_ITEM, project)));
   }
@@ -257,7 +256,7 @@ public class PullRequestPanel {
   }
 
   /** click on the 'Hide' button */
-  public void clickHideButtonAndWaitClosePanel() {
+  public void closePanelByHideButton() {
     seleniumWebDriverHelper.waitAndClick(hideButton);
     waitClosePanel();
   }
@@ -268,7 +267,7 @@ public class PullRequestPanel {
   }
 
   /** click on the 'Hide' button in the menu 'Options' */
-  public void clickContextHideButtonAndWAitClosedPanel() {
+  public void closePanelFromContextMenu() {
     seleniumWebDriverHelper.waitAndClick(contextHideButton);
     waitClosePanel();
   }

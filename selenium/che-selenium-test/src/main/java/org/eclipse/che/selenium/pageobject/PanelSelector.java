@@ -35,8 +35,8 @@ public class PanelSelector {
   }
 
   public interface PanelTypes {
-    String LEFT_BOTTOM = "gwt-debug-selectorLeftBottom";
-    String LEFT_RIGHT_BOTTOM = "gwt-debug-selectorLeftRightBottom";
+    String LEFT_BOTTOM_ID = "gwt-debug-selectorLeftBottom";
+    String LEFT_RIGHT_BOTTOM_ID = "gwt-debug-selectorLeftRightBottom";
   }
 
   private interface Locators {

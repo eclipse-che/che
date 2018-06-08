@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
-import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM;
+import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM_ID;
 import static org.openqa.selenium.Keys.PAGE_DOWN;
 import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.fail;
@@ -90,7 +90,7 @@ public class WorkingWithTerminalTest {
   @BeforeMethod
   private void prepareNewTerminal() {
     try {
-      panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM);
+      panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM_ID);
 
       projectExplorer.waitItem(PROJECT_NAME);
 

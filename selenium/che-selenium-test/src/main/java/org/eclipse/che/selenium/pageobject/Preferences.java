@@ -265,7 +265,7 @@ public class Preferences {
 
   /** wait ok button click and wait closing the form */
   public void clickOnOkBtn() {
-    webDriverHelper.waitAndClick((saveBtn));
+    webDriverHelper.waitAndClick(saveBtn);
     loader.waitOnClosed();
   }
 
@@ -283,7 +283,7 @@ public class Preferences {
    *
    * @return true if the button is enabled
    */
-  public boolean saveButtonIsEnabled() {
+  public boolean isSaveButtonIsEnabled() {
     return webDriverHelper.isEnabled(saveBtn);
   }
 
@@ -298,7 +298,7 @@ public class Preferences {
   }
 
   /** click on the 'Close' button and wait closing the form */
-  public void clickOnCloseBtnAndWaitClosedForm() {
+  public void closeForm() {
     webDriverHelper.waitAndClick(closeBtn);
     waitPreferencesFormIsClosed();
   }
@@ -414,7 +414,7 @@ public class Preferences {
     waitInputEmailCommitter(emailCommitter);
   }
 
-  /** click on the 'Contribute' checkbox */
+  /** clicks on the 'Contribute' checkbox */
   public void clickOnContributeCheckbox() {
     webDriverHelper.waitAndClick(setContributeCheckbox);
   }
@@ -646,7 +646,7 @@ public class Preferences {
 
     // check if github key has been uploaded without authorization on github.com
     if (isSshKeyIsPresent(GITHUB_COM)) {
-      clickOnCloseBtnAndWaitClosedForm();
+      closeForm();
       waitPreferencesFormIsClosed();
       return;
     }
@@ -676,7 +676,7 @@ public class Preferences {
     loader.waitOnClosed();
     waitSshKeyIsPresent(GITHUB_COM);
     loader.waitOnClosed();
-    clickOnCloseBtnAndWaitClosedForm();
+    closeForm();
     waitPreferencesFormIsClosed();
   }
 
