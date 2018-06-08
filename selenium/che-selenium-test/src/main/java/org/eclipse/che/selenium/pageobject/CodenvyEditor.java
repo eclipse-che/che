@@ -795,14 +795,15 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits marker with specified {@code markerLocator} on the defined {@code position} and move cursor to
-   * it
+   * Waits marker with specified {@code markerLocator} on the defined {@code position} and move
+   * cursor to it
    *
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    * @param position line's number, where marker is expected
    */
   public void waitMarkerInPositionAndMoveCursor(MarkerLocator markerLocator, int position) {
-    WebElement marker = seleniumWebDriverHelper.waitVisibility(By.xpath(format(markerLocator.get(), position)));
+    WebElement marker =
+        seleniumWebDriverHelper.waitVisibility(By.xpath(format(markerLocator.get(), position)));
     seleniumWebDriverHelper.moveCursorTo(marker);
   }
 
