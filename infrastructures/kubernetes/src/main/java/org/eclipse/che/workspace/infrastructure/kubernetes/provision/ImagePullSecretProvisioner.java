@@ -53,18 +53,16 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
 
   static final String SECRET_NAME = "workspace-private-registries";
 
-  private final UserSpecificDockerRegistryCredentialsProvider
-      userSpecificDockerRegistryCredentialsProvider;
+  private final UserSpecificDockerRegistryCredentialsProvider credentialsProvider;
   private final KubernetesClientFactory clientFactory;
   private final KubernetesNamespaceFactory namespaceFactory;
 
   @Inject
   public ImagePullSecretProvisioner(
-      UserSpecificDockerRegistryCredentialsProvider userSpecificDockerRegistryCredentialsProvider,
+      UserSpecificDockerRegistryCredentialsProvider credentialsProvider,
       KubernetesClientFactory clientFactory,
       KubernetesNamespaceFactory namespaceFactory) {
-    this.userSpecificDockerRegistryCredentialsProvider =
-        userSpecificDockerRegistryCredentialsProvider;
+    this.credentialsProvider = credentialsProvider;
     this.clientFactory = clientFactory;
     this.namespaceFactory = namespaceFactory;
   }
@@ -73,7 +71,7 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    AuthConfigs credentials = userSpecificDockerRegistryCredentialsProvider.getCredentials();
+    AuthConfigs credentials = credentialsProvider.getCredentials();
     if (credentials == null) {
       return;
     }

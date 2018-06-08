@@ -64,9 +64,7 @@ public class ImagePullSecretProvisionerTest {
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private KubernetesClientFactory clientFactory;
 
-  @Mock
-  private UserSpecificDockerRegistryCredentialsProvider
-      userSpecificDockerRegistryCredentialsProvider;
+  @Mock private UserSpecificDockerRegistryCredentialsProvider credentialsProvider;
 
   @Mock private KubernetesNamespaceFactory namespaceFactory;
   @Mock private KubernetesNamespace namespace;
@@ -93,7 +91,7 @@ public class ImagePullSecretProvisionerTest {
 
   @BeforeMethod
   public void setup() throws InfrastructureException {
-    when(userSpecificDockerRegistryCredentialsProvider.getCredentials()).thenReturn(authConfigs);
+    when(credentialsProvider.getCredentials()).thenReturn(authConfigs);
 
     when(k8sEnv.getPods()).thenReturn(ImmutableMap.of("wksp", pod));
     when(pod.getSpec()).thenReturn(podSpec);
@@ -111,8 +109,7 @@ public class ImagePullSecretProvisionerTest {
     when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
 
     imagePullSecretProvisioner =
-        new ImagePullSecretProvisioner(
-            userSpecificDockerRegistryCredentialsProvider, clientFactory, namespaceFactory);
+        new ImagePullSecretProvisioner(credentialsProvider, clientFactory, namespaceFactory);
   }
 
   @Test
