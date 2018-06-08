@@ -1,0 +1,89 @@
+# Copyright (c) 2012-2018 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: feature-api
+  annotations:
+    description: Che Workspace Next Feature API
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: feature-api-service
+  spec:
+    ports:
+    - name: feature-api
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      app: feature-api
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: feature-api
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+      app: feature-api
+    strategy:
+      type: ${STRATEGY}
+    template:
+      metadata:
+        labels:
+          app: feature-api
+      spec:
+        containers:
+        - env:
+          - name: CHE_REGISTRY_UPDATE_INTERVAL
+            value: "${CHE_REGISTRY_UPDATE_INTERVAL}"
+          - name: CHE_REGISTRY_GITHUB_URL
+            value: "${CHE_REGISTRY_GITHUB_URL}"
+          image: ${IMAGE}
+          imagePullPolicy: "${PULL_POLICY}"
+          name: feature-api
+          ports:
+          - containerPort: 3000
+            name: feature-api
+          resources:
+            limits:
+              memory: 600Mi
+            requests:
+              memory: 256Mi
+          terminationMessagePath: "/dev/termination-log"
+          terminationMessagePolicy: File
+        restartPolicy: Always
+    triggers:
+    - type: ConfigChange
+
+parameters:
+- name: CHE_REGISTRY_GITHUB_URL
+  displayName: URL of Github repo with Feature API objects
+  description: URL of Github repo that contains Feature API objects
+  value: "https://github.com/garagatyi/che-registry.git"
+- name: CHE_REGISTRY_UPDATE_INTERVAL
+  displayName: Interval of fetching changes from CHE_REGISTRY_GITHUB_URL in seconds
+  description: Specifies how often in seconds Feature API will fetch changes in Feature API objects from Github repo that contains those objects
+  value: "60"
+- name: IMAGE
+  displayName: Feature API image
+  description: Feature API docker image. Defaults to ksmster/kubsrv:0.2.1
+  value: ksmster/kubsrv:0.2.1
+- name: STRATEGY
+  displayName: Update Strategy
+  description: Feature API update strategy. Defaults to Rolling
+  value: 'Rolling'
+- name: PULL_POLICY
+  displayName: Che server image pull policy
+  description: Always pull by default. Can be IfNotPresent
+  value: 'Always'
+labels:
+  app: feature-api
+  template: feature-api

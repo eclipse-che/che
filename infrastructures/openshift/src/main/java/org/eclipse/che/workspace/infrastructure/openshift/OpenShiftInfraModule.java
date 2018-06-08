@@ -24,6 +24,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
@@ -44,6 +45,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
@@ -95,5 +97,9 @@ public class OpenShiftInfraModule extends AbstractModule {
     Multibinder.newSetBinder(binder(), ServiceTermination.class)
         .addBinding()
         .to(KubernetesClientTermination.class);
+
+    MapBinder<String, WorkspaceNextApplier> wsNext =
+        MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
+    wsNext.addBinding(OpenShiftEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
   }
 }
