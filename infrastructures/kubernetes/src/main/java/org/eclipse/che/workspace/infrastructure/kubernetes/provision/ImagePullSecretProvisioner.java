@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.LocalObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Base64;
@@ -100,8 +101,10 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
           .secrets()
           .inNamespace(namespaceFactory.create(identity.getWorkspaceId()).getName())
           .createOrReplace(secret);
-    } catch (Exception e) {
-      throw new InfrastructureException(e);
+    } catch (KubernetesClientException e) {
+      throw new InfrastructureException(
+          "Unexpected exception occured while adding the 'ImagePullSecret' built from private docker registry user preferences",
+          e);
     }
 
     k8sEnv.getPods().values().forEach(this::provision);
@@ -161,7 +164,9 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
           jsonWriter.value(encoder.encodeToString(auth.getBytes()));
           jsonWriter.endObject();
         } catch (IOException e) {
-          throw new InfrastructureException(e);
+          throw new InfrastructureException(
+              "Unexpected exception occured while building the 'ImagePullSecret' from private docker registry user preferences",
+              e);
         }
       }
 
