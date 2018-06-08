@@ -10,6 +10,7 @@
 #
 
 SCRIPT_FILE=~/.ssh/git.sh
+mkdir -p ~/.ssh
 
 token=$(if [ "$CHE_MACHINE_TOKEN" != "dummy_token" ]; then echo "$CHE_MACHINE_TOKEN"; fi)
 che_host=$(cat /etc/hosts | grep che-host | awk '{print $1;}')

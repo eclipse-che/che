@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
@@ -65,6 +66,7 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeContextFactory.class));
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
+    install(new FactoryModuleBuilder().build(StartSynchronizerFactory.class));
 
     install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
     bind(WorkspacePVCCleaner.class).asEagerSingleton();
