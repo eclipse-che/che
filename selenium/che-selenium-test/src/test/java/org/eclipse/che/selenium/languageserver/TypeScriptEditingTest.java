@@ -102,7 +102,7 @@ public class TypeScriptEditingTest {
         String.format(
             "The expected value of errors marker should be %d but actual %d",
             expectedAmountOfErrorMarkers, actualValueErrorMarkers));
-    editor.moveCursorToLineWithMarker(ERROR_OVERVIEW, 13);
+    editor.moveToMarker(ERROR_OVERVIEW, 13);
     editor.waitTextInToolTipPopup(tooltipWithErrorMessage);
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor(DELETE.toString());
@@ -116,17 +116,22 @@ public class TypeScriptEditingTest {
     String textFromGreeterObject = "greet\ngreeting\ntestPrint";
 
     String nameOfGreeterClassRef = "greeter.";
+    String methodToComplete = "greet";
 
+    // check autocomplete form content after the ";"
     editor.goToPosition(28, 36);
-
     editor.launchAutocomplete();
     editor.waitTextIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
+
     editor.closeAutocomplete();
+
+    // Check autocomplete of method 'Greeter.greet' by double clicking in autocomplete form
     editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor(nameOfGreeterClassRef);
+
     editor.launchAutocomplete();
     editor.waitTextIntoAutocompleteContainer(textFromGreeterObject);
-    editor.selectItemIntoAutocompleteAndPerformDoubleClick("greet");
+    editor.selectItemIntoAutocompleteAndPerformDoubleClick(methodToComplete);
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
