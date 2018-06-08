@@ -110,7 +110,6 @@ public class TypeScriptEditingTest {
   }
 
   private void checkCodeAssistant() {
-
     String textFromWholeCodeAssistantScope =
         "AbortController\nAbortSignal\nabstract\nActiveXObject\naddEventListener\nalert";
 
@@ -119,6 +118,7 @@ public class TypeScriptEditingTest {
     String nameOfGreeterClassRef = "greeter.";
 
     editor.goToPosition(28, 36);
+
     editor.launchAutocomplete();
     editor.waitTextIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
     editor.closeAutocomplete();
