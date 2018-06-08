@@ -18,11 +18,13 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ADD_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ADD_OR_IMPORT_PROJECT_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ALL_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_PROJECT_OPTIONS_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DECREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
@@ -35,8 +37,12 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.MULTI_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.OPEN_IN_IDE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ORGANIZATIONS_LIST_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.PROJECT_NAME_ERROR_MESSAGE_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.PROJECT_TAB_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.QUICK_START_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.REPOSITORY_URL_ERROR_MESSAGE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SAMPLES_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SAVE_PROJECT_OPTIONS_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SINGLE_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.STACK_ROW_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
@@ -138,6 +144,7 @@ public class NewWorkspace {
     String SINGLE_MACHINE_BUTTON_ID = "single-machine-button";
     String MULTI_MACHINE_BUTTON_ID = "multi-machine-button";
     String ADD_OR_IMPORT_PROJECT_BUTTON_ID = "ADD_PROJECT";
+    String ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE = "//*[@id='%s']/button";
 
     // "Add or Import Project" form buttons
     String SAMPLES_BUTTON_ID = "samples-button";
@@ -149,8 +156,17 @@ public class NewWorkspace {
     String CANCEL_BUTTON_ID = "cancel-button";
 
     String CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE = "sample-%s";
+    String PROJECT_TAB_XPATH_TEMPLATE = "//toggle-single-button[@id='%s']/div/button/div";
     String PROJECT_TAB_BY_NAME_XPATH_TEMPLATE =
         "//div[@class='%s']//span[text()='console-java-simple']";
+
+    // Project options
+    String CANCEL_PROJECT_OPTIONS_BUTTON_XPATH = "//button[@name='cancelButton']";
+    String SAVE_PROJECT_OPTIONS_BUTTON_XPATH = "//che-button-primary//button[@name='saveButton']";
+    String PROJECT_NAME_ERROR_MESSAGE_XPATH =
+        "//div[@che-name='projectName']//div[@id='new-workspace-error-message']/div";
+    String REPOSITORY_URL_ERROR_MESSAGE_XPATH =
+        "//div[@che-name='projectGitURL']//div[@id='new-workspace-error-message']/div";
   }
 
   public enum StackId {
@@ -338,32 +354,41 @@ public class NewWorkspace {
     waitHeaderButtonInImportProjectFormSelected(ZIP_BUTTON_ID);
   }
 
-  private void waitAddOrCancelButtonDisabled(String buttonId, boolean state) {
+  private void waitButtonDisableState(WebElement button, boolean state) {
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
                 driver ->
                     seleniumWebDriverHelper
-                        .waitVisibilityAndGetAttribute(
-                            By.xpath(format("//*[@id='%s']/button", buttonId)), "aria-disabled")
+                        .waitVisibilityAndGetAttribute(button, "aria-disabled")
                         .equals(Boolean.toString(state)));
   }
 
+  private WebElement waitAddButtonInImportProjectForm() {
+    return seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE, ADD_BUTTON_ID)));
+  }
+
+  private WebElement waitCancelButtonInImportProjectForm() {
+    return seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE, CANCEL_BUTTON_ID)));
+  }
+
   public void waitAddButtonInImportProjectFormDisabled() {
-    waitAddOrCancelButtonDisabled(ADD_BUTTON_ID, true);
+    waitButtonDisableState(waitAddButtonInImportProjectForm(), true);
   }
 
   public void waitCancelButtonInImportProjectFormDisabled() {
-    waitAddOrCancelButtonDisabled(CANCEL_BUTTON_ID, true);
+    waitButtonDisableState(waitCancelButtonInImportProjectForm(), true);
   }
 
   public void waitAddButtonInImportProjectFormEnabled() {
-    waitAddOrCancelButtonDisabled(ADD_BUTTON_ID, false);
+    waitButtonDisableState(waitAddButtonInImportProjectForm(), false);
   }
 
   public void waitCancelButtonInImportProjectFormEnabled() {
-    waitAddOrCancelButtonDisabled(CANCEL_BUTTON_ID, false);
+    waitButtonDisableState(waitCancelButtonInImportProjectForm(), false);
   }
 
   private List<WebElement> getSamples() {
@@ -440,10 +465,30 @@ public class NewWorkspace {
   }
 
   public void clickOnProjectTab(String tabName) {
-    seleniumWebDriverHelper.waitAndClick(By.id(tabName));
+    String locator = format(PROJECT_TAB_XPATH_TEMPLATE, tabName);
+    seleniumWebDriverHelper.moveCursorTo(By.xpath(locator));
+
+    waitTextInTooltip(tabName);
+
+    seleniumWebDriverHelper.waitAndClick(By.xpath(locator));
   }
 
-  public void waitProjectOptionsForm() {}
+  private void waitTextInTooltip(String expectedText) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    seleniumWebDriverHelper
+                        .waitVisibilityAndGetText(By.xpath("//*[contains(@class, 'tooltip')]"))
+                        .equals(expectedText));
+  }
+
+  public void waitProjectOptionsForm() {
+    waitProjectNameFieldInProjectOptionsForm();
+    waitDescriptionFieldInProjectOptionsForm();
+    waitRepositoryUrlFieldInProjectOptionsForm();
+  }
 
   private WebElement waitElementByNameAttribute(String nameAttribute) {
     return seleniumWebDriverHelper.waitVisibility(
@@ -459,6 +504,10 @@ public class NewWorkspace {
         waitProjectNameFieldInProjectOptionsForm(), expectedValue);
   }
 
+  public void setValueOfNameFieldInProjectOptionsForm(String value) {
+    seleniumWebDriverHelper.setValue(waitProjectNameFieldInProjectOptionsForm(), value);
+  }
+
   public WebElement waitDescriptionFieldInProjectOptionsForm() {
     return waitElementByNameAttribute("projectDescription");
   }
@@ -468,13 +517,79 @@ public class NewWorkspace {
         waitDescriptionFieldInProjectOptionsForm(), expectedValue);
   }
 
+  public void setValueOfDescriptionFieldInProjectOptionsForm(String value) {
+    seleniumWebDriverHelper.setValue(waitDescriptionFieldInProjectOptionsForm(), value);
+  }
+
   public WebElement waitRepositoryUrlFieldInProjectOptionsForm() {
     return waitElementByNameAttribute("projectGitURL");
+  }
+
+  public void setValueOfRepositoryUrlFieldInProjectOptionsForm(String value) {
+    seleniumWebDriverHelper.setValue(waitRepositoryUrlFieldInProjectOptionsForm(), value);
   }
 
   public void waitRepositoryUrlFieldValueInProjectOptionsForm(String expectedValue) {
     seleniumWebDriverHelper.waitValueEqualsTo(
         waitRepositoryUrlFieldInProjectOptionsForm(), expectedValue);
+  }
+
+  public WebElement waitRemoveButtonInProjectOptionsForm() {
+    return seleniumWebDriverHelper.waitVisibility(By.xpath("//button[@name='removeButton']"));
+  }
+
+  public void clickOnRemoveButtonInProjectOptionsForm() {
+    seleniumWebDriverHelper.waitAndClick(waitRemoveButtonInProjectOptionsForm());
+  }
+
+  public WebElement waitSaveButtonInProjectOptionsForm() {
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(SAVE_PROJECT_OPTIONS_BUTTON_XPATH));
+  }
+
+  public WebElement waitCancelButtonInProjectOptionsForm() {
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(CANCEL_PROJECT_OPTIONS_BUTTON_XPATH));
+  }
+
+  public void clickOnSaveButtonInProjectOptionsForm() {
+    waitSaveButtonInProjectOptionsForm().click();
+  }
+
+  public void clickOnCancelButtonInProjectOptionsForm() {
+    waitCancelButtonInProjectOptionsForm().click();
+  }
+
+  public void waitSaveButtonEnablingInProjectOptionsForm() {
+    waitButtonDisableState(waitSaveButtonInProjectOptionsForm(), false);
+  }
+
+  public void waitSaveButtonDisablingInProjectOptionsForm() {
+    waitButtonDisableState(waitSaveButtonInProjectOptionsForm(), true);
+  }
+
+  public void waitCancelButtonEnablingInProjectOptionsForm() {
+    waitButtonDisableState(waitCancelButtonInProjectOptionsForm(), false);
+  }
+
+  public void waitCancelButtonDisablingInProjectOptionsForm() {
+    waitButtonDisableState(waitCancelButtonInProjectOptionsForm(), true);
+  }
+
+  public void waitProjectNameErrorMessageInOptionsForm(String expectedMessage) {
+    seleniumWebDriverHelper.waitTextEqualsTo(
+        By.xpath(PROJECT_NAME_ERROR_MESSAGE_XPATH), expectedMessage);
+  }
+
+  public void waitProjectNameErrorDisappearanceInOptionsForm() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(PROJECT_NAME_ERROR_MESSAGE_XPATH));
+  }
+
+  public void waitRepositoryUrlErrorMessageInOptionsForm(String expectedMessage) {
+    seleniumWebDriverHelper.waitTextEqualsTo(
+        By.xpath(REPOSITORY_URL_ERROR_MESSAGE_XPATH), expectedMessage);
+  }
+
+  public void waitRepositoryUrlErrorDisappearanceInOptionsForm() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(REPOSITORY_URL_ERROR_MESSAGE_XPATH));
   }
 
   ///////////////////////////// -----------------------------------------------
@@ -610,11 +725,6 @@ public class NewWorkspace {
             format(
                 "//div[text()='%s']/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']/i",
                 tagName)));
-    /*seleniumWebDriverHelper.waitAndClick(
-    By.xpath(
-        format(
-            "//*[text()='%s']/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']/i",
-            tagName)));*/
   }
 
   public void waitTextContainsInFiltersInput(String expectedText) {
