@@ -298,7 +298,7 @@ public class Preferences {
   }
 
   /** click on the 'Close' button and wait closing the form */
-  public void clickOnCloseBtn() {
+  public void clickOnCloseBtnAndWaitClosedForm() {
     webDriverHelper.waitAndClick(closeBtn);
     waitPreferencesFormIsClosed();
   }
@@ -646,7 +646,7 @@ public class Preferences {
 
     // check if github key has been uploaded without authorization on github.com
     if (isSshKeyIsPresent(GITHUB_COM)) {
-      clickOnCloseBtn();
+      clickOnCloseBtnAndWaitClosedForm();
       waitPreferencesFormIsClosed();
       return;
     }
@@ -676,7 +676,7 @@ public class Preferences {
     loader.waitOnClosed();
     waitSshKeyIsPresent(GITHUB_COM);
     loader.waitOnClosed();
-    clickOnCloseBtn();
+    clickOnCloseBtnAndWaitClosedForm();
     waitPreferencesFormIsClosed();
   }
 
