@@ -24,6 +24,7 @@
     <packaging>pom</packaging>
     <name>Infrastructure :: Docker :: Parent</name>
     <modules>
+        <module>docker-auth</module>
         <module>docker-client</module>
         <module>environment</module>
         <module>infrastructure</module>

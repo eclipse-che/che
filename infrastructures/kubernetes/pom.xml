@@ -116,7 +116,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.infrastructure.docker</groupId>
-            <artifactId>docker-client</artifactId>
+            <artifactId>docker-auth</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.infrastructure.docker</groupId>

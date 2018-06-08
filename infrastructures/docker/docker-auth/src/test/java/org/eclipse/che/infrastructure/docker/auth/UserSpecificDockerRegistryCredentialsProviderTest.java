@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.infrastructure.docker.client;
+package org.eclipse.che.infrastructure.docker.auth;
 
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.when;
@@ -23,8 +23,8 @@ import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfig;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfigs;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
