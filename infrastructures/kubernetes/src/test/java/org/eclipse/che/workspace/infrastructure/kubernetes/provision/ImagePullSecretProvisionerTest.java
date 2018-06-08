@@ -20,14 +20,17 @@ import static org.testng.Assert.assertEquals;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.LocalObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -70,13 +73,14 @@ public class ImagePullSecretProvisionerTest {
   @Mock private AuthConfigs authConfigs;
   @Mock private KubernetesClient kubernetesClient;
 
-  @SuppressWarnings("rawtypes")
   @Mock
-  private MixedOperation mixedOperation;
+  private MixedOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
+      mixedOperation;
 
-  @SuppressWarnings("rawtypes")
   @Mock
-  private NonNamespaceOperation namespaceOperation;
+  private NonNamespaceOperation<
+          Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
+      namespaceOperation;
 
   @Mock private Pod pod;
   @Mock private PodSpec podSpec;
@@ -119,6 +123,49 @@ public class ImagePullSecretProvisionerTest {
 
     verifyZeroInteractions(namespaceOperation);
     verifyZeroInteractions(podSpec);
+  }
+
+  @Test
+  public void addSecretAndReferenceInPod() throws Exception {
+    when(authConfigs.getConfigs())
+        .thenReturn(
+            ImmutableMap.of(
+                "reg1",
+                new TestAuthConfig().withUsername("username1").withPassword("password1"),
+                "reg2",
+                new TestAuthConfig().withUsername("username2").withPassword("password2")));
+
+    imagePullSecretProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    verify(podSpec)
+        .setImagePullSecrets(ImmutableList.of(newImagePullSecretRef, existingImagePullSecretRef));
+
+    ArgumentCaptor<Secret> varArgs = ArgumentCaptor.forClass(Secret.class);
+    verify(namespaceOperation).createOrReplace(varArgs.capture());
+
+    List<Secret> addedSecrets = varArgs.getAllValues();
+
+    assertEquals(addedSecrets.size(), 1);
+    Secret secret = addedSecrets.get(0);
+
+    Assert.assertEquals(secret.getType(), "kubernetes.io/dockercfg");
+    String dockerCfgData = secret.getData().get(".dockercfg");
+    Assert.assertNotNull(dockerCfgData);
+    Gson gson = new Gson();
+    assertEquals(
+        gson.toJson(
+            gson.fromJson(new String(Base64.getDecoder().decode(dockerCfgData)), Map.class)),
+        gson.toJson(
+            gson.fromJson(
+                ""
+                    + "{ \"https://reg1\": { \"username\": \"username1\", \"password\": \"password1\", \"email\": \"email@email\", \"auth\": \""
+                    + buildAuth("username1", "password1")
+                    + "\" }"
+                    + ", \"https://reg2\": { \"username\": \"username2\", \"password\": \"password2\", \"email\": \"email@email\", \"auth\": \""
+                    + buildAuth("username2", "password2")
+                    + "\" }"
+                    + "}",
+                Map.class)));
   }
 
   private static class TestAuthConfig implements AuthConfig {
@@ -167,49 +214,5 @@ public class ImagePullSecretProvisionerTest {
                 .append(password)
                 .toString()
                 .getBytes());
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void addSecretAndReferenceInPod() throws Exception {
-    when(authConfigs.getConfigs())
-        .thenReturn(
-            ImmutableMap.of(
-                "reg1",
-                new TestAuthConfig().withUsername("username1").withPassword("password1"),
-                "reg2",
-                new TestAuthConfig().withUsername("username2").withPassword("password2")));
-
-    imagePullSecretProvisioner.provision(k8sEnv, runtimeIdentity);
-
-    verify(podSpec)
-        .setImagePullSecrets(ImmutableList.of(newImagePullSecretRef, existingImagePullSecretRef));
-
-    ArgumentCaptor<Secret> varArgs = ArgumentCaptor.forClass(Secret.class);
-    verify(namespaceOperation).createOrReplace(varArgs.capture());
-
-    List<Secret> addedSecrets = varArgs.getAllValues();
-
-    assertEquals(addedSecrets.size(), 1);
-    Secret secret = addedSecrets.get(0);
-
-    Assert.assertEquals(secret.getType(), "kubernetes.io/dockercfg");
-    String dockerCfgData = secret.getData().get(".dockercfg");
-    Assert.assertNotNull(dockerCfgData);
-    Gson gson = new Gson();
-    assertEquals(
-        gson.toJson(
-            gson.fromJson(new String(Base64.getDecoder().decode(dockerCfgData)), Map.class)),
-        gson.toJson(
-            gson.fromJson(
-                ""
-                    + "{ \"https://reg1\": { \"username\": \"username1\", \"password\": \"password1\", \"email\": \"email@email\", \"auth\": \""
-                    + buildAuth("username1", "password1")
-                    + "\" }"
-                    + ", \"https://reg2\": { \"username\": \"username2\", \"password\": \"password2\", \"email\": \"email@email\", \"auth\": \""
-                    + buildAuth("username2", "password2")
-                    + "\" }"
-                    + "}",
-                Map.class)));
   }
 }
