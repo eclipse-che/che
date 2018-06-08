@@ -87,6 +87,7 @@ public class TypeScriptEditingTest {
   }
 
   private void checkCodeValidation() {
+
     final int expectedValueOfErrorMarkers = 9;
 
     editor.waitActive();
@@ -107,6 +108,7 @@ public class TypeScriptEditingTest {
   }
 
   private void checkCodeAssistant() {
+
     String textFromWholeCodeAssistantScope =
         "AbortController\nAbortSignal\nabstract\nActiveXObject\naddEventListener\nalert";
 
