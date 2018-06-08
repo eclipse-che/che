@@ -21,7 +21,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 
 /**
  * @author Vitaliy Gulyy
@@ -33,7 +32,7 @@ public class Ide {
   private final TestWorkspaceUrlResolver testWorkspaceUrlResolver;
   private final Entrance entrance;
   private final ProjectExplorer projectExplorer;
-  private final MachineTerminal terminal;
+  private final CheTerminal terminal;
   private final Menu menu;
 
   @Inject
@@ -42,7 +41,7 @@ public class Ide {
       TestWorkspaceUrlResolver testWorkspaceUrlResolver,
       Entrance entrance,
       ProjectExplorer projectExplorer,
-      MachineTerminal terminal,
+      CheTerminal terminal,
       Menu menu) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.testWorkspaceUrlResolver = testWorkspaceUrlResolver;

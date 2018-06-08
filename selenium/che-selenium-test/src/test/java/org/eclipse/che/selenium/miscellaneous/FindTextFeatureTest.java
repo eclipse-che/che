@@ -33,6 +33,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -45,7 +46,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PanelSelector;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -62,7 +62,7 @@ public class FindTextFeatureTest {
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
   @Inject private ConfigureClasspath configureClasspath;
-  @Inject private MachineTerminal terminal;
+  @Inject private CheTerminal terminal;
   @Inject private FindText findTextPage;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;

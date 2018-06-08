@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.GitHub;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -32,7 +33,6 @@ import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakFederatedIdentitiesPage;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -62,7 +62,7 @@ public class AuthorizeOnGithubFromPreferencesTest {
   private boolean isMultiuser;
 
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private MachineTerminal terminal;
+  @Inject private CheTerminal terminal;
   @Inject private Menu menu;
   @Inject private ImportProjectFromLocation importProject;
   @Inject private Preferences preferences;
