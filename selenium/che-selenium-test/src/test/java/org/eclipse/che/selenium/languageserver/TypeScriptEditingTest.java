@@ -102,7 +102,7 @@ public class TypeScriptEditingTest {
         String.format(
             "The expected value of errors marker should be %d but actual %d",
             expectedAmountOfErrorMarkers, actualValueErrorMarkers));
-    editor.waitMarkerInPositionAndMoveCursor(ERROR_OVERVIEW, 13);
+    editor.moveCursorToLineWithMarker(ERROR_OVERVIEW, 13);
     editor.waitTextInToolTipPopup(tooltipWithErrorMessage);
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor(DELETE.toString());

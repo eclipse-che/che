@@ -795,17 +795,13 @@ public class CodenvyEditor {
   }
 
   /**
-   * Usually used in tests which check code validation. Code may have warning and error markers in defined line.
-   * After hovering a cursor on the marker usually tooltip appears.
-   * This method waits a marker with defined type, sets cursor on the marker for invoking tooltip.
-   *
    * Waits marker with specified {@code markerLocator} on the defined {@code line number} and move
    * cursor to it.
    *
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    * @param position line's number, where marker is expected
    */
-  public void waitMarkerInPositionAndMoveCursor(MarkerLocator markerLocator, int position) {
+  public void moveCursorToLineWithMarker(MarkerLocator markerLocator, int position) {
     WebElement marker =
         seleniumWebDriverHelper.waitVisibility(By.xpath(format(markerLocator.get(), position)));
     seleniumWebDriverHelper.moveCursorTo(marker);
