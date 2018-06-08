@@ -795,7 +795,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits marker with specified {@code markerLocator} on the defined {@code position} and move
+   * Waits marker with specified {@code markerLocator} on the defined {@code line number} and move
    * cursor to it
    *
    * @param markerLocator marker's type, defined in {@link MarkerLocator}

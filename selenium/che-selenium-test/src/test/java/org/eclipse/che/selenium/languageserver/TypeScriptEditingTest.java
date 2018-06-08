@@ -17,8 +17,9 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
-import static org.openqa.selenium.Keys.*;
+import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.SPACE;
+import static org.openqa.selenium.Keys.DELETE;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
@@ -62,8 +63,10 @@ public class TypeScriptEditingTest {
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/type-script-simple-project");
+
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, NODE_JS);
+
     ide.open(workspace);
 
     projectExplorer.waitVisibleItem(PROJECT_NAME);
@@ -85,6 +88,7 @@ public class TypeScriptEditingTest {
 
   private void checkCodeValidation() {
     final int expectedValueOfErrorMarkers = 9;
+
     editor.waitActive();
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor(SPACE.toString());
@@ -105,6 +109,7 @@ public class TypeScriptEditingTest {
   private void checkCodeAssistant() {
     String textFromWholeCodeAssistantScope =
         "AbortController\nAbortSignal\nabstract\nActiveXObject\naddEventListener\nalert";
+
     String textFromGreeterObject = "greet\ngreeting\ntestPrint";
 
     editor.goToPosition(28, 36);
@@ -120,6 +125,7 @@ public class TypeScriptEditingTest {
   }
 
   private void checkGoToDefinition() {
+    // set cursor to printVar.print place
     editor.goToPosition(24, 20);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitActiveTabFileName("testPrint.ts");
