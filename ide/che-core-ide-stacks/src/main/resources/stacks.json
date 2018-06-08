@@ -657,7 +657,6 @@
   {
     "scope": "general",
     "tags": [
-      "Java 1.8",
       "Pony"
     ],
     "creator": "che",
@@ -690,7 +689,7 @@
       "projects": [],
       "commands": [
         {
-          "commandLine": "mkdir -p ${current.project.path}/build && rm -rf ${current.project.path}/build/* && ponyc ${current.project.path} -o ${current.project.path}/build && ${current.project.path}/build/${editor.current.project.name}",
+          "commandLine": "mkdir -p ${current.project.path}/build && rm -rf ${current.project.path}/build/* && ponyc ${current.project.path} -b program.out -o ${current.project.path}/build && ${current.project.path}/build/program.out",
           "name": "run",
           "type": "custom",
           "attributes": {}
