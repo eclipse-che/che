@@ -12,10 +12,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.allOf;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.*;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.ObjectReference;
@@ -219,8 +220,9 @@ public class KubernetesPods {
    * <p>Note that the resulting future must be explicitly cancelled when its completion no longer
    * important because of finalization allocated resources.
    *
+   * <p>Pod watcher will look for
+   *
    * @param name the pod name that should be watched
-   * @param predicate a function that performs pod state check
    * @return completable future that is completed when one of the following conditions is met:
    *     <ul>
    *       <li>an event that satisfies predicate is received
@@ -229,7 +231,7 @@ public class KubernetesPods {
    *     </ul>
    *     otherwise, it must be explicitly closed
    */
-  public CompletableFuture<Void> waitAsync(String name, Predicate<Pod> predicate) {
+  public CompletableFuture<Void> waitAsync(String name) {
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
       final PodResource<Pod, DoneablePod> podResource =
@@ -239,8 +241,39 @@ public class KubernetesPods {
               new Watcher<Pod>() {
                 @Override
                 public void eventReceived(Action action, Pod pod) {
-                  if (predicate.test(pod)) {
+                  if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_RUNNING)) {
                     podRunningFuture.complete(null);
+                  }
+
+                  if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_SUCCEEDED)) {
+                    podRunningFuture.completeExceptionally(
+                        new InfrastructureException(
+                            "Pod container has been terminated. Container must be configured to use a non-terminating command."));
+                  }
+
+                  if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_FAILED)) {
+                    String reason = pod.getStatus().getReason();
+                    if (Strings.isNullOrEmpty(reason)) {
+                      try {
+                        String podLog =
+                            clientFactory
+                                .create()
+                                .pods()
+                                .withName(pod.getMetadata().getName())
+                                .getLog();
+                        reason =
+                            "Pod '"
+                                + pod.getMetadata().getName()
+                                + "' failed to start. Pod logs: "
+                                + podLog;
+
+                      } catch (InfrastructureException e) {
+                        reason = "Error occurred while fetching pod logs";
+                      }
+                    }
+                    podRunningFuture.completeExceptionally(
+                        new InfrastructureException(reason.substring(reason.length())));
+                    LOG.warn(reason);
                   }
                 }
 
@@ -258,7 +291,7 @@ public class KubernetesPods {
         podRunningFuture.completeExceptionally(
             new InfrastructureException("Specified pod " + name + " doesn't exist"));
       }
-      if (predicate.test(pod)) {
+      if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_RUNNING)) {
         podRunningFuture.complete(null);
       }
     } catch (KubernetesClientException | InfrastructureException ex) {
