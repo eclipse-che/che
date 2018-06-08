@@ -17,9 +17,9 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
+import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.SPACE;
-import static org.openqa.selenium.Keys.DELETE;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
@@ -88,7 +88,9 @@ public class TypeScriptEditingTest {
 
   private void checkCodeValidation() {
 
-    final int expectedValueOfErrorMarkers = 9;
+    final int expectedAmountOfErrorMarkers = 9;
+
+    String tooltipWithErrorMessage = "Cannot find name 'c'";
 
     editor.waitActive();
     editor.goToPosition(13, 2);
@@ -96,12 +98,12 @@ public class TypeScriptEditingTest {
     final int actualValueErrorMarkers = editor.getMarkersQuantity(ERROR);
     assertEquals(
         actualValueErrorMarkers,
-        expectedValueOfErrorMarkers,
+        expectedAmountOfErrorMarkers,
         String.format(
             "The expected value of errors marker should be %d but actual %d",
-            expectedValueOfErrorMarkers, actualValueErrorMarkers));
+            expectedAmountOfErrorMarkers, actualValueErrorMarkers));
     editor.waitMarkerInPositionAndMoveCursor(ERROR_OVERVIEW, 13);
-    editor.waitTextInToolTipPopup("Cannot find name 'c'");
+    editor.waitTextInToolTipPopup(tooltipWithErrorMessage);
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
@@ -114,12 +116,14 @@ public class TypeScriptEditingTest {
 
     String textFromGreeterObject = "greet\ngreeting\ntestPrint";
 
+    String nameOfGreeterClassRef = "greeter.";
+
     editor.goToPosition(28, 36);
     editor.launchAutocomplete();
     editor.waitTextIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
     editor.closeAutocomplete();
     editor.typeTextIntoEditor(ENTER.toString());
-    editor.typeTextIntoEditor("greeter.");
+    editor.typeTextIntoEditor(nameOfGreeterClassRef);
     editor.launchAutocomplete();
     editor.waitTextIntoAutocompleteContainer(textFromGreeterObject);
     editor.selectItemIntoAutocompleteAndPerformDoubleClick("greet");
