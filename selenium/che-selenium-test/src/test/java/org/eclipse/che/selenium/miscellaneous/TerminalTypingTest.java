@@ -14,10 +14,10 @@ import com.google.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -79,7 +79,7 @@ public class TerminalTypingTest {
   @Inject private Loader loader;
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
-  @Inject private MachineTerminal terminal;
+  @Inject private CheTerminal terminal;
   @Inject private ProjectExplorer projectExplorer;
 
   @BeforeClass
