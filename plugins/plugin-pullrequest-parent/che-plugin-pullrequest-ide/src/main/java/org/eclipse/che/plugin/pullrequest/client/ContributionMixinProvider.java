@@ -172,6 +172,7 @@ public class ContributionMixinProvider {
       return;
     }
 
+    lastSelected = project;
     vcsHostingServiceProvider
         .getVcsHostingService(project)
         .then(
