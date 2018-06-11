@@ -28,10 +28,14 @@ import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Dmytro Nochevnov */
+/**
+ * This class is aimed to call Keycloak admin CLI inside Open Shift pod.
+ *
+ * @author Dmytro Nochevnov
+ */
 @Singleton
-public class OpenShiftPodCommandExecutor implements KeycloakCommandExecutor {
-  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftPodCommandExecutor.class);
+public class OpenShiftKeycloakCommandExecutor implements KeycloakCommandExecutor {
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftKeycloakCommandExecutor.class);
 
   private static final boolean IS_MAC_OS =
       System.getProperty("os.name").toLowerCase().startsWith("mac");

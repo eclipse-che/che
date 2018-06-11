@@ -18,16 +18,20 @@ import java.io.IOException;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 
-/** @author Dmytro Nochevnov */
+/**
+ * This class is aimed to call Keycloak admin CLI inside Docker container.
+ *
+ * @author Dmytro Nochevnov
+ */
 @Singleton
-public class DockerContainerCommandExecutor implements KeycloakCommandExecutor {
+public class DockerKeycloakCommandExecutor implements KeycloakCommandExecutor {
 
   private final ProcessAgent processAgent;
 
   private String keycloakContainerId;
 
   @Inject
-  public DockerContainerCommandExecutor(ProcessAgent processAgent) {
+  public DockerKeycloakCommandExecutor(ProcessAgent processAgent) {
     this.processAgent = processAgent;
   }
 
