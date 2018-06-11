@@ -223,7 +223,7 @@ public class ContributeTabTest {
   }
 
   @Test(priority = 1)
-  public void checkOpenPrPanelOnDemand() {
+  public void checkDirectAccessToContributeTab() {
     openContributeTab();
     setStateContributeChecboxAndCloseForm(false);
 
