@@ -31,6 +31,8 @@ public class AlteredFiles {
   protected final Project project;
   protected final LinkedHashMap<String, Status> alteredFilesStatuses;
   protected final List<String> alteredFilesList;
+  protected final String commitA;
+  protected final String commitB;
 
   /**
    * Parses raw git diff string and creates advanced representation.
@@ -39,6 +41,10 @@ public class AlteredFiles {
    * @param diff plain result of git diff operation
    */
   public AlteredFiles(Project project, String diff) {
+    this(project, diff, null, null);
+  }
+
+  public AlteredFiles(Project project, String diff, String commitA, String commitB) {
     this.project = project;
 
     alteredFilesStatuses = new LinkedHashMap<>();
@@ -53,6 +59,27 @@ public class AlteredFiles {
     }
 
     alteredFilesList = new ArrayList<>(alteredFilesStatuses.keySet());
+
+    this.commitA = commitA;
+    this.commitB = commitB;
+  }
+
+  /**
+   * Returns the commit A from the current diff.
+   *
+   * @return commit A or {@code null} if such wasn't provided
+   */
+  public String getCommitA() {
+    return commitA;
+  }
+
+  /**
+   * Returns the commit B from the current diff.
+   *
+   * @return commit B or {@code null} if such wasn't provided
+   */
+  public String getCommitB() {
+    return commitB;
   }
 
   /** Returns project in which git repository is located. */
