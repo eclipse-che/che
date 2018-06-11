@@ -86,7 +86,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     String command = params.getCommand();
     switch (command) {
       case CLIENT_UPDATE_PROJECTS_CLASSPATH:
-        List<Object> fixedPathList = new ArrayList<>();
+        List<Object> fixedPathList = new ArrayList<>(params.getArguments().size());
         for (Object uri : params.getArguments()) {
           fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
         }
