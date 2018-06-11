@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.infrastructure.docker.client.dto;
+package org.eclipse.che.infrastructure.docker.auth.dto;
 
 import java.util.Map;
 import org.eclipse.che.dto.shared.DTO;
