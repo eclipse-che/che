@@ -47,13 +47,18 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
 
   private final Runtime workspaceRuntime;
   private final ConfigExtractor configExtractor;
+  private final GuiceConfigProvider guiceConfigProvider;
 
   @Inject
-  WorkspaceConfigProvider(WorkspaceProjectSynchronizer workspace, JsonParser jsonParser)
+  WorkspaceConfigProvider(
+      WorkspaceProjectSynchronizer workspace,
+      JsonParser jsonParser,
+      GuiceConfigProvider guiceConfigProvider)
       throws ServerException {
 
     this.workspaceRuntime = workspace.getRuntime();
     this.configExtractor = new ConfigExtractor(jsonParser);
+    this.guiceConfigProvider = guiceConfigProvider;
   }
 
   @Override
@@ -106,6 +111,10 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
 
                 @Override
                 public InstanceProvider getInstanceProvider() {
+
+                  if (guiceConfigProvider.getAll().containsKey(id)) {
+                    return guiceConfigProvider.getAll().get(id).getInstanceProvider();
+                  }
                   return DefaultInstanceProvider.getInstance();
                 }
               });
