@@ -22,6 +22,9 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ADD_OR_IMPORT_PROJECT_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ALL_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_FORM_DESCRIPTION_FIELD_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_FORM_NAME_ERROR_MESSAGE_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_FORM_NAME_FIELD_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_PROJECT_OPTIONS_BUTTON_XPATH;
@@ -167,6 +170,12 @@ public class NewWorkspace {
         "//div[@che-name='projectName']//div[@id='new-workspace-error-message']/div";
     String REPOSITORY_URL_ERROR_MESSAGE_XPATH =
         "//div[@che-name='projectGitURL']//div[@id='new-workspace-error-message']/div";
+
+    // Blank tab fields
+    String BLANK_FORM_NAME_FIELD_XPATH = "//input[@name='name']";
+    String BLANK_FORM_DESCRIPTION_FIELD_XPATH = "//input[@name='description']";
+    String BLANK_FORM_NAME_ERROR_MESSAGE_XPATH =
+        "//div[@id='project-source-selector']//div[@id='new-workspace-error-message']/div";
   }
 
   public enum StackId {
@@ -465,6 +474,7 @@ public class NewWorkspace {
   }
 
   public void clickOnProjectTab(String tabName) {
+    waitProjectTabAppearance(tabName);
     String locator = format(PROJECT_TAB_XPATH_TEMPLATE, tabName);
     seleniumWebDriverHelper.moveCursorTo(By.xpath(locator));
 
@@ -590,6 +600,55 @@ public class NewWorkspace {
 
   public void waitRepositoryUrlErrorDisappearanceInOptionsForm() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(REPOSITORY_URL_ERROR_MESSAGE_XPATH));
+  }
+
+  public void waitTextInBlankNameField(String expectedText) {
+    seleniumWebDriverHelper.waitAttributeEqualsTo(
+        By.xpath(BLANK_FORM_NAME_FIELD_XPATH), "value", expectedText);
+  }
+
+  public void typeToBlankNameField(String text) {
+    seleniumWebDriverHelper.setValue(By.xpath(BLANK_FORM_NAME_FIELD_XPATH), text);
+  }
+
+  public void waitNameFieldErrorMessageInBlankForm(String errorMessage) {
+    seleniumWebDriverHelper.waitTextEqualsTo(
+        By.xpath(BLANK_FORM_NAME_ERROR_MESSAGE_XPATH), errorMessage);
+  }
+
+  public void waitErrorMessageDissappearanceInBlankNameField() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(BLANK_FORM_NAME_ERROR_MESSAGE_XPATH));
+  }
+
+  public void waitTextInBlankDescriptionField(String expectedText) {
+    seleniumWebDriverHelper.waitAttributeEqualsTo(
+        By.xpath(BLANK_FORM_DESCRIPTION_FIELD_XPATH), "value", expectedText);
+  }
+
+  public void typeToBlankDescriptionField(String text) {
+    seleniumWebDriverHelper.setValue(By.xpath(BLANK_FORM_DESCRIPTION_FIELD_XPATH), text);
+  }
+
+  public void waitGitTabOpenedInImportProjectForm() {
+    waitGitButtonSelected();
+    waitGitUrlField();
+  }
+
+  public WebElement waitGitUrlField() {
+    return seleniumWebDriverHelper.waitVisibility(waitElementByNameAttribute("remoteGitURL"));
+  }
+
+  public void typeToGitUrlField(String text) {
+    seleniumWebDriverHelper.setValue(waitGitUrlField(), text);
+  }
+
+  public WebElement waitConnectYourGithubAccountButton() {
+    return seleniumWebDriverHelper.waitVisibility(
+        By.xpath("//che-button-default[@class='import-github-project-button']/button"));
+  }
+
+  public void clickConnectYourGithubAccountButton() {
+    seleniumWebDriverHelper.waitAndClick(waitConnectYourGithubAccountButton());
   }
 
   ///////////////////////////// -----------------------------------------------
@@ -870,6 +929,7 @@ public class NewWorkspace {
   }
 
   public void selectStack(StackId stackId) {
+    waitStacks(asList(stackId.toString()));
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stackId.toString())));
   }
 

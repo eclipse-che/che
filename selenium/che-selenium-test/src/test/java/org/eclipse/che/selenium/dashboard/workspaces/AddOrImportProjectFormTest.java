@@ -10,11 +10,14 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -30,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,6 +41,8 @@ import org.testng.annotations.Test;
 public class AddOrImportProjectFormTest {
 
   private static final String NAME_WITH_MAX_AVAILABLE_LENGTH = NameGenerator.generate("name", 124);
+  private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
+  private static final String TEST_WORKSPACE = "test-workspace";
   private static final String NAME_WITH_SPECIAL_CHARACTERS = "@#$%^&*";
   private static final String SPRING_SAMPLE_NAME = "web-java-spring";
   private static final String EXPECTED_SPRING_REPOSITORY_URL =
@@ -47,6 +53,10 @@ public class AddOrImportProjectFormTest {
   private static final String RENAMED_CONSOLE_SAMPLE_NAME = "java-console-test";
   private static final String EXPECTED_CONSOLE_REPOSITORY_URL =
       "https://github.com/che-samples/console-java-simple.git";
+  private static final String BLANK_FORM_DESCRIPTION = "example of description";
+  private static final String CUSTOM_BLANK_PROJECT_NAME = "blank-project";
+  private static final String BLANK_PROJECT_NAME = "blank";
+  private static final String BLANK_DEFAULT_URL = "https://github.com/che-samples/blank";
   private static final Map<String, String> EXPECTED_SAMPLES_WITH_DESCRIPTIONS =
       ImmutableMap.of(
           SPRING_SAMPLE_NAME,
@@ -55,6 +65,8 @@ public class AddOrImportProjectFormTest {
           "The Eclipse Che source code. Build Che-in-Che.",
           CONSOLE_SAMPLE_NAME,
           "A hello world Java application.");
+
+  private Workspace customWorkspace;
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
@@ -126,7 +138,7 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitAddButtonInImportProjectFormDisabled();
   }
 
-  @Test(priority = 1)
+  // @Test(priority = 1)
   public void checkProjectSamples() {
     newWorkspace.waitPageLoad();
     newWorkspace.selectStack(JAVA);
@@ -236,7 +248,8 @@ public class AddOrImportProjectFormTest {
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
     newWorkspace.setValueOfRepositoryUrlFieldInProjectOptionsForm("");
-    newWorkspace.waitRepositoryUrlFieldValueInProjectOptionsForm("Invalid Git URL");
+
+    newWorkspace.waitRepositoryUrlErrorMessageInOptionsForm("Invalid Git URL");
     newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
     newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
 
@@ -262,6 +275,103 @@ public class AddOrImportProjectFormTest {
     newWorkspace.setValueOfNameFieldInProjectOptionsForm(RENAMED_CONSOLE_SAMPLE_NAME);
     newWorkspace.clickOnSaveButtonInProjectOptionsForm();
     newWorkspace.waitProjectTabAppearance(RENAMED_CONSOLE_SAMPLE_NAME);
+    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
+    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+  }
+
+  // @Test(priority = 2)
+  public void checkProjectsBlank() throws Exception {
+    newWorkspace.waitPageLoad();
+    newWorkspace.selectStack(BLANK);
+    newWorkspace.waitStackSelected(BLANK);
+    newWorkspace.clickOnAddOrImportProjectButton();
+    newWorkspace.waitAddOrImportFormOpened();
+    newWorkspace.clickOnBlankButton();
+
+    newWorkspace.typeToBlankNameField(NAME_WITH_MAX_AVAILABLE_LENGTH);
+    newWorkspace.waitErrorMessageDissappearanceInBlankNameField();
+
+    newWorkspace.waitAddButtonInImportProjectFormEnabled();
+    newWorkspace.waitCancelButtonInImportProjectFormEnabled();
+
+    newWorkspace.typeToBlankNameField("");
+    newWorkspace.waitAddButtonInImportProjectFormDisabled();
+    newWorkspace.waitCancelButtonInImportProjectFormDisabled();
+
+    newWorkspace.typeToBlankNameField(NAME_WITH_MAX_AVAILABLE_LENGTH + "p");
+    newWorkspace.waitNameFieldErrorMessageInBlankForm(
+        "The name has to be less than 128 characters long.");
+    newWorkspace.waitAddButtonInImportProjectFormDisabled();
+    newWorkspace.waitCancelButtonInImportProjectFormEnabled();
+
+    newWorkspace.typeToBlankNameField(NAME_WITH_SPECIAL_CHARACTERS);
+    newWorkspace.waitNameFieldErrorMessageInBlankForm(
+        "The name should not contain special characters like space, dollar, etc.");
+    newWorkspace.waitAddButtonInImportProjectFormDisabled();
+    newWorkspace.waitCancelButtonInImportProjectFormEnabled();
+
+    newWorkspace.typeToBlankDescriptionField(BLANK_FORM_DESCRIPTION);
+    newWorkspace.waitTextInBlankDescriptionField(BLANK_FORM_DESCRIPTION);
+
+    newWorkspace.clickOnCancelButtonInImportProjectForm();
+
+    newWorkspace.waitTextInBlankNameField("");
+    newWorkspace.waitTextInBlankDescriptionField("");
+
+    newWorkspace.typeToBlankNameField(CUSTOM_BLANK_PROJECT_NAME);
+    newWorkspace.typeToBlankDescriptionField(BLANK_FORM_DESCRIPTION);
+    newWorkspace.clickOnAddButtonInImportProjectForm();
+
+    newWorkspace.waitProjectTabAppearance(CUSTOM_BLANK_PROJECT_NAME);
+    checkProjectTabAppearanceAndFields(
+        CUSTOM_BLANK_PROJECT_NAME, BLANK_FORM_DESCRIPTION, BLANK_DEFAULT_URL);
+
+    newWorkspace.clickOnAddOrImportProjectButton();
+    newWorkspace.waitAddOrImportFormOpened();
+    newWorkspace.clickOnGitButton();
+    newWorkspace.waitGitTabOpenedInImportProjectForm();
+    newWorkspace.typeToGitUrlField(BLANK_DEFAULT_URL);
+    newWorkspace.clickOnAddButtonInImportProjectForm();
+
+    checkProjectTabAppearanceAndFields(BLANK_PROJECT_NAME, "", BLANK_DEFAULT_URL);
+
+    newWorkspace.clickOnAddOrImportProjectButton();
+    newWorkspace.waitAddOrImportFormOpened();
+    newWorkspace.clickOnGitHubButton();
+
+    newWorkspace.setMachineRAM("dev-machine", 5.0);
+    newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
+    newWorkspace.clickOnCreateButtonAndOpenInIDE();
+
+    /*testWorkspaceServiceClient.waitStatus(WORKSPACE_NAME, defaultTestUser.getName(), RUNNING);
+    customWorkspace = getWorkspace();
+    List<? extends ProjectConfig> projects = customWorkspace.getConfig().getProjects();*/
+
+  }
+
+  @Test(priority = 3)
+  public void checkCreatingProject() {
+    newWorkspace.waitPageLoad();
+    newWorkspace.typeWorkspaceName(TEST_WORKSPACE);
+    newWorkspace.selectStack(DOT_NET);
+    newWorkspace.waitStackSelected(DOT_NET);
+
+    Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_WORKSPACE);
+
+    newWorkspace.selectStack(JAVA);
+    newWorkspace.waitStackSelected(JAVA);
+
+    Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_WORKSPACE);
+
+    newWorkspace.setMachineRAM("dev-machine", 3.0);
+    newWorkspace.waitRamValue("dev-machine", 3.0);
+
+    newWorkspace.clickOnAddOrImportProjectButton();
+    newWorkspace.waitAddOrImportFormOpened();
+    newWorkspace.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    newWorkspace.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    newWorkspace.clickOnAddButtonInImportProjectForm();
+    newWorkspace.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
   }
 
   private void waitAllCheckboxesDisabled() {
@@ -291,5 +401,9 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitRemoveButtonInProjectOptionsForm();
     newWorkspace.waitCancelButtonDisablingInProjectOptionsForm();
     newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
+  }
+
+  private Workspace getWorkspace() throws Exception {
+    return testWorkspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
   }
 }
