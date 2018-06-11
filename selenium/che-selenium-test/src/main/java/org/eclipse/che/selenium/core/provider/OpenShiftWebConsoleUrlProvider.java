@@ -38,7 +38,7 @@ public class OpenShiftWebConsoleUrlProvider implements Provider<URL> {
   private String cheHost;
 
   @Inject(optional = true)
-  @Named("openshift.url")
+  @Named("env.openshift.url")
   private String openShiftUrl;
 
   @Override
@@ -64,7 +64,7 @@ public class OpenShiftWebConsoleUrlProvider implements Provider<URL> {
     if (!matcher.matches()) {
       throw new RuntimeException(
           format(
-              "It's impossible to extract OpenShift host from Eclipse Che host '%s'. Make sure that correct value is set for `CHE_INFRASTRUCTURE`.",
+              "It's impossible to extract Open Shift host from Eclipse Che host '%s'. Make sure that correct value is set for `CHE_INFRASTRUCTURE`.",
               cheHost));
     }
 

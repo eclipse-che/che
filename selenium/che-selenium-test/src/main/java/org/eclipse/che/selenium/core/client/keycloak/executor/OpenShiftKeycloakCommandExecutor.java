@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.client.keycloak.executor;
 
 import static java.lang.String.format;
+import static java.lang.System.getProperty;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,28 +38,35 @@ import org.slf4j.LoggerFactory;
 public class OpenShiftKeycloakCommandExecutor implements KeycloakCommandExecutor {
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftKeycloakCommandExecutor.class);
 
-  private static final boolean IS_MAC_OS =
-      System.getProperty("os.name").toLowerCase().startsWith("mac");
+  private static final boolean IS_MAC_OS = getProperty("os.name").toLowerCase().startsWith("mac");
   private static final String DEFAULT_OPENSHIFT_USERNAME = "developer";
   private static final String DEFAULT_OPENSHIFT_PASSWORD = "any";
+  private static final String DEFAULT_OPENSHIFT_CHE_NAMESPACE = "eclipse-che";
 
   private static final Path PATH_TO_OPENSHIFT_CLI_DIRECTORY =
-      Paths.get(System.getProperty("java.io.tmpdir"));
+      Paths.get(getProperty("java.io.tmpdir"));
 
   private static final Path PATH_TO_OPENSHIFT_CLI = PATH_TO_OPENSHIFT_CLI_DIRECTORY.resolve("oc");
-  public static final String ECLIPSE_CHE_NAMESPACE = "eclipse-che";
 
   private String keycloakPodName;
 
   @Inject private ProcessAgent processAgent;
 
   @Inject(optional = true)
-  @Named("openshift.username")
+  @Named("env.openshift.username")
   private String openShiftUsername;
 
   @Inject(optional = true)
-  @Named("openshift.password")
+  @Named("env.openshift.password")
   private String openShiftPassword;
+
+  @Inject(optional = true)
+  @Named("env.openshift.token")
+  private String openShiftToken;
+
+  @Inject(optional = true)
+  @Named("env.openshift.che.namespace")
+  private String openShiftCheNamespace;
 
   @Inject private OpenShiftWebConsoleUrlProvider openShiftWebConsoleUrlProvider;
 
@@ -81,20 +89,26 @@ public class OpenShiftKeycloakCommandExecutor implements KeycloakCommandExecutor
       downloadOpenShiftCLI();
     }
 
-    reLoginToOpenShift();
+    loginToOpenShift();
 
     // obtain name of keycloak pod
     keycloakPodName =
         processAgent.process(
             format(
                 "%s get pod --namespace=%s -l app=keycloak --no-headers | awk '{print $1}'",
-                PATH_TO_OPENSHIFT_CLI, ECLIPSE_CHE_NAMESPACE));
+                PATH_TO_OPENSHIFT_CLI,
+                openShiftCheNamespace != null
+                    ? openShiftCheNamespace
+                    : DEFAULT_OPENSHIFT_CHE_NAMESPACE));
 
     if (keycloakPodName.trim().isEmpty()) {
       throw new RuntimeException(
           format(
-              "Keycloak pod is not found at namespace %s at OpenShift instance %s.",
-              ECLIPSE_CHE_NAMESPACE, openShiftWebConsoleUrlProvider.get()));
+              "Keycloak pod is not found at namespace %s at Open Shift instance %s.",
+              openShiftCheNamespace != null
+                  ? openShiftCheNamespace
+                  : DEFAULT_OPENSHIFT_CHE_NAMESPACE,
+              openShiftWebConsoleUrlProvider.get()));
     }
   }
 
@@ -124,24 +138,32 @@ public class OpenShiftKeycloakCommandExecutor implements KeycloakCommandExecutor
           format("tar --strip 1 -xzf %s -C %s", packagePath, PATH_TO_OPENSHIFT_CLI_DIRECTORY);
     }
 
-    LOG.info("Downloading OpenShift CLI from {} ...", url);
+    LOG.info("Downloading Open Shift CLI from {} ...", url);
     FileUtils.copyURLToFile(url, packagePath);
-    LOG.info("OpenShift CLI has been downloaded.");
+    LOG.info("Open Shift CLI has been downloaded.");
 
     processAgent.process(commandToUnpackOpenShiftCli);
 
     FileUtils.deleteQuietly(packagePath);
   }
 
-  private void reLoginToOpenShift() throws ProcessAgentException {
-    String reLoginToOpenShiftCliCommand =
-        format(
-            "%1$s logout && %1$s login --server=%2$s -u=%3$s -p=%4$s --insecure-skip-tls-verify",
-            PATH_TO_OPENSHIFT_CLI,
-            openShiftWebConsoleUrlProvider.get(),
-            openShiftUsername != null ? openShiftUsername : DEFAULT_OPENSHIFT_USERNAME,
-            openShiftPassword != null ? openShiftPassword : DEFAULT_OPENSHIFT_PASSWORD);
+  private void loginToOpenShift() throws ProcessAgentException {
+    String loginToOpenShiftCliCommand;
+    if (openShiftToken != null) {
+      loginToOpenShiftCliCommand =
+          format(
+              "%s login --server=%s --token=%s --insecure-skip-tls-verify",
+              PATH_TO_OPENSHIFT_CLI, openShiftWebConsoleUrlProvider.get(), openShiftToken);
+    } else {
+      loginToOpenShiftCliCommand =
+          format(
+              "%s login --server=%s -u=%s -p=%s --insecure-skip-tls-verify",
+              PATH_TO_OPENSHIFT_CLI,
+              openShiftWebConsoleUrlProvider.get(),
+              openShiftUsername != null ? openShiftUsername : DEFAULT_OPENSHIFT_USERNAME,
+              openShiftPassword != null ? openShiftPassword : DEFAULT_OPENSHIFT_PASSWORD);
+    }
 
-    processAgent.process(reLoginToOpenShiftCliCommand);
+    processAgent.process(loginToOpenShiftCliCommand);
   }
 }
