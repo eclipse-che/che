@@ -14,11 +14,11 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -41,7 +41,7 @@ public class ServerRuntimeInfoTest {
   @Inject private Consoles consoles;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private MachineTerminal terminal;
+  @Inject private CheTerminal terminal;
 
   @BeforeClass
   public void setUp() throws Exception {

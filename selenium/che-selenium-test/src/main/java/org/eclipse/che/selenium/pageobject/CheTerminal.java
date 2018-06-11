@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject.machineperspective;
+package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
@@ -26,8 +26,6 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -41,8 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class MachineTerminal {
-  private static final Logger LOG = LoggerFactory.getLogger(MachineTerminal.class);
+public class CheTerminal {
+  private static final Logger LOG = LoggerFactory.getLogger(CheTerminal.class);
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
@@ -51,7 +49,7 @@ public class MachineTerminal {
   private final Consoles consoles;
 
   @Inject
-  public MachineTerminal(
+  public CheTerminal(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       ActionsFactory actionsFactory,
