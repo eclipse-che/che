@@ -72,6 +72,7 @@ public class KubernetesInfraModule extends AbstractModule {
 
     install(new FactoryModuleBuilder().build(KubernetesRuntimeFactory.class));
     install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
+    install(new FactoryModuleBuilder().build(StartSynchronizerFactory.class));
     bind(WorkspacePVCCleaner.class).asEagerSingleton();
     bind(RemoveNamespaceOnWorkspaceRemove.class).asEagerSingleton();
 

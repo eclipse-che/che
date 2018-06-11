@@ -16,6 +16,7 @@ import static org.mockito.Mockito.inOrder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -54,6 +55,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private SecurityContextProvisioner securityContextProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   @Mock private IngressTlsProvisioner externalServerIngressTlsProvisioner;
+  @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
 
   private KubernetesEnvironmentProvisioner osInfraProvisioner;
 
@@ -74,7 +76,8 @@ public class KubernetesEnvironmentProvisionerTest {
             logsVolumeMachineProvisioner,
             securityContextProvisioner,
             podTerminationGracePeriodProvisioner,
-            externalServerIngressTlsProvisioner);
+            externalServerIngressTlsProvisioner,
+            imagePullSecretProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -87,7 +90,8 @@ public class KubernetesEnvironmentProvisionerTest {
             ramLimitProvisioner,
             securityContextProvisioner,
             podTerminationGracePeriodProvisioner,
-            externalServerIngressTlsProvisioner);
+            externalServerIngressTlsProvisioner,
+            imagePullSecretProvisioner);
   }
 
   @Test
@@ -111,6 +115,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder
         .verify(podTerminationGracePeriodProvisioner)
         .provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(imagePullSecretProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

@@ -54,12 +54,16 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
 
   @Override
   public String toString() {
-    return "RuntimeIdentityImpl: { workspace: "
+    return "RuntimeIdentityImpl{"
+        + "workspaceId='"
         + workspaceId
-        + " environment: "
+        + '\''
+        + ", envName='"
         + envName
-        + " ownerId: "
+        + '\''
+        + ", ownerId='"
         + ownerId
-        + " }";
+        + '\''
+        + '}';
   }
 }

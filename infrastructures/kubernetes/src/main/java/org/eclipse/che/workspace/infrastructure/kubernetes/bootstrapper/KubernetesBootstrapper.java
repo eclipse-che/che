@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.slf4j.Logger;
@@ -62,6 +63,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   private final String bootstrapperLogsFile;
   private final EventService eventService;
   private final KubernetesNamespace namespace;
+  private final StartSynchronizer startSynchronizer;
 
   @Inject
   public KubernetesBootstrapper(
@@ -69,6 +71,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
       @Assisted List<? extends Installer> installers,
       @Assisted KubernetesMachineImpl kubernetesMachine,
       @Assisted KubernetesNamespace namespace,
+      @Assisted StartSynchronizer startSynchronizer,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.kubernetes.bootstrapper.binary_url") String bootstrapperBinaryUrl,
       @Named("che.infra.kubernetes.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
@@ -92,6 +95,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     this.eventService = eventService;
     this.namespace = namespace;
     this.bootstrapperLogsFile = bootstrapperLogsFolder + "/bootstrapper.log";
+    this.startSynchronizer = startSynchronizer;
   }
 
   @Override
@@ -99,6 +103,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
       throws InfrastructureException {
     injectBootstrapper();
 
+    startSynchronizer.checkFailure();
     exec(
         "sh",
         "-c",
@@ -143,9 +148,11 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
                     .withText(text)
                     .withTime(ZonedDateTime.now().format(ISO_OFFSET_DATE_TIME))
                     .withMachineName(mName));
+    startSynchronizer.checkFailure();
     LOG.debug("Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, mName);
     exec(outputConsumer, "mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
 
+    startSynchronizer.checkFailure();
     LOG.debug("Bootstrapping {}:{}. Downloading bootstrapper binary", runtimeIdentity, mName);
     exec(
         outputConsumer,
@@ -155,6 +162,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
         bootstrapperBinaryUrl);
     exec(outputConsumer, "chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
+    startSynchronizer.checkFailure();
     LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, mName);
     exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE);
 
@@ -171,6 +179,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     }
     contentsToConcatenate.add("]");
     for (String content : contentsToConcatenate) {
+      startSynchronizer.checkFailure();
       exec(
           "sh",
           "-c",
