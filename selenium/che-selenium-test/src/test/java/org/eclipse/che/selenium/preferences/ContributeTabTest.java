@@ -137,7 +137,7 @@ public class ContributeTabTest {
   public void checkRefreshAndSaveButton() {
     openContributeTab();
 
-    preferences.setAndWaitStateContributeCheckbox(true);
+    preferences.setContributeCheckbox(true);
     preferences.clickOnOkBtn();
 
     assertFalse(preferences.isSaveButtonIsEnabled());
@@ -270,7 +270,7 @@ public class ContributeTabTest {
   }
 
   private void setStateContributeChecboxAndCloseForm(boolean state) {
-    preferences.setAndWaitStateContributeCheckbox(state);
+    preferences.setContributeCheckbox(state);
     preferences.clickOnOkBtn();
     preferences.closeForm();
   }

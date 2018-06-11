@@ -439,18 +439,8 @@ public class Preferences {
    *
    * @param state state of checkbox (true if checkbox must be selected)
    */
-  public void setAndWaitStateContributeCheckbox(boolean state) {
-    if (state) {
-      if (!showContributeCheckbox.isSelected()) {
-        clickOnContributeCheckbox();
-        waitContributeCheckboxIsSelected();
-      }
-    } else {
-      if (showContributeCheckbox.isSelected()) {
-        clickOnContributeCheckbox();
-        waitContributeCheckboxIsNotSelected();
-      }
-    }
+  public void setContributeCheckbox(boolean state) {
+    webDriverHelper.waitAndSetCheckbox(showContributeCheckbox, setContributeCheckbox, state);
   }
 
   /**

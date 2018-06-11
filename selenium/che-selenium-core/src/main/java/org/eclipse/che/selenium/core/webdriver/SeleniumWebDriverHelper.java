@@ -1154,4 +1154,28 @@ public class SeleniumWebDriverHelper {
   public void waitElementIsNotSelected(WebElement webElement, int timeout) {
     webDriverWaitFactory.get(timeout).until(elementSelectionStateToBe(webElement, false));
   }
+
+  /**
+   * Sets given {@code isCheckedWebElement} to specified state and waits its state
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
+   *
+   * @param isCheckedWebElement element which should be selected
+   * @param setWebElement element which should be clicked to change the state
+   * @param state state of given element (true if the given element should be selected)
+   */
+  public void waitAndSetCheckbox(
+      WebElement isCheckedWebElement, WebElement setWebElement, boolean state) {
+    if (state) {
+      if (!isCheckedWebElement.isSelected()) {
+        waitAndClick(setWebElement);
+        waitElementIsSelected(isCheckedWebElement);
+      }
+    } else {
+      if (isCheckedWebElement.isSelected()) {
+        waitAndClick(setWebElement);
+        waitElementIsNotSelected(isCheckedWebElement);
+      }
+    }
+  }
 }
