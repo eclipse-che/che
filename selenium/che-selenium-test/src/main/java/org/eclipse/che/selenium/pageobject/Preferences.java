@@ -441,12 +441,12 @@ public class Preferences {
    */
   public void setAndWaitStateContributeCheckbox(boolean state) {
     if (state) {
-      if (!(webDriverHelper.isSelected(showContributeCheckbox))) {
+      if (!showContributeCheckbox.isSelected()) {
         clickOnContributeCheckbox();
         waitContributeCheckboxIsSelected();
       }
     } else {
-      if (webDriverHelper.isSelected(showContributeCheckbox)) {
+      if (showContributeCheckbox.isSelected()) {
         clickOnContributeCheckbox();
         waitContributeCheckboxIsNotSelected();
       }

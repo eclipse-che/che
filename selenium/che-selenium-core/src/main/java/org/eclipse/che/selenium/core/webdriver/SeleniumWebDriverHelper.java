@@ -955,22 +955,6 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Determines whether or not this element {@code webElement} is selected.
-   *
-   * <p>Note! Uses only for checkboxes and radio buttons.
-   *
-   * @param webElement element which should be selected
-   * @return true if given element is selected
-   */
-  public boolean isSelected(WebElement webElement) {
-    try {
-      return webElement.isSelected();
-    } catch (NoSuchElementException ex) {
-      return false;
-    }
-  }
-
-  /**
    * Determines whether or not this element {@code webElement} is enabled.
    *
    * @param webElement element which should be enabled
