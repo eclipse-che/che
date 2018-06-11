@@ -18,7 +18,8 @@ const CUSTOM_PLUGIN_KEYWORD = 'custom-plugin';
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_DESCRIPTION_SEPARATOR = ':';
 const DEFAULT_PLUGINS =  ['@theia/typescript', '@theia/navigator', '@theia/terminal', '@theia/outline-view',
-  '@theia/preferences', '@theia/git', '@theia/file-search', '@theia/markers', '@theia/extension-manager'];
+  '@theia/preferences', '@theia/git', '@theia/file-search', '@theia/markers', '@theia/extension-manager',
+  '@eclipse-che/theia-java-extension'];
 
 /**
  * @ngdoc controller
