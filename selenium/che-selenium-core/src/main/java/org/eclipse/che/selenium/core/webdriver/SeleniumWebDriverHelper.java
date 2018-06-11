@@ -976,7 +976,7 @@ public class SeleniumWebDriverHelper {
    * @param webElement element which should be enabled
    * @return true if given element is enabled
    */
-  public boolean isEnabled(WebElement webElement) {
+  public boolean waitVisibilityAndGetEnableState(WebElement webElement) {
     return waitVisibility(webElement).isEnabled();
   }
 

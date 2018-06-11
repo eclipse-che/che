@@ -284,7 +284,7 @@ public class Preferences {
    * @return true if the button is enabled
    */
   public boolean isSaveButtonIsEnabled() {
-    return webDriverHelper.isEnabled(saveBtn);
+    return webDriverHelper.waitVisibilityAndGetEnableState(saveBtn);
   }
 
   /** wait and click on the 'Refresh' button */
