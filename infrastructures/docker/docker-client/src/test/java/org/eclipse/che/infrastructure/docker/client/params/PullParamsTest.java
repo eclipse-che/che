@@ -13,7 +13,7 @@ package org.eclipse.che.infrastructure.docker.client.params;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfigs;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
 import org.mockito.Mock;
 import org.testng.annotations.Test;
 
