@@ -22,9 +22,6 @@
     <artifactId>docker-auth</artifactId>
     <packaging>jar</packaging>
     <name>Infrastructure :: Docker :: Docker Auth</name>
-    <properties>
-        <findbugs.failonerror>false</findbugs.failonerror>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
