@@ -14,12 +14,15 @@ import static java.util.Comparator.naturalOrder;
 import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +46,7 @@ import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
+import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
 
 /**
  * Implementation of {@link ChangesPanelView}.
@@ -58,6 +62,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
   @UiField Button changeViewModeButton;
   @UiField Button expandButton;
   @UiField Button collapseButton;
+  @UiField TextBox commitHash;
 
   @UiField(provided = true)
   final GitLocalizationConstant locale;
@@ -73,7 +78,10 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
 
   @Inject
   public ChangesPanelViewImpl(
-      GitResources resources, GitLocalizationConstant locale, NodesResources nodesResources) {
+      GitResources resources,
+      GitLocalizationConstant locale,
+      NodesResources nodesResources,
+      ClipboardButtonBuilder clipboardButtonBuilder) {
     this.res = resources;
     this.locale = locale;
     this.nodesResources = nodesResources;
@@ -89,6 +97,12 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
     changesPanel.add(tree);
 
     createButtons();
+
+    Element copyToClipboardElement = clipboardButtonBuilder.withResourceWidget(commitHash).build();
+    copyToClipboardElement.getStyle().setFloat(Style.Float.RIGHT);
+    copyToClipboardElement.getStyle().setPosition(Style.Position.ABSOLUTE);
+    copyToClipboardElement.getStyle().setTop(0., Style.Unit.PX);
+    copyToClipboardElement.getStyle().setRight(5., Style.Unit.PX);
   }
 
   @Override
@@ -117,6 +131,8 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
                       new ChangedFileNode(
                           file, files.getStatusByFilePath(file), res, delegate, false)));
     }
+
+    commitHash.setText(files.getCommitB());
   }
 
   @Override

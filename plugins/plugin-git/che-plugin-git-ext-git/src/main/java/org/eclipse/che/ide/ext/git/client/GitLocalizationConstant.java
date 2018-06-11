@@ -788,4 +788,7 @@ public interface GitLocalizationConstant extends Messages {
 
   @Key("console.revert.command.name")
   String consoleRevertCommandName();
+
+  @Key("commit.id")
+  String commitID();
 }
