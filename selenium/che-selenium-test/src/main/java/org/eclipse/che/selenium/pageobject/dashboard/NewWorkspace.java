@@ -37,6 +37,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
+import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -56,19 +57,22 @@ public class NewWorkspace {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory webDriverWaitFactory;
   private static final int DEFAULT_TIMEOUT = TestTimeoutsConstants.DEFAULT_TIMEOUT;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
 
   @Inject
   public NewWorkspace(
       SeleniumWebDriver seleniumWebDriver,
       ActionsFactory actionsFactory,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
-      WebDriverWaitFactory webDriverWaitFactory) {
+      WebDriverWaitFactory webDriverWaitFactory,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     this.webDriverWaitFactory = webDriverWaitFactory;
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -274,7 +278,8 @@ public class NewWorkspace {
   }
 
   public void waitWorkspaceCreatedDialogIsVisible() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
+    testWebElementRenderChecker.waitElementIsRendered(
+        By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
   }
 
   public void clickOnEditWorkspaceButton() {
