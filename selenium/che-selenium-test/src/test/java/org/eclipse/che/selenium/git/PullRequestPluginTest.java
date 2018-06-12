@@ -172,7 +172,7 @@ public class PullRequestPluginTest {
     pullRequestPanel.enterTitle(TITLE);
 
     // change commit and create pull request
-    pullRequestPanel.clickCreatePRBtn();
+    pullRequestPanel.clickCreatePullRequestButton();
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(BRANCH_PUSHED_ON_YOUR_ORIGIN);
     pullRequestPanel.waitStatusOk(PULL_REQUEST_ISSUED);
@@ -193,7 +193,7 @@ public class PullRequestPluginTest {
     openFileAndChangeContent(PATH_TO_README_FILE, generate("", 12));
 
     // update PR and check status
-    pullRequestPanel.clickUpdatePRBtn();
+    pullRequestPanel.clickUpdatePullRequestButton();
     pullRequestPanel.clickOkCommitBtn();
     askDialog.acceptDialogWithText(expectedText);
     pullRequestPanel.waitStatusOk(NEW_COMMITS_PUSHED);

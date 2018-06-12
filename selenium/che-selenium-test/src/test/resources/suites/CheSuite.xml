@@ -194,6 +194,7 @@
           <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4CheckRunSuitesAndScopesTest"/>
           <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest"/>
           <class name="org.eclipse.che.selenium.preferences.CheckErrorsWarningsTabTest"/>
+          <class name="org.eclipse.che.selenium.preferences.ContributeTabTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckAutoSaveForFileWhichAlreadyExistTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckCollapseAllNodesProjectTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckCopyCutFeaturesForFilesTest"/>
