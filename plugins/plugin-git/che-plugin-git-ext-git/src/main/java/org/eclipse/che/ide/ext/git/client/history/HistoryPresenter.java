@@ -184,7 +184,7 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
                     .show();
                 return;
               }
-              AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+              AlteredFiles alteredFiles = new AlteredFiles(project, diff, revisionA, revisionB);
               if (alteredFiles.getFilesQuantity() == 1) {
                 comparePresenter.showCompareBetweenRevisions(
                     alteredFiles, null, revisionA, revisionB);

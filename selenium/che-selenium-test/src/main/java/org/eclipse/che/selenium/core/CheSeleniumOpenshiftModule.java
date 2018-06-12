@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
+import org.eclipse.che.selenium.core.client.keycloak.executor.KeycloakCommandExecutor;
+import org.eclipse.che.selenium.core.client.keycloak.executor.OpenShiftKeycloakCommandExecutor;
 import org.eclipse.che.selenium.core.workspace.CheTestOpenshiftWorkspaceLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 
@@ -20,5 +22,6 @@ public class CheSeleniumOpenshiftModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(TestWorkspaceLogsReader.class).to(CheTestOpenshiftWorkspaceLogsReader.class);
+    bind(KeycloakCommandExecutor.class).to(OpenShiftKeycloakCommandExecutor.class);
   }
 }

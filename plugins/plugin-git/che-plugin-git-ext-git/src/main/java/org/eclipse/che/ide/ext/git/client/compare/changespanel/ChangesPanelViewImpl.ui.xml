@@ -23,6 +23,20 @@
             width: 30px;
             min-width: auto;
         }
+
+        .right {
+            float: right;
+        }
+
+        .commitIdLabel {
+            display: inline;
+            padding-right: 5px;
+        }
+
+        .commitIdTextBox {
+            width: 270px;
+            padding-right: 25px;
+        }
     </ui:style>
 
     <g:DockLayoutPanel width="100%" height="100%">
@@ -31,6 +45,10 @@
                 <g:Button ui:field="changeViewModeButton" addStyleNames="{style.button}"/>
                 <g:Button ui:field="expandButton" addStyleNames="{style.button}"/>
                 <g:Button ui:field="collapseButton" addStyleNames="{style.button}"/>
+                <g:FlowPanel addStyleNames="{style.right}">
+                    <g:Label text="{locale.commitID}" addStyleNames="{style.commitIdLabel}"/>
+                    <g:TextBox ui:field="commitHash" addStyleNames="{style.commitIdTextBox}"/>
+                </g:FlowPanel>
             </g:FlowPanel>
         </g:north>
         <g:center>

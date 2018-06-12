@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class ProcessAgent {
   private static final Logger LOG = LoggerFactory.getLogger(ProcessAgent.class);
 
-  public String execute(String command) throws ProcessAgentException {
+  public String process(String command) throws ProcessAgentException {
     try {
       Process process = getProcess(command);
 
@@ -35,7 +35,7 @@ public class ProcessAgent {
 
       return processOutput(exitStatus, in, err);
     } catch (Exception e) {
-      String errMessage = format("Can't execute command '%s'.", command);
+      String errMessage = format("Can't process command '%s'.", command);
       throw new ProcessAgentException(errMessage, e);
     }
   }

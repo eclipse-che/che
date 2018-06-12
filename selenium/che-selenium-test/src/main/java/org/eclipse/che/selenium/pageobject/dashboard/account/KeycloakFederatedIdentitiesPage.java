@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.ws.rs.NotSupportedException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.TestKeycloakSettingsServiceClient;
+import org.eclipse.che.selenium.core.client.keycloak.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
