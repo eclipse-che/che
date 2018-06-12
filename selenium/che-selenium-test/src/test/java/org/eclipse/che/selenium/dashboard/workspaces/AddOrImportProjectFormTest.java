@@ -37,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOvervie
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -121,6 +122,14 @@ public class AddOrImportProjectFormTest {
   @BeforeClass
   public void setup() {
     dashboard.open();
+  }
+
+  @AfterClass
+  public void cleanup() throws Exception {
+    checkWorkspaceStatusAndDelete(WORKSPACE_NAME);
+    checkWorkspaceStatusAndDelete(TEST_BLANK_WORKSPACE_NAME);
+    checkWorkspaceStatusAndDelete(TEST_JAVA_WORKSPACE_NAME);
+    checkWorkspaceStatusAndDelete(TEST_JAVA_WORKSPACE_NAME_EDIT);
   }
 
   @BeforeMethod
@@ -311,7 +320,7 @@ public class AddOrImportProjectFormTest {
     newWorkspace.clickOnSaveButtonInProjectOptionsForm();
     newWorkspace.waitProjectTabAppearance(RENAMED_CONSOLE_SAMPLE_NAME);
     newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+    newWorkspace.waitCancelButtonDisablingInProjectOptionsForm();
   }
 
   @Test(priority = 2)
@@ -377,6 +386,8 @@ public class AddOrImportProjectFormTest {
     newWorkspace.setMachineRAM("dev-machine", 5.0);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    testWorkspaceServiceClient.waitStatus(WORKSPACE_NAME, defaultTestUser.getName(), RUNNING);
+    dashboard.selectWorkspacesItemOnDashboard();
   }
 
   @Test(priority = 3)
@@ -480,5 +491,13 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SPRING_REPOSITORY_URL);
     newWorkspace.clickOnBottomCreateButton();
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
+  }
+
+  private void checkWorkspaceStatusAndDelete(String workspaceName) throws Exception {
+    if (!testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName())) {
+      return;
+    }
+
+    testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
   }
 }
