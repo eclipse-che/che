@@ -109,9 +109,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
@@ -171,8 +171,8 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesNamespace namespace;
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
-  @Mock private KubernetesPods pods;
   @Mock private KubernetesSecrets secrets;
+  @Mock private KubernetesDeployments deployments;
   @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
@@ -189,6 +189,14 @@ public class KubernetesInternalRuntimeTest {
 
   private KubernetesInternalRuntime<KubernetesRuntimeContext<KubernetesEnvironment>>
       internalRuntimeWithoutUnrecoverableHandler;
+
+  private final ImmutableMap<String, Pod> podsMap =
+      ImmutableMap.of(
+          WORKSPACE_POD_NAME,
+          mockPod(
+              ImmutableList.of(
+                  mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
+                  mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -246,7 +254,7 @@ public class KubernetesInternalRuntimeTest {
     doNothing().when(namespace).cleanUp();
     when(namespace.services()).thenReturn(services);
     when(namespace.ingresses()).thenReturn(ingresses);
-    when(namespace.pods()).thenReturn(pods);
+    when(namespace.deployments()).thenReturn(deployments);
     when(namespace.secrets()).thenReturn(secrets);
     when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
         .thenReturn(bootstrapper);
@@ -267,33 +275,26 @@ public class KubernetesInternalRuntimeTest {
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(any(), anyInt(), any())).thenReturn(ingress);
-    when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
     when(k8sEnv.getPods()).thenReturn(allPods);
-    when(pods.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
+    when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
     when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
+    when(k8sEnv.getPods()).thenReturn(podsMap);
   }
 
   @Test
   public void startsKubernetesEnvironment() throws Exception {
-    final ImmutableMap<String, Pod> podsMap =
-        ImmutableMap.of(
-            WORKSPACE_POD_NAME,
-            mockPod(
-                ImmutableList.of(
-                    mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
-                    mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
-    when(k8sEnv.getPods()).thenReturn(podsMap);
     when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
-
     internalRuntime.internalStart(emptyMap());
 
-    verify(pods).create(any());
+    verify(deployments).deploy(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    verify(namespace.pods(), times(2)).watchEvents(any());
+    verify(secrets).create(any());
+    verify(namespace.deployments(), times(2)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -302,26 +303,17 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.pods(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch();
   }
 
   @Test
   public void startsKubernetesEnvironmentWithoutUnrecoverableHandler() throws Exception {
-    final ImmutableMap<String, Pod> podsMap =
-        ImmutableMap.of(
-            WORKSPACE_POD_NAME,
-            mockPod(
-                ImmutableList.of(
-                    mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
-                    mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
-    when(k8sEnv.getPods()).thenReturn(podsMap);
-
     internalRuntimeWithoutUnrecoverableHandler.internalStart(emptyMap());
 
-    verify(pods).create(any());
+    verify(deployments).deploy(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    verify(namespace.pods(), times(1)).watchEvents(any());
+    verify(namespace.deployments(), times(1)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -330,7 +322,7 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.pods(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch();
   }
 
   @Test(expectedExceptions = InternalInfrastructureException.class)
@@ -346,7 +338,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(2)).stopWatch();
     }
   }
 
@@ -362,7 +354,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.internalStart(emptyMap());
     } catch (Exception rethrow) {
-      verify(pods).create(any());
+      verify(deployments).deploy(any());
       verify(ingresses).create(any());
       verify(services).create(any());
       verify(bootstrapper, atLeastOnce()).bootstrapAsync();
@@ -388,7 +380,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(2)).stopWatch();
     }
   }
 
@@ -400,14 +392,6 @@ public class KubernetesInternalRuntimeTest {
   )
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
-    final ImmutableMap<String, Pod> podsMap =
-        ImmutableMap.of(
-            WORKSPACE_POD_NAME,
-            mockPod(
-                ImmutableList.of(
-                    mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
-                    mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
-    when(k8sEnv.getPods()).thenReturn(podsMap);
     when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
 
     Executors.newSingleThreadScheduledExecutor()
@@ -578,7 +562,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.internalStart(emptyMap());
 
-    verify(probesScheduler).schedule(eq(workspaceProbes), any());
+    verify(probesScheduler, times(2)).schedule(eq(workspaceProbes), any());
   }
 
   @Test

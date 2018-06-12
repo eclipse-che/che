@@ -43,7 +43,8 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class KubernetesPodsTest {
+public class KubernetesDeploymentsTest {
+  private static final String POD_NAME = "podName";
 
   @Mock private KubernetesClientFactory clientFactory;
 
@@ -61,7 +62,7 @@ public class KubernetesPodsTest {
 
   private Watcher watcher;
 
-  private KubernetesPods kubernetesPods;
+  private KubernetesDeployments kubernetesDeployments;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -71,6 +72,7 @@ public class KubernetesPodsTest {
     when(podResource.get()).thenReturn(earlyPod);
 
     when(clientFactory.create()).thenReturn(kubernetesClient);
+    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
 
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
@@ -81,18 +83,18 @@ public class KubernetesPodsTest {
 
     when(pod.getStatus()).thenReturn(status);
     when(pod.getMetadata()).thenReturn(metadata);
-    when(metadata.getName()).thenReturn("podName");
+    when(metadata.getName()).thenReturn(POD_NAME);
     when(podResource.getLog()).thenReturn("Pod fail log");
     watcherCaptor = ArgumentCaptor.forClass(Watcher.class);
 
-    kubernetesPods = new KubernetesPods("namespace", "workspace123", clientFactory);
+    kubernetesDeployments = new KubernetesDeployments("namespace", "workspace123", clientFactory);
   }
 
   @Test
   public void shouldCompleteFutureForWaitingPidIfStatusIsRunning() {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
-    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -107,7 +109,7 @@ public class KubernetesPodsTest {
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
-    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -131,7 +133,7 @@ public class KubernetesPodsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(pod.getStatus().getReason()).thenReturn("Evicted");
-    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -154,7 +156,7 @@ public class KubernetesPodsTest {
           throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
-    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -177,7 +179,7 @@ public class KubernetesPodsTest {
           throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
-    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     doThrow(new InfrastructureException("Failure while retrieving pod logs"))
         .when(clientFactory)

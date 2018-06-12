@@ -32,9 +32,9 @@ import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -55,7 +55,7 @@ public class OpenShiftProjectTest {
   public static final String PROJECT_NAME = "testProject";
   public static final String WORKSPACE_ID = "workspace123";
 
-  @Mock private KubernetesPods pods;
+  @Mock private KubernetesDeployments deployments;
   @Mock private KubernetesServices services;
   @Mock private OpenShiftRoutes routes;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
@@ -88,7 +88,7 @@ public class OpenShiftProjectTest {
             clientFactory,
             WORKSPACE_ID,
             PROJECT_NAME,
-            pods,
+            deployments,
             services,
             routes,
             pvcs,
@@ -131,14 +131,14 @@ public class OpenShiftProjectTest {
 
     verify(routes).delete();
     verify(services).delete();
-    verify(pods).delete();
+    verify(deployments).delete();
     verify(secrets).delete();
   }
 
   @Test
   public void testOpenShiftProjectCleaningUpIfExceptionsOccurs() throws Exception {
     doThrow(new InfrastructureException("err1.")).when(services).delete();
-    doThrow(new InfrastructureException("err2.")).when(pods).delete();
+    doThrow(new InfrastructureException("err2.")).when(deployments).delete();
 
     InfrastructureException error = null;
     // when
