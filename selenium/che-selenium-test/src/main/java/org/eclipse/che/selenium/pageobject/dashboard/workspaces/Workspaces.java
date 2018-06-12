@@ -131,7 +131,7 @@ public class Workspaces {
             });
   }
 
-  public void waitPageIsLoad() {
+  public void waitPageLoading() {
     waitToolbarTitleName();
     waitDocumentationLink();
     waitAddWorkspaceButton();
@@ -182,7 +182,7 @@ public class Workspaces {
         .click();
   }
 
-  public boolean isBulkCheckboxChecked() {
+  public boolean isBulkCheckboxEnabled() {
     return seleniumWebDriverHelper
         .waitVisibility(By.xpath("//md-checkbox[@aria-label='Workspace list']"))
         .getAttribute("class")
@@ -375,7 +375,7 @@ public class Workspaces {
         .size();
   }
 
-  public String getFullListItemName(int index) {
+  public String getFullNameOfWorkspacesListItem(int index) {
     String itemXpath = String.format(Locators.WORKSPACE_LIST_ITEM, index);
     String fullNameXpath = itemXpath + "//div[@class='workspace-name-clip']";
     return seleniumWebDriverHelper
@@ -384,7 +384,7 @@ public class Workspaces {
         .replace("ws-full-name-", "");
   }
 
-  public Workspaces.WorkspaceListItem getWorkspaceListItemByWorkspaceName(
+  public Workspaces.WorkspaceListItem getWorkspacesListItemByWorkspaceName(
       List<Workspaces.WorkspaceListItem> itemsList, String workspaceName) {
     return itemsList
         .stream()
@@ -397,7 +397,7 @@ public class Workspaces {
     List<WorkspaceListItem> items = new ArrayList<>();
 
     for (int i = 1; i <= getVisibleWorkspacesCount(); i++) {
-      String fullName = getFullListItemName(i);
+      String fullName = getFullNameOfWorkspacesListItem(i);
       String ownerName = Arrays.asList(fullName.split("/")).get(0);
       String workspaceName = Arrays.asList(fullName.split("/")).get(1);
       int ramCount =

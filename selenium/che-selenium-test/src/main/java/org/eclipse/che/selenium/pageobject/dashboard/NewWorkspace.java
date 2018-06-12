@@ -266,7 +266,6 @@ public class NewWorkspace {
 
   @FindBy(id = Locators.SELECT_MULTI_MACHINE_STACKS_TAB)
   WebElement selectMultiMachineStacksTab;
-  ///////////////////////////// -----------------------------------------------
 
   public WebElement waitAddOrImportProjectButton(int timeout) {
     return seleniumWebDriverHelper.waitVisibility(By.id(ADD_OR_IMPORT_PROJECT_BUTTON_ID), timeout);
@@ -332,49 +331,34 @@ public class NewWorkspace {
             By.id(CANCEL_BUTTON_ID)));
   }
 
-  private void waitHeaderButtonInImportProjectFormSelected(String buttonId) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    seleniumWebDriverHelper
-                        .waitVisibilityAndGetAttribute(
-                            By.xpath(
-                                format("//che-toggle-joined-button[@id='%s']/button", buttonId)),
-                            "class")
-                        .contains("che-toggle-button-enabled"));
+  private void waitSelectionOfHeaderButtonInImportProjectForm(String buttonId) {
+    String locator = format("//che-toggle-joined-button[@id='%s']/button", buttonId);
+    seleniumWebDriverHelper.waitAttributeContainsValue(
+        By.xpath(locator), "class", "che-toggle-button-enabled");
   }
 
   public void waitSamplesButtonSelected() {
-    waitHeaderButtonInImportProjectFormSelected(SAMPLES_BUTTON_ID);
+    waitSelectionOfHeaderButtonInImportProjectForm(SAMPLES_BUTTON_ID);
   }
 
   public void waitBlankButtonSelected() {
-    waitHeaderButtonInImportProjectFormSelected(BLANK_BUTTON_ID);
+    waitSelectionOfHeaderButtonInImportProjectForm(BLANK_BUTTON_ID);
   }
 
   public void waitGitButtonSelected() {
-    waitHeaderButtonInImportProjectFormSelected(GIT_BUTTON_ID);
+    waitSelectionOfHeaderButtonInImportProjectForm(GIT_BUTTON_ID);
   }
 
   public void waitGitHubButtonSelected() {
-    waitHeaderButtonInImportProjectFormSelected(GITHUG_BUTTON_ID);
+    waitSelectionOfHeaderButtonInImportProjectForm(GITHUG_BUTTON_ID);
   }
 
   public void waitZipButtonSelected() {
-    waitHeaderButtonInImportProjectFormSelected(ZIP_BUTTON_ID);
+    waitSelectionOfHeaderButtonInImportProjectForm(ZIP_BUTTON_ID);
   }
 
   private void waitButtonDisableState(WebElement button, boolean state) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    seleniumWebDriverHelper
-                        .waitVisibilityAndGetAttribute(button, "aria-disabled")
-                        .equals(Boolean.toString(state)));
+    seleniumWebDriverHelper.waitAttributeEqualsTo(button, "aria-disabled", Boolean.toString(state));
   }
 
   private WebElement waitAddButtonInImportProjectForm() {
@@ -450,14 +434,8 @@ public class NewWorkspace {
     String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
     String locator = format("//div[@id='%s']/md-checkbox", checkboxId);
 
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    seleniumWebDriverHelper
-                        .waitVisibilityAndGetAttribute(By.xpath(locator), "aria-checked")
-                        .equals(Boolean.toString(state)));
+    seleniumWebDriverHelper.waitAttributeEqualsTo(
+        By.xpath(locator), "aria-checked", Boolean.toString(state));
   }
 
   public void waitSampleCheckboxEnabled(String sampleName) {
@@ -487,14 +465,8 @@ public class NewWorkspace {
   }
 
   private void waitTextInTooltip(String expectedText) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    seleniumWebDriverHelper
-                        .waitVisibilityAndGetText(By.xpath("//*[contains(@class, 'tooltip')]"))
-                        .equals(expectedText));
+    seleniumWebDriverHelper.waitTextEqualsTo(
+        By.xpath("//*[contains(@class, 'tooltip')]"), expectedText);
   }
 
   public void waitProjectOptionsForm() {
@@ -654,7 +626,6 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitAndClick(waitConnectYourGithubAccountButton());
   }
 
-  ///////////////////////////// -----------------------------------------------
   public void typeWorkspaceName(String name) {
     seleniumWebDriverHelper.setValue(workspaceNameInput, name);
   }
@@ -897,27 +868,13 @@ public class NewWorkspace {
   }
 
   public void waitRedRamFieldBorders() {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    seleniumWebDriverHelper
-                        .waitVisibility(By.xpath("//ng-form[@name='ramAmountForm']"))
-                        .getAttribute("class")
-                        .contains("ng-invalid-required"));
+    seleniumWebDriverHelper.waitAttributeContainsValue(
+        By.xpath("//ng-form[@name='ramAmountForm']"), "class", "ng-invalid-required");
   }
 
   public void waitRedRamFieldBordersDisappearance() {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    seleniumWebDriverHelper
-                        .waitVisibility(By.xpath("//ng-form[@name='ramAmountForm']"))
-                        .getAttribute("class")
-                        .contains("ng-valid-required"));
+    seleniumWebDriverHelper.waitAttributeContainsValue(
+        By.xpath("//ng-form[@name='ramAmountForm']"), "class", "ng-valid-required");
   }
 
   public void clearTextInSearchInput() {

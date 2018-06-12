@@ -148,6 +148,12 @@ public class Dashboard {
   @FindBy(xpath = Locators.LICENSE_NAG_MESSAGE_XPATH)
   WebElement licenseNagMessage;
 
+  /**
+   * Gets digit which displays near "Workspaces" item on dashboard and means count of the existing
+   * workspaces.
+   *
+   * @return count of workspaces
+   */
   public int getWorkspacesCountInWorkspacesItem() {
     return Integer.parseInt(
         seleniumWebDriverHelper

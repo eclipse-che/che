@@ -114,15 +114,16 @@ public class WorkspacesListTest {
 
     dashboard.selectWorkspacesItemOnDashboard();
 
-    workspaces.waitPageIsLoad();
+    workspaces.waitPageLoading();
 
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
     assertEquals(
-        workspaces.getWorkspaceListItemByWorkspaceName(items, expectedBlankItem.getWorkspaceName()),
+        workspaces.getWorkspacesListItemByWorkspaceName(
+            items, expectedBlankItem.getWorkspaceName()),
         expectedBlankItem);
 
     assertEquals(
-        workspaces.getWorkspaceListItemByWorkspaceName(items, expectedJavaItem.getWorkspaceName()),
+        workspaces.getWorkspacesListItemByWorkspaceName(items, expectedJavaItem.getWorkspaceName()),
         expectedJavaItem);
   }
 
@@ -135,56 +136,56 @@ public class WorkspacesListTest {
 
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(workspaces.isBulkCheckboxChecked());
+    assertTrue(workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
     workspaces.selectAllWorkspacesByBulk();
 
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxChecked());
+    assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
     workspaces.selectAllWorkspacesByBulk();
 
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(workspaces.isBulkCheckboxChecked());
+    assertTrue(workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
     workspaces.selectWorkspaceByCheckbox(blankWorkspaceName);
 
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxChecked());
+    assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
 
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxChecked());
+    assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
     workspaces.selectWorkspaceByCheckbox(blankWorkspaceName);
 
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxChecked());
+    assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
 
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(workspaces.isBulkCheckboxChecked());
+    assertTrue(workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
     workspaces.selectAllWorkspacesByBulk();
 
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxChecked());
+    assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtnDisappearance();
   }
 
@@ -249,13 +250,13 @@ public class WorkspacesListTest {
     assertEquals(items.size(), 2);
     assertEquals(
         asList(
-                workspaces.getWorkspaceListItemByWorkspaceName(
+                workspaces.getWorkspacesListItemByWorkspaceName(
                     items, expectedBlankItem.getWorkspaceName()))
             .size(),
         1);
     assertEquals(
         asList(
-                workspaces.getWorkspaceListItemByWorkspaceName(
+                workspaces.getWorkspacesListItemByWorkspaceName(
                     items, expectedJavaItem.getWorkspaceName()))
             .size(),
         1);
@@ -279,7 +280,7 @@ public class WorkspacesListTest {
 
     seleniumWebDriver.navigate().back();
 
-    workspaces.waitPageIsLoad();
+    workspaces.waitPageLoading();
 
     workspaces.clickOnWorkspaceListItem(
         defaultTestUser.getName(), expectedBlankItem.getWorkspaceName());
@@ -288,7 +289,7 @@ public class WorkspacesListTest {
 
     seleniumWebDriver.navigate().back();
 
-    workspaces.waitPageIsLoad();
+    workspaces.waitPageLoading();
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceAddProjectButton(expectedJavaItem.getWorkspaceName());
@@ -297,7 +298,7 @@ public class WorkspacesListTest {
 
     seleniumWebDriver.navigate().back();
 
-    workspaces.waitPageIsLoad();
+    workspaces.waitPageLoading();
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceConfigureButton(expectedJavaItem.getWorkspaceName());
@@ -309,7 +310,7 @@ public class WorkspacesListTest {
         workspaceConfig.getWorkspaceConfig());
 
     seleniumWebDriver.navigate().back();
-    workspaces.waitPageIsLoad();
+    workspaces.waitPageLoading();
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
@@ -328,11 +329,11 @@ public class WorkspacesListTest {
 
     dashboard.selectWorkspacesItemOnDashboard();
 
-    workspaces.waitPageIsLoad();
+    workspaces.waitPageLoading();
     assertEquals(workspaces.getVisibleWorkspacesCount(), EXPECTED_WORKSPACES_COUNT + 1);
 
     Workspaces.WorkspaceListItem newestCreatedWorkspaceItem =
-        workspaces.getWorkspaceListItemByWorkspaceName(
+        workspaces.getWorkspacesListItemByWorkspaceName(
             workspaces.getVisibleWorkspaces(), NEWEST_CREATED_WORKSPACE_NAME);
 
     assertEquals(newestCreatedWorkspaceItem, expectedNewestWorkspaceItem);

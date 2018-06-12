@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core.webdriver;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
@@ -32,7 +33,6 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 /** @author Ihor Okhrimenko */
 @Singleton
 public class SeleniumWebDriverHelper {
-  protected final int DEFAULT_TIMEOUT = TestTimeoutsConstants.DEFAULT_TIMEOUT;
+  protected final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
   protected final SeleniumWebDriver seleniumWebDriver;
   protected final WebDriverWaitFactory webDriverWaitFactory;
   protected final ActionsFactory actionsFactory;
@@ -1124,6 +1124,26 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits during {@code timeout} until attribute with specified {@code attributeName} has {@code
+   * expectedValue}.
+   *
+   * @param element element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   * @param timeout waiting time
+   */
+  public void waitAttributeEqualsTo(
+      WebElement element, String attributeName, String expectedValue, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    waitVisibilityAndGetAttribute(element, attributeName, timeout)
+                        .equals(expectedValue));
+  }
+
+  /**
    * Waits until attribute with specified {@code attributeName} has {@code expectedValue}.
    *
    * @param elementLocator element which contains attribute
@@ -1132,6 +1152,50 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAttributeEqualsTo(By elementLocator, String attributeName, String expectedValue) {
     waitAttributeEqualsTo(elementLocator, attributeName, expectedValue, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until attribute with specified {@code attributeName} has {@code expectedValue}.
+   *
+   * @param element element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   */
+  public void waitAttributeEqualsTo(
+      WebElement element, String attributeName, String expectedValue) {
+    waitAttributeEqualsTo(element, attributeName, expectedValue, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until attribute with specified {@code attributeName} contains
+   * {@code expectedValue}.
+   *
+   * @param elementLocator element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   * @param timeout waiting time
+   */
+  public void waitAttributeContainsValue(
+      By elementLocator, String attributeName, String expectedValue, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    waitVisibilityAndGetAttribute(elementLocator, attributeName, timeout)
+                        .contains(expectedValue));
+  }
+
+  /**
+   * Waits until attribute with specified {@code attributeName} contains {@code expectedValue}.
+   *
+   * @param elementLocator element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   */
+  public void waitAttributeContainsValue(
+      By elementLocator, String attributeName, String expectedValue) {
+    waitAttributeContainsValue(elementLocator, attributeName, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -1225,21 +1289,5 @@ public class SeleniumWebDriverHelper {
     action.clickAndHold(waitVisibility(element)).perform();
     WaitUtils.sleepQuietly(holdingTimeout);
     action.release(waitVisibility(element)).perform();
-  }
-
-  /**
-   * Waits until {@code nestedElementLocator} is presented in the DOM and gets it.
-   *
-   * @param parentElement element which contains nested element
-   * @param nestedElementLocator relative path to nested element
-   * @return found element
-   */
-  public WebElement waitPresenceAndGetNestedElement(
-      WebElement parentElement, By nestedElementLocator) {
-    return webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<WebElement>)
-                driver -> waitVisibility(parentElement).findElement(nestedElementLocator));
   }
 }

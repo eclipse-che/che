@@ -132,7 +132,7 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitPageLoad();
   }
 
-  // @Test
+  @Test
   public void checkOfCheckboxes() {
     newWorkspace.waitPageLoad();
     newWorkspace.selectStack(JAVA);
@@ -173,7 +173,7 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitAddButtonInImportProjectFormDisabled();
   }
 
-  // @Test(priority = 1)
+  @Test(priority = 1)
   public void checkProjectSamples() {
     newWorkspace.waitPageLoad();
     newWorkspace.selectStack(JAVA);
@@ -314,7 +314,7 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
   }
 
-  // @Test(priority = 2)
+  @Test(priority = 2)
   public void checkProjectsBlank() throws Exception {
     newWorkspace.waitPageLoad();
     newWorkspace.selectStack(BLANK);
