@@ -24,7 +24,8 @@ github.auxiliary.username=<AUXILIARY_GITHUB_USERNAME>
 github.auxiliary.password=<AUXILIARY_GITHUB_PASSWORD>
 ```
 
-In case of running of tests for Eclipse Che in Multi User mode you can set your own credentials of test user or admin instead of default ones
+In case of running the tests for Eclipse Che in Multi User mode you can set your own credentials of test user or admin instead of default ones
+```
 export CHE_ADMIN_NAME=<che_admin_name>
 export CHE_ADMIN_EMAIL=<che_admin_email>
 export CHE_ADMIN_PASSWORD=<che_admin_password>
@@ -32,6 +33,12 @@ export CHE_ADMIN_PASSWORD=<che_admin_password>
 export CHE_TESTUSER_NAME=<che_test_user_name>
 export CHE_TESTUSER_EMAIL=<che_test_user_email>
 export CHE_TESTUSER_PASSWORD=<che_test_user_password>
+```
+
+Default values:
+- CHE_ADMIN_NAME: "admin"
+- CHE_ADMIN_EMAIL: "admin@admin.com"
+- CHE_ADMIN_PASSWORD: "admin"
 
 #### 3. Prepare repository 
 Fork all repositories from [https://github.com/idexmai?tab=repositories](https://github.com/idexmai?tab=repositories) into the main GitHub account.
@@ -45,13 +52,31 @@ Follow the guide: [https://github.com/eclipse/che](https://github.com/eclipse/ch
 
 Simply launch `./selenium-tests.sh`
 
-### How to run tests on OpenShift
+### How to run tests on Open Shift
 #### 1. Set workspace runtime infrastructure implementation
 export CHE_INFRASTRUCTURE=openshift
-#### 2. Run tests and specify host and port of Che deployed to OpenShift
+#### 2. Run tests and specify host and port of Che deployed to Open Shift
 Launch `./selenium-tests.sh --host=<Che host on openshift> --port=80`
 
 Example: `./selenium-tests.sh --host=che-spi.192.168.99.100.nip.io --port=80`
+
+In case of running the tests for Eclipse Che on OCP, which is run remotely with default Eclipse Che admin and test user credentials: 
+```
+export OPENSHIFT_USERNAME=<openshift_web_console_username>
+export OPENSHIFT_PASSWORD=<openshift_web_console_password>
+export OPENSHIFT_TOKEN=<openshift_web_console_bearer_auth_token>
+export OPENSHIFT_CHE_NAMESPACE=<namespace_of_eclipse_che_deployed_on_openshift>
+export OPENSHIFT_URL=<url_of_openshift_web_console>
+```
+where `OPENSHIFT_TOKEN` is optional and is aimed to replace username/password when Open Shift is configured with oAuth. 
+
+
+Default values:
+- OPENSHIFT_USERNAME: "developer"
+- OPENSHIFT_PASSWORD: "any"
+- OPENSHIFT_CHE_NAMESPACE: "eclipse-che"
+- OPENSHIFT_URL: https://<che_host_ip>:8443
+
 
 Run tests configuration properties
 --------------------------------------
