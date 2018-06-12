@@ -109,7 +109,7 @@ public class PullRequestPluginWithForkTest {
     pullRequestPanel.clickPullRequestBtn();
     pullRequestPanel.enterComment(COMMENT);
     pullRequestPanel.enterTitle(TITLE);
-    pullRequestPanel.clickCreatePRBtn();
+    pullRequestPanel.clickCreatePullRequestButton();
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(FORK_CREATED);
     pullRequestPanel.waitStatusOk(BRANCH_PUSHED_ON_YOUR_FORK);
@@ -131,7 +131,7 @@ public class PullRequestPluginWithForkTest {
     openFileAndChangeContent(PATH_TO_README_FILE, generate("Update ", 12));
 
     // update PR and check status
-    pullRequestPanel.clickUpdatePRBtn();
+    pullRequestPanel.clickUpdatePullRequestButton();
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(NEW_COMMITS_PUSHED);
     pullRequestPanel.waitStatusOk(Status.PULL_REQUEST_UPDATED);

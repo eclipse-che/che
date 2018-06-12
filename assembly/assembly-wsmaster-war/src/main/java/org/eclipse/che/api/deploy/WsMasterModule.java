@@ -64,6 +64,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarP
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceMavenServerJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.core.db.DBTermination;
@@ -257,6 +258,8 @@ public class WsMasterModule extends AbstractModule {
     }
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
+
+    MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
   }
 
   private void configureSingleUserMode(Map<String, String> persistenceProperties) {

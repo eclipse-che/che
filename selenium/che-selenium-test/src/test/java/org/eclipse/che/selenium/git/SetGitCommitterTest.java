@@ -10,8 +10,11 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
+import static org.eclipse.che.selenium.pageobject.Preferences.DropDownGitInformationMenu.COMMITTER;
+
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -43,14 +46,11 @@ public class SetGitCommitterTest {
     loader.waitOnClosed();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Profile.PROFILE_MENU,
-        TestMenuCommandsConstants.Profile.PREFERENCES);
+    menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
 
-    preferences.waitMenuInCollapsedDropdown(
-        Preferences.DropDownGitCommitterInformationMenu.COMMITTER);
-    preferences.selectDroppedMenuByName(Preferences.DropDownGitCommitterInformationMenu.COMMITTER);
+    preferences.waitMenuInCollapsedDropdown(COMMITTER);
+    preferences.selectDroppedMenuByName(COMMITTER);
     preferences.typeAndWaitNameCommitter(defaultUser.getName());
     preferences.typeAndWaitEmailCommitter(defaultUser.getEmail());
     preferences.clickOnOkBtn();

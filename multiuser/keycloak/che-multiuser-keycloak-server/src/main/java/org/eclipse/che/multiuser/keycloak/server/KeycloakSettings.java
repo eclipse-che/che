@@ -23,6 +23,7 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.PROFIL
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.TOKEN_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERINFO_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERNAME_CLAIM_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class KeycloakSettings {
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakSettings.class);
+  private static final String DEFAULT_USERNAME_CLAIM = "preferred_username";
 
   private final Map<String, String> settings;
 
@@ -56,6 +58,7 @@ public class KeycloakSettings {
       @Nullable @Named(REALM_SETTING) String realm,
       @Named(CLIENT_ID_SETTING) String clientId,
       @Nullable @Named(OIDC_PROVIDER_SETTING) String oidcProvider,
+      @Nullable @Named(USERNAME_CLAIM_SETTING) String usernameClaim,
       @Named(USE_NONCE_SETTING) boolean useNonce,
       @Nullable @Named(OSO_ENDPOINT_SETTING) String osoEndpoint,
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint) {
@@ -99,6 +102,8 @@ public class KeycloakSettings {
     LOG.info("openid configuration = {}", openIdConfiguration);
 
     Map<String, String> settings = Maps.newHashMap();
+    settings.put(
+        USERNAME_CLAIM_SETTING, usernameClaim == null ? DEFAULT_USERNAME_CLAIM : usernameClaim);
     settings.put(CLIENT_ID_SETTING, clientId);
     settings.put(REALM_SETTING, realm);
     if (serverURL != null) {

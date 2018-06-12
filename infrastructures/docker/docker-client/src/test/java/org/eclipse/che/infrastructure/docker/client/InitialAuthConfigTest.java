@@ -20,7 +20,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfig;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
 import org.eclipse.che.inject.ConfigurationProperties;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;

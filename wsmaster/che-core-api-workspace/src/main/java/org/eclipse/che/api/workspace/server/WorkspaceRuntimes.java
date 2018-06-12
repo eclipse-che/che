@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -65,6 +66,9 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -100,6 +104,8 @@ public class WorkspaceRuntimes {
   private final ProbeScheduler probeScheduler;
   // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
+  private final Map<String, WorkspaceNextApplier> workspaceNextAppliers;
+  private final WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
 
   @VisibleForTesting
   WorkspaceRuntimes(
@@ -112,7 +118,9 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService) {
+      WorkspaceLockService lockService,
+      Map<String, WorkspaceNextApplier> workspaceNextAppliers,
+      WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever) {
     this(
         eventService,
         envFactories,
@@ -122,7 +130,9 @@ public class WorkspaceRuntimes {
         ignored,
         probeScheduler,
         statuses,
-        lockService);
+        lockService,
+        workspaceNextAppliers,
+        workspaceNextObjectsRetriever);
     this.runtimes = runtimes;
   }
 
@@ -136,7 +146,9 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService) {
+      WorkspaceLockService lockService,
+      Map<String, WorkspaceNextApplier> workspaceNextAppliers,
+      WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever) {
     this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
     this.statuses = statuses;
@@ -147,6 +159,8 @@ public class WorkspaceRuntimes {
     this.infrastructure = infra;
     this.environmentFactories = ImmutableMap.copyOf(envFactories);
     this.lockService = lockService;
+    this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
+    this.workspaceNextObjectsRetriever = workspaceNextObjectsRetriever;
     LOG.info("Configured factories for environments: '{}'", envFactories.keySet());
     LOG.info("Registered infrastructure '{}'", infra.getName());
     SetView<String> notSupportedByInfra =
@@ -172,7 +186,7 @@ public class WorkspaceRuntimes {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
     // try to create internal environment to check if the specified environment is valid
-    createInternalEnvironment(environment);
+    createInternalEnvironment(environment, null);
   }
 
   /**
@@ -296,7 +310,8 @@ public class WorkspaceRuntimes {
     final String ownerId = EnvironmentContext.getCurrent().getSubject().getUserId();
     final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
     try {
-      InternalEnvironment internalEnv = createInternalEnvironment(environment);
+      InternalEnvironment internalEnv =
+          createInternalEnvironment(environment, workspace.getAttributes());
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
 
@@ -570,7 +585,8 @@ public class WorkspaceRuntimes {
 
     InternalRuntime runtime;
     try {
-      InternalEnvironment internalEnv = createInternalEnvironment(environment);
+      InternalEnvironment internalEnv =
+          createInternalEnvironment(environment, workspace.getAttributes());
       runtime = infra.prepare(identity, internalEnv).getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
@@ -723,7 +739,8 @@ public class WorkspaceRuntimes {
     return environmentFactories.keySet();
   }
 
-  private InternalEnvironment createInternalEnvironment(Environment environment)
+  private InternalEnvironment createInternalEnvironment(
+      Environment environment, Map<String, String> workspaceAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType = environment.getRecipe().getType();
     InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
@@ -731,7 +748,28 @@ public class WorkspaceRuntimes {
       throw new NotFoundException(
           format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
     }
-    return factory.create(environment);
+    InternalEnvironment internalEnvironment = factory.create(environment);
+
+    applyWorkspaceNext(internalEnvironment, workspaceAttributes, recipeType);
+
+    return internalEnvironment;
+  }
+
+  private void applyWorkspaceNext(
+      InternalEnvironment internalEnvironment,
+      Map<String, String> workspaceAttributes,
+      String recipeType)
+      throws InfrastructureException {
+    Collection<CheService> cheServices = workspaceNextObjectsRetriever.get(workspaceAttributes);
+    if (cheServices.isEmpty()) {
+      return;
+    }
+    WorkspaceNextApplier wsNext = workspaceNextAppliers.get(recipeType);
+    if (wsNext == null) {
+      throw new InfrastructureException(
+          "Workspace.Next features are not supported for recipe type " + recipeType);
+    }
+    wsNext.apply(internalEnvironment, cheServices);
   }
 
   private String sessionUserNameOr(String nameIfNoUser) {

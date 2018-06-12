@@ -69,6 +69,17 @@ public final class Constants {
    */
   public static final String ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage";
   /**
+   * Contains Workspace.Next features list that should be added to a workspace. Should be set/read
+   * from {@link Workspace#getAttributes}.
+   *
+   * <p>Value is comma separated list of features in a format: '< feature1Name >/< feature1Version
+   * >,< feature2Name >/< feature2Version >' <br>
+   * Spaces around commas are trimmed. <br>
+   * This is beta constant that is subject to change or removal. Example of the attribute value:
+   * 'org.eclipse.che.feature1/0.0.1, com.redhat.enterpriseFeature1/1.0.0'
+   */
+  public static final String WORKSPACE_NEXT_FEATURES = "features";
+  /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
    * from {@link Workspace#getAttributes}
    */

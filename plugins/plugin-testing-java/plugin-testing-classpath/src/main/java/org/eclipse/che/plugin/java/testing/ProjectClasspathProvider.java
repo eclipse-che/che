@@ -10,12 +10,12 @@
  */
 package org.eclipse.che.plugin.java.testing;
 
-import com.google.inject.name.Named;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,8 +34,8 @@ public class ProjectClasspathProvider {
   private final String workspacePath;
 
   @Inject
-  public ProjectClasspathProvider(@Named("che.user.workspaces.storage") String workspacePath) {
-    this.workspacePath = workspacePath;
+  public ProjectClasspathProvider(RootDirPathProvider pathProvider) {
+    this.workspacePath = pathProvider.get();
   }
 
   /**

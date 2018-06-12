@@ -1,0 +1,91 @@
+# Copyright (c) 2012-2018 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+---
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: feature-api
+    name: feature-api-service
+  spec:
+    ports:
+    - name: feature-api
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      app: feature-api
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    labels:
+      app: feature-api
+    name: feature-api
+  data:
+    CHE_REGISTRY_UPDATE_INTERVAL: "60"
+    CHE_REGISTRY_GITHUB_URL: "https://github.com/garagatyi/che-registry.git"
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    name: feature-api-ingress
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+  spec:
+    rules:
+    - host: feature.192.168.99.100.nip.io
+      http:
+        paths:
+        - backend:
+            serviceName: feature-api-service
+            servicePort: 3000
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: feature-api
+    name: feature-api
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+      matchLabels:
+        app: feature-api
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: feature-api
+      spec:
+        containers:
+        - env:
+          - name: CHE_REGISTRY_UPDATE_INTERVAL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_REGISTRY_UPDATE_INTERVAL
+                name: feature-api
+          - name: CHE_REGISTRY_GITHUB_URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_REGISTRY_GITHUB_URL
+                name: feature-api
+          image: garagatyi/kubesrv:latest
+          imagePullPolicy: Always
+          name: feature-api
+          ports:
+          - containerPort: 3000
+            name: feature-api
+          resources:
+            limits:
+              memory: 600Mi
+            requests:
+              memory: 256Mi

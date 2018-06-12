@@ -14,9 +14,9 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 @Singleton
@@ -34,7 +34,7 @@ public class MavenTargetExcludeMatcher implements PathMatcher {
   @Override
   public boolean matches(Path fsPath) {
     String wsPath = pathTransformer.transform(fsPath);
-    RegisteredProject project = projectManager.getClosestOrNull(wsPath);
+    ProjectConfig project = projectManager.getClosestOrNull(wsPath);
     if (project == null) {
       return false;
     }

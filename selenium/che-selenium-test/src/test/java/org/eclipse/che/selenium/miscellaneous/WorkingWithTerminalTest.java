@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
-import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM;
+import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM_ID;
 import static org.openqa.selenium.Keys.PAGE_DOWN;
 import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.fail;
@@ -26,12 +26,12 @@ import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PanelSelector;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class WorkingWithTerminalTest {
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private MachineTerminal terminal;
+  @Inject private CheTerminal terminal;
   @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private PanelSelector panelSelector;
@@ -90,7 +90,7 @@ public class WorkingWithTerminalTest {
   @BeforeMethod
   private void prepareNewTerminal() {
     try {
-      panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM);
+      panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM_ID);
 
       projectExplorer.waitItem(PROJECT_NAME);
 

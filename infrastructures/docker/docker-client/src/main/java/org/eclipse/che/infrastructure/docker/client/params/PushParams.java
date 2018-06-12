@@ -15,9 +15,9 @@ import static org.eclipse.che.infrastructure.docker.client.DockerRegistryAuthRes
 
 import java.util.Objects;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
 import org.eclipse.che.infrastructure.docker.client.ProgressMonitor;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfigs;
 
 /**
  * Arguments holder for {@link DockerConnector#push(PushParams, ProgressMonitor)}.

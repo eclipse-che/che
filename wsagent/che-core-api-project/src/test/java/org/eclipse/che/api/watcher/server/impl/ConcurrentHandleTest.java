@@ -18,6 +18,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,7 +49,7 @@ public class ConcurrentHandleTest {
   @Before
   public void setUp() throws Exception {
     root = rootFolder.getRoot().toPath();
-    handler = new FileWatcherEventHandler(rootFolder.getRoot());
+    handler = new FileWatcherEventHandler(new DummyRootProvider(rootFolder.getRoot()));
   }
 
   @Test
@@ -96,5 +98,12 @@ public class ConcurrentHandleTest {
                 })
             .count();
     assertEquals(count, 0);
+  }
+
+  private static class DummyRootProvider extends RootDirPathProvider {
+
+    public DummyRootProvider(File folder) {
+      this.rootFile = folder;
+    }
   }
 }
