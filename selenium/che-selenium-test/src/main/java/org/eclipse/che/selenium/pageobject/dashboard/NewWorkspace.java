@@ -51,6 +51,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.WORKSPACE_CREATED_DIALOG;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.WORKSPACE_CREATED_DIALOG_CLOSE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ZIP_BUTTON_ID;
 import static org.openqa.selenium.Keys.BACK_SPACE;
 
@@ -134,6 +135,8 @@ public class NewWorkspace {
         "//*[@id='machine-%s-ram']//button[@aria-label='Increment memory']";
     String MACHINE_RAM_VALUE = "//*[@id='machine-%s-ram']//input";
     String WORKSPACE_CREATED_DIALOG = "//md-dialog/che-popup[@title='Workspace Is Created']";
+    String WORKSPACE_CREATED_DIALOG_CLOSE_BUTTON_XPATH =
+        "//md-dialog/che-popup[@title='Workspace Is Created']//i";
     String EDIT_WORKSPACE_DIALOG_BUTTON = "//che-button-primary//span[text()='Edit']";
     String OPEN_IN_IDE_DIALOG_BUTTON = "//che-button-default//span[text()='Open In IDE']";
     String ORGANIZATIONS_LIST_ID = "namespace-selector";
@@ -977,6 +980,16 @@ public class NewWorkspace {
 
   public void waitWorkspaceCreatedDialogIsVisible() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
+    WaitUtils.sleepQuietly(1);
+  }
+
+  public void closeWorkspaceCreatedDialog() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(WORKSPACE_CREATED_DIALOG_CLOSE_BUTTON_XPATH));
+  }
+
+  public void waitWorkspaceCreatedDialogDisappearance() {
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
   }
 
   public void clickOnEditWorkspaceButton() {

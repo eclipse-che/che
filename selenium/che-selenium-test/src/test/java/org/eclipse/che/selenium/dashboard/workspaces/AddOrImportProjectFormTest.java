@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA;
@@ -25,6 +26,8 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -42,7 +45,10 @@ public class AddOrImportProjectFormTest {
 
   private static final String NAME_WITH_MAX_AVAILABLE_LENGTH = NameGenerator.generate("name", 124);
   private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
-  private static final String TEST_WORKSPACE = "test-workspace";
+  private static final String TEST_BLANK_WORKSPACE_NAME = "test-blank-workspace";
+  private static final String TEST_JAVA_WORKSPACE_NAME = "test-java-workspace";
+  private static final String TEST_JAVA_WORKSPACE_NAME_EDIT =
+      NameGenerator.generate("test-java-workspace", 4);
   private static final String NAME_WITH_SPECIAL_CHARACTERS = "@#$%^&*";
   private static final String SPRING_SAMPLE_NAME = "web-java-spring";
   private static final String EXPECTED_SPRING_REPOSITORY_URL =
@@ -65,6 +71,33 @@ public class AddOrImportProjectFormTest {
           "The Eclipse Che source code. Build Che-in-Che.",
           CONSOLE_SAMPLE_NAME,
           "A hello world Java application.");
+  private static final String EXPECTED_TEXT_IN_EDITOR =
+      "package org.eclipse.che.examples;\n"
+          + "\n"
+          + "import org.springframework.web.servlet.ModelAndView;\n"
+          + "import org.springframework.web.servlet.mvc.Controller;\n"
+          + "\n"
+          + "import javax.servlet.http.HttpServletRequest;\n"
+          + "import javax.servlet.http.HttpServletResponse;\n"
+          + "\n"
+          + "public class GreetingController implements Controller\n"
+          + "{\n"
+          + "\n"
+          + "   @Override\n"
+          + "   public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception\n"
+          + "   {\n"
+          + "      String userName = request.getParameter(\"user\");\n"
+          + "      String result = \"\";\n"
+          + "      if (userName != null)\n"
+          + "      {\n"
+          + "        result = \"Hello, \" + userName + \"!\";\n"
+          + "      }\n"
+          + "\n"
+          + "      ModelAndView view = new ModelAndView(\"hello_view\");\n"
+          + "      view.addObject(\"greeting\", result);\n"
+          + "      return view;\n"
+          + "   }\n"
+          + "}\n";
 
   private Workspace customWorkspace;
 
@@ -82,6 +115,8 @@ public class AddOrImportProjectFormTest {
   @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private Stacks stacks;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private CodenvyEditor editor;
 
   @BeforeClass
   public void setup() {
@@ -342,26 +377,21 @@ public class AddOrImportProjectFormTest {
     newWorkspace.setMachineRAM("dev-machine", 5.0);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
-
-    /*testWorkspaceServiceClient.waitStatus(WORKSPACE_NAME, defaultTestUser.getName(), RUNNING);
-    customWorkspace = getWorkspace();
-    List<? extends ProjectConfig> projects = customWorkspace.getConfig().getProjects();*/
-
   }
 
   @Test(priority = 3)
-  public void checkCreatingProject() {
+  public void checkCreatingProject() throws Exception {
     newWorkspace.waitPageLoad();
-    newWorkspace.typeWorkspaceName(TEST_WORKSPACE);
+    newWorkspace.typeWorkspaceName(TEST_BLANK_WORKSPACE_NAME);
     newWorkspace.selectStack(DOT_NET);
     newWorkspace.waitStackSelected(DOT_NET);
 
-    Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_WORKSPACE);
+    Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
     newWorkspace.selectStack(JAVA);
     newWorkspace.waitStackSelected(JAVA);
 
-    Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_WORKSPACE);
+    Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
     newWorkspace.setMachineRAM("dev-machine", 3.0);
     newWorkspace.waitRamValue("dev-machine", 3.0);
@@ -372,6 +402,37 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
     newWorkspace.clickOnAddButtonInImportProjectForm();
     newWorkspace.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    newWorkspace.clickOnBottomCreateButton();
+    newWorkspace.waitWorkspaceCreatedDialogIsVisible();
+    newWorkspace.closeWorkspaceCreatedDialog();
+    newWorkspace.waitWorkspaceCreatedDialogDisappearance();
+    workspaceOverview.checkNameWorkspace(TEST_BLANK_WORKSPACE_NAME);
+
+    seleniumWebDriver.navigate().back();
+
+    prepareJavaWorkspaceAndOpenCreateDialog(TEST_JAVA_WORKSPACE_NAME);
+
+    newWorkspace.clickOnEditWorkspaceButton();
+    workspaceOverview.checkNameWorkspace(TEST_JAVA_WORKSPACE_NAME);
+
+    seleniumWebDriver.navigate().back();
+
+    prepareJavaWorkspaceAndOpenCreateDialog(TEST_JAVA_WORKSPACE_NAME_EDIT);
+
+    newWorkspace.waitWorkspaceCreatedDialogIsVisible();
+    newWorkspace.clickOnOpenInIDEButton();
+
+    testWorkspaceServiceClient.waitStatus(
+        TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName(), RUNNING);
+
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(SPRING_SAMPLE_NAME);
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        SPRING_SAMPLE_NAME + "/src/main/java/org.eclipse.che.examples", "GreetingController.java");
+    editor.waitActive();
+    editor.waitTextIntoEditor(EXPECTED_TEXT_IN_EDITOR);
   }
 
   private void waitAllCheckboxesDisabled() {
@@ -403,7 +464,21 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
   }
 
-  private Workspace getWorkspace() throws Exception {
-    return testWorkspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
+  private void prepareJavaWorkspaceAndOpenCreateDialog(String workspaceName) {
+    newWorkspace.waitPageLoad();
+    newWorkspace.typeWorkspaceName(workspaceName);
+    newWorkspace.selectStack(JAVA);
+    newWorkspace.waitStackSelected(JAVA);
+    newWorkspace.clickOnAddOrImportProjectButton();
+    newWorkspace.waitAddOrImportFormOpened();
+    newWorkspace.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    newWorkspace.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    newWorkspace.clickOnAddButtonInImportProjectForm();
+    checkProjectTabAppearanceAndFields(
+        SPRING_SAMPLE_NAME,
+        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
+        EXPECTED_SPRING_REPOSITORY_URL);
+    newWorkspace.clickOnBottomCreateButton();
+    newWorkspace.waitWorkspaceCreatedDialogIsVisible();
   }
 }
