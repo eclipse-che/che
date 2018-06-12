@@ -96,7 +96,7 @@ public class CreateAndDeleteProjectsTest {
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
 
-    // wait for project initializing
+    // wait for projects initializing
     explorer.waitItem(WEB_JAVA_SPRING);
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);
     explorer.waitItem(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
@@ -106,7 +106,7 @@ public class CreateAndDeleteProjectsTest {
     explorer.waitDefinedTypeOfFolder(WEB_JAVA_SPRING, PROJECT_FOLDER);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
 
-    // delete projects from workspace detais page
+    // delete projects from workspace details page
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE);
