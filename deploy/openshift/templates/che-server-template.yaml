@@ -142,6 +142,8 @@ objects:
                 key: ca.crt
                 name: openshift-identity-provider
                 optional: true
+          - name: CHE_WORKSPACE_FEATURE_API
+            value: "http://feature-api-service:3000"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:

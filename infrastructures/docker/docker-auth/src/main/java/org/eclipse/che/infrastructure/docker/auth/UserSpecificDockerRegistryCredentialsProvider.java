@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.infrastructure.docker.client;
+package org.eclipse.che.infrastructure.docker.auth;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -17,8 +17,8 @@ import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfig;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfigs;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
