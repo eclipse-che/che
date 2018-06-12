@@ -295,19 +295,26 @@ public abstract class SeleniumTestHandler
 
           testsWithFailure.put(result.getTestClass().getRealClass().getName(), result.getMethod());
 
-          captureScreenshot(result);
-          captureHtmlSource(result);
-          captureTestWorkspaceLogs(result);
-          storeWebDriverLogs(result);
-
           break;
 
         case ITestResult.SKIP:
           LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
+
+          // don't capture test data if test is skipped because of previous test with higher priority
+          // failed
+          if (testsWithFailure.containsKey(result.getMethod().getInstance().getClass().getName())) {
+            return;
+          }
+
           break;
 
         default:
       }
+
+      captureScreenshot(result);
+      captureHtmlSource(result);
+      captureTestWorkspaceLogs(result);
+      storeWebDriverLogs(result);
     }
   }
 
