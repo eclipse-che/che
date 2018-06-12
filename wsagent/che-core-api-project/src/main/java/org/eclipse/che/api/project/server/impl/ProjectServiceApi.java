@@ -218,8 +218,12 @@ public class ProjectServiceApi {
     if (wsPath != null) {
       projectConfigDto.setPath(absolutize(wsPath));
     }
-
+    boolean registeredEarly = projectManager.isRegistered(wsPath);
     RegisteredProject updated = projectManager.update(projectConfigDto);
+    if (!registeredEarly) { // if project config set firstly we will fire event project created
+      eventService.publish(new ProjectCreatedEvent(updated.getPath()));
+    }
+
     return asDto(updated);
   }
 
@@ -289,12 +293,13 @@ public class ProjectServiceApi {
   /** Import project from specified source storage to specified location */
   public void importProject(
       String wsPath, boolean force, String clientId, SourceStorageDto sourceStorage)
-      throws ConflictException, ForbiddenException, UnauthorizedException, IOException,
-          ServerException, NotFoundException, BadRequestException {
+      throws ConflictException, ForbiddenException, UnauthorizedException, ServerException,
+          NotFoundException {
 
     wsPath = absolutize(wsPath);
 
     projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
+    eventService.publish(new ProjectCreatedEvent(wsPath));
   }
 
   /** Create file with specified path, name and content */
