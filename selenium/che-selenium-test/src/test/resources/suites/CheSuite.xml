@@ -51,6 +51,7 @@
           <class name="org.eclipse.che.selenium.languageserver.PhpFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.PythonFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
