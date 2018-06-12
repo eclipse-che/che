@@ -936,8 +936,8 @@ public class NewWorkspace {
   }
 
   public void waitWorkspaceCreatedDialogIsVisible() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
-    WaitUtils.sleepQuietly(1);
+    testWebElementRenderChecker.waitElementIsRendered(
+        By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
   }
 
   public void closeWorkspaceCreatedDialog() {

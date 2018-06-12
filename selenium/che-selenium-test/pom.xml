@@ -234,6 +234,7 @@
                             <goal>integration-test</goal>
                         </goals>
                         <configuration>
+                            <trimStackTrace>false</trimStackTrace>
                             <properties>
                                 <property>
                                     <name>configfailurepolicy</name>
