@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -979,6 +980,16 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Determines whether or not this element {@code webElement} is enabled.
+   *
+   * @param webElement element which should be enabled
+   * @return true if given element is enabled
+   */
+  public boolean waitVisibilityAndGetEnableState(WebElement webElement) {
+    return waitVisibility(webElement).isEnabled();
+  }
+
+  /**
    * Waits during {@code timeout} until frame which defined by {@code frameLocator} is available and
    * switches to it.
    *
@@ -1121,6 +1132,76 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAttributeEqualsTo(By elementLocator, String attributeName, String expectedValue) {
     waitAttributeEqualsTo(elementLocator, attributeName, expectedValue, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until given {@code webElement} is selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
+   *
+   * @param webElement element which should be selected
+   */
+  public void waitElementIsSelected(WebElement webElement) {
+    waitElementIsSelected(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until given {@code webElement} is selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
+   *
+   * @param webElement element which should be selected
+   * @param timeout waiting time in seconds
+   */
+  public void waitElementIsSelected(WebElement webElement, int timeout) {
+    webDriverWaitFactory.get(timeout).until(elementSelectionStateToBe(webElement, true));
+  }
+
+  /**
+   * Waits until given {@code webElement} is not selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
+   *
+   * @param webElement element which should be not selected
+   */
+  public void waitElementIsNotSelected(WebElement webElement) {
+    waitElementIsNotSelected(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until given {@code webElement} is not selected.
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
+   *
+   * @param webElement element which should be not selected
+   * @param timeout waiting time in seconds
+   */
+  public void waitElementIsNotSelected(WebElement webElement, int timeout) {
+    webDriverWaitFactory.get(timeout).until(elementSelectionStateToBe(webElement, false));
+  }
+
+  /**
+   * Sets given {@code isCheckedWebElement} to specified state and waits its state
+   *
+   * <p>Note! Uses only for checkboxes and radio buttons.
+   *
+   * @param isCheckedWebElement element which should be selected
+   * @param setWebElement element which should be clicked to change the state
+   * @param state state of given element (true if the given element should be selected)
+   */
+  public void waitAndSetCheckbox(
+      WebElement isCheckedWebElement, WebElement setWebElement, boolean state) {
+    if (state) {
+      if (!isCheckedWebElement.isSelected()) {
+        waitAndClick(setWebElement);
+        waitElementIsSelected(isCheckedWebElement);
+      }
+    } else {
+      if (isCheckedWebElement.isSelected()) {
+        waitAndClick(setWebElement);
+        waitElementIsNotSelected(isCheckedWebElement);
+      }
+    }
   }
 
   /**

@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.pullrequest.client.parts.contribute;
 
 import static com.google.gwt.dom.client.Style.Cursor.POINTER;
 import static com.google.gwt.dom.client.Style.Unit.PX;
+import static org.vectomatic.dom.svg.ui.SVGButtonBase.SVGFaceName.UP;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -134,6 +135,7 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
     this.refreshContributionBranchNameListButton.getElement().getStyle().setWidth(23, PX);
     this.refreshContributionBranchNameListButton.getElement().getStyle().setHeight(20, PX);
     this.refreshContributionBranchNameListButton.getElement().getStyle().setCursor(POINTER);
+    this.refreshContributionBranchNameListButton.showFace(UP);
     this.refreshContributionBranchNameListButton
         .getElement()
         .getStyle()
