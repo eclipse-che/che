@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
@@ -49,6 +50,7 @@ public class OpenShiftEnvironmentProvisioner {
   private final InstallerServersPortProvisioner installerServersPortProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
+  private final ImagePullSecretProvisioner imagePullSecretProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -62,7 +64,8 @@ public class OpenShiftEnvironmentProvisioner {
       RamLimitProvisioner ramLimitProvisioner,
       InstallerServersPortProvisioner installerServersPortProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
-      PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner) {
+      PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
+      ImagePullSecretProvisioner imagePullSecretProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -74,6 +77,7 @@ public class OpenShiftEnvironmentProvisioner {
     this.installerServersPortProvisioner = installerServersPortProvisioner;
     this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
     this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
+    this.imagePullSecretProvisioner = imagePullSecretProvisioner;
   }
 
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
@@ -97,5 +101,6 @@ public class OpenShiftEnvironmentProvisioner {
     routeTlsProvisioner.provision(osEnv, identity);
     ramLimitProvisioner.provision(osEnv, identity);
     podTerminationGracePeriodProvisioner.provision(osEnv, identity);
+    imagePullSecretProvisioner.provision(osEnv, identity);
   }
 }

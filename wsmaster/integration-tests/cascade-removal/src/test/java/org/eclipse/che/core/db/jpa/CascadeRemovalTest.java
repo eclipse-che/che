@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.core.db.jpa;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createAccount;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
@@ -33,7 +34,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.google.inject.name.Names;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.annotation.PostConstruct;
@@ -209,14 +209,16 @@ public class CascadeRemovalTest {
                     spy(
                         new WorkspaceRuntimes(
                             mock(EventService.class),
-                            Collections.emptyMap(),
+                            emptyMap(),
                             infra,
                             mock(WorkspaceSharedPool.class),
                             mock(WorkspaceDao.class),
                             mock(DBInitializer.class),
                             mock(ProbeScheduler.class),
                             new DefaultWorkspaceStatusCache(),
-                            new DefaultWorkspaceLockService()));
+                            new DefaultWorkspaceLockService(),
+                            emptyMap(),
+                            null));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);

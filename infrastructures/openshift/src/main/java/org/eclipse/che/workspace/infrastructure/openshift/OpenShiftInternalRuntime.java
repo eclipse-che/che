@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
@@ -18,6 +18,7 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
@@ -27,6 +28,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
@@ -44,13 +46,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftRuntimeContext> {
 
   private final OpenShiftProject project;
-  private final String unrecoverableEvents;
+  private final Set<String> unrecoverableEvents;
 
   @Inject
   public OpenShiftInternalRuntime(
       @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
       @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
-      @Named("che.infra.kubernetes.workspace_unrecoverable_events") String unrecoverableEvents,
+      @Named("che.infra.kubernetes.workspace_unrecoverable_events") String[] unrecoverableEvents,
       NoOpURLRewriter urlRewriter,
       KubernetesBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
@@ -61,6 +63,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       KubernetesSharedPool sharedPool,
       KubernetesRuntimeStateCache runtimesStatusesCache,
       KubernetesMachineCache machinesCache,
+      StartSynchronizerFactory startSynchronizerFactory,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -78,11 +81,12 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         sharedPool,
         runtimesStatusesCache,
         machinesCache,
+        startSynchronizerFactory,
         context,
         project,
         warnings);
     this.project = project;
-    this.unrecoverableEvents = unrecoverableEvents;
+    this.unrecoverableEvents = ImmutableSet.copyOf(unrecoverableEvents);
   }
 
   @Override
@@ -101,9 +105,9 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     // project.pods().watch(new AbnormalStopHandler());
 
     project.pods().watchContainers(new MachineLogsPublisher());
-    if (!Strings.isNullOrEmpty(unrecoverableEvents)) {
+    if (!unrecoverableEvents.isEmpty()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      project.pods().watchContainers(new UnrecoverableEventHanler(pods));
+      project.pods().watchContainers(new UnrecoverableEventHandler(pods));
     }
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));

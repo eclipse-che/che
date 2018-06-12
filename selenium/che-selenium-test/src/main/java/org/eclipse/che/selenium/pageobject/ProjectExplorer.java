@@ -172,6 +172,7 @@ public class ProjectExplorer {
     String PROJECT_EXPLORER_ITEM_TEMPLATE = "//div[@path='/%s']/div";
     String COLOURED_ITEM_TEMPLATE =
         "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
+    String MAXIMIZE_BUTTON_XPATH = "(//div[@id='gwt-debug-maximizeButton'])[position()=1]";
   }
 
   /**
@@ -1057,5 +1058,10 @@ public class ProjectExplorer {
    */
   public void waitAllItemsIsSelected(List<String> paths) {
     paths.forEach(this::waitItemIsSelected);
+  }
+
+  /** click on the 'Maximize' button */
+  public void clickOnMaximizeButton() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.MAXIMIZE_BUTTON_XPATH));
   }
 }

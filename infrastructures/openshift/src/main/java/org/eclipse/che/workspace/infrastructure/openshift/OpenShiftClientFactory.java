@@ -14,6 +14,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.fabric8.kubernetes.client.utils.Utils.isNotNullOrEmpty;
 
 import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.URLUtils;
 import io.fabric8.kubernetes.client.utils.Utils;
@@ -22,7 +23,6 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import io.fabric8.openshift.client.internal.OpenShiftOAuthInterceptor;
-import java.io.IOException;
 import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,8 +36,6 @@ import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Sergii Leshchenko
@@ -53,8 +51,6 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
 
   private static final String BEFORE_TOKEN = "access_token=";
   private static final String AFTER_TOKEN = "&expires";
-
-  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftClientFactory.class);
 
   private final OpenShiftClientConfigFactory configBuilder;
 
@@ -83,128 +79,6 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
         maxIdleConnections,
         connectionPoolKeepAlive);
     this.configBuilder = configBuilder;
-  }
-
-  protected Config buildDefaultConfig(
-      String masterUrl, String username, String password, String oauthToken, Boolean doTrustCerts) {
-    OpenShiftConfigBuilder configBuilder = new OpenShiftConfigBuilder();
-    if (!isNullOrEmpty(masterUrl)) {
-      configBuilder.withMasterUrl(masterUrl);
-    }
-
-    if (!isNullOrEmpty(username)) {
-      configBuilder.withUsername(username);
-    }
-
-    if (!isNullOrEmpty(password)) {
-      configBuilder.withPassword(password);
-    }
-
-    if (!isNullOrEmpty(oauthToken)) {
-      configBuilder.withOauthToken(oauthToken);
-    }
-
-    if (doTrustCerts != null) {
-      configBuilder.withTrustCerts(doTrustCerts);
-    }
-
-    Config theConfig = configBuilder.build();
-    return theConfig;
-  }
-
-  /**
-   * Builds the Openshift {@link Config} object based on a default {@link Config} object and an
-   * optional workspace Id.
-   *
-   * <p>This method overrides the one in the Kubernetes infrastructure to introduce an additional
-   * extension level by delegating to an {@link OpenShiftClientConfigFactory}
-   */
-  @Override
-  protected Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
-      throws InfrastructureException {
-    return configBuilder.buildConfig(defaultConfig, workspaceId);
-  }
-
-  protected Interceptor buildKubernetesInterceptor(Config config) {
-    final String oauthToken;
-    if (Utils.isNotNullOrEmpty(config.getUsername())
-        && Utils.isNotNullOrEmpty(config.getPassword())) {
-      synchronized (getHttpClient()) {
-        try {
-          OkHttpClient.Builder builder = getHttpClient().newBuilder();
-          builder.interceptors().clear();
-          OkHttpClient clone = builder.build();
-
-          String credential =
-              Credentials.basic(config.getUsername(), new String(config.getPassword()));
-          URL url = new URL(URLUtils.join(config.getMasterUrl(), AUTHORIZE_PATH));
-          Response response =
-              clone
-                  .newCall(
-                      new Request.Builder()
-                          .get()
-                          .url(url)
-                          .header(AUTHORIZATION, credential)
-                          .build())
-                  .execute();
-
-          response.body().close();
-          response = response.priorResponse() != null ? response.priorResponse() : response;
-          response = response.networkResponse() != null ? response.networkResponse() : response;
-          String token = response.header(LOCATION);
-          if (token == null || token.isEmpty()) {
-            throw new KubernetesClientException(
-                "Unexpected response ("
-                    + response.code()
-                    + " "
-                    + response.message()
-                    + "), to the authorization request. Missing header:["
-                    + LOCATION
-                    + "]!");
-          }
-          token = token.substring(token.indexOf(BEFORE_TOKEN) + BEFORE_TOKEN.length());
-          token = token.substring(0, token.indexOf(AFTER_TOKEN));
-          oauthToken = token;
-        } catch (Exception e) {
-          throw KubernetesClientException.launderThrowable(e);
-        }
-      }
-    } else if (Utils.isNotNullOrEmpty(config.getOauthToken())) {
-      oauthToken = config.getOauthToken();
-    } else {
-      oauthToken = null;
-    }
-
-    return new Interceptor() {
-      @Override
-      public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
-        if (isNotNullOrEmpty(oauthToken)) {
-          Request authReq =
-              chain
-                  .request()
-                  .newBuilder()
-                  .addHeader("Authorization", "Bearer " + oauthToken)
-                  .build();
-          return chain.proceed(authReq);
-        }
-        return chain.proceed(request);
-      }
-    };
-  }
-
-  private OpenShiftClient createOC(Config config) throws InfrastructureException {
-    OkHttpClient clientHttpClient =
-        getHttpClient().newBuilder().authenticator(Authenticator.NONE).build();
-    OkHttpClient.Builder builder = clientHttpClient.newBuilder();
-    builder.interceptors().clear();
-    clientHttpClient =
-        builder
-            .addInterceptor(
-                new OpenShiftOAuthInterceptor(clientHttpClient, OpenShiftConfig.wrap(config)))
-            .build();
-
-    return new UnclosableOpenShiftClient(clientHttpClient, config);
   }
 
   /**
@@ -240,6 +114,123 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    */
   public OpenShiftClient createOC() throws InfrastructureException {
     return createOC(buildConfig(getDefaultConfig(), null));
+  }
+
+  @Override
+  protected Config buildDefaultConfig(
+      String masterUrl, String username, String password, String oauthToken, Boolean doTrustCerts) {
+    OpenShiftConfigBuilder configBuilder = new OpenShiftConfigBuilder();
+    if (!isNullOrEmpty(masterUrl)) {
+      configBuilder.withMasterUrl(masterUrl);
+    }
+
+    if (!isNullOrEmpty(username)) {
+      configBuilder.withUsername(username);
+    }
+
+    if (!isNullOrEmpty(password)) {
+      configBuilder.withPassword(password);
+    }
+
+    if (!isNullOrEmpty(oauthToken)) {
+      configBuilder.withOauthToken(oauthToken);
+    }
+
+    if (doTrustCerts != null) {
+      configBuilder.withTrustCerts(doTrustCerts);
+    }
+
+    return configBuilder.build();
+  }
+
+  /**
+   * Builds the Openshift {@link Config} object based on a provided {@link Config} object and an
+   * optional workspace ID.
+   *
+   * <p>This method overrides the one in the Kubernetes infrastructure to introduce an additional
+   * extension level by delegating to an {@link OpenShiftClientConfigFactory}
+   */
+  @Override
+  protected Config buildConfig(Config config, @Nullable String workspaceId)
+      throws InfrastructureException {
+    return configBuilder.buildConfig(config, workspaceId);
+  }
+
+  @Override
+  protected Interceptor buildKubernetesInterceptor(Config config) {
+    final String oauthToken;
+    if (Utils.isNotNullOrEmpty(config.getUsername())
+        && Utils.isNotNullOrEmpty(config.getPassword())) {
+      synchronized (getHttpClient()) {
+        try {
+          OkHttpClient.Builder builder = getHttpClient().newBuilder();
+          builder.interceptors().clear();
+          OkHttpClient clone = builder.build();
+
+          String credential = Credentials.basic(config.getUsername(), config.getPassword());
+          URL url = new URL(URLUtils.join(config.getMasterUrl(), AUTHORIZE_PATH));
+          Response response =
+              clone
+                  .newCall(
+                      new Request.Builder()
+                          .get()
+                          .url(url)
+                          .header(AUTHORIZATION, credential)
+                          .build())
+                  .execute();
+
+          // False positive warn: according to javadocs response.body() returns non-null value
+          // if called after Call.execute()
+          response.body().close();
+          response = response.priorResponse() != null ? response.priorResponse() : response;
+          response = response.networkResponse() != null ? response.networkResponse() : response;
+          String token = response.header(LOCATION);
+          if (token == null || token.isEmpty()) {
+            throw new KubernetesClientException(
+                "Unexpected response ("
+                    + response.code()
+                    + " "
+                    + response.message()
+                    + "), to the authorization request. Missing header:["
+                    + LOCATION
+                    + "]!");
+          }
+          token = token.substring(token.indexOf(BEFORE_TOKEN) + BEFORE_TOKEN.length());
+          token = token.substring(0, token.indexOf(AFTER_TOKEN));
+          oauthToken = token;
+        } catch (Exception e) {
+          throw KubernetesClientException.launderThrowable(e);
+        }
+      }
+    } else if (Utils.isNotNullOrEmpty(config.getOauthToken())) {
+      oauthToken = config.getOauthToken();
+    } else {
+      oauthToken = null;
+    }
+
+    return chain -> {
+      Request request = chain.request();
+      if (isNotNullOrEmpty(oauthToken)) {
+        Request authReq =
+            chain.request().newBuilder().addHeader("Authorization", "Bearer " + oauthToken).build();
+        return chain.proceed(authReq);
+      }
+      return chain.proceed(request);
+    };
+  }
+
+  private OpenShiftClient createOC(Config config) {
+    OkHttpClient clientHttpClient =
+        getHttpClient().newBuilder().authenticator(Authenticator.NONE).build();
+    OkHttpClient.Builder builder = clientHttpClient.newBuilder();
+    builder.interceptors().clear();
+    clientHttpClient =
+        builder
+            .addInterceptor(
+                new OpenShiftOAuthInterceptor(clientHttpClient, OpenShiftConfig.wrap(config)))
+            .build();
+
+    return new UnclosableOpenShiftClient(clientHttpClient, config);
   }
 
   /** Decorates the {@link DefaultOpenShiftClient} so that it can not be closed from the outside. */

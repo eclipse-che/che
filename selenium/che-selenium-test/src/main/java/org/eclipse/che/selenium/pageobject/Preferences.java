@@ -23,6 +23,8 @@ import static org.eclipse.che.selenium.pageobject.Preferences.Locators.ERRORS_WA
 import static org.eclipse.che.selenium.pageobject.Preferences.Locators.ERRORS_WARNINGS_RADIO_BUTTON_BLOCK;
 import static org.eclipse.che.selenium.pageobject.Preferences.Locators.MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM;
 import static org.eclipse.che.selenium.pageobject.Preferences.Locators.SSH_DELETE_BUTTON_FOR_HOST;
+import static org.openqa.selenium.Keys.ALT;
+import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
@@ -40,6 +42,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -97,7 +100,8 @@ public class Preferences {
     String SSH_GENERATE_AND_ADD_TO_GITHUB = "gwt-debug-gitSshKeys-generateGithubKey";
     String SSH_KEYS_TABLE = "//table[@id='gwt-debug-sshKeys-cellTable-keys']/tbody[1]";
     String SSH_DELETE_BUTTON_FOR_HOST = "/following::button[text()='Delete']";
-    String OK_BUTTON_ID = "window-preferences-storeChanges";
+    String SAVE_BUTTON_ID = "window-preferences-storeChanges";
+    String REFRESH_BUTTON_ID = "window-preferences-refresh";
     String CLOSE_BTN_ID = "window-preferences-close";
     String COMMITTER_INPUT_NAME = "gwt-debug-committer-preferences-name";
     String COMMITTER_INPUT_EMAIL = "gwt-debug-committer-preferences-email";
@@ -113,6 +117,10 @@ public class Preferences {
         "div#gwt-debug-askValueDialog-window input#gwt-debug-askValueDialog-textBox";
     String SHOW_ARTIFACT_CHECKBOX =
         "//input[@id='gwt-debug-window-preferences-plugins-maven-showArtifactId-input']";
+    String SET_CONTRIBUTE_CHECKBOX_ID =
+        "gwt-debug-preferences-git-contribute-activateByProjectSelection";
+    String SHOW_CONTRIBUTE_CHECKBOX_ID =
+        "gwt-debug-preferences-git-contribute-activateByProjectSelection-input";
   }
 
   public interface DropDownListsHeaders {
@@ -128,8 +136,9 @@ public class Preferences {
     String MACHINE = "Machine";
   }
 
-  public interface DropDownGitCommitterInformationMenu {
+  public interface DropDownGitInformationMenu {
     String COMMITTER = "Committer";
+    String CONTRIBUTE_PREFERENCES = "Contribute";
   }
 
   public interface DropDownJavaCompilerMenu {
@@ -160,8 +169,11 @@ public class Preferences {
   @FindBy(id = Locators.DEFAULT_RAM_MENU_FIELD)
   private WebElement defaulRAMField;
 
-  @FindBy(id = Locators.OK_BUTTON_ID)
-  private WebElement okBtn;
+  @FindBy(id = Locators.SAVE_BUTTON_ID)
+  private WebElement saveBtn;
+
+  @FindBy(id = Locators.REFRESH_BUTTON_ID)
+  private WebElement refreshBtn;
 
   @FindBy(id = Locators.CLOSE_BTN_ID)
   private WebElement closeBtn;
@@ -195,6 +207,12 @@ public class Preferences {
 
   @FindBy(xpath = Locators.SHOW_ARTIFACT_CHECKBOX)
   private WebElement showArtifactCheckBox;
+
+  @FindBy(id = Locators.SET_CONTRIBUTE_CHECKBOX_ID)
+  private WebElement setContributeCheckbox;
+
+  @FindBy(id = Locators.SHOW_CONTRIBUTE_CHECKBOX_ID)
+  private WebElement showContributeCheckbox;
 
   /** wait preferences form */
   public void waitPreferencesForm() {
@@ -247,15 +265,41 @@ public class Preferences {
 
   /** wait ok button click and wait closing the form */
   public void clickOnOkBtn() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(okBtn));
-    okBtn.click();
+    webDriverHelper.waitAndClick(saveBtn);
     loader.waitOnClosed();
   }
 
-  /** wait close button click and wait closing the form */
-  public void clickOnCloseBtn() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(closeBtn));
-    closeBtn.click();
+  /**
+   * determines whether or not 'Preferences' form opened
+   *
+   * @return true if the form is opened
+   */
+  public boolean isPreferencesFormOpened() {
+    return webDriverHelper.isVisible(closeBtn);
+  }
+
+  /**
+   * defines a state the 'Save' button, enabled or not
+   *
+   * @return true if the button is enabled
+   */
+  public boolean isSaveButtonIsEnabled() {
+    return webDriverHelper.waitVisibilityAndGetEnableState(saveBtn);
+  }
+
+  /** wait and click on the 'Refresh' button */
+  public void clickRefreshButton() {
+    webDriverHelper.waitAndClick(refreshBtn);
+  }
+
+  /** click on the 'Close' button */
+  public void clickOnCloseButton() {
+    webDriverHelper.waitAndClick(closeBtn);
+  }
+
+  /** click on the 'Close' button and wait closing the form */
+  public void closeForm() {
+    webDriverHelper.waitAndClick(closeBtn);
     waitPreferencesFormIsClosed();
   }
 
@@ -368,6 +412,35 @@ public class Preferences {
   public void typeAndWaitEmailCommitter(String emailCommitter) {
     typeEmailCommitter(emailCommitter);
     waitInputEmailCommitter(emailCommitter);
+  }
+
+  /** clicks on the 'Contribute' checkbox */
+  public void clickOnContributeCheckbox() {
+    webDriverHelper.waitAndClick(setContributeCheckbox);
+  }
+
+  /** call the 'Contribute' by hot key */
+  public void callContributeActionByHotKey() {
+    webDriverHelper.sendKeys(Keys.chord(CONTROL, ALT, "6"));
+  }
+
+  /** wait the 'Contribute' checkbox is selected */
+  public void waitContributeCheckboxIsSelected() {
+    webDriverHelper.waitElementIsSelected(showContributeCheckbox);
+  }
+
+  /** wait the 'Contribute' checkbox is not selected */
+  public void waitContributeCheckboxIsNotSelected() {
+    webDriverHelper.waitElementIsNotSelected(showContributeCheckbox);
+  }
+
+  /**
+   * Set 'Contribute' checkbox to specified state and wait it state
+   *
+   * @param state state of checkbox (true if checkbox must be selected)
+   */
+  public void setContributeCheckbox(boolean state) {
+    webDriverHelper.waitAndSetCheckbox(showContributeCheckbox, setContributeCheckbox, state);
   }
 
   /**
@@ -563,7 +636,7 @@ public class Preferences {
 
     // check if github key has been uploaded without authorization on github.com
     if (isSshKeyIsPresent(GITHUB_COM)) {
-      clickOnCloseBtn();
+      closeForm();
       waitPreferencesFormIsClosed();
       return;
     }
@@ -593,7 +666,7 @@ public class Preferences {
     loader.waitOnClosed();
     waitSshKeyIsPresent(GITHUB_COM);
     loader.waitOnClosed();
-    clickOnCloseBtn();
+    closeForm();
     waitPreferencesFormIsClosed();
   }
 

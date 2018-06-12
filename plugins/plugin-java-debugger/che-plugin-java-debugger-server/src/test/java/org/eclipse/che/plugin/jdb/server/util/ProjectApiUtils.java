@@ -69,7 +69,7 @@ public class ProjectApiUtils {
 
   /** Initialize project API for tests. */
   private static void init() throws Exception {
-    File root = new File("target/test-classes/workspace");
+    File root = new File("target/test-classes/workspace").getAbsoluteFile();
     File indexDir = new File("target/test-classes/workspace/index");
 
     Injector injector =

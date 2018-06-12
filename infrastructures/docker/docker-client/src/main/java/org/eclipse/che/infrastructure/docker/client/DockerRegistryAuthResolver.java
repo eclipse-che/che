@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonHelper;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfig;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfigs;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
 
 /**
  * Class for preparing auth header value for docker registry.

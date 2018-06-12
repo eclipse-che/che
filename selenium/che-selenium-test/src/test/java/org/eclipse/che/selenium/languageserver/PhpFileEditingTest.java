@@ -127,7 +127,7 @@ public class PhpFileEditingTest {
   private void checkCodeValidation() {
     editor.goToPosition(14, 2);
     editor.typeTextIntoEditor(" ");
-    editor.waitMarkerInPositionAndClick(ERROR_OVERVIEW, 14);
+    editor.clickOnMarker(ERROR_OVERVIEW, 14);
     editor.waitTextInToolTipPopup("';' expected.");
 
     editor.goToPosition(14, 3);
