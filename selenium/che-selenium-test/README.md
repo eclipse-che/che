@@ -68,14 +68,10 @@ export OPENSHIFT_TOKEN=<openshift_web_console_bearer_auth_token>
 export OPENSHIFT_CHE_NAMESPACE=<namespace_of_eclipse_che_deployed_on_openshift>
 export OPENSHIFT_URL=<url_of_openshift_web_console>
 ```
-where `OPENSHIFT_TOKEN` can be used when Open Shift is configured with oAuth instead of username/password. 
+where `OPENSHIFT_TOKEN` is optional and is aimed to replace username/password when Open Shift is configured with oAuth. 
 
 
 Default values:
-- CHE_ADMIN_NAME: "admin"
-- CHE_ADMIN_EMAIL: "admin@admin.com"
-- CHE_ADMIN_PASSWORD: "admin"
- 
 - OPENSHIFT_USERNAME: "developer"
 - OPENSHIFT_PASSWORD: "any"
 - OPENSHIFT_CHE_NAMESPACE: "eclipse-che"
