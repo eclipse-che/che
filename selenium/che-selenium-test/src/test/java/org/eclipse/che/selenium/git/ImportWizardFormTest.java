@@ -147,8 +147,12 @@ public class ImportWizardFormTest {
   }
 
   @AfterMethod
-  private void deleteProject() throws Exception {
-    testProjectServiceClient.deleteResource(ws.getId(), currentProjectName);
+  private void deleteProject() {
+    try {
+      testProjectServiceClient.deleteResource(ws.getId(), currentProjectName);
+    } catch (Exception e) {
+      LOG.warn(e.getMessage(), e);
+    }
   }
 
   @Test
