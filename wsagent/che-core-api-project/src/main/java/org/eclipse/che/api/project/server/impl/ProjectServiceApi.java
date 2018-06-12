@@ -218,8 +218,12 @@ public class ProjectServiceApi {
     if (wsPath != null) {
       projectConfigDto.setPath(absolutize(wsPath));
     }
-
+    boolean registeredEarly = projectManager.isRegistered(wsPath);
     RegisteredProject updated = projectManager.update(projectConfigDto);
+    if (!registeredEarly) { // if project config set firstly we will fire event project created
+      eventService.publish(new ProjectCreatedEvent(updated.getPath()));
+    }
+
     return asDto(updated);
   }
 
