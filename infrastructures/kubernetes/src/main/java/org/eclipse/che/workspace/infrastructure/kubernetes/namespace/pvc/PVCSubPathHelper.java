@@ -35,8 +35,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,11 +137,11 @@ public class PVCSubPathHelper {
     final Pod pod = newPod(podName, command);
     securityContextProvisioner.provision(pod);
 
-    KubernetesPods pods = null;
+    KubernetesDeployments deployments = null;
     try {
-      pods = factory.create(workspaceId).pods();
-      pods.create(pod);
-      final Pod finished = pods.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
+      deployments = factory.create(workspaceId).deployments();
+      deployments.create(pod);
+      final Pod finished = deployments.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
       if (POD_PHASE_FAILED.equals(finished.getStatus().getPhase())) {
         LOG.error("Job command '{}' execution is failed.", Arrays.toString(command));
       }
@@ -152,9 +152,9 @@ public class PVCSubPathHelper {
           workspaceId,
           ex.getMessage());
     } finally {
-      if (pods != null) {
+      if (deployments != null) {
         try {
-          pods.delete(podName);
+          deployments.delete(podName);
         } catch (InfrastructureException ignored) {
         }
       }
