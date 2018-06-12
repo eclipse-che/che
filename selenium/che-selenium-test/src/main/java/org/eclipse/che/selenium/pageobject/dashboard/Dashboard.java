@@ -33,6 +33,7 @@ import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
@@ -40,6 +41,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
@@ -54,6 +56,7 @@ public class Dashboard {
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWaitFactory webDriverWaitFactory;
   private final boolean isMultiuser;
 
   @Inject
@@ -66,6 +69,7 @@ public class Dashboard {
       TestWebElementRenderChecker testWebElementRenderChecker,
       TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
+      WebDriverWaitFactory webDriverWaitFactory,
       @Named("che.multiuser") boolean isMultiuser) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
@@ -75,6 +79,7 @@ public class Dashboard {
     this.testWebElementRenderChecker = testWebElementRenderChecker;
     this.testKeycloakSettingsServiceClient = testKeycloakSettingsServiceClient;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     this.isMultiuser = isMultiuser;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -160,6 +165,14 @@ public class Dashboard {
             .waitVisibilityAndGetText(workspacesItem)
             .replace("Workspaces\n (", "")
             .replace(")", ""));
+  }
+
+  public void waitWorkspacesCountInWorkspacesItem(int expectedCount) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> expectedCount == getWorkspacesCountInWorkspacesItem());
   }
 
   /** wait button with drop dawn icon (left top corner) */

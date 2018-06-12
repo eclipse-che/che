@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.WebElement;
@@ -51,6 +52,7 @@ public class CheMultiuserAdminDashboard extends Dashboard {
       TestWebElementRenderChecker testWebElementRenderChecker,
       TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
+      WebDriverWaitFactory webDriverWaitFactory,
       @Named("che.multiuser") boolean isMultiuser) {
     super(
         seleniumWebDriver,
@@ -61,6 +63,7 @@ public class CheMultiuserAdminDashboard extends Dashboard {
         testWebElementRenderChecker,
         testKeycloakSettingsServiceClient,
         seleniumWebDriverHelper,
+        webDriverWaitFactory,
         isMultiuser);
     PageFactory.initElements(seleniumWebDriver, this);
   }

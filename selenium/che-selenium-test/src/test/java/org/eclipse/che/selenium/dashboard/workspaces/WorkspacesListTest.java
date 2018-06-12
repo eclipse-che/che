@@ -114,11 +114,10 @@ public class WorkspacesListTest {
 
   @Test
   public void shouldDisplayElements() {
-    assertEquals(EXPECTED_WORKSPACES_COUNT, dashboard.getWorkspacesCountInWorkspacesItem());
-
     dashboard.selectWorkspacesItemOnDashboard();
 
     workspaces.waitPageLoading();
+    dashboard.waitWorkspacesCountInWorkspacesItem(EXPECTED_WORKSPACES_COUNT);
 
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
     assertEquals(
