@@ -15,6 +15,7 @@ import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.cr
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -233,15 +234,13 @@ public class TreeResourceRevealer {
                   if (handler[0] != null) {
                     // Do not remove the handler immediately to not to lose 'loadChildren' events
                     // that were fired after the children request.
-                    Scheduler.get()
-                        .scheduleFixedDelay(
-                            () -> {
-                              handler[0].removeHandler();
-                              return false;
-                            },
-                            1000);
+                    new Timer() {
+                      @Override
+                      public void run() {
+                        handler[0].removeHandler();
+                      }
+                    }.schedule(2000);
                   }
-
                   final List<Node> children =
                       tree.getNodeStorage().getChildren(event.getRequestedNode());
 
