@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
@@ -20,7 +21,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -80,12 +80,16 @@ public class CreateAndDeleteProjectsTest {
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
+    newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(WORKSPACE);
+
+    // create 'web-java-spring' and 'console-java-simple' projects
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.selectSample(CONSOLE_JAVA_SIMPLE);
     projectSourcePage.clickOnAddProjectButton();
+
+    // create 'web-java-spring-1' project
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.clickOnAddProjectButton();
