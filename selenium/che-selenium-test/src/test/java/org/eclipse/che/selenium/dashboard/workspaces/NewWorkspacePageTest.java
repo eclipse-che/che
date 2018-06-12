@@ -41,6 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/** @author Ihor Okhrimenko */
 public class NewWorkspacePageTest {
   private static final int EXPECTED_QUICK_START_STACKS_COUNT = 15;
   private static final int EXPECTED_SINGLE_MACHINE_STACKS_COUNT = 34;

@@ -37,6 +37,10 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.*;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses;
 import org.testng.annotations.*;
 
+/**
+ * @author Sergey Skorik
+ * @author Ihor Okhrimenko
+ */
 @Test(groups = TestGroup.OSIO)
 public class WorkspacesListTest {
   private static final int EXPECTED_WORKSPACES_COUNT = 2;
