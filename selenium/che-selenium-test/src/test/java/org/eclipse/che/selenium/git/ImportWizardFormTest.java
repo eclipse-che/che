@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.GO_INTO;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -48,9 +49,11 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakFederatedIdentitiesPage;
 import org.eclipse.che.selenium.pageobject.git.Git;
+import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -141,6 +144,15 @@ public class ImportWizardFormTest {
     }
 
     preferences.closeForm();
+  }
+
+  @AfterMethod
+  private void deleteProject() {
+    try {
+      testProjectServiceClient.deleteResource(ws.getId(), currentProjectName);
+    } catch (Exception e) {
+      LOG.warn(e.getMessage(), e);
+    }
   }
 
   @Test
@@ -651,8 +663,13 @@ public class ImportWizardFormTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(projectName);
 
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        projectName + "/" + REGULAR_SUBMODULE + "/src/main/java/com.company.example", "A.java");
+    try {
+      projectExplorer.expandPathInProjectExplorerAndOpenFile(
+          projectName + "/" + REGULAR_SUBMODULE + "/src/main/java/com.company.example", "A.java");
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10012", ex);
+    }
     editor.closeFileByNameWithSaving("A");
   }
 
