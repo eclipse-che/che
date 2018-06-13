@@ -25,13 +25,11 @@ import org.eclipse.che.api.project.server.impl.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
-import org.eclipse.che.api.project.server.impl.ProjectSynchronizer;
 import org.eclipse.che.api.project.server.impl.RegisteredProjectFactory;
 import org.eclipse.che.api.project.server.impl.RegisteredProjectImpl;
 import org.eclipse.che.api.project.server.impl.RootDirCreationHandler;
 import org.eclipse.che.api.project.server.impl.RootDirRemovalHandler;
 import org.eclipse.che.api.project.server.impl.ValidatingProjectManager;
-import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.eclipse.che.api.project.server.impl.ZipProjectImporter;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.InitBaseProjectTypeHandler;
@@ -66,7 +64,6 @@ public class ProjectApiModule extends AbstractModule {
     bind(RootDirRemovalHandler.class).asEagerSingleton();
 
     bind(ProjectManager.class).to(ValidatingProjectManager.class);
-    bind(ProjectSynchronizer.class).to(WorkspaceProjectSynchronizer.class);
     bind(ProjectQualifier.class).to(SimpleProjectQualifier.class);
     bind(ProjectTypeResolver.class).to(SimpleProjectTypeResolver.class);
 
