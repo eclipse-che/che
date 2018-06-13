@@ -65,7 +65,7 @@ public class WorkspacesListTest {
   @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
 
-  @InjectTestWorkspace(template = DEFAULT, memoryGb = 2)
+  @InjectTestWorkspace(template = DEFAULT, memoryGb = 2, startAfterCreation = false)
   private TestWorkspace blankWorkspace;
 
   @InjectTestWorkspace(template = UBUNTU_JDK8, memoryGb = 3)
