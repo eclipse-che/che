@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.dashboard.workspaces.workspaceDetails;
+package org.eclipse.che.selenium.dashboard.workspaces.workspacedetails;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA_MYSQL;
