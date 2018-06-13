@@ -79,7 +79,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
    */
   @Override
   public void onResize() {
-    if (terminal != null && getElement().getOffsetWidth() > 0 && getElement().getOffsetHeight() > 0) {
+    if (terminal != null) {
         if (isOpen) {
             resizeTimer.schedule(200);
         } else {
@@ -97,11 +97,13 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
       };
 
   private void open() {
-      terminal.open(terminalPanel.getElement());
-      if (focusOnOpen) {
-          terminal.focus();
+      if (getElement().getOffsetWidth() > 0 && getElement().getOffsetHeight() > 0) {
+          terminal.open(terminalPanel.getElement());
+          if (focusOnOpen) {
+              terminal.focus();
+          }
+          isOpen = true;
       }
-      isOpen = true;
   }
 
   private void resizeTerminal() {
