@@ -20,6 +20,9 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+
+import org.eclipse.che.ide.util.loging.Log;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -76,9 +79,9 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
    */
   @Override
   public void onResize() {
-    if (terminal != null && this.getElement().getClientWidth() > 0 && this.getElement().getClientHeight() > 0) {
+    if (terminal != null && getElement().getOffsetWidth() > 0 && getElement().getOffsetHeight() > 0) {
         if (isOpen) {
-            resizeTimer.schedule(100);
+            resizeTimer.schedule(200);
         } else {
             open();
         }
@@ -103,7 +106,12 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   private void resizeTerminal() {
     TerminalGeometryJso geometryJso = terminal.proposeGeometry();
-    terminal.resize(geometryJso.getCols(), geometryJso.getRows());
+    int x = geometryJso.getCols();
+    int y = geometryJso.getRows();
+
+    if (x > 0 && y > 0 && isVisible() && isAttached()) {
+        terminal.resize(geometryJso.getCols(), geometryJso.getRows());
+    }
   }
 
   @Override

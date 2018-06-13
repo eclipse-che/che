@@ -28,7 +28,7 @@
             height: 100%;
             overflow: hidden;
             background-color: outputBackgroundColor;
-            padding: 1px;
+            /*padding: 1px;*/
         }
 
         .unavailable {
