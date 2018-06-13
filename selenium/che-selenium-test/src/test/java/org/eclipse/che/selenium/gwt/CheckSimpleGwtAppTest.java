@@ -88,6 +88,7 @@ public class CheckSimpleGwtAppTest {
             NameGenerator.generate("check-gwt-test", 4),
             testUser,
             4,
+            true,
             workspace,
             workspaceServiceClient);
 

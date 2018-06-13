@@ -367,7 +367,7 @@ ${CHE_VAR_ARRAY}"
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
       ${OC_BINARY} apply -f ${BASE_DIR}/templates/pvc/che-server-pvc.yaml
-      ${OC_BINARY} set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
+      ${OC_BINARY} set volume dc/che --add -m "/data" --name=che-data-volume --claim-name=che-data-volume
     fi
 
     if [ "${ENABLE_SSL}" == "true" ]; then
