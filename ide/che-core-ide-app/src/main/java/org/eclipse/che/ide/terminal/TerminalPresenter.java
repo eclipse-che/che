@@ -169,12 +169,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     socket.setOnOpenHandler(
         () -> {
           connected = true;
-          setUpTerminalTheme();
-          JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
-          terminal = TerminalJso.create(terminalJso, options);
-          JavaScriptObject fitJso = moduleHolder.getModule(FIT_ADDON);
-          terminal.applyAddon(fitJso);
-
+          createTerminal();
           view.setTerminal(terminal, focusOnOpen);
 
           terminal.on(
@@ -202,6 +197,20 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                 reconnect();
               }
             });
+  }
+
+  private TerminalJso createTerminal() {
+    setUpTerminalTheme();
+
+    JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
+    terminal = TerminalJso.create(terminalJso, options);
+
+    JavaScriptObject fitJso = moduleHolder.getModule(FIT_ADDON);
+    terminal.applyAddon(fitJso);
+
+    terminal.attachCustomKeyEventHandler(CustomKeyEventTerminalHandler.create());
+
+    return terminal;
   }
 
   private void setUpTerminalTheme() {

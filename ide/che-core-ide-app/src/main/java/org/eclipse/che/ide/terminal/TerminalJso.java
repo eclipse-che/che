@@ -36,7 +36,7 @@ class TerminalJso extends JavaScriptObject {
         this.terminal.open(element);
     }-*/;
 
-  public final native void attachCustomKeyEventHandler(JavaScriptObject customKeyEventHandler) /*-{
+  public final native void attachCustomKeyEventHandler(CustomKeyEventTerminalHandler customKeyEventHandler) /*-{
       this.terminal.attachCustomKeyEventHandler(customKeyEventHandler);
     }-*/;
 
