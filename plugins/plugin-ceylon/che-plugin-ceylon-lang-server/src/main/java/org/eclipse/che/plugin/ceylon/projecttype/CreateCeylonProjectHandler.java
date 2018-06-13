@@ -35,15 +35,16 @@ public class CreateCeylonProjectHandler implements CreateProjectHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(CreateCeylonProjectHandler.class);
 
-  private static final String[] PROJECT_FILES = new String[] {
-    "ceylonb",
-    "ceylonb.bat",
-    ".ceylon/config",
-    ".ceylon/ide-config",
-    ".ceylon/bootstrap/ceylon-bootstrap.jar",
-    ".ceylon/bootstrap/ceylon-bootstrap.properties",
-    "source/run.ceylon"
-  };
+  private static final String[] PROJECT_FILES =
+      new String[] {
+        "ceylonb",
+        "ceylonb.bat",
+        ".ceylon/config",
+        ".ceylon/ide-config",
+        ".ceylon/bootstrap/ceylon-bootstrap.jar",
+        ".ceylon/bootstrap/ceylon-bootstrap.properties",
+        "source/run.ceylon"
+      };
 
   private final FsManager fsManager;
 
@@ -61,12 +62,12 @@ public class CreateCeylonProjectHandler implements CreateProjectHandler {
     fsManager.createDir(resolve(projectWsPath, "source"));
     fsManager.createDir(resolve(projectWsPath, "resource"));
     for (String file : PROJECT_FILES) {
-        InputStream inputStream = new ByteArrayInputStream(getProjectContent("project/" + file));
-        String wsPath = resolve(projectWsPath, file);
-        fsManager.createFile(wsPath, inputStream, true, true);
-        if (file.startsWith("ceylonb")) {
-            fsManager.toIoFile(wsPath).setExecutable(true);
-        }
+      InputStream inputStream = new ByteArrayInputStream(getProjectContent("project/" + file));
+      String wsPath = resolve(projectWsPath, file);
+      fsManager.createFile(wsPath, inputStream, true, true);
+      if (file.startsWith("ceylonb")) {
+        fsManager.toIoFile(wsPath).setExecutable(true);
+      }
     }
   }
 

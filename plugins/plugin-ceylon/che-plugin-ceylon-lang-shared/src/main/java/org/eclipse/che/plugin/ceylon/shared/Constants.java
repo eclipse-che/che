@@ -26,6 +26,6 @@ public final class Constants {
   public static final String CEYLON_EXT = "ceylon";
 
   public static final String LANGUAGE_ID = "ceylon";
-    
+
   private Constants() {}
 }
