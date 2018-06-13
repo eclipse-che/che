@@ -274,6 +274,7 @@ public class WorkspacesListTest {
     workspaces.waitPageLoading();
     String mainWindow = seleniumWebDriver.getWindowHandle();
 
+    // check documentation link
     workspaces.clickOnDocumentationLink();
     seleniumWebDriverHelper.waitOpenedSomeWin();
     seleniumWebDriverHelper.switchToNextWindow(mainWindow);
@@ -283,6 +284,7 @@ public class WorkspacesListTest {
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(mainWindow);
 
+    // go to workspace details by clicking on item in workspaces list
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitPageLoad();
 
@@ -297,6 +299,7 @@ public class WorkspacesListTest {
 
     seleniumWebDriver.navigate().back();
 
+    // check "Add project" button
     workspaces.waitPageLoading();
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
@@ -306,6 +309,7 @@ public class WorkspacesListTest {
 
     seleniumWebDriver.navigate().back();
 
+    // check "Workspace configuration" button
     workspaces.waitPageLoading();
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
@@ -318,6 +322,8 @@ public class WorkspacesListTest {
         workspaceConfig.getWorkspaceConfig());
 
     seleniumWebDriver.navigate().back();
+
+    // check stop/start button
     workspaces.waitPageLoading();
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
@@ -327,6 +333,7 @@ public class WorkspacesListTest {
     workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
     workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Statuses.RUNNING);
 
+    // check adding the workspace to list
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
@@ -346,6 +353,7 @@ public class WorkspacesListTest {
 
     assertEquals(newestCreatedWorkspaceItem, expectedNewestWorkspaceItem);
 
+    // delete workspaces by checkboxes
     workspaces.selectWorkspaceByCheckbox(expectedNewestWorkspaceItem.getWorkspaceName());
     workspaces.clickOnDeleteWorkspacesBtn();
     workspaces.clickOnDeleteButtonInDialogWindow();

@@ -58,8 +58,8 @@
           <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitTest"/>
           <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromZipTest"/>
           <class name="org.eclipse.che.selenium.dashboard.RenameWorkspaceTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.workspaces.workspacedetails.WorkspaceDetailsSingleMachineTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.workspaces.workspacedetails.WorkspaceDetailsComposeTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsSingleMachineTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsComposeTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>

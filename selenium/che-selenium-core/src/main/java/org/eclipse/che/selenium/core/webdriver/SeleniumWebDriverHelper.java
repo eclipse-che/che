@@ -429,7 +429,7 @@ public class SeleniumWebDriverHelper {
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
    * @param elementLocator locator of element from which text should be got
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(By elementLocator) {
     return waitVisibility(elementLocator).getAttribute("value");
@@ -439,7 +439,7 @@ public class SeleniumWebDriverHelper {
    * Waits visibility of provided {@code webElement} and gets text.
    *
    * @param webElement element, text from which should be got
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(WebElement webElement) {
     return waitVisibility(webElement).getAttribute("value");
@@ -447,11 +447,11 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text from
-   * its {@code attribute} attribute.
+   * its {@code attribute}.
    *
    * @param elementLocator locator of element from which attribute should be got
    * @param attribute name of element attribute
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetAttribute(By elementLocator, String attribute) {
     return waitVisibilityAndGetAttribute(elementLocator, attribute, DEFAULT_TIMEOUT);
@@ -459,23 +459,22 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility during {@code timeout} of {@link WebElement} with provided {@code
-   * elementLocator} and gets text from its {@code attribute} attribute.
+   * elementLocator} and gets text from its {@code attribute}.
    *
    * @param elementLocator locator of element from which attribute should be got
    * @param attribute name of element attribute
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetAttribute(By elementLocator, String attribute, int timeout) {
     return waitVisibility(elementLocator, timeout).getAttribute(attribute);
   }
 
   /**
-   * Waits visibility of specified {@code element} and gets text from its {@code attribute}
-   * attribute.
+   * Waits visibility of specified {@code element} and gets text from its {@code attribute}.
    *
    * @param element element from which attribute should be got
    * @param attribute name of element attribute
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetAttribute(WebElement element, String attribute) {
     return waitVisibilityAndGetAttribute(element, attribute, DEFAULT_TIMEOUT);
@@ -483,11 +482,11 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility during {@code timeout} of specified {@code element} and gets text from its
-   * {@code attribute} attribute.
+   * {@code attribute}.
    *
    * @param element element from which attribute should be got
    * @param attribute name of element attribute
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetAttribute(WebElement element, String attribute, int timeout) {
     return waitVisibility(element, timeout).getAttribute(attribute);
@@ -1130,7 +1129,7 @@ public class SeleniumWebDriverHelper {
    * @param element element which contains attribute
    * @param attributeName name of the attribute
    * @param expectedValue expected attribute value
-   * @param timeout waiting time
+   * @param timeout waiting time in seconds
    */
   public void waitAttributeEqualsTo(
       WebElement element, String attributeName, String expectedValue, int timeout) {
@@ -1173,7 +1172,7 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator element which contains attribute
    * @param attributeName name of the attribute
    * @param expectedValue expected attribute value
-   * @param timeout waiting time
+   * @param timeout waiting time in seconds
    */
   public void waitAttributeContainsValue(
       By elementLocator, String attributeName, String expectedValue, int timeout) {
