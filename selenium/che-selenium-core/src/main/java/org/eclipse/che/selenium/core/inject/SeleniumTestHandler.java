@@ -301,8 +301,7 @@ public abstract class SeleniumTestHandler
           LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
 
           // don't capture test data if test is skipped because of previous test with higher
-          // priority
-          // failed
+          // priority failed
           if (testsWithFailure.containsKey(result.getMethod().getInstance().getClass().getName())) {
             return;
           }
