@@ -21,7 +21,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 /**
  * To instantiate {@link TestWorkspace} in test classes with none default parameters.
  *
- * @see TestWorkspaceProvider#createWorkspace(DefaultTestUser, int, String)
+ * @see TestWorkspaceProvider#createWorkspace(DefaultTestUser, int, String, boolean)
  * @author Anatolii Bazko
  */
 @Target({FIELD})
@@ -39,4 +39,7 @@ public @interface InjectTestWorkspace {
 
   /** The workspace owner. If value is empty then default user will be used. */
   String user() default "";
+
+  /** Should we start workspace just after creation. */
+  boolean startAfterCreation() default true;
 }
