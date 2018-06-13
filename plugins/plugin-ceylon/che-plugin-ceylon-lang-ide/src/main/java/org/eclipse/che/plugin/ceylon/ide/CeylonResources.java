@@ -12,8 +12,6 @@ package org.eclipse.che.plugin.ceylon.ide;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ImageResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author David Festal */
@@ -23,6 +21,6 @@ public interface CeylonResources extends ClientBundle {
   @Source("svg/ceylon.svg")
   SVGResource ceylonFile();
 
-  @Source("png/ceylon_icon_32px.png")
-  ImageResource category();
+  @Source("svg/ceylon.svg")
+  SVGResource category();
 }
