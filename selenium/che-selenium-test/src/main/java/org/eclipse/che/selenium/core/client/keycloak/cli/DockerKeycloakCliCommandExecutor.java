@@ -8,32 +8,29 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client.keycloak.executor;
+package org.eclipse.che.selenium.core.client.keycloak.cli;
 
 import static java.lang.String.format;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import org.eclipse.che.selenium.core.executor.DockerCliCommandExecutor;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 
 /**
- * This class is aimed to call Keycloak admin CLI inside Docker container.
+ * This class is aimed to call Keycloak CLI commands inside Docker container.
  *
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class DockerKeycloakCommandExecutor implements KeycloakCommandExecutor {
+public class DockerKeycloakCliCommandExecutor implements KeycloakCliCommandExecutor {
+  @Inject private DockerCliCommandExecutor dockerCliCommandExecutor;
 
-  private final ProcessAgent processAgent;
+  @Inject private ProcessAgent processAgent;
 
   private String keycloakContainerId;
-
-  @Inject
-  public DockerKeycloakCommandExecutor(ProcessAgent processAgent) {
-    this.processAgent = processAgent;
-  }
 
   @Override
   public String execute(String command) throws IOException {
@@ -41,9 +38,9 @@ public class DockerKeycloakCommandExecutor implements KeycloakCommandExecutor {
       obtainKeycloakContainerId();
     }
 
-    String dockerCommand =
-        format("docker exec -i %s sh -c 'keycloak/bin/kcadm.sh %s'", keycloakContainerId, command);
-    return processAgent.process(dockerCommand);
+    String dockerKeycloakCliCommand =
+        format("exec -i %s sh -c 'keycloak/bin/kcadm.sh %s'", keycloakContainerId, command);
+    return dockerCliCommandExecutor.execute(dockerKeycloakCliCommand);
   }
 
   private void obtainKeycloakContainerId() throws ProcessAgentException {
