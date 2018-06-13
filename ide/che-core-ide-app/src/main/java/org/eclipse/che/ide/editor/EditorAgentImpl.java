@@ -845,7 +845,7 @@ public class EditorAgentImpl
           ((HasReadOnlyProperty) editor).setReadOnly(true);
         });
   }
-  
+
   public void onWindowOpened(WindowOpenedEvent event) {
     if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
       return;
