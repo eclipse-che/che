@@ -41,7 +41,8 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   private ActionDelegate delegate;
 
   private TerminalJso terminal;
-  private boolean isOpen = false;
+  private boolean isOpen;
+  private boolean focusOnOpen;
 
   public TerminalViewImpl() {
     initWidget(UI_BINDER.createAndBindUi(this));
@@ -54,10 +55,11 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   /** {@inheritDoc} */
   @Override
-  public void setTerminal(@NotNull final TerminalJso terminal) {
+  public void setTerminal(@NotNull final TerminalJso terminal, boolean focusOnOpen) {
     unavailableLabel.setVisible(false);
 
     terminalPanel.setVisible(true);
+    this.focusOnOpen = focusOnOpen;
     this.terminal = terminal;
   }
 
@@ -97,6 +99,9 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   private void open() {
       terminal.open(terminalPanel.getElement());
+      if (focusOnOpen) {
+          terminal.focus();
+      }
       isOpen = true;
   }
 
@@ -121,7 +126,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   @Override
   public void setAccessKey(char key) {}
 
-  private Timer focusTimer =
+  private Timer focusTimer = //todo throw away focus timer
       new Timer() {
         @Override
         public void run() {

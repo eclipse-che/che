@@ -30,10 +30,14 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.theme.Theme;
+import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.core.AgentURLModifier;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalThemeJso;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.requirejs.ModuleHolder;
 
@@ -48,14 +52,16 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private static final String DATA_EVENT_NAME = "data";
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
-  private final TerminalView view;
-  private final TerminalOptionsJso options;
-  private final NotificationManager notificationManager;
-  private final CoreLocalizationConstant locale;
-  private final MachineImpl machine;
+  private final TerminalView                    view;
+  private final TerminalOptionsJso              options;
+  private final NotificationManager             notificationManager;
+  private final CoreLocalizationConstant        locale;
+  private final MachineImpl                     machine;
   private final TerminalInitializePromiseHolder terminalHolder;
-  private final ModuleHolder moduleHolder;
-  private final AgentURLModifier agentURLModifier;
+  private final ModuleHolder                    moduleHolder;
+  private final AgentURLModifier                agentURLModifier;
+  private final ThemeAgent                      themeAgent;
+  private final boolean focusOnOpen;
 
   private WebSocket socket;
   private boolean connected;
@@ -72,11 +78,14 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       CoreLocalizationConstant locale,
       @NotNull @Assisted MachineImpl machine,
       @Assisted TerminalOptionsJso options,
+      @Assisted boolean focusOnOpen,
       final TerminalInitializePromiseHolder terminalHolder,
       final ModuleHolder moduleHolder,
-      AgentURLModifier agentURLModifier) {
+      AgentURLModifier agentURLModifier,
+      ThemeAgent themeAgent) {
     this.view = view;
-    this.options = options != null ? options : TerminalOptionsJso.createDefault();
+    this.options = options != null ? options : TerminalOptionsJso.create();
+    this.focusOnOpen = focusOnOpen;
     this.agentURLModifier = agentURLModifier;
     view.setDelegate(this);
     this.notificationManager = notificationManager;
@@ -87,6 +96,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     countRetry = 2;
     this.terminalHolder = terminalHolder;
     this.moduleHolder = moduleHolder;
+    this.themeAgent = themeAgent;
   }
 
   /**
@@ -160,11 +170,12 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
         () -> {
           connected = true;
           JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
+          setUpTerminalOptions();
           terminal = TerminalJso.create(terminalJso, options);
           JavaScriptObject fitJso = moduleHolder.getModule(FIT_ADDON);
           terminal.applyAddon(fitJso);
 
-          view.setTerminal(terminal);
+          view.setTerminal(terminal, focusOnOpen);
 
           terminal.on(
               DATA_EVENT_NAME,
@@ -191,6 +202,16 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                 reconnect();
               }
             });
+  }
+
+  private void setUpTerminalOptions() {
+    Theme ideTheme = themeAgent.getTheme(themeAgent.getCurrentThemeId());
+    TerminalThemeJso terminalTheme = TerminalThemeJso.create();
+    terminalTheme.setCursor(ideTheme.getBlueIconColor());
+    terminalTheme.setBackGround(ideTheme.outputBackgroundColor());
+    terminalTheme.setForeGround(ideTheme.getOutputFontColor());
+
+    options.setTheme(terminalTheme);
   }
 
   /** Sends 'close' message on server side to stop terminal. */

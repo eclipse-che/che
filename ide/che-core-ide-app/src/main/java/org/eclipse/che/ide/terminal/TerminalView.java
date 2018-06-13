@@ -45,7 +45,7 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
    *
    * @param terminal terminal which will be opened
    */
-  void setTerminal(@NotNull TerminalJso terminal);
+  void setTerminal(@NotNull TerminalJso terminal, boolean focusOnOpen);
 
   /**
    * Shows special error message when terminal is failed.

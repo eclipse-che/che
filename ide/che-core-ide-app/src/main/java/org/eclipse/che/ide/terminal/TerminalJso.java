@@ -13,6 +13,7 @@ package org.eclipse.che.ide.terminal;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 
 /**
  * GWT binding to term.js script
@@ -25,9 +26,10 @@ class TerminalJso extends JavaScriptObject {
 
   public static native TerminalJso create(
       JavaScriptObject termJSO, TerminalOptionsJso options) /*-{
-        this.termJSO = termJSO;
-        this.terminal = new termJSO(options);
-        return this;
+        return {
+            termJSO : termJSO,
+            terminal : new termJSO(options)
+        };
     }-*/;
 
   public final native void open(Element element) /*-{

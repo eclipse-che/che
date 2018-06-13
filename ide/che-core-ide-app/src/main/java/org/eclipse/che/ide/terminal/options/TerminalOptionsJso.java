@@ -8,7 +8,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.terminal;
+package org.eclipse.che.ide.terminal.options;
+
+import com.google.gwt.core.client.JavaScriptObject;
 
 import org.eclipse.che.ide.collections.Jso;
 
@@ -16,17 +18,15 @@ import org.eclipse.che.ide.collections.Jso;
 public class TerminalOptionsJso extends Jso {
   protected TerminalOptionsJso() {}
 
-  public static native TerminalOptionsJso createDefault() /*-{
+  public static native TerminalOptionsJso create() /*-{
         return {
             cols: 80,
             rows: 24,
-            screenKeys: true,
-            focusOnOpen: true
+            screenKeys: true
         }
     }-*/;
 
-  public final native TerminalOptionsJso withFocusOnOpen(boolean focusOnOpen) /*-{
-        this.focusOnOpen = focusOnOpen;
-        return this;
+    public native final void setTheme(JavaScriptObject theme) /*-{
+        this.theme = theme;
     }-*/;
 }
