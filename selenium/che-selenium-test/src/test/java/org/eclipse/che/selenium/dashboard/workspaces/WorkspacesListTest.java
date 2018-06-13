@@ -28,8 +28,8 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -58,7 +58,6 @@ public class WorkspacesListTest {
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
@@ -66,8 +65,12 @@ public class WorkspacesListTest {
   @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
 
+  @InjectTestWorkspace(template = DEFAULT, memoryGb = 2)
   private TestWorkspace blankWorkspace;
+
+  @InjectTestWorkspace(template = UBUNTU_JDK8, memoryGb = 3)
   private TestWorkspace javaWorkspace;
+
   private Workspaces.WorkspaceListItem expectedBlankItem;
   private Workspaces.WorkspaceListItem expectedJavaItem;
   private Workspaces.WorkspaceListItem expectedNewestWorkspaceItem;
@@ -75,9 +78,6 @@ public class WorkspacesListTest {
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/defaultSpringProjectWithDifferentTypeOfFiles");
-
-    blankWorkspace = testWorkspaceProvider.createWorkspace(defaultTestUser, 2, DEFAULT);
-    javaWorkspace = testWorkspaceProvider.createWorkspace(defaultTestUser, 3, UBUNTU_JDK8);
 
     blankWorkspace.await();
     javaWorkspace.await();
@@ -105,17 +105,19 @@ public class WorkspacesListTest {
     dashboard.open();
   }
 
+  @BeforeMethod
+  public void prepareToTestMethod() {
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+  }
+
   @AfterClass
   public void tearDown() throws Exception {
-    deleteIfWorkspaceExist(expectedJavaItem.getWorkspaceName());
-    deleteIfWorkspaceExist(expectedBlankItem.getWorkspaceName());
     deleteIfWorkspaceExist(expectedNewestWorkspaceItem.getWorkspaceName());
   }
 
   @Test
   public void shouldDisplayElements() {
-    dashboard.selectWorkspacesItemOnDashboard();
-
     workspaces.waitPageLoading();
     dashboard.waitWorkspacesCountInWorkspacesItem(EXPECTED_WORKSPACES_COUNT);
 
@@ -130,11 +132,12 @@ public class WorkspacesListTest {
         expectedJavaItem);
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkWorkspaceSelectingByCheckbox() throws Exception {
     String blankWorkspaceName = blankWorkspace.getName();
     String javaWorkspaceName = javaWorkspace.getName();
 
+    workspaces.waitPageLoading();
     workspaces.selectAllWorkspacesByBulk();
 
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
@@ -192,8 +195,9 @@ public class WorkspacesListTest {
     workspaces.waitDeleteWorkspaceBtnDisappearance();
   }
 
-  @Test(priority = 2)
+  @Test
   public void checkSorting() {
+    workspaces.waitPageLoading();
     workspaces.clickOnRamButton();
 
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
@@ -235,7 +239,7 @@ public class WorkspacesListTest {
     assertEquals(items.get(1).getProjectsAmount(), BLANK_WS_PROJECTS_COUNT);
   }
 
-  @Test(priority = 3)
+  @Test
   public void checkSearchField() throws Exception {
     int nameLength = expectedBlankItem.getWorkspaceName().length();
     String sequenceForSearch =
@@ -265,8 +269,9 @@ public class WorkspacesListTest {
         1);
   }
 
-  @Test(priority = 4)
+  @Test(priority = 1)
   public void checkWorkspaceActions() {
+    workspaces.waitPageLoading();
     String mainWindow = seleniumWebDriver.getWindowHandle();
 
     workspaces.clickOnDocumentationLink();
