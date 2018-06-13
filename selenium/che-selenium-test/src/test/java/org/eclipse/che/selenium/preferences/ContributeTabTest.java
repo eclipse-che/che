@@ -20,6 +20,7 @@ import static org.eclipse.che.selenium.pageobject.Preferences.DropDownGitInforma
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -40,6 +41,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.refactor.move.MoveItemsTest;
+import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -94,13 +96,12 @@ public class ContributeTabTest {
 
   @AfterMethod
   public void closeForm() {
+    if (askDialog.isOpened()) {
+      askDialog.confirmAndWaitClosed();
+    }
 
     if (preferences.isPreferencesFormOpened()) {
       preferences.clickOnCloseButton();
-    }
-
-    if (askDialog.isOpened()) {
-      askDialog.confirmAndWaitClosed();
     }
 
     preferences.waitPreferencesFormIsClosed();
@@ -155,7 +156,12 @@ public class ContributeTabTest {
         preferences.isSaveButtonIsEnabled(),
         "Known issue https://github.com/eclipse/che/issues/9959");
 
-    preferences.closeForm();
+    try {
+      preferences.closeForm();
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10019", ex);
+    }
   }
 
   @Test(priority = 1)
