@@ -50,6 +50,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
   // event which is performed when user input data into terminal
   private static final String DATA_EVENT_NAME = "data";
+  private static final String RESIZE_EVENT_NAME = "resize";
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
   private final TerminalView                    view;
@@ -66,10 +67,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private WebSocket socket;
   private boolean connected;
   private int countRetry;
-  private TerminalJso terminal;
   private TerminalStateListener terminalStateListener;
-  private int width;
-  private int height;
 
   @Inject
   public TerminalPresenter(
@@ -152,7 +150,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
   private void connectToTerminal(@NotNull String wsUrl) {
     countRetry--;
-
+    TerminalJso terminal = createTerminal();
     socket = WebSocket.create(wsUrl);
 
     socket.setOnMessageHandler(event -> terminal.write(event.getMessage()));
@@ -169,8 +167,15 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     socket.setOnOpenHandler(
         () -> {
           connected = true;
-          createTerminal();
+
           view.setTerminal(terminal, focusOnOpen);
+
+          terminal.on(
+              RESIZE_EVENT_NAME,
+              data -> {
+                TerminalGeometryJso geometry = (TerminalGeometryJso)data;
+                setTerminalSize(geometry.getCols(), geometry.getRows());
+              });
 
           terminal.on(
               DATA_EVENT_NAME,
@@ -203,7 +208,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     setUpTerminalTheme();
 
     JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
-    terminal = TerminalJso.create(terminalJso, options);
+    TerminalJso terminal = TerminalJso.create(terminalJso, options);
 
     JavaScriptObject fitJso = moduleHolder.getModule(FIT_ADDON);
     terminal.applyAddon(fitJso);
@@ -254,14 +259,6 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     if (!connected) {
       return;
     }
-
-    if (width == x && height == y) {
-      return;
-    }
-
-    terminal.resize(x, y);
-    width = x;
-    height = y;
 
     Jso jso = Jso.create();
     JsArrayInteger arr = Jso.createArray().cast();

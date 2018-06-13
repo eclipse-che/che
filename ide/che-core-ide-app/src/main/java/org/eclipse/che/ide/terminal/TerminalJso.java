@@ -48,7 +48,7 @@ class TerminalJso extends JavaScriptObject {
         return this.terminal.proposeGeometry();
     }-*/;
 
-  public final native void on(String event, Operation<String> operation) /*-{
+  public final native <T> void  on(String event, Operation<T> operation) /*-{
       this.terminal.on(event, $entry(function (data) {
             operation.@org.eclipse.che.api.promises.client.Operation::apply(*)(data);
         }));

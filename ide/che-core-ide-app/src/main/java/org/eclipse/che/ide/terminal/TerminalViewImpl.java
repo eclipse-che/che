@@ -38,8 +38,6 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   @UiField Label unavailableLabel;
 
-  private ActionDelegate delegate;
-
   private TerminalJso terminal;
   private boolean isOpen;
   private boolean focusOnOpen;
@@ -49,9 +47,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   }
 
   @Override
-  public void setDelegate(ActionDelegate delegate) {
-    this.delegate = delegate;
-  }
+  public void setDelegate(ActionDelegate delegate) {}
 
   /** {@inheritDoc} */
   @Override
@@ -82,7 +78,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   public void onResize() {
     if (terminal != null && this.getElement().getClientWidth() > 0 && this.getElement().getClientHeight() > 0) {
         if (isOpen) {
-            resizeTimer.schedule(200);
+            resizeTimer.schedule(100);
         } else {
             open();
         }
@@ -107,15 +103,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   private void resizeTerminal() {
     TerminalGeometryJso geometryJso = terminal.proposeGeometry();
-    int x = geometryJso.getCols();
-    int y = geometryJso.getRows();
-    if (x <= 0 || y <= 0) {
-      resizeTimer.cancel();
-      resizeTimer.schedule(500);
-      return;
-    }
-
-    delegate.setTerminalSize(x, y);
+    terminal.resize(geometryJso.getCols(), geometryJso.getRows());
   }
 
   @Override
@@ -136,7 +124,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   @Override
   public void setFocus(boolean focused) {
-    if (terminal == null || terminal.getElement() == null) {
+    if (terminal == null || !isOpen) {
       return;
     }
 
