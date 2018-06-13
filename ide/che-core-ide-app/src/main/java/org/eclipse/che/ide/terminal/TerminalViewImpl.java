@@ -114,22 +114,10 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   @Override
   public void setAccessKey(char key) {}
 
-  private Timer focusTimer = //todo throw away focus timer
-      new Timer() {
-        @Override
-        public void run() {
-          terminal.focus();
-        }
-      };
-
   @Override
   public void setFocus(boolean focused) {
-    if (terminal == null || !isOpen) {
-      return;
-    }
-
-    if (focused && !terminal.hasSelection()) {
-      focusTimer.schedule(10);
+    if (terminal != null && isOpen) {
+        terminal.focus();
     }
   }
 
