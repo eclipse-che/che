@@ -25,48 +25,58 @@ class TerminalJso extends JavaScriptObject {
 
   public static native TerminalJso create(
       JavaScriptObject termJSO, TerminalOptionsJso options) /*-{
-        return new termJSO(options);
+        this.termJSO = termJSO;
+        this.terminal = new termJSO(options);
+        return this;
     }-*/;
 
   public final native void open(Element element) /*-{
-        this.open(element);
+        this.terminal.open(element);
     }-*/;
 
-  public final native void attachCustomKeyDownHandler(JavaScriptObject customKeyDownHandler) /*-{
-        this.attachCustomKeydownHandler(customKeyDownHandler);
+  public final native void attachCustomKeyEventHandler(JavaScriptObject customKeyEventHandler) /*-{
+      this.terminal.attachCustomKeyEventHandler(customKeyEventHandler);
     }-*/;
 
   public final native Element getElement() /*-{
-        return this.element;
+        return  this.terminal.element;
     }-*/;
 
   public final native TerminalGeometryJso proposeGeometry() /*-{
-        return this.proposeGeometry();
+        return this.terminal.proposeGeometry();
     }-*/;
 
   public final native void on(String event, Operation<String> operation) /*-{
-        this.on(event, $entry(function (data) {
+      this.terminal.on(event, $entry(function (data) {
             operation.@org.eclipse.che.api.promises.client.Operation::apply(*)(data);
         }));
     }-*/;
 
   public final native void resize(int x, int y) /*-{
-        this.resize(x, y);
+      this.terminal.resize(x, y);
     }-*/;
 
   public final native void write(String data) /*-{
-        this.write(data);
+      this.terminal.write(data);
     }-*/;
 
   public final native void focus() /*-{
-        this.focus();
+      this.terminal.focus();
     }-*/;
 
   public final native void blur() /*-{
-        this.blur();
+      this.terminal.blur();
     }-*/;
 
   public final native boolean hasSelection() /*-{
-      return this.hasSelection();
+      this.terminal.hasSelection();
     }-*/;
+
+  public final native void destroy() /*-{
+      this.terminal.destroy();
+  }-*/;
+
+  public final native void applyAddon(JavaScriptObject addon) /*-{
+      this.termJSO.applyAddon(addon);
+  }-*/;
 }

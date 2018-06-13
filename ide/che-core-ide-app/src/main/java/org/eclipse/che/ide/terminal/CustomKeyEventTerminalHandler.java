@@ -17,11 +17,11 @@ import com.google.gwt.core.client.JavaScriptObject;
  *
  * @author Alexander Andrienko
  */
-public class CustomKeyDownTerminalHandler extends JavaScriptObject {
-  protected CustomKeyDownTerminalHandler() {}
+public class CustomKeyEventTerminalHandler extends JavaScriptObject {
+  protected CustomKeyEventTerminalHandler() {}
 
-  public static native CustomKeyDownTerminalHandler create() /*-{
-        return function(ev) {
+  public static native CustomKeyEventTerminalHandler create() /*-{
+        return function onKeyEvent(ev) {
             var C = 67;
             var V = 86;
             if (ev.ctrlKey && !(ev.shiftKey || ev.metaKey || ev.altKey)) {
@@ -36,6 +36,7 @@ public class CustomKeyDownTerminalHandler extends JavaScriptObject {
                     return false;
                 }
             }
+            return true;
         }
     }-*/;
 }

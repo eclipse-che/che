@@ -14,6 +14,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REF
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.terminal.TerminalInitializer.FIT_ADDON;
+import static org.eclipse.che.ide.terminal.TerminalInitializer.XTERM_JS_MODULE;
 import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_NORMAL;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -33,7 +35,6 @@ import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.websocket.WebSocket;
-import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 /**
@@ -151,16 +152,19 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
           if (CLOSE_NORMAL == event.getCode()) {
             connected = false;
             terminalStateListener.onExit();
+            terminal.destroy();
           }
         });
 
     socket.setOnOpenHandler(
         () -> {
-          JavaScriptObject terminalJso = moduleHolder.getModule("Xterm");
-          terminal = TerminalJso.create(terminalJso, options);
           connected = true;
+          JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
+          terminal = TerminalJso.create(terminalJso, options);
+          JavaScriptObject fitJso = moduleHolder.getModule(FIT_ADDON);
+          terminal.applyAddon(fitJso);
 
-          view.openTerminal(terminal);
+          view.setTerminal(terminal);
 
           terminal.on(
               DATA_EVENT_NAME,
@@ -173,23 +177,20 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
         });
 
     socket.setOnErrorHandler(
-        new ConnectionErrorHandler() {
-          @Override
-          public void onError() {
-            connected = false;
+            () -> {
+              connected = false;
 
-            if (countRetry == 0) {
-              view.showErrorMessage(locale.terminalErrorStart());
-              notificationManager.notify(
-                  locale.connectionFailedWithTerminal(),
-                  locale.terminalErrorConnection(),
-                  FAIL,
-                  FLOAT_MODE);
-            } else {
-              reconnect();
-            }
-          }
-        });
+              if (countRetry == 0) {
+                view.showErrorMessage(locale.terminalErrorStart());
+                notificationManager.notify(
+                    locale.connectionFailedWithTerminal(),
+                    locale.terminalErrorConnection(),
+                    FAIL,
+                    FLOAT_MODE);
+              } else {
+                reconnect();
+              }
+            });
   }
 
   /** Sends 'close' message on server side to stop terminal. */

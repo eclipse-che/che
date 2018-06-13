@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.terminal;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -42,7 +41,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   private ActionDelegate delegate;
 
   private TerminalJso terminal;
-  private Element terminalElement;
+  private boolean isOpen = false;
 
   public TerminalViewImpl() {
     initWidget(UI_BINDER.createAndBindUi(this));
@@ -55,21 +54,11 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   /** {@inheritDoc} */
   @Override
-  public void openTerminal(@NotNull final TerminalJso terminal) {
+  public void setTerminal(@NotNull final TerminalJso terminal) {
     unavailableLabel.setVisible(false);
 
-    this.terminal = terminal;
-    terminalElement = terminalPanel.getElement();
     terminalPanel.setVisible(true);
-    terminalElement.getStyle().setProperty("opacity", "0");
-
-    terminal.open(terminalPanel.getElement());
-    terminal.attachCustomKeyDownHandler(CustomKeyDownTerminalHandler.create());
-    resizeTerminal();
-
-    terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
-    terminalElement.getFirstChildElement().getStyle().clearProperty("color");
-    terminalElement.getStyle().clearProperty("opacity");
+    this.terminal = terminal;
   }
 
   /** {@inheritDoc} */
@@ -89,8 +78,12 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
    */
   @Override
   public void onResize() {
-    if (terminalElement != null && isVisible()) {
-      resizeTimer.schedule(200);
+    if (terminal != null && this.getElement().getClientWidth() > 0 && this.getElement().getClientHeight() > 0) {
+        if (isOpen) {
+            resizeTimer.schedule(200);
+        } else {
+            open();
+        }
     }
   }
 
@@ -101,6 +94,11 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
           resizeTerminal();
         }
       };
+
+  private void open() {
+      terminal.open(terminalPanel.getElement());
+      isOpen = true;
+  }
 
   private void resizeTerminal() {
     TerminalGeometryJso geometryJso = terminal.proposeGeometry();
