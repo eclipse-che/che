@@ -169,8 +169,8 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     socket.setOnOpenHandler(
         () -> {
           connected = true;
+          setUpTerminalTheme();
           JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
-          setUpTerminalOptions();
           terminal = TerminalJso.create(terminalJso, options);
           JavaScriptObject fitJso = moduleHolder.getModule(FIT_ADDON);
           terminal.applyAddon(fitJso);
@@ -204,14 +204,16 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
             });
   }
 
-  private void setUpTerminalOptions() {
-    Theme ideTheme = themeAgent.getTheme(themeAgent.getCurrentThemeId());
-    TerminalThemeJso terminalTheme = TerminalThemeJso.create();
-    terminalTheme.setCursor(ideTheme.getBlueIconColor());
-    terminalTheme.setBackGround(ideTheme.outputBackgroundColor());
-    terminalTheme.setForeGround(ideTheme.getOutputFontColor());
+  private void setUpTerminalTheme() {
+    if (options.getTheme() == null) {
+      Theme ideTheme = themeAgent.getTheme(themeAgent.getCurrentThemeId());
+      TerminalThemeJso terminalTheme = TerminalThemeJso.create();
+      terminalTheme.setCursor(ideTheme.getBlueIconColor());
+      terminalTheme.setBackGround(ideTheme.outputBackgroundColor());
+      terminalTheme.setForeGround(ideTheme.getOutputFontColor());
 
-    options.setTheme(terminalTheme);
+      options.setTheme(terminalTheme);
+    }
   }
 
   /** Sends 'close' message on server side to stop terminal. */

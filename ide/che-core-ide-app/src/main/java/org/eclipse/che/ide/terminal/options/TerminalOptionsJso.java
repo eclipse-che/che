@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.ide.terminal.options;
 
-import com.google.gwt.core.client.JavaScriptObject;
-
 import org.eclipse.che.ide.collections.Jso;
 
 /** @author Evgen Vidolob */
@@ -22,11 +20,17 @@ public class TerminalOptionsJso extends Jso {
         return {
             cols: 80,
             rows: 24,
-            screenKeys: true
+            screenKeys: true,
+            fontSize: 12,
+            fontFamily: "DejaVu Sans Mono"
         }
     }-*/;
 
-    public native final void setTheme(JavaScriptObject theme) /*-{
+  public native final TerminalThemeJso getTheme() /*-{
+      return this.theme;
+    }-*/;
+
+    public native final void setTheme(TerminalThemeJso theme) /*-{
         this.theme = theme;
     }-*/;
 }
