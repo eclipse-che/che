@@ -52,10 +52,10 @@ Follow the guide: [https://github.com/eclipse/che](https://github.com/eclipse/ch
 
 Simply launch `./selenium-tests.sh`
 
-### How to run tests on Open Shift
+### How to run tests on OpenShift
 #### 1. Set workspace runtime infrastructure implementation
 export CHE_INFRASTRUCTURE=openshift
-#### 2. Run tests and specify host and port of Che deployed to Open Shift
+#### 2. Run tests and specify host and port of Che deployed to OpenShift
 Launch `./selenium-tests.sh --host=<Che host on openshift> --port=80`
 
 Example: `./selenium-tests.sh --host=che-spi.192.168.99.100.nip.io --port=80`
@@ -68,7 +68,7 @@ export OPENSHIFT_TOKEN=<openshift_web_console_bearer_auth_token>
 export OPENSHIFT_CHE_NAMESPACE=<namespace_of_eclipse_che_deployed_on_openshift>
 export OPENSHIFT_URL=<url_of_openshift_web_console>
 ```
-where `OPENSHIFT_TOKEN` is optional and is aimed to replace username/password when Open Shift is configured with oAuth. 
+where `OPENSHIFT_TOKEN` is optional and is aimed to replace username/password when OpenShift is configured with oAuth. 
 
 
 Default values:

@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.core.user;
 import com.google.inject.Inject;
 import java.io.IOException;
 import javax.annotation.PreDestroy;
-import org.eclipse.che.selenium.core.client.keycloak.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.client.keycloak.cli.KeycloakCliClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.TestUserProvider;
 import org.slf4j.Logger;
@@ -30,18 +30,18 @@ public class MultiUserCheTestUserProvider implements TestUserProvider {
 
   private final TestUser testUser;
   private final boolean isNewUser;
-  private final KeycloakAdminConsoleClient keycloakAdminConsoleClient;
+  private final KeycloakCliClient keycloakCliClient;
 
   @Inject
   public MultiUserCheTestUserProvider(
       TestUserFactory<TestUserImpl> testUserFactory,
-      KeycloakAdminConsoleClient keycloakAdminConsoleClient,
+      KeycloakCliClient keycloakCliClient,
       AdminTestUserProvider adminTestUserProvider) {
-    this.keycloakAdminConsoleClient = keycloakAdminConsoleClient;
+    this.keycloakCliClient = keycloakCliClient;
     TestUserImpl testUser;
     Boolean isNewUser;
     try {
-      testUser = keycloakAdminConsoleClient.createUser(this);
+      testUser = keycloakCliClient.createUser(this);
       isNewUser = true;
     } catch (IOException e) {
       LOG.warn(
@@ -79,7 +79,7 @@ public class MultiUserCheTestUserProvider implements TestUserProvider {
   @PreDestroy
   public void delete() throws IOException {
     if (isNewUser) {
-      keycloakAdminConsoleClient.delete(testUser);
+      keycloakCliClient.delete(testUser);
     }
   }
 }
