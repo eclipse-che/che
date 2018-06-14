@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.ide.maven.tools.MavenArtifact;
@@ -45,7 +43,7 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
   private final ArchetypeGenerator archetypeGenerator;
 
   @Inject
-  public ArchetypeGenerationStrategy(ArchetypeGenerator archetypeGenerator) throws ServerException {
+  public ArchetypeGenerationStrategy(ArchetypeGenerator archetypeGenerator) {
     this.archetypeGenerator = archetypeGenerator;
   }
 
@@ -56,7 +54,7 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
   @Override
   public void generateProject(
       String projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-      throws ForbiddenException, ConflictException, ServerException {
+      throws ServerException {
 
     AttributeValue artifactId = attributes.get(ARTIFACT_ID);
     AttributeValue groupId = attributes.get(GROUP_ID);
@@ -106,11 +104,12 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
             archetypeRepository,
             archetypeProperties);
 
-    String projectName = projectPath.substring(projectPath.lastIndexOf(separator));
+    String projectName = projectPath.substring(projectPath.lastIndexOf(separator) + 1);
     final MavenArtifact mavenArtifact = new MavenArtifact();
     mavenArtifact.setGroupId(getFirst(groupId.getList(), projectName));
     mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectName));
     mavenArtifact.setVersion(getFirst(version.getList(), DEFAULT_VERSION));
-    archetypeGenerator.generateFromArchetype(new File("/projects"), mavenArchetype, mavenArtifact);
+    archetypeGenerator.generateFromArchetype(
+        projectName, new File("/projects"), mavenArchetype, mavenArtifact);
   }
 }
