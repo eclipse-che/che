@@ -27,7 +27,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BLANK_FORM_NAME_FIELD_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CANCEL_PROJECT_OPTIONS_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DECREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
@@ -40,12 +39,9 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.MULTI_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.OPEN_IN_IDE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ORGANIZATIONS_LIST_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.PROJECT_NAME_ERROR_MESSAGE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.PROJECT_TAB_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.QUICK_START_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.REPOSITORY_URL_ERROR_MESSAGE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SAMPLES_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SAVE_PROJECT_OPTIONS_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SINGLE_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.STACK_ROW_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
@@ -165,14 +161,6 @@ public class NewWorkspace {
     String PROJECT_TAB_XPATH_TEMPLATE = "//toggle-single-button[@id='%s']/div/button/div";
     String PROJECT_TAB_BY_NAME_XPATH_TEMPLATE =
         "//div[@class='%s']//span[text()='console-java-simple']";
-
-    // Project options
-    String CANCEL_PROJECT_OPTIONS_BUTTON_XPATH = "//button[@name='cancelButton']";
-    String SAVE_PROJECT_OPTIONS_BUTTON_XPATH = "//che-button-primary//button[@name='saveButton']";
-    String PROJECT_NAME_ERROR_MESSAGE_XPATH =
-        "//div[@che-name='projectName']//div[@id='new-workspace-error-message']/div";
-    String REPOSITORY_URL_ERROR_MESSAGE_XPATH =
-        "//div[@che-name='projectGitURL']//div[@id='new-workspace-error-message']/div";
 
     // Blank tab fields
     String BLANK_FORM_NAME_FIELD_XPATH = "//input[@name='name']";
@@ -469,112 +457,9 @@ public class NewWorkspace {
         By.xpath("//*[contains(@class, 'tooltip')]"), expectedText);
   }
 
-  public void waitProjectOptionsForm() {
-    waitProjectNameFieldInProjectOptionsForm();
-    waitDescriptionFieldInProjectOptionsForm();
-    waitRepositoryUrlFieldInProjectOptionsForm();
-  }
-
   private WebElement waitElementByNameAttribute(String nameAttribute) {
     return seleniumWebDriverHelper.waitVisibility(
         By.xpath(format("//input[@name='%s']", nameAttribute)));
-  }
-
-  public WebElement waitProjectNameFieldInProjectOptionsForm() {
-    return waitElementByNameAttribute("projectName");
-  }
-
-  public void waitProjectNameFieldValueInProjectOptionsForm(String expectedValue) {
-    seleniumWebDriverHelper.waitValueEqualsTo(
-        waitProjectNameFieldInProjectOptionsForm(), expectedValue);
-  }
-
-  public void setValueOfNameFieldInProjectOptionsForm(String value) {
-    seleniumWebDriverHelper.setValue(waitProjectNameFieldInProjectOptionsForm(), value);
-  }
-
-  public WebElement waitDescriptionFieldInProjectOptionsForm() {
-    return waitElementByNameAttribute("projectDescription");
-  }
-
-  public void waitDescriptionFieldValueInProjectOptionsForm(String expectedValue) {
-    seleniumWebDriverHelper.waitValueEqualsTo(
-        waitDescriptionFieldInProjectOptionsForm(), expectedValue);
-  }
-
-  public void setValueOfDescriptionFieldInProjectOptionsForm(String value) {
-    seleniumWebDriverHelper.setValue(waitDescriptionFieldInProjectOptionsForm(), value);
-  }
-
-  public WebElement waitRepositoryUrlFieldInProjectOptionsForm() {
-    return waitElementByNameAttribute("projectGitURL");
-  }
-
-  public void setValueOfRepositoryUrlFieldInProjectOptionsForm(String value) {
-    seleniumWebDriverHelper.setValue(waitRepositoryUrlFieldInProjectOptionsForm(), value);
-  }
-
-  public void waitRepositoryUrlFieldValueInProjectOptionsForm(String expectedValue) {
-    seleniumWebDriverHelper.waitValueEqualsTo(
-        waitRepositoryUrlFieldInProjectOptionsForm(), expectedValue);
-  }
-
-  public WebElement waitRemoveButtonInProjectOptionsForm() {
-    return seleniumWebDriverHelper.waitVisibility(By.xpath("//button[@name='removeButton']"));
-  }
-
-  public void clickOnRemoveButtonInProjectOptionsForm() {
-    seleniumWebDriverHelper.waitAndClick(waitRemoveButtonInProjectOptionsForm());
-  }
-
-  public WebElement waitSaveButtonInProjectOptionsForm() {
-    return seleniumWebDriverHelper.waitVisibility(By.xpath(SAVE_PROJECT_OPTIONS_BUTTON_XPATH));
-  }
-
-  public WebElement waitCancelButtonInProjectOptionsForm() {
-    return seleniumWebDriverHelper.waitVisibility(By.xpath(CANCEL_PROJECT_OPTIONS_BUTTON_XPATH));
-  }
-
-  public void clickOnSaveButtonInProjectOptionsForm() {
-    waitSaveButtonInProjectOptionsForm().click();
-  }
-
-  public void clickOnCancelButtonInProjectOptionsForm() {
-    waitCancelButtonInProjectOptionsForm().click();
-  }
-
-  public void waitSaveButtonEnablingInProjectOptionsForm() {
-    waitButtonDisableState(waitSaveButtonInProjectOptionsForm(), false);
-  }
-
-  public void waitSaveButtonDisablingInProjectOptionsForm() {
-    waitButtonDisableState(waitSaveButtonInProjectOptionsForm(), true);
-  }
-
-  public void waitCancelButtonEnablingInProjectOptionsForm() {
-    waitButtonDisableState(waitCancelButtonInProjectOptionsForm(), false);
-  }
-
-  public void waitCancelButtonDisablingInProjectOptionsForm() {
-    waitButtonDisableState(waitCancelButtonInProjectOptionsForm(), true);
-  }
-
-  public void waitProjectNameErrorMessageInOptionsForm(String expectedMessage) {
-    seleniumWebDriverHelper.waitTextEqualsTo(
-        By.xpath(PROJECT_NAME_ERROR_MESSAGE_XPATH), expectedMessage);
-  }
-
-  public void waitProjectNameErrorDisappearanceInOptionsForm() {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(PROJECT_NAME_ERROR_MESSAGE_XPATH));
-  }
-
-  public void waitRepositoryUrlErrorMessageInOptionsForm(String expectedMessage) {
-    seleniumWebDriverHelper.waitTextEqualsTo(
-        By.xpath(REPOSITORY_URL_ERROR_MESSAGE_XPATH), expectedMessage);
-  }
-
-  public void waitRepositoryUrlErrorDisappearanceInOptionsForm() {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(REPOSITORY_URL_ERROR_MESSAGE_XPATH));
   }
 
   public void waitTextInBlankNameField(String expectedText) {

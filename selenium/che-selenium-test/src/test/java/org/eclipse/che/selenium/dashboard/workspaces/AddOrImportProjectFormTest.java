@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.ProjectOptions;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
@@ -119,6 +120,7 @@ public class AddOrImportProjectFormTest {
   @Inject private Stacks stacks;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
+  @Inject private ProjectOptions projectOptions;
 
   @BeforeClass
   public void setup() {
@@ -201,7 +203,7 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
-    newWorkspace.clickOnRemoveButtonInProjectOptionsForm();
+    projectOptions.clickOnRemoveButton();
     newWorkspace.waitProjectTabDisappearance(CONSOLE_SAMPLE_NAME);
 
     newWorkspace.waitAddOrImportFormOpened();
@@ -241,7 +243,7 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CHE_SAMPLE_NAME),
         EXPECTED_CHE_REPOSITORY_URL);
 
-    newWorkspace.clickOnRemoveButtonInProjectOptionsForm();
+    projectOptions.clickOnRemoveButton();
 
     newWorkspace.waitProjectTabDisappearance(CHE_SAMPLE_NAME);
     newWorkspace.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
@@ -250,66 +252,65 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitSamplesButtonSelected();
 
     newWorkspace.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
-    newWorkspace.waitProjectOptionsForm();
+    projectOptions.waitProjectOptionsForm();
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm("");
-    newWorkspace.waitProjectNameErrorMessageInOptionsForm("A name is required.");
-    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+    projectOptions.setValueOfNameField("");
+    projectOptions.waitProjectNameErrorMessage("A name is required.");
+    projectOptions.waitSaveButtonDisabling();
+    projectOptions.waitCancelButtonEnabling();
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm(RENAMED_CONSOLE_SAMPLE_NAME);
-    newWorkspace.waitProjectNameErrorDisappearanceInOptionsForm();
-    newWorkspace.waitSaveButtonEnablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+    projectOptions.setValueOfNameField(RENAMED_CONSOLE_SAMPLE_NAME);
+    projectOptions.waitProjectNameErrorDisappearance();
+    projectOptions.waitSaveButtonEnabling();
+    projectOptions.waitCancelButtonEnabling();
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm("");
-    newWorkspace.waitProjectNameErrorMessageInOptionsForm("A name is required.");
-    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+    projectOptions.setValueOfNameField("");
+    projectOptions.waitProjectNameErrorMessage("A name is required.");
+    projectOptions.waitSaveButtonDisabling();
+    projectOptions.waitCancelButtonEnabling();
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm(NAME_WITH_MAX_AVAILABLE_LENGTH);
-    newWorkspace.waitProjectNameErrorDisappearanceInOptionsForm();
-    newWorkspace.waitSaveButtonEnablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+    projectOptions.setValueOfNameField(NAME_WITH_MAX_AVAILABLE_LENGTH);
+    projectOptions.waitProjectNameErrorDisappearance();
+    projectOptions.waitSaveButtonEnabling();
+    projectOptions.waitCancelButtonEnabling();
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm(NAME_WITH_MAX_AVAILABLE_LENGTH + "p");
-    newWorkspace.waitProjectNameErrorMessageInOptionsForm(
-        "The name has to be less than 128 characters long.");
-    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+    projectOptions.setValueOfNameField(NAME_WITH_MAX_AVAILABLE_LENGTH + "p");
+    projectOptions.waitProjectNameErrorMessage("The name has to be less than 128 characters long.");
+    projectOptions.waitSaveButtonDisabling();
+    projectOptions.waitCancelButtonEnabling();
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm(NAME_WITH_SPECIAL_CHARACTERS);
-    newWorkspace.waitProjectNameErrorMessageInOptionsForm(
+    projectOptions.setValueOfNameField(NAME_WITH_SPECIAL_CHARACTERS);
+    projectOptions.waitProjectNameErrorMessage(
         "The name should not contain special characters like space, dollar, etc.");
-    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
+    projectOptions.waitSaveButtonDisabling();
+    projectOptions.waitCancelButtonEnabling();
 
-    newWorkspace.setValueOfDescriptionFieldInProjectOptionsForm("");
-    newWorkspace.clickOnCancelButtonInProjectOptionsForm();
-
-    checkProjectTabAppearanceAndFields(
-        CONSOLE_SAMPLE_NAME,
-        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
-        EXPECTED_CONSOLE_REPOSITORY_URL);
-
-    newWorkspace.setValueOfRepositoryUrlFieldInProjectOptionsForm("");
-
-    newWorkspace.waitRepositoryUrlErrorMessageInOptionsForm("Invalid Git URL");
-    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonEnablingInProjectOptionsForm();
-
-    newWorkspace.clickOnCancelButtonInProjectOptionsForm();
+    projectOptions.typeTextInDescriptionField("");
+    projectOptions.clickOnCancelButton();
 
     checkProjectTabAppearanceAndFields(
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm("");
-    newWorkspace.setValueOfDescriptionFieldInProjectOptionsForm("");
-    newWorkspace.setValueOfRepositoryUrlFieldInProjectOptionsForm("");
+    projectOptions.typeTextInRepositoryUrlField("");
+
+    projectOptions.waitRepositoryUrlErrorMessage("Invalid Git URL");
+    projectOptions.waitSaveButtonDisabling();
+    projectOptions.waitCancelButtonEnabling();
+
+    projectOptions.clickOnCancelButton();
+
+    checkProjectTabAppearanceAndFields(
+        CONSOLE_SAMPLE_NAME,
+        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
+        EXPECTED_CONSOLE_REPOSITORY_URL);
+
+    projectOptions.setValueOfNameField("");
+    projectOptions.typeTextInDescriptionField("");
+    projectOptions.typeTextInRepositoryUrlField("");
     newWorkspace.clickOnProjectTab(SPRING_SAMPLE_NAME);
-    newWorkspace.waitProjectNameFieldValueInProjectOptionsForm(SPRING_SAMPLE_NAME);
+    projectOptions.waitProjectNameFieldValue(SPRING_SAMPLE_NAME);
     newWorkspace.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
 
     checkProjectTabAppearanceAndFields(
@@ -317,11 +318,11 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
-    newWorkspace.setValueOfNameFieldInProjectOptionsForm(RENAMED_CONSOLE_SAMPLE_NAME);
-    newWorkspace.clickOnSaveButtonInProjectOptionsForm();
+    projectOptions.setValueOfNameField(RENAMED_CONSOLE_SAMPLE_NAME);
+    projectOptions.clickOnSaveButton();
     newWorkspace.waitProjectTabAppearance(RENAMED_CONSOLE_SAMPLE_NAME);
-    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitCancelButtonDisablingInProjectOptionsForm();
+    projectOptions.waitSaveButtonDisabling();
+    projectOptions.waitCancelButtonDisabling();
   }
 
   @Test(priority = 2)
@@ -467,13 +468,13 @@ public class AddOrImportProjectFormTest {
 
   private void checkProjectTabAppearanceAndFields(
       String tabName, String expectedDescription, String expectedUrl) {
-    newWorkspace.waitProjectOptionsForm();
-    newWorkspace.waitProjectNameFieldValueInProjectOptionsForm(tabName);
-    newWorkspace.waitDescriptionFieldValueInProjectOptionsForm(expectedDescription);
-    newWorkspace.waitRepositoryUrlFieldValueInProjectOptionsForm(expectedUrl);
-    newWorkspace.waitRemoveButtonInProjectOptionsForm();
-    newWorkspace.waitCancelButtonDisablingInProjectOptionsForm();
-    newWorkspace.waitSaveButtonDisablingInProjectOptionsForm();
+    projectOptions.waitProjectOptionsForm();
+    projectOptions.waitProjectNameFieldValue(tabName);
+    projectOptions.waitDescriptionFieldValue(expectedDescription);
+    projectOptions.waitRepositoryUrlFieldValue(expectedUrl);
+    projectOptions.waitRemoveButton();
+    projectOptions.waitCancelButtonDisabling();
+    projectOptions.waitSaveButtonDisabling();
   }
 
   private void prepareJavaWorkspaceAndOpenCreateDialog(String workspaceName) {
