@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.hotupdate;
 
 import com.google.inject.Inject;
-
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.CheTestAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
@@ -22,34 +21,24 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class RecreateUpdate {
-    @Inject
-    CheTestAdminHttpJsonRequestFactory testUserHttpJsonRequestFactory;
+  @Inject CheTestAdminHttpJsonRequestFactory testUserHttpJsonRequestFactory;
 
-    @Inject
-    CheTestApiEndpointUrlProvider cheTestApiEndpointUrlProvider;
+  @Inject CheTestApiEndpointUrlProvider cheTestApiEndpointUrlProvider;
 
-    @Inject
-    private ProcessAgent processAgent;
+  @Inject private ProcessAgent processAgent;
 
-    @Inject
-    private TestWorkspace workspace;
+  @Inject private TestWorkspace workspace;
 
-    @javax.inject.Inject
-    private Ide ide;
+  @javax.inject.Inject private Ide ide;
 
-    @BeforeTest
-    public void setUp() throws ProcessAgentException {
-        String command = "/tmp/oc  describe dc/che | grep Strategy";
-        String result = processAgent.process(command);
-    }
+  @BeforeTest
+  public void setUp() throws ProcessAgentException {
+    String command = "/tmp/oc  describe dc/che | grep Strategy";
+    String result = processAgent.process(command);
+  }
 
-    @Test
-    public void checkRecreateUpdateStrategy() throws Exception {
-        ide.open(workspace);
-
-    }
-
-
-
-
+  @Test
+  public void checkRecreateUpdateStrategy() throws Exception {
+    ide.open(workspace);
+  }
 }
