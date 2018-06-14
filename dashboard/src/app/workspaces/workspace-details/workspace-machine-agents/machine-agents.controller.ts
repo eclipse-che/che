@@ -29,13 +29,15 @@ const LATEST: string = 'latest';
  */
 export class MachineAgentsController {
 
-  static $inject = ['$scope', 'cheAgent'];
+  static $inject = ['$scope', 'cheAgent', '$timeout'];
 
   onChange: Function;
   agentOrderBy = 'name';
   agentsList: Array<IAgentItem>;
 
   private cheAgent: CheAgent;
+  private $timeout: ng.ITimeoutService;
+  private timeoutPromise: ng.IPromise<any>;
   private selectedMachine: IEnvironmentManagerMachine;
   private environmentManager: EnvironmentManager;
   private agents: Array<string>;
@@ -43,8 +45,9 @@ export class MachineAgentsController {
   /**
    * Default constructor that is using resource
    */
-  constructor($scope: ng.IScope, cheAgent: CheAgent) {
+  constructor($scope: ng.IScope, cheAgent: CheAgent, $timeout: ng.ITimeoutService) {
     this.cheAgent = cheAgent;
+    this.$timeout = $timeout;
 
     cheAgent.fetchAgents().then(() => {
       this.agents = this.selectedMachine ? this.environmentManager.getAgents(this.selectedMachine) : [];
@@ -52,12 +55,15 @@ export class MachineAgentsController {
     });
 
     const deRegistrationFn = $scope.$watch(() => {
-      return angular.isDefined(this.environmentManager) && this.selectedMachine;
-    }, (selectedMachine: IEnvironmentManagerMachine) => {
-      if (!selectedMachine) {
+      if (!this.environmentManager || !this.selectedMachine) {
+        return false;
+      }
+      return !angular.equals(this.agents, this.environmentManager.getAgents(this.selectedMachine));
+    }, (newVal: boolean) => {
+      if (!newVal) {
         return;
       }
-      this.agents = this.environmentManager.getAgents(selectedMachine);
+      this.agents = this.environmentManager.getAgents(this.selectedMachine);
       this.buildAgentsList();
     }, true);
 
@@ -82,13 +88,20 @@ export class MachineAgentsController {
    * @param agent {IAgentItem}
    */
   updateAgent(agent: IAgentItem): void {
-    if (agent.isEnabled) {
-      this.agents.push(agent.id);
-    } else {
-      this.agents.splice(this.agents.indexOf(agent.id), 1);
-    }
-    this.environmentManager.setAgents(this.selectedMachine, this.agents);
-    this.onChange();
+    this.$timeout.cancel(this.timeoutPromise);
+
+    this.timeoutPromise = this.$timeout(() => {
+      const index = this.agents.indexOf(agent.id);
+      if (agent.isEnabled) {
+        if (index === -1) {
+          this.agents.push(agent.id);
+        }
+      } else if (index >= 0) {
+        this.agents.splice(index, 1);
+      }
+      this.environmentManager.setAgents(this.selectedMachine, this.agents);
+      this.onChange();
+    }, 500);
   }
 
   /**
