@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces.notjavastack;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.DOT_NET;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;

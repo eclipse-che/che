@@ -76,7 +76,7 @@ export class WorkspaceSelectStackController {
     $scope.$on('event:selectStackId', (event: ng.IAngularEvent, data: any) => {
       event.stopPropagation();
       let findStack = this.lodash.find(this.stacks, (stack: any) => {
-        return stack.id === data.stackId;
+        return stack.id === data.stack;
       });
       if (findStack) {
         if (data.tabName === 'ready-to-go') {
@@ -178,7 +178,7 @@ export class WorkspaceSelectStackController {
       workspaceConfig.name = this.workspaceName;
     }
 
-    this.workspaceStackOnChange({config: workspaceConfig, stackId: stack ? stack.id : ''});
+    this.workspaceStackOnChange({config: workspaceConfig, stack: stack ? stack.id : ''});
   }
 
   /**

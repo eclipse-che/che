@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.BLANK;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA_MYSQL;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;

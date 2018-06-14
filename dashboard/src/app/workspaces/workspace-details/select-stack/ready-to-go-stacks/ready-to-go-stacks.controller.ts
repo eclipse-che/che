@@ -89,11 +89,11 @@ export class ReadyToGoStacksController {
 
   /**
    * Gets icon src.
-   * @param stackId {string}
+   * @param stack {string}
    * @returns {undefined|string}
    */
-  getIconSrc(stackId: string): string {
-    return this.stackIconsMap.get(stackId);
+  getIconSrc(stack: string): string {
+    return this.stackIconsMap.get(stack);
   }
 
   /**
@@ -133,12 +133,12 @@ export class ReadyToGoStacksController {
 
   /**
    * Select stack by Id
-   * @param stackId {string}
+   * @param stack {string}
    */
-  setStackSelectionById(stackId: string): void {
-    this.selectedStackId = stackId;
+  setStackSelectionById(stack: string): void {
+    this.selectedStackId = stack;
     if (this.selectedStackId) {
-      this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stackId: this.selectedStackId});
+      this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stack: this.selectedStackId});
     }
   }
 

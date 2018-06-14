@@ -20,6 +20,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DECREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTERS_INPUT_TAGS_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTERS_INPUT_TAG_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SELECTED_SUGGESTION_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SUGGESTION_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.INCREMENT_MEMORY_BUTTON;
@@ -44,7 +46,6 @@ import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
-import org.eclipse.che.selenium.pageobject.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -115,6 +116,8 @@ public class NewWorkspace {
     String OPEN_IN_IDE_DIALOG_BUTTON = "//che-button-default//span[text()='Open In IDE']";
     String ORGANIZATIONS_LIST_ID = "namespace-selector";
     String ORGANIZATION_ITEM = "//md-menu-item[text()='%s']";
+    String FILTERS_INPUT_TAGS_XPATH = "//div[@class='md-chip-content']";
+    String FILTERS_INPUT_TAG_XPATH_TEMPLATE = "//div[@class='md-chip-content']//div[text()='%s']";
 
     // buttons
     String TOP_CREATE_BUTTON_XPATH = "//button[@name='split-button']";
@@ -125,7 +128,7 @@ public class NewWorkspace {
     String MULTI_MACHINE_BUTTON_ID = "multi-machine-button";
   }
 
-  public enum StackId {
+  public enum Stack {
     BLANK("blank-default"),
     JAVA("java-default"),
     JAVA_MYSQL("java-mysql"),
@@ -168,7 +171,7 @@ public class NewWorkspace {
 
     private final String stackId;
 
-    StackId(String stackId) {
+    Stack(String stackId) {
       this.stackId = stackId;
     }
 
@@ -301,6 +304,9 @@ public class NewWorkspace {
 
   public void deleteLastTagFromInputTagsField() {
     seleniumWebDriverHelper.waitAndSendKeysTo(filterStackInput, BACK_SPACE.toString());
+
+    // one "backspace" should sent exactly to defined tag (for activating) and next "backspace"
+    // should be a simple button pressing
     seleniumWebDriverHelper.sendKeys(BACK_SPACE.toString());
   }
 
@@ -316,42 +322,43 @@ public class NewWorkspace {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(filterStackInput);
   }
 
-  private List<WebElement> getTagsFromFiltersInputField() {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath("//div[@class='md-chip-content']/md-chip-template"));
+  private List<WebElement> getTagsFromFiltersInput() {
+    String tagsXpath = FILTERS_INPUT_TAGS_XPATH + "/md-chip-template";
 
-    return seleniumWebDriverHelper.waitVisibilityOfAllElements(
-        By.xpath("//div[@class='md-chip-content']/md-chip-template"));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(tagsXpath));
+
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(tagsXpath));
   }
 
   private String getFiltersInputTagName(WebElement tag) {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(tag);
   }
 
-  public List<String> getFiltersInputFieldTags() {
-    return getTagsFromFiltersInputField()
+  public List<String> getFiltersInputTags() {
+    return getTagsFromFiltersInput()
         .stream()
         .map(tag -> getFiltersInputTagName(tag))
         .collect(Collectors.toList());
   }
 
-  public void waitFiltersInputFieldIsEmpty() {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath("//div[@class='md-chip-content']"));
+  public void waitFiltersInputIsEmpty() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(FILTERS_INPUT_TAGS_XPATH));
   }
 
-  public void waitFiltersInputFieldTags(List<String> expectedTags) {
+  public void waitFiltersInputTags(List<String> expectedTags) {
     webDriverWaitFactory
         .get()
-        .until(
-            (ExpectedCondition<Boolean>) driver -> getFiltersInputFieldTags().equals(expectedTags));
+        .until((ExpectedCondition<Boolean>) driver -> getFiltersInputTags().equals(expectedTags));
   }
 
   public void deleteTagByRemoveButton(String tagName) {
-    seleniumWebDriverHelper.moveCursorToAndClick(
-        By.xpath(
-            format(
-                "//div[text()='%s']/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']/i",
-                tagName)));
+    String removeButtonXpath =
+        format(
+            FILTERS_INPUT_TAG_XPATH_TEMPLATE
+                + "/parent::md-chip-template/div[@class='stack-library-filter-tag-btn']/i",
+            tagName);
+
+    seleniumWebDriverHelper.moveCursorToAndClick(By.xpath(removeButtonXpath));
   }
 
   public void waitTextContainsInFiltersInput(String expectedText) {
@@ -378,7 +385,8 @@ public class NewWorkspace {
   }
 
   public List<WebElement> getFiltersSuggestions() {
-    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath("//md-chip"));
+    String filtersSuggestionBody = "//md-chip";
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(filtersSuggestionBody));
   }
 
   public void waitFiltersSuggestionsNames(List<String> expectedSuggestions) {
@@ -417,8 +425,10 @@ public class NewWorkspace {
   }
 
   public WebElement getFiltersSuggestionByName(String suggestionName) {
-    return seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format("//div[@name='suggestionText' and text()='%s']", suggestionName)));
+    String filtersSuggestion =
+        format("//div[@name='suggestionText' and text()='%s']", suggestionName);
+
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(filtersSuggestion));
   }
 
   public String getSuggestionName(WebElement suggestion) {
@@ -433,7 +443,7 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(FILTER_SUGGESTION_BUTTON, suggestion)));
   }
 
-  public void singleClickOnFiltersSuggestions(String suggestionName) {
+  public void clickOnFiltersSuggestions(String suggestionName) {
     seleniumWebDriverHelper.waitAndClick(getFiltersSuggestionByName(suggestionName));
   }
 
@@ -475,16 +485,16 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitAndClick(clearInput);
   }
 
-  public boolean isStackVisible(StackId stackId) {
+  public boolean isStackVisible(Stack stack) {
     return seleniumWebDriver
-            .findElements(By.xpath(format(STACK_ROW_XPATH, stackId.toString())))
+            .findElements(By.xpath(format(STACK_ROW_XPATH, stack.toString())))
             .size()
         > 0;
   }
 
-  public void selectStack(StackId stackId) {
-    waitStacks(asList(stackId.toString()));
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stackId.toString())));
+  public void selectStack(Stack stack) {
+    waitStacks(asList(stack.toString()));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stack.toString())));
   }
 
   public boolean isCreateWorkspaceButtonEnabled() {
@@ -686,7 +696,7 @@ public class NewWorkspace {
         .collect(toList());
   }
 
-  public void waitStackSelected(StackId stackId) {
+  public void waitStackSelected(Stack stack) {
     webDriverWaitFactory
         .get()
         .until(
@@ -697,7 +707,7 @@ public class NewWorkspace {
                       .stream()
                       .filter(
                           webElement ->
-                              webElement.getAttribute("data-stack-id").equals(stackId.toString()))
+                              webElement.getAttribute("data-stack-id").equals(stack.toString()))
                       .collect(Collectors.toList())
                       .get(0)
                       .getAttribute("class")
@@ -760,7 +770,8 @@ public class NewWorkspace {
   }
 
   public void clickOnInputFieldTag(String tagName) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format("//div[text()='%s']", tagName)));
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(FILTERS_INPUT_TAG_XPATH_TEMPLATE, tagName)));
   }
 
   public void clickOnAddStackButton() {

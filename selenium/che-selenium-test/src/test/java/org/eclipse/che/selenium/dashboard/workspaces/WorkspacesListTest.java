@@ -113,7 +113,7 @@ public class WorkspacesListTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    deleteIfWorkspaceExist(expectedNewestWorkspaceItem.getWorkspaceName());
+    deleteIfWorkspaceExists(expectedNewestWorkspaceItem.getWorkspaceName());
   }
 
   @Test
@@ -138,6 +138,7 @@ public class WorkspacesListTest {
     String javaWorkspaceName = javaWorkspace.getName();
 
     workspaces.waitPageLoading();
+
     workspaces.selectAllWorkspacesByBulk();
 
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
@@ -202,6 +203,7 @@ public class WorkspacesListTest {
 
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
 
+    // items are sorted by name, check is present for ensuring of items order
     if (items.get(0).getRamAmount() != BLANK_WS_MB) {
       workspaces.clickOnRamButton();
       items = workspaces.getVisibleWorkspaces();
@@ -216,7 +218,6 @@ public class WorkspacesListTest {
     }
 
     workspaces.clickOnRamButton();
-
     items = workspaces.getVisibleWorkspaces();
     try {
       assertEquals(items.get(0).getRamAmount(), JAVA_WS_MB);
@@ -227,13 +228,11 @@ public class WorkspacesListTest {
     }
 
     workspaces.clickOnProjectsButton();
-
     items = workspaces.getVisibleWorkspaces();
     assertEquals(items.get(0).getProjectsAmount(), BLANK_WS_PROJECTS_COUNT);
     assertEquals(items.get(1).getProjectsAmount(), JAVA_WS_PROJECTS_COUNT);
 
     workspaces.clickOnProjectsButton();
-
     items = workspaces.getVisibleWorkspaces();
     assertEquals(items.get(0).getProjectsAmount(), JAVA_WS_PROJECTS_COUNT);
     assertEquals(items.get(1).getProjectsAmount(), BLANK_WS_PROJECTS_COUNT);
@@ -246,13 +245,11 @@ public class WorkspacesListTest {
         expectedBlankItem.getWorkspaceName().substring(nameLength - 5, nameLength);
 
     workspaces.typeToSearchInput(sequenceForSearch);
-
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
     assertEquals(items.size(), 1);
     assertEquals(items.get(0).getWorkspaceName(), expectedBlankItem.getWorkspaceName());
 
     workspaces.typeToSearchInput("");
-
     items = workspaces.getVisibleWorkspaces();
     assertEquals(items.size(), 2);
     assertEquals(
@@ -270,7 +267,7 @@ public class WorkspacesListTest {
   }
 
   @Test(priority = 1)
-  public void checkWorkspaceActions() {
+  public void checkWorkspaceActions() throws Exception {
     workspaces.waitPageLoading();
     String mainWindow = seleniumWebDriver.getWindowHandle();
 
@@ -368,7 +365,7 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceIsNotPresent(expectedJavaItem.getWorkspaceName());
   }
 
-  private void deleteIfWorkspaceExist(String workspaceName) throws Exception {
+  private void deleteIfWorkspaceExists(String workspaceName) throws Exception {
     if (isWorkspaceExist(workspaceName)) {
       testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
     }

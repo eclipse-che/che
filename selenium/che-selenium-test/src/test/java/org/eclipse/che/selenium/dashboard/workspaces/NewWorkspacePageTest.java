@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -56,6 +56,7 @@ public class NewWorkspacePageTest {
       "wksp-ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
+  private static final String LETTER_FOR_SEARCHING = "j";
   private static final List<String> EXPECTED_JDK_STACKS = asList("java-default", "che-in-che");
   private static List<String> EXPECTED_QUICK_START_STACKS =
       asList(
@@ -74,6 +75,7 @@ public class NewWorkspacePageTest {
           "platformio",
           "python-default",
           "rails-default");
+
   private static List<String> EXPECTED_SINGLE_MACHINE_STACKS =
       asList(
           "blank-default",
@@ -209,7 +211,7 @@ public class NewWorkspacePageTest {
   }
 
   @BeforeMethod
-  public void prepareToTestMethod() {
+  public void prepareTestWorkspace() {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitToolbarTitleName();
@@ -223,33 +225,33 @@ public class NewWorkspacePageTest {
     assertEquals(
         newWorkspace.getWorkspaceNameValue().substring(0, 5), EXPECTED_WORKSPACE_NAME_PREFIX);
 
+    // empty name field
     newWorkspace.typeWorkspaceName("");
-
     newWorkspace.waitErrorMessage("A name is required.");
     newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
+    // too short name
     newWorkspace.typeWorkspaceName("wk");
-
     newWorkspace.waitErrorMessage("The name has to be more than 3 characters long.");
     newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
+    // min valid name
     newWorkspace.typeWorkspaceName("wks");
-
     newWorkspace.waitErrorMessageDisappearance();
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
+    // max valid name
     newWorkspace.typeWorkspaceName(NAME_WITH_ONE_HUNDRED_SYMBOLS);
-
     newWorkspace.waitErrorMessageDisappearance();
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
+    // too long name
     newWorkspace.typeWorkspaceName(NAME_WITH_ONE_HUNDRED_SYMBOLS + "p");
-
     newWorkspace.waitErrorMessage("The name has to be less than 100 characters long.");
     newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
+    // max valid name after too long name
     newWorkspace.typeWorkspaceName(NAME_WITH_ONE_HUNDRED_SYMBOLS);
-
     newWorkspace.waitErrorMessageDisappearance();
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
@@ -265,18 +267,22 @@ public class NewWorkspacePageTest {
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
     assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_QUICK_START_STACKS_COUNT);
 
+    // single machine stacks
     newWorkspace.clickOnSingleMachineButton();
     newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
     assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_SINGLE_MACHINE_STACKS_COUNT);
 
+    // all stacks
     newWorkspace.clickOnAllButton();
     newWorkspace.waitStacks(EXPECTED_ALL_STACKS);
     assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_ALL_STACKS_COUNT);
 
+    // multi-machine stacks
     newWorkspace.clickOnMultiMachineButton();
     newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
     assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_MULTI_MACHINE_STACKS_COUNT);
 
+    // check that only expected stacks are displayed and no duplicates are presented
     newWorkspace.clickOnAllButton();
     newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
     newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
@@ -284,6 +290,7 @@ public class NewWorkspacePageTest {
         newWorkspace.getAvailableStacksCount(),
         EXPECTED_SINGLE_MACHINE_STACKS_COUNT + EXPECTED_MULTI_MACHINE_STACKS_COUNT);
 
+    // quick start stacks
     newWorkspace.clickOnQuickStartButton();
     newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS);
     newWorkspace.clickNameButton();
@@ -302,25 +309,30 @@ public class NewWorkspacePageTest {
   @Test
   public void checkFiltersButton() {
     newWorkspace.waitPageLoad();
+
+    // close by "Escape" button
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
     seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
     newWorkspace.waitFiltersFormClosed();
 
+    // close by clicking on the outside of the "Filters" form
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
     newWorkspace.clickOnTitlePlaceCoordinate();
     newWorkspace.waitFiltersFormClosed();
 
+    // check suggestion list
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
-    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
 
     assertEquals(
         newWorkspace.getSelectedFiltersSuggestionName(),
         newWorkspace.getFiltersSuggestionsNames().get(0));
 
+    // check navigation by keyboard arrows between suggested tags
     seleniumWebDriverHelper.sendKeys(ARROW_DOWN.toString());
     newWorkspace.waitSelectedFiltersSuggestion("JDK");
 
@@ -330,54 +342,57 @@ public class NewWorkspacePageTest {
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
     newWorkspace.waitSelectedFiltersSuggestion("JAVA 1.8, THEIA");
 
-    newWorkspace.singleClickOnFiltersSuggestions("JAVA");
+    // interaction with suggested tads by mouse clicking
+    newWorkspace.clickOnFiltersSuggestions("JAVA");
     newWorkspace.waitSelectedFiltersSuggestion("JAVA");
 
-    newWorkspace.singleClickOnFiltersSuggestions("JDK");
+    newWorkspace.clickOnFiltersSuggestions("JDK");
     newWorkspace.waitSelectedFiltersSuggestion("JDK");
 
     newWorkspace.doubleClickOnFiltersSuggestion("JDK");
-    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+    newWorkspace.waitFiltersInputTags(asList("JDK"));
 
     newWorkspace.deleteLastTagFromInputTagsField();
-    newWorkspace.waitFiltersInputFieldIsEmpty();
+    newWorkspace.waitFiltersInputIsEmpty();
 
-    newWorkspace.typeToFiltersInput("j");
+    // delete tags from input
+    newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
 
     newWorkspace.waitSelectedFiltersSuggestion("JAVA");
     newWorkspace.doubleClickOnFiltersSuggestion("JAVA 1.8, THEIA");
 
-    newWorkspace.waitFiltersInputFieldTags(asList("JAVA 1.8, THEIA"));
+    newWorkspace.waitFiltersInputTags(asList("JAVA 1.8, THEIA"));
 
     newWorkspace.deleteTagByRemoveButton("JAVA 1.8, THEIA");
-    newWorkspace.waitFiltersInputFieldIsEmpty();
+    newWorkspace.waitFiltersInputIsEmpty();
 
-    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
     newWorkspace.waitSelectedFiltersSuggestion("JAVA");
     newWorkspace.chooseFilterSuggestionByPlusButton("JDK");
-    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+    newWorkspace.waitFiltersInputTags(asList("JDK"));
     newWorkspace.clickOnInputFieldTag("JDK");
     seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
-    newWorkspace.waitFiltersInputFieldIsEmpty();
+    newWorkspace.waitFiltersInputIsEmpty();
 
-    newWorkspace.typeToFiltersInput("j");
+    newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
     newWorkspace.waitSelectedFiltersSuggestion("JAVA");
     newWorkspace.chooseFilterSuggestionByPlusButton("JAVA");
-    newWorkspace.waitFiltersInputFieldTags(asList("JAVA"));
+    newWorkspace.waitFiltersInputTags(asList("JAVA"));
     newWorkspace.clickOnInputFieldTag("JAVA");
     seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
-    newWorkspace.waitFiltersInputFieldIsEmpty();
+    newWorkspace.waitFiltersInputIsEmpty();
     newWorkspace.deleteLastTagFromInputTagsField();
 
-    newWorkspace.typeToFiltersInput("j");
+    // navigation by "Tab" button
+    newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitSelectedFiltersSuggestion("JAVA");
     seleniumWebDriverHelper.sendKeys(Keys.TAB.toString());
     newWorkspace.waitSelectedFiltersSuggestion("JDK");
     seleniumWebDriverHelper.sendKeys(Keys.ENTER.toString());
-    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+    newWorkspace.waitFiltersInputTags(asList("JDK"));
     newWorkspace.clickOnTitlePlaceCoordinate();
     newWorkspace.waitFiltersFormClosed();
 
@@ -386,9 +401,9 @@ public class NewWorkspacePageTest {
 
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
-    newWorkspace.waitFiltersInputFieldTags(asList("JDK"));
+    newWorkspace.waitFiltersInputTags(asList("JDK"));
     newWorkspace.deleteLastTagFromInputTagsField();
-    newWorkspace.waitFiltersInputFieldIsEmpty();
+    newWorkspace.waitFiltersInputIsEmpty();
     newWorkspace.clickOnTitlePlaceCoordinate();
     newWorkspace.waitFiltersFormClosed();
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
@@ -397,26 +412,32 @@ public class NewWorkspacePageTest {
   @Test
   public void checkAddStackButton() {
     newWorkspace.waitPageLoad();
+
+    // close form by "ESCAPE" button
     newWorkspace.clickOnAddStackButton();
     newWorkspace.waitCreateStackDialog();
     seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
     newWorkspace.waitCreateStackDialogClosing();
 
+    // close form by clicking on outside of form bounds
     newWorkspace.clickOnAddStackButton();
     newWorkspace.waitCreateStackDialog();
     newWorkspace.clickOnTitlePlaceCoordinate();
     newWorkspace.waitCreateStackDialogClosing();
 
+    // close form by "Close" button
     newWorkspace.clickOnAddStackButton();
     newWorkspace.waitCreateStackDialog();
     newWorkspace.closeCreateStackDialogByCloseButton();
     newWorkspace.waitCreateStackDialogClosing();
 
+    // close form by "No" button
     newWorkspace.clickOnAddStackButton();
     newWorkspace.waitCreateStackDialog();
     newWorkspace.clickOnNoButtonInCreateStackDialog();
     newWorkspace.waitCreateStackDialogClosing();
 
+    // click on "Yes" button
     newWorkspace.clickOnAddStackButton();
     newWorkspace.waitCreateStackDialog();
     newWorkspace.clickOnYesButtonInCreateStackDialog();
@@ -428,16 +449,22 @@ public class NewWorkspacePageTest {
   @Test
   public void checkSearchField() {
     newWorkspace.waitPageLoad();
+
     newWorkspace.typeToSearchInput("Java");
     newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+
     newWorkspace.typeToSearchInput("");
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+
     newWorkspace.typeToSearchInput("java");
     newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+
     newWorkspace.typeToSearchInput("");
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+
     newWorkspace.typeToSearchInput("JAVA");
     newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+
     newWorkspace.typeToSearchInput("");
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
   }
@@ -445,6 +472,8 @@ public class NewWorkspacePageTest {
   @Test
   public void checkRamSelection() {
     newWorkspace.waitPageLoad();
+
+    // empty RAM
     newWorkspace.selectStack(JAVA);
     newWorkspace.waitStackSelected(JAVA);
     newWorkspace.waitRamValue(MACHINE_NAME, 2.0);
@@ -453,17 +482,20 @@ public class NewWorkspacePageTest {
     newWorkspace.waitTopCreateWorkspaceButtonDisabled();
     newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
 
+    // max valid value
     newWorkspace.typeToRamField(Double.toString(MAX_RAM_VALUE));
     newWorkspace.waitRedRamFieldBordersDisappearance();
     newWorkspace.waitTopCreateWorkspaceButtonEnabled();
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
+    // increment and decrement buttons with max valid value
     newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
     newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE);
 
     newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
     newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE - RAM_CHANGE_STEP);
 
+    // min valid value
     newWorkspace.typeToRamField("");
     newWorkspace.waitRedRamFieldBorders();
     newWorkspace.waitTopCreateWorkspaceButtonDisabled();
@@ -473,11 +505,14 @@ public class NewWorkspacePageTest {
     newWorkspace.waitRedRamFieldBordersDisappearance();
     newWorkspace.waitTopCreateWorkspaceButtonEnabled();
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
+
+    // increment and decrement buttons with min valid value
     newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
     newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE);
     newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
     newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE + RAM_CHANGE_STEP);
 
+    // increment and decrement by click and hold
     newWorkspace.clickAndHoldIncrementMemoryButton(MACHINE_NAME, 3);
     newWorkspace.waitRamValueInSpecifiedRange(MACHINE_NAME, 3, MAX_RAM_VALUE);
 
@@ -490,12 +525,10 @@ public class NewWorkspacePageTest {
     NOT_VALID_NAMES.forEach(
         name -> {
           newWorkspace.typeWorkspaceName("temporary");
-
           newWorkspace.waitErrorMessageDisappearance();
           newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
           newWorkspace.typeWorkspaceName(name);
-
           newWorkspace.waitErrorMessage(
               "The name should not contain special characters like space, dollar, etc. and should start and end only with digits, latin letters or underscores.");
           newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
@@ -506,12 +539,10 @@ public class NewWorkspacePageTest {
     VALID_NAMES.forEach(
         name -> {
           newWorkspace.typeWorkspaceName("temporary");
-
           newWorkspace.waitErrorMessageDisappearance();
           newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
 
           newWorkspace.typeWorkspaceName(name);
-
           newWorkspace.waitErrorMessageDisappearance();
           newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
         });

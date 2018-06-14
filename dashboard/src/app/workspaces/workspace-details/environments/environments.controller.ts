@@ -42,7 +42,7 @@ export class WorkspaceEnvironmentsController {
     onLoad: Function
   };
 
-  stackId: string;
+  stack: string;
   workspaceRuntime: any;
   workspaceConfig: che.IWorkspaceConfig;
   environment: any;
@@ -238,10 +238,10 @@ export class WorkspaceEnvironmentsController {
    * Callback when stack has been changed.
    *
    * @param config {object} workspace config
-   * @param stackId {string}
+   * @param stack {string}
    */
-  changeWorkspaceStack(config: any, stackId: string): void {
-    this.stackId = stackId;
+  changeWorkspaceStack(config: any, stack: string): void {
+    this.stack = stack;
     this.workspaceConfig = config;
 
     if (!this.environmentName || this.environmentName !== config.defaultEnv) {

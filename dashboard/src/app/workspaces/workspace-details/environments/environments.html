@@ -46,7 +46,7 @@
                        che-label-name="Select Stack"
                        che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
     <ng-form name="workspaceStackForm">
-      <workspace-select-stack workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stackId)"
+      <workspace-select-stack workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stack)"
                               workspace-name="workspaceEnvironmentsController.workspaceName"
                               environment-name="workspaceEnvironmentsController.environmentName"
                               workspace-imported-recipe="workspaceEnvironmentsController.workspaceImportedRecipe"></workspace-select-stack>

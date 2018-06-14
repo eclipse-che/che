@@ -8,26 +8,26 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject;
+package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.ADD_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.ADD_OR_IMPORT_PROJECT_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.BLANK_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.BLANK_FORM_DESCRIPTION_FIELD_XPATH;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.BLANK_FORM_NAME_ERROR_MESSAGE_XPATH;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.BLANK_FORM_NAME_FIELD_XPATH;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.CANCEL_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.GITHUG_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.GIT_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.PROJECT_TAB_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.SAMPLES_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.AddOrImportForm.Locators.ZIP_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.ADD_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.ADD_OR_IMPORT_PROJECT_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.BLANK_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.BLANK_FORM_DESCRIPTION_FIELD_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.BLANK_FORM_NAME_ERROR_MESSAGE_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.BLANK_FORM_NAME_FIELD_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.CANCEL_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.GITHUG_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.GIT_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.PROJECT_TAB_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.SAMPLES_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.ZIP_BUTTON_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

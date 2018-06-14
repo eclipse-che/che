@@ -11,9 +11,9 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.BLANK;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.DOT_NET;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -26,9 +26,9 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
-import org.eclipse.che.selenium.pageobject.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -149,6 +149,7 @@ public class AddOrImportProjectFormTest {
   @Test
   public void checkOfCheckboxes() {
     newWorkspace.waitPageLoad();
+
     newWorkspace.selectStack(JAVA);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
@@ -190,16 +191,18 @@ public class AddOrImportProjectFormTest {
   @Test(priority = 1)
   public void checkProjectSamples() {
     newWorkspace.waitPageLoad();
+
     newWorkspace.selectStack(JAVA);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
+
     addOrImportForm.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
     addOrImportForm.waitAddButtonInImportProjectFormEnabled();
-    addOrImportForm.clickOnAddButtonInImportProjectForm();
 
+    addOrImportForm.clickOnAddButtonInImportProjectForm();
     checkProjectTabAppearanceAndFields(
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
@@ -207,7 +210,6 @@ public class AddOrImportProjectFormTest {
 
     projectOptions.clickOnRemoveButton();
     addOrImportForm.waitProjectTabDisappearance(CONSOLE_SAMPLE_NAME);
-
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
     addOrImportForm.waitSamplesWithDescriptions(EXPECTED_SAMPLES_WITH_DESCRIPTIONS);
@@ -216,13 +218,11 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitAddButtonInImportProjectFormDisabled();
 
     clickOnEachCheckbox();
-
     waitAllCheckboxesEnabled();
     addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
     addOrImportForm.waitAddButtonInImportProjectFormEnabled();
 
     addOrImportForm.clickOnAddButtonInImportProjectForm();
-
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(CHE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
@@ -246,7 +246,6 @@ public class AddOrImportProjectFormTest {
         EXPECTED_CHE_REPOSITORY_URL);
 
     projectOptions.clickOnRemoveButton();
-
     addOrImportForm.waitProjectTabDisappearance(CHE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
@@ -289,20 +288,17 @@ public class AddOrImportProjectFormTest {
 
     projectOptions.typeTextInDescriptionField("");
     projectOptions.clickOnCancelButton();
-
     checkProjectTabAppearanceAndFields(
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
     projectOptions.typeTextInRepositoryUrlField("");
-
     projectOptions.waitRepositoryUrlErrorMessage("Invalid Git URL");
     projectOptions.waitSaveButtonDisabling();
     projectOptions.waitCancelButtonEnabling();
 
     projectOptions.clickOnCancelButton();
-
     checkProjectTabAppearanceAndFields(
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
@@ -311,10 +307,11 @@ public class AddOrImportProjectFormTest {
     projectOptions.setValueOfNameField("");
     projectOptions.typeTextInDescriptionField("");
     projectOptions.typeTextInRepositoryUrlField("");
+
     addOrImportForm.clickOnProjectTab(SPRING_SAMPLE_NAME);
     projectOptions.waitProjectNameFieldValue(SPRING_SAMPLE_NAME);
-    addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
 
+    addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
     checkProjectTabAppearanceAndFields(
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
@@ -330,15 +327,17 @@ public class AddOrImportProjectFormTest {
   @Test(priority = 2)
   public void checkProjectsBlank() throws Exception {
     newWorkspace.waitPageLoad();
+
     newWorkspace.selectStack(BLANK);
     newWorkspace.waitStackSelected(BLANK);
+
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
+
     addOrImportForm.clickOnBlankButton();
 
     addOrImportForm.typeToBlankNameField(NAME_WITH_MAX_AVAILABLE_LENGTH);
     addOrImportForm.waitErrorMessageDissappearanceInBlankNameField();
-
     addOrImportForm.waitAddButtonInImportProjectFormEnabled();
     addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
 
@@ -362,7 +361,6 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitTextInBlankDescriptionField(BLANK_FORM_DESCRIPTION);
 
     addOrImportForm.clickOnCancelButtonInImportProjectForm();
-
     addOrImportForm.waitTextInBlankNameField("");
     addOrImportForm.waitTextInBlankDescriptionField("");
 
@@ -376,17 +374,18 @@ public class AddOrImportProjectFormTest {
 
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
+
     addOrImportForm.clickOnGitButton();
     addOrImportForm.waitGitTabOpenedInImportProjectForm();
+
     addOrImportForm.typeToGitUrlField(BLANK_DEFAULT_URL);
     addOrImportForm.clickOnAddButtonInImportProjectForm();
-
     checkProjectTabAppearanceAndFields(BLANK_PROJECT_NAME, "", BLANK_DEFAULT_URL);
 
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
-    addOrImportForm.clickOnGitHubButton();
 
+    addOrImportForm.clickOnGitHubButton();
     newWorkspace.setMachineRAM("dev-machine", 5.0);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
@@ -397,15 +396,15 @@ public class AddOrImportProjectFormTest {
   @Test(priority = 3)
   public void checkCreatingProject() throws Exception {
     newWorkspace.waitPageLoad();
+
     newWorkspace.typeWorkspaceName(TEST_BLANK_WORKSPACE_NAME);
+
     newWorkspace.selectStack(DOT_NET);
     newWorkspace.waitStackSelected(DOT_NET);
-
     Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
     newWorkspace.selectStack(JAVA);
     newWorkspace.waitStackSelected(JAVA);
-
     Assert.assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
     newWorkspace.setMachineRAM("dev-machine", 3.0);
@@ -413,12 +412,16 @@ public class AddOrImportProjectFormTest {
 
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
+
     addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+
     addOrImportForm.clickOnAddButtonInImportProjectForm();
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+
     newWorkspace.clickOnBottomCreateButton();
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
+
     newWorkspace.closeWorkspaceCreatedDialog();
     newWorkspace.waitWorkspaceCreatedDialogDisappearance();
     workspaceOverview.checkNameWorkspace(TEST_BLANK_WORKSPACE_NAME);
@@ -426,22 +429,17 @@ public class AddOrImportProjectFormTest {
     seleniumWebDriver.navigate().back();
 
     prepareJavaWorkspaceAndOpenCreateDialog(TEST_JAVA_WORKSPACE_NAME);
-
     newWorkspace.clickOnEditWorkspaceButton();
     workspaceOverview.checkNameWorkspace(TEST_JAVA_WORKSPACE_NAME);
 
     seleniumWebDriver.navigate().back();
 
     prepareJavaWorkspaceAndOpenCreateDialog(TEST_JAVA_WORKSPACE_NAME_EDIT);
-
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
     newWorkspace.clickOnOpenInIDEButton();
-
     testWorkspaceServiceClient.waitStatus(
         TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName(), RUNNING);
-
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(SPRING_SAMPLE_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
@@ -480,19 +478,26 @@ public class AddOrImportProjectFormTest {
   }
 
   private void prepareJavaWorkspaceAndOpenCreateDialog(String workspaceName) {
+    // prepare workspace
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(workspaceName);
+
     newWorkspace.selectStack(JAVA);
     newWorkspace.waitStackSelected(JAVA);
+
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
+
     addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+
     addOrImportForm.clickOnAddButtonInImportProjectForm();
     checkProjectTabAppearanceAndFields(
         SPRING_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
         EXPECTED_SPRING_REPOSITORY_URL);
+
+    // open create dialog
     newWorkspace.clickOnBottomCreateButton();
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
   }

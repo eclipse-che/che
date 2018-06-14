@@ -74,12 +74,12 @@ export class CreateProjectStackLibraryController {
 
   /**
    * Select stack by Id
-   * @param stackId {string}
+   * @param stack {string}
    */
-  setStackSelectionById(stackId: string): void {
-    this.selectedStackId = stackId;
+  setStackSelectionById(stack: string): void {
+    this.selectedStackId = stack;
     if (this.selectedStackId) {
-      this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stackId: this.selectedStackId});
+      this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stack: this.selectedStackId});
     }
   }
 

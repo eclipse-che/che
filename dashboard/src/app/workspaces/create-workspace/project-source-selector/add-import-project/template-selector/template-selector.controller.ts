@@ -105,12 +105,12 @@ export class TemplateSelectorController {
    * Callback which is called when stack is selected.
    */
   onStackChanged(): void {
-    const stackId = this.stackSelectorSvc.getStackId();
-    if (!stackId) {
+    const stack = this.stackSelectorSvc.getStackId();
+    if (!stack) {
       return;
     }
 
-    const stack = this.stackSelectorSvc.getStackById(stackId);
+    const stack = this.stackSelectorSvc.getStackById(stack);
     this.stackTags = stack ? stack.tags : [];
 
     this.filterAndSortTemplates();

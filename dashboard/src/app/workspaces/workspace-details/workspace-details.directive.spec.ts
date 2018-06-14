@@ -73,7 +73,7 @@ describe(`WorkspaceDetailsController >`, () => {
         'ide': 'http://localhost:8080/che/wksp-98cs'
       },
       'id': 'workspacezbkov1e8qcm00dli',
-      'attributes': {'created': 1516282666658, 'stackId': 'blank-default'}
+      'attributes': {'created': 1516282666658, 'stack': 'blank-default'}
     };
   }
 

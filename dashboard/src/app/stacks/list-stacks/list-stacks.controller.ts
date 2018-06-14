@@ -228,9 +228,9 @@ export class ListStacksController {
     confirmationPromise.then(() => {
       const deleteStackPromises = [];
 
-      selectedStackIds.forEach((stackId: string) => {
-        this.cheListHelper.itemsSelectionStatus[stackId] = false;
-        deleteStackPromises.push(this.cheStack.deleteStack(stackId));
+      selectedStackIds.forEach((stack: string) => {
+        this.cheListHelper.itemsSelectionStatus[stack] = false;
+        deleteStackPromises.push(this.cheStack.deleteStack(stack));
       });
 
       this.$q.all(deleteStackPromises).then(() => {

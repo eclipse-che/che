@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces.notjavastack;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.StackId.ANDROID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;

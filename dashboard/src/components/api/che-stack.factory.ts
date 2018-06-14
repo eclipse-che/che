@@ -14,10 +14,10 @@ import {ICheRecipeService} from '../../app/workspaces/workspace-details/che-reci
 
 interface IRemoteStackAPI<T> extends ng.resource.IResourceClass<T> {
   getStacks(): ng.resource.IResource<T>;
-  getStack(data: { stackId: string }): ng.resource.IResource<T>;
-  updateStack(data: { stackId: string }, stack: che.IStack): ng.resource.IResource<T>;
+  getStack(data: { stack: string }): ng.resource.IResource<T>;
+  updateStack(data: { stack: string }, stack: che.IStack): ng.resource.IResource<T>;
   createStack(data: Object, stack: che.IStack): ng.resource.IResource<T>;
-  deleteStack(data: { stackId: string }): ng.resource.IResource<T>;
+  deleteStack(data: { stack: string }): ng.resource.IResource<T>;
 }
 
 /**
@@ -31,7 +31,7 @@ export class CheStack {
   static $inject = ['$resource', '$q', 'cheWorkspace', 'cheRecipeService'];
 
   $resource: ng.resource.IResourceService;
-  stacksById: { [stackId: string]: che.IStack };
+  stacksById: { [stack: string]: che.IStack };
   stacks: Array<any>;
   usedStackNames: Array<string>;
   remoteStackAPI: IRemoteStackAPI<any>;
@@ -71,10 +71,10 @@ export class CheStack {
     // remote call
     this.remoteStackAPI = <IRemoteStackAPI<any>>this.$resource('/api/stack', {}, {
       getStacks: {method: 'GET', url: '/api/stack?maxItems=50', isArray: true}, // todo: 50 items is temp solution while paging is not added
-      getStack: {method: 'GET', url: '/api/stack/:stackId'},
-      updateStack: {method: 'PUT', url: '/api/stack/:stackId'},
+      getStack: {method: 'GET', url: '/api/stack/:stack'},
+      updateStack: {method: 'PUT', url: '/api/stack/:stack'},
       createStack: {method: 'POST', url: '/api/stack'},
-      deleteStack: {method: 'DELETE', url: '/api/stack/:stackId'}
+      deleteStack: {method: 'DELETE', url: '/api/stack/:stack'}
     });
   }
 
@@ -216,29 +216,29 @@ export class CheStack {
 
   /**
    * Fetch pointed stack.
-   * @param stackId {string} - stack's id
+   * @param stack {string} - stack's id
    * @returns {ng.IPromise<any>}
    */
-  fetchStack(stackId: string): ng.IPromise<any> {
-    return this.remoteStackAPI.getStack({stackId: stackId}).$promise;
+  fetchStack(stack: string): ng.IPromise<any> {
+    return this.remoteStackAPI.getStack({stack: stack}).$promise;
   }
 
   /**
    * Update pointed stack.
-   * @param stackId {string} - stack's id
+   * @param stack {string} - stack's id
    * @param stack {che.IStack} - data for new stack
    * @returns {ng.IPromise<any>}
    */
-  updateStack(stackId: string, stack: che.IStack): ng.IPromise<any> {
-    return this.remoteStackAPI.updateStack({stackId: stackId}, stack).$promise;
+  updateStack(stack: string, stack: che.IStack): ng.IPromise<any> {
+    return this.remoteStackAPI.updateStack({stack: stack}, stack).$promise;
   }
 
   /**
    * Delete pointed stack.
-   * @param stackId {string} - stack's id
+   * @param stack {string} - stack's id
    * @returns {ng.IPromise<any>}
    */
-  deleteStack(stackId: string): ng.IPromise<any> {
-    return this.remoteStackAPI.deleteStack({stackId: stackId}).$promise;
+  deleteStack(stack: string): ng.IPromise<any> {
+    return this.remoteStackAPI.deleteStack({stack: stack}).$promise;
   }
 }

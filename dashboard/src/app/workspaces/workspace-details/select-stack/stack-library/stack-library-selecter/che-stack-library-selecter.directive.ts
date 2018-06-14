@@ -11,7 +11,7 @@
 'use strict';
 
 interface ISelecterScope extends ng.IScope {
-  stackId: string;
+  stack: string;
   select: Function;
 }
 
@@ -36,7 +36,7 @@ export class CheStackLibrarySelecter implements ng.IDirective {
       title: '@cheTitle',
       text: '@cheText',
       extraText: '@cheExtraText',
-      stackId: '@cheStackId',
+      stack: '@cheStackId',
       isActive: '=cheIsActive',
       isSelect: '=cheIsSelect'
     };
@@ -45,7 +45,7 @@ export class CheStackLibrarySelecter implements ng.IDirective {
   link($scope: ISelecterScope, element: ng.IAugmentedJQuery) {
     // select item
     $scope.select = () => {
-      $scope.$emit('event:library:selectStackId', $scope.stackId);
+      $scope.$emit('event:library:selectStackId', $scope.stack);
     };
 
     const jqTextWrapper  = element.find('.che-stack-library-selecter-descr'),

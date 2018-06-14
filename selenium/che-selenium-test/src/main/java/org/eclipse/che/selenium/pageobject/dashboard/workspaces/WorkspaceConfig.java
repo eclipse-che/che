@@ -10,13 +10,13 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig.Locators.CONFIG_EDITOR;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig.Locators.CONFIG_FORM;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -54,36 +54,21 @@ public class WorkspaceConfig {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(CONFIG_EDITOR), 20);
   }
 
-  public String createExpectedWorkspaceConfig(String workspaceName) {
-    String expectedWorkspaceConfTemplate = Joiner.on('\n').join(getConfFileContent());
-    return String.format(expectedWorkspaceConfTemplate, workspaceName);
+  public String createExpectedWorkspaceConfig(String workspaceName)
+      throws IOException, URISyntaxException {
+    String expectedWorkspaceConfTemplate = Joiner.on('\n').join(getConfigFileContent());
+    return format(expectedWorkspaceConfTemplate, workspaceName);
   }
 
-  private Path getConfigTemplatePath() {
-    URI fileUri;
+  private Path getConfigTemplatePath() throws URISyntaxException {
     URL fileUrl =
         getClass()
             .getResource("/org/eclipse/che/selenium/dashboard/expectedWorkspaceConfTemplate.txt");
 
-    try {
-      fileUri = fileUrl.toURI();
-    } catch (URISyntaxException ex) {
-      LOG.info("Parsed url: {} has wrong syntax and can't be converted to URI", fileUrl);
-      throw new RuntimeException(ex.getLocalizedMessage(), ex);
-    }
-
-    return Paths.get(fileUri);
+    return Paths.get(fileUrl.toURI());
   }
 
-  private List<String> getConfFileContent() {
-    List<String> result = null;
-    try {
-      result = Files.readAllLines(getConfigTemplatePath());
-    } catch (IOException ex) {
-      LOG.info("Error of reading the {} file", getConfigTemplatePath());
-      throw new RuntimeException(ex.getLocalizedMessage(), ex);
-    }
-
-    return result;
+  private List<String> getConfigFileContent() throws URISyntaxException, IOException {
+    return Files.readAllLines(getConfigTemplatePath());
   }
 }

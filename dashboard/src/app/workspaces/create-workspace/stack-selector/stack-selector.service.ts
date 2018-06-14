@@ -37,7 +37,7 @@ export class StackSelectorSvc extends Observable<any> {
   /**
    * Selected stack ID.
    */
-  private stackId: string;
+  private stack: string;
 
   /**
    * Default constructor that is using resource injection
@@ -75,23 +75,23 @@ export class StackSelectorSvc extends Observable<any> {
   }
 
   /**
-   * Sets stackId.
+   * Sets stack.
    *
-   * @param {string} stackId
+   * @param {string} stack
    */
-  setStackId(stackId: string): void {
-    this.onStackSelected(stackId);
+  setStackId(stack: string): void {
+    this.onStackSelected(stack);
   }
 
   /**
    * Callback which is called when stack is selected.
    *
-   * @param {string} stackId a stack ID
+   * @param {string} stack a stack ID
    */
-  onStackSelected(stackId: string): void {
-    this.stackId = stackId;
+  onStackSelected(stack: string): void {
+    this.stack = stack;
 
-    this.publish(stackId);
+    this.publish(stack);
   }
 
   /**
@@ -109,18 +109,18 @@ export class StackSelectorSvc extends Observable<any> {
    * @return {string}
    */
   getStackId(): string {
-    return this.stackId;
+    return this.stack;
   }
 
   /**
    * Returns stack by its ID.
    *
-   * @param {string} stackId a stack ID
+   * @param {string} stack a stack ID
    * @return {che.IStack}
    */
-  getStackById(stackId: string): che.IStack {
+  getStackById(stack: string): che.IStack {
     return this.getStacks().find((stack: che.IStack) => {
-      return stack.id === stackId;
+      return stack.id === stack;
     });
   }
 
