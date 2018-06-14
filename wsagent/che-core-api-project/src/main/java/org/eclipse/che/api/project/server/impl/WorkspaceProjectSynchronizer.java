@@ -15,6 +15,7 @@ import static org.eclipse.che.api.project.server.impl.ProjectDtoConverter.asDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
@@ -24,6 +25,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.project.shared.RegisteredProject;
@@ -120,9 +122,12 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer, Worksp
   }
 
   @Override
-  public Set<RegisteredProject> getProjects() throws ServerException {
+  public Set<ProjectConfig> getProjects() throws ServerException {
 
-    return unmodifiableSet(projectConfigRegistry.getAll());
+    WorkspaceConfig config = workspaceDto().getConfig();
+    Set<ProjectConfig> projectConfigs = new HashSet<>(config.getProjects());
+
+    return unmodifiableSet(projectConfigs);
   }
 
   private void add(ProjectConfig project) throws ServerException {
