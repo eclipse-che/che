@@ -58,7 +58,11 @@ public class TestWorkspaceInjector<T> implements MembersInjector<T> {
               : injectTestWorkspace.memoryGb();
 
       TestWorkspace testWorkspace =
-          testWorkspaceProvider.createWorkspace(testUser, memoryGb, injectTestWorkspace.template());
+          testWorkspaceProvider.createWorkspace(
+              testUser,
+              memoryGb,
+              injectTestWorkspace.template(),
+              injectTestWorkspace.startAfterCreation());
       testWorkspace.await();
 
       field.setAccessible(true);

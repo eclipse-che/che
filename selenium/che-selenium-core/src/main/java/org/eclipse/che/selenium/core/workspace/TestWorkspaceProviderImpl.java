@@ -78,9 +78,10 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   }
 
   @Override
-  public TestWorkspace createWorkspace(DefaultTestUser owner, int memoryGB, String template)
+  public TestWorkspace createWorkspace(
+      DefaultTestUser owner, int memoryGB, String template, boolean startAfterCreation)
       throws Exception {
-    if (poolSize > 0 && hasDefaultValues(owner, memoryGB, template)) {
+    if (poolSize > 0 && hasDefaultValues(owner, memoryGB, template, startAfterCreation)) {
       return doGetWorkspaceFromPool();
     }
 
@@ -88,14 +89,17 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         generateName(),
         owner,
         memoryGB,
+        startAfterCreation,
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(template),
         testWorkspaceServiceClientFactory.create(owner));
   }
 
-  private boolean hasDefaultValues(DefaultTestUser testUser, int memoryGB, String template) {
+  private boolean hasDefaultValues(
+      DefaultTestUser testUser, int memoryGB, String template, boolean startAfterCreation) {
     return memoryGB == defaultMemoryGb
         && WorkspaceTemplate.DEFAULT.equals(template)
-        && testUser.getEmail().equals(defaultUser.getEmail());
+        && testUser.getEmail().equals(defaultUser.getEmail())
+        && startAfterCreation;
   }
 
   private TestWorkspace doGetWorkspaceFromPool() throws Exception {
@@ -189,6 +193,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
                       name,
                       defaultUser,
                       defaultMemoryGb,
+                      true,
                       workspaceDtoDeserializer.deserializeWorkspaceTemplate(
                           WorkspaceTemplate.DEFAULT),
                       testWorkspaceServiceClient);
