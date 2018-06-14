@@ -8,24 +8,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client.keycloak.executor;
+package org.eclipse.che.selenium.core.utils.executor;
 
 import java.io.IOException;
-import org.eclipse.che.selenium.core.utils.process.ProcessAgentException;
 
 /**
- * Executor of command of 'keycloak/bin/kcadm.sh' command line application.
+ * Executes commands of CLI application.
  *
  * @author Dmytro Nochevnov
  */
-public interface KeycloakCommandExecutor {
+public interface CommandExecutor {
 
   /**
-   * Executes command-line interface command.
+   * Executes CLI application command.
    *
    * @param command CLI command to execute
    * @return response of CLI command
-   * @throws ProcessAgentException
+   * @throws IOException if there is a problem with command execution.
    */
   String execute(String command) throws IOException;
 }
