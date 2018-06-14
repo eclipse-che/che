@@ -12,7 +12,12 @@ package org.eclipse.che.ide.terminal.options;
 
 import org.eclipse.che.ide.collections.Jso;
 
-/** @author Evgen Vidolob */
+/**
+ * Options to configure xterm.js.
+ *
+ * @author Evgen Vidolob
+ * @author Oleksandr Andriienko
+ */
 public class TerminalOptionsJso extends Jso {
   protected TerminalOptionsJso() {}
 
@@ -26,11 +31,11 @@ public class TerminalOptionsJso extends Jso {
         }
     }-*/;
 
-  public native final TerminalThemeJso getTheme() /*-{
+  public final native TerminalThemeJso getTheme() /*-{
       return this.theme;
     }-*/;
 
-    public native final void setTheme(TerminalThemeJso theme) /*-{
+  public final native void setTheme(TerminalThemeJso theme) /*-{
         this.theme = theme;
     }-*/;
 }

@@ -15,7 +15,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * Custom keyDown handler for {@link TerminalJso}
  *
- * @author Alexander Andrienko
+ * @author Oleksandr Andriienko
  */
 public class CustomKeyEventTerminalHandler extends JavaScriptObject {
   protected CustomKeyEventTerminalHandler() {}

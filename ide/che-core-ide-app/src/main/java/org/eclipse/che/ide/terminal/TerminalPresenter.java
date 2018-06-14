@@ -45,6 +45,7 @@ import org.eclipse.che.requirejs.ModuleHolder;
  * The class defines methods which contains business logic to control machine's terminal.
  *
  * @author Dmitry Shnurenko
+ * @author Oleksandr Andriienko
  */
 public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate {
 
@@ -53,15 +54,15 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private static final String RESIZE_EVENT_NAME = "resize";
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
-  private final TerminalView                    view;
-  private final TerminalOptionsJso              options;
-  private final NotificationManager             notificationManager;
-  private final CoreLocalizationConstant        locale;
-  private final MachineImpl                     machine;
+  private final TerminalView view;
+  private final TerminalOptionsJso options;
+  private final NotificationManager notificationManager;
+  private final CoreLocalizationConstant locale;
+  private final MachineImpl machine;
   private final TerminalInitializePromiseHolder terminalHolder;
-  private final ModuleHolder                    moduleHolder;
-  private final AgentURLModifier                agentURLModifier;
-  private final ThemeAgent                      themeAgent;
+  private final ModuleHolder moduleHolder;
+  private final AgentURLModifier agentURLModifier;
+  private final ThemeAgent themeAgent;
   private final boolean focusOnOpen;
 
   private WebSocket socket;
@@ -173,7 +174,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
           terminal.on(
               RESIZE_EVENT_NAME,
               data -> {
-                TerminalGeometryJso geometry = (TerminalGeometryJso)data;
+                TerminalGeometryJso geometry = (TerminalGeometryJso) data;
                 setTerminalSize(geometry.getCols(), geometry.getRows());
               });
 
@@ -188,20 +189,20 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
         });
 
     socket.setOnErrorHandler(
-            () -> {
-              connected = false;
+        () -> {
+          connected = false;
 
-              if (countRetry == 0) {
-                view.showErrorMessage(locale.terminalErrorStart());
-                notificationManager.notify(
-                    locale.connectionFailedWithTerminal(),
-                    locale.terminalErrorConnection(),
-                    FAIL,
-                    FLOAT_MODE);
-              } else {
-                reconnect();
-              }
-            });
+          if (countRetry == 0) {
+            view.showErrorMessage(locale.terminalErrorStart());
+            notificationManager.notify(
+                locale.connectionFailedWithTerminal(),
+                locale.terminalErrorConnection(),
+                FAIL,
+                FLOAT_MODE);
+          } else {
+            reconnect();
+          }
+        });
   }
 
   private TerminalJso createTerminal() {

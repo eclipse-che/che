@@ -11,21 +11,21 @@
 package org.eclipse.che.ide.terminal.addons;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
 import org.eclipse.che.ide.terminal.TerminalGeometryJso;
 
 /**
- * @author Alexander Andrienko
+ * Wrapper for xterm.js Fit addon. Fit addon uses for calculation terminal size on resize operation.
+ *
+ * @author Oleksandr Andriienko
  */
 public class FitAddonJso extends JavaScriptObject {
-    protected FitAddonJso() {
-    }
+  protected FitAddonJso() {}
 
-    public static native FitAddonJso create(JavaScriptObject fitJSO) /*-{
+  public static native FitAddonJso create(JavaScriptObject fitJSO) /*-{
         return fitJSO;
     }-*/;
 
-    public static native TerminalGeometryJso proposeGeometry() /*-{
+  public static native TerminalGeometryJso proposeGeometry() /*-{
         return this.proposeGeometry();
     }-*/;
 }

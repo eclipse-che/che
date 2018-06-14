@@ -18,7 +18,7 @@ import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
  * Special factory for creating {@link TerminalPresenter} instances.
  *
  * @author Dmitry Shnurenko
- * @author Alexander Andrienko
+ * @author Oleksandr Andriienko
  */
 public interface TerminalFactory {
 
@@ -29,5 +29,8 @@ public interface TerminalFactory {
    * @param options options for new terminal
    * @return an instance of {@link TerminalPresenter}
    */
-  TerminalPresenter create(@Assisted MachineImpl machine, @Assisted TerminalOptionsJso options, @Assisted boolean focusOnOpen);
+  TerminalPresenter create(
+      @Assisted MachineImpl machine,
+      @Assisted TerminalOptionsJso options,
+      @Assisted boolean focusOnOpen);
 }

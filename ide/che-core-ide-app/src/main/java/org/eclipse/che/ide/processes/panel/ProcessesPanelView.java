@@ -112,7 +112,8 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
      *
      * @param machineId id of machine in which the terminal will be added
      * @param options context creation terminal. @see {@link TerminalOptionsJso}
-     * @param  focusOnOpen if true than set focus after terminal opening, otherwise open unfocused terminal.
+     * @param focusOnOpen if true than set focus after terminal opening, otherwise open unfocused
+     *     terminal.
      */
     void onAddTerminal(String machineId, TerminalOptionsJso options, boolean focusOnOpen);
 

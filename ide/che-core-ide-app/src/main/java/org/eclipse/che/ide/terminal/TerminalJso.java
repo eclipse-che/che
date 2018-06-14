@@ -19,7 +19,7 @@ import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
  * GWT binding to term.js script
  *
  * @author Evgen Vidolob
- * @author Alexander Andrienko
+ * @author Oleksandr Andriienko
  */
 class TerminalJso extends JavaScriptObject {
   protected TerminalJso() {}
@@ -36,7 +36,8 @@ class TerminalJso extends JavaScriptObject {
         this.terminal.open(element);
     }-*/;
 
-  public final native void attachCustomKeyEventHandler(CustomKeyEventTerminalHandler customKeyEventHandler) /*-{
+  public final native void attachCustomKeyEventHandler(
+      CustomKeyEventTerminalHandler customKeyEventHandler) /*-{
       this.terminal.attachCustomKeyEventHandler(customKeyEventHandler);
     }-*/;
 
@@ -48,7 +49,7 @@ class TerminalJso extends JavaScriptObject {
         return this.terminal.proposeGeometry();
     }-*/;
 
-  public final native <T> void  on(String event, Operation<T> operation) /*-{
+  public final native <T> void on(String event, Operation<T> operation) /*-{
       this.terminal.on(event, $entry(function (data) {
             operation.@org.eclipse.che.api.promises.client.Operation::apply(*)(data);
         }));

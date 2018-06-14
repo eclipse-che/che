@@ -107,8 +107,8 @@ import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoProvider;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoWidgetFactory;
 import org.eclipse.che.ide.terminal.TerminalFactory;
-import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 import org.eclipse.che.ide.terminal.TerminalPresenter;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
@@ -475,7 +475,8 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param options terminal options
    */
   @Override
-  public void onAddTerminal(final String machineId, TerminalOptionsJso options, boolean focusOnOpen) {
+  public void onAddTerminal(
+      final String machineId, TerminalOptionsJso options, boolean focusOnOpen) {
     onAddTerminal(machineId, options, true, focusOnOpen);
   }
 
@@ -486,7 +487,8 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param options terminal options
    * @param activate activate terminal tab
    */
-  public void onAddTerminal(final String machineId, TerminalOptionsJso options, boolean activate, boolean focusOnOpen) {
+  public void onAddTerminal(
+      final String machineId, TerminalOptionsJso options, boolean activate, boolean focusOnOpen) {
     final MachineImpl machine = getMachine(machineId);
     if (machine == null) {
       notificationManager.notify(

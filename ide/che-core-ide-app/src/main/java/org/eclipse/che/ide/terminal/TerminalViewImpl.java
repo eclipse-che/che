@@ -20,15 +20,13 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-
-import org.eclipse.che.ide.util.loging.Log;
-
 import javax.validation.constraints.NotNull;
 
 /**
  * The class contains methods to display terminal.
  *
  * @author Dmitry Shnurenko
+ * @author Oleksandr Andriienko
  */
 final class TerminalViewImpl extends Composite implements TerminalView, Focusable, RequiresResize {
 
@@ -80,11 +78,11 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   @Override
   public void onResize() {
     if (terminal != null) {
-        if (isOpen) {
-            resizeTimer.schedule(200);
-        } else {
-            open();
-        }
+      if (isOpen) {
+        resizeTimer.schedule(200);
+      } else {
+        open();
+      }
     }
   }
 
@@ -97,13 +95,13 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
       };
 
   private void open() {
-      if (getElement().getOffsetWidth() > 0 && getElement().getOffsetHeight() > 0) {
-          terminal.open(terminalPanel.getElement());
-          if (focusOnOpen) {
-              terminal.focus();
-          }
-          isOpen = true;
+    if (getElement().getOffsetWidth() > 0 && getElement().getOffsetHeight() > 0) {
+      terminal.open(terminalPanel.getElement());
+      if (focusOnOpen) {
+        terminal.focus();
       }
+      isOpen = true;
+    }
   }
 
   private void resizeTerminal() {
@@ -112,7 +110,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     int y = geometryJso.getRows();
 
     if (x > 0 && y > 0 && isVisible() && isAttached()) {
-        terminal.resize(geometryJso.getCols(), geometryJso.getRows());
+      terminal.resize(geometryJso.getCols(), geometryJso.getRows());
     }
   }
 
@@ -127,7 +125,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   @Override
   public void setFocus(boolean focused) {
     if (terminal != null && isOpen) {
-        terminal.focus();
+      terminal.focus();
     }
   }
 

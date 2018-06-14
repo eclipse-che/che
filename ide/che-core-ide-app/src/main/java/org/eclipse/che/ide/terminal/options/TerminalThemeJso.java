@@ -13,13 +13,15 @@ package org.eclipse.che.ide.terminal.options;
 import org.eclipse.che.ide.collections.Jso;
 
 /**
- * @author Alexander Andrienko
+ * xterm.js theme definition.
+ *
+ * @author Oleksandr Andriienko
  */
 public class TerminalThemeJso extends Jso {
 
-    protected TerminalThemeJso() {}
+  protected TerminalThemeJso() {}
 
-    public static native TerminalThemeJso create() /*-{
+  public static native TerminalThemeJso create() /*-{
         return {
             cursor: "white",
             background: "black",
@@ -27,15 +29,15 @@ public class TerminalThemeJso extends Jso {
         }
     }-*/;
 
-    public native final void setCursor(String cursorColor) /*-{
+  public final native void setCursor(String cursorColor) /*-{
         this.cursor = cursorColor;
     }-*/;
 
-    public native final void setBackGround(String backGroundColor) /*-{
+  public final native void setBackGround(String backGroundColor) /*-{
         this.background = backGroundColor;
     }-*/;
 
-    public native final void setForeGround(String foreGroundColor) /*-{
+  public final native void setForeGround(String foreGroundColor) /*-{
         this.foreground = foreGroundColor;
     }-*/;
 }
