@@ -11,8 +11,8 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.selenium.core.client.keycloak.executor.DockerKeycloakCommandExecutor;
-import org.eclipse.che.selenium.core.client.keycloak.executor.KeycloakCommandExecutor;
+import org.eclipse.che.selenium.core.client.keycloak.cli.DockerKeycloakCliCommandExecutor;
+import org.eclipse.che.selenium.core.client.keycloak.cli.KeycloakCliCommandExecutor;
 import org.eclipse.che.selenium.core.workspace.CheTestDockerWorkspaceLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 
@@ -22,6 +22,6 @@ public class CheSeleniumDockerModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(TestWorkspaceLogsReader.class).to(CheTestDockerWorkspaceLogsReader.class);
-    bind(KeycloakCommandExecutor.class).to(DockerKeycloakCommandExecutor.class);
+    bind(KeycloakCliCommandExecutor.class).to(DockerKeycloakCliCommandExecutor.class);
   }
 }

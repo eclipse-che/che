@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
-import org.eclipse.che.selenium.core.client.keycloak.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.client.keycloak.cli.KeycloakCliClient;
 import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,23 +33,23 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
 
   private final DefaultTestUser defaultTestUser;
   private final boolean isNewUser;
-  private final KeycloakAdminConsoleClient keycloakAdminConsoleClient;
+  private final KeycloakCliClient keycloakCliClient;
 
   @Inject
   public MultiUserCheDefaultTestUserProvider(
       TestUserFactory<DefaultTestUser> defaultTestUserFactory,
-      KeycloakAdminConsoleClient keycloakAdminConsoleClient,
+      KeycloakCliClient keycloakCliClient,
       MultiUserCheAdminTestUserProvider adminTestUserProvider,
       @Named("che.testuser.name") String name,
       @Named("che.testuser.email") String email,
       @Named("che.testuser.password") String password,
       @Named("che.testuser.offline_token") String offlineToken) {
-    this.keycloakAdminConsoleClient = keycloakAdminConsoleClient;
+    this.keycloakCliClient = keycloakCliClient;
     if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
       DefaultTestUser testUser;
       Boolean isNewUser;
       try {
-        testUser = keycloakAdminConsoleClient.createDefaultUser(this);
+        testUser = keycloakCliClient.createDefaultUser(this);
         isNewUser = true;
       } catch (IOException e) {
         LOG.warn(
@@ -91,7 +91,7 @@ public class MultiUserCheDefaultTestUserProvider implements DefaultTestUserProvi
   @Override
   public void delete() throws IOException {
     if (isNewUser) {
-      keycloakAdminConsoleClient.delete(defaultTestUser);
+      keycloakCliClient.delete(defaultTestUser);
     }
   }
 }
