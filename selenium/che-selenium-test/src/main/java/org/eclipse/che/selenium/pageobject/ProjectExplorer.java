@@ -243,6 +243,10 @@ public class ProjectExplorer {
     waitProjectExplorer(EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 
+  public void waitProjectExplorerIsNotPresent(int timeout) {
+    seleniumWebDriverHelper.waitInvisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
+  }
+
   /**
    * Waits appearance of the IDE Project Explorer
    *
