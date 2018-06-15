@@ -106,14 +106,12 @@ public class CreateWorkspaceFromPythonStackTest {
   }
 
   private void switchToIdeAndWaitWorkspaceIsReadyToUse() {
-    // switch to the IDE and wait for workspace is ready to use
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   private void waitProjectInitialization(String projectName) {
-    // wait for projects initialization
     projectExplorer.waitItem(projectName);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();
@@ -140,7 +138,7 @@ public class CreateWorkspaceFromPythonStackTest {
     projectExplorer.openItemByPath(projectName + "/" + fileName);
     editor.waitTabIsPresent(fileName);
 
-    // check a language sever initialized
+    // check a language server initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(textInTerminal, ELEMENT_TIMEOUT_SEC);
   }
