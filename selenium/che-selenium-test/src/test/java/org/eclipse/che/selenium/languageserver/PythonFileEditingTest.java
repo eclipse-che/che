@@ -13,17 +13,16 @@ package org.eclipse.che.selenium.languageserver;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.CPP;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.PYTHON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.openqa.selenium.Keys.F4;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -32,7 +31,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -60,10 +58,7 @@ public class PythonFileEditingTest {
     URL resource =
         PythonFileEditingTest.this.getClass().getResource("/projects/console-python3-simple");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        CPP); // TODO change project type to PYTHON
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PYTHON);
     ide.open(workspace);
   }
 
@@ -108,13 +103,7 @@ public class PythonFileEditingTest {
     editor.typeTextIntoEditor("\n\n");
     editor.typeTextIntoEditor("object = MyClass()\nprint(object.");
 
-    try {
-      editor.launchAutocompleteAndWaitContainer();
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9148", ex);
-    }
-
+    editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("function");
     editor.waitTextIntoAutocompleteContainer("var");
     editor.waitTextIntoAutocompleteContainer("variable");
