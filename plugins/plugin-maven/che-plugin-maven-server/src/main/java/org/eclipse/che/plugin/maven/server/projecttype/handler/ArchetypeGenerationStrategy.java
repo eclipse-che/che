@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.ide.maven.tools.MavenArtifact;
 import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGenerator;
@@ -41,10 +42,13 @@ import org.eclipse.che.plugin.maven.shared.MavenArchetype;
 public class ArchetypeGenerationStrategy implements GeneratorStrategy {
 
   private final ArchetypeGenerator archetypeGenerator;
+  private final RootDirPathProvider rootDirPathProvider;
 
   @Inject
-  public ArchetypeGenerationStrategy(ArchetypeGenerator archetypeGenerator) {
+  public ArchetypeGenerationStrategy(
+      ArchetypeGenerator archetypeGenerator, RootDirPathProvider rootDirPathProvider) {
     this.archetypeGenerator = archetypeGenerator;
+    this.rootDirPathProvider = rootDirPathProvider;
   }
 
   public String getId() {
@@ -110,6 +114,6 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
     mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectName));
     mavenArtifact.setVersion(getFirst(version.getList(), DEFAULT_VERSION));
     archetypeGenerator.generateFromArchetype(
-        projectName, new File("/projects"), mavenArchetype, mavenArtifact);
+        projectName, new File(rootDirPathProvider.get()), mavenArchetype, mavenArtifact);
   }
 }
