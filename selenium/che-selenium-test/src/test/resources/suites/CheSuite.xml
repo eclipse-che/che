@@ -266,6 +266,7 @@
           <class name="org.eclipse.che.selenium.refactor.types.TestEnumerationsTest"/>
           <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>

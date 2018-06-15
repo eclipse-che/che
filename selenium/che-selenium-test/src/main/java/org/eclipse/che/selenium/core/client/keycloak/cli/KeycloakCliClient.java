@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client.keycloak;
+package org.eclipse.che.selenium.core.client.keycloak.cli;
 
 import static java.lang.String.format;
 
@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
-import org.eclipse.che.selenium.core.client.keycloak.executor.KeycloakCommandExecutor;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -34,8 +33,8 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class KeycloakAdminConsoleClient {
-  private static final Logger LOG = LoggerFactory.getLogger(KeycloakAdminConsoleClient.class);
+public class KeycloakCliClient {
+  private static final Logger LOG = LoggerFactory.getLogger(KeycloakCliClient.class);
   private static final Pattern EXTRACT_USER_ID_PATTERN =
       Pattern.compile("^.*Created new user with id '(.*)'.*$", Pattern.DOTALL);
 
@@ -45,10 +44,10 @@ public class KeycloakAdminConsoleClient {
   private final TestUserFactory<DefaultTestUser> defaultTestUserFactory;
   private final TestUserFactory<TestUserImpl> testUserFactory;
 
-  @Inject private KeycloakCommandExecutor executor;
+  @Inject private KeycloakCliCommandExecutor executor;
 
   @Inject
-  public KeycloakAdminConsoleClient(
+  public KeycloakCliClient(
       TestUserFactory<TestUserImpl> testUserFactory,
       TestUserFactory<DefaultTestUser> defaultTestUserFactory) {
     this.testUserFactory = testUserFactory;

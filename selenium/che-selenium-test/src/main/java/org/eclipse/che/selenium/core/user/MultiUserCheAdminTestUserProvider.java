@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import javax.inject.Singleton;
-import org.eclipse.che.selenium.core.client.keycloak.KeycloakAdminConsoleClient;
+import org.eclipse.che.selenium.core.client.keycloak.cli.KeycloakCliClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
   private AdminTestUser adminTestUser;
 
   @Inject private TestUserFactory<AdminTestUser> adminTestUserFactory;
-  @Inject private KeycloakAdminConsoleClient keycloakAdminConsoleClient;
+  @Inject private KeycloakCliClient keycloakCliClient;
 
   @Inject
   @Named("che.admin.name")
@@ -63,7 +63,7 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
       }
 
       adminTestUser = adminTestUserFactory.create(name, email, password, offlineToken, this);
-      keycloakAdminConsoleClient.setupAdmin(adminTestUser);
+      keycloakCliClient.setupAdmin(adminTestUser);
 
       LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());
     }
