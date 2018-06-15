@@ -16,7 +16,7 @@ import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 
 /**
  * The visual part of Preview view that has an ability to show preview information about the

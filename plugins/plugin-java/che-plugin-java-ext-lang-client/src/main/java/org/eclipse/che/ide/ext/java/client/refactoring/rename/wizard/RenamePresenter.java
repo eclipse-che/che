@@ -13,6 +13,8 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.jdt.ls.extension.api.RefactoringSeverity.INFO;
+import static org.eclipse.che.jdt.ls.extension.api.RefactoringSeverity.OK;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
