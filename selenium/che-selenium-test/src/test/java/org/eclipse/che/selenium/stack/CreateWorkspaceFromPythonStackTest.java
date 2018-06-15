@@ -74,7 +74,7 @@ public class CreateWorkspaceFromPythonStackTest {
   }
 
   @Test
-  public void createWorkspaceFromPythonStackTest() {
+  public void checkWorkspaceCreationFromPythonStack() {
     createWorkspaceWithProjectFromStack(PYTHON.getId(), WORKSPACE_NAME, PROJECT_NAME);
 
     switchToIdeAndWaitWorkspaceIsReadyToUse();
@@ -85,7 +85,7 @@ public class CreateWorkspaceFromPythonStackTest {
     startCommandAndCheckMessageInTerminal(
         PROJECT_NAME, RUN, "console-python3-simple:run", "Hello, world!");
 
-    checkLanguageServer(PROJECT_NAME, PYTHON_FILE_NAME, LS_INIT_MESSAGE);
+    checkLanguageServerInitialization(PROJECT_NAME, PYTHON_FILE_NAME, LS_INIT_MESSAGE);
   }
 
   private void createWorkspaceWithProjectFromStack(
@@ -126,13 +126,15 @@ public class CreateWorkspaceFromPythonStackTest {
       ContextMenuCommandGoals commandsGoal,
       String commandName,
       String expectedMessage) {
+    projectExplorer.waitAndSelectItem(projectName);
     projectExplorer.invokeCommandWithContextMenu(commandsGoal, projectName, commandName);
     consoles.waitTabNameProcessIsPresent(commandName);
     consoles.waitProcessInProcessConsoleTree(commandName);
     consoles.waitExpectedTextIntoConsole(expectedMessage, WIDGET_TIMEOUT_SEC);
   }
 
-  private void checkLanguageServer(String projectName, String fileName, String textInTerminal) {
+  private void checkLanguageServerInitialization(
+      String projectName, String fileName, String textInTerminal) {
     projectExplorer.waitAndSelectItem(projectName);
     projectExplorer.openItemByPath(projectName);
     projectExplorer.openItemByPath(projectName + "/" + fileName);
