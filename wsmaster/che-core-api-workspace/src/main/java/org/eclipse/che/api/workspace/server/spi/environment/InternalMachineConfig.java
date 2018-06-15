@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
  * Machine Config to use inside infrastructure.
@@ -52,8 +51,7 @@ public class InternalMachineConfig {
       Map<String, ? extends ServerConfig> servers,
       Map<String, String> env,
       Map<String, String> attributes,
-      Map<String, ? extends Volume> volumes)
-      throws InfrastructureException {
+      Map<String, ? extends Volume> volumes) {
     this();
     if (servers != null) {
       this.servers.putAll(servers);

@@ -46,6 +46,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
 import org.eclipse.che.ide.api.editor.EditorWithErrors.EditorState;
+import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -245,11 +246,6 @@ public class EditorPartStackPresenter extends PartStackPresenter
 
             boolean isReadOnly =
                 ((EditorPartPresenter) source).getEditorInput().getFile().isReadOnly();
-            if (propId == EditorPartPresenter.PROP_INPUT) {
-              editorTab.setReadOnlyMark(isReadOnly);
-              return;
-            }
-
             if (!isReadOnly && propId == EditorPartPresenter.PROP_DIRTY) {
               editorTab.setUnsavedDataMark(((EditorPartPresenter) source).isDirty());
             }
@@ -286,6 +282,12 @@ public class EditorPartStackPresenter extends PartStackPresenter
             }
           });
     }
+
+    if (editorPart instanceof HasReadOnlyProperty) {
+      boolean isReadOnly = editorPart.getEditorInput().getFile().isReadOnly();
+      editorTab.setReadOnlyMark(isReadOnly);
+    }
+
     view.selectTab(editorPart);
   }
 

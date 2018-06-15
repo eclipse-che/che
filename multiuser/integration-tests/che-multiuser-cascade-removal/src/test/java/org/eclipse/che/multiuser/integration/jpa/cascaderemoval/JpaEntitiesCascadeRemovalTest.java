@@ -82,6 +82,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -253,6 +254,10 @@ public class JpaEntitiesCascadeRemovalTest {
                 Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class);
                 Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
                 MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class);
+                bind(String.class)
+                    .annotatedWith(Names.named("che.workspace.feature.api"))
+                    .toInstance("");
+                MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
                 Multibinder.newSetBinder(binder(), ResourceType.class)
                     .addBinding()
                     .to(RamResourceType.class);

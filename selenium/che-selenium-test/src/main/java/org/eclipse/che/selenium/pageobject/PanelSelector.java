@@ -15,27 +15,28 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraiev */
 @Singleton
 public class PanelSelector {
 
-  private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public PanelSelector(SeleniumWebDriver seleniumWebDriver) {
-    this.seleniumWebDriver = seleniumWebDriver;
+  public PanelSelector(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   public interface PanelTypes {
-    String LEFT_BOTTOM = "gwt-debug-selectorLeftBottom";
+    String LEFT_BOTTOM_ID = "gwt-debug-selectorLeftBottom";
+    String LEFT_RIGHT_BOTTOM_ID = "gwt-debug-selectorLeftRightBottom";
   }
 
   private interface Locators {
@@ -51,22 +52,18 @@ public class PanelSelector {
 
   /** click on the 'panel selector' button */
   public void clickPanelSelectorBtn() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(panelSelectorBtn))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(panelSelectorBtn, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** wait 'panel selector popup' is open */
   public void waitPanelSelectorPopupOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(panelSelectorPopup));
+    seleniumWebDriverHelper.waitVisibility(panelSelectorPopup, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** wait 'panel selector popup' is closed */
   public void waitPanelSelectorPopupClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.PANEL_SELECTOR_POPUP)));
+    seleniumWebDriverHelper.waitInvisibility(
+        By.id(Locators.PANEL_SELECTOR_POPUP), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
@@ -75,9 +72,7 @@ public class PanelSelector {
    * @param typePanel is type panel into panel selector popup
    */
   public void clickPanelIntoSelectorPopup(String typePanel) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(typePanel)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.id(typePanel), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     waitPanelSelectorPopupClosed();
   }
 

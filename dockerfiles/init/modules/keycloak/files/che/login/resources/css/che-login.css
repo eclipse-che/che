@@ -180,6 +180,7 @@ div#kc-header {
 
 div#kc-registration {
     font-size: 20px;
+    margin-top: 20px;
     margin-bottom: 20px;
 }
 
@@ -198,32 +199,22 @@ div#kc-social-providers ul {
     list-style: none;
     margin: 0;
     padding: 0;
+
+    font-size: 18px;
 }
 
 div#kc-social-providers ul li {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 div#kc-social-providers ul li span {
     display: inline;
-    width: 100px;
 }
 
 a.zocial {
     border: none;
     padding-top: 0.2em;
     padding-bottom: 0.2em;
-}
-
-#zocial-image-github {
-    width: 48px;
-    height: 48px;
-    background-size: cover;
-    background-image: url("../img/logo-github@3x.png");
-}
-
-#zocial-image-github:hover {
-    background-image: url("../img/logo-github-hover@3x.png");
 }
 
 #logo-banner {

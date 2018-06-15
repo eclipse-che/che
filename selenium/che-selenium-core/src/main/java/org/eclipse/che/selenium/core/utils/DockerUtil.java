@@ -47,7 +47,7 @@ public class DockerUtil {
     String command = "docker run --rm --net host eclipse/che-ip:nightly";
 
     try {
-      String cheIpAddress = processAgent.execute(command);
+      String cheIpAddress = processAgent.process(command);
 
       if (cheIpAddress != null && cheHostParameter.contains(cheIpAddress)) {
         return true;
@@ -71,7 +71,7 @@ public class DockerUtil {
     String copyCommand =
         format("docker cp %1$s:%2$s %3$s", containerId, pathInsideContainer, copyTo);
 
-    processAgent.execute(copyCommand);
+    processAgent.process(copyCommand);
   }
 
   /**
@@ -88,7 +88,7 @@ public class DockerUtil {
             "docker ps -q --filter='name=selenium_chromenode*' | xargs docker inspect --format '{{ .Id }} {{ .NetworkSettings.Networks.selenium_selenium_grid_internal.IPAddress }}' | grep %s | awk 'NR>0 {print $1;}'",
             IP);
 
-    return processAgent.execute(getContainerIdCommand);
+    return processAgent.process(getContainerIdCommand);
   }
 
   /**
@@ -102,6 +102,6 @@ public class DockerUtil {
     String deleteInsideContainer =
         format("docker exec -i %s sh -c 'rm -fr %s'", gridNodeContainerId, pathToDelete);
 
-    processAgent.execute(deleteInsideContainer);
+    processAgent.process(deleteInsideContainer);
   }
 }

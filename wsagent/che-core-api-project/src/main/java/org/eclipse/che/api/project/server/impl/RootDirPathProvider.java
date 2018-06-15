@@ -12,21 +12,23 @@ package org.eclipse.che.api.project.server.impl;
 
 import com.google.inject.Inject;
 import java.io.File;
+import java.nio.file.Paths;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
- * Provides path for projects root directory using: env variable 'CHE_PROJECTS_ROOT' (which is set
- * by workspace API == "project" volume configured) if not - uses 'che.user.workspaces.storage'
- * property otherwise - default with '/project' directory (backward compatible solution)
+ * Provides ABSOLUTE path for projects root directory using: env variable 'CHE_PROJECTS_ROOT' (which
+ * is set by workspace API == "project" volume configured) if not - uses
+ * 'che.user.workspaces.storage' property otherwise - default with '/project' directory (backward
+ * compatible solution)
  *
  * @author gazarenkov
  */
 @Singleton
 public class RootDirPathProvider implements Provider<String> {
 
-  private static String DEF = "/projects";
+  public static String DEFAULT = "/projects";
 
   @Inject(optional = true)
   @Named("che.user.workspaces.storage")
@@ -40,9 +42,12 @@ public class RootDirPathProvider implements Provider<String> {
       path = rootFile.getPath();
     }
     if (path == null) {
-      path = DEF;
+      path = DEFAULT;
     }
 
-    return path;
+    if (Paths.get(path).isAbsolute()) {
+      return path;
+    }
+    throw new IllegalArgumentException("Path to the project should be declared as absolute path");
   }
 }

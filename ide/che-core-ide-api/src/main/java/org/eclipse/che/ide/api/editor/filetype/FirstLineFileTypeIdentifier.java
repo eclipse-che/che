@@ -14,6 +14,7 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import java.util.Collections;
 import java.util.List;
+import javax.inject.Singleton;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -22,6 +23,7 @@ import org.eclipse.che.ide.util.loging.Log;
  *
  * @author "Mickaël Leduque"
  */
+@Singleton
 public class FirstLineFileTypeIdentifier implements FileTypeIdentifier {
 
   // format: <?xml

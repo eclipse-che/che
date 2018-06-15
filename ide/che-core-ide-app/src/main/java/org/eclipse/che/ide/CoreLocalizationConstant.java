@@ -1186,6 +1186,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("message.projectCreated")
   String projectCreated(String projectName);
 
+  @Key("message.switch.editors.in.readOnly.mode")
+  String messageSwitchEditorsInReadOnlyMode();
+
   @Key("ssh.connect.info")
   String sshConnectInfo(
       String machineName,

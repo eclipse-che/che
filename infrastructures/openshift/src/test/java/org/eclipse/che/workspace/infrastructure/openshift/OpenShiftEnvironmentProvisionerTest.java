@@ -15,6 +15,7 @@ import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
@@ -52,6 +53,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private RamLimitProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
+  @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -71,7 +73,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             ramLimitProvisioner,
             installerServersPortProvisioner,
             logsVolumeMachineProvisioner,
-            podTerminationGracePeriodProvisioner);
+            podTerminationGracePeriodProvisioner,
+            imagePullSecretProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -83,7 +86,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             tlsRouteProvisioner,
             restartPolicyRewriter,
             ramLimitProvisioner,
-            podTerminationGracePeriodProvisioner);
+            podTerminationGracePeriodProvisioner,
+            imagePullSecretProvisioner);
   }
 
   @Test
@@ -104,6 +108,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder
         .verify(podTerminationGracePeriodProvisioner)
         .provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(imagePullSecretProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

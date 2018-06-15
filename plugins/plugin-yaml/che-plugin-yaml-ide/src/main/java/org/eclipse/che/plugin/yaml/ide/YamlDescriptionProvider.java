@@ -18,7 +18,7 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 public class YamlDescriptionProvider implements Provider<LanguageDescription> {
   private static final String LANGUAGE_ID = "yaml";
   private static final String[] EXTENSIONS = new String[] {"yaml", "yml"};
-  private static final String MIME_TYPE = "text/yaml";
+  private static final String MIME_TYPE = "text/x-yaml";
 
   @Override
   public LanguageDescription get() {

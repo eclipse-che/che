@@ -13,4 +13,4 @@ dependencies:
   - name: che-keycloak
     repository: file://./charts/che-keycloak/
     version: 1.0.0
-    condition: global.multiuser
+    condition: global.cheDedicatedKeycloak,global.multiuser

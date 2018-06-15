@@ -13,7 +13,7 @@ package org.eclipse.che.infrastructure.docker.client;
 import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfig;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
 
 /** @author Mykola Morhun */
 public class NoOpDockerRegistryDynamicAuthResolverImpl

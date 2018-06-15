@@ -18,6 +18,7 @@ import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelViewImpl;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
 
 /**
  * Implementation of {@link SelectableChangesPanelView}.
@@ -32,8 +33,11 @@ public class SelectableChangesPanelViewImpl extends ChangesPanelViewImpl
 
   @Inject
   public SelectableChangesPanelViewImpl(
-      GitResources resources, GitLocalizationConstant locale, NodesResources nodesResources) {
-    super(resources, locale, nodesResources);
+      GitResources resources,
+      GitLocalizationConstant locale,
+      NodesResources nodesResources,
+      ClipboardButtonBuilder clipboardButtonBuilder) {
+    super(resources, locale, nodesResources, clipboardButtonBuilder);
   }
 
   @Override
