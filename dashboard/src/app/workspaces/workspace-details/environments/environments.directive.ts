@@ -45,7 +45,7 @@ export class WorkspaceEnvironments {
       workspaceRuntime: '=',
       workspaceCreationFlow: '=',
       workspaceName: '=',
-      stack: '=',
+      stackId: '=',
       environmentName: '=',
       machinesViewStatus: '=',
       workspaceConfig: '=',

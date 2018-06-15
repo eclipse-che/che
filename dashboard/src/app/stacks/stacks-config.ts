@@ -96,9 +96,9 @@ export class StacksConfig {
             }]
           }
         })
-        .accessWhen('/stack/:stack', {
+        .accessWhen('/stack/:stackId', {
           title: (params: any) => {
-            return params.stack;
+            return params.stackId;
           },
           templateUrl: 'app/stacks/stack-details/stack.html',
           controller: 'StackController',
@@ -106,9 +106,9 @@ export class StacksConfig {
           resolve: {
             initData: ['$route', 'cheStack', ($route: ng.route.IRouteService, cheStack: CheStack) => {
               return cheStack.fetchStacks().then(() => {
-                const {stack} = $route.current.params;
-                const stack = cheStack.getStackById(stack);
-                return {stack, stack};
+                const {stackId} = $route.current.params;
+                const stack = cheStack.getStackById(stackId);
+                return {stackId, stack};
               });
             }]
           }

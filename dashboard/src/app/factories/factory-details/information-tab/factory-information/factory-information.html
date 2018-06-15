@@ -78,7 +78,7 @@
     </md-radio-group>
     <div ng-if="factoryInformationController.stackRecipeMode === 'from-stack'">
       <ng-form name="factoryInformationController.factoryInformationForm">
-        <workspace-select-stack workspace-stack-on-change="factoryInformationController.onWorkspaceStackChanged(config, stack)"
+        <workspace-select-stack workspace-stack-on-change="factoryInformationController.onWorkspaceStackChanged(config, stackId)"
                                 workspace-name="factoryInformationController.workspaceName"
                                 environment-name="factoryInformationController.environmentName"
                                 workspace-imported-recipe="factoryInformationController.workspaceImportedRecipe"></workspace-select-stack>

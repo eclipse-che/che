@@ -295,7 +295,7 @@ declare namespace che {
   export interface IWorkspaceAttributes {
     created: number;
     updated?: number;
-    stack?: string;
+    stackId?: string;
     errorMessage?: string;
     [propName: string]: string | number;
   }

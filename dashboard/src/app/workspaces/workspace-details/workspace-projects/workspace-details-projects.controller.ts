@@ -147,7 +147,7 @@ export class WorkspaceDetailsProjectsCtrl {
       return;
     }
     this.workspaceDetails = workspaceDetails;
-    this.stackSelectorSvc.setStackId(this.workspaceDetails.attributes.stack);
+    this.stackSelectorSvc.setStackId(this.workspaceDetails.attributes.stackId);
     this.cheListHelper.setList(this.workspaceDetails.config.projects, 'name');
   }
 

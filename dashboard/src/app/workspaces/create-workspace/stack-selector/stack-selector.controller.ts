@@ -108,18 +108,18 @@ export class StackSelectorController {
    * Stack's icons
    */
   stackIconLinks: {
-    [stack: string]: string
+    [stackId: string]: string
   };
   /**
    * Stack's machines.
    */
   stackMachines: {
-    [stack: string]: Array<{[machineProp: string]: string|number}>
+    [stackId: string]: Array<{[machineProp: string]: string|number}>
   };
   /**
    * Callback which should be called when stack is selected.
    */
-  onStackSelect: (data: {stack: string}) => void;
+  onStackSelect: (data: {stackId: string}) => void;
   /**
    * The list of tags selected by user.
    */
@@ -276,14 +276,14 @@ export class StackSelectorController {
   /**
    * Set specified stack ID as selected.
    *
-   * @param stack {string} stack ID
+   * @param stackId {string} stack ID
    */
-  selectStack(stack: string): void {
-    this.selectedStackId = stack;
+  selectStack(stackId: string): void {
+    this.selectedStackId = stackId;
 
-    this.onStackSelect({stack: stack});
+    this.onStackSelect({stackId: stackId});
 
-    this.stackSelectorSvc.onStackSelected(stack);
+    this.stackSelectorSvc.onStackSelected(stackId);
   }
 
   /**
@@ -334,8 +334,8 @@ export class StackSelectorController {
 
     if (this.needToSelectStack()) {
       let ids = this.lodash.pluck(this.stacksFiltered, 'id');
-      let stack = (this.defaultStack && ids.indexOf(this.defaultStack) >= 0) ? this.defaultStack : this.stacksFiltered[0].id;
-      this.selectStack(stack);
+      let stackId = (this.defaultStack && ids.indexOf(this.defaultStack) >= 0) ? this.defaultStack : this.stacksFiltered[0].id;
+      this.selectStack(stackId);
     }
   }
 

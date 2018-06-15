@@ -44,7 +44,7 @@
                                 che-column-title='Projects'></che-list-header-column>
         <che-list-header-column flex-gt-xs="30"
                                 che-sort-value='listOrganizationWorkspacesController.workspaceOrderBy'
-                                che-sort-item='attributes.stack'
+                                che-sort-item='attributes.stackId'
                                 che-column-title='Stack'></che-list-header-column>
         <che-list-header-column flex-gt-xs="15"
                                 che-column-title='Actions'></che-list-header-column>
@@ -108,7 +108,7 @@
           <div flex-gt-xs="30"
                class="che-list-item-name workspace-item-stack">
             <span class="che-xs-header noselect" hide-gt-xs>Stack</span>
-            <span class="che-hover" name="workspace-stacks-name">{{workspace.attributes.stack}}</span>
+            <span class="che-hover" name="workspace-stacks-name">{{workspace.attributes.stackId}}</span>
           </div>
           <!-- Actions -->
           <div flex-gt-xs="15"

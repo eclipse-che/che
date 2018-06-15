@@ -17,7 +17,7 @@ import {ImportStackService} from './import-stack.service';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 export  interface IInitData {
-  stack?: string;
+  stackId?: string;
   stack: che.IStack;
 }
 
@@ -50,7 +50,7 @@ export class StackController {
   loading: boolean;
   isLoading: boolean;
   isStackChange: boolean;
-  stack: string;
+  stackId: string;
   tmpWorkspaceId: string;
   stackName: string;
   stackDescription: string;
@@ -95,7 +95,7 @@ export class StackController {
       }
     };
 
-    this.stack = initData.stack;
+    this.stackId = initData.stackId;
     this.stack = initData.stack;
     this.machinesViewStatus = {};
     this.stackTags = [];
@@ -242,7 +242,7 @@ export class StackController {
    * Saves stack configuration - creates new one or updates existing.
    */
   saveStack(): void {
-    if (!this.stack) {
+    if (!this.stackId) {
       this.cheNotification.showError('Update stack failed.');
       return;
     }
@@ -251,14 +251,14 @@ export class StackController {
       this.cheStack.fetchStacks().finally(() => {
         this.cheNotification.showInfo('Stack has been successfully updated.');
         this.isLoading = false;
-        this.stack = this.cheStack.getStackById(this.stack);
+        this.stack = this.cheStack.getStackById(this.stackId);
         this.prepareStackData();
       });
     }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
       this.$log.error(error);
-      this.stack = this.cheStack.getStackById(this.stack);
+      this.stack = this.cheStack.getStackById(this.stackId);
       this.cancelStackChanges();
     });
   }

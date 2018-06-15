@@ -42,7 +42,7 @@ export class FactoryInformationController {
   // private workspaceImportedRecipe: any;
   private environmentName: string;
   private workspaceName: string;
-  private stack: string;
+  private stackId: string;
   private workspaceConfig: any;
   private origName: string;
   private isEditorContentChanged: boolean = false;
@@ -317,10 +317,10 @@ export class FactoryInformationController {
    * Handles stack and workspace config changes.
    *
    * @param config workspace config
-   * @param stack stack id
+   * @param stackId stack id
    */
-  onWorkspaceStackChanged(config: any, stack: string): void {
-    this.stack = stack;
+  onWorkspaceStackChanged(config: any, stackId: string): void {
+    this.stackId = stackId;
     this.workspaceConfig = config;
   }
 

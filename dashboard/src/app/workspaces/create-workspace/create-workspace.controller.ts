@@ -176,15 +176,15 @@ export class CreateWorkspaceController {
   /**
    * Callback which is called when stack is selected.
    *
-   * @param {string} stack the stack ID
+   * @param {string} stackId the stack ID
    */
-  onStackSelected(stack: string): void {
+  onStackSelected(stackId: string): void {
     // tiny timeout for templates selector to be rendered
     this.$timeout(() => {
       this.hideLoader = true;
     }, 10);
 
-    this.stack = this.stackSelectorSvc.getStackById(stack);
+    this.stack = this.stackSelectorSvc.getStackById(stackId);
 
     if (!this.stack.workspaceConfig) {
       this.memoryByMachine = {};
@@ -351,7 +351,7 @@ export class CreateWorkspaceController {
       const newEnvironment = this.environmentManager.getEnvironment(environment, this.stackMachines);
       this.stack.workspaceConfig.environments[environmentName] = newEnvironment;
     }
-    let attributes = {stack: this.stack.id};
+    let attributes = {stackId: this.stack.id};
     let workspaceConfig = angular.copy(this.stack.workspaceConfig);
 
     return this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
