@@ -192,7 +192,8 @@ public class ApplyWorkspaceEditAction extends BaseAction {
             });
   }
 
-  private Promise<Void> applyResourceChanges(Notification notification, CheWorkspaceEdit edit) {
+  private Promise<Void> applyResourceChanges(
+      StatusNotification notification, CheWorkspaceEdit edit) {
     List<CheResourceChange> resourceChanges = edit.getCheResourceChanges();
     if (resourceChanges.isEmpty()) {
       return promises.resolve(null);
@@ -257,7 +258,7 @@ public class ApplyWorkspaceEditAction extends BaseAction {
     return promises.all2(changesPromises).thenPromise(ignored -> promises.resolve(null));
   }
 
-  private void createResource(Path path, ResourceKind kind, Notification notification) {
+  private void createResource(Path path, ResourceKind kind, StatusNotification notification) {
     Container workspaceRoot = appContext.getWorkspaceRoot();
     workspaceRoot
         .getResource(path)
@@ -268,6 +269,7 @@ public class ApplyWorkspaceEditAction extends BaseAction {
                     .createFolder(path)
                     .catchError(
                         error -> {
+                          notification.setStatus(Status.FAIL);
                           notification.setContent(error.getMessage());
                         });
               } else if (ResourceKind.FILE.equals(kind)) {
@@ -275,13 +277,14 @@ public class ApplyWorkspaceEditAction extends BaseAction {
                     .createFile(path, "")
                     .catchError(
                         error -> {
+                          notification.setStatus(Status.FAIL);
                           notification.setContent(error.getMessage());
                         });
               }
             });
   }
 
-  private void moveResource(Resource resource, Path path, Notification notification) {
+  private void moveResource(Resource resource, Path path, StatusNotification notification) {
     if (resource.isProject()) {
       closeRelatedEditors(resource);
     }
@@ -303,8 +306,9 @@ public class ApplyWorkspaceEditAction extends BaseAction {
               }
             })
         .catchError(
-            arg -> {
-              notification.setContent(arg.getMessage());
+            error -> {
+              notification.setStatus(Status.FAIL);
+              notification.setContent(error.getMessage());
             });
   }
 

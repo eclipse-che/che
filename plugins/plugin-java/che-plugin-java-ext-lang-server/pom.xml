@@ -25,10 +25,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
@@ -58,10 +54,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
         </dependency>
         <dependency>
@@ -71,10 +63,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-schedule</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
@@ -101,14 +89,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.jdt.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.jface</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -228,17 +208,6 @@
                     <excludes>
                         <exclude>**/*.jar</exclude>
                         <exclude>**/*.zip</exclude>
-                        <exclude>**/RenameMethodInInterface/**</exclude>
-                        <exclude>**/RenameNonPrivateField/**</exclude>
-                        <exclude>**/RenamePackage/**</exclude>
-                        <exclude>**/RenameParameters/**</exclude>
-                        <exclude>**/RenamePrivateField/**</exclude>
-                        <exclude>**/RenamePrivateMethod/**</exclude>
-                        <exclude>**/RenameStaticMethod/**</exclude>
-                        <exclude>**/RenameTests18/**</exclude>
-                        <exclude>**/RenameType/**</exclude>
-                        <exclude>**/RenameTypeParameter/**</exclude>
-                        <exclude>**/RenameVirtualMethodInClass/**</exclude>
                         <exclude>**/org/eclipse/che/plugin/java/server/test/Accessor.java</exclude>
                         <exclude>**/projects/**</exclude>
                         <exclude>**/org/eclipse/che/plugin/java/server/jdt/**</exclude>
