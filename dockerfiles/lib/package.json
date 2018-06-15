@@ -19,7 +19,7 @@
     "babel": "^6.5.2",
     "babel-polyfill": "^6.16.0",
     "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.41",
+    "@types/node": "6.0.41",
     "@types/reflect-metadata": "0.0.4",
     "babel": "^6.5.2",
     "babel-preset-es2015": "^6.16.0",
