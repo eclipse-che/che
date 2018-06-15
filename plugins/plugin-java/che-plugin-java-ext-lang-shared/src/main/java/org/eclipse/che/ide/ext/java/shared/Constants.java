@@ -61,6 +61,10 @@ public final class Constants {
   public static final String REFACTORING_GET_RENAME_TYPE = "java/refactoringGetRenameType";
   public static final String VALIDATE_RENAMED_NAME = "java/validateRenamedName";
   public static final String GET_LINKED_MODEL = "java/getLinkedModel";
+  public static final String REFACTORING_MOVE = "java/refactoringMove";
+  public static final String GET_DESTINATIONS = "java/refactoringGetDestinations";
+  public static final String VALIDATE_MOVE_COMMAND = "java/validateMoveCommand";
+  public static final String VERIFY_DESTINATION = "java/verifyDestination";
 
   public static final String EXECUTE_CLIENT_COMMAND = "workspace/executeClientCommand";
   public static final String EXECUTE_CLIENT_COMMAND_UNSUBSCRIBE =

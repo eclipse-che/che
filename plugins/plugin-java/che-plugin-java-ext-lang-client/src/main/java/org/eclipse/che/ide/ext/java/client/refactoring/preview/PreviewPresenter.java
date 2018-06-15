@@ -14,6 +14,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.preview;
 import static java.util.stream.Collectors.toList;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.gwt.dom.client.Document;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -211,7 +212,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
   }
 
   private void prepareResourceChangeNodes(List<CheResourceChange> resourceChanges) {
-    for (ResourceChange resourceChange : resourceChanges) {
+    for (CheResourceChange resourceChange : resourceChanges) {
       PreviewNode node = new PreviewNode();
       node.setData(Either.forLeft(resourceChange));
       node.setEnable(true);
@@ -221,7 +222,9 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
       String newUri = resourceChange.getNewUri();
       node.setUri(newUri);
       if (current != null && newUri != null) {
-        if (Path.valueOf(current)
+        if (!Strings.isNullOrEmpty(resourceChange.getDescription())) {
+          node.setDescription(resourceChange.getDescription());
+        } else if (Path.valueOf(current)
             .removeLastSegments(1)
             .equals(Path.valueOf(newUri).removeLastSegments(1))) {
           node.setDescription(

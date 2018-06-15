@@ -33,7 +33,7 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.similarnames.SimilarNamesConfigurationPresenter;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.jdt.ls.extension.api.dto.NameValidationStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 
 /** @author Valeriy Svydenko */
@@ -236,14 +236,14 @@ final class RenameViewImpl extends Window implements RenameView {
 
   /** {@inheritDoc} */
   @Override
-  public void showStatusMessage(NameValidationStatus status) {
+  public void showStatusMessage(RefactoringStatus status) {
     errorLabel.getElement().getStyle().setColor(Style.getMainFontColor());
     showMessage(status);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void showErrorMessage(NameValidationStatus status) {
+  public void showErrorMessage(RefactoringStatus status) {
     newName.addStyleName(javaResources.css().errorBorder());
     errorLabel.getElement().getStyle().setColor(Style.getErrorColor());
     showMessage(status);
@@ -312,7 +312,7 @@ final class RenameViewImpl extends Window implements RenameView {
     return patternField.getValue();
   }
 
-  private void showMessage(NameValidationStatus status) {
+  private void showMessage(RefactoringStatus status) {
     RefactoringStatusEntry statusEntry =
         getEntryMatchingSeverity(
             status.getRefactoringSeverity().getValue(), status.getRefactoringStatusEntries());
