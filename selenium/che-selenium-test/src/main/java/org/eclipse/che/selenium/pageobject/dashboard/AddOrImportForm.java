@@ -119,11 +119,11 @@ public class AddOrImportForm {
     seleniumWebDriverHelper.waitAndClick(By.id(ZIP_BUTTON_ID));
   }
 
-  public void clickOnAddButtonInImportProjectForm() {
+  public void clickOnAddButton() {
     seleniumWebDriverHelper.waitAndClick(By.id(ADD_BUTTON_ID));
   }
 
-  public void clickOnCancelButtonInImportProjectForm() {
+  public void clickOnCancelButton() {
     seleniumWebDriverHelper.waitAndClick(By.id(CANCEL_BUTTON_ID));
   }
 
@@ -151,63 +151,63 @@ public class AddOrImportForm {
             By.id(CANCEL_BUTTON_ID)));
   }
 
-  private void waitSelectionOfHeaderButtonInImportProjectForm(String buttonId) {
+  private void waitSelectionOfHeaderButton(String buttonId) {
     String locator = format("//che-toggle-joined-button[@id='%s']/button", buttonId);
     seleniumWebDriverHelper.waitAttributeContainsValue(
         By.xpath(locator), "class", "che-toggle-button-enabled");
   }
 
   public void waitSamplesButtonSelected() {
-    waitSelectionOfHeaderButtonInImportProjectForm(SAMPLES_BUTTON_ID);
+    waitSelectionOfHeaderButton(SAMPLES_BUTTON_ID);
   }
 
   public void waitBlankButtonSelected() {
-    waitSelectionOfHeaderButtonInImportProjectForm(BLANK_BUTTON_ID);
+    waitSelectionOfHeaderButton(BLANK_BUTTON_ID);
   }
 
   public void waitGitButtonSelected() {
-    waitSelectionOfHeaderButtonInImportProjectForm(GIT_BUTTON_ID);
+    waitSelectionOfHeaderButton(GIT_BUTTON_ID);
   }
 
   public void waitGitHubButtonSelected() {
-    waitSelectionOfHeaderButtonInImportProjectForm(GITHUG_BUTTON_ID);
+    waitSelectionOfHeaderButton(GITHUG_BUTTON_ID);
   }
 
   public void waitZipButtonSelected() {
-    waitSelectionOfHeaderButtonInImportProjectForm(ZIP_BUTTON_ID);
+    waitSelectionOfHeaderButton(ZIP_BUTTON_ID);
   }
 
   private void waitButtonDisableState(WebElement button, boolean state) {
     seleniumWebDriverHelper.waitAttributeEqualsTo(button, "aria-disabled", Boolean.toString(state));
   }
 
-  private WebElement waitAddButtonInImportProjectForm() {
+  private WebElement waitAddButton() {
     return seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE, ADD_BUTTON_ID)));
   }
 
-  private WebElement waitCancelButtonInImportProjectForm() {
+  private WebElement waitCancelButton() {
     return seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(ADD_OR_CANCEL_BUTTON_XPATH_TEMPLATE, CANCEL_BUTTON_ID)));
   }
 
-  public void waitAddButtonInImportProjectFormDisabled() {
-    waitButtonDisableState(waitAddButtonInImportProjectForm(), true);
+  public void waitAddButtonDisabled() {
+    waitButtonDisableState(waitAddButton(), true);
   }
 
-  public void waitCancelButtonInImportProjectFormDisabled() {
-    waitButtonDisableState(waitCancelButtonInImportProjectForm(), true);
+  public void waitCancelButtonDisabled() {
+    waitButtonDisableState(waitCancelButton(), true);
   }
 
-  public void waitAddButtonInImportProjectFormEnabled() {
-    waitButtonDisableState(waitAddButtonInImportProjectForm(), false);
+  public void waitAddButtonEnabled() {
+    waitButtonDisableState(waitAddButton(), false);
   }
 
-  public void waitCancelButtonInImportProjectFormEnabled() {
-    waitButtonDisableState(waitCancelButtonInImportProjectForm(), false);
+  public void waitCancelButtonEnabled() {
+    waitButtonDisableState(waitCancelButton(), false);
   }
 
-  public void waitGitTabOpenedInImportProjectForm() {
+  public void waitGitTabOpened() {
     waitGitButtonSelected();
     waitGitUrlField();
   }

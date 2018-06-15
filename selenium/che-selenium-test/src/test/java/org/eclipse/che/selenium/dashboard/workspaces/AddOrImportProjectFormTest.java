@@ -156,36 +156,36 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitSamplesButtonSelected();
     addOrImportForm.waitSamplesWithDescriptions(EXPECTED_SAMPLES_WITH_DESCRIPTIONS);
     waitAllCheckboxesDisabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormDisabled();
-    addOrImportForm.waitAddButtonInImportProjectFormDisabled();
+    addOrImportForm.waitCancelButtonDisabled();
+    addOrImportForm.waitAddButtonDisabled();
 
     addOrImportForm.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
-    addOrImportForm.waitAddButtonInImportProjectFormEnabled();
+    addOrImportForm.waitCancelButtonEnabled();
+    addOrImportForm.waitAddButtonEnabled();
 
-    addOrImportForm.clickOnCancelButtonInImportProjectForm();
+    addOrImportForm.clickOnCancelButton();
     addOrImportForm.waitSampleCheckboxDisabled(CONSOLE_SAMPLE_NAME);
 
     addOrImportForm.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(CHE_SAMPLE_NAME);
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
-    addOrImportForm.waitAddButtonInImportProjectFormEnabled();
+    addOrImportForm.waitCancelButtonEnabled();
+    addOrImportForm.waitAddButtonEnabled();
 
     addOrImportForm.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxDisabled(CHE_SAMPLE_NAME);
-    addOrImportForm.waitCancelButtonInImportProjectFormDisabled();
-    addOrImportForm.waitAddButtonInImportProjectFormDisabled();
+    addOrImportForm.waitCancelButtonDisabled();
+    addOrImportForm.waitAddButtonDisabled();
 
     clickOnEachCheckbox();
     waitAllCheckboxesEnabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
-    addOrImportForm.waitAddButtonInImportProjectFormEnabled();
+    addOrImportForm.waitCancelButtonEnabled();
+    addOrImportForm.waitAddButtonEnabled();
 
-    addOrImportForm.clickOnCancelButtonInImportProjectForm();
+    addOrImportForm.clickOnCancelButton();
     waitAllCheckboxesDisabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormDisabled();
-    addOrImportForm.waitAddButtonInImportProjectFormDisabled();
+    addOrImportForm.waitCancelButtonDisabled();
+    addOrImportForm.waitAddButtonDisabled();
   }
 
   @Test(priority = 1)
@@ -199,10 +199,10 @@ public class AddOrImportProjectFormTest {
 
     addOrImportForm.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
-    addOrImportForm.waitAddButtonInImportProjectFormEnabled();
+    addOrImportForm.waitCancelButtonEnabled();
+    addOrImportForm.waitAddButtonEnabled();
 
-    addOrImportForm.clickOnAddButtonInImportProjectForm();
+    addOrImportForm.clickOnAddButton();
     checkProjectTabAppearanceAndFields(
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
@@ -214,15 +214,15 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitSamplesButtonSelected();
     addOrImportForm.waitSamplesWithDescriptions(EXPECTED_SAMPLES_WITH_DESCRIPTIONS);
     waitAllCheckboxesDisabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormDisabled();
-    addOrImportForm.waitAddButtonInImportProjectFormDisabled();
+    addOrImportForm.waitCancelButtonDisabled();
+    addOrImportForm.waitAddButtonDisabled();
 
     clickOnEachCheckbox();
     waitAllCheckboxesEnabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
-    addOrImportForm.waitAddButtonInImportProjectFormEnabled();
+    addOrImportForm.waitCancelButtonEnabled();
+    addOrImportForm.waitAddButtonEnabled();
 
-    addOrImportForm.clickOnAddButtonInImportProjectForm();
+    addOrImportForm.clickOnAddButton();
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(CHE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
@@ -338,35 +338,35 @@ public class AddOrImportProjectFormTest {
 
     addOrImportForm.typeToBlankNameField(NAME_WITH_MAX_AVAILABLE_LENGTH);
     addOrImportForm.waitErrorMessageDissappearanceInBlankNameField();
-    addOrImportForm.waitAddButtonInImportProjectFormEnabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
+    addOrImportForm.waitAddButtonEnabled();
+    addOrImportForm.waitCancelButtonEnabled();
 
     addOrImportForm.typeToBlankNameField("");
-    addOrImportForm.waitAddButtonInImportProjectFormDisabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormDisabled();
+    addOrImportForm.waitAddButtonDisabled();
+    addOrImportForm.waitCancelButtonDisabled();
 
     addOrImportForm.typeToBlankNameField(NAME_WITH_MAX_AVAILABLE_LENGTH + "p");
     addOrImportForm.waitNameFieldErrorMessageInBlankForm(
         "The name has to be less than 128 characters long.");
-    addOrImportForm.waitAddButtonInImportProjectFormDisabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
+    addOrImportForm.waitAddButtonDisabled();
+    addOrImportForm.waitCancelButtonEnabled();
 
     addOrImportForm.typeToBlankNameField(NAME_WITH_SPECIAL_CHARACTERS);
     addOrImportForm.waitNameFieldErrorMessageInBlankForm(
         "The name should not contain special characters like space, dollar, etc.");
-    addOrImportForm.waitAddButtonInImportProjectFormDisabled();
-    addOrImportForm.waitCancelButtonInImportProjectFormEnabled();
+    addOrImportForm.waitAddButtonDisabled();
+    addOrImportForm.waitCancelButtonEnabled();
 
     addOrImportForm.typeToBlankDescriptionField(BLANK_FORM_DESCRIPTION);
     addOrImportForm.waitTextInBlankDescriptionField(BLANK_FORM_DESCRIPTION);
 
-    addOrImportForm.clickOnCancelButtonInImportProjectForm();
+    addOrImportForm.clickOnCancelButton();
     addOrImportForm.waitTextInBlankNameField("");
     addOrImportForm.waitTextInBlankDescriptionField("");
 
     addOrImportForm.typeToBlankNameField(CUSTOM_BLANK_PROJECT_NAME);
     addOrImportForm.typeToBlankDescriptionField(BLANK_FORM_DESCRIPTION);
-    addOrImportForm.clickOnAddButtonInImportProjectForm();
+    addOrImportForm.clickOnAddButton();
 
     addOrImportForm.waitProjectTabAppearance(CUSTOM_BLANK_PROJECT_NAME);
     checkProjectTabAppearanceAndFields(
@@ -376,10 +376,10 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitAddOrImportFormOpened();
 
     addOrImportForm.clickOnGitButton();
-    addOrImportForm.waitGitTabOpenedInImportProjectForm();
+    addOrImportForm.waitGitTabOpened();
 
     addOrImportForm.typeToGitUrlField(BLANK_DEFAULT_URL);
-    addOrImportForm.clickOnAddButtonInImportProjectForm();
+    addOrImportForm.clickOnAddButton();
     checkProjectTabAppearanceAndFields(BLANK_PROJECT_NAME, "", BLANK_DEFAULT_URL);
 
     addOrImportForm.clickOnAddOrImportProjectButton();
@@ -416,7 +416,7 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
 
-    addOrImportForm.clickOnAddButtonInImportProjectForm();
+    addOrImportForm.clickOnAddButton();
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
 
     newWorkspace.clickOnBottomCreateButton();
@@ -491,7 +491,7 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
 
-    addOrImportForm.clickOnAddButtonInImportProjectForm();
+    addOrImportForm.clickOnAddButton();
     checkProjectTabAppearanceAndFields(
         SPRING_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
