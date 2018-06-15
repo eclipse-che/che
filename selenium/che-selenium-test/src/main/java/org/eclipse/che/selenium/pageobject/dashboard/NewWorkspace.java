@@ -169,15 +169,14 @@ public class NewWorkspace {
     UBUNTU("ubuntu"),
     ZEND("zend");
 
-    private final String stackId;
+    private final String id;
 
-    Stack(String stackId) {
-      this.stackId = stackId;
+    Stack(String id) {
+      this.id = id;
     }
 
-    @Override
-    public String toString() {
-      return this.stackId;
+    public String getId() {
+      return this.id;
     }
   }
 
@@ -486,15 +485,13 @@ public class NewWorkspace {
   }
 
   public boolean isStackVisible(Stack stack) {
-    return seleniumWebDriver
-            .findElements(By.xpath(format(STACK_ROW_XPATH, stack.toString())))
-            .size()
+    return seleniumWebDriver.findElements(By.xpath(format(STACK_ROW_XPATH, stack.getId()))).size()
         > 0;
   }
 
   public void selectStack(Stack stack) {
-    waitStacks(asList(stack.toString()));
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stack.toString())));
+    waitStacks(asList(stack.getId()));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stack.getId())));
   }
 
   public boolean isCreateWorkspaceButtonEnabled() {
@@ -700,7 +697,7 @@ public class NewWorkspace {
     String selectedStackXpath =
         format(
             "//div[@data-stack-id='%s' and contains(@class, 'stack-selector-item-selected')]",
-            stack.toString());
+            stack.getId());
     seleniumWebDriverHelper.waitVisibility(By.xpath(selectedStackXpath));
   }
 
