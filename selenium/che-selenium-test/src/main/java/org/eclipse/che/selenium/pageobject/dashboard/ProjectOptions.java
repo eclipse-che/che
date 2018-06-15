@@ -24,6 +24,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 
+/** @author Ihor Okhrimenko */
 @Singleton
 public class ProjectOptions {
 

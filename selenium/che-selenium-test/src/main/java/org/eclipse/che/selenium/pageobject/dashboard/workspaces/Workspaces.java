@@ -256,15 +256,11 @@ public class Workspaces {
   }
 
   public void clickOnProjectsButton() {
-    seleniumWebDriverHelper
-        .waitVisibility(By.xpath("//div[@che-column-title='Projects']/div"))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//div[@che-column-title='Projects']/div"));
   }
 
   public void clickOnStackButton() {
-    seleniumWebDriverHelper
-        .waitVisibility(By.xpath("//div[@che-column-title='Stack']/div"))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//div[@che-column-title='Stack']/div"));
   }
 
   public void clickOnWorkspaceStopStartButton(String workspaceName) {
@@ -379,8 +375,7 @@ public class Workspaces {
     String itemXpath = String.format(Locators.WORKSPACE_LIST_ITEM, index);
     String fullNameXpath = itemXpath + "//div[@class='workspace-name-clip']";
     return seleniumWebDriverHelper
-        .waitVisibility(By.xpath(fullNameXpath))
-        .getAttribute("id")
+        .waitVisibilityAndGetAttribute(By.xpath(fullNameXpath), "id")
         .replace("ws-full-name-", "");
   }
 

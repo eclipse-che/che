@@ -42,6 +42,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+/** @author Ihor Okhrimenko */
 @Singleton
 public class AddOrImportForm {
 

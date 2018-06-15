@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
-import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -65,7 +63,7 @@ public class WorkspacesListTest {
   @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
 
-  @InjectTestWorkspace(template = DEFAULT, memoryGb = 2, startAfterCreation = false)
+  @InjectTestWorkspace(memoryGb = 2, startAfterCreation = false)
   private TestWorkspace blankWorkspace;
 
   @InjectTestWorkspace(template = UBUNTU_JDK8, memoryGb = 3)
@@ -78,9 +76,6 @@ public class WorkspacesListTest {
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/defaultSpringProjectWithDifferentTypeOfFiles");
-
-    blankWorkspace.await();
-    javaWorkspace.await();
 
     testProjectServiceClient.importProject(
         javaWorkspace.getId(), Paths.get(resource.toURI()), "web-java-spring", MAVEN_SPRING);
@@ -113,7 +108,8 @@ public class WorkspacesListTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    deleteIfWorkspaceExists(expectedNewestWorkspaceItem.getWorkspaceName());
+    testWorkspaceServiceClient.delete(
+        expectedNewestWorkspaceItem.getWorkspaceName(), defaultTestUser.getName());
   }
 
   @Test
@@ -121,15 +117,9 @@ public class WorkspacesListTest {
     workspaces.waitPageLoading();
     dashboard.waitWorkspacesCountInWorkspacesItem(EXPECTED_WORKSPACES_COUNT);
 
-    List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
-    assertEquals(
-        workspaces.getWorkspacesListItemByWorkspaceName(
-            items, expectedBlankItem.getWorkspaceName()),
-        expectedBlankItem);
+    checkExpectedBlankWorkspaceDisplaying();
 
-    assertEquals(
-        workspaces.getWorkspacesListItemByWorkspaceName(items, expectedJavaItem.getWorkspaceName()),
-        expectedJavaItem);
+    checkExpectedJavaWorkspaceDisplaying();
   }
 
   @Test
@@ -139,57 +129,57 @@ public class WorkspacesListTest {
 
     workspaces.waitPageLoading();
 
+    // select all by bulk
     workspaces.selectAllWorkspacesByBulk();
-
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
+    // unselect all by bulk
     workspaces.selectAllWorkspacesByBulk();
-
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
+    // select all by bulk
     workspaces.selectAllWorkspacesByBulk();
-
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
+    // unselect one checkbox
     workspaces.selectWorkspaceByCheckbox(blankWorkspaceName);
-
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
+    // unselect all checkboxes
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
-
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
+    // select one checkbox
     workspaces.selectWorkspaceByCheckbox(blankWorkspaceName);
-
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(!workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
+    // select all checkboxes
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
-
     assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(workspaces.isBulkCheckboxEnabled());
     workspaces.waitDeleteWorkspaceBtn();
 
+    // unselect all by bulk
     workspaces.selectAllWorkspacesByBulk();
-
     assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
     assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
     assertTrue(!workspaces.isBulkCheckboxEnabled());
@@ -209,6 +199,7 @@ public class WorkspacesListTest {
       items = workspaces.getVisibleWorkspaces();
     }
 
+    // check items order after "RAM" clicking
     try {
       assertEquals(items.get(0).getRamAmount(), BLANK_WS_MB);
       assertEquals(items.get(1).getRamAmount(), JAVA_WS_MB);
@@ -217,6 +208,7 @@ public class WorkspacesListTest {
       fail("Known issue https://github.com/eclipse/che/issues/4242");
     }
 
+    // check reverse order after "RAM" clicking
     workspaces.clickOnRamButton();
     items = workspaces.getVisibleWorkspaces();
     try {
@@ -227,11 +219,13 @@ public class WorkspacesListTest {
       fail("Known issue https://github.com/eclipse/che/issues/4242");
     }
 
+    // check items order after "Projects" clicking
     workspaces.clickOnProjectsButton();
     items = workspaces.getVisibleWorkspaces();
     assertEquals(items.get(0).getProjectsAmount(), BLANK_WS_PROJECTS_COUNT);
     assertEquals(items.get(1).getProjectsAmount(), JAVA_WS_PROJECTS_COUNT);
 
+    // check items reverse order after "Projects" clicking
     workspaces.clickOnProjectsButton();
     items = workspaces.getVisibleWorkspaces();
     assertEquals(items.get(0).getProjectsAmount(), JAVA_WS_PROJECTS_COUNT);
@@ -249,21 +243,15 @@ public class WorkspacesListTest {
     assertEquals(items.size(), 1);
     assertEquals(items.get(0).getWorkspaceName(), expectedBlankItem.getWorkspaceName());
 
+    // check displaying list size
     workspaces.typeToSearchInput("");
     items = workspaces.getVisibleWorkspaces();
     assertEquals(items.size(), 2);
-    assertEquals(
-        asList(
-                workspaces.getWorkspacesListItemByWorkspaceName(
-                    items, expectedBlankItem.getWorkspaceName()))
-            .size(),
-        1);
-    assertEquals(
-        asList(
-                workspaces.getWorkspacesListItemByWorkspaceName(
-                    items, expectedJavaItem.getWorkspaceName()))
-            .size(),
-        1);
+
+    // check that expected blank and java items are displaying, in sum with previous items count
+    // checking it gives a full workspaces list checking
+    checkExpectedBlankWorkspaceDisplaying();
+    checkExpectedJavaWorkspaceDisplaying();
   }
 
   @Test(priority = 1)
@@ -365,13 +353,22 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceIsNotPresent(expectedJavaItem.getWorkspaceName());
   }
 
-  private void deleteIfWorkspaceExists(String workspaceName) throws Exception {
-    if (isWorkspaceExist(workspaceName)) {
-      testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
-    }
+  private void checkExpectedBlankWorkspaceDisplaying() {
+    List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
+
+    Workspaces.WorkspaceListItem currentDisplayingBlankItem =
+        workspaces.getWorkspacesListItemByWorkspaceName(
+            items, expectedBlankItem.getWorkspaceName());
+
+    assertEquals(currentDisplayingBlankItem, expectedBlankItem);
   }
 
-  private boolean isWorkspaceExist(String workspaceName) throws Exception {
-    return testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName());
+  private void checkExpectedJavaWorkspaceDisplaying() {
+    List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
+
+    Workspaces.WorkspaceListItem currentDisplayingJavaItem =
+        workspaces.getWorkspacesListItemByWorkspaceName(items, expectedJavaItem.getWorkspaceName());
+
+    assertEquals(currentDisplayingJavaItem, expectedJavaItem);
   }
 }

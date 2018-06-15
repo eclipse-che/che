@@ -503,10 +503,8 @@ public class AddOrImportProjectFormTest {
   }
 
   private void checkWorkspaceStatusAndDelete(String workspaceName) throws Exception {
-    if (!testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName())) {
-      return;
+    if (testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName())) {
+      testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
     }
-
-    testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
   }
 }
