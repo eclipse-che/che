@@ -23,18 +23,21 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_C
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.GET_DESTINATIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_LINKED_MODEL;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNOSTICS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_GET_RENAME_TYPE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_MOVE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_RENAME;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.VALIDATE_RENAMED_NAME;
+import static org.eclipse.che.ide.ext.java.shared.Constants.VERIFY_DESTINATION;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTERS_COMMAND;
@@ -91,11 +94,13 @@ import org.eclipse.che.api.languageserver.LanguageServerInitializer;
 import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.Severity;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
+import org.eclipse.che.jdt.ls.extension.api.dto.CreateMoveParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
@@ -103,14 +108,19 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
+import org.eclipse.che.jdt.ls.extension.api.dto.JavaProjectStructure;
 import org.eclipse.che.jdt.ls.extension.api.dto.JobResult;
-import org.eclipse.che.jdt.ls.extension.api.dto.NameValidationStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.MoveSettings;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
+import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragment;
+import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragmentRoot;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenamingElementInfo;
+import org.eclipse.che.jdt.ls.extension.api.dto.Resource;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
@@ -292,7 +302,7 @@ public class JavaLanguageServerExtensionService {
         .newConfiguration()
         .methodName(VALIDATE_RENAMED_NAME)
         .paramsAsDto(RenameSelectionParams.class)
-        .resultAsDto(NameValidationStatus.class)
+        .resultAsDto(RefactoringStatus.class)
         .withFunction(this::validateName);
 
     requestHandler
@@ -301,6 +311,34 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(TextDocumentPositionParams.class)
         .resultAsListOfDto(Range.class)
         .withFunction(this::getLinkedElements);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(GET_DESTINATIONS)
+        .noParams()
+        .resultAsListOfDto(JavaProjectStructure.class)
+        .withFunction(this::getDestinations);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(REFACTORING_MOVE)
+        .paramsAsDto(MoveSettings.class)
+        .resultAsDto(CheWorkspaceEdit.class)
+        .withFunction(this::move);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(Constants.VALIDATE_MOVE_COMMAND)
+        .paramsAsDto(CreateMoveParams.class)
+        .resultAsBoolean()
+        .withFunction(this::validateMove);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(VERIFY_DESTINATION)
+        .paramsAsDto(MoveSettings.class)
+        .resultAsDto(RefactoringStatus.class)
+        .withFunction(this::verifyMoveDestination);
   }
 
   /**
@@ -665,10 +703,10 @@ public class JavaLanguageServerExtensionService {
               String current = each.getCurrent();
               String newUri = each.getNewUri();
               if (current != null) {
-                each.setCurrent(LanguageServiceUtils.removePrefixUri(current));
+                each.setCurrent(removePrefixUri(current));
               }
               if (newUri != null) {
-                each.setNewUri(LanguageServiceUtils.removePrefixUri(newUri));
+                each.setNewUri(removePrefixUri(newUri));
               }
             })
         .collect(Collectors.toList());
@@ -677,8 +715,7 @@ public class JavaLanguageServerExtensionService {
   private Map<String, List<TextEdit>> getTextChanges(CheWorkspaceEdit cheWorkspaceEdit) {
     Map<String, List<TextEdit>> changes = new LinkedHashMap<>();
     for (String uri : cheWorkspaceEdit.getChanges().keySet()) {
-      changes.put(
-          LanguageServiceUtils.removePrefixUri(uri), cheWorkspaceEdit.getChanges().get(uri));
+      changes.put(removePrefixUri(uri), cheWorkspaceEdit.getChanges().get(uri));
     }
     return changes;
   }
@@ -691,8 +728,8 @@ public class JavaLanguageServerExtensionService {
     return doGetOne(Commands.GET_RENAME_TYPE_COMMAND, singletonList(renameSelection), type);
   }
 
-  private NameValidationStatus validateName(RenameSelectionParams renameSelectionParams) {
-    Type type = new TypeToken<NameValidationStatus>() {}.getType();
+  private RefactoringStatus validateName(RenameSelectionParams renameSelectionParams) {
+    Type type = new TypeToken<RefactoringStatus>() {}.getType();
     String uri = renameSelectionParams.getResourceUri();
     renameSelectionParams.setResourceUri(prefixURI(uri));
 
@@ -707,6 +744,85 @@ public class JavaLanguageServerExtensionService {
 
     return doGetOne(
         Commands.GET_LINKED_ELEMENTS_COMMAND, singletonList(textDocumentPositionParams), type);
+  }
+
+  private List<JavaProjectStructure> getDestinations(String string) {
+    Type type = new TypeToken<List<JavaProjectStructure>>() {}.getType();
+
+    List<JavaProjectStructure> projectStructures =
+        doGetOne(Commands.GET_DESTINATIONS_COMMAND, emptyList(), type);
+    convertUrisToPath(projectStructures);
+
+    return projectStructures;
+  }
+
+  private void convertUrisToPath(List<JavaProjectStructure> projectStructures) {
+    for (JavaProjectStructure project : projectStructures) {
+      project.setUri(removePrefixUri(project.getUri()));
+      List<PackageFragmentRoot> packageRoots = project.getPackageRoots();
+      for (PackageFragmentRoot fragmentRoot : packageRoots) {
+        fragmentRoot.setUri(removePrefixUri(fragmentRoot.getUri()));
+        List<PackageFragment> packages = fragmentRoot.getPackages();
+        for (PackageFragment pack : packages) {
+          pack.setUri(removePrefixUri(pack.getUri()));
+        }
+      }
+    }
+  }
+
+  private CheWorkspaceEdit move(MoveSettings moveSettings) {
+    Type type = new TypeToken<CheWorkspaceEdit>() {}.getType();
+    String destinationUri = moveSettings.getDestination();
+    moveSettings.setDestination(prefixURI(destinationUri));
+
+    List<Resource> resourceToMove =
+        moveSettings
+            .getElements()
+            .stream()
+            .peek(each -> each.setUri(prefixURI(each.getUri())))
+            .collect(Collectors.toList());
+
+    moveSettings.setElements(resourceToMove);
+
+    CheWorkspaceEdit cheWorkspaceEdit =
+        doGetOne(Commands.MOVE_COMMAND, singletonList(moveSettings), type);
+    List<CheResourceChange> resourceChanges = getResourceChanges(cheWorkspaceEdit);
+    cheWorkspaceEdit.setCheResourceChanges(resourceChanges);
+    cheWorkspaceEdit.setChanges(getTextChanges(cheWorkspaceEdit));
+    return cheWorkspaceEdit;
+  }
+
+  private Boolean validateMove(CreateMoveParams moveParams) {
+    Type type = new TypeToken<Boolean>() {}.getType();
+
+    List<Resource> resources =
+        moveParams
+            .getResources()
+            .stream()
+            .peek(each -> each.setUri(prefixURI(each.getUri())))
+            .collect(Collectors.toList());
+
+    moveParams.setResources(resources);
+    moveParams.setProjectUri(prefixURI(moveParams.getProjectUri()));
+
+    return doGetOne(Commands.VALIDATE_MOVE_COMMAND, singletonList(moveParams), type);
+  }
+
+  private RefactoringStatus verifyMoveDestination(MoveSettings moveSettings) {
+    Type type = new TypeToken<RefactoringStatus>() {}.getType();
+    String destinationUri = moveSettings.getDestination();
+    moveSettings.setDestination(prefixURI(destinationUri));
+
+    List<Resource> resourceToMove =
+        moveSettings
+            .getElements()
+            .stream()
+            .peek(each -> each.setUri(prefixURI(each.getUri())))
+            .collect(Collectors.toList());
+
+    moveSettings.setElements(resourceToMove);
+
+    return doGetOne(Commands.VERIFY_MOVE_DESTINATION_COMMAND, singletonList(moveSettings), type);
   }
 
   private List<String> executeFindTestsCommand(
