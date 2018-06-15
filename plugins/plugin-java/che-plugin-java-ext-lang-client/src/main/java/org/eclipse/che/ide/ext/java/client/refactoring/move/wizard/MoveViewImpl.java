@@ -37,13 +37,13 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.MoveType;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
-import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
-import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
-import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
 import org.eclipse.che.ide.ui.cellview.CellTreeResources;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.jdt.ls.extension.api.dto.JavaProjectStructure;
+import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragment;
+import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragmentRoot;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 
 /**
  * @author Dmitry Shnurenko
@@ -162,24 +162,21 @@ final class MoveViewImpl extends Window implements MoveView {
 
   /** {@inheritDoc} */
   @Override
-  public void setTreeOfDestinations(RefactorInfo refactorInfo, List<JavaProject> projects) {
+  public void setTreeOfDestinations(
+      RefactorInfo refactorInfo, List<JavaProjectStructure> projects) {
     final SingleSelectionModel<Object> selectionModel = new SingleSelectionModel<>();
     selectionModel.addSelectionChangeHandler(
         event -> {
           Object object = selectionModel.getSelectedObject();
 
-          if (object instanceof JavaProject) {
-            JavaProject project = (JavaProject) object;
-            delegate.setMoveDestinationPath(project.getPath(), project.getPath());
-          }
           if (object instanceof PackageFragmentRoot) {
             PackageFragmentRoot fragmentRoot = (PackageFragmentRoot) object;
-            delegate.setMoveDestinationPath(fragmentRoot.getPath(), fragmentRoot.getProjectPath());
+            delegate.setMoveDestinationPath(fragmentRoot.getUri(), fragmentRoot.getProjectUri());
           }
 
           if (object instanceof PackageFragment) {
             PackageFragment fragment = (PackageFragment) object;
-            delegate.setMoveDestinationPath(fragment.getPath(), fragment.getProjectPath());
+            delegate.setMoveDestinationPath(fragment.getUri(), fragment.getProjectUri());
           }
         });
     CellTree tree =
@@ -222,7 +219,8 @@ final class MoveViewImpl extends Window implements MoveView {
 
   private void showMessage(RefactoringStatus status) {
     RefactoringStatusEntry statusEntry =
-        getEntryMatchingSeverity(status.getSeverity(), status.getEntries());
+        getEntryMatchingSeverity(
+            status.getRefactoringSeverity().getValue(), status.getRefactoringStatusEntries());
     if (statusEntry != null) {
       errorLabel.setText(statusEntry.getMessage());
     } else {
@@ -267,7 +265,7 @@ final class MoveViewImpl extends Window implements MoveView {
   private RefactoringStatusEntry getEntryMatchingSeverity(
       int severity, List<RefactoringStatusEntry> entries) {
     for (RefactoringStatusEntry entry : entries) {
-      if (entry.getSeverity() >= severity) return entry;
+      if (entry.getRefactoringSeverity().getValue() >= severity) return entry;
     }
     return null;
   }
