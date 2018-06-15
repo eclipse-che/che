@@ -241,17 +241,20 @@ public class KubernetesPods {
               new Watcher<Pod>() {
                 @Override
                 public void eventReceived(Action action, Pod pod) {
-                  if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_RUNNING)) {
+                  podRunningFuture.isCompletedExceptionally();
+                  if (POD_STATUS_PHASE_RUNNING.equals(pod.getStatus().getPhase())) {
                     podRunningFuture.complete(null);
                   }
 
-                  if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_SUCCEEDED)) {
+                  if (POD_STATUS_PHASE_SUCCEEDED.equals(pod.getStatus().getPhase())) {
                     podRunningFuture.completeExceptionally(
                         new InfrastructureException(
                             "Pod container has been terminated. Container must be configured to use a non-terminating command."));
                   }
 
-                  if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_FAILED)) {
+                  if (POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
+                    String exceptionMessage =
+                        "Pod '" + pod.getMetadata().getName() + "' failed to start.";
                     String reason = pod.getStatus().getReason();
                     if (Strings.isNullOrEmpty(reason)) {
                       try {
@@ -259,21 +262,21 @@ public class KubernetesPods {
                             clientFactory
                                 .create()
                                 .pods()
+                                .inNamespace(namespace)
                                 .withName(pod.getMetadata().getName())
                                 .getLog();
-                        reason =
-                            "Pod '"
-                                + pod.getMetadata().getName()
-                                + "' failed to start. Pod logs: "
-                                + podLog;
+                        exceptionMessage = exceptionMessage.concat(" Pod logs: ").concat(podLog);
 
                       } catch (InfrastructureException e) {
-                        reason = "Error occurred while fetching pod logs";
+                        exceptionMessage =
+                            exceptionMessage.concat(" Error occurred while fetching pod logs.");
                       }
+                    } else {
+                      exceptionMessage = exceptionMessage.concat(" Reason: ").concat(reason);
                     }
                     podRunningFuture.completeExceptionally(
-                        new InfrastructureException(reason.substring(reason.length())));
-                    LOG.warn(reason);
+                        new InfrastructureException(exceptionMessage));
+                    LOG.warn(exceptionMessage);
                   }
                 }
 
@@ -290,9 +293,11 @@ public class KubernetesPods {
       if (pod == null) {
         podRunningFuture.completeExceptionally(
             new InfrastructureException("Specified pod " + name + " doesn't exist"));
-      }
-      if (pod.getStatus().getPhase().equals(POD_STATUS_PHASE_RUNNING)) {
-        podRunningFuture.complete(null);
+      } else {
+        if (pod.getStatus() != null
+            && POD_STATUS_PHASE_RUNNING.equals(pod.getStatus().getPhase())) {
+          podRunningFuture.complete(null);
+        }
       }
     } catch (KubernetesClientException | InfrastructureException ex) {
       podRunningFuture.completeExceptionally(ex);
