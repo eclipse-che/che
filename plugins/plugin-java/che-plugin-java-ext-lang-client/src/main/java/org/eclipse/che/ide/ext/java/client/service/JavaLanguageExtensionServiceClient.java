@@ -20,19 +20,23 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_C
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.GET_DESTINATIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_LINKED_MODEL;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNOSTICS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_GET_RENAME_TYPE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_MOVE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_RENAME;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
+import static org.eclipse.che.ide.ext.java.shared.Constants.VALIDATE_MOVE_COMMAND;
 import static org.eclipse.che.ide.ext.java.shared.Constants.VALIDATE_RENAMED_NAME;
+import static org.eclipse.che.ide.ext.java.shared.Constants.VERIFY_DESTINATION;
 
 import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
@@ -49,6 +53,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
+import org.eclipse.che.jdt.ls.extension.api.dto.CreateMoveParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
@@ -56,10 +61,12 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
-import org.eclipse.che.jdt.ls.extension.api.dto.NameValidationStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.JavaProjectStructure;
+import org.eclipse.che.jdt.ls.extension.api.dto.MoveSettings;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenamingElementInfo;
@@ -318,7 +325,7 @@ public class JavaLanguageExtensionServiceClient {
   }
 
   /** Validates new name. */
-  public Promise<NameValidationStatus> validateRenamedName(RenameSelectionParams renameSelection) {
+  public Promise<RefactoringStatus> validateRenamedName(RenameSelectionParams renameSelection) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
@@ -326,7 +333,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(VALIDATE_RENAMED_NAME)
                 .paramsAsDto(renameSelection)
-                .sendAndReceiveResultAsDto(NameValidationStatus.class, REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsDto(RefactoringStatus.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -342,6 +349,66 @@ public class JavaLanguageExtensionServiceClient {
                 .methodName(GET_LINKED_MODEL)
                 .paramsAsDto(linkedModelParams)
                 .sendAndReceiveResultAsListOfDto(Range.class, REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /** Move refactoring. */
+  public Promise<CheWorkspaceEdit> move(MoveSettings moveSettings) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(REFACTORING_MOVE)
+                .paramsAsDto(moveSettings)
+                .sendAndReceiveResultAsDto(CheWorkspaceEdit.class, REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /** Gets destinations for move refactoring. */
+  public Promise<List<JavaProjectStructure>> getDestinations() {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(GET_DESTINATIONS)
+                .noParams()
+                .sendAndReceiveResultAsListOfDto(JavaProjectStructure.class, REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /** Check if move operation is available for the selected element. */
+  public Promise<Boolean> validateMoveCommand(CreateMoveParams moveParams) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(VALIDATE_MOVE_COMMAND)
+                .paramsAsDto(moveParams)
+                .sendAndReceiveResultAsBoolean(REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /** Check selected destination for move refactoring. */
+  public Promise<RefactoringStatus> verifyDestination(MoveSettings moveSettings) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(VERIFY_DESTINATION)
+                .paramsAsDto(moveSettings)
+                .sendAndReceiveResultAsDto(RefactoringStatus.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));

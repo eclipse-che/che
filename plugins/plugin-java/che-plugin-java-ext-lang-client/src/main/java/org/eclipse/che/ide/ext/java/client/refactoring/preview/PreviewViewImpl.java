@@ -42,14 +42,14 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
 import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareInitializer;
 import org.eclipse.che.ide.orion.compare.FileOptions;
 import org.eclipse.che.ide.orion.compare.jso.GitCompareOverlay;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 /**
@@ -352,7 +352,8 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
   private void showMessage(RefactoringStatus status) {
     RefactoringStatusEntry statusEntry =
-        getEntryMatchingSeverity(status.getSeverity(), status.getEntries());
+        getEntryMatchingSeverity(
+            status.getRefactoringSeverity().getValue(), status.getRefactoringStatusEntries());
     if (statusEntry != null) {
       errorLabel.setText(statusEntry.getMessage());
     } else {
@@ -373,7 +374,7 @@ final class PreviewViewImpl extends Window implements PreviewView {
   private RefactoringStatusEntry getEntryMatchingSeverity(
       int severity, List<RefactoringStatusEntry> entries) {
     for (RefactoringStatusEntry entry : entries) {
-      if (entry.getSeverity() >= severity) return entry;
+      if (entry.getRefactoringSeverity().getValue() >= severity) return entry;
     }
     return null;
   }
