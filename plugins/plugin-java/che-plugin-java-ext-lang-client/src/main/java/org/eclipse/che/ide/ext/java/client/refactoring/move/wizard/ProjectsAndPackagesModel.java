@@ -20,9 +20,9 @@ import java.util.List;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
-import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
-import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
-import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
+import org.eclipse.che.jdt.ls.extension.api.dto.JavaProjectStructure;
+import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragment;
+import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragmentRoot;
 
 /**
  * A model of a tree which contains all possible destinations from the current workspace.
@@ -31,13 +31,13 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
  * @author Valeriy Svydenko
  */
 public class ProjectsAndPackagesModel implements TreeViewModel {
-  private List<JavaProject> projects;
+  private List<JavaProjectStructure> projects;
   private final RefactorInfo refactorInfo;
   private SingleSelectionModel<Object> selectionModel;
   private JavaResources resources;
 
   public ProjectsAndPackagesModel(
-      List<JavaProject> projects,
+      List<JavaProjectStructure> projects,
       RefactorInfo refactorInfo,
       SingleSelectionModel<Object> selectionModel,
       JavaResources resources) {
@@ -53,9 +53,9 @@ public class ProjectsAndPackagesModel implements TreeViewModel {
     if (value == null) {
       return new DefaultNodeInfo<>(
           new ListDataProvider<>(projects),
-          new AbstractCell<JavaProject>() {
+          new AbstractCell<JavaProjectStructure>() {
             @Override
-            public void render(Context context, JavaProject value, SafeHtmlBuilder sb) {
+            public void render(Context context, JavaProjectStructure value, SafeHtmlBuilder sb) {
               sb.appendHtmlConstant(resources.javaCategoryIcon().getSvg().getElement().getString())
                   .appendEscaped(" ");
               sb.appendEscaped(value.getName());
@@ -65,17 +65,17 @@ public class ProjectsAndPackagesModel implements TreeViewModel {
           null);
     }
 
-    if (value instanceof JavaProject) {
-      final JavaProject project = (JavaProject) value;
+    if (value instanceof JavaProjectStructure) {
+      final JavaProjectStructure project = (JavaProjectStructure) value;
       return new DefaultNodeInfo<>(
-          new ListDataProvider<>(project.getPackageFragmentRoots()),
+          new ListDataProvider<>(project.getPackageRoots()),
           new AbstractCell<PackageFragmentRoot>() {
             @Override
             public void render(Context context, PackageFragmentRoot value, SafeHtmlBuilder sb) {
               sb.appendHtmlConstant(resources.sourceFolder().getSvg().getElement().getString())
                   .appendEscaped(" ");
 
-              sb.appendEscaped(value.getPath().substring(project.getPath().length()));
+              sb.appendEscaped(value.getUri().substring(project.getUri().length()));
             }
           },
           selectionModel,
@@ -87,17 +87,17 @@ public class ProjectsAndPackagesModel implements TreeViewModel {
         return null;
       }
       return new DefaultNodeInfo<>(
-          new ListDataProvider<>(((PackageFragmentRoot) value).getPackageFragments()),
+          new ListDataProvider<>(((PackageFragmentRoot) value).getPackages()),
           new AbstractCell<PackageFragment>() {
             @Override
             public void render(Context context, PackageFragment value, SafeHtmlBuilder sb) {
               sb.appendHtmlConstant(resources.packageItem().getSvg().getElement().getString())
                   .appendEscaped(" ");
 
-              if (value.getElementName().isEmpty()) {
+              if (value.getName().isEmpty()) {
                 sb.appendEscaped("(default package)");
               } else {
-                sb.appendEscaped(value.getElementName());
+                sb.appendEscaped(value.getName());
               }
             }
           },
