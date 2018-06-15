@@ -697,22 +697,11 @@ public class NewWorkspace {
   }
 
   public void waitStackSelected(Stack stack) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  return seleniumWebDriverHelper
-                      .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
-                      .stream()
-                      .filter(
-                          webElement ->
-                              webElement.getAttribute("data-stack-id").equals(stack.toString()))
-                      .collect(Collectors.toList())
-                      .get(0)
-                      .getAttribute("class")
-                      .contains("stack-selector-item-selected");
-                });
+    String selectedStackXpath =
+        format(
+            "//div[@data-stack-id='%s' and contains(@class, 'stack-selector-item-selected')]",
+            stack.toString());
+    seleniumWebDriverHelper.waitVisibility(By.xpath(selectedStackXpath));
   }
 
   public List<String> getVisibleStacks() {
