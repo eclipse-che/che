@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,17 +24,19 @@ import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
+public class WorkspaceProjectSynchronizer implements ProjectSynchronizer, WorkspaceKeeper {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceProjectSynchronizer.class);
 
@@ -45,6 +46,7 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
 
   private final String apiEndpoint;
   private final String workspaceId;
+  private final Runtime workspaceRuntime;
 
   @Inject
   public WorkspaceProjectSynchronizer(
@@ -64,18 +66,13 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
     LOG.info("API Endpoint: " + apiEndpoint);
 
     // check connection
-    try {
-      workspaceDto();
-    } catch (ServerException e) {
-      LOG.error(e.getLocalizedMessage());
-      System.exit(1);
-    }
+    workspaceRuntime = workspaceDto().getRuntime();
   }
 
   @Override
   public void synchronize() throws ServerException {
 
-    Set<ProjectConfig> remote = getAll();
+    List<ProjectConfigDto> remote = workspaceDto().getConfig().getProjects();
 
     // check on removed
     List<ProjectConfig> removed = new ArrayList<>();
@@ -125,43 +122,15 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
   }
 
   @Override
-  public Set<ProjectConfig> getAll() throws ServerException {
+  public Set<ProjectConfig> getProjects() throws ServerException {
+
     WorkspaceConfig config = workspaceDto().getConfig();
     Set<ProjectConfig> projectConfigs = new HashSet<>(config.getProjects());
 
     return unmodifiableSet(projectConfigs);
   }
 
-  @Override
-  public Set<ProjectConfig> getAll(String wsPath) throws ServerException {
-    WorkspaceConfig config = workspaceDto().getConfig();
-    Set<ProjectConfig> projectConfigs = new HashSet<>(config.getProjects());
-
-    projectConfigs.removeIf(it -> it.getPath().equals(wsPath));
-    projectConfigs.removeIf(it -> !it.getPath().startsWith(wsPath));
-
-    return unmodifiableSet(projectConfigs);
-  }
-
-  @Override
-  public Optional<ProjectConfig> get(String wsPath) throws ServerException {
-    return workspaceDto()
-        .getConfig()
-        .getProjects()
-        .stream()
-        .filter(ProjectConfig.class::isInstance)
-        .map(it -> (ProjectConfig) it)
-        .filter(it -> it.getPath().equals(wsPath))
-        .findAny();
-  }
-
-  @Override
-  public ProjectConfig getOrNull(String wsPath) throws ServerException {
-    return get(wsPath).orElse(null);
-  }
-
-  @Override
-  public void add(ProjectConfig project) throws ServerException {
+  private void add(ProjectConfig project) throws ServerException {
     final UriBuilder builder =
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
@@ -175,7 +144,11 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
   }
 
   @Override
-  public void update(ProjectConfig project) throws ServerException {
+  public Runtime getRuntime() throws ServerException {
+    return workspaceRuntime;
+  }
+
+  private void update(ProjectConfig project) throws ServerException {
 
     final UriBuilder builder =
         UriBuilder.fromUri(apiEndpoint)
@@ -190,8 +163,7 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
     }
   }
 
-  @Override
-  public void remove(ProjectConfig project) throws ServerException {
+  private void remove(ProjectConfig project) throws ServerException {
 
     final UriBuilder builder =
         UriBuilder.fromUri(apiEndpoint)
