@@ -12,16 +12,7 @@ package org.eclipse.che.selenium.hotupdate;
 
 import com.google.inject.Inject;
 import java.io.IOException;
-
-import org.apache.commons.lang.enums.Enum;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.commons.json.JsonHelper;
-import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
@@ -49,10 +40,11 @@ public class RecreateUpdate {
   @Inject private Menu menu;
   private String cheRevisionBeforeRollout;
 
-
   private enum WsMasterStauses {
-      RUNNING, READY_TO_SHUTDOWN;
-    }
+    RUNNING,
+    READY_TO_SHUTDOWN,
+    PREPARING_TO_SHUTDOWN;
+  }
 
   @BeforeClass
   public void setUp() throws IOException {
@@ -65,8 +57,8 @@ public class RecreateUpdate {
     String ocClientRolloutCommand = "rollout latest che";
     String restUrlForSuspendingWorkspaces =
         cheTestApiEndpointUrlProvider.get().toString() + "system/stop";
-    int timeLimitInSecForRecreateingUpdate = 300;
-    int delayBetweenRequest = 5;
+    int timeLimitInSecForRecreateingUpdate = 600;
+    int delayBetweenRequest = 6;
 
     ide.open(workspace);
     testUserHttpJsonRequestFactory
@@ -75,70 +67,79 @@ public class RecreateUpdate {
         .request();
     checkWorkspaceIsNotAvailable();
     openShiftCliCommandExecutor.execute(ocClientRolloutCommand);
-    waitExpectedStatus(timeLimitInSecForRecreateingUpdate, delayBetweenRequest, WsMasterStauses.RUNNING);
+    waitExpectedStatus(
+        timeLimitInSecForRecreateingUpdate, delayBetweenRequest, WsMasterStauses.RUNNING);
   }
 
-  private void checkWorkspaceIsNotAvailable()
-          throws Exception {
-    int disappearanceWorkspaceTimeout = 3;
-    int timeLimitForReadyToShutdownStatus = 3;
+  private void checkWorkspaceIsNotAvailable() throws Exception {
+    int timeLimitForReadyToShutdownStatus = 15;
     int delayBetweenRequestes = 1;
-    waitExpectedStatus(timeLimitForReadyToShutdownStatus, delayBetweenRequestes, WsMasterStauses.READY_TO_SHUTDOWN);
 
-    projectExplorer.waitProjectExplorerIsNotPresent(disappearanceWorkspaceTimeout);
-    terminal.waitTerminalIsNotPresent(disappearanceWorkspaceTimeout);
+    waitExpectedStatus(
+        timeLimitForReadyToShutdownStatus,
+        delayBetweenRequestes,
+        WsMasterStauses.PREPARING_TO_SHUTDOWN);
+
+    waitExpectedStatus(
+        timeLimitForReadyToShutdownStatus,
+        delayBetweenRequestes,
+        WsMasterStauses.READY_TO_SHUTDOWN);
+
+    projectExplorer.waitProjectExplorerIsNotPresent(timeLimitForReadyToShutdownStatus);
+    terminal.waitTerminalIsNotPresent(timeLimitForReadyToShutdownStatus);
   }
 
-  private void waitExpectedStatus(int maxWaitingLimitInSec, int delayBetweenRequestsInSec, WsMasterStauses staus)
+  private void waitExpectedStatus(
+      int maxWaitingLimitInSec, int delayBetweenRequestsInSec, WsMasterStauses staus)
       throws Exception {
 
     // if the limit is not exceeded - do request and check status of the system
     while (maxWaitingLimitInSec > 0) {
-      System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<" + getCurrentRollingStatus());
-      WaitUtils.sleepQuietly(1);
+      System.out.println(
+          "<<<<<<<<<<<getted status: "
+              + getCurrentRollingStatus()
+              + "eq status: "
+              + staus.toString());
+      boolean isStatusFinished = getCurrentRollingStatus().equals(staus.toString());
 
-      boolean isRolloutStatusFinished = getCurrentRollingStatus().equals(staus);
-
-      if (isRolloutStatusFinished) {
+      if (isStatusFinished) {
         break;
       }
-    }
 
-    // delay after request and decrement limit
-    WaitUtils.sleepQuietly(delayBetweenRequestsInSec);
-    maxWaitingLimitInSec = -delayBetweenRequestsInSec;
-
-    // if limit exceeded - something went wrong
-    if (maxWaitingLimitInSec <= 0) {
-      throw new RuntimeException(
-          "The process did not end in the allotted limit or something went wrong with the test environment");
+      // delay after request and decrement limit
+      WaitUtils.sleepQuietly(delayBetweenRequestsInSec);
+      maxWaitingLimitInSec -= delayBetweenRequestsInSec;
+      // if limit exceeded - something went wrong
+      if (maxWaitingLimitInSec <= 0) {
+        throw new RuntimeException(
+            "The process did not end in the allotted limit or something went wrong with the test environment");
+      }
     }
   }
 
-  private String getCurrentRollingStatus()
-      throws ForbiddenException, BadRequestException, IOException, ConflictException,
-          NotFoundException, ServerException, UnauthorizedException, JsonParseException {
+  private String getCurrentRollingStatus() throws Exception {
     String restUrlForGettingSuspendingStatus =
         cheTestApiEndpointUrlProvider.get().toString() + "system/state";
 
     // get current response code - if system is suspended,  usually we will get 503 response
-    int responseCode =
-        testUserHttpJsonRequestFactory
-            .fromUrl(restUrlForGettingSuspendingStatus)
-            .useGetMethod()
-            .request()
-            .getResponseCode();
 
-    if (responseCode != 200) {
+    try {
+      testUserHttpJsonRequestFactory
+          .fromUrl(restUrlForGettingSuspendingStatus)
+          .useGetMethod()
+          .request()
+          .getResponseCode();
+    } catch (IOException ex) {
       return "SUSPENDED";
-    } else
-      return JsonHelper.parseJson(
-              testUserHttpJsonRequestFactory
-                  .fromUrl(restUrlForGettingSuspendingStatus)
-                  .useGetMethod()
-                  .request()
-                  .toString())
-          .getElement("status")
-          .getStringValue();
+    }
+
+    return JsonHelper.parseJson(
+            testUserHttpJsonRequestFactory
+                .fromUrl(restUrlForGettingSuspendingStatus)
+                .useGetMethod()
+                .request()
+                .asString())
+        .getElement("status")
+        .getStringValue();
   }
 }
