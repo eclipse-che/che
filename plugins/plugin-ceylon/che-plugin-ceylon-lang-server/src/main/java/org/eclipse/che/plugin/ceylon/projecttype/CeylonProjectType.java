@@ -15,9 +15,9 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.plugin.ceylon.shared.Constants;
 
 /**
- * C# project type
+ * Ceylon project type
  *
- * @author Anatolii Bazko
+ * @author David Festal
  */
 public class CeylonProjectType extends ProjectTypeDef {
   @Inject
