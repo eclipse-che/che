@@ -270,8 +270,8 @@ parse_args() {
                shift
            ;;
            --image-che=*)
-               export CHE_IMAGE_REPO=$(echo "${key#*=}" | sed 's/:.*//')
-               export CHE_IMAGE_TAG=$(echo "${key#*=}" | sed 's/.*://')
+               export CHE_IMAGE_REPO=$(echo "${i#*=}" | sed 's/:.*//')
+               export CHE_IMAGE_TAG=$(echo "${i#*=}" | sed 's/.*://')
                shift
            ;;
            --remove-che)

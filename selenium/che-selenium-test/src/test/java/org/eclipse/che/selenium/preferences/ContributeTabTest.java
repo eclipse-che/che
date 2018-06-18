@@ -96,12 +96,12 @@ public class ContributeTabTest {
 
   @AfterMethod
   public void closeForm() {
-    if (askDialog.isOpened()) {
-      askDialog.confirmAndWaitClosed();
-    }
-
     if (preferences.isPreferencesFormOpened()) {
       preferences.clickOnCloseButton();
+    }
+
+    if (askDialog.isOpened()) {
+      askDialog.confirmAndWaitClosed();
     }
 
     preferences.waitPreferencesFormIsClosed();
