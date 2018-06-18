@@ -18,7 +18,6 @@ import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -67,7 +66,7 @@ public class AddOrImportProjectFormTest {
   private static final String CUSTOM_BLANK_PROJECT_NAME = "blank-project";
   private static final String BLANK_PROJECT_NAME = "blank";
   private static final String BLANK_DEFAULT_URL = "https://github.com/che-samples/blank";
-  private static final Map<String, String> EXPECTED_SAMPLES_WITH_DESCRIPTIONS =
+  private static final ImmutableMap<String, String> EXPECTED_SAMPLES_WITH_DESCRIPTIONS =
       ImmutableMap.of(
           SPRING_SAMPLE_NAME,
           "A basic example using Spring servlets. The app returns values entered into a submit form.",
