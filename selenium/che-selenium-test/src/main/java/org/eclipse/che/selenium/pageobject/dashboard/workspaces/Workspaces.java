@@ -404,6 +404,12 @@ public class Workspaces {
     return items;
   }
 
+  public void waitVisibleWorkspacesCount(int expectedCount) {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> expectedCount == getVisibleWorkspacesCount());
+  }
+
   public static class WorkspaceListItem {
     private String ownerName;
     private String workspaceName;

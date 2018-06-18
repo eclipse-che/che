@@ -239,14 +239,13 @@ public class WorkspacesListTest {
         expectedBlankItem.getWorkspaceName().substring(nameLength - 5, nameLength);
 
     workspaces.typeToSearchInput(sequenceForSearch);
+    workspaces.waitVisibleWorkspacesCount(1);
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
-    assertEquals(items.size(), 1);
     assertEquals(items.get(0).getWorkspaceName(), expectedBlankItem.getWorkspaceName());
 
     // check displaying list size
     workspaces.typeToSearchInput("");
-    items = workspaces.getVisibleWorkspaces();
-    assertEquals(items.size(), 2);
+    workspaces.waitVisibleWorkspacesCount(2);
 
     // check that expected blank and java items are displaying, in sum with previous items count
     // checking it gives a full workspaces list checking
