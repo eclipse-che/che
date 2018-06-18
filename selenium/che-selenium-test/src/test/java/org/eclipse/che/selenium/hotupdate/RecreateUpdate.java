@@ -125,11 +125,6 @@ public class RecreateUpdate {
 
     // if the limit is not exceeded - do request and check status of the system
     while (maxTimeLimitInSec > 0) {
-      System.out.println(
-          "<<<<<<<<<<<current status: "
-              + getCurrentRollingStatus()
-              + " desired status: "
-              + status.toString());
       boolean isStatusFinished = getCurrentRollingStatus().equals(status.toString());
 
       if (isStatusFinished) {
