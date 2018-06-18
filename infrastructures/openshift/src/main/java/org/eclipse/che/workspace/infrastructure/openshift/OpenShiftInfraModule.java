@@ -34,6 +34,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
@@ -101,5 +102,6 @@ public class OpenShiftInfraModule extends AbstractModule {
     MapBinder<String, WorkspaceNextApplier> wsNext =
         MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
     wsNext.addBinding(OpenShiftEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
+    wsNext.addBinding(KubernetesEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
   }
 }

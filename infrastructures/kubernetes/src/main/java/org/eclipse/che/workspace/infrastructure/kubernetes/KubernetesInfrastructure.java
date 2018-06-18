@@ -12,7 +12,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,6 +26,8 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -38,6 +43,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
+  private final Map<String, WorkspaceNextApplier> workspaceNextAppliers;
 
   @Inject
   public KubernetesInfrastructure(
@@ -46,7 +52,8 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
-      KubernetesRuntimeStateCache runtimeStatusesCache) {
+      KubernetesRuntimeStateCache runtimeStatusesCache,
+      Map<String, WorkspaceNextApplier> workspaceNextAppliers) {
     super(
         NAME,
         ImmutableSet.of(KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE),
@@ -56,6 +63,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
     this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
+    this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
   }
 
   @Override
@@ -65,8 +73,11 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   @Override
   protected KubernetesRuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment) throws InfrastructureException {
+      RuntimeIdentity id, InternalEnvironment environment, Collection<CheService> wsNextServices)
+      throws InfrastructureException {
     final KubernetesEnvironment kubernetesEnvironment = asKubernetesEnv(environment);
+
+    applyWorkspaceNext(kubernetesEnvironment, wsNextServices);
 
     k8sEnvProvisioner.provision(kubernetesEnvironment, id);
 
@@ -85,5 +96,19 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
         format(
             "Environment type '%s' is not supported. Supported environment types: %s",
             source.getRecipe().getType(), KubernetesEnvironment.TYPE));
+  }
+
+  protected void applyWorkspaceNext(
+      KubernetesEnvironment kubernetesEnvironment, Collection<CheService> cheServices)
+      throws InfrastructureException {
+    if (cheServices.isEmpty()) {
+      return;
+    }
+    WorkspaceNextApplier wsNext = workspaceNextAppliers.get(getName());
+    if (wsNext == null) {
+      throw new InfrastructureException(
+          "Workspace.Next features are not supported for recipe type " + getName());
+    }
+    wsNext.apply(kubernetesEnvironment, cheServices);
   }
 }

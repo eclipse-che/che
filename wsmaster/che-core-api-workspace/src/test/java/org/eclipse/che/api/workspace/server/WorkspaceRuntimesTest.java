@@ -34,6 +34,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +64,7 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.core.db.DBInitializer;
@@ -129,7 +131,7 @@ public class WorkspaceRuntimesTest {
     RuntimeContext context = mockContext(identity);
     when(context.getRuntime())
         .thenReturn(new TestInternalRuntime(context, emptyMap(), WorkspaceStatus.STARTING));
-    doReturn(context).when(infrastructure).prepare(eq(identity), any());
+    doReturn(context).when(infrastructure).prepare(eq(identity), any(), any());
     doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
     when(statuses.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
 
@@ -185,7 +187,7 @@ public class WorkspaceRuntimesTest {
     doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
     doThrow(new InfrastructureException("oops!"))
         .when(infrastructure)
-        .prepare(eq(identity), any(InternalEnvironment.class));
+        .prepare(eq(identity), any(InternalEnvironment.class), any());
 
     // try recover
     runtimes.recoverOne(infrastructure, identity);
@@ -252,7 +254,7 @@ public class WorkspaceRuntimesTest {
 
     RuntimeIdentity identity = new RuntimeIdentityImpl("ws123", "my-env", "myId");
     RuntimeContext context = mockContext(identity);
-    doReturn(context).when(infrastructure).prepare(eq(identity), any());
+    doReturn(context).when(infrastructure).prepare(eq(identity), any(), any());
 
     ConcurrentHashMap<String, InternalRuntime<?>> runtimesStorage = new ConcurrentHashMap<>();
     runtimesStorage.put(
@@ -288,7 +290,7 @@ public class WorkspaceRuntimesTest {
 
     when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
     RuntimeContext context = mockContext(identity);
-    doReturn(context).when(infrastructure).prepare(eq(identity), any());
+    doReturn(context).when(infrastructure).prepare(eq(identity), any(), any());
     ImmutableMap<String, Machine> machines =
         ImmutableMap.of("machine", new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING));
     when(context.getRuntime())
@@ -331,7 +333,9 @@ public class WorkspaceRuntimesTest {
         ImmutableMap.of("machine", new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING));
     when(context.getRuntime())
         .thenReturn(new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING));
-    doThrow(new InfrastructureException("error")).when(infrastructure).prepare(eq(identity), any());
+    doThrow(new InfrastructureException("error"))
+        .when(infrastructure)
+        .prepare(eq(identity), any(), any());
 
     // when
     WorkspaceImpl workspace = new WorkspaceImpl();
@@ -414,7 +418,7 @@ public class WorkspaceRuntimesTest {
     RuntimeContext context = mock(RuntimeContext.class);
     InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
     doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
-    doReturn(context).when(infrastructure).prepare(eq(identity), eq(internalEnvironment));
+    doReturn(context).when(infrastructure).prepare(eq(identity), eq(internalEnvironment), any());
     when(context.getInfrastructure()).thenReturn(infrastructure);
     when(context.getIdentity()).thenReturn(identity);
     return context;
@@ -450,7 +454,10 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
-    public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment) {
+    public RuntimeContext internalPrepare(
+        RuntimeIdentity id,
+        InternalEnvironment environment,
+        Collection<CheService> wsNextServices) {
       throw new UnsupportedOperationException();
     }
   }

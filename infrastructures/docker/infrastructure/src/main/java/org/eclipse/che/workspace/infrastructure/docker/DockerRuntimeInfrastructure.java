@@ -14,6 +14,7 @@ import static java.lang.String.format;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
@@ -24,6 +25,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentNormalizer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.convert.DockerEnvironmentConverter;
@@ -64,8 +66,11 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
   @Override
   protected RuntimeContext internalPrepare(
-      RuntimeIdentity identity, InternalEnvironment environment)
+      RuntimeIdentity identity,
+      InternalEnvironment environment,
+      Collection<CheService> wsNextServices)
       throws ValidationException, InfrastructureException {
+    // TODO Docker infra doesn't support workspace Next for the time being
     DockerEnvironment dockerEnvironment = convertToDockerEnv(environment);
 
     // modify environment with everything needed to use docker machines on particular (cloud)

@@ -10,12 +10,16 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
+import java.util.Collection;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
+import org.eclipse.che.api.workspace.server.wsnext.model.Container;
+import org.eclipse.che.api.workspace.server.wsnext.model.EnvVar;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
@@ -33,7 +37,10 @@ public class EnvVarEnvironmentProvisioner implements InternalEnvironmentProvisio
   }
 
   @Override
-  public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
+  public void provision(
+      RuntimeIdentity id,
+      InternalEnvironment internalEnvironment,
+      Collection<CheService> wsNextServices)
       throws InfrastructureException {
     for (EnvVarProvider envVarProvider : envVarProviders) {
       Pair<String, String> envVar = envVarProvider.get(id);
@@ -41,6 +48,11 @@ public class EnvVarEnvironmentProvisioner implements InternalEnvironmentProvisio
           .getMachines()
           .values()
           .forEach(m -> m.getEnv().putIfAbsent(envVar.first, envVar.second));
+      for (CheService wsNextService : wsNextServices) {
+        for (Container container : wsNextService.getSpec().getContainers()) {
+          container.getEnv().add(new EnvVar().name(envVar.first).value(envVar.first));
+        }
+      }
     }
   }
 }

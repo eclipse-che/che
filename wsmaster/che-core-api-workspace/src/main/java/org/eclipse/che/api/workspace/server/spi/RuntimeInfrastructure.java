@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement for
@@ -91,16 +92,18 @@ public abstract class RuntimeInfrastructure {
    *
    * @param id the RuntimeIdentity
    * @param environment incoming internal environment
+   * @param wsNextServices workspace next services that should be added to the environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+  public RuntimeContext prepare(
+      RuntimeIdentity id, InternalEnvironment environment, Collection<CheService> wsNextServices)
       throws ValidationException, InfrastructureException {
     for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
-      provisioner.provision(id, environment);
+      provisioner.provision(id, environment, wsNextServices);
     }
-    return internalPrepare(id, environment);
+    return internalPrepare(id, environment, wsNextServices);
   }
 
   /**
@@ -109,11 +112,12 @@ public abstract class RuntimeInfrastructure {
    *
    * @param id the RuntimeIdentity
    * @param environment incoming internal environment
+   * @param wsNextServices workspace next services that should be added to the environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
   protected abstract RuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment)
+      RuntimeIdentity id, InternalEnvironment environment, Collection<CheService> wsNextServices)
       throws ValidationException, InfrastructureException;
 }

@@ -12,7 +12,10 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.lang.String.format;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,6 +27,8 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -40,6 +45,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   private final OpenShiftRuntimeContextFactory runtimeContextFactory;
   private final OpenShiftEnvironmentProvisioner osEnvProvisioner;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
+  private final Map<String, WorkspaceNextApplier> workspaceNextAppliers;
 
   @Inject
   public OpenShiftInfrastructure(
@@ -48,7 +54,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       OpenShiftEnvironmentProvisioner osEnvProvisioner,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
-      KubernetesRuntimeStateCache runtimeStatusesCache) {
+      KubernetesRuntimeStateCache runtimeStatusesCache,
+      Map<String, WorkspaceNextApplier> workspaceNextAppliers) {
     super(
         NAME,
         ImmutableSet.of(
@@ -59,6 +66,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     this.osEnvProvisioner = osEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
+    this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
   }
 
   @Override
@@ -68,9 +76,11 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
 
   @Override
   protected OpenShiftRuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment)
+      RuntimeIdentity id, InternalEnvironment environment, Collection<CheService> wsNextServices)
       throws ValidationException, InfrastructureException {
     final OpenShiftEnvironment openShiftEnvironment = asOpenShiftEnv(environment);
+
+    applyWorkspaceNext(openShiftEnvironment, wsNextServices);
 
     osEnvProvisioner.provision(openShiftEnvironment, id);
 
@@ -97,5 +107,19 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
         format(
             "Environment type '%s' is not supported. Supported environment types: %s",
             source.getRecipe().getType(), OpenShiftEnvironment.TYPE));
+  }
+
+  protected void applyWorkspaceNext(
+      KubernetesEnvironment kubernetesEnvironment, Collection<CheService> cheServices)
+      throws InfrastructureException {
+    if (cheServices.isEmpty()) {
+      return;
+    }
+    WorkspaceNextApplier wsNext = workspaceNextAppliers.get(getName());
+    if (wsNext == null) {
+      throw new InfrastructureException(
+          "Workspace.Next features are not supported for recipe type " + getName());
+    }
+    wsNext.apply(kubernetesEnvironment, cheServices);
   }
 }

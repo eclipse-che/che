@@ -14,6 +14,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import com.google.inject.Singleton;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -24,6 +25,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,10 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
   private static final Logger LOG = LoggerFactory.getLogger(RuntimeInfrastructure.class);
 
   @Override
-  public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
+  public void provision(
+      RuntimeIdentity id,
+      InternalEnvironment internalEnvironment,
+      Collection<CheService> wsNextServices)
       throws InfrastructureException {
     for (InternalMachineConfig machineConfig : internalEnvironment.getMachines().values()) {
       fillEnv(machineConfig.getEnv(), machineConfig.getInstallers());

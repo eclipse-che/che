@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision;
 
+import java.util.Collection;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,6 +20,7 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 
 /**
  * Adds projects volumes to a machine with 'ws-agent' server.
@@ -38,7 +40,10 @@ public class ProjectsVolumeForWsAgentProvisioner implements InternalEnvironmentP
   }
 
   @Override
-  public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
+  public void provision(
+      RuntimeIdentity id,
+      InternalEnvironment internalEnvironment,
+      Collection<CheService> wsNextServices)
       throws InfrastructureException {
 
     Optional<String> wsAgentServerMachine =

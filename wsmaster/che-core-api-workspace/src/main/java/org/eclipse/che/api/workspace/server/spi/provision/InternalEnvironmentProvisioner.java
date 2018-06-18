@@ -10,18 +10,23 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision;
 
+import java.util.Collection;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
 
 /**
- * Modifies internal environment with everything needed for some logical part of {@link
- * RuntimeInfrastructure}.
+ * Modifies internal environment and workspace next services with everything needed for some logical
+ * part of {@link RuntimeInfrastructure}.
  *
  * @author Sergii Leshchenko
  */
 public interface InternalEnvironmentProvisioner {
-  void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
+  void provision(
+      RuntimeIdentity id,
+      InternalEnvironment internalEnvironment,
+      Collection<CheService> wsNextServices)
       throws InfrastructureException;
 }
