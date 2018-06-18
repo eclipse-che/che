@@ -87,7 +87,7 @@ public class RecreateUpdate {
     waitOpenShiftStatus(
         timeLimitInSecForRecreateingUpdate, delayBetweenRequest, WsMasterStauses.RUNNING);
 
-    // get current version of deployment after rollout and check this
+    // get current version of deployment after rollout
     int cheDeploymentAfterRollout =
         parseInt(openShiftCliCommandExecutor.execute(COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE));
     // After rollout updating - deployment should be increased on 1. So we previews version +1
