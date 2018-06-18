@@ -10,10 +10,14 @@
  */
 package org.eclipse.che.selenium.hotupdate;
 
+import static java.lang.Integer.*;
+import static org.testng.Assert.*;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.CheTestAdminHttpJsonRequestFactory;
@@ -27,7 +31,11 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = {TestGroup.OSIO, TestGroup.MULTIUSER})
 public class RecreateUpdate {
+  private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
+      "get dc | grep che | awk '{print $2}'";
+
   @Inject CheTestAdminHttpJsonRequestFactory testUserHttpJsonRequestFactory;
   @Inject CheTestApiEndpointUrlProvider cheTestApiEndpointUrlProvider;
   @Inject ProjectExplorer projectExplorer;
@@ -38,18 +46,21 @@ public class RecreateUpdate {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private CheTerminal terminal;
   @Inject private Menu menu;
-  private String cheRevisionBeforeRollout;
+
+  private int cheDeploymentBeforeRollout;
 
   private enum WsMasterStauses {
     RUNNING,
     READY_TO_SHUTDOWN,
-    PREPARING_TO_SHUTDOWN;
+    PREPARING_TO_SHUTDOWN,
+    SUSPENDED;
   }
 
   @BeforeClass
   public void setUp() throws IOException {
-    String ocGettingCurrentRevisionChe = "get dc | grep che | awk '{print $2}'";
-    cheRevisionBeforeRollout = openShiftCliCommandExecutor.execute(ocGettingCurrentRevisionChe);
+
+    cheDeploymentBeforeRollout =
+        parseInt(openShiftCliCommandExecutor.execute(COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE));
   }
 
   @Test
@@ -60,59 +71,79 @@ public class RecreateUpdate {
     int timeLimitInSecForRecreateingUpdate = 600;
     int delayBetweenRequest = 6;
 
+    // open a user workspace and send request for preparing to shutdown
     ide.open(workspace);
+
     testUserHttpJsonRequestFactory
         .fromUrl(restUrlForSuspendingWorkspaces)
         .usePostMethod()
         .request();
-    checkWorkspaceIsNotAvailable();
+
+    // make sure, that system is prepared to  shutdown and than ready to shutdown
+    checkExpectedStatusesAndWorkspaceAfterShutDowning();
+
+    // performs rollout
     openShiftCliCommandExecutor.execute(ocClientRolloutCommand);
-    waitExpectedStatus(
+    waitOpenShiftStatus(
         timeLimitInSecForRecreateingUpdate, delayBetweenRequest, WsMasterStauses.RUNNING);
+
+    // get current version of deployment after rollout and check this
+    int cheDeploymentAfterRollout =
+        parseInt(openShiftCliCommandExecutor.execute(COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE));
+    // After rollout updating - deployment should be increased on 1. So we previews version +1
+    // should be equal current
+    assertEquals(cheDeploymentAfterRollout, cheDeploymentBeforeRollout += 1);
+
+    // make sure that CHE ide is available after updating again
+    ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
-  private void checkWorkspaceIsNotAvailable() throws Exception {
-    int timeLimitForReadyToShutdownStatus = 15;
+  private void checkExpectedStatusesAndWorkspaceAfterShutDowning() throws Exception {
+    int timeLimitForReadyToShutdownStatus = 30;
     int delayBetweenRequestes = 1;
 
-    waitExpectedStatus(
+    waitOpenShiftStatus(
         timeLimitForReadyToShutdownStatus,
         delayBetweenRequestes,
         WsMasterStauses.PREPARING_TO_SHUTDOWN);
 
-    waitExpectedStatus(
+    waitOpenShiftStatus(
         timeLimitForReadyToShutdownStatus,
         delayBetweenRequestes,
         WsMasterStauses.READY_TO_SHUTDOWN);
 
+    // reopen the workspace and make sure that this one is not available after suspending system
+    ide.open(workspace);
     projectExplorer.waitProjectExplorerIsNotPresent(timeLimitForReadyToShutdownStatus);
     terminal.waitTerminalIsNotPresent(timeLimitForReadyToShutdownStatus);
   }
 
-  private void waitExpectedStatus(
-      int maxWaitingLimitInSec, int delayBetweenRequestsInSec, WsMasterStauses staus)
+  private void waitOpenShiftStatus(
+      int maxTimeLimitInSec, int delayBetweenRequestsInSec, WsMasterStauses status)
       throws Exception {
 
     // if the limit is not exceeded - do request and check status of the system
-    while (maxWaitingLimitInSec > 0) {
+    while (maxTimeLimitInSec > 0) {
       System.out.println(
-          "<<<<<<<<<<<getted status: "
+          "<<<<<<<<<<<current status: "
               + getCurrentRollingStatus()
-              + "eq status: "
-              + staus.toString());
-      boolean isStatusFinished = getCurrentRollingStatus().equals(staus.toString());
+              + " desired status: "
+              + status.toString());
+      boolean isStatusFinished = getCurrentRollingStatus().equals(status.toString());
 
       if (isStatusFinished) {
         break;
       }
 
-      // delay after request and decrement limit
+      // delay if expected status has been not achieved and decrement limit
       WaitUtils.sleepQuietly(delayBetweenRequestsInSec);
-      maxWaitingLimitInSec -= delayBetweenRequestsInSec;
-      // if limit exceeded - something went wrong
-      if (maxWaitingLimitInSec <= 0) {
+      maxTimeLimitInSec -= delayBetweenRequestsInSec;
+
+      // if the limit has exceeded and we have not achieved expected status - something went wrong
+      if (maxTimeLimitInSec <= 0) {
         throw new RuntimeException(
-            "The process did not end in the allotted limit or something went wrong with the test environment");
+            "The limit has passed or something went wrong with the test environment");
       }
     }
   }
@@ -121,8 +152,8 @@ public class RecreateUpdate {
     String restUrlForGettingSuspendingStatus =
         cheTestApiEndpointUrlProvider.get().toString() + "system/state";
 
-    // get current response code - if system is suspended,  usually we will get 503 response
-
+    // get current response code - if system is suspended,  we will get IO exception from the
+    // server. This mean that we have suspended status
     try {
       testUserHttpJsonRequestFactory
           .fromUrl(restUrlForGettingSuspendingStatus)
@@ -130,7 +161,7 @@ public class RecreateUpdate {
           .request()
           .getResponseCode();
     } catch (IOException ex) {
-      return "SUSPENDED";
+      return WsMasterStauses.SUSPENDED.toString();
     }
 
     return JsonHelper.parseJson(
