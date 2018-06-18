@@ -32,7 +32,7 @@ public class CheTestSystemClient {
     RUNNING,
     READY_TO_SHUTDOWN,
     PREPARING_TO_SHUTDOWN,
-    SUSPENDED;
+    SUSPENDED
   }
 
   /**
@@ -86,7 +86,7 @@ public class CheTestSystemClient {
         .getStringValue();
   }
 
-  private void waitWorkspaceMasterStatus(
+  public void waitWorkspaceMasterStatus(
       int maxReadStatusAttempts, int readStatusTimeoutInSec, WsMasterStatus expectedStatus)
       throws Exception {
     int readStatusAttempts = maxReadStatusAttempts;
@@ -100,7 +100,7 @@ public class CheTestSystemClient {
 
     throw new IOException(
         String.format(
-            "Workspace Master hasn't achieved status '%s' in '%' seconds.",
+            "Workspace Master hasn't achieved status '%s' in '%s' seconds.",
             expectedStatus, maxReadStatusAttempts * readStatusTimeoutInSec));
   }
 }
