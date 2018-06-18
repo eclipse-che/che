@@ -16,30 +16,23 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static javax.ws.rs.core.UriBuilder.fromUri;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Runtime;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.LanguageServerConfig.CommunicationProvider;
-import org.eclipse.che.api.workspace.server.WorkspaceService;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,38 +45,24 @@ import org.slf4j.LoggerFactory;
 class WorkspaceConfigProvider implements LanguageServerConfigProvider {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceConfigProvider.class);
 
-  private final String workspaceId;
-  private final WorkspaceProvider workspaceProvider;
+  private final Runtime workspaceRuntime;
   private final ConfigExtractor configExtractor;
 
   @Inject
-  WorkspaceConfigProvider(
-      @Named("env.CHE_WORKSPACE_ID") String workspaceId,
-      @Named("che.api") String apiEndpoint,
-      HttpJsonRequestFactory httpJsonRequestFactory,
-      JsonParser jsonParser) {
-    this.workspaceId = workspaceId;
-    this.workspaceProvider = new WorkspaceProvider(apiEndpoint, httpJsonRequestFactory);
+  WorkspaceConfigProvider(WorkspaceProjectSynchronizer workspace, JsonParser jsonParser)
+      throws ServerException {
+
+    this.workspaceRuntime = workspace.getRuntime();
     this.configExtractor = new ConfigExtractor(jsonParser);
   }
 
   @Override
   public Map<String, LanguageServerConfig> getAll() {
-    Workspace workspace = workspaceProvider.get(workspaceId);
-    if (workspace == null) {
-      LOG.error("Can't get workspace");
-      return ImmutableMap.of();
-    }
-
-    Runtime runtime = workspace.getRuntime();
-    if (runtime == null) {
-      LOG.error("Can't get runtime");
-      return ImmutableMap.of();
-    }
 
     Map<String, LanguageServerConfig> configs = newHashMap();
 
-    for (Entry<String, ? extends Machine> machineEntry : runtime.getMachines().entrySet()) {
+    for (Entry<String, ? extends Machine> machineEntry :
+        workspaceRuntime.getMachines().entrySet()) {
       Map<String, ? extends Server> servers = machineEntry.getValue().getServers();
 
       for (Entry<String, ? extends Server> serverEntry : servers.entrySet()) {
@@ -183,36 +162,6 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
           .stream()
           .map(JsonElement::getAsString)
           .collect(toSet());
-    }
-  }
-
-  private class WorkspaceProvider {
-    private final String apiEndpoint;
-    private final HttpJsonRequestFactory httpJsonRequestFactory;
-
-    private WorkspaceProvider(String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory) {
-      this.apiEndpoint = apiEndpoint;
-      this.httpJsonRequestFactory = httpJsonRequestFactory;
-    }
-
-    private Workspace get(String workspaceId) {
-      try {
-        String href =
-            fromUri(apiEndpoint)
-                .path(WorkspaceService.class)
-                .path(WorkspaceService.class, "getByKey")
-                .queryParam("includeInternalServers", true)
-                .build(workspaceId)
-                .toString();
-        return httpJsonRequestFactory
-            .fromUrl(href)
-            .useGetMethod()
-            .request()
-            .asDto(WorkspaceDto.class);
-      } catch (IOException | ApiException e) {
-        LOG.error("Did not manage to get workspace configuration: {}", workspaceId, e);
-      }
-      return null;
     }
   }
 }

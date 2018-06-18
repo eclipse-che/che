@@ -10,10 +10,21 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
+import java.util.Set;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
-public interface ProjectSynchronizer {
+/**
+ * Abstraction for keeping current workspace
+ *
+ * @author gazarenkov
+ */
+public interface WorkspaceKeeper {
 
-  /** Synchronizes Project Config state on Agent and Master */
-  void synchronize() throws ServerException;
+  /** @return projects from Workspace Config */
+  Set<ProjectConfig> getProjects() throws ServerException;
+
+  /** @return workspace's runtime */
+  Runtime getRuntime() throws ServerException;
 }

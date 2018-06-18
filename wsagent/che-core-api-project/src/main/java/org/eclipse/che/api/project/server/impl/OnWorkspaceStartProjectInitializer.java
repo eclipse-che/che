@@ -33,7 +33,7 @@ import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 public class OnWorkspaceStartProjectInitializer {
 
   private final FsManager fsManager;
-  private final ProjectSynchronizer projectSynchronizer;
+  private final WorkspaceProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectHandlerRegistry projectHandlerRegistry;
   private final HiddenItemPathMatcher hiddenItemPathMatcher;
@@ -41,7 +41,7 @@ public class OnWorkspaceStartProjectInitializer {
   @Inject
   public OnWorkspaceStartProjectInitializer(
       FsManager fsManager,
-      ProjectSynchronizer projectSynchronizer,
+      WorkspaceProjectSynchronizer projectSynchronizer,
       ProjectConfigRegistry projectConfigRegistry,
       ProjectHandlerRegistry projectHandlerRegistry,
       HiddenItemPathMatcher hiddenItemPathMatcher) {
@@ -62,7 +62,7 @@ public class OnWorkspaceStartProjectInitializer {
 
   private void initializeRegisteredProjects()
       throws ServerException, NotFoundException, ConflictException {
-    for (ProjectConfig projectConfig : projectSynchronizer.getAll()) {
+    for (ProjectConfig projectConfig : projectSynchronizer.getProjects()) {
       projectConfigRegistry.put(projectConfig, false, false);
     }
   }

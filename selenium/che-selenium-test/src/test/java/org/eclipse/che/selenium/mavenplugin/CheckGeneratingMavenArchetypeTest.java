@@ -26,7 +26,9 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckGeneratingMavenArchetypeTest {
-  private static final String NAME_OF_ARTIFACT = NameGenerator.generate("quickStart", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("quickStart", 4);
+  private static final String ARTIFACT_ID = "artifact";
+  private static final String GROUP_ID = "group";
   @Inject private Wizard projectWizard;
   @Inject private Menu menu;
   @Inject private ProjectExplorer projectExplorer;
@@ -42,31 +44,33 @@ public class CheckGeneratingMavenArchetypeTest {
             "  <groupId>%s</groupId>\n"
                 + "  <artifactId>%s</artifactId>\n"
                 + "  <version>1.0-SNAPSHOT</version>",
-            NAME_OF_ARTIFACT, NAME_OF_ARTIFACT);
+            GROUP_ID, ARTIFACT_ID);
 
     Stream<String> expectedItems =
         Stream.of(
-            NAME_OF_ARTIFACT + "/src/main/java/" + NAME_OF_ARTIFACT + "/App.java",
-            NAME_OF_ARTIFACT + "/src/test/java/" + NAME_OF_ARTIFACT + "/AppTest.java",
-            NAME_OF_ARTIFACT + "/pom.xml");
+            PROJECT_NAME + "/src/main/java/" + GROUP_ID + "/App.java",
+            PROJECT_NAME + "/src/test/java/" + GROUP_ID + "/AppTest.java",
+            PROJECT_NAME + "/pom.xml");
     ide.open(workspace);
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
     projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
-    projectWizard.typeProjectNameOnWizard(NAME_OF_ARTIFACT);
+    projectWizard.typeProjectNameOnWizard(PROJECT_NAME);
     projectWizard.clickNextButton();
     projectWizard.waitOpenProjectConfigForm();
     projectWizard.selectArcheTypeFromList(Wizard.Archetypes.QUICK_START);
-    projectWizard.checkArtifactIdOnWizardContainsText(NAME_OF_ARTIFACT);
-    projectWizard.checkGroupIdOnWizardContainsText(NAME_OF_ARTIFACT);
+    projectWizard.setArtifactIdOnWizard(ARTIFACT_ID);
+    projectWizard.checkArtifactIdOnWizardContainsText(ARTIFACT_ID);
+    projectWizard.setGroupIdOnWizard(GROUP_ID);
+    projectWizard.checkGroupIdOnWizardContainsText(GROUP_ID);
     projectWizard.checkVersionOnWizardContainsText("1.0-SNAPSHOT");
     projectWizard.clickCreateButton();
-    projectExplorer.waitItem(NAME_OF_ARTIFACT);
+    projectExplorer.waitItem(PROJECT_NAME);
     console.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.quickExpandWithJavaScript();
     expectedItems.forEach(projectExplorer::waitItem);
-    projectExplorer.openItemByPath(NAME_OF_ARTIFACT + "/pom.xml");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitTextIntoEditor(expectedContnetInPomXml);
   }
 }
