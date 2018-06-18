@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ALL_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CREATE_STACK_DIALOG_FORM_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DECREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
@@ -118,6 +119,8 @@ public class NewWorkspace {
     String ORGANIZATION_ITEM = "//md-menu-item[text()='%s']";
     String FILTERS_INPUT_TAGS_XPATH = "//div[@class='md-chip-content']";
     String FILTERS_INPUT_TAG_XPATH_TEMPLATE = "//div[@class='md-chip-content']//div[text()='%s']";
+    String CREATE_STACK_DIALOG_FORM_XPATH =
+        "//div[contains(@class, 'md-dialog-container ng-scope')]/md-dialog";
 
     // buttons
     String TOP_CREATE_BUTTON_XPATH = "//button[@name='split-button']";
@@ -765,8 +768,11 @@ public class NewWorkspace {
   }
 
   public void waitCreateStackDialog() {
+    // wait should be changed to "TestWebElementRenderChecker" after resolving issue
+    // https://github.com/eclipse/che/issues/10087
     WaitUtils.sleepQuietly(2);
-    seleniumWebDriverHelper.waitVisibility(By.xpath("//md-dialog"));
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(CREATE_STACK_DIALOG_FORM_XPATH));
     seleniumWebDriverHelper.waitVisibility(
         By.xpath("//div[text()='Would you like to create a new stack?']"));
     seleniumWebDriverHelper.waitVisibility(By.xpath("//div[text()='Create stack']"));

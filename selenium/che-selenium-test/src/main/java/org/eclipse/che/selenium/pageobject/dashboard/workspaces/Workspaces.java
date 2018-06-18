@@ -440,12 +440,23 @@ public class Workspaces {
       return projectsAmount;
     }
 
+    @Override
+    public int hashCode() {
+      return super.hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
-      WorkspaceListItem itemForCompare = (WorkspaceListItem) obj;
-      return this.ownerName.equals(itemForCompare.ownerName)
-          && this.workspaceName.equals(itemForCompare.workspaceName)
-          && this.ramAmount == itemForCompare.ramAmount
-          && this.projectsAmount == itemForCompare.projectsAmount;
+      if (obj instanceof WorkspaceListItem) {
+        WorkspaceListItem itemForCompare = (WorkspaceListItem) obj;
+
+        return this.ownerName.equals(itemForCompare.ownerName)
+            && this.workspaceName.equals(itemForCompare.workspaceName)
+            && this.ramAmount == itemForCompare.ramAmount
+            && this.projectsAmount == itemForCompare.projectsAmount;
+      }
+
+      return false;
     }
   }
 }

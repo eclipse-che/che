@@ -19,7 +19,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -114,7 +113,7 @@ public class NewWorkspacePageTest {
           "zend");
 
   private static final List<String> EXPECTED_ALL_STACKS =
-      Arrays.asList(
+      asList(
           "blank-default",
           "java-default",
           "java-mysql",
