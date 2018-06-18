@@ -50,6 +50,8 @@
           <class name="org.eclipse.che.selenium.languageserver.CSharpFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.PhpFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.PythonFileEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
@@ -193,6 +195,7 @@
           <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4CheckRunSuitesAndScopesTest"/>
           <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest"/>
           <class name="org.eclipse.che.selenium.preferences.CheckErrorsWarningsTabTest"/>
+          <class name="org.eclipse.che.selenium.preferences.ContributeTabTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckAutoSaveForFileWhichAlreadyExistTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckCollapseAllNodesProjectTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckCopyCutFeaturesForFilesTest"/>
@@ -263,6 +266,7 @@
           <class name="org.eclipse.che.selenium.refactor.types.TestEnumerationsTest"/>
           <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>

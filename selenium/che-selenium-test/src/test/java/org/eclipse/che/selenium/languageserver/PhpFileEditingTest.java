@@ -88,10 +88,10 @@ public class PhpFileEditingTest {
     checkCodeValidation();
     checkAutocompletion();
     checkCodeAssistant();
-    checkGoToDefenition();
+    checkGoToDefinition();
   }
 
-  private void checkGoToDefenition() {
+  private void checkGoToDefinition() {
     editor.deleteCurrentLine();
 
     editor.goToPosition(14, 9);
@@ -127,7 +127,7 @@ public class PhpFileEditingTest {
   private void checkCodeValidation() {
     editor.goToPosition(14, 2);
     editor.typeTextIntoEditor(" ");
-    editor.waitMarkerInPositionAndClick(ERROR_OVERVIEW, 14);
+    editor.clickOnMarker(ERROR_OVERVIEW, 14);
     editor.waitTextInToolTipPopup("';' expected.");
 
     editor.goToPosition(14, 3);

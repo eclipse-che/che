@@ -642,6 +642,7 @@ public class EditorAgentImpl
                           restoreCreateEditor(
                               optionalFile.get(), file, editorPartStack, callback, activeEditors);
                         } else {
+                          removeFromOpeningFilesList(path, editorPartStack);
                           callback.onSuccess(null);
                         }
                       }

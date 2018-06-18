@@ -139,7 +139,7 @@ public class AutocompleteJSFilesTest {
     editor.typeTextIntoEditorWithoutDelayForSaving(Keys.END.toString());
     editor.typeTextIntoEditorWithoutDelayForSaving(Keys.BACK_SPACE.toString());
 
-    editor.waitMarkerInPositionAndClick(INFO, 11);
+    editor.clickOnMarker(INFO, 11);
     editor.clickOnElementByXpath("//button[text()='Add missing semicolon']");
 
     editor.waitAllMarkersInvisibility(INFO);

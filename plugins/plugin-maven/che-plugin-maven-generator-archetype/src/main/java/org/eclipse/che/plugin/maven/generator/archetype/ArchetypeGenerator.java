@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.maven.generator.archetype;
 
+import static java.io.File.separator;
 import static org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput.State.DONE;
 import static org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput.State.ERROR;
 
@@ -22,7 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
@@ -31,6 +33,7 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.core.util.Watchdog;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.ide.maven.tools.MavenArtifact;
 import org.eclipse.che.ide.maven.tools.MavenUtils;
 import org.eclipse.che.plugin.maven.shared.MavenArchetype;
@@ -48,22 +51,25 @@ public class ArchetypeGenerator {
   private static final Logger LOG = LoggerFactory.getLogger(ArchetypeGenerator.class);
 
   private EventService eventService;
+  private final FsManager fsManager;
 
   @Inject
-  public ArchetypeGenerator(EventService eventService) {
+  public ArchetypeGenerator(EventService eventService, FsManager fsManager) {
     this.eventService = eventService;
+    this.fsManager = fsManager;
   }
 
   /**
    * Generates a new project from the specified archetype by given maven artifact descriptor.
    *
+   * @param projectName name of the project
    * @param workDir folder where command will execute in common use root dir of workspace
    * @param archetype archetype from which need to generate new project
    * @param mavenArtifact maven artifact descriptor
    * @throws ServerException if an error occurs while generating project
    */
   public void generateFromArchetype(
-      @NotNull File workDir, @NotNull MavenArchetype archetype, MavenArtifact mavenArtifact)
+      String projectName, File workDir, MavenArchetype archetype, MavenArtifact mavenArtifact)
       throws ServerException {
     Map<String, String> archetypeProperties = new HashMap<>();
     archetypeProperties.put(
@@ -74,6 +80,7 @@ public class ArchetypeGenerator {
     archetypeProperties.put("-DgroupId", mavenArtifact.getGroupId());
     archetypeProperties.put("-DartifactId", mavenArtifact.getArtifactId());
     archetypeProperties.put("-Dversion", mavenArtifact.getVersion());
+    archetypeProperties.put("-Dbasedir", workDir.toPath().resolve(projectName).toString());
     if (archetype.getRepository() != null) {
       archetypeProperties.put("-DarchetypeRepository", archetype.getRepository());
     }
@@ -83,11 +90,18 @@ public class ArchetypeGenerator {
     final CommandLine commandLine = createCommandLine(archetypeProperties);
     try {
       execute(commandLine.toShellCommand(), workDir);
-    } catch (TimeoutException e) {
-      LOG.error(e.getMessage());
-    } catch (IOException e) {
-      LOG.error(e.getMessage());
-    } catch (InterruptedException e) {
+      // TODO Remove this block and use 'basedir' option of the Maven Archetype Plugin when the
+      // related issue will be solved: https://issues.apache.org/jira/browse/ARCHETYPE-311.
+      // Maven Archetype Plugin creates project directory with 'artifact-id' name, so need to rename
+      // it to specified project name.
+      if (!fsManager.exists(projectName) && fsManager.exists(mavenArtifact.getArtifactId())) {
+        fsManager.move(separator + mavenArtifact.getArtifactId(), separator + projectName);
+      }
+    } catch (TimeoutException
+        | IOException
+        | InterruptedException
+        | ConflictException
+        | NotFoundException e) {
       LOG.error(e.getMessage());
     }
   }

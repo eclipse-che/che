@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
 import org.eclipse.che.infrastructure.docker.client.ProgressMonitor;
-import org.eclipse.che.infrastructure.docker.client.dto.AuthConfigs;
 
 /**
  * Arguments holder for {@link DockerConnector#buildImage(BuildImageParams, ProgressMonitor)}.

@@ -39,11 +39,12 @@ import org.eclipse.che.api.project.shared.RegisteredProject;
 public class SynchronizingProjectManager implements ProjectManager {
 
   private final ExecutiveProjectManager executiveProjectManager;
-  private final ProjectSynchronizer projectSynchronizer;
+  private final WorkspaceProjectSynchronizer projectSynchronizer;
 
   @Inject
   public SynchronizingProjectManager(
-      ExecutiveProjectManager executiveProjectManager, ProjectSynchronizer projectSynchronizer) {
+      ExecutiveProjectManager executiveProjectManager,
+      WorkspaceProjectSynchronizer projectSynchronizer) {
     this.executiveProjectManager = executiveProjectManager;
     this.projectSynchronizer = projectSynchronizer;
   }

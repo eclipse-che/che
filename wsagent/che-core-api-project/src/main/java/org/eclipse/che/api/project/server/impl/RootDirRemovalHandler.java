@@ -33,14 +33,14 @@ import org.slf4j.LoggerFactory;
 public class RootDirRemovalHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(RootDirRemovalHandler.class);
 
-  private final ProjectSynchronizer projectSynchronizer;
+  private final WorkspaceProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final FileWatcherManager fileWatcherManager;
   private final EventService eventService;
 
   @Inject
   public RootDirRemovalHandler(
-      ProjectSynchronizer projectSynchronizer,
+      WorkspaceProjectSynchronizer projectSynchronizer,
       ProjectConfigRegistry projectConfigRegistry,
       FileWatcherManager fileWatcherManager,
       EventService eventService) {

@@ -43,6 +43,10 @@
             <artifactId>guice-assistedinject</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
         </dependency>
@@ -230,6 +234,7 @@
                             <goal>integration-test</goal>
                         </goals>
                         <configuration>
+                            <trimStackTrace>false</trimStackTrace>
                             <properties>
                                 <property>
                                     <name>configfailurepolicy</name>

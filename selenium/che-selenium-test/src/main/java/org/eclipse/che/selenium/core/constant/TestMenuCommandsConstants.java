@@ -88,6 +88,12 @@ public interface TestMenuCommandsConstants {
     String QUICK_FIX = ASSISTANT_MENU_PREFIX + "quickFix";
     String FIND_DEFINITION = ASSISTANT_MENU_PREFIX + "LSFindDefinitionAction";
 
+    interface ToolWindows {
+      String TOOL_WINDOWS = ASSISTANT_MENU_PREFIX + "toolWindows";
+      String CONTRIBUTE_TOOL_WIDOWS =
+          ASSISTANT_MENU_PREFIX + "Tool Windows/contributePartDisplayingMode";
+    }
+
     interface Refactoring {
       String REFACTORING = ASSISTANT_MENU_PREFIX + "assistantRefactoringGroup";
       String MOVE = ASSISTANT_MENU_PREFIX + "Refactoring/javaMoveRefactoring";
@@ -171,9 +177,8 @@ public interface TestMenuCommandsConstants {
     String COMMAND_LIST_XPATH = "//div[@id='gwt-debug-dropDownHeader'][2]";
   }
 
-  public static final String TEST_NG_TEST_DROP_DAWN_ITEM = "topmenu/Run/Test/Run Test";
-  public static final String JUNIT_TEST_DROP_DAWN_ITEM =
-      "gwt-debug-topmenu/Run/Test/TestJUnitActionRun";
+  String TEST_NG_TEST_DROP_DAWN_ITEM = "topmenu/Run/Test/Run Test";
+  String JUNIT_TEST_DROP_DAWN_ITEM = "gwt-debug-topmenu/Run/Test/TestJUnitActionRun";
 
-  public static final String TEST_DROP_DAWN_ITEM = "gwt-debug-topmenu/Run/Test/RunTest";
+  String TEST_DROP_DAWN_ITEM = "gwt-debug-topmenu/Run/Test/RunTest";
 }
