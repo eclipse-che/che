@@ -380,7 +380,7 @@ public class KubernetesInternalRuntime<
    */
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
-    CompletableFuture<Void> waitFuture = namespace.pods().waitAsync(machine.getPodName());
+    CompletableFuture<Void> waitFuture = namespace.pods().waitRunningAsync(machine.getPodName());
     toCancelFutures.add(waitFuture);
     return waitFuture;
   }

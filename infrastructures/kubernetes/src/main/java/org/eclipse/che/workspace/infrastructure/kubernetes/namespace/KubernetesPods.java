@@ -214,13 +214,11 @@ public class KubernetesPods {
   }
 
   /**
-   * Subscribes to pod events and returns the resulting future, which ends when a pod event that
-   * satisfies the predicate is received.
+   * Subscribes to pod events and returns the resulting future, which completes when pod becomes
+   * running.
    *
    * <p>Note that the resulting future must be explicitly cancelled when its completion no longer
    * important because of finalization allocated resources.
-   *
-   * <p>Pod watcher will look for
    *
    * @param name the pod name that should be watched
    * @return completable future that is completed when one of the following conditions is met:
@@ -231,7 +229,7 @@ public class KubernetesPods {
    *     </ul>
    *     otherwise, it must be explicitly closed
    */
-  public CompletableFuture<Void> waitAsync(String name) {
+  public CompletableFuture<Void> waitRunningAsync(String name) {
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
       final PodResource<Pod, DoneablePod> podResource =
@@ -241,43 +239,7 @@ public class KubernetesPods {
               new Watcher<Pod>() {
                 @Override
                 public void eventReceived(Action action, Pod pod) {
-                  podRunningFuture.isCompletedExceptionally();
-                  if (POD_STATUS_PHASE_RUNNING.equals(pod.getStatus().getPhase())) {
-                    podRunningFuture.complete(null);
-                  }
-
-                  if (POD_STATUS_PHASE_SUCCEEDED.equals(pod.getStatus().getPhase())) {
-                    podRunningFuture.completeExceptionally(
-                        new InfrastructureException(
-                            "Pod container has been terminated. Container must be configured to use a non-terminating command."));
-                  }
-
-                  if (POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
-                    String exceptionMessage =
-                        "Pod '" + pod.getMetadata().getName() + "' failed to start.";
-                    String reason = pod.getStatus().getReason();
-                    if (Strings.isNullOrEmpty(reason)) {
-                      try {
-                        String podLog =
-                            clientFactory
-                                .create()
-                                .pods()
-                                .inNamespace(namespace)
-                                .withName(pod.getMetadata().getName())
-                                .getLog();
-                        exceptionMessage = exceptionMessage.concat(" Pod logs: ").concat(podLog);
-
-                      } catch (InfrastructureException e) {
-                        exceptionMessage =
-                            exceptionMessage.concat(" Error occurred while fetching pod logs.");
-                      }
-                    } else {
-                      exceptionMessage = exceptionMessage.concat(" Reason: ").concat(reason);
-                    }
-                    podRunningFuture.completeExceptionally(
-                        new InfrastructureException(exceptionMessage));
-                    LOG.warn(exceptionMessage);
-                  }
+                  handleStartingPodStatus(podRunningFuture, pod);
                 }
 
                 @Override
@@ -294,15 +256,61 @@ public class KubernetesPods {
         podRunningFuture.completeExceptionally(
             new InfrastructureException("Specified pod " + name + " doesn't exist"));
       } else {
-        if (pod.getStatus() != null
-            && POD_STATUS_PHASE_RUNNING.equals(pod.getStatus().getPhase())) {
-          podRunningFuture.complete(null);
-        }
+        handleStartingPodStatus(podRunningFuture, pod);
       }
     } catch (KubernetesClientException | InfrastructureException ex) {
       podRunningFuture.completeExceptionally(ex);
     }
     return podRunningFuture;
+  }
+
+  /**
+   * Complete the future of the pod depending on it's status:
+   *
+   * <ul>
+   *   <li>complete successfully in case of "Running" pod state.
+   *   <li>complete exceptionally in case of "Failed" pod state. Exception will contain pod status
+   *       reason value, or if absent, it will attempt to retrieve pod logs.
+   *   <li>complete exceptionally in case of "Succeeded" pod state. (workspace container has been
+   *       terminated).
+   * </ul>
+   *
+   * -
+   */
+  private void handleStartingPodStatus(CompletableFuture<Void> podRunningFuture, Pod pod) {
+    if (POD_STATUS_PHASE_RUNNING.equals(pod.getStatus().getPhase())) {
+      podRunningFuture.complete(null);
+    }
+
+    if (POD_STATUS_PHASE_SUCCEEDED.equals(pod.getStatus().getPhase())) {
+      podRunningFuture.completeExceptionally(
+          new InfrastructureException(
+              "Pod container has been terminated. Container must be configured to use a non-terminating command."));
+    }
+
+    if (POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
+      String exceptionMessage = "Pod '" + pod.getMetadata().getName() + "' failed to start.";
+      String reason = pod.getStatus().getReason();
+      if (Strings.isNullOrEmpty(reason)) {
+        try {
+          String podLog =
+              clientFactory
+                  .create()
+                  .pods()
+                  .inNamespace(namespace)
+                  .withName(pod.getMetadata().getName())
+                  .getLog();
+          exceptionMessage = exceptionMessage.concat(" Pod logs: ").concat(podLog);
+
+        } catch (InfrastructureException e) {
+          exceptionMessage = exceptionMessage.concat(" Error occurred while fetching pod logs.");
+        }
+      } else {
+        exceptionMessage = exceptionMessage.concat(" Reason: ").concat(reason);
+      }
+      podRunningFuture.completeExceptionally(new InfrastructureException(exceptionMessage));
+      LOG.warn(exceptionMessage);
+    }
   }
 
   /**

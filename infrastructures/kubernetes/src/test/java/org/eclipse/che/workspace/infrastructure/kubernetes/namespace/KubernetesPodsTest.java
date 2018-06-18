@@ -39,23 +39,23 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesPodsTest {
 
-  @Mock KubernetesClientFactory clientFactory;
+  @Mock private KubernetesClientFactory clientFactory;
 
-  @Mock PodResource<Pod, DoneablePod> podResource;
+  @Mock private PodResource<Pod, DoneablePod> podResource;
 
-  @Mock KubernetesClient kubernetesClient;
+  @Mock private KubernetesClient kubernetesClient;
 
-  @Mock Pod pod;
+  @Mock private Pod pod;
 
-  @Mock PodStatus status;
+  @Mock private PodStatus status;
 
-  @Mock ObjectMeta metadata;
+  @Mock private ObjectMeta metadata;
 
-  ArgumentCaptor<Watcher> watcherCaptor;
+  private ArgumentCaptor<Watcher> watcherCaptor;
 
-  Watcher watcher;
+  private Watcher watcher;
 
-  KubernetesPods kubernetesPods;
+  private KubernetesPods kubernetesPods;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -86,7 +86,7 @@ public class KubernetesPodsTest {
   public void shouldCompleteFutureForWaitingPidIfStatusIsRunning() {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
-    CompletableFuture future = kubernetesPods.waitAsync("name");
+    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -101,7 +101,7 @@ public class KubernetesPodsTest {
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
-    CompletableFuture future = kubernetesPods.waitAsync("name");
+    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -125,7 +125,7 @@ public class KubernetesPodsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(pod.getStatus().getReason()).thenReturn("Evicted");
-    CompletableFuture future = kubernetesPods.waitAsync("name");
+    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -148,7 +148,7 @@ public class KubernetesPodsTest {
           throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
-    CompletableFuture future = kubernetesPods.waitAsync("name");
+    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -171,7 +171,7 @@ public class KubernetesPodsTest {
           throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
-    CompletableFuture future = kubernetesPods.waitAsync("name");
+    CompletableFuture future = kubernetesPods.waitRunningAsync("name");
 
     doThrow(new InfrastructureException("Failure while retrieving pod logs"))
         .when(clientFactory)
