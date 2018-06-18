@@ -16,10 +16,14 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRIN
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
+import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -36,6 +40,9 @@ public class RolloutUpdate {
   private static final String NAME_OF_ARTIFACT = NameGenerator.generate("quickStart", 4);
   private static final String PROJECT_NAME = "default-spring-project";
 
+  @InjectTestWorkspace(startAfterCreation = false)
+  private TestWorkspace workspaceForStarting;
+
   @Inject private Wizard projectWizard;
   @Inject private Menu menu;
   @Inject private ProjectExplorer projectExplorer;
@@ -43,9 +50,12 @@ public class RolloutUpdate {
   @Inject private CodenvyEditor editor;
   @Inject private Ide ide;
   @Inject private TestWorkspace workspace;
+  @Inject private TestWorkspace workspaceForStopping;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private ProcessAgent processAgent;
   @Inject private WebDriverWaitFactory webDriverWaitFactory;
+  @Inject private DefaultTestUser defaultTestUser;
 
   @BeforeMethod
   public void prepare() throws Exception {
@@ -61,9 +71,7 @@ public class RolloutUpdate {
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
     int currentRevision = getRevision();
 
-    executeRolloutUpdateCommand();
-
-    waitRevision(currentRevision + 1);
+    // check editor availability
 
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
@@ -73,6 +81,24 @@ public class RolloutUpdate {
 
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     editor.waitActive();
+
+    // execute rollout
+    executeRolloutUpdateCommand();
+
+    // --- check that rollout is in progress
+
+    // run and stop workspaces
+    testWorkspaceServiceClient.stop(workspaceForStopping.getName(), defaultTestUser.getName());
+    testWorkspaceServiceClient.waitStatus(
+        workspaceForStopping.getName(), defaultTestUser.getName(), WorkspaceStatus.STOPPING);
+
+    testWorkspaceServiceClient.start(
+        workspaceForStarting.getId(), workspaceForStarting.getName(), defaultTestUser);
+    testWorkspaceServiceClient.waitStatus(
+        workspaceForStarting.getName(), defaultTestUser.getName(), WorkspaceStatus.STARTING);
+
+    // check that che is updated
+    waitRevision(currentRevision + 1);
   }
 
   private int parseOutputAndGetRevision(String output) {
