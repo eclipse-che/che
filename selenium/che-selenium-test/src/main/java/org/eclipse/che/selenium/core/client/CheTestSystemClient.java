@@ -86,26 +86,16 @@ public class CheTestSystemClient {
         .getStringValue();
   }
 
-  public void waitWorkspaceMasterStatus(
-      int maxReadStatusAttempts, int delayBetweenRequestsInSec, WsMasterStatus expectedStatus)
-      throws Exception {
-    int readStatusAttempts = maxReadStatusAttempts;
-    // if the limit is not exceeded - do request and check status of the system
-    while (readStatusAttempts-- > 0) {
-      if (getCurrentState().equals(expectedStatus.toString())) {
-        break;
-      }
+    private void waitWorkspaceMasterStatus(int maxReadStatusAttempts, int readStatusTimeoutInSec, WsMasterStatus expectedStatus) throws Exception {
+        int readStatusAttempts = maxReadStatusAttempts;
+        while (readStatusAttempts-- > 0) {
+            if (getCurrentState().equals(expectedStatus.toString())) {
+                return;
+            }
 
-      // delay if expected status has been not achieved and decrement limit
-      WaitUtils.sleepQuietly(delayBetweenRequestsInSec);
+            WaitUtils.sleepQuietly(readStatusTimeoutInSec);
+        }
 
-      // if the limit has exceeded and we have not achieved expected status - something went wrong
-      if (maxReadStatusAttempts <= 0) {
-        throw new IOException(
-            String.format(
-                "Workspace Master hasn't achieved status '%s' in '%' seconds.",
-                maxReadStatusAttempts, maxReadStatusAttempts * maxReadStatusAttempts));
-      }
+        throw new IOException(String.format("Workspace Master hasn't achieved status '%s' in '%' seconds.", expectedStatus, maxReadStatusAttempts * readStatusTimeoutInSec));
     }
-  }
 }
