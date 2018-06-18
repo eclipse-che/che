@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.hotupdate;
 
 import static java.lang.Integer.*;
 import static org.eclipse.che.selenium.core.client.CheTestSystemClient.WsMasterStatus.RUNNING;
-import static org.eclipse.che.selenium.hotupdate.RecreateUpdateStrategyTest.WsMasterStatus.*;
 import static org.testng.Assert.*;
 
 import com.google.inject.Inject;
