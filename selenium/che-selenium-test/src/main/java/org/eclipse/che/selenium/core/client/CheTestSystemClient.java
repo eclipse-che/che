@@ -86,16 +86,21 @@ public class CheTestSystemClient {
         .getStringValue();
   }
 
-    private void waitWorkspaceMasterStatus(int maxReadStatusAttempts, int readStatusTimeoutInSec, WsMasterStatus expectedStatus) throws Exception {
-        int readStatusAttempts = maxReadStatusAttempts;
-        while (readStatusAttempts-- > 0) {
-            if (getCurrentState().equals(expectedStatus.toString())) {
-                return;
-            }
+  private void waitWorkspaceMasterStatus(
+      int maxReadStatusAttempts, int readStatusTimeoutInSec, WsMasterStatus expectedStatus)
+      throws Exception {
+    int readStatusAttempts = maxReadStatusAttempts;
+    while (readStatusAttempts-- > 0) {
+      if (getCurrentState().equals(expectedStatus.toString())) {
+        return;
+      }
 
-            WaitUtils.sleepQuietly(readStatusTimeoutInSec);
-        }
-
-        throw new IOException(String.format("Workspace Master hasn't achieved status '%s' in '%' seconds.", expectedStatus, maxReadStatusAttempts * readStatusTimeoutInSec));
+      WaitUtils.sleepQuietly(readStatusTimeoutInSec);
     }
+
+    throw new IOException(
+        String.format(
+            "Workspace Master hasn't achieved status '%s' in '%' seconds.",
+            expectedStatus, maxReadStatusAttempts * readStatusTimeoutInSec));
+  }
 }
