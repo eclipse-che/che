@@ -38,9 +38,7 @@ public class DialogAboutTest {
     menu.runCommand(HELP, ABOUT);
 
     dialogAbout.waitVerifyTextElements("About");
-    dialogAbout.waitVerifyTextElements("Version :");
-    dialogAbout.waitVerifyTextElements("Revision :");
-    dialogAbout.waitVerifyTextElements("Build Time :");
+    dialogAbout.waitVerifyTextElements("Build Details");
     dialogAbout.closeAboutDialog();
   }
 }

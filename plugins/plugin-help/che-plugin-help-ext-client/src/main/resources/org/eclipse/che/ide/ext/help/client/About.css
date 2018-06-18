@@ -15,12 +15,12 @@
 }
 
 .label {
-    margin: 6px 5px 0 15px;
-    margin-right: 5px;
     font-size: 11px;
     font-weight: bold;
-    float: left;
-    clear: left;
+    width: 100%;
+    font-size: fontSize;
+    font-family: outputFontFamily;
+    color: outputLinkColor;
 }
 
 .spacing {
@@ -29,14 +29,23 @@
 
 .value {
     font-size: 11px;
-    float: left;
     margin-top: 6px;
+    width: 100%;
 }
 
 .mainText {
     font-family: mainFontFamily;
+    text-align: center;
 }
 
 .logo g {
     fill: logoFill;
+}
+
+.label:hover {
+    text-decoration: underline;
+}
+
+.debugSummaryTextArea {
+    font-family: editorFontFamily;
 }
