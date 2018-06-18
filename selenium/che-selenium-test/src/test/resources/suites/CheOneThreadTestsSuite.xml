@@ -43,6 +43,7 @@
             </method-selector>
         </method-selectors>
         <classes>
+            <class name="org.eclipse.che.selenium.hotupdate.RecreateUpdateStrategyTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.CreateRootOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationByBulkTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationInListTest"/>
