@@ -198,7 +198,7 @@ fi
 
 if [ ! -f "${LS_DIR}/run" ]; then
     echo "Downloading C# language server"
-    curl -L -o ${LS_DIR}/omnisharp-linux-x64.tar.gz  ${AGENT_BINARIES_URI}
+    curl -s -L -o ${LS_DIR}/omnisharp-linux-x64.tar.gz  ${AGENT_BINARIES_URI}
     cd ${LS_DIR} && tar -xzf omnisharp-linux-x64.tar.gz
 fi
 
