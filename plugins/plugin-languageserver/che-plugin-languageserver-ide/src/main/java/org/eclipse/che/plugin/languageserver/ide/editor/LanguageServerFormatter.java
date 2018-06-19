@@ -145,9 +145,23 @@ public class LanguageServerFormatter implements ContentFormatter {
             .thenPromise(
                 arg -> {
                   for (TextEdit textEdit : arg) {
-                    int endLine = document.getLineCount() - 1;
-                    int endCharacter = document.getTextRangeForLine(endLine).getTo().getCharacter();
-                    textEdit.getRange().setEnd(new Position(endLine, endCharacter));
+                    Range range = textEdit.getRange();
+                    Position start = range.getStart();
+                    Position end = range.getEnd();
+                    int startCharacter = start.getCharacter();
+                    int startLine = start.getLine();
+                    int endCharacter = end.getCharacter();
+                    int endLine = end.getLine();
+
+                    if (startCharacter == 0
+                        && startLine == 0
+                        && endCharacter == 0
+                        && endLine == document.getLineCount()) {
+                      int newEndLine = document.getLineCount() - 1;
+                      int newEndCharacter =
+                          document.getTextRangeForLine(newEndLine).getTo().getCharacter();
+                      range.setEnd(new Position(newEndLine, newEndCharacter));
+                    }
                   }
 
                   return promiseProvider.resolve(arg);
