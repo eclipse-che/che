@@ -58,7 +58,7 @@ public class RecreateUpdateStrategyTest {
   public void checkRecreateUpdateStrategy() throws Exception {
     String ocClientRolloutCommand = "rollout latest che";
 
-    int requestAttempts = 600;
+    int requestAttempts = 100;
     int requestTimeoutInSec = 6;
 
     // open a user workspace and send request for preparing to shutdown
