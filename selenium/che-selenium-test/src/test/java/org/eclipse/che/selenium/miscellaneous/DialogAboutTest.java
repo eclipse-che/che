@@ -39,6 +39,9 @@ public class DialogAboutTest {
 
     dialogAbout.waitVerifyTextElements("About");
     dialogAbout.waitVerifyTextElements("Build Details");
+    dialogAbout.clickOnBuildDetailsAnchor();
+    dialogAbout.waitBuildDetailsDialogIsOpen();
+    dialogAbout.closeBuildDetailsDialog();
     dialogAbout.closeAboutDialog();
   }
 }
