@@ -11,11 +11,11 @@
 package org.eclipse.che.selenium.hotupdate;
 
 import static java.lang.Integer.*;
-import static org.eclipse.che.selenium.core.client.CheTestSystemClient.WsMasterStatus.RUNNING;
 import static org.testng.Assert.*;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
@@ -58,23 +58,23 @@ public class RecreateUpdateStrategyTest {
   public void checkRecreateUpdateStrategy() throws Exception {
     String ocClientRolloutCommand = "rollout latest che";
 
-    int timeLimitInSecForRecreatingUpdate = 600;
-    int delayBetweenRequests = 6;
+    int requestAttempts = 600;
+    int requestTimeoutInSec = 6;
 
     // open a user workspace and send request for preparing to shutdown
     ide.open(workspace);
 
-    cheTestSystemClient.prepareToStopping();
+    cheTestSystemClient.stop();
 
     // reopen the workspace and make sure that this one is not available after suspending system
     ide.open(workspace);
-    projectExplorer.waitProjectExplorerDisappearance(delayBetweenRequests);
-    terminal.waitTerminalIsNotPresent(delayBetweenRequests);
+    projectExplorer.waitProjectExplorerDisappearance(requestTimeoutInSec);
+    terminal.waitTerminalIsNotPresent(requestTimeoutInSec);
 
     // performs rollout
     openShiftCliCommandExecutor.execute(ocClientRolloutCommand);
     cheTestSystemClient.waitWorkspaceMasterStatus(
-        timeLimitInSecForRecreatingUpdate, delayBetweenRequests, RUNNING);
+        requestAttempts, requestTimeoutInSec, SystemStatus.RUNNING);
 
     // get current version of deployment after rollout
     int cheDeploymentAfterRollout =
