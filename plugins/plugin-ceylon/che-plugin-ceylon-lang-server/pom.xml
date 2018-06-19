@@ -70,11 +70,10 @@
                     <excludes>
                         <!-- The files don't need a license since they will
                         be added as templates inside the user projects -->
-                        
                         <exclude>src/main/resources/project/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
         </plugins>
-    </build>    
+    </build>
 </project>
