@@ -11,10 +11,10 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.NODE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
@@ -79,7 +79,7 @@ public class WorkingWithNodeWsTest {
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
-    newWorkspace.selectStack(NODE.getId());
+    newWorkspace.selectStack(NODE);
     newWorkspace.typeWorkspaceName(WORKSPACE);
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);

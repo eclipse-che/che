@@ -8,10 +8,10 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.dashboard;
+package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.ENV_VARIABLES;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.MACHINES;
@@ -172,7 +172,7 @@ public class WorkspaceDetailsComposeTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     loader.waitOnClosed();
-    newWorkspace.selectStack(JAVA_MYSQL.getId());
+    newWorkspace.selectStack(JAVA_MYSQL);
     newWorkspace.typeWorkspaceName(WORKSPACE);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
 

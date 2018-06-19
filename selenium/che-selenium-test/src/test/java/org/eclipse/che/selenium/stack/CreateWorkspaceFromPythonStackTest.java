@@ -13,10 +13,10 @@ package org.eclipse.che.selenium.stack;
 import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.PYTHON;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -75,7 +75,7 @@ public class CreateWorkspaceFromPythonStackTest {
 
   @Test
   public void checkWorkspaceCreationFromPythonStack() {
-    createWorkspaceWithProjectFromStack(PYTHON.getId(), WORKSPACE_NAME, PROJECT_NAME);
+    createWorkspaceWithProjectFromStack(PYTHON, WORKSPACE_NAME, PROJECT_NAME);
 
     switchToIdeAndWaitWorkspaceIsReadyToUse();
 
@@ -89,14 +89,14 @@ public class CreateWorkspaceFromPythonStackTest {
   }
 
   private void createWorkspaceWithProjectFromStack(
-      String stackName, String workspaceName, String projectName) {
+      NewWorkspace.Stack stack, String workspaceName, String projectName) {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
 
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(stackName);
+    newWorkspace.selectStack(stack);
     newWorkspace.typeWorkspaceName(workspaceName);
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(projectName);
