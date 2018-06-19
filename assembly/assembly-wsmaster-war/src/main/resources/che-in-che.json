@@ -56,6 +56,10 @@
                   "path": "api",
                   "protocol": "http",
                   "port": "8087"
+                },
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
                 }
               },
               "attributes": {
