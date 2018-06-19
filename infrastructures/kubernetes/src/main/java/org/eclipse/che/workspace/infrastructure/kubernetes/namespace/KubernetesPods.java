@@ -226,9 +226,13 @@ public class KubernetesPods {
    * @param name the pod name that should be watched
    * @return completable future that is completed when one of the following conditions is met:
    *     <ul>
-   *       <li>an event that satisfies predicate is received
-   *       <li>exception while getting pod resource occurred
-   *       <li>connection problem occurred
+   *       <li>complete successfully in case of "Running" pod state.
+   *       <li>complete exceptionally in case of "Failed" pod state. Exception will contain pod
+   *           status reason value, or if absent, it will attempt to retrieve pod logs.
+   *       <li>complete exceptionally in case of "Succeeded" pod state. (workspace container has
+   *           been terminated).
+   *       <li>complete exceptionally when exception while getting pod resource occurred.
+   *       <li>complete exceptionally when connection problem occurred.
    *     </ul>
    *     otherwise, it must be explicitly closed
    */
@@ -267,28 +271,17 @@ public class KubernetesPods {
     return podRunningFuture;
   }
 
-  /**
-   * Complete the future of the pod depending on it's status:
-   *
-   * <ul>
-   *   <li>complete successfully in case of "Running" pod state.
-   *   <li>complete exceptionally in case of "Failed" pod state. Exception will contain pod status
-   *       reason value, or if absent, it will attempt to retrieve pod logs.
-   *   <li>complete exceptionally in case of "Succeeded" pod state. (workspace container has been
-   *       terminated).
-   * </ul>
-   *
-   * -
-   */
   private void handleStartingPodStatus(CompletableFuture<Void> podRunningFuture, Pod pod) {
     if (POD_STATUS_PHASE_RUNNING.equals(pod.getStatus().getPhase())) {
       podRunningFuture.complete(null);
+      return;
     }
 
     if (POD_STATUS_PHASE_SUCCEEDED.equals(pod.getStatus().getPhase())) {
       podRunningFuture.completeExceptionally(
           new InfrastructureException(
               "Pod container has been terminated. Container must be configured to use a non-terminating command."));
+      return;
     }
 
     if (POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
