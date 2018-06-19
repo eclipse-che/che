@@ -40,7 +40,7 @@ public class AboutViewImpl extends Window implements AboutView {
 
   Button btnOk;
   @UiField Label version;
-  @UiField Anchor showSystemInfo;
+  @UiField Anchor buildDetailsAnchor;
 
   @UiField(provided = true)
   AboutLocalizationConstant locale;
@@ -72,7 +72,8 @@ public class AboutViewImpl extends Window implements AboutView {
       logoPanel.add(new SVGImage(logo));
     }
 
-    showSystemInfo.addClickHandler(event -> delegate.onShowBuildDetailsClicked());
+    buildDetailsAnchor.ensureDebugId("build-details-anchor");
+    buildDetailsAnchor.addClickHandler(event -> delegate.onShowBuildDetailsClicked());
   }
 
   /** {@inheritDoc} */

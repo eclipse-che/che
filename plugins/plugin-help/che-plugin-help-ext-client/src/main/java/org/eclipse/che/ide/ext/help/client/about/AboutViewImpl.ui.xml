@@ -24,7 +24,7 @@
         <g:center>
             <g:FlowPanel addStyleNames="{res.aboutCss.spacing} {res.aboutCss.mainText}">
                 <g:Label ui:field="version" addStyleNames="{res.aboutCss.value}"/>
-                <g:Anchor ui:field="showSystemInfo" addStyleNames="{res.aboutCss.label}" text="{buildDetailsLocale.title}"/>
+                <g:Anchor ui:field="buildDetailsAnchor" addStyleNames="{res.aboutCss.label}" text="{buildDetailsLocale.title}"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>
