@@ -728,6 +728,12 @@ public class NewWorkspace {
                 By.xpath(format("//div[@data-stack-id='%s']", stackId))));
   }
 
+  public void waitStacksCount(int expectedCount) {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> expectedCount == getAvailableStacksCount());
+  }
+
   public int getAvailableStacksCount() {
     return getAvailableStacks().size();
   }

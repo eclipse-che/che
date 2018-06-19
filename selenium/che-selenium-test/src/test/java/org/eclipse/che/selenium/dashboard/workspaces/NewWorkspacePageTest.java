@@ -264,29 +264,28 @@ public class NewWorkspacePageTest {
     newWorkspace.waitPageLoad();
     newWorkspace.waitQuickStartButton();
     newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
-    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_QUICK_START_STACKS_COUNT);
+    newWorkspace.waitStacksCount(EXPECTED_QUICK_START_STACKS_COUNT);
 
     // single machine stacks
     newWorkspace.clickOnSingleMachineButton();
     newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
-    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_SINGLE_MACHINE_STACKS_COUNT);
+    newWorkspace.waitStacksCount(EXPECTED_SINGLE_MACHINE_STACKS_COUNT);
 
     // all stacks
     newWorkspace.clickOnAllButton();
     newWorkspace.waitStacks(EXPECTED_ALL_STACKS);
-    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_ALL_STACKS_COUNT);
+    newWorkspace.waitStacksCount(EXPECTED_ALL_STACKS_COUNT);
 
     // multi-machine stacks
     newWorkspace.clickOnMultiMachineButton();
     newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
-    assertEquals(newWorkspace.getAvailableStacksCount(), EXPECTED_MULTI_MACHINE_STACKS_COUNT);
+    newWorkspace.waitStacksCount(EXPECTED_MULTI_MACHINE_STACKS_COUNT);
 
     // check that only expected stacks are displayed and no duplicates are presented
     newWorkspace.clickOnAllButton();
     newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
     newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
-    assertEquals(
-        newWorkspace.getAvailableStacksCount(),
+    newWorkspace.waitStacksCount(
         EXPECTED_SINGLE_MACHINE_STACKS_COUNT + EXPECTED_MULTI_MACHINE_STACKS_COUNT);
 
     // quick start stacks

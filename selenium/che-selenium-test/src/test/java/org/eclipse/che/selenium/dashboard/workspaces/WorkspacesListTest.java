@@ -235,8 +235,11 @@ public class WorkspacesListTest {
   @Test
   public void checkSearchField() throws Exception {
     int nameLength = expectedBlankItem.getWorkspaceName().length();
+    int existingWorkspacesCount = getWorkspacesCount();
     String sequenceForSearch =
         expectedBlankItem.getWorkspaceName().substring(nameLength - 5, nameLength);
+
+    workspaces.waitVisibleWorkspacesCount(existingWorkspacesCount);
 
     workspaces.typeToSearchInput(sequenceForSearch);
     workspaces.waitVisibleWorkspacesCount(1);
@@ -369,5 +372,9 @@ public class WorkspacesListTest {
         workspaces.getWorkspacesListItemByWorkspaceName(items, expectedJavaItem.getWorkspaceName());
 
     assertEquals(currentDisplayingJavaItem, expectedJavaItem);
+  }
+
+  private int getWorkspacesCount() throws Exception {
+    return testWorkspaceServiceClient.getAll().size();
   }
 }
