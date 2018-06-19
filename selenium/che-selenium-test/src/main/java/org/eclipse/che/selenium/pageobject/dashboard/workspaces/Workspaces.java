@@ -200,6 +200,30 @@ public class Workspaces {
     return Boolean.parseBoolean(attrValue);
   }
 
+  public void waitWorkspaceCheckboxEnabled(String workspaceName) {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> isWorkspaceChecked(workspaceName));
+  }
+
+  public void waitWorkspaceCheckboxDisabled(String workspaceName) {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> !isWorkspaceChecked(workspaceName));
+  }
+
+  public void waitBulkCheckboxEnabled() {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> isBulkCheckboxEnabled());
+  }
+
+  public void waitBulkCheckboxDisabled() {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> !isBulkCheckboxEnabled());
+  }
+
   public String getWorkspaceRamValue(String workspaceName) {
     return redrawUiElementsTimeout
         .until(visibilityOfElementLocated(By.xpath(format(WORKSPACE_ITEM_RAM, workspaceName))))

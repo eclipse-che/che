@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard.workspaces;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -49,6 +48,7 @@ public class WorkspacesListTest {
   private static final String EXPECTED_DOCUMENTATION_PAGE_TITLE = "What Is a Che Workspace?";
   private static final String EXPECTED_JAVA_PROJECT_NAME = "web-java-spring";
   private static final String NEWEST_CREATED_WORKSPACE_NAME = "just-created-workspace";
+  private static final int EXPECTED_SORTED_WORKSPACES_COUNT = 1;
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
@@ -113,9 +113,9 @@ public class WorkspacesListTest {
   }
 
   @Test
-  public void shouldDisplayElements() {
+  public void shouldDisplayElements() throws Exception {
     workspaces.waitPageLoading();
-    dashboard.waitWorkspacesCountInWorkspacesItem(EXPECTED_WORKSPACES_COUNT);
+    dashboard.waitWorkspacesCountInWorkspacesItem(getWorkspacesCount());
 
     checkExpectedBlankWorkspaceDisplaying();
 
@@ -131,58 +131,58 @@ public class WorkspacesListTest {
 
     // select all by bulk
     workspaces.selectAllWorkspacesByBulk();
-    assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxEnabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxEnabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxEnabled();
     workspaces.waitDeleteWorkspaceBtn();
 
     // unselect all by bulk
     workspaces.selectAllWorkspacesByBulk();
-    assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxDisabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxDisabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxDisabled();
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
     // select all by bulk
     workspaces.selectAllWorkspacesByBulk();
-    assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxEnabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxEnabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxEnabled();
     workspaces.waitDeleteWorkspaceBtn();
 
     // unselect one checkbox
     workspaces.selectWorkspaceByCheckbox(blankWorkspaceName);
-    assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxEnabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxDisabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxDisabled();
     workspaces.waitDeleteWorkspaceBtn();
 
     // unselect all checkboxes
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
-    assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxDisabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxDisabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxDisabled();
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
     // select one checkbox
     workspaces.selectWorkspaceByCheckbox(blankWorkspaceName);
-    assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxDisabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxEnabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxDisabled();
     workspaces.waitDeleteWorkspaceBtn();
 
     // select all checkboxes
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
-    assertTrue(workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxEnabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxEnabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxEnabled();
     workspaces.waitDeleteWorkspaceBtn();
 
     // unselect all by bulk
     workspaces.selectAllWorkspacesByBulk();
-    assertTrue(!workspaces.isWorkspaceChecked(javaWorkspaceName));
-    assertTrue(!workspaces.isWorkspaceChecked(blankWorkspaceName));
-    assertTrue(!workspaces.isBulkCheckboxEnabled());
+    workspaces.waitWorkspaceCheckboxDisabled(javaWorkspaceName);
+    workspaces.waitWorkspaceCheckboxDisabled(blankWorkspaceName);
+    workspaces.waitBulkCheckboxDisabled();
     workspaces.waitDeleteWorkspaceBtnDisappearance();
   }
 
@@ -242,13 +242,13 @@ public class WorkspacesListTest {
     workspaces.waitVisibleWorkspacesCount(existingWorkspacesCount);
 
     workspaces.typeToSearchInput(sequenceForSearch);
-    workspaces.waitVisibleWorkspacesCount(1);
+    workspaces.waitVisibleWorkspacesCount(EXPECTED_SORTED_WORKSPACES_COUNT);
     List<Workspaces.WorkspaceListItem> items = workspaces.getVisibleWorkspaces();
     assertEquals(items.get(0).getWorkspaceName(), expectedBlankItem.getWorkspaceName());
 
     // check displaying list size
     workspaces.typeToSearchInput("");
-    workspaces.waitVisibleWorkspacesCount(2);
+    workspaces.waitVisibleWorkspacesCount(getWorkspacesCount());
 
     // check that expected blank and java items are displaying, in sum with previous items count
     // checking it gives a full workspaces list checking
@@ -326,13 +326,12 @@ public class WorkspacesListTest {
     newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
-
-    assertEquals(dashboard.getWorkspacesCountInWorkspacesItem(), EXPECTED_WORKSPACES_COUNT + 1);
+    workspaces.waitVisibleWorkspacesCount(getWorkspacesCount());
 
     dashboard.selectWorkspacesItemOnDashboard();
 
     workspaces.waitPageLoading();
-    assertEquals(workspaces.getVisibleWorkspacesCount(), EXPECTED_WORKSPACES_COUNT + 1);
+    workspaces.waitVisibleWorkspacesCount(getWorkspacesCount());
 
     Workspaces.WorkspaceListItem newestCreatedWorkspaceItem =
         workspaces.getWorkspacesListItemByWorkspaceName(
