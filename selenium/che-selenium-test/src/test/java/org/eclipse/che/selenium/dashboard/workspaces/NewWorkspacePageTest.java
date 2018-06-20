@@ -51,6 +51,9 @@ public class NewWorkspacePageTest {
   private static final double MAX_RAM_VALUE = 100.0;
   private static final double MIN_RAM_VALUE = 0.5;
   private static final double RAM_CHANGE_STEP = 0.5;
+  private static final String JDK_SUGGESTION_TITLE = "JDK";
+  private static final String JAVA_SUGGESTION_TITLE = "JAVA";
+  private static final String JAVA_1_8_SUGGESTION_TITLE = "JAVA 1.8";
   private static final String NAME_WITH_ONE_HUNDRED_SYMBOLS =
       "wksp-ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
   private static final List<String> NOT_VALID_NAMES =
@@ -184,7 +187,7 @@ public class NewWorkspacePageTest {
       asList("java-default", "android-default", "che-in-che", "java-theia-openshift");
 
   private static final List<String> EXPECTED_FILTERS_SUGGESTIONS =
-      asList("JAVA", "JDK", "JAVA 1.8, THEIA");
+      asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);
 
   private static final List<String> VALID_NAMES =
       asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
@@ -332,23 +335,23 @@ public class NewWorkspacePageTest {
 
     // check navigation by keyboard arrows between suggested tags
     seleniumWebDriverHelper.sendKeys(ARROW_DOWN.toString());
-    newWorkspace.waitSelectedFiltersSuggestion("JDK");
+    newWorkspace.waitSelectedFiltersSuggestion(JDK_SUGGESTION_TITLE);
 
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
-    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+    newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
 
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
-    newWorkspace.waitSelectedFiltersSuggestion("JAVA 1.8, THEIA");
+    newWorkspace.waitSelectedFiltersSuggestion(JAVA_1_8_SUGGESTION_TITLE);
 
     // interaction with suggested tads by mouse clicking
-    newWorkspace.clickOnFiltersSuggestions("JAVA");
-    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+    newWorkspace.clickOnFiltersSuggestions(JAVA_SUGGESTION_TITLE);
+    newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
 
-    newWorkspace.clickOnFiltersSuggestions("JDK");
-    newWorkspace.waitSelectedFiltersSuggestion("JDK");
+    newWorkspace.clickOnFiltersSuggestions(JDK_SUGGESTION_TITLE);
+    newWorkspace.waitSelectedFiltersSuggestion(JDK_SUGGESTION_TITLE);
 
-    newWorkspace.doubleClickOnFiltersSuggestion("JDK");
-    newWorkspace.waitFiltersInputTags(asList("JDK"));
+    newWorkspace.doubleClickOnFiltersSuggestion(JDK_SUGGESTION_TITLE);
+    newWorkspace.waitFiltersInputTags(asList(JDK_SUGGESTION_TITLE));
 
     newWorkspace.deleteLastTagFromInputTagsField();
     newWorkspace.waitFiltersInputIsEmpty();
@@ -357,40 +360,40 @@ public class NewWorkspacePageTest {
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
 
-    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
-    newWorkspace.doubleClickOnFiltersSuggestion("JAVA 1.8, THEIA");
+    newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
+    newWorkspace.doubleClickOnFiltersSuggestion(JAVA_1_8_SUGGESTION_TITLE);
 
-    newWorkspace.waitFiltersInputTags(asList("JAVA 1.8, THEIA"));
+    newWorkspace.waitFiltersInputTags(asList(JAVA_1_8_SUGGESTION_TITLE));
 
-    newWorkspace.deleteTagByRemoveButton("JAVA 1.8, THEIA");
+    newWorkspace.deleteTagByRemoveButton(JAVA_1_8_SUGGESTION_TITLE);
     newWorkspace.waitFiltersInputIsEmpty();
 
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
-    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
-    newWorkspace.chooseFilterSuggestionByPlusButton("JDK");
-    newWorkspace.waitFiltersInputTags(asList("JDK"));
-    newWorkspace.clickOnInputFieldTag("JDK");
+    newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
+    newWorkspace.chooseFilterSuggestionByPlusButton(JDK_SUGGESTION_TITLE);
+    newWorkspace.waitFiltersInputTags(asList(JDK_SUGGESTION_TITLE));
+    newWorkspace.clickOnInputFieldTag(JDK_SUGGESTION_TITLE);
     seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
     newWorkspace.waitFiltersInputIsEmpty();
 
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
     newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
-    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
-    newWorkspace.chooseFilterSuggestionByPlusButton("JAVA");
-    newWorkspace.waitFiltersInputTags(asList("JAVA"));
-    newWorkspace.clickOnInputFieldTag("JAVA");
+    newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
+    newWorkspace.chooseFilterSuggestionByPlusButton(JAVA_SUGGESTION_TITLE);
+    newWorkspace.waitFiltersInputTags(asList(JAVA_SUGGESTION_TITLE));
+    newWorkspace.clickOnInputFieldTag(JAVA_SUGGESTION_TITLE);
     seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
     newWorkspace.waitFiltersInputIsEmpty();
     newWorkspace.deleteLastTagFromInputTagsField();
 
     // navigation by "Tab" button
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
-    newWorkspace.waitSelectedFiltersSuggestion("JAVA");
+    newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
     seleniumWebDriverHelper.sendKeys(Keys.TAB.toString());
-    newWorkspace.waitSelectedFiltersSuggestion("JDK");
+    newWorkspace.waitSelectedFiltersSuggestion(JDK_SUGGESTION_TITLE);
     seleniumWebDriverHelper.sendKeys(Keys.ENTER.toString());
-    newWorkspace.waitFiltersInputTags(asList("JDK"));
+    newWorkspace.waitFiltersInputTags(asList(JDK_SUGGESTION_TITLE));
     newWorkspace.clickOnTitlePlaceCoordinate();
     newWorkspace.waitFiltersFormClosed();
 
@@ -399,7 +402,7 @@ public class NewWorkspacePageTest {
 
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
-    newWorkspace.waitFiltersInputTags(asList("JDK"));
+    newWorkspace.waitFiltersInputTags(asList(JDK_SUGGESTION_TITLE));
     newWorkspace.deleteLastTagFromInputTagsField();
     newWorkspace.waitFiltersInputIsEmpty();
     newWorkspace.clickOnTitlePlaceCoordinate();
