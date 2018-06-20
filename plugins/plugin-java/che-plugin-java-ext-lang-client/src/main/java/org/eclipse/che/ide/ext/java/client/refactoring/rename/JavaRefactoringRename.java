@@ -45,6 +45,7 @@ import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceC
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.jdt.ls.extension.api.RenameKind;
 import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -315,9 +316,15 @@ public class JavaRefactoringRename implements FileEventHandler {
               RefactoringStatus refactoringStatus = result.getRefactoringStatus();
               if (!FATAL.equals(refactoringStatus.getRefactoringSeverity())) {
                 applyWorkspaceEditAction.applyWorkspaceEdit(result.getCheWorkspaceEdit());
+                clientServerEventService.sendFileTrackingResumeEvent();
+                sendOpenEvent();
+              } else {
+                notificationManager.notify(
+                    locale.failedToRename(),
+                    getErrorMessage(refactoringStatus.getRefactoringStatusEntries()),
+                    FAIL,
+                    FLOAT_MODE);
               }
-              clientServerEventService.sendFileTrackingResumeEvent();
-              sendOpenEvent();
             })
         .catchError(
             error -> {
@@ -327,6 +334,15 @@ public class JavaRefactoringRename implements FileEventHandler {
               notificationManager.notify(
                   locale.failedToRename(), error.getMessage(), FAIL, FLOAT_MODE);
             });
+  }
+
+  private String getErrorMessage(List<RefactoringStatusEntry> entries) {
+    for (RefactoringStatusEntry entry : entries) {
+      if (FATAL.equals(entry.getRefactoringSeverity())) {
+        return entry.getMessage();
+      }
+    }
+    return "";
   }
 
   private void enableAutoSave() {
