@@ -377,7 +377,7 @@ ${CHE_VAR_ARRAY}"
         $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
           -p REDIRECT_URI="http://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
           -p OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID} \
-          -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET} \
+          -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET}
 
         # register OpenShift Identity Provider in Keycloak
         $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
