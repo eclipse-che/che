@@ -85,7 +85,7 @@ public class RecreateUpdate {
         delayBetweenRequestes,
         WsMasterStauses.READY_TO_SHUTDOWN);
 
-    projectExplorer.waitProjectExplorerIsNotPresent(timeLimitForReadyToShutdownStatus);
+    projectExplorer.waitProjectExplorerDisappearance(timeLimitForReadyToShutdownStatus);
     terminal.waitTerminalIsNotPresent(timeLimitForReadyToShutdownStatus);
   }
 
