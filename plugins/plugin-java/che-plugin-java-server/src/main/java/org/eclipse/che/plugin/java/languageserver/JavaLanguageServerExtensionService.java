@@ -116,6 +116,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragment;
 import org.eclipse.che.jdt.ls.extension.api.dto.PackageFragmentRoot;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
@@ -288,7 +289,7 @@ public class JavaLanguageServerExtensionService {
         .newConfiguration()
         .methodName(REFACTORING_RENAME)
         .paramsAsDto(RenameSettings.class)
-        .resultAsDto(CheWorkspaceEdit.class)
+        .resultAsDto(RefactoringResult.class)
         .withFunction(this::rename);
 
     requestHandler
@@ -323,7 +324,7 @@ public class JavaLanguageServerExtensionService {
         .newConfiguration()
         .methodName(REFACTORING_MOVE)
         .paramsAsDto(MoveSettings.class)
-        .resultAsDto(CheWorkspaceEdit.class)
+        .resultAsDto(RefactoringResult.class)
         .withFunction(this::move);
 
     requestHandler
@@ -681,17 +682,19 @@ public class JavaLanguageServerExtensionService {
     return doGetOne(GET_LIBRARY_ENTRY_COMMAND, singletonList(fixJdtUri(resourceUri)), type);
   }
 
-  private CheWorkspaceEdit rename(RenameSettings renameSettings) {
-    Type type = new TypeToken<CheWorkspaceEdit>() {}.getType();
+  private RefactoringResult rename(RenameSettings renameSettings) {
+    Type type = new TypeToken<RefactoringResult>() {}.getType();
     String uri = renameSettings.getRenameParams().getTextDocument().getUri();
     renameSettings.getRenameParams().getTextDocument().setUri(prefixURI(uri));
 
-    CheWorkspaceEdit cheWorkspaceEdit =
+    RefactoringResult refactoringResult =
         doGetOne(RENAME_COMMAND, singletonList(renameSettings), type);
+    CheWorkspaceEdit cheWorkspaceEdit = refactoringResult.getCheWorkspaceEdit();
     List<CheResourceChange> resourceChanges = getResourceChanges(cheWorkspaceEdit);
     cheWorkspaceEdit.setCheResourceChanges(resourceChanges);
     cheWorkspaceEdit.setChanges(getTextChanges(cheWorkspaceEdit));
-    return cheWorkspaceEdit;
+    refactoringResult.setCheWorkspaceEdit(cheWorkspaceEdit);
+    return refactoringResult;
   }
 
   private List<CheResourceChange> getResourceChanges(CheWorkspaceEdit cheWorkspaceEdit) {
@@ -770,8 +773,8 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  private CheWorkspaceEdit move(MoveSettings moveSettings) {
-    Type type = new TypeToken<CheWorkspaceEdit>() {}.getType();
+  private RefactoringResult move(MoveSettings moveSettings) {
+    Type type = new TypeToken<RefactoringResult>() {}.getType();
     String destinationUri = moveSettings.getDestination();
     moveSettings.setDestination(prefixURI(destinationUri));
 
@@ -784,12 +787,14 @@ public class JavaLanguageServerExtensionService {
 
     moveSettings.setElements(resourceToMove);
 
-    CheWorkspaceEdit cheWorkspaceEdit =
+    RefactoringResult refactoringResult =
         doGetOne(Commands.MOVE_COMMAND, singletonList(moveSettings), type);
+    CheWorkspaceEdit cheWorkspaceEdit = refactoringResult.getCheWorkspaceEdit();
     List<CheResourceChange> resourceChanges = getResourceChanges(cheWorkspaceEdit);
     cheWorkspaceEdit.setCheResourceChanges(resourceChanges);
     cheWorkspaceEdit.setChanges(getTextChanges(cheWorkspaceEdit));
-    return cheWorkspaceEdit;
+    refactoringResult.setCheWorkspaceEdit(cheWorkspaceEdit);
+    return refactoringResult;
   }
 
   private Boolean validateMove(CreateMoveParams moveParams) {

@@ -14,6 +14,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.jdt.ls.extension.api.RefactoringSeverity.FATAL;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,6 +45,8 @@ import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePrese
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.jdt.ls.extension.api.RenameKind;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -308,12 +311,21 @@ public class JavaRefactoringRename implements FileEventHandler {
     extensionServiceClient
         .rename(settings)
         .then(
-            edits -> {
+            result -> {
               enableAutoSave();
               undoChanges();
-              applyWorkspaceEditAction.applyWorkspaceEdit(edits);
-              clientServerEventService.sendFileTrackingResumeEvent();
-              sendOpenEvent();
+              RefactoringStatus refactoringStatus = result.getRefactoringStatus();
+              if (!FATAL.equals(refactoringStatus.getRefactoringSeverity())) {
+                applyWorkspaceEditAction.applyWorkspaceEdit(result.getCheWorkspaceEdit());
+                clientServerEventService.sendFileTrackingResumeEvent();
+                sendOpenEvent();
+              } else {
+                notificationManager.notify(
+                    locale.failedToRename(),
+                    getErrorMessage(refactoringStatus.getRefactoringStatusEntries()),
+                    FAIL,
+                    FLOAT_MODE);
+              }
             })
         .catchError(
             error -> {
@@ -323,6 +335,15 @@ public class JavaRefactoringRename implements FileEventHandler {
               notificationManager.notify(
                   locale.failedToRename(), error.getMessage(), FAIL, FLOAT_MODE);
             });
+  }
+
+  private String getErrorMessage(List<RefactoringStatusEntry> entries) {
+    for (RefactoringStatusEntry entry : entries) {
+      if (FATAL.equals(entry.getRefactoringSeverity())) {
+        return entry.getMessage();
+      }
+    }
+    return "";
   }
 
   private void enableAutoSave() {
