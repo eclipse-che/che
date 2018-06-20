@@ -51,7 +51,6 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.CreateMoveParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
@@ -66,6 +65,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.MoveSettings;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
@@ -295,7 +295,7 @@ public class JavaLanguageExtensionServiceClient {
   }
 
   /** Rename refactoring. */
-  public Promise<CheWorkspaceEdit> rename(RenameSettings renameSettings) {
+  public Promise<RefactoringResult> rename(RenameSettings renameSettings) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
@@ -303,7 +303,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(REFACTORING_RENAME)
                 .paramsAsDto(renameSettings)
-                .sendAndReceiveResultAsDto(CheWorkspaceEdit.class, REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsDto(RefactoringResult.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -355,7 +355,7 @@ public class JavaLanguageExtensionServiceClient {
   }
 
   /** Move refactoring. */
-  public Promise<CheWorkspaceEdit> move(MoveSettings moveSettings) {
+  public Promise<RefactoringResult> move(MoveSettings moveSettings) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
@@ -363,7 +363,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(REFACTORING_MOVE)
                 .paramsAsDto(moveSettings)
-                .sendAndReceiveResultAsDto(CheWorkspaceEdit.class, REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsDto(RefactoringResult.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));

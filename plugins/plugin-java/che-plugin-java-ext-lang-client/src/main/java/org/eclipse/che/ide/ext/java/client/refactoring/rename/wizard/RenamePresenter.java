@@ -18,6 +18,7 @@ import static org.eclipse.che.jdt.ls.extension.api.RefactoringSeverity.OK;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -35,8 +36,13 @@ import org.eclipse.che.ide.ext.java.client.refactoring.preview.PreviewPresenter;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenameView.ActionDelegate;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.similarnames.SimilarNamesConfigurationPresenter;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.jdt.ls.extension.api.RefactoringSeverity;
 import org.eclipse.che.jdt.ls.extension.api.RenameKind;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringResult;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenamingElementInfo;
@@ -58,6 +64,7 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   private final ApplyWorkspaceEditAction applyWorkspaceEditAction;
   private final JavaLocalizationConstant locale;
   private final DtoBuildHelper dtoBuildHelper;
+  private final DialogFactory dialogFactory;
   private final EditorAgent editorAgent;
   private final NotificationManager notificationManager;
   private final PreviewPresenter previewPresenter;
@@ -73,6 +80,7 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
       ApplyWorkspaceEditAction applyWorkspaceEditAction,
       JavaLocalizationConstant locale,
       DtoBuildHelper dtoBuildHelper,
+      DialogFactory dialogFactory,
       EditorAgent editorAgent,
       NotificationManager notificationManager,
       PreviewPresenter previewPresenter,
@@ -83,6 +91,7 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
     this.applyWorkspaceEditAction = applyWorkspaceEditAction;
     this.locale = locale;
     this.dtoBuildHelper = dtoBuildHelper;
+    this.dialogFactory = dialogFactory;
     this.editorAgent = editorAgent;
     this.notificationManager = notificationManager;
     this.view.setDelegate(this);
@@ -199,7 +208,23 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   /** {@inheritDoc} */
   @Override
   public void onAcceptButtonClicked() {
-    getChanges().then(this::applyRefactoring);
+    getChanges()
+        .then(
+            refactoringResult -> {
+              RefactoringSeverity severity =
+                  refactoringResult.getRefactoringStatus().getRefactoringSeverity();
+              switch (severity) {
+                case WARNING:
+                case ERROR:
+                  showWarningDialog(refactoringResult);
+                  break;
+                case FATAL:
+                  view.showErrorMessage(refactoringResult.getRefactoringStatus());
+                  break;
+                default:
+                  applyRefactoring(refactoringResult.getCheWorkspaceEdit());
+              }
+            });
   }
 
   /** {@inheritDoc} */
@@ -276,13 +301,17 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   private void showPreview() {
     getChanges()
         .then(
-            workspaceEdit -> {
-              previewPresenter.show(workspaceEdit, this);
+            refactoringResult -> {
+              CheWorkspaceEdit edit = refactoringResult.getCheWorkspaceEdit();
+              if (edit == null) {
+                return;
+              }
+              previewPresenter.show(edit, this);
               previewPresenter.setTitle(locale.renameItemTitle());
             });
   }
 
-  private Promise<CheWorkspaceEdit> getChanges() {
+  private Promise<RefactoringResult> getChanges() {
     RenameSettings renameSettings = createRenameSettings();
     RenameParams renameParams = createRenameParams(renameSettings);
 
@@ -333,6 +362,24 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
     view.close();
     applyWorkspaceEditAction.applyWorkspaceEdit(workspaceEdit);
     setEditorFocus();
+  }
+
+  private void showWarningDialog(RefactoringResult refactoringResult) {
+    List<RefactoringStatusEntry> entries =
+        refactoringResult.getRefactoringStatus().getRefactoringStatusEntries();
+
+    ConfirmCallback confirmCallback =
+        () -> applyRefactoring(refactoringResult.getCheWorkspaceEdit());
+
+    dialogFactory
+        .createConfirmDialog(
+            locale.warningOperationTitle(),
+            entries.isEmpty() ? locale.warningOperationContent() : entries.get(0).getMessage(),
+            locale.renameRename(),
+            locale.buttonCancel(),
+            confirmCallback,
+            () -> {})
+        .show();
   }
 
   private RenameSettings createRenameSettings() {
