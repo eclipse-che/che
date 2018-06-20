@@ -22,6 +22,7 @@ WORKDIR /home/theia
 # have default Theia build in the workspace in case no plugins are requested
 ADD https://raw.githubusercontent.com/theia-ide/theia/v${THEIA_VERSION}/examples/browser/package.json /home/theia/package.json
 ADD theia-default-package.json /home/default/theia/package.json
+ADD ${THEIA_VERSION}/yarn.lock /home/default/theia/yarn.lock
 ADD versions.sh /home/default/versions.sh
 RUN cd /home/default && ./versions.sh
 
