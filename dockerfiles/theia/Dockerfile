@@ -13,7 +13,8 @@ ARG GITHUB_TOKEN
 ARG THEIA_VERSION=0.3.10
 ENV USE_LOCAL_GIT=true \
     GITHUB_TOKEN=${GITHUB_TOKEN} \
-    THEIA_VERSION=${THEIA_VERSION}
+    THEIA_VERSION=${THEIA_VERSION} \
+    YARN_CACHE_FOLDER=/usr/local/share/.cache/yarn
 
 # build dependencies requireed to compile a custom Theia
 RUN apk add --no-cache make gcc g++ python git openssh bash supervisor jq
@@ -23,16 +24,18 @@ WORKDIR /home/theia
 ADD https://raw.githubusercontent.com/theia-ide/theia/v${THEIA_VERSION}/examples/browser/package.json /home/theia/package.json
 ADD theia-default-package.json /home/default/theia/package.json
 ADD versions.sh /home/default/versions.sh
-RUN cd /home/default && ./versions.sh
-
 ADD supervisord.conf /etc/
-RUN cd /home/theia && \
+RUN cd /home/default && ./versions.sh && \
+    cd /home/theia && \
     yarn && \
     yarn theia build --mode development && \
     rm -rf * && \
     cd /home/default/theia && \
     yarn && \
     yarn theia build
+RUN find ${YARN_CACHE_FOLDER} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
+RUN mkdir -p /.yarn && chgrp 0 /.yarn && chmod g+rwX /.yarn && \
+    touch /.yarnrc && chgrp 0 /.yarnrc && chmod g+rwX /.yarnrc
 ADD src/main.js /theia_launcher/theia_launcher.js
 EXPOSE 3000
 
