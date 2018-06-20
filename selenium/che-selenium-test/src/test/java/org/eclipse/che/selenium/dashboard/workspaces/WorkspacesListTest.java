@@ -326,7 +326,7 @@ public class WorkspacesListTest {
     newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
-    workspaces.waitVisibleWorkspacesCount(getWorkspacesCount());
+    dashboard.waitWorkspacesCountInWorkspacesItem(getWorkspacesCount());
 
     dashboard.selectWorkspacesItemOnDashboard();
 

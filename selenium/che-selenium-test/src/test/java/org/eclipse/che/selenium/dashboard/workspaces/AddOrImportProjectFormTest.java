@@ -70,8 +70,6 @@ public class AddOrImportProjectFormTest {
       ImmutableMap.of(
           SPRING_SAMPLE_NAME,
           "A basic example using Spring servlets. The app returns values entered into a submit form.",
-          CHE_SAMPLE_NAME,
-          "The Eclipse Che source code. Build Che-in-Che.",
           CONSOLE_SAMPLE_NAME,
           "A hello world Java application.");
   private static final String EXPECTED_TEXT_IN_EDITOR =
@@ -166,13 +164,13 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.clickOnCancelButton();
     addOrImportForm.waitSampleCheckboxDisabled(CONSOLE_SAMPLE_NAME);
 
-    addOrImportForm.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxEnabled(CHE_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
     addOrImportForm.waitCancelButtonEnabled();
     addOrImportForm.waitAddButtonEnabled();
 
-    addOrImportForm.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxDisabled(CHE_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitSampleCheckboxDisabled(SPRING_SAMPLE_NAME);
     addOrImportForm.waitCancelButtonDisabled();
     addOrImportForm.waitAddButtonDisabled();
 
@@ -223,7 +221,6 @@ public class AddOrImportProjectFormTest {
 
     addOrImportForm.clickOnAddButton();
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitProjectTabAppearance(CHE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
 
     addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
@@ -238,16 +235,9 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
         EXPECTED_SPRING_REPOSITORY_URL);
 
-    addOrImportForm.clickOnProjectTab(CHE_SAMPLE_NAME);
-    checkProjectTabAppearanceAndFields(
-        CHE_SAMPLE_NAME,
-        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CHE_SAMPLE_NAME),
-        EXPECTED_CHE_REPOSITORY_URL);
-
     projectOptions.clickOnRemoveButton();
-    addOrImportForm.waitProjectTabDisappearance(CHE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitProjectTabDisappearance(SPRING_SAMPLE_NAME);
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
 
@@ -302,6 +292,15 @@ public class AddOrImportProjectFormTest {
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
+
+    addOrImportForm.clickOnAddOrImportProjectButton();
+    addOrImportForm.waitAddOrImportFormOpened();
+    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnAddButton();
+    addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
+    projectOptions.waitProjectNameFieldValue(CONSOLE_SAMPLE_NAME);
 
     projectOptions.setValueOfNameField("");
     projectOptions.typeTextInDescriptionField("");
