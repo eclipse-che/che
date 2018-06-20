@@ -156,8 +156,8 @@ public class MovePresenter implements MoveView.ActionDelegate, RefactoringAction
     extensionService
         .move(moveSettings)
         .then(
-            workspaceEdit -> {
-              previewPresenter.show(workspaceEdit, this);
+            refactoringResult -> {
+              previewPresenter.show(refactoringResult.getCheWorkspaceEdit(), this);
             })
         .catchError(
             error -> {
@@ -173,9 +173,9 @@ public class MovePresenter implements MoveView.ActionDelegate, RefactoringAction
     extensionService
         .move(moveSettings)
         .then(
-            workspaceEdit -> {
+            refactoringResult -> {
               view.close();
-              applyWorkspaceEditAction.applyWorkspaceEdit(workspaceEdit);
+              applyWorkspaceEditAction.applyWorkspaceEdit(refactoringResult.getCheWorkspaceEdit());
               setEditorFocus();
             })
         .catchError(
