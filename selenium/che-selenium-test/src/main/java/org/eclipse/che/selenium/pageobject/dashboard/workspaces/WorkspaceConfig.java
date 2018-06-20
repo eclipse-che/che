@@ -10,31 +10,65 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig.Locators.CONFIG_EDITOR;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig.Locators.CONFIG_FORM;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WorkspaceConfig {
-
-  private final WebDriverWait redrawUiElementsTimeout;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final Logger LOG = LoggerFactory.getLogger(WorkspaceConfig.class);
 
   @Inject
-  public WorkspaceConfig(SeleniumWebDriver seleniumWebDriver) {
+  public WorkspaceConfig(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
-    this.redrawUiElementsTimeout =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  private interface Locators {
+  public interface Locators {
     String CONFIG_FORM = "//ng-form[@name='workspaceConfigForm']";
+    String CONFIG_EDITOR = "//ng-form[@name='workspaceConfigForm']//div[@class='CodeMirror-code']";
   }
 
   public void waitConfigForm() {
-    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.xpath(Locators.CONFIG_FORM)));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(CONFIG_FORM));
+  }
+
+  public String getWorkspaceConfig() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(CONFIG_EDITOR), 20);
+  }
+
+  public String createExpectedWorkspaceConfig(String workspaceName)
+      throws IOException, URISyntaxException {
+    String expectedWorkspaceConfTemplate = Joiner.on('\n').join(getConfigFileContent());
+    return format(expectedWorkspaceConfTemplate, workspaceName);
+  }
+
+  private Path getConfigTemplatePath() throws URISyntaxException {
+    URL fileUrl =
+        getClass()
+            .getResource("/org/eclipse/che/selenium/dashboard/expectedWorkspaceConfTemplate.txt");
+
+    return Paths.get(fileUrl.toURI());
+  }
+
+  private List<String> getConfigFileContent() throws URISyntaxException, IOException {
+    return Files.readAllLines(getConfigTemplatePath());
   }
 }

@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.CONFIG_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.GIT_TAB_ID;
@@ -201,7 +201,7 @@ public class CreateFactoryTest {
     loader.waitOnClosed();
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(workspaceName);
 
     projectSourcePage.clickOnAddOrImportProjectButton();

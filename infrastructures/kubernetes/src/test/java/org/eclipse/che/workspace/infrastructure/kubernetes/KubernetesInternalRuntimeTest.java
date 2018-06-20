@@ -267,7 +267,7 @@ public class KubernetesInternalRuntimeTest {
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
     when(k8sEnv.getPods()).thenReturn(allPods);
-    when(pods.waitAsync(any(), any())).thenReturn(CompletableFuture.completedFuture(null));
+    when(pods.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
     when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
   }

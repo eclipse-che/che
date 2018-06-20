@@ -32,6 +32,8 @@ import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
@@ -39,6 +41,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
@@ -52,6 +55,8 @@ public class Dashboard {
   private final LoginPage loginPage;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWaitFactory webDriverWaitFactory;
   private final boolean isMultiuser;
 
   @Inject
@@ -63,6 +68,8 @@ public class Dashboard {
       LoginPage loginPage,
       TestWebElementRenderChecker testWebElementRenderChecker,
       TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      WebDriverWaitFactory webDriverWaitFactory,
       @Named("che.multiuser") boolean isMultiuser) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
@@ -71,6 +78,8 @@ public class Dashboard {
     this.loginPage = loginPage;
     this.testWebElementRenderChecker = testWebElementRenderChecker;
     this.testKeycloakSettingsServiceClient = testKeycloakSettingsServiceClient;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     this.isMultiuser = isMultiuser;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -92,7 +101,7 @@ public class Dashboard {
     }
   }
 
-  private interface Locators {
+  public interface Locators {
     String DASHBOARD_TOOLBAR_TITLE = "navbar";
     String NAVBAR_NOTIFICATION_CONTAINER = "navbar-notification-container";
     String COLLAPSE_DASH_NAVBAR_BTN = "ide-iframe-button-link";
@@ -143,6 +152,28 @@ public class Dashboard {
 
   @FindBy(xpath = Locators.LICENSE_NAG_MESSAGE_XPATH)
   WebElement licenseNagMessage;
+
+  /**
+   * Gets digit which displays near "Workspaces" item on dashboard and means count of the existing
+   * workspaces.
+   *
+   * @return count of workspaces
+   */
+  public int getWorkspacesCountInWorkspacesItem() {
+    return Integer.parseInt(
+        seleniumWebDriverHelper
+            .waitVisibilityAndGetText(workspacesItem)
+            .replace("Workspaces\n (", "")
+            .replace(")", ""));
+  }
+
+  public void waitWorkspacesCountInWorkspacesItem(int expectedCount) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> expectedCount == getWorkspacesCountInWorkspacesItem());
+  }
 
   /** wait button with drop dawn icon (left top corner) */
   public void waitDashboardToolbarTitle() {
