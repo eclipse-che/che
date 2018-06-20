@@ -18,6 +18,8 @@
 # Print Che logo
 # --------------
 
+set -e
+
 echo
 cat <<EOF
 [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;52m1[38;5;94m0[38;5;136m1[38;5;215m0[38;5;215m0[38;5;136m0[38;5;94m0[38;5;58m0[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m
@@ -342,6 +344,7 @@ Che version: ${CHE_IMAGE_TAG}
 Image: ${CHE_IMAGE_REPO}
 Pull policy: ${IMAGE_PULL_POLICY}
 Update strategy: ${UPDATE_STRATEGY}
+Setup OpenShift oAuth: ${SETUP_OCP_OAUTH}
 Environment variables:
 ${CHE_VAR_ARRAY}"
     if [ "${CHE_MULTIUSER}" == "true" ]; then
@@ -350,9 +353,54 @@ ${CHE_VAR_ARRAY}"
       fi
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml
       wait_for_postgres
-      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} -p PROTOCOL=${HTTP_PROTOCOL} ${KEYCLOAK_PARAM}
+
+      CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
+      CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=NULL
+
+      if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
+        # create secret with OpenShift certificate
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat /var/lib/origin/openshift.local.config/master/ca.crt)"
+      fi
+
+      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml \
+        -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} \
+        -p PROTOCOL=${HTTP_PROTOCOL} \
+        -p KEYCLOAK_USER=${KEYCLOAK_USER} \
+        -p KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD} \
+        ${KEYCLOAK_PARAM}
       wait_for_keycloak
+
+      if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
+        # register oAuth client in OpenShift
+        $OC_BINARY login -u "system:admin" > /dev/null
+        KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
+          -p REDIRECT_URI="http://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
+          -p OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID} \
+          -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET}
+
+        # register OpenShift Identity Provider in Keycloak
+        $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
+        KEYCLOAK_POD_NAME=$(${OC_BINARY} get pod --namespace=${CHE_OPENSHIFT_PROJECT} -l app=keycloak --no-headers | awk '{print $1}')
+        ${OC_BINARY} exec ${KEYCLOAK_POD_NAME} -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che \
+          -s alias=${OCP_IDENTITY_PROVIDER_ID} \
+          -s providerId=${OCP_IDENTITY_PROVIDER_ID} \
+          -s enabled=true \
+          -s storeToken=true \
+          -s addReadTokenRoleOnCreate=true \
+          -s config.useJwksUrl="true" \
+          -s config.clientId=${OCP_OAUTH_CLIENT_ID} \
+          -s config.clientSecret=${OCP_OAUTH_CLIENT_SECRET} \
+          -s config.baseUrl="${OPENSHIFT_ENDPOINT}" \
+          -s config.defaultScope="user:full" \
+          --no-config --server http://localhost:8080/auth --user ${KEYCLOAK_USER} --password ${KEYCLOAK_PASSWORD} --realm master
+
+        # setup Che variables related to oAuth identity provider
+        CHE_INFRA_OPENSHIFT_PROJECT=
+        CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${OCP_IDENTITY_PROVIDER_ID}
+      fi
     fi
+
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
                          -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} \
                          -p IMAGE_CHE=${CHE_IMAGE_REPO} \
@@ -362,6 +410,8 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_MULTIUSER=${CHE_MULTIUSER} \
                          -p PROTOCOL=${HTTP_PROTOCOL} \
                          -p WS_PROTOCOL=${WS_PROTOCOL} \
+                         -p CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT} \
+                         -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
                          ${ENV}
 
