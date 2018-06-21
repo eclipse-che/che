@@ -22,6 +22,8 @@ import static org.eclipse.che.workspace.infrastructure.openshift.environment.Ope
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.ROUTES_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.ROUTE_IGNORED_WARNING_CODE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.SECRET_IGNORED_WARNING_CODE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,6 +43,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
 import io.fabric8.openshift.api.model.Route;
@@ -139,6 +142,21 @@ public class OpenShiftEnvironmentFactoryTest {
     assertEquals(
         parsed.getWarnings().get(0),
         new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
+  }
+
+  @Test
+  public void ignoreSecretsWhenRecipeContainsThem() throws Exception {
+    final List<HasMetadata> recipeObjects = singletonList(new Secret());
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final OpenShiftEnvironment parsed =
+        osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertTrue(parsed.getRoutes().isEmpty());
+    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(
+        parsed.getWarnings().get(0),
+        new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
   }
 
   @Test

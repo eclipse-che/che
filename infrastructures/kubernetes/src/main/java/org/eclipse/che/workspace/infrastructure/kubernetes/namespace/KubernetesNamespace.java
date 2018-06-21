@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
@@ -62,6 +63,7 @@ public class KubernetesNamespace {
   private final KubernetesPersistentVolumeClaims pvcs;
   private final KubernetesIngresses ingresses;
   private final KubernetesClientFactory clientFactory;
+  private final KubernetesSecrets secrets;
 
   @VisibleForTesting
   protected KubernetesNamespace(
@@ -71,7 +73,8 @@ public class KubernetesNamespace {
       KubernetesPods pods,
       KubernetesServices services,
       KubernetesPersistentVolumeClaims pvcs,
-      KubernetesIngresses kubernetesIngresses) {
+      KubernetesIngresses kubernetesIngresses,
+      KubernetesSecrets secrets) {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
@@ -79,6 +82,7 @@ public class KubernetesNamespace {
     this.services = services;
     this.pvcs = pvcs;
     this.ingresses = kubernetesIngresses;
+    this.secrets = secrets;
   }
 
   public KubernetesNamespace(
@@ -90,6 +94,7 @@ public class KubernetesNamespace {
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
+    this.secrets = new KubernetesSecrets(name, workspaceId, clientFactory);
   }
 
   /**
@@ -136,9 +141,14 @@ public class KubernetesNamespace {
     return ingresses;
   }
 
+  /** Returns object for managing {@link Secret} instances inside namespace. */
+  public KubernetesSecrets secrets() {
+    return secrets;
+  }
+
   /** Removes all object except persistent volume claims inside namespace. */
   public void cleanUp() throws InfrastructureException {
-    doRemove(ingresses::delete, services::delete, pods::delete);
+    doRemove(ingresses::delete, services::delete, pods::delete, secrets::delete);
   }
 
   /**
