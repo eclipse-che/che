@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 class WorkspaceConfigProvider implements LanguageServerConfigProvider {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceConfigProvider.class);
+  public static final String PROJECTS_ROOT_ATTR_NAME = "projectsRoot";
 
   private final Runtime workspaceRuntime;
   private final ConfigExtractor configExtractor;
@@ -80,6 +81,8 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
           continue;
         }
 
+        String projectsRoot = attributes.get(PROJECTS_ROOT_ATTR_NAME);
+
         try {
           String id = configExtractor.extractId(attributes);
           Map<String, String> languageRegexes = configExtractor.extractLanguageRegexes(attributes);
@@ -103,6 +106,11 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
                       return fileWatchPatterns;
                     }
                   };
+                }
+
+                @Override
+                public Map<String, String> getAttributes() {
+                  return ImmutableMap.of(PROJECTS_ROOT_ATTR_NAME, projectsRoot);
                 }
 
                 @Override
