@@ -83,21 +83,6 @@ public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
 
     javaLanguageExtensionServiceClient
         .reImportMavenProjects(paramsDto)
-        .then(
-            updatedProjects -> {
-              for (final String path : updatedProjects) {
-                appContext
-                    .getWorkspaceRoot()
-                    .getContainer(path)
-                    .then(
-                        container -> {
-                          if (container.isPresent()) {
-                            container.get().synchronize();
-                          }
-                        });
-              }
-              // TODO update error markers in poms if needed
-            })
         .catchError(
             error -> {
               notificationManager.notify(
