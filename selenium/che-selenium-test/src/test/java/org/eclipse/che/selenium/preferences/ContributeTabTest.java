@@ -57,7 +57,7 @@ public class ContributeTabTest {
   private static final String EXP_TEXT_NOT_VCS =
       "Project does not provide VCS, supported by contribution plugin.";
   private static final String NOTIFICATION_MESSAGE =
-      "To activate Contribute Panel by clicking on a project go to Profile -> Preferences -> Git -> Contribute";
+      "To activate Contribute Panel by clicking on a project go to ProfilePage -> Preferences -> Git -> Contribute";
 
   private String firstProjectUrl;
   private String secondProjectUrl;

@@ -113,7 +113,7 @@ public interface TestMenuCommandsConstants {
   }
 
   interface Profile {
-    String PROFILE_PREFIX = "gwt-debug-topmenu/Profile/";
+    String PROFILE_PREFIX = "gwt-debug-topmenu/ProfilePage/";
     String PROFILE_MENU = "gwt-debug-MenuItem/profileGroup-true";
     String ACCOUNT = PROFILE_PREFIX + "redirectToDashboardAccount";
     String PROJECTS = PROFILE_PREFIX + "redirectToDashboardProjectsAction";
