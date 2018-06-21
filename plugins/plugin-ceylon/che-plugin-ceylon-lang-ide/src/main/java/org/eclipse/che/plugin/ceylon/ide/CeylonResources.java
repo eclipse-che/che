@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.ceylon.ide;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.TextResource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author David Festal */
@@ -23,4 +24,7 @@ public interface CeylonResources extends ClientBundle {
 
   @Source("svg/ceylon.svg")
   SVGResource category();
+
+  @Source("json/highlighting.json")
+  TextResource syntax();
 }
