@@ -11,7 +11,29 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WILDFLY_SWARM;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WITH_JAVA_JAVASCRIPT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_VERTX;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_DOCKER;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.KOTLIN;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.OPENSHIFT_SQL;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -20,6 +42,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -42,10 +65,6 @@ import org.testng.annotations.Test;
 
 /** @author Ihor Okhrimenko */
 public class NewWorkspacePageTest {
-  private static final int EXPECTED_QUICK_START_STACKS_COUNT = 15;
-  private static final int EXPECTED_SINGLE_MACHINE_STACKS_COUNT = 34;
-  private static final int EXPECTED_ALL_STACKS_COUNT = 39;
-  private static final int EXPECTED_MULTI_MACHINE_STACKS_COUNT = 5;
   private static final String EXPECTED_WORKSPACE_NAME_PREFIX = "wksp-";
   private static final String MACHINE_NAME = "dev-machine";
   private static final double MAX_RAM_VALUE = 100.0;
@@ -54,134 +73,104 @@ public class NewWorkspacePageTest {
   private static final String JDK_SUGGESTION_TITLE = "JDK";
   private static final String JAVA_SUGGESTION_TITLE = "JAVA";
   private static final String JAVA_1_8_SUGGESTION_TITLE = "JAVA 1.8";
-  private static final String NAME_WITH_ONE_HUNDRED_SYMBOLS =
-      "wksp-ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
+  private static final String NAME_WITH_ONE_HUNDRED_SYMBOLS = NameGenerator.generate("wksp-", 95);
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
   private static final List<String> EXPECTED_JDK_STACKS = asList("java-default", "che-in-che");
   private static List<String> EXPECTED_QUICK_START_STACKS =
       asList(
-          "blank-default",
-          "java-default",
-          "dotnet-default",
-          "android-default",
-          "cpp-default",
-          "che-in-che",
-          "go-default",
-          "java-theia-openshift",
-          "node-default",
-          "openshift-default",
-          "openshift-sql",
-          "php-default",
-          "platformio",
-          "python-default",
-          "rails-default");
+          BLANK.getId(),
+          JAVA.getId(),
+          DOT_NET.getId(),
+          ANDROID.getId(),
+          CPP.getId(),
+          ECLIPSE_CHE.getId(),
+          GO.getId(),
+          JAVA_THEIA_OPENSHIFT.getId(),
+          NODE.getId(),
+          PHP.getId(),
+          PYTHON.getId(),
+          RAILS.getId());
+
+  private static final int EXPECTED_QUICK_START_STACKS_COUNT = EXPECTED_QUICK_START_STACKS.size();
 
   private static List<String> EXPECTED_SINGLE_MACHINE_STACKS =
       asList(
-          "blank-default",
-          "java-default",
-          "dotnet-default",
-          "android-default",
-          "cpp-default",
-          "centos",
-          "centos-go",
-          "nodejs4",
-          "wildfly-swarm",
-          "ceylon-java-javascript-dart-centos",
-          "debian",
-          "debianlsp",
-          "che-in-che",
-          "vert.x",
-          "go-default",
-          "hadoop-default",
-          "java-centos",
-          "java-debian",
-          "kotlin-default",
-          "node-default",
-          "openshift-default",
-          "php-default",
-          "php-gae",
-          "php5.6-default",
-          "platformio",
-          "python-default",
-          "python-2.7",
-          "python-gae",
-          "rails-default",
-          "selenium",
-          "spring-boot",
-          "tomee-default",
-          "ubuntu",
-          "zend");
+          BLANK.getId(),
+          JAVA.getId(),
+          DOT_NET.getId(),
+          ANDROID.getId(),
+          CPP.getId(),
+          CENTOS_BLANK.getId(),
+          CENTOS_GO.getId(),
+          CENTOS_WILDFLY_SWARM.getId(),
+          CENTOS_WITH_JAVA_JAVASCRIPT.getId(),
+          ECLIPSE_CHE.getId(),
+          ECLIPSE_VERTX.getId(),
+          GO.getId(),
+          JAVA_CENTOS.getId(),
+          KOTLIN.getId(),
+          NODE.getId(),
+          PHP.getId(),
+          PYTHON.getId(),
+          RAILS.getId());
+
+  private static final int EXPECTED_SINGLE_MACHINE_STACKS_COUNT =
+      EXPECTED_SINGLE_MACHINE_STACKS.size();
 
   private static final List<String> EXPECTED_ALL_STACKS =
       asList(
-          "blank-default",
-          "java-default",
-          "java-mysql",
-          "dotnet-default",
-          "android-default",
-          "cpp-default",
-          "centos",
-          "centos-go",
-          "nodejs4",
-          "wildfly-swarm",
-          "ceylon-java-javascript-dart-centos",
-          "debian",
-          "debianlsp",
-          "che-in-che",
-          "vert.x",
-          "go-default",
-          "hadoop-default",
-          "java-centos",
-          "java-debian",
-          "java-theia-docker",
-          "java-theia-openshift",
-          "java-centos-mysql",
-          "kotlin-default",
-          "node-default",
-          "openshift-default",
-          "openshift-sql",
-          "php-default",
-          "php-gae",
-          "php5.6-default",
-          "platformio",
-          "python-default",
-          "python-2.7",
-          "python-gae",
-          "rails-default",
-          "selenium",
-          "spring-boot",
-          "tomee-default",
-          "ubuntu",
-          "zend");
+          BLANK.getId(),
+          JAVA.getId(),
+          DOT_NET.getId(),
+          ANDROID.getId(),
+          CPP.getId(),
+          CENTOS_BLANK.getId(),
+          CENTOS_GO.getId(),
+          CENTOS_WILDFLY_SWARM.getId(),
+          CENTOS_WITH_JAVA_JAVASCRIPT.getId(),
+          ECLIPSE_CHE.getId(),
+          ECLIPSE_VERTX.getId(),
+          GO.getId(),
+          JAVA_CENTOS.getId(),
+          KOTLIN.getId(),
+          NODE.getId(),
+          PHP.getId(),
+          PYTHON.getId(),
+          RAILS.getId(),
+          JAVA_MYSQL.getId(),
+          JAVA_THEIA_DOCKER.getId(),
+          JAVA_THEIA_OPENSHIFT.getId(),
+          JAVA_MYSQL_CENTOS.getId());
+
+  private static final int EXPECTED_ALL_STACKS_COUNT = EXPECTED_ALL_STACKS.size();
 
   private static final List<String> EXPECTED_MULTI_MACHINE_STACKS =
       asList(
-          "java-mysql",
-          "java-theia-docker",
-          "java-theia-openshift",
-          "java-centos-mysql",
-          "openshift-sql");
+          JAVA_MYSQL.getId(),
+          JAVA_THEIA_DOCKER.getId(),
+          JAVA_THEIA_OPENSHIFT.getId(),
+          JAVA_MYSQL_CENTOS.getId());
+
+  private static final int EXPECTED_MULTI_MACHINE_STACKS_COUNT =
+      EXPECTED_MULTI_MACHINE_STACKS.size();
 
   private static final List<String> EXPECTED_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          "blank-default",
-          "java-default",
-          "dotnet-default",
-          "rails-default",
-          "python-default",
-          "platformio",
-          "php-default",
-          "openshift-sql",
-          "openshift-default",
-          "node-default",
-          "java-theia-openshift",
-          "go-default",
-          "che-in-che",
-          "cpp-default",
-          "android-default");
+          BLANK.getId(),
+          JAVA.getId(),
+          DOT_NET.getId(),
+          RAILS.getId(),
+          PYTHON.getId(),
+          PHP.getId(),
+          OPENSHIFT_SQL.getId(),
+          NODE.getId(),
+          JAVA_THEIA_OPENSHIFT.getId(),
+          GO.getId(),
+          ECLIPSE_CHE.getId(),
+          CPP.getId(),
+          ANDROID.getId());
 
   private static final List<String> EXPECTED_JAVA_STACKS =
       asList("java-default", "android-default", "che-in-che", "java-theia-openshift");

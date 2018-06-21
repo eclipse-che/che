@@ -148,29 +148,17 @@ public class NewWorkspace {
     ECLIPSE_CHE("che-in-che"),
     ECLIPSE_VERTX("vert.x"),
     GO("go-default"),
-    HADOOP("hadoop-default"),
     JAVA_CENTOS("java-centos"),
-    JAVA_DEBIAN("java-debian"),
     JAVA_THEIA_DOCKER("java-theia-docker"),
     JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
     JAVA_MYSQL_CENTOS("java-centos-mysql"),
     KOTLIN("kotlin-default"),
     NODE("node-default"),
-    OPENSHIFT_DEFAULT("openshift-default"),
     OPENSHIFT_SQL("openshift-sql"),
     PHP("php-default"),
-    PHP_GAE("php-gae"),
-    PHP_5_6("php5.6-default"),
     PLATFORMIO("platformio"),
     PYTHON("python-default"),
-    PYTHON_2_7("python-2.7"),
-    PYTHON_GAE("python-gae"),
-    RAILS("rails-default"),
-    SELENIUM("selenium"),
-    SPRING_BOOT("spring-boot"),
-    TOMEE("tomee-default"),
-    UBUNTU("ubuntu"),
-    ZEND("zend");
+    RAILS("rails-default");
 
     private final String id;
 
@@ -722,10 +710,13 @@ public class NewWorkspace {
   }
 
   public void waitStacks(List<String> expectedStacks) {
+    System.out.println("############# " + expectedStacks);
     expectedStacks.forEach(
-        stackId ->
-            seleniumWebDriverHelper.waitPresence(
-                By.xpath(format("//div[@data-stack-id='%s']", stackId))));
+        stackId -> {
+          System.out.println("===>>>> " + stackId);
+          seleniumWebDriverHelper.waitPresence(
+              By.xpath(format("//div[@data-stack-id='%s']", stackId)));
+        });
   }
 
   public void waitStacksCount(int expectedCount) {
