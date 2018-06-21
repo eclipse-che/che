@@ -10,9 +10,10 @@
 #
 
 
-class MyClass:
-    var = 1
-    variable = "variable"
+def towers(i, start, finish, middle):
+    if i > 0:
+        towers(i-1, start, middle, finish)
+        print('move disk from ', start, ' to ', finish)
+        towers  ( i-1, middle, finish, start   )
 
-    def function(self):
-        print("This is a message inside the class.")
+towers  ( 5, 'X', 'Z', 'Y'      )

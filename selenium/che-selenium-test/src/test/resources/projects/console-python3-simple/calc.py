@@ -9,6 +9,7 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
+
 import module.py
 
-var2 = math.add(100, 200)
+var2 = module.add(100, 200)

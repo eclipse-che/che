@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.PYTHON;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.openqa.selenium.Keys.F4;
@@ -75,31 +76,31 @@ public class PythonFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkMarkers() throws Exception {
+  public void checkMarkers() {
     editor.selectTabByName(PYTHON_FILE_NAME);
 
     // check warning marker message
-    editor.goToPosition(17, 53);
+    editor.goToPosition(18, 53);
     editor.typeTextIntoEditor("\n");
     editor.waitMarkerInPosition(WARNING, editor.getPositionVisible());
     editor.moveToMarkerAndWaitAssistContent(WARNING);
-    // editor.waitTextIntoAnnotationAssist("W293 blank line contains whitespace");
+    editor.waitTextIntoAnnotationAssist("W293 blank line contains whitespace");
 
     // check error marker message
-    editor.goToCursorPositionVisible(12, 1);
+    editor.goToCursorPositionVisible(13, 1);
     editor.waitAllMarkersInvisibility(ERROR);
     editor.typeTextIntoEditor("c");
-    editor.waitMarkerInPosition(ERROR, 12);
+    editor.waitMarkerInPosition(ERROR, 13);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
-  @Test(priority = 2)
-  public void checkAutocompleteFeature() throws Exception {
+  @Test(priority = 1)
+  public void checkAutocompleteFeature() {
     editor.selectTabByName(PYTHON_FILE_NAME);
 
     // check contents of autocomplete container
-    editor.goToPosition(18, 1);
+    editor.goToPosition(18, 53);
     editor.typeTextIntoEditor("\n\n");
     editor.typeTextIntoEditor("object = MyClass()\nprint(object.");
 
@@ -113,20 +114,31 @@ public class PythonFileEditingTest {
     editor.typeTextIntoEditor("())");
   }
 
-  @Test(priority = 3)
+  @Test(priority = 1)
   public void checkFindDefinitionFeature() {
     // check Find Definition feature from Assistant menu
     projectExplorer.openItemByPath(PROJECT_NAME + "/calc.py");
-    editor.selectTabByName("/calc.py");
+    editor.selectTabByName("calc.py");
 
-    editor.goToPosition(13, 14);
+    editor.goToPosition(15, 17);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitTabIsPresent(PYTHON_MODULE_FILE_NAME);
     editor.closeFileByNameWithSaving(PYTHON_MODULE_FILE_NAME);
 
     // check Find Definition feature by pressing F4
-    editor.goToPosition(13, 14);
+    editor.goToPosition(15, 17);
     editor.typeTextIntoEditor(F4.toString());
     editor.waitTabIsPresent(PYTHON_MODULE_FILE_NAME);
+  }
+
+  @Test(priority = 1)
+  public void checkFormatCodeFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.py");
+    editor.selectTabByName("towers.py");
+
+    editor.openContextMenuInEditor();
+    editor.clickOnItemInContextMenu(FORMAT);
+    editor.waitTextIntoEditor(
+        "        towers(i-1, middle, finish, start)\n\n\n" + "towers(5, 'X', 'Z', 'Y')\n");
   }
 }
