@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
 
 import com.google.inject.Inject;
@@ -122,12 +124,22 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   }
 
   private ExecuteCommandParams convertParams(ExecuteCommandParams params) {
-    if (CLIENT_UPDATE_PROJECTS_CLASSPATH.equals(params.getCommand())) {
-      List<Object> fixedPathList = new ArrayList<>();
-      for (Object uri : params.getArguments()) {
-        fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
-      }
-      params.setArguments(fixedPathList);
+    String command = params.getCommand();
+    switch (command) {
+      case CLIENT_UPDATE_PROJECTS_CLASSPATH:
+        List<Object> fixedPathList = new ArrayList<>(params.getArguments().size());
+        for (Object uri : params.getArguments()) {
+          fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
+        }
+        params.setArguments(fixedPathList);
+        break;
+      case CLIENT_UPDATE_PROJECT:
+        Object projectUri = params.getArguments().get(0);
+        params.setArguments(
+            singletonList(removePrefixUri(convertToJson(projectUri).getAsString())));
+        break;
+      default:
+        break;
     }
     return params;
   }
