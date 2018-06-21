@@ -1,0 +1,76 @@
+1
+{
+2
+  "environments": {
+3
+    "%s": {
+4
+      "machines": {
+5
+        "dev-machine": {
+6
+          "attributes": {
+7
+            "memoryLimitBytes": "3221225472"
+8
+          },
+9
+          "servers": {
+10
+            "tomcat8-debug": {
+11
+              "attributes": {},
+12
+              "port": "8000",
+13
+              "protocol": "http"
+14
+            },
+15
+            "codeserver": {
+16
+              "attributes": {},
+17
+              "port": "9876",
+18
+              "protocol": "http"
+19
+            },
+20
+            "tomcat8": {
+21
+              "attributes": {},
+22
+              "port": "8080",
+23
+              "protocol": "http"
+24
+            }
+25
+          },
+26
+          "volumes": {},
+27
+          "installers": [
+28
+            "org.eclipse.che.terminal",
+29
+            "org.eclipse.che.ws-agent",
+30
+            "org.eclipse.che.exec"
+32
+          "env": {
+33
+            "CHE_MACHINE_NAME": "dev-machine"
+34
+          }
+35
+        }
+36
+      },
+37
+      "recipe": {
+38
+        "type": "dockerimage",
+39
+        "content": "eclipse/ubuntu_jdk8"

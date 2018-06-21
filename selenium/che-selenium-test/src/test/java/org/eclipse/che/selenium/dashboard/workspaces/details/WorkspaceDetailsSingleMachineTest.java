@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.dashboard;
+package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;

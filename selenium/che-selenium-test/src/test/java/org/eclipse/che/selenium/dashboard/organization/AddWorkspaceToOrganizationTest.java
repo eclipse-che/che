@@ -11,8 +11,8 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -171,7 +171,7 @@ public class AddWorkspaceToOrganizationTest {
     newWorkspace.waitToolbar();
     newWorkspace.openOrganizationsList();
     newWorkspace.selectOrganizationFromList(organizationName);
-    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(workspaceName);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceDetails.waitToolbarTitleName(workspaceName);

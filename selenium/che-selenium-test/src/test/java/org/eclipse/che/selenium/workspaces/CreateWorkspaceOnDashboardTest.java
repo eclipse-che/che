@@ -14,9 +14,9 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -75,7 +75,7 @@ public class CreateWorkspaceOnDashboardTest {
     newWorkspace.waitToolbar();
     newWorkspace.typeWorkspaceName(WS_NAME);
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.selectStack(JAVA);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
