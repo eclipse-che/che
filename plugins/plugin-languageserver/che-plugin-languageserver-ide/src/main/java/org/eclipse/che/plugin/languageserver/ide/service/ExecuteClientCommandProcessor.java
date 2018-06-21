@@ -10,10 +10,14 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
+
 import com.google.gwt.json.client.JSONString;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 
@@ -25,22 +29,40 @@ import org.eclipse.lsp4j.ExecuteCommandParams;
  */
 @Singleton
 public class ExecuteClientCommandProcessor {
-  private static final String CLIENT_UPDATE_PROJECTS_CLASSPATH =
-      "che.jdt.ls.extension.workspace.clientUpdateProjectsClasspath";
-
   private EventBus eventBus;
+  private AppContext appContext;
 
   @Inject
-  public ExecuteClientCommandProcessor(EventBus eventBus) {
+  public ExecuteClientCommandProcessor(EventBus eventBus, AppContext appContext) {
     this.eventBus = eventBus;
+    this.appContext = appContext;
   }
 
   public void execute(ExecuteCommandParams params) {
-    if (CLIENT_UPDATE_PROJECTS_CLASSPATH.equals(params.getCommand())) {
-      for (Object project : params.getArguments()) {
-        eventBus.fireEvent(new ProjectClasspathChangedEvent(stringValue(project)));
-      }
+    switch (params.getCommand()) {
+      case CLIENT_UPDATE_PROJECTS_CLASSPATH:
+        for (Object project : params.getArguments()) {
+          eventBus.fireEvent(new ProjectClasspathChangedEvent(stringValue(project)));
+        }
+        break;
+      case CLIENT_UPDATE_PROJECT:
+        updateProject(stringValue(params.getArguments()));
+        break;
+      default:
+        break;
     }
+  }
+
+  private void updateProject(String project) {
+    appContext
+        .getWorkspaceRoot()
+        .getContainer(project)
+        .then(
+            container -> {
+              if (container.isPresent()) {
+                container.get().synchronize();
+              }
+            });
   }
 
   private String stringValue(Object value) {
