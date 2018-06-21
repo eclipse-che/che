@@ -29,10 +29,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -52,18 +60,51 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private final Path launchScript;
   private ProcessorJsonRpcCommunication processorJsonRpcCommunication;
   private ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter;
+  private EventService eventService;
+  private ProjectManager projectManager;
 
   @Inject
   public JavaLanguageServerLauncher(
       ProcessorJsonRpcCommunication processorJsonRpcCommunication,
-      ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter) {
+      ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter,
+      EventService eventService,
+      ProjectManager projectManager) {
     this.processorJsonRpcCommunication = processorJsonRpcCommunication;
     this.executeCliendCommandTransmitter = executeCliendCommandTransmitter;
+    this.eventService = eventService;
+    this.projectManager = projectManager;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
 
   public void sendStatusReport(StatusReport report) {
     LOG.info("{}: {}", report.getType(), report.getMessage());
+    if ("Started".equals(report.getType())) {
+      updateWorkspaceOnLSStarted();
+    }
+  }
+
+  private void updateWorkspaceOnLSStarted() {
+    projectManager
+        .getAll()
+        .forEach(
+            registeredProject -> {
+              if (!registeredProject.getProblems().isEmpty()) {
+                try {
+                  projectManager.update(registeredProject);
+                  eventService.publish(new ProjectUpdatedEvent(registeredProject.getPath()));
+                } catch (ForbiddenException
+                    | ServerException
+                    | NotFoundException
+                    | ConflictException
+                    | BadRequestException e) {
+                  LOG.error(
+                      String.format(
+                          "Failed to update project '%s' configuration",
+                          registeredProject.getName()),
+                      e);
+                }
+              }
+            });
   }
 
   /**
