@@ -37,6 +37,11 @@ public interface LanguageServerConfig {
    */
   RegexProvider getRegexpProvider();
 
+  /**
+   * Language server related attributes.
+   *
+   * @return map of attributes
+   */
   default Map<String, String> getAttributes() {
     return ImmutableMap.of();
   };
