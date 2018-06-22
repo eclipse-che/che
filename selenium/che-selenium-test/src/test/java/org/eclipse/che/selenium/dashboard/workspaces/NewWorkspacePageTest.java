@@ -17,7 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WILDFLY_SWARM;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WITH_JAVA_JAVASCRIPT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CEYLON_WITH_JAVA_JAVASCRIPT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DEBIAN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DEBIAN_LSP;
@@ -60,6 +60,7 @@ import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -94,7 +95,7 @@ public class NewWorkspacePageTest {
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
   private static final List<NewWorkspace.Stack> EXPECTED_JDK_STACKS = asList(JAVA, ECLIPSE_CHE);
-  private static List<NewWorkspace.Stack> EXPECTED_QUICK_START_STACKS =
+  private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_QUICK_START_STACKS =
       asList(
           BLANK,
           JAVA,
@@ -112,7 +113,23 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS);
 
-  private static List<String> EXPECTED_QUICK_START_STACKS_ORDER =
+  private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
+      asList(
+          BLANK,
+          JAVA,
+          JAVA_MYSQL,
+          DOT_NET,
+          ANDROID,
+          CPP,
+          ECLIPSE_CHE,
+          GO,
+          JAVA_THEIA_DOCKER,
+          NODE,
+          PHP,
+          PYTHON,
+          RAILS);
+
+  private static List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER =
       asList(
           BLANK.getId(),
           JAVA.getId(),
@@ -130,9 +147,23 @@ public class NewWorkspacePageTest {
           PYTHON.getId(),
           RAILS.getId());
 
-  private static final int EXPECTED_QUICK_START_STACKS_COUNT = EXPECTED_QUICK_START_STACKS.size();
+  private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_ORDER =
+      asList(
+          BLANK.getId(),
+          JAVA.getId(),
+          JAVA_MYSQL.getId(),
+          DOT_NET.getId(),
+          ANDROID.getId(),
+          CPP.getId(),
+          ECLIPSE_CHE.getId(),
+          GO.getId(),
+          JAVA_THEIA_DOCKER.getId(),
+          NODE.getId(),
+          PHP.getId(),
+          PYTHON.getId(),
+          RAILS.getId());
 
-  private static List<NewWorkspace.Stack> EXPECTED_SINGLE_MACHINE_STACKS =
+  private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
           BLANK,
           JAVA,
@@ -143,7 +174,7 @@ public class NewWorkspacePageTest {
           CENTOS_GO,
           CENTOS_NODEJS,
           CENTOS_WILDFLY_SWARM,
-          CENTOS_WITH_JAVA_JAVASCRIPT,
+          CEYLON_WITH_JAVA_JAVASCRIPT,
           DEBIAN,
           DEBIAN_LSP,
           ECLIPSE_CHE,
@@ -169,14 +200,10 @@ public class NewWorkspacePageTest {
           UBUNTU,
           ZEND);
 
-  private static final int EXPECTED_SINGLE_MACHINE_STACKS_COUNT =
-      EXPECTED_SINGLE_MACHINE_STACKS.size();
-
-  private static final List<NewWorkspace.Stack> EXPECTED_ALL_STACKS =
+  private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
           BLANK,
           JAVA,
-          JAVA_MYSQL,
           DOT_NET,
           ANDROID,
           CPP,
@@ -184,45 +211,25 @@ public class NewWorkspacePageTest {
           CENTOS_GO,
           CENTOS_NODEJS,
           CENTOS_WILDFLY_SWARM,
-          CENTOS_WITH_JAVA_JAVASCRIPT,
-          DEBIAN,
-          DEBIAN_LSP,
+          CEYLON_WITH_JAVA_JAVASCRIPT,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
-          HADOOP,
           JAVA_CENTOS,
-          JAVA_DEBIAN,
-          JAVA_THEIA_DOCKER,
-          JAVA_THEIA_OPENSHIFT,
-          JAVA_MYSQL_CENTOS,
           KOTLIN,
           NODE,
-          OPENSHIFT,
-          OPENSHIFT_SQL,
           PHP,
-          PHP_GAE,
-          PHP_5_6,
-          PLATFORMIO,
           PYTHON,
-          PYTHON_2_7,
-          PYTHON_GAE,
           RAILS,
-          SELENIUM,
-          SPRING_BOOT,
-          TOM_EE,
-          UBUNTU,
-          ZEND);
+          SPRING_BOOT);
 
-  private static final int EXPECTED_ALL_STACKS_COUNT = EXPECTED_ALL_STACKS.size();
-
-  private static final List<NewWorkspace.Stack> EXPECTED_MULTI_MACHINE_STACKS =
+  private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
       asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, OPENSHIFT_SQL);
 
-  private static final int EXPECTED_MULTI_MACHINE_STACKS_COUNT =
-      EXPECTED_MULTI_MACHINE_STACKS.size();
+  private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
+      asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
 
-  private static final List<String> EXPECTED_QUICK_START_STACKS_REVERSE_ORDER =
+  private static final List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
           BLANK.getId(),
           JAVA.getId(),
@@ -238,8 +245,27 @@ public class NewWorkspacePageTest {
           CPP.getId(),
           ANDROID.getId());
 
-  private static final List<NewWorkspace.Stack> EXPECTED_JAVA_STACKS =
+  private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
+      asList(
+          BLANK.getId(),
+          JAVA.getId(),
+          JAVA_MYSQL.getId(),
+          RAILS.getId(),
+          PYTHON.getId(),
+          PHP.getId(),
+          NODE.getId(),
+          JAVA_THEIA_DOCKER.getId(),
+          GO.getId(),
+          ECLIPSE_CHE.getId(),
+          CPP.getId(),
+          ANDROID.getId(),
+          DOT_NET.getId());
+
+  private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_JAVA_STACKS =
       asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_THEIA_OPENSHIFT);
+
+  private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_JAVA_STACKS =
+      asList(JAVA_MYSQL, JAVA, JAVA_THEIA_DOCKER, ECLIPSE_CHE, ANDROID);
 
   private static final List<String> EXPECTED_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);
@@ -317,53 +343,182 @@ public class NewWorkspacePageTest {
     checkValidNames();
   }
 
+  @Test(groups = TestGroup.OPENSHIFT)
+  public void checkOpenshiftStackButtons() {
+    checkStackButtons(
+        EXPECTED_OPENSHIFT_QUICK_START_STACKS,
+        EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS,
+        EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS,
+        EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER,
+        EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER);
+  }
+
+  @Test(groups = TestGroup.DOCKER)
+  public void checkDockerStackButtons() {
+    checkStackButtons(
+        EXPECTED_DOCKER_QUICK_START_STACKS,
+        EXPECTED_DOCKER_SINGLE_MACHINE_STACKS,
+        EXPECTED_DOCKER_MULTI_MACHINE_STACKS,
+        EXPECTED_DOCKER_QUICK_START_STACKS_ORDER,
+        EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER);
+  }
+
+  @Test(groups = TestGroup.OPENSHIFT)
+  public void checkOpenshiftFiltersButton() {
+    checkFiltersButton(EXPECTED_OPENSHIFT_QUICK_START_STACKS);
+  }
+
+  @Test(groups = TestGroup.DOCKER)
+  public void checkDockerFiltersButton() {
+    checkFiltersButton(EXPECTED_DOCKER_QUICK_START_STACKS);
+  }
+
   @Test
-  public void checkStackButtons() {
+  public void checkAddStackButton() {
+    newWorkspace.waitPageLoad();
+
+    // close form by "ESCAPE" button
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
+    newWorkspace.waitCreateStackDialogClosing();
+
+    // close form by clicking on outside of form bounds
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.clickOnTitlePlaceCoordinate();
+    newWorkspace.waitCreateStackDialogClosing();
+
+    // close form by "Close" button
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.closeCreateStackDialogByCloseButton();
+    newWorkspace.waitCreateStackDialogClosing();
+
+    // close form by "No" button
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.clickOnNoButtonInCreateStackDialog();
+    newWorkspace.waitCreateStackDialogClosing();
+
+    // click on "Yes" button
+    newWorkspace.clickOnAddStackButton();
+    newWorkspace.waitCreateStackDialog();
+    newWorkspace.clickOnYesButtonInCreateStackDialog();
+    stacks.waitToolbarTitleName();
+    seleniumWebDriver.navigate().back();
+    newWorkspace.waitPageLoad();
+  }
+
+  @Test(groups = TestGroup.OPENSHIFT)
+  public void checkOpenshiftSearchField() {
+    checkSearchField(EXPECTED_OPENSHIFT_JAVA_STACKS, EXPECTED_OPENSHIFT_QUICK_START_STACKS);
+  }
+
+  @Test(groups = TestGroup.DOCKER)
+  public void checkDockerSearchField() {
+    checkSearchField(EXPECTED_DOCKER_JAVA_STACKS, EXPECTED_DOCKER_QUICK_START_STACKS);
+  }
+
+  @Test
+  public void checkRamSelection() {
+    newWorkspace.waitPageLoad();
+
+    // empty RAM
+    newWorkspace.selectStack(JAVA);
+    newWorkspace.waitStackSelected(JAVA);
+    newWorkspace.waitRamValue(MACHINE_NAME, 2.0);
+    newWorkspace.typeToRamField("");
+    newWorkspace.waitRedRamFieldBorders();
+    newWorkspace.waitTopCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
+
+    // max valid value
+    newWorkspace.typeToRamField(Double.toString(MAX_RAM_VALUE));
+    newWorkspace.waitRedRamFieldBordersDisappearance();
+    newWorkspace.waitTopCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
+
+    // increment and decrement buttons with max valid value
+    newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE);
+
+    newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE - RAM_CHANGE_STEP);
+
+    // min valid value
+    newWorkspace.typeToRamField("");
+    newWorkspace.waitRedRamFieldBorders();
+    newWorkspace.waitTopCreateWorkspaceButtonDisabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
+
+    newWorkspace.typeToRamField(Double.toString(MIN_RAM_VALUE));
+    newWorkspace.waitRedRamFieldBordersDisappearance();
+    newWorkspace.waitTopCreateWorkspaceButtonEnabled();
+    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
+
+    // increment and decrement buttons with min valid value
+    newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE);
+    newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
+    newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE + RAM_CHANGE_STEP);
+
+    // increment and decrement by click and hold
+    newWorkspace.clickAndHoldIncrementMemoryButton(MACHINE_NAME, 3);
+    newWorkspace.waitRamValueInSpecifiedRange(MACHINE_NAME, 3, MAX_RAM_VALUE);
+
+    double currentRamAmount = newWorkspace.getRAM(MACHINE_NAME);
+    newWorkspace.clickAndHoldDecrementMemoryButton(MACHINE_NAME, 3);
+    newWorkspace.waitRamValueInSpecifiedRange(MACHINE_NAME, MIN_RAM_VALUE, currentRamAmount - 2);
+  }
+
+  private void checkStackButtons(
+      List<NewWorkspace.Stack> expectedQuickStartStacks,
+      List<NewWorkspace.Stack> expectedSingleMachineStacks,
+      List<NewWorkspace.Stack> expectedMultiMachineStacks,
+      List<String> expectedQuickStartStacksOrder,
+      List<String> expectedQuickStartStacksReverseOrder) {
+
     newWorkspace.waitPageLoad();
     newWorkspace.waitQuickStartButton();
-    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
-    newWorkspace.waitStacksCount(EXPECTED_QUICK_START_STACKS_COUNT);
+    newWorkspace.waitStacks(expectedQuickStartStacks);
+    newWorkspace.waitStacksCount(expectedQuickStartStacks.size());
 
     // single machine stacks
     newWorkspace.clickOnSingleMachineButton();
-    newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
-    newWorkspace.waitStacksCount(EXPECTED_SINGLE_MACHINE_STACKS_COUNT);
-
-    // all stacks
-    newWorkspace.clickOnAllButton();
-    newWorkspace.waitStacks(EXPECTED_ALL_STACKS);
-    newWorkspace.waitStacksCount(EXPECTED_ALL_STACKS_COUNT);
+    newWorkspace.waitStacks(expectedSingleMachineStacks);
+    newWorkspace.waitStacksCount(expectedSingleMachineStacks.size());
 
     // multi-machine stacks
     newWorkspace.clickOnMultiMachineButton();
-    newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
-    newWorkspace.waitStacksCount(EXPECTED_MULTI_MACHINE_STACKS_COUNT);
+    newWorkspace.waitStacks(expectedMultiMachineStacks);
+    newWorkspace.waitStacksCount(expectedMultiMachineStacks.size());
 
-    // check that only expected stacks are displayed and no duplicates are presented
+    // check that only expected stacks are displayed and no duplicates are presented and also checks
+    // "All" stacks
     newWorkspace.clickOnAllButton();
-    newWorkspace.waitStacks(EXPECTED_SINGLE_MACHINE_STACKS);
-    newWorkspace.waitStacks(EXPECTED_MULTI_MACHINE_STACKS);
+    newWorkspace.waitStacks(expectedSingleMachineStacks);
+    newWorkspace.waitStacks(expectedMultiMachineStacks);
     newWorkspace.waitStacksCount(
-        EXPECTED_SINGLE_MACHINE_STACKS_COUNT + EXPECTED_MULTI_MACHINE_STACKS_COUNT);
+        expectedSingleMachineStacks.size() + expectedMultiMachineStacks.size());
 
     // quick start stacks
     newWorkspace.clickOnQuickStartButton();
-    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS_ORDER);
+    newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
     newWorkspace.clickNameButton();
 
     try {
-      newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS_REVERSE_ORDER);
+      newWorkspace.waitStacksOrder(expectedQuickStartStacksReverseOrder);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/5650", ex);
     }
 
     newWorkspace.clickNameButton();
-    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS_ORDER);
+    newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
   }
 
-  @Test
-  public void checkFiltersButton() {
+  private void checkFiltersButton(List<NewWorkspace.Stack> expectedQuickStartStacks) {
     newWorkspace.waitPageLoad();
 
     // close by "Escape" button
@@ -462,119 +617,31 @@ public class NewWorkspacePageTest {
     newWorkspace.waitFiltersInputIsEmpty();
     newWorkspace.clickOnTitlePlaceCoordinate();
     newWorkspace.waitFiltersFormClosed();
-    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.waitStacks(expectedQuickStartStacks);
   }
 
-  @Test
-  public void checkAddStackButton() {
-    newWorkspace.waitPageLoad();
-
-    // close form by "ESCAPE" button
-    newWorkspace.clickOnAddStackButton();
-    newWorkspace.waitCreateStackDialog();
-    seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
-    newWorkspace.waitCreateStackDialogClosing();
-
-    // close form by clicking on outside of form bounds
-    newWorkspace.clickOnAddStackButton();
-    newWorkspace.waitCreateStackDialog();
-    newWorkspace.clickOnTitlePlaceCoordinate();
-    newWorkspace.waitCreateStackDialogClosing();
-
-    // close form by "Close" button
-    newWorkspace.clickOnAddStackButton();
-    newWorkspace.waitCreateStackDialog();
-    newWorkspace.closeCreateStackDialogByCloseButton();
-    newWorkspace.waitCreateStackDialogClosing();
-
-    // close form by "No" button
-    newWorkspace.clickOnAddStackButton();
-    newWorkspace.waitCreateStackDialog();
-    newWorkspace.clickOnNoButtonInCreateStackDialog();
-    newWorkspace.waitCreateStackDialogClosing();
-
-    // click on "Yes" button
-    newWorkspace.clickOnAddStackButton();
-    newWorkspace.waitCreateStackDialog();
-    newWorkspace.clickOnYesButtonInCreateStackDialog();
-    stacks.waitToolbarTitleName();
-    seleniumWebDriver.navigate().back();
-    newWorkspace.waitPageLoad();
-  }
-
-  @Test
-  public void checkSearchField() {
+  private void checkSearchField(
+      List<NewWorkspace.Stack> expectedJavaStacks,
+      List<NewWorkspace.Stack> expectedQuickStartStacks) {
     newWorkspace.waitPageLoad();
 
     newWorkspace.typeToSearchInput("Java");
-    newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+    newWorkspace.waitStacks(expectedJavaStacks);
 
     newWorkspace.typeToSearchInput("");
-    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.waitStacks(expectedQuickStartStacks);
 
     newWorkspace.typeToSearchInput("java");
-    newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+    newWorkspace.waitStacks(expectedJavaStacks);
 
     newWorkspace.typeToSearchInput("");
-    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.waitStacks(expectedQuickStartStacks);
 
     newWorkspace.typeToSearchInput("JAVA");
-    newWorkspace.waitStacks(EXPECTED_JAVA_STACKS);
+    newWorkspace.waitStacks(expectedJavaStacks);
 
     newWorkspace.typeToSearchInput("");
-    newWorkspace.waitStacks(EXPECTED_QUICK_START_STACKS);
-  }
-
-  @Test
-  public void checkRamSelection() {
-    newWorkspace.waitPageLoad();
-
-    // empty RAM
-    newWorkspace.selectStack(JAVA);
-    newWorkspace.waitStackSelected(JAVA);
-    newWorkspace.waitRamValue(MACHINE_NAME, 2.0);
-    newWorkspace.typeToRamField("");
-    newWorkspace.waitRedRamFieldBorders();
-    newWorkspace.waitTopCreateWorkspaceButtonDisabled();
-    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
-
-    // max valid value
-    newWorkspace.typeToRamField(Double.toString(MAX_RAM_VALUE));
-    newWorkspace.waitRedRamFieldBordersDisappearance();
-    newWorkspace.waitTopCreateWorkspaceButtonEnabled();
-    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
-
-    // increment and decrement buttons with max valid value
-    newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
-    newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE);
-
-    newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
-    newWorkspace.waitRamValue(MACHINE_NAME, MAX_RAM_VALUE - RAM_CHANGE_STEP);
-
-    // min valid value
-    newWorkspace.typeToRamField("");
-    newWorkspace.waitRedRamFieldBorders();
-    newWorkspace.waitTopCreateWorkspaceButtonDisabled();
-    newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
-
-    newWorkspace.typeToRamField(Double.toString(MIN_RAM_VALUE));
-    newWorkspace.waitRedRamFieldBordersDisappearance();
-    newWorkspace.waitTopCreateWorkspaceButtonEnabled();
-    newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
-
-    // increment and decrement buttons with min valid value
-    newWorkspace.clickOnDecrementMemoryButton(MACHINE_NAME);
-    newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE);
-    newWorkspace.clickOnIncrementMemoryButton(MACHINE_NAME);
-    newWorkspace.waitRamValue(MACHINE_NAME, MIN_RAM_VALUE + RAM_CHANGE_STEP);
-
-    // increment and decrement by click and hold
-    newWorkspace.clickAndHoldIncrementMemoryButton(MACHINE_NAME, 3);
-    newWorkspace.waitRamValueInSpecifiedRange(MACHINE_NAME, 3, MAX_RAM_VALUE);
-
-    double currentRamAmount = newWorkspace.getRAM(MACHINE_NAME);
-    newWorkspace.clickAndHoldDecrementMemoryButton(MACHINE_NAME, 3);
-    newWorkspace.waitRamValueInSpecifiedRange(MACHINE_NAME, MIN_RAM_VALUE, currentRamAmount - 2);
+    newWorkspace.waitStacks(expectedQuickStartStacks);
   }
 
   private void checkNotValidNames() {

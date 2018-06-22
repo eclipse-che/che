@@ -142,7 +142,7 @@ public class NewWorkspace {
     CENTOS_GO("centos-go"),
     CENTOS_NODEJS("nodejs4"),
     CENTOS_WILDFLY_SWARM("wildfly-swarm"),
-    CENTOS_WITH_JAVA_JAVASCRIPT("ceylon-java-javascript-dart-centos"),
+    CEYLON_WITH_JAVA_JAVASCRIPT("ceylon-java-javascript-dart-centos"),
     DEBIAN("debian"),
     DEBIAN_LSP("debianlsp"),
     ECLIPSE_CHE("che-in-che"),
