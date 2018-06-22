@@ -152,13 +152,25 @@ public class NewWorkspace {
     JAVA_THEIA_DOCKER("java-theia-docker"),
     JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
     JAVA_MYSQL_CENTOS("java-centos-mysql"),
+    JAVA_DEBIAN("java-debian"),
     KOTLIN("kotlin-default"),
     NODE("node-default"),
     OPENSHIFT_SQL("openshift-sql"),
     PHP("php-default"),
+    PHP_GAE("php-gae"),
+    PHP_5_6("php5.6-default"),
     PLATFORMIO("platformio"),
     PYTHON("python-default"),
-    RAILS("rails-default");
+    PYTHON_2_7("python-2.7"),
+    PYTHON_GAE("python-gae"),
+    RAILS("rails-default"),
+    OPENSHIFT("openshift-default"),
+    HADOOP("hadoop-default"),
+    SELENIUM("selenium"),
+    SPRING_BOOT("spring-boot"),
+    TOM_EE("tomee-default"),
+    UBUNTU("ubuntu"),
+    ZEND("zend");
 
     private final String id;
 

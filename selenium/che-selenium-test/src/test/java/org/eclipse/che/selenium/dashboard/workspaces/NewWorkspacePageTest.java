@@ -15,25 +15,41 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.A
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WILDFLY_SWARM;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WITH_JAVA_JAVASCRIPT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DEBIAN;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DEBIAN_LSP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_VERTX;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.HADOOP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_DEBIAN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_DOCKER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.KOTLIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.OPENSHIFT_SQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP_5_6;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP_GAE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PLATFORMIO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON_2_7;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON_GAE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SELENIUM;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.TOM_EE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.UBUNTU;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ZEND;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -89,7 +105,10 @@ public class NewWorkspacePageTest {
           GO.getId(),
           JAVA_THEIA_OPENSHIFT.getId(),
           NODE.getId(),
+          OPENSHIFT.getId(),
+          OPENSHIFT_SQL.getId(),
           PHP.getId(),
+          PLATFORMIO.getId(),
           PYTHON.getId(),
           RAILS.getId());
 
@@ -104,17 +123,33 @@ public class NewWorkspacePageTest {
           CPP.getId(),
           CENTOS_BLANK.getId(),
           CENTOS_GO.getId(),
+          CENTOS_NODEJS.getId(),
           CENTOS_WILDFLY_SWARM.getId(),
           CENTOS_WITH_JAVA_JAVASCRIPT.getId(),
+          DEBIAN.getId(),
+          DEBIAN_LSP.getId(),
           ECLIPSE_CHE.getId(),
           ECLIPSE_VERTX.getId(),
           GO.getId(),
+          HADOOP.getId(),
           JAVA_CENTOS.getId(),
+          JAVA_DEBIAN.getId(),
           KOTLIN.getId(),
           NODE.getId(),
+          OPENSHIFT.getId(),
           PHP.getId(),
+          PHP_GAE.getId(),
+          PHP_5_6.getId(),
+          PLATFORMIO.getId(),
           PYTHON.getId(),
-          RAILS.getId());
+          PYTHON_2_7.getId(),
+          PYTHON_GAE.getId(),
+          RAILS.getId(),
+          SELENIUM.getId(),
+          SPRING_BOOT.getId(),
+          TOM_EE.getId(),
+          UBUNTU.getId(),
+          ZEND.getId());
 
   private static final int EXPECTED_SINGLE_MACHINE_STACKS_COUNT =
       EXPECTED_SINGLE_MACHINE_STACKS.size();
@@ -123,26 +158,43 @@ public class NewWorkspacePageTest {
       asList(
           BLANK.getId(),
           JAVA.getId(),
+          JAVA_MYSQL.getId(),
           DOT_NET.getId(),
           ANDROID.getId(),
           CPP.getId(),
           CENTOS_BLANK.getId(),
           CENTOS_GO.getId(),
+          CENTOS_NODEJS.getId(),
           CENTOS_WILDFLY_SWARM.getId(),
           CENTOS_WITH_JAVA_JAVASCRIPT.getId(),
+          DEBIAN.getId(),
+          DEBIAN_LSP.getId(),
           ECLIPSE_CHE.getId(),
           ECLIPSE_VERTX.getId(),
           GO.getId(),
+          HADOOP.getId(),
           JAVA_CENTOS.getId(),
-          KOTLIN.getId(),
-          NODE.getId(),
-          PHP.getId(),
-          PYTHON.getId(),
-          RAILS.getId(),
-          JAVA_MYSQL.getId(),
+          JAVA_DEBIAN.getId(),
           JAVA_THEIA_DOCKER.getId(),
           JAVA_THEIA_OPENSHIFT.getId(),
-          JAVA_MYSQL_CENTOS.getId());
+          JAVA_MYSQL_CENTOS.getId(),
+          KOTLIN.getId(),
+          NODE.getId(),
+          OPENSHIFT.getId(),
+          OPENSHIFT_SQL.getId(),
+          PHP.getId(),
+          PHP_GAE.getId(),
+          PHP_5_6.getId(),
+          PLATFORMIO.getId(),
+          PYTHON.getId(),
+          PYTHON_2_7.getId(),
+          PYTHON_GAE.getId(),
+          RAILS.getId(),
+          SELENIUM.getId(),
+          SPRING_BOOT.getId(),
+          TOM_EE.getId(),
+          UBUNTU.getId(),
+          ZEND.getId());
 
   private static final int EXPECTED_ALL_STACKS_COUNT = EXPECTED_ALL_STACKS.size();
 
@@ -151,7 +203,8 @@ public class NewWorkspacePageTest {
           JAVA_MYSQL.getId(),
           JAVA_THEIA_DOCKER.getId(),
           JAVA_THEIA_OPENSHIFT.getId(),
-          JAVA_MYSQL_CENTOS.getId());
+          JAVA_MYSQL_CENTOS.getId(),
+          OPENSHIFT_SQL.getId());
 
   private static final int EXPECTED_MULTI_MACHINE_STACKS_COUNT =
       EXPECTED_MULTI_MACHINE_STACKS.size();
