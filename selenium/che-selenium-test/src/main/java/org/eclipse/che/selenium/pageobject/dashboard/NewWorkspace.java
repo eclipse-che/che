@@ -722,13 +722,10 @@ public class NewWorkspace {
   }
 
   public void waitStacks(List<String> expectedStacks) {
-    System.out.println("############# " + expectedStacks);
     expectedStacks.forEach(
-        stackId -> {
-          System.out.println("===>>>> " + stackId);
-          seleniumWebDriverHelper.waitPresence(
-              By.xpath(format("//div[@data-stack-id='%s']", stackId)));
-        });
+        stackId ->
+            seleniumWebDriverHelper.waitPresence(
+                By.xpath(format("//div[@data-stack-id='%s']", stackId))));
   }
 
   public void waitStacksCount(int expectedCount) {
