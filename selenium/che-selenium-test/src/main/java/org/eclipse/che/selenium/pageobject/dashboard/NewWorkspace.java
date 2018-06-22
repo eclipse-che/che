@@ -493,7 +493,7 @@ public class NewWorkspace {
   }
 
   public void selectStack(Stack stack) {
-    waitStacks(asList(stack.getId()));
+    waitStacks(asList(stack));
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stack.getId())));
   }
 
@@ -721,11 +721,11 @@ public class NewWorkspace {
                 driver -> getVisibleStacks().equals(expectedVisibleStacks));
   }
 
-  public void waitStacks(List<String> expectedStacks) {
+  public void waitStacks(List<Stack> expectedStacks) {
     expectedStacks.forEach(
-        stackId ->
+        stack ->
             seleniumWebDriverHelper.waitPresence(
-                By.xpath(format("//div[@data-stack-id='%s']", stackId))));
+                By.xpath(format("//div[@data-stack-id='%s']", stack.getId()))));
   }
 
   public void waitStacksCount(int expectedCount) {

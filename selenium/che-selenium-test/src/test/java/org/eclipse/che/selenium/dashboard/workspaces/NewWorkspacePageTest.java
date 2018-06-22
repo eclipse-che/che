@@ -93,8 +93,26 @@ public class NewWorkspacePageTest {
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
-  private static final List<String> EXPECTED_JDK_STACKS = asList(JAVA.getId(), ECLIPSE_CHE.getId());
-  private static List<String> EXPECTED_QUICK_START_STACKS =
+  private static final List<NewWorkspace.Stack> EXPECTED_JDK_STACKS = asList(JAVA, ECLIPSE_CHE);
+  private static List<NewWorkspace.Stack> EXPECTED_QUICK_START_STACKS =
+      asList(
+          BLANK,
+          JAVA,
+          DOT_NET,
+          ANDROID,
+          CPP,
+          ECLIPSE_CHE,
+          GO,
+          JAVA_THEIA_OPENSHIFT,
+          NODE,
+          OPENSHIFT,
+          OPENSHIFT_SQL,
+          PHP,
+          PLATFORMIO,
+          PYTHON,
+          RAILS);
+
+  private static List<String> EXPECTED_QUICK_START_STACKS_ORDER =
       asList(
           BLANK.getId(),
           JAVA.getId(),
@@ -114,97 +132,92 @@ public class NewWorkspacePageTest {
 
   private static final int EXPECTED_QUICK_START_STACKS_COUNT = EXPECTED_QUICK_START_STACKS.size();
 
-  private static List<String> EXPECTED_SINGLE_MACHINE_STACKS =
+  private static List<NewWorkspace.Stack> EXPECTED_SINGLE_MACHINE_STACKS =
       asList(
-          BLANK.getId(),
-          JAVA.getId(),
-          DOT_NET.getId(),
-          ANDROID.getId(),
-          CPP.getId(),
-          CENTOS_BLANK.getId(),
-          CENTOS_GO.getId(),
-          CENTOS_NODEJS.getId(),
-          CENTOS_WILDFLY_SWARM.getId(),
-          CENTOS_WITH_JAVA_JAVASCRIPT.getId(),
-          DEBIAN.getId(),
-          DEBIAN_LSP.getId(),
-          ECLIPSE_CHE.getId(),
-          ECLIPSE_VERTX.getId(),
-          GO.getId(),
-          HADOOP.getId(),
-          JAVA_CENTOS.getId(),
-          JAVA_DEBIAN.getId(),
-          KOTLIN.getId(),
-          NODE.getId(),
-          OPENSHIFT.getId(),
-          PHP.getId(),
-          PHP_GAE.getId(),
-          PHP_5_6.getId(),
-          PLATFORMIO.getId(),
-          PYTHON.getId(),
-          PYTHON_2_7.getId(),
-          PYTHON_GAE.getId(),
-          RAILS.getId(),
-          SELENIUM.getId(),
-          SPRING_BOOT.getId(),
-          TOM_EE.getId(),
-          UBUNTU.getId(),
-          ZEND.getId());
+          BLANK,
+          JAVA,
+          DOT_NET,
+          ANDROID,
+          CPP,
+          CENTOS_BLANK,
+          CENTOS_GO,
+          CENTOS_NODEJS,
+          CENTOS_WILDFLY_SWARM,
+          CENTOS_WITH_JAVA_JAVASCRIPT,
+          DEBIAN,
+          DEBIAN_LSP,
+          ECLIPSE_CHE,
+          ECLIPSE_VERTX,
+          GO,
+          HADOOP,
+          JAVA_CENTOS,
+          JAVA_DEBIAN,
+          KOTLIN,
+          NODE,
+          OPENSHIFT,
+          PHP,
+          PHP_GAE,
+          PHP_5_6,
+          PLATFORMIO,
+          PYTHON,
+          PYTHON_2_7,
+          PYTHON_GAE,
+          RAILS,
+          SELENIUM,
+          SPRING_BOOT,
+          TOM_EE,
+          UBUNTU,
+          ZEND);
 
   private static final int EXPECTED_SINGLE_MACHINE_STACKS_COUNT =
       EXPECTED_SINGLE_MACHINE_STACKS.size();
 
-  private static final List<String> EXPECTED_ALL_STACKS =
+  private static final List<NewWorkspace.Stack> EXPECTED_ALL_STACKS =
       asList(
-          BLANK.getId(),
-          JAVA.getId(),
-          JAVA_MYSQL.getId(),
-          DOT_NET.getId(),
-          ANDROID.getId(),
-          CPP.getId(),
-          CENTOS_BLANK.getId(),
-          CENTOS_GO.getId(),
-          CENTOS_NODEJS.getId(),
-          CENTOS_WILDFLY_SWARM.getId(),
-          CENTOS_WITH_JAVA_JAVASCRIPT.getId(),
-          DEBIAN.getId(),
-          DEBIAN_LSP.getId(),
-          ECLIPSE_CHE.getId(),
-          ECLIPSE_VERTX.getId(),
-          GO.getId(),
-          HADOOP.getId(),
-          JAVA_CENTOS.getId(),
-          JAVA_DEBIAN.getId(),
-          JAVA_THEIA_DOCKER.getId(),
-          JAVA_THEIA_OPENSHIFT.getId(),
-          JAVA_MYSQL_CENTOS.getId(),
-          KOTLIN.getId(),
-          NODE.getId(),
-          OPENSHIFT.getId(),
-          OPENSHIFT_SQL.getId(),
-          PHP.getId(),
-          PHP_GAE.getId(),
-          PHP_5_6.getId(),
-          PLATFORMIO.getId(),
-          PYTHON.getId(),
-          PYTHON_2_7.getId(),
-          PYTHON_GAE.getId(),
-          RAILS.getId(),
-          SELENIUM.getId(),
-          SPRING_BOOT.getId(),
-          TOM_EE.getId(),
-          UBUNTU.getId(),
-          ZEND.getId());
+          BLANK,
+          JAVA,
+          JAVA_MYSQL,
+          DOT_NET,
+          ANDROID,
+          CPP,
+          CENTOS_BLANK,
+          CENTOS_GO,
+          CENTOS_NODEJS,
+          CENTOS_WILDFLY_SWARM,
+          CENTOS_WITH_JAVA_JAVASCRIPT,
+          DEBIAN,
+          DEBIAN_LSP,
+          ECLIPSE_CHE,
+          ECLIPSE_VERTX,
+          GO,
+          HADOOP,
+          JAVA_CENTOS,
+          JAVA_DEBIAN,
+          JAVA_THEIA_DOCKER,
+          JAVA_THEIA_OPENSHIFT,
+          JAVA_MYSQL_CENTOS,
+          KOTLIN,
+          NODE,
+          OPENSHIFT,
+          OPENSHIFT_SQL,
+          PHP,
+          PHP_GAE,
+          PHP_5_6,
+          PLATFORMIO,
+          PYTHON,
+          PYTHON_2_7,
+          PYTHON_GAE,
+          RAILS,
+          SELENIUM,
+          SPRING_BOOT,
+          TOM_EE,
+          UBUNTU,
+          ZEND);
 
   private static final int EXPECTED_ALL_STACKS_COUNT = EXPECTED_ALL_STACKS.size();
 
-  private static final List<String> EXPECTED_MULTI_MACHINE_STACKS =
-      asList(
-          JAVA_MYSQL.getId(),
-          JAVA_THEIA_DOCKER.getId(),
-          JAVA_THEIA_OPENSHIFT.getId(),
-          JAVA_MYSQL_CENTOS.getId(),
-          OPENSHIFT_SQL.getId());
+  private static final List<NewWorkspace.Stack> EXPECTED_MULTI_MACHINE_STACKS =
+      asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, OPENSHIFT_SQL);
 
   private static final int EXPECTED_MULTI_MACHINE_STACKS_COUNT =
       EXPECTED_MULTI_MACHINE_STACKS.size();
@@ -225,8 +238,8 @@ public class NewWorkspacePageTest {
           CPP.getId(),
           ANDROID.getId());
 
-  private static final List<String> EXPECTED_JAVA_STACKS =
-      asList(JAVA.getId(), ANDROID.getId(), ECLIPSE_CHE.getId(), JAVA_THEIA_OPENSHIFT.getId());
+  private static final List<NewWorkspace.Stack> EXPECTED_JAVA_STACKS =
+      asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_THEIA_OPENSHIFT);
 
   private static final List<String> EXPECTED_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);
@@ -335,7 +348,7 @@ public class NewWorkspacePageTest {
 
     // quick start stacks
     newWorkspace.clickOnQuickStartButton();
-    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS_ORDER);
     newWorkspace.clickNameButton();
 
     try {
@@ -346,7 +359,7 @@ public class NewWorkspacePageTest {
     }
 
     newWorkspace.clickNameButton();
-    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS);
+    newWorkspace.waitStacksOrder(EXPECTED_QUICK_START_STACKS_ORDER);
   }
 
   @Test
