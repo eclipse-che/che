@@ -11,12 +11,12 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event;
 
 /**
- * Defines the handling mechanism for Kubernetes container events.
+ * Defines the handling mechanism for Kubernetes events.
  *
  * @author Sergii Leshchenko
  */
-public interface ContainerEventHandler {
+public interface PodEventHandler {
 
   /** Handles the container event. */
-  void handle(ContainerEvent event);
+  void handle(PodEvent event);
 }
