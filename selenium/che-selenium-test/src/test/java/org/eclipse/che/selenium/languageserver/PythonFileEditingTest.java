@@ -99,7 +99,7 @@ public class PythonFileEditingTest {
     editor.selectTabByName(PYTHON_FILE_NAME);
 
     // check contents of autocomplete container
-    editor.goToPosition(18, 53);
+    editor.goToPosition(19, 1);
     editor.typeTextIntoEditor("\n\nobject = MyClass()\nprint(object.");
 
     editor.launchAutocompleteAndWaitContainer();
