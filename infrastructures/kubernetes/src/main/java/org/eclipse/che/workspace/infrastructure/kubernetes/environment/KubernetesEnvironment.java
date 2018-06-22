@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
   private final Map<String, Service> services;
   private final Map<String, Ingress> ingresses;
   private final Map<String, PersistentVolumeClaim> persistentVolumeClaims;
+  private final Map<String, Secret> secrets;
 
   public KubernetesEnvironment(KubernetesEnvironment k8sEnv) {
     this(
@@ -45,7 +47,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
         k8sEnv.getPods(),
         k8sEnv.getServices(),
         k8sEnv.getIngresses(),
-        k8sEnv.getPersistentVolumeClaims());
+        k8sEnv.getPersistentVolumeClaims(),
+        k8sEnv.getSecrets());
   }
 
   public static Builder builder() {
@@ -59,12 +62,14 @@ public class KubernetesEnvironment extends InternalEnvironment {
       Map<String, Pod> pods,
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
-      Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
+      Map<String, PersistentVolumeClaim> persistentVolumeClaims,
+      Map<String, Secret> secrets) {
     super(internalRecipe, machines, warnings);
     this.pods = pods;
     this.services = services;
     this.ingresses = ingresses;
     this.persistentVolumeClaims = persistentVolumeClaims;
+    this.secrets = secrets;
   }
 
   /** Returns pods that should be created when environment starts. */
@@ -87,6 +92,11 @@ public class KubernetesEnvironment extends InternalEnvironment {
     return persistentVolumeClaims;
   }
 
+  /** Returns secrets that should be created when environment starts. */
+  public Map<String, Secret> getSecrets() {
+    return secrets;
+  }
+
   public static class Builder {
     protected InternalRecipe internalRecipe;
     protected final Map<String, InternalMachineConfig> machines = new HashMap<>();
@@ -94,7 +104,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
     protected final Map<String, Pod> pods = new HashMap<>();
     protected final Map<String, Service> services = new HashMap<>();
     protected final Map<String, Ingress> ingresses = new HashMap<>();
-    protected final Map<String, PersistentVolumeClaim> persistentVolumeClaims = new HashMap<>();
+    protected final Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
+    protected final Map<String, Secret> secrets = new HashMap<>();
 
     protected Builder() {}
 
@@ -129,13 +140,18 @@ public class KubernetesEnvironment extends InternalEnvironment {
     }
 
     public Builder setPersistentVolumeClaims(Map<String, PersistentVolumeClaim> pvcs) {
-      this.persistentVolumeClaims.putAll(pvcs);
+      this.pvcs.putAll(pvcs);
+      return this;
+    }
+
+    public Builder setSecrets(Map<String, Secret> secrets) {
+      this.secrets.putAll(secrets);
       return this;
     }
 
     public KubernetesEnvironment build() {
       return new KubernetesEnvironment(
-          internalRecipe, machines, warnings, pods, services, ingresses, persistentVolumeClaims);
+          internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets);
     }
   }
 }

@@ -50,6 +50,7 @@ import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
@@ -111,6 +112,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServe
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -170,6 +172,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesPods pods;
+  @Mock private KubernetesSecrets secrets;
   @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
@@ -244,6 +247,7 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.services()).thenReturn(services);
     when(namespace.ingresses()).thenReturn(ingresses);
     when(namespace.pods()).thenReturn(pods);
+    when(namespace.secrets()).thenReturn(secrets);
     when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
         .thenReturn(bootstrapper);
     doReturn(
@@ -282,12 +286,14 @@ public class KubernetesInternalRuntimeTest {
                     mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
                     mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
     when(k8sEnv.getPods()).thenReturn(podsMap);
+    when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
 
     internalRuntime.internalStart(emptyMap());
 
     verify(pods).create(any());
     verify(ingresses).create(any());
     verify(services).create(any());
+    verify(secrets).create(any());
     verify(namespace.pods(), times(2)).watchContainers(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());

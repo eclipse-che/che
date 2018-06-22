@@ -58,6 +58,7 @@
         <module>plugin-pullrequest-parent</module>
         <module>plugin-yaml</module>
         <module>plugin-camel</module>
+        <module>plugin-ceylon</module>
         <module>plugin-clangd</module>
         <module>plugin-golang</module>
     </modules>

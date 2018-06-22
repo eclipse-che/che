@@ -67,7 +67,7 @@
         .mainPanel[unsaved] .iconPanel::after {
             color: unsavedMarkColor;
             content: '*';
-            float: inherit;
+            float: right;
             margin-top: 9px;
             margin-left: 19px;
         }
