@@ -20,6 +20,7 @@ import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
@@ -462,6 +463,11 @@ public class KubernetesInternalRuntime<
    */
   protected void startMachines() throws InfrastructureException {
     KubernetesEnvironment k8sEnv = getContext().getEnvironment();
+
+    for (Secret secret : k8sEnv.getSecrets().values()) {
+      namespace.secrets().create(secret);
+    }
+
     List<Service> createdServices = new ArrayList<>();
     for (Service service : k8sEnv.getServices().values()) {
       createdServices.add(namespace.services().create(service));
