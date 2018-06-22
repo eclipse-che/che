@@ -93,7 +93,7 @@ public class NewWorkspacePageTest {
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
-  private static final List<String> EXPECTED_JDK_STACKS = asList("java-default", "che-in-che");
+  private static final List<String> EXPECTED_JDK_STACKS = asList(JAVA.getId(), ECLIPSE_CHE.getId());
   private static List<String> EXPECTED_QUICK_START_STACKS =
       asList(
           BLANK.getId(),
@@ -226,7 +226,7 @@ public class NewWorkspacePageTest {
           ANDROID.getId());
 
   private static final List<String> EXPECTED_JAVA_STACKS =
-      asList("java-default", "android-default", "che-in-che", "java-theia-openshift");
+      asList(JAVA.getId(), ANDROID.getId(), ECLIPSE_CHE.getId(), JAVA_THEIA_OPENSHIFT.getId());
 
   private static final List<String> EXPECTED_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);
