@@ -136,6 +136,7 @@ public class PythonFileEditingTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.py");
     editor.selectTabByName("towers.py");
 
+    // select Format feature from context menu
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FORMAT);
     editor.waitTextIntoEditor(
