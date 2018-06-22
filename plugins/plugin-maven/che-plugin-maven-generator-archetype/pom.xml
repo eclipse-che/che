@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-maven-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.7.0-SNAPSHOT</version>
+        <version>6.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-maven-generator-archetype</artifactId>
     <packaging>jar</packaging>
@@ -47,16 +47,16 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

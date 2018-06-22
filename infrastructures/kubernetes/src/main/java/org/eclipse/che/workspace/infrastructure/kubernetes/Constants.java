@@ -40,5 +40,11 @@ public final class Constants {
   public static final String MACHINE_NAME_ANNOTATION_FMT =
       "org.eclipse.che.container.%s.machine_name";
 
+  /** Kubernetes Pod status phase values */
+  public static final String POD_STATUS_PHASE_RUNNING = "Running";
+
+  public static final String POD_STATUS_PHASE_FAILED = "Failed";
+  public static final String POD_STATUS_PHASE_SUCCEEDED = "Succeeded";
+
   private Constants() {}
 }

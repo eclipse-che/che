@@ -16,6 +16,7 @@ import static io.fabric8.kubernetes.client.utils.Utils.isNotNullOrEmpty;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.utils.ImpersonatorInterceptor;
 import io.fabric8.kubernetes.client.utils.URLUtils;
 import io.fabric8.kubernetes.client.utils.Utils;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -228,6 +229,7 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
         builder
             .addInterceptor(
                 new OpenShiftOAuthInterceptor(clientHttpClient, OpenShiftConfig.wrap(config)))
+            .addInterceptor(new ImpersonatorInterceptor(config))
             .build();
 
     return new UnclosableOpenShiftClient(clientHttpClient, config);

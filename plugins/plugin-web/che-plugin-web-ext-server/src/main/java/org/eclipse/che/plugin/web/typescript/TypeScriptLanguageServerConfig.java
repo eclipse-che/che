@@ -28,7 +28,7 @@ import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
 @Singleton
 public class TypeScriptLanguageServerConfig implements LanguageServerConfig {
 
-  private static final String REGEX = ".*\\.(ts|tsx)";
+  private static final String REGEX = ".*\\.(js|ts|tsx)";
 
   private final Path launchScript;
 

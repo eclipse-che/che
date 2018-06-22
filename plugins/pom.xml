@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.7.0-SNAPSHOT</version>
+        <version>6.8.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-parent</artifactId>
-    <version>6.7.0-SNAPSHOT</version>
+    <version>6.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Plugin :: Parent</name>
     <modules>
@@ -58,6 +58,7 @@
         <module>plugin-pullrequest-parent</module>
         <module>plugin-yaml</module>
         <module>plugin-camel</module>
+        <module>plugin-ceylon</module>
         <module>plugin-clangd</module>
         <module>plugin-golang</module>
     </modules>

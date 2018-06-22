@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -19,6 +20,7 @@ import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
@@ -86,9 +88,6 @@ public class KubernetesInternalRuntime<
     extends InternalRuntime<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesInternalRuntime.class);
-
-  private static final String POD_RUNNING_STATUS = "Running";
-  private static final String POD_FAILED_STATUS = "Failed";
 
   private final int workspaceStartTimeout;
   private final int ingressStartTimeout;
@@ -382,11 +381,7 @@ public class KubernetesInternalRuntime<
    */
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
-    CompletableFuture<Void> waitFuture =
-        namespace
-            .pods()
-            .waitAsync(
-                machine.getPodName(), p -> (POD_RUNNING_STATUS.equals(p.getStatus().getPhase())));
+    CompletableFuture<Void> waitFuture = namespace.pods().waitRunningAsync(machine.getPodName());
     toCancelFutures.add(waitFuture);
     return waitFuture;
   }
@@ -468,6 +463,11 @@ public class KubernetesInternalRuntime<
    */
   protected void startMachines() throws InfrastructureException {
     KubernetesEnvironment k8sEnv = getContext().getEnvironment();
+
+    for (Secret secret : k8sEnv.getSecrets().values()) {
+      namespace.secrets().create(secret);
+    }
+
     List<Service> createdServices = new ArrayList<>();
     for (Service service : k8sEnv.getServices().values()) {
       createdServices.add(namespace.services().create(service));
@@ -806,7 +806,7 @@ public class KubernetesInternalRuntime<
     public void handle(Action action, Pod pod) {
       // Cancels workspace servers probes if any
       probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
-      if (pod.getStatus() != null && POD_FAILED_STATUS.equals(pod.getStatus().getPhase())) {
+      if (pod.getStatus() != null && POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
         try {
           internalStop(emptyMap());
         } catch (InfrastructureException ex) {

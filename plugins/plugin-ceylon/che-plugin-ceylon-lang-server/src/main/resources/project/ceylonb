@@ -1,0 +1,81 @@
+#!/bin/sh
+
+# resolve links - $0 may be a softlink
+PRG="$0"
+while [ -h "$PRG" ]; do
+    ls="$(ls -ld "$PRG")"
+    link="${ls##*-> }" # remove largest prefix: yields link target (behind ->)
+    if [ "$link" != "${link#/}" ]; then # remove prefix / if present
+        # path was absolute
+        PRG="$link"
+    else
+        # was not
+        PRG="$(dirname "$PRG")/$link"
+    fi
+done
+
+DIR="$(dirname "$PRG")"
+
+# Check if we should use a distribution bootstrap
+if [ -f "$DIR/.ceylon/bootstrap/ceylon-bootstrap.properties" ] && [ -f "$DIR/.ceylon/bootstrap/ceylon-bootstrap.jar" ]; then
+    # Using bootstrap
+    LIB="$DIR/.ceylon/bootstrap"
+else
+    # Normal execution
+    CEYLON_HOME="$DIR/.."
+    LIB="$CEYLON_HOME/lib"
+
+    if [ "$1" = "--show-home" ]; then
+        echo "$CEYLON_HOME"
+        exit
+    fi
+fi
+
+if [ -z "$JAVA_HOME" ]; then
+    JAVA="java"
+else
+    JAVA="$JAVA_HOME/bin/java"
+fi
+
+# Make sure we have java installed
+if ! hash java 2>&-
+then
+    echo >&2 "Java not found, you must install Java in order to compile and run Ceylon programs"
+    echo >&2 "Go to http://www.java.com/getjava/ to download the latest version of Java"
+    exit 1
+fi
+
+#JAVA_DEBUG_OPTS="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"
+
+if [ "$PRESERVE_JAVA_OPTS" != "true" ]; then
+    PREPEND_JAVA_OPTS="$JAVA_DEBUG_OPTS"
+    if [ -n "$COLUMNS" ]; then
+        CEYL_COLS="$COLUMNS"
+    elif stty size 2>/dev/null >/dev/null; then
+        CEYL_COLS="$(stty size 2>/dev/null | cut -d' ' -f2)"
+    else
+        CEYL_COLS="$(tput 2>/dev/null cols)"
+    fi
+    PREPEND_JAVA_OPTS="$PREPEND_JAVA_OPTS -Dcom.redhat.ceylon.common.tool.terminal.width=$CEYL_COLS"
+    PREPEND_JAVA_OPTS="$PREPEND_JAVA_OPTS -Dcom.redhat.ceylon.common.tool.progname=$(basename "$PRG")"
+fi
+for arg; do
+    case $arg in
+        --java=*) JAVA_OPTS="$JAVA_OPTS ${arg#--java=}";;
+        [!-]*) break;;
+    esac
+done
+JAVA_OPTS="$PREPEND_JAVA_OPTS $JAVA_OPTS"
+
+BOOTSTRAP="$LIB/ceylon-bootstrap.jar"
+
+# Check for cygwin, convert bootstrap path to Windows format
+case "`uname`" in
+  CYGWIN*) [ -n "$LIB" ] && BOOTSTRAP=`cygpath -w "$BOOTSTRAP"`
+esac
+
+exec "$JAVA" \
+    $JAVA_OPTS \
+    -jar "$BOOTSTRAP" \
+    "$@"
+
