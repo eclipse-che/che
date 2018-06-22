@@ -56,8 +56,7 @@ public class PythonFileEditingTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource =
-        PythonFileEditingTest.this.getClass().getResource("/projects/console-python3-simple");
+    URL resource = PythonFileEditingTest.class.getResource("/projects/console-python3-simple");
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PYTHON);
     ide.open(workspace);
@@ -101,8 +100,7 @@ public class PythonFileEditingTest {
 
     // check contents of autocomplete container
     editor.goToPosition(18, 53);
-    editor.typeTextIntoEditor("\n\n");
-    editor.typeTextIntoEditor("object = MyClass()\nprint(object.");
+    editor.typeTextIntoEditor("\n\nobject = MyClass()\nprint(object.");
 
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("function");
@@ -111,7 +109,6 @@ public class PythonFileEditingTest {
 
     editor.enterAutocompleteProposal("function() ");
     editor.waitTextIntoEditor("print(object.function");
-    editor.typeTextIntoEditor("())");
   }
 
   @Test(priority = 1)
@@ -140,6 +137,6 @@ public class PythonFileEditingTest {
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FORMAT);
     editor.waitTextIntoEditor(
-        "        towers(i-1, middle, finish, start)\n\n\n" + "towers(5, 'X', 'Z', 'Y')\n");
+        "        towers(i-1, middle, finish, start)\n\n\ntowers(5, 'X', 'Z', 'Y')\n");
   }
 }
