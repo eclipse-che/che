@@ -22,6 +22,8 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.Ku
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.INGRESSES_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.PVC_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.PVC_IGNORED_WARNING_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.SECRET_IGNORED_WARNING_CODE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,6 +43,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
@@ -137,6 +140,21 @@ public class KubernetesEnvironmentFactoryTest {
     assertEquals(
         parsed.getWarnings().get(0),
         new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
+  }
+
+  @Test
+  public void ignoreSecretsWhenRecipeContainsThem() throws Exception {
+    final List<HasMetadata> recipeObjects = singletonList(new Secret());
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertTrue(parsed.getPersistentVolumeClaims().isEmpty());
+    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(
+        parsed.getWarnings().get(0),
+        new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
   }
 
   @Test

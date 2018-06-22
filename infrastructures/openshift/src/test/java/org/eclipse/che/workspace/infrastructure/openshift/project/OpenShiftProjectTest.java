@@ -35,6 +35,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.Mock;
@@ -59,6 +60,7 @@ public class OpenShiftProjectTest {
   @Mock private OpenShiftRoutes routes;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
   @Mock private KubernetesIngresses ingresses;
+  @Mock private KubernetesSecrets secrets;
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftClient openShiftClient;
   @Mock private KubernetesClient kubernetesClient;
@@ -83,7 +85,15 @@ public class OpenShiftProjectTest {
 
     openShiftProject =
         new OpenShiftProject(
-            clientFactory, WORKSPACE_ID, PROJECT_NAME, pods, services, routes, pvcs, ingresses);
+            clientFactory,
+            WORKSPACE_ID,
+            PROJECT_NAME,
+            pods,
+            services,
+            routes,
+            pvcs,
+            ingresses,
+            secrets);
   }
 
   @Test
@@ -122,6 +132,7 @@ public class OpenShiftProjectTest {
     verify(routes).delete();
     verify(services).delete();
     verify(pods).delete();
+    verify(secrets).delete();
   }
 
   @Test

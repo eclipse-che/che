@@ -38,6 +38,7 @@ import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
@@ -70,6 +71,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.Kubernet
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -122,6 +124,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftProject project;
   @Mock private KubernetesServices services;
+  @Mock private KubernetesSecrets secrets;
   @Mock private OpenShiftRoutes routes;
   @Mock private KubernetesPods pods;
   @Mock private KubernetesBootstrapper bootstrapper;
@@ -191,6 +194,7 @@ public class OpenShiftInternalRuntimeTest {
     doNothing().when(project).cleanUp();
     when(project.services()).thenReturn(services);
     when(project.routes()).thenReturn(routes);
+    when(project.secrets()).thenReturn(secrets);
     when(project.pods()).thenReturn(pods);
     when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
         .thenReturn(bootstrapper);
@@ -213,6 +217,7 @@ public class OpenShiftInternalRuntimeTest {
     when(osEnv.getServices()).thenReturn(allServices);
     when(osEnv.getRoutes()).thenReturn(allRoutes);
     when(osEnv.getPods()).thenReturn(allPods);
+    when(osEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
   }
 
   @Test
@@ -228,6 +233,7 @@ public class OpenShiftInternalRuntimeTest {
     verify(pods).create(any());
     verify(routes).create(any());
     verify(services).create(any());
+    verify(secrets).create(any());
 
     verify(project.pods(), times(2)).watchContainers(any());
     verify(eventService, times(2)).publish(any());
