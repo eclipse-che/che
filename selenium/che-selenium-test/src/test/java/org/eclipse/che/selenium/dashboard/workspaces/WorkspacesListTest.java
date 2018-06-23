@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 import static org.testng.Assert.assertEquals;
@@ -19,6 +20,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -162,6 +164,10 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceCheckboxDisabled(javaWorkspaceName);
     workspaces.waitWorkspaceCheckboxDisabled(blankWorkspaceName);
     workspaces.waitBulkCheckboxDisabled();
+
+    // for avoid of failing in the multi-thread mode
+    clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
+
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
     // select one checkbox
@@ -175,6 +181,10 @@ public class WorkspacesListTest {
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
     workspaces.waitWorkspaceCheckboxEnabled(javaWorkspaceName);
     workspaces.waitWorkspaceCheckboxEnabled(blankWorkspaceName);
+
+    // for avoid of failing in the multi-thread mode
+    clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
+
     workspaces.waitBulkCheckboxEnabled();
     workspaces.waitDeleteWorkspaceBtn();
 
@@ -375,5 +385,39 @@ public class WorkspacesListTest {
 
   private int getWorkspacesCount() throws Exception {
     return testWorkspaceServiceClient.getAll().size();
+  }
+
+  private List<Workspaces.WorkspaceListItem> getUnexpectedWorkspaces(
+      List<String> expectedWorkspacesNames) {
+    return workspaces
+        .getVisibleWorkspaces()
+        .stream()
+        .filter(workspace -> !expectedWorkspacesNames.contains(workspace.getWorkspaceName()))
+        .collect(Collectors.toList());
+  }
+
+  private void waitOfOpositeCheckboxState(String workspaceName, boolean currentCheckboxState) {
+    if (currentCheckboxState) {
+      workspaces.waitWorkspaceCheckboxDisabled(workspaceName);
+      return;
+    }
+
+    workspaces.waitWorkspaceCheckboxEnabled(workspaceName);
+  }
+
+  private void clickOnUnexpectedWorkspacesCheckboxes(List<String> expectedWorkspaces) {
+    List<Workspaces.WorkspaceListItem> unexpectedWorkspaces =
+        getUnexpectedWorkspaces(expectedWorkspaces);
+
+    if (unexpectedWorkspaces.isEmpty()) {
+      return;
+    }
+
+    unexpectedWorkspaces.forEach(
+        workspace -> {
+          boolean checkboxState = workspaces.isWorkspaceChecked(workspace.getWorkspaceName());
+          workspaces.selectWorkspaceByCheckbox(workspace.getWorkspaceName());
+          waitOfOpositeCheckboxState(workspace.getWorkspaceName(), checkboxState);
+        });
   }
 }
