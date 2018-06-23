@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.*;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.INFO;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.testng.Assert.fail;
 
