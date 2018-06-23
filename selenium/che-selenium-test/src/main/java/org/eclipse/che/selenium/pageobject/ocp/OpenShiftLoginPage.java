@@ -12,8 +12,8 @@ package org.eclipse.che.selenium.pageobject.ocp;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.LOGIN_BUTTON_XPATH;
-import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.PASSWORD_FIELD_NAME;
-import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.USERNAME_FIELD_NAME;
+import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.PASSWORD_INPUT_NAME;
+import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.USERNAME_INPUT_NAME;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -28,15 +28,15 @@ public class OpenShiftLoginPage implements LoginPage {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   protected interface Locators {
-    String USERNAME_FIELD_NAME = "username";
-    String PASSWORD_FIELD_NAME = "password";
+    String USERNAME_INPUT_NAME = "username";
+    String PASSWORD_INPUT_NAME = "password";
     String LOGIN_BUTTON_XPATH = "//button[contains(text(),'Log In')]";
   }
 
-  @FindBy(name = USERNAME_FIELD_NAME)
+  @FindBy(name = USERNAME_INPUT_NAME)
   private WebElement usernameInput;
 
-  @FindBy(name = PASSWORD_FIELD_NAME)
+  @FindBy(name = PASSWORD_INPUT_NAME)
   private WebElement passwordInput;
 
   @FindBy(xpath = LOGIN_BUTTON_XPATH)

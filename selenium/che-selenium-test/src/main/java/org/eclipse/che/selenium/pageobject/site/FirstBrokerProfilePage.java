@@ -21,7 +21,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-/** @author Dmytro Nochevnov */
+/**
+ * This class describes page where OpenShift user is registering in Che at.
+ *
+ * @author Dmytro Nochevnov
+ */
 @Singleton
 public class FirstBrokerProfilePage {
 
