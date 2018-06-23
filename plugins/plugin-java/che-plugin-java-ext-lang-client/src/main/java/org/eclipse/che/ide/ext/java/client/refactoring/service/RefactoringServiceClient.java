@@ -39,6 +39,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ValidateNewName;
 public interface RefactoringServiceClient {
 
   Promise<String> getRecommendationPosition();
+
   Promise<String> getRecommendation();
 
   /**

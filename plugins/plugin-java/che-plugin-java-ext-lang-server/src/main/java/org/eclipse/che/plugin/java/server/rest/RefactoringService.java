@@ -38,6 +38,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ValidateNewName;
 import org.eclipse.che.plugin.java.server.refactoring.RefactoringException;
 import org.eclipse.che.plugin.java.server.refactoring.RefactoringManager;
+import org.eclipse.che.plugin.java.server.rest.recommend.model.DataModel;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -48,8 +49,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-
-import org.eclipse.che.plugin.java.server.rest.recommend.model.DataModel;
 
 /**
  * Service for all Java refactorings
@@ -262,7 +261,7 @@ public class RefactoringService {
       throw new RefactoringException("Can't find java element to recommend.");
     }
 
-    JavaRenameRecommend.javaElement=elementToRename;
+    JavaRenameRecommend.javaElement = elementToRename;
 
     return manager.createRenameRefactoring(
         elementToRename, cu, settings.getOffset(), settings.isRefactorLightweight());
@@ -282,15 +281,13 @@ public class RefactoringService {
   @Produces("application/json")
   public RefactoringResult applyLinkedModeRename(LinkedRenameRefactoringApply refactoringApply)
       throws RefactoringException, CoreException {
-    
-    RefactoringResult res=manager.applyLinkedRename(refactoringApply);
-    JavaRenameRecommend javaRenameRecommend =new JavaRenameRecommend();
-    DataModel renameData=getInfo(refactoringApply);
 
-    if(renameData==null)
-        JavaRenameRecommend.result.recommendOriginalName="";
-    else
-      javaRenameRecommend.recommend(renameData);
+    RefactoringResult res = manager.applyLinkedRename(refactoringApply);
+    JavaRenameRecommend javaRenameRecommend = new JavaRenameRecommend();
+    DataModel renameData = getInfo(refactoringApply);
+
+    if (renameData == null) JavaRenameRecommend.result.recommendOriginalName = "";
+    else javaRenameRecommend.recommend(renameData);
     return res;
   }
 
@@ -298,50 +295,68 @@ public class RefactoringService {
   @Path("recommend/linked/extension/recommendation")
   @Consumes("application/json")
   @Produces("application/json")
-  public String getRecommendation(){
-    if(JavaRenameRecommend.result.recommendOriginalName.equals("")) return "$$null";
-    return JavaRenameRecommend.result.recommendRefactorType+" "+JavaRenameRecommend.result.recommendOriginalName+" to "+JavaRenameRecommend.result.recommendSubsequentName;
+  public String getRecommendation() {
+    if (JavaRenameRecommend.result.recommendOriginalName.equals("")) return "$$null";
+    return JavaRenameRecommend.result.recommendRefactorType
+        + " "
+        + JavaRenameRecommend.result.recommendOriginalName
+        + " to "
+        + JavaRenameRecommend.result.recommendSubsequentName;
   }
 
   @POST
   @Path("recommend/linked/extension/position")
   @Consumes("application/json")
   @Produces("application/json")
-  public String getRecommendationPosition(){
-    return ""+JavaRenameRecommend.result.recommendStartPosition+","+JavaRenameRecommend.result.recommendOriginalName.length();
+  public String getRecommendationPosition() {
+    return ""
+        + JavaRenameRecommend.result.recommendStartPosition
+        + ","
+        + JavaRenameRecommend.result.recommendOriginalName.length();
   }
 
-  private DataModel getInfo(LinkedRenameRefactoringApply refactoringApply) throws RefactoringException, CoreException{
-    DataModel dataModel=new DataModel();
-    int elementType=JavaRenameRecommend.javaElementjavaElement.getElementType();
-    if(elementType==IJavaElement.TYPE) dataModel.refactorType="org.eclipse.jdt.ui.recommend.type";
-    else if(elementType==IJavaElement.FIELD) dataModel.refactorType="org.eclipse.jdt.ui.recommend.field";
-    else if(elementType==IJavaElement.METHOD) dataModel.refactorType="org.eclipse.jdt.ui.recommend.method";
-    else if(elementType==IJavaElement.LOCAL_VARIABLE) dataModel.refactorType="org.eclipse.jdt.ui.recommend.local.variable";
+  private DataModel getInfo(LinkedRenameRefactoringApply refactoringApply)
+      throws RefactoringException, CoreException {
+    DataModel dataModel = new DataModel();
+    int elementType = JavaRenameRecommend.javaElement.getElementType();
+    if (elementType == IJavaElement.TYPE)
+      dataModel.refactorType = "org.eclipse.jdt.ui.recommend.type";
+    else if (elementType == IJavaElement.FIELD)
+      dataModel.refactorType = "org.eclipse.jdt.ui.recommend.field";
+    else if (elementType == IJavaElement.METHOD)
+      dataModel.refactorType = "org.eclipse.jdt.ui.recommend.method";
+    else if (elementType == IJavaElement.LOCAL_VARIABLE)
+      dataModel.refactorType = "org.eclipse.jdt.ui.recommend.local.variable";
     else return null;
 
-    dataModel.projectName=JavaRenameRecommend.javaElementjavaElement.getJavaProject().getProject().getName();
-    dataModel.originalName=JavaRenameRecommend.javaElementjavaElement.getElementName();
-    dataModel.subsequentName=refactoringApply.getNewName();
-    dataModel.javaElement=JavaRenameRecommend.javaElementjavaElement;
+    dataModel.projectName = JavaRenameRecommend.javaElement.getJavaProject().getProject().getName();
+    dataModel.originalName = JavaRenameRecommend.javaElement.getElementName();
+    dataModel.subsequentName = refactoringApply.getNewName();
+    dataModel.javaElement = JavaRenameRecommend.javaElement;
 
-    if(dataModel.refactorType.equals("org.eclipse.jdt.ui.recommend.local.variable")){
-      dataModel.packageName=JavaRenameRecommend.javaElementjavaElement.getParent().getParent().getParent().getParent().getElementName();
-      dataModel.typeName=JavaRenameRecommend.javaElementjavaElement.getParent().getParent().getElementName();
-      dataModel.methodName=JavaRenameRecommend.javaElementjavaElement.getParent().getElementName();
-    }
-    else if(dataModel.refactorType.equals("org.eclipse.jdt.ui.recommend.type")){
-      dataModel.packageName=JavaRenameRecommend.javaElementjavaElement.getParent().getParent().getElementName();
-      dataModel.typeName=JavaRenameRecommend.javaElementjavaElement.getElementName();
-    }
-    else{
-      dataModel.packageName=JavaRenameRecommend.javaElementjavaElement.getParent().getParent().getParent().getElementName();
-      dataModel.typeName=JavaRenameRecommend.javaElementjavaElement.getParent().getElementName();
+    if (dataModel.refactorType.equals("org.eclipse.jdt.ui.recommend.local.variable")) {
+      dataModel.packageName =
+          JavaRenameRecommend.javaElement
+              .getParent()
+              .getParent()
+              .getParent()
+              .getParent()
+              .getElementName();
+      dataModel.typeName = JavaRenameRecommend.javaElement.getParent().getParent().getElementName();
+      dataModel.methodName = JavaRenameRecommend.javaElement.getParent().getElementName();
+    } else if (dataModel.refactorType.equals("org.eclipse.jdt.ui.recommend.type")) {
+      dataModel.packageName =
+          JavaRenameRecommend.javaElement.getParent().getParent().getElementName();
+      dataModel.typeName = JavaRenameRecommend.javaElement.getElementName();
+    } else {
+      dataModel.packageName =
+          JavaRenameRecommend.javaElement.getParent().getParent().getParent().getElementName();
+      dataModel.typeName = JavaRenameRecommend.javaElement.getParent().getElementName();
     }
 
     return dataModel;
   }
-  ///////////////////////////////////////////////////////////////////////////////////////////////
+
   /**
    * Validate new name. Used for validation new name in recommend refactoring wizard.
    *

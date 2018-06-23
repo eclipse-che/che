@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
@@ -65,9 +66,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSession;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import java.lang.Integer;
-
 /**
  * Class for recommend refactoring java classes
  *
@@ -90,7 +88,7 @@ public class JavaRefactoringRename implements FileEventHandler {
   private LinkedMode mode;
   private HasLinkedMode linkedEditor;
   private String newName;
-  
+
   @Inject
   public JavaRefactoringRename(
       RenamePresenter renamePresenter,
@@ -138,8 +136,6 @@ public class JavaRefactoringRename implements FileEventHandler {
 
     linkedEditor = (HasLinkedMode) textEditorPresenter;
     textEditorPresenter.setFocus();
-
-
   }
 
   private void createRenameSession() {
@@ -280,7 +276,6 @@ public class JavaRefactoringRename implements FileEventHandler {
         });
   }
 
-
   private void performRename(RenameRefactoringSession session) {
     final LinkedRenameRefactoringApply dto =
         createLinkedRenameRefactoringApplyDto(newName, session.getSessionId());
@@ -315,56 +310,62 @@ public class JavaRefactoringRename implements FileEventHandler {
                                   .then(clientServerEventService.sendFileTrackingResumeEvent());
                             });
 
-                      refactoringServiceClient.getRecommendationPosition().then(
-                        new Operation<String>() {
-                            @Override
-                            public void apply(String info) throws OperationException {
+                    refactoringServiceClient
+                        .getRecommendationPosition()
+                        .then(
+                            new Operation<String>() {
+                              @Override
+                              public void apply(String info) throws OperationException {
 
-                                refactoringServiceClient.getRecommendation().then(
-                                    new Operation<String>() {
-                                    @Override
-                                    public void apply(String text) throws OperationException {
+                                refactoringServiceClient
+                                    .getRecommendation()
+                                    .then(
+                                        new Operation<String>() {
+                                          @Override
+                                          public void apply(String text) throws OperationException {
 
-                                        if(text.equals("$$null")) return ;
+                                            if (text.equals("$$null")) return;
 
-                                        String[] args=info.split(",");
+                                            String[] args = info.split(",");
 
-                                        int from=Integer.parseInt(args[0]);
-                                        int len=Integer.parseInt(args[1]);
+                                            int from = Integer.parseInt(args[0]);
+                                            int len = Integer.parseInt(args[1]);
 
-                                        RecommendNotificationListener recommendNotificationListener=new RecommendNotificationListener(textEditor,from,len);
+                                            RecommendNotificationListener
+                                                recommendNotificationListener =
+                                                    new RecommendNotificationListener(
+                                                        textEditor, from, len);
 
-                                        notificationManager.notify(
-                                        "Rename Recommendation",
-                                        text,
-                                        SUCCESS,
-                                        FLOAT_MODE,recommendNotificationListener);}
-                                        })
-                                        .catchError(
-                                        new Operation<PromiseError>() {
-                                        @Override
-                                        public void apply(PromiseError arg) throws OperationException {
                                             notificationManager.notify(
-                                            "Fail to recommend",
-                                            arg.getMessage(),
-                                            FAIL,
-                                            FLOAT_MODE);
-                                        }
+                                                "Rename Recommendation",
+                                                text,
+                                                SUCCESS,
+                                                FLOAT_MODE,
+                                                recommendNotificationListener);
+                                          }
+                                        })
+                                    .catchError(
+                                        new Operation<PromiseError>() {
+                                          @Override
+                                          public void apply(PromiseError arg)
+                                              throws OperationException {
+                                            notificationManager.notify(
+                                                "Fail to recommend",
+                                                arg.getMessage(),
+                                                FAIL,
+                                                FLOAT_MODE);
+                                          }
                                         });
-
-                            }
-                        })
+                              }
+                            })
                         .catchError(
-                        new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError arg) throws OperationException {
-                            notificationManager.notify(
-                            "Fail to recommend",
-                            arg.getMessage(),
-                            FAIL,
-                            FLOAT_MODE);
-                        }
-                    });
+                            new Operation<PromiseError>() {
+                              @Override
+                              public void apply(PromiseError arg) throws OperationException {
+                                notificationManager.notify(
+                                    "Fail to recommend", arg.getMessage(), FAIL, FLOAT_MODE);
+                              }
+                            });
 
                     break;
                   case WARNING:
@@ -408,15 +409,14 @@ public class JavaRefactoringRename implements FileEventHandler {
                     locale.failedToRename(), arg.getMessage(), FAIL, FLOAT_MODE);
               }
             });
-
   }
 
-  private int StringtoInt(String num){
-    int ans=0;
-    for(int i=0;i<num.length();i++) ans=ans*10+num.charAt(i)-'0';
+  private int StringtoInt(String num) {
+    int ans = 0;
+    for (int i = 0; i < num.length(); i++) ans = ans * 10 + num.charAt(i) - '0';
     return ans;
   }
-  
+
   private void enableAutoSave() {
     if (linkedEditor instanceof EditorWithAutoSave) {
       ((EditorWithAutoSave) linkedEditor).enableAutoSave();

@@ -42,7 +42,6 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
-
 /**
  * @author Dmitry Shnurenko
  * @author Valeriy Svydenko
@@ -73,9 +72,11 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   @Override
   public Promise<String> getRecommendation() {
     final String url =
-        appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/linked/extension/recommendation";
+        appContext.getWsAgentServerApiEndpoint()
+            + pathToService
+            + "recommend/linked/extension/recommendation";
     return asyncRequestFactory
-        .createPostRequest(url,null)
+        .createPostRequest(url, null)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
         .loader(loaderFactory.newLoader("Apply linked mode recommend refactoring ..."))
@@ -85,9 +86,11 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   @Override
   public Promise<String> getRecommendationPosition() {
     final String url =
-        appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/linked/extension/position";
+        appContext.getWsAgentServerApiEndpoint()
+            + pathToService
+            + "recommend/linked/extension/position";
     return asyncRequestFactory
-        .createPostRequest(url,null)
+        .createPostRequest(url, null)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
         .loader(loaderFactory.newLoader("Apply linked mode recommend refactoring ..."))
@@ -111,7 +114,8 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   @Override
   public Promise<RenameRefactoringSession> createRenameRefactoring(
       final CreateRenameRefactoring settings) {
-    final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/create";
+    final String url =
+        appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/create";
     return asyncRequestFactory
         .createPostRequest(url, settings)
         .header(ACCEPT, APPLICATION_JSON)
