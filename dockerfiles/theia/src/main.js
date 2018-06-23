@@ -190,7 +190,7 @@ function optimizeRootPackageJson(packageJsonPath, packageJson) {
 }
 
 function writeJsonToFile(filePath, json) {
-    const content = JSON.stringify(json);
+    const content = JSON.stringify(json, undefined, 4);
     fs.writeFileSync(filePath, content, 'utf8');
 }
 

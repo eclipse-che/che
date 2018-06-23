@@ -23,9 +23,16 @@ WORKDIR /home/theia
 # have default Theia build in the workspace in case no plugins are requested
 ADD https://raw.githubusercontent.com/theia-ide/theia/v${THEIA_VERSION}/examples/browser/package.json /home/theia/package.json
 ADD theia-default-package.json /home/default/theia/package.json
-ADD versions.sh /home/default/versions.sh
+ADD src/versions.sh /home/default/versions.sh
+ADD src/resolutions-provider.js /home/default/resolutions-provider.js
+ADD src/resolutions-applier.js /home/default/resolutions-applier.js
 ADD supervisord.conf /etc/
-RUN cd /home/default && ./versions.sh && \
+RUN cd /home/default && \
+    ./versions.sh /home/theia/package.json && \
+    ./versions.sh /home/default/theia/package.json && \
+    node resolutions-provider.js /home/theia/package.json /home/default/resolutions.json && \
+    node resolutions-applier.js /home/default/resolutions.json /home/theia/package.json && \
+    node resolutions-applier.js /home/default/resolutions.json /home/default/theia/package.json && \
     cd /home/theia && \
     yarn && \
     yarn theia build --mode development && \
@@ -33,6 +40,7 @@ RUN cd /home/default && ./versions.sh && \
     cd /home/default/theia && \
     yarn && \
     yarn theia build
+
 RUN find ${YARN_CACHE_FOLDER} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 RUN mkdir -p /.yarn && chgrp 0 /.yarn && chmod g+rwX /.yarn && \
     touch /.yarnrc && chgrp 0 /.yarnrc && chmod g+rwX /.yarnrc
