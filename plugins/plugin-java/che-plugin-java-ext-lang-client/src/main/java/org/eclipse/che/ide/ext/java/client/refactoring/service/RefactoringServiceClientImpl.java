@@ -42,6 +42,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
+
 /**
  * @author Dmitry Shnurenko
  * @author Valeriy Svydenko
@@ -69,6 +70,30 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     this.pathToService = "/java/refactoring/";
   }
 
+  @Override
+  public Promise<String> getRecommendation() {
+    final String url =
+        appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/linked/extension/recommendation";
+    return asyncRequestFactory
+        .createPostRequest(url,null)
+        .header(ACCEPT, APPLICATION_JSON)
+        .header(CONTENT_TYPE, APPLICATION_JSON)
+        .loader(loaderFactory.newLoader("Apply linked mode recommend refactoring ..."))
+        .send(new StringUnmarshaller());
+  }
+
+  @Override
+  public Promise<String> getRecommendationPosition() {
+    final String url =
+        appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/linked/extension/position";
+    return asyncRequestFactory
+        .createPostRequest(url,null)
+        .header(ACCEPT, APPLICATION_JSON)
+        .header(CONTENT_TYPE, APPLICATION_JSON)
+        .loader(loaderFactory.newLoader("Apply linked mode recommend refactoring ..."))
+        .send(new StringUnmarshaller());
+  }
+
   /** {@inheritDoc} */
   @Override
   public Promise<String> createMoveRefactoring(final CreateMoveRefactoring moveRefactoring) {
@@ -86,12 +111,12 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   @Override
   public Promise<RenameRefactoringSession> createRenameRefactoring(
       final CreateRenameRefactoring settings) {
-    final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "rename/create";
+    final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/create";
     return asyncRequestFactory
         .createPostRequest(url, settings)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader("Prepare for rename refactoring ..."))
+        .loader(loaderFactory.newLoader("Prepare for recommend refactoring ..."))
         .send(unmarshallerFactory.newUnmarshaller(RenameRefactoringSession.class));
   }
 
@@ -100,12 +125,12 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   public Promise<RefactoringResult> applyLinkedModeRename(
       final LinkedRenameRefactoringApply refactoringApply) {
     final String url =
-        appContext.getWsAgentServerApiEndpoint() + pathToService + "rename/linked/apply";
+        appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/linked/apply";
     return asyncRequestFactory
         .createPostRequest(url, refactoringApply)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader("Apply linked mode rename refactoring ..."))
+        .loader(loaderFactory.newLoader("Apply linked mode recommend refactoring ..."))
         .send(unmarshallerFactory.newUnmarshaller(RefactoringResult.class));
   }
 
@@ -205,7 +230,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   @Override
   public Promise<RefactoringStatus> validateNewName(final ValidateNewName newName) {
     final String url =
-        appContext.getWsAgentServerApiEndpoint() + pathToService + "rename/validate/name";
+        appContext.getWsAgentServerApiEndpoint() + pathToService + "recommend/validate/name";
 
     return asyncRequestFactory
         .createPostRequest(url, newName)
@@ -219,13 +244,13 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   @Override
   public Promise<Void> setRenameSettings(final RenameSettings settings) {
     final String url =
-        appContext.getWsAgentServerApiEndpoint() + pathToService + "set/rename/settings";
+        appContext.getWsAgentServerApiEndpoint() + pathToService + "set/recommend/settings";
 
     return asyncRequestFactory
         .createPostRequest(url, settings)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader("Set rename refactoring settings"))
+        .loader(loaderFactory.newLoader("Set recommend refactoring settings"))
         .send();
   }
 

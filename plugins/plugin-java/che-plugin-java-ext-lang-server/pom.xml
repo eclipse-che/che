@@ -25,6 +25,11 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>uk.org.facetus</groupId>
+            <artifactId>intt</artifactId>
+            <version>0.8.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
