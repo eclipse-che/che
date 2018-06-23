@@ -69,14 +69,12 @@ public class CSharpFileEditingTest {
 
   @AfterMethod
   public void restartWorkspace() throws Exception {
-    if (testWorkspaceServiceClient.getStatus(workspace.getId()).equals(WorkspaceStatus.RUNNING)) {
       editor.closeAllTabs();
       testWorkspaceServiceClient.stop(workspace.getName(), workspace.getOwner().getName());
       ide.open(workspace);
       ide.waitOpenedWorkspaceIsReadyToUse();
       restoreDependenciesForLanguageServerByCommand();
       projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
-    }
   }
 
   @Test
