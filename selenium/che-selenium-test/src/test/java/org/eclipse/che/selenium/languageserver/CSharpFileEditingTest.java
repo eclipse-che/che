@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.INFO;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.INFO;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -63,7 +63,7 @@ public class CSharpFileEditingTest {
   public void setUp() throws Exception {
     ide.open(workspace);
     createDotNetAppFromWizard();
-    restoreLanguageServer();
+    restoreDependenciesForLanguageServerByCommand();
     projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
   }
 
@@ -74,7 +74,7 @@ public class CSharpFileEditingTest {
       testWorkspaceServiceClient.stop(workspace.getName(), workspace.getOwner().getName());
       ide.open(workspace);
       ide.waitOpenedWorkspaceIsReadyToUse();
-      restoreLanguageServer();
+      restoreDependenciesForLanguageServerByCommand();
       projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
     }
   }
@@ -93,7 +93,7 @@ public class CSharpFileEditingTest {
       editor.waitMarkerInPosition(INFO, 2);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("https://github.com/eclipse/che/issues/10151");
+      fail("Known issue: https://github.com/eclipse/che/issues/10151", ex);
     }
   }
 
@@ -102,7 +102,7 @@ public class CSharpFileEditingTest {
     for (int i = 0; i < 9; i++) {
       editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     }
-    editor.waitMarkerInPosition(ERROR, 23);
+    editor.waitMarkerInPosition(INFO, 23);
     editor.waitMarkerInPosition(ERROR, 21);
     checkAutocompletion();
   }
@@ -113,7 +113,7 @@ public class CSharpFileEditingTest {
     editor.launchAutocomplete();
     editor.enterAutocompleteProposal("Build ");
     editor.typeTextIntoEditor("();");
-    editor.waitAllMarkersInvisibility(ERROR);
+    editor.waitAllMarkersInvisibility(INFO);
   }
 
   private void createDotNetAppFromWizard() {
@@ -127,7 +127,7 @@ public class CSharpFileEditingTest {
     wizard.waitCloseProjectConfigForm();
   }
 
-  private void restoreLanguageServer() {
+  private void restoreDependenciesForLanguageServerByCommand() {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(COMMAND_NAME_FOR_RESTORE_LS);
     consoles.waitExpectedTextIntoConsole("Restore completed");
