@@ -63,6 +63,7 @@ public class KubernetesNamespaceTest {
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
+  @Mock private KubernetesSecrets secrets;
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private NonNamespaceOperation namespaceOperation;
@@ -86,7 +87,7 @@ public class KubernetesNamespaceTest {
 
     k8sNamespace =
         new KubernetesNamespace(
-            clientFactory, WORKSPACE_ID, NAMESPACE, pods, services, pvcs, ingresses);
+            clientFactory, WORKSPACE_ID, NAMESPACE, pods, services, pvcs, ingresses, secrets);
   }
 
   @Test
@@ -123,6 +124,7 @@ public class KubernetesNamespaceTest {
     verify(ingresses).delete();
     verify(services).delete();
     verify(pods).delete();
+    verify(secrets).delete();
   }
 
   @Test

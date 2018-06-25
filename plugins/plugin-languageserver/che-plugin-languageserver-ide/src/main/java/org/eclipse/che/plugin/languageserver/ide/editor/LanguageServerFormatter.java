@@ -18,6 +18,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
@@ -51,6 +52,7 @@ public class LanguageServerFormatter implements ContentFormatter {
   private final NotificationManager manager;
   private final ServerCapabilities capabilities;
   private final EditorPreferencesManager editorPreferencesManager;
+  private final PromiseProvider promiseProvider;
   private TextEditor editor;
 
   @Inject
@@ -59,12 +61,14 @@ public class LanguageServerFormatter implements ContentFormatter {
       DtoFactory dtoFactory,
       NotificationManager manager,
       @Assisted ServerCapabilities capabilities,
-      EditorPreferencesManager editorPreferencesManager) {
+      EditorPreferencesManager editorPreferencesManager,
+      PromiseProvider promiseProvider) {
     this.client = client;
     this.dtoFactory = dtoFactory;
     this.manager = manager;
     this.capabilities = capabilities;
     this.editorPreferencesManager = editorPreferencesManager;
+    this.promiseProvider = promiseProvider;
   }
 
   @Override
@@ -134,7 +138,35 @@ public class LanguageServerFormatter implements ContentFormatter {
 
     params.setTextDocument(identifier);
     params.setOptions(getFormattingOptions());
-    Promise<List<TextEdit>> promise = client.formatting(params);
+
+    Promise<List<TextEdit>> promise =
+        client
+            .formatting(params)
+            .thenPromise(
+                arg -> {
+                  for (TextEdit textEdit : arg) {
+                    Range range = textEdit.getRange();
+                    Position start = range.getStart();
+                    Position end = range.getEnd();
+                    int startCharacter = start.getCharacter();
+                    int startLine = start.getLine();
+                    int endCharacter = end.getCharacter();
+                    int endLine = end.getLine();
+
+                    if (startCharacter == 0
+                        && startLine == 0
+                        && endCharacter == 0
+                        && endLine == document.getLineCount()) {
+                      int newEndLine = document.getLineCount() - 1;
+                      int newEndCharacter =
+                          document.getTextRangeForLine(newEndLine).getTo().getCharacter();
+                      range.setEnd(new Position(newEndLine, newEndCharacter));
+                    }
+                  }
+
+                  return promiseProvider.resolve(arg);
+                });
+
     handleFormatting(promise, document);
   }
 

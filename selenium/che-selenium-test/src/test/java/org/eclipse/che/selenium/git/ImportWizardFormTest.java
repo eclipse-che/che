@@ -211,7 +211,12 @@ public class ImportWizardFormTest {
     // check GitHub identity is present in Keycloak account management page
     if (isMultiuser) {
       keycloakFederatedIdentitiesPage.open();
-      assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), gitHubUsername);
+
+      // set to lower case because it's a normal behaviour (issue:
+      // https://github.com/eclipse/che/issues/10138)
+      assertEquals(
+          keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(),
+          gitHubUsername.toLowerCase());
       ide.open(ws);
     }
   }

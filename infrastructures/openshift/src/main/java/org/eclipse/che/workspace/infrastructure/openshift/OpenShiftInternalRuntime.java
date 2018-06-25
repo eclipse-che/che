@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
@@ -92,6 +93,11 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   @Override
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
+
+    for (Secret secret : osEnv.getSecrets().values()) {
+      project.secrets().create(secret);
+    }
+
     List<Service> createdServices = new ArrayList<>();
     for (Service service : osEnv.getServices().values()) {
       createdServices.add(project.services().create(service));

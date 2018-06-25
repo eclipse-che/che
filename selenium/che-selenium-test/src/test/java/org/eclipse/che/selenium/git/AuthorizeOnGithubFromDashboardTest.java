@@ -15,8 +15,12 @@ import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -62,6 +66,8 @@ public class AuthorizeOnGithubFromDashboardTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private KeycloakFederatedIdentitiesPage keycloakFederatedIdentitiesPage;
+  @Inject private TestGitHubRepository testRepo;
+  @Inject private TestGitHubRepository testRepo2;
 
   @BeforeClass(groups = TestGroup.MULTIUSER)
   @AfterClass(groups = TestGroup.MULTIUSER)
@@ -82,7 +88,13 @@ public class AuthorizeOnGithubFromDashboardTest {
   }
 
   @Test
-  public void checkAuthorizationOnGithubWhenLoadProjectList() {
+  public void checkAuthorizationOnGithubWhenLoadProjectList() throws IOException {
+    // need to add projects if the github account doesn't have any repos that displayed in the list
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
+    testRepo.addContent(entryPath);
+    testRepo2.addContent(entryPath);
+
     dashboard.open();
 
     String ideWin = seleniumWebDriver.getWindowHandle();
@@ -121,7 +133,12 @@ public class AuthorizeOnGithubFromDashboardTest {
     // check GitHub identity is present in Keycloak account management page
     if (isMultiuser) {
       keycloakFederatedIdentitiesPage.open();
-      assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), gitHubUsername);
+
+      // set to lower case because it's normal behaviour (issue:
+      // https://github.com/eclipse/che/issues/10138)
+      assertEquals(
+          keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(),
+          gitHubUsername.toLowerCase());
     }
   }
 }

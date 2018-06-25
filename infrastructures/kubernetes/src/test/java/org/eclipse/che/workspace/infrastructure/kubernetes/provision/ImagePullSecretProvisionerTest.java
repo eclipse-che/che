@@ -10,115 +10,85 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner.SECRET_NAME_SUFFIX;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.LocalObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.SecretList;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.infrastructure.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
 import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link ImagePullSecretProvisionner}.
+ * Tests {@link ImagePullSecretProvisioner}.
  *
  * @author David Festal
  */
 @Listeners(MockitoTestNGListener.class)
 public class ImagePullSecretProvisionerTest {
 
-  @Mock private KubernetesEnvironment k8sEnv;
+  private static final String WORKSPACE_ID = "workspace123";
+
+  private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
-  @Mock private KubernetesClientFactory clientFactory;
 
   @Mock private UserSpecificDockerRegistryCredentialsProvider credentialsProvider;
 
-  @Mock private KubernetesNamespaceFactory namespaceFactory;
-  @Mock private KubernetesNamespace namespace;
   @Mock private AuthConfigs authConfigs;
-  @Mock private KubernetesClient kubernetesClient;
-
-  @Mock
-  private MixedOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      mixedOperation;
-
-  @Mock
-  private NonNamespaceOperation<
-          Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      namespaceOperation;
 
   @Mock private Pod pod;
+
   @Mock private PodSpec podSpec;
+
   private LocalObjectReference existingImagePullSecretRef =
       new LocalObjectReferenceBuilder().withName("existing").build();
+
   private LocalObjectReference newImagePullSecretRef =
-      new LocalObjectReferenceBuilder().withName(ImagePullSecretProvisioner.SECRET_NAME).build();
+      new LocalObjectReferenceBuilder().withName(WORKSPACE_ID + SECRET_NAME_SUFFIX).build();
 
   private ImagePullSecretProvisioner imagePullSecretProvisioner;
 
   @BeforeMethod
-  public void setup() throws InfrastructureException {
-    when(credentialsProvider.getCredentials()).thenReturn(authConfigs);
+  public void setup() {
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
-    when(k8sEnv.getPods()).thenReturn(ImmutableMap.of("wksp", pod));
+    k8sEnv = KubernetesEnvironment.builder().build();
+    k8sEnv.getPods().put("wksp", pod);
     when(pod.getSpec()).thenReturn(podSpec);
     when(podSpec.getImagePullSecrets()).thenReturn(ImmutableList.of(existingImagePullSecretRef));
 
-    when(runtimeIdentity.getWorkspaceId()).thenReturn("workspaceId");
-
-    when(namespaceFactory.create(anyString())).thenReturn(namespace);
-    when(namespace.getName()).thenReturn("namespaceName");
-
-    when(clientFactory.create()).thenReturn(kubernetesClient);
-    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
-
-    doReturn(mixedOperation).when(kubernetesClient).secrets();
-    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
-
-    imagePullSecretProvisioner =
-        new ImagePullSecretProvisioner(credentialsProvider, clientFactory, namespaceFactory);
+    when(credentialsProvider.getCredentials()).thenReturn(authConfigs);
+    imagePullSecretProvisioner = new ImagePullSecretProvisioner(credentialsProvider);
   }
 
   @Test
-  public void dontDoAnythingIfNoPrivateRegistries() throws Exception {
+  public void doNotDoAnythingIfNoPrivateRegistries() throws Exception {
     when(authConfigs.getConfigs()).thenReturn(Collections.emptyMap());
 
     imagePullSecretProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verifyZeroInteractions(namespaceOperation);
+    assertTrue(k8sEnv.getSecrets().isEmpty());
     verifyZeroInteractions(podSpec);
   }
 
@@ -137,17 +107,13 @@ public class ImagePullSecretProvisionerTest {
     verify(podSpec)
         .setImagePullSecrets(ImmutableList.of(newImagePullSecretRef, existingImagePullSecretRef));
 
-    ArgumentCaptor<Secret> varArgs = ArgumentCaptor.forClass(Secret.class);
-    verify(namespaceOperation).createOrReplace(varArgs.capture());
+    Secret secret = k8sEnv.getSecrets().get(WORKSPACE_ID + SECRET_NAME_SUFFIX);
+    assertNotNull(secret);
+    assertEquals(secret.getType(), "kubernetes.io/dockercfg");
 
-    List<Secret> addedSecrets = varArgs.getAllValues();
-
-    assertEquals(addedSecrets.size(), 1);
-    Secret secret = addedSecrets.get(0);
-
-    Assert.assertEquals(secret.getType(), "kubernetes.io/dockercfg");
     String dockerCfgData = secret.getData().get(".dockercfg");
-    Assert.assertNotNull(dockerCfgData);
+    assertNotNull(dockerCfgData);
+
     Gson gson = new Gson();
     assertEquals(
         gson.toJson(
@@ -166,6 +132,7 @@ public class ImagePullSecretProvisionerTest {
   }
 
   private static class TestAuthConfig implements AuthConfig {
+
     private String username;
     private String password;
 
@@ -203,13 +170,6 @@ public class ImagePullSecretProvisionerTest {
   }
 
   private String buildAuth(String username, String password) {
-    return Base64.getEncoder()
-        .encodeToString(
-            new StringBuilder()
-                .append(username)
-                .append(':')
-                .append(password)
-                .toString()
-                .getBytes());
+    return Base64.getEncoder().encodeToString((username + ':' + password).getBytes());
   }
 }

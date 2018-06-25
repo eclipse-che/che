@@ -55,6 +55,24 @@ export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OP
 
 DEFAULT_WAIT_FOR_CHE=true
 export WAIT_FOR_CHE=${WAIT_FOR_CHE:-${DEFAULT_WAIT_FOR_CHE}}
+
+DEFAULT_SETUP_OCP_OAUTH=false
+export SETUP_OCP_OAUTH=${SETUP_OCP_OAUTH:-${DEFAULT_SETUP_OCP_OAUTH}}
+
+DEFAULT_OCP_IDENTITY_PROVIDER_ID=openshift-v3
+export OCP_IDENTITY_PROVIDER_ID=${OCP_IDENTITY_PROVIDER_ID:-${DEFAULT_OCP_IDENTITY_PROVIDER_ID}}
+
+DEFAULT_OCP_OAUTH_CLIENT_ID=ocp-client
+export OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID:-${DEFAULT_OCP_OAUTH_CLIENT_ID}}
+
+DEFAULT_OCP_OAUTH_CLIENT_SECRET=ocp-client-secret
+export OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET:-${DEFAULT_OCP_OAUTH_CLIENT_SECRET}}
+
+DEFAULT_KEYCLOAK_USER=admin
+export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
+
+DEFAULT_KEYCLOAK_PASSWORD=admin
+export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
 }
 
 test_dns_provider() {
@@ -212,6 +230,7 @@ parse_args() {
     --debug - deploy Che in a debug mode, create and expose debug route
     --image-che - override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
+    --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
@@ -243,7 +262,7 @@ parse_args() {
                shift
            ;;
            --deploy-che)
-               DEPLOY_CHE="true"
+               DEPLOY_CHE=true
                shift
            ;;
            --multiuser)
@@ -276,6 +295,10 @@ parse_args() {
            ;;
            --remove-che)
            shift
+           ;;
+           --setup-ocp-oauth)
+               export SETUP_OCP_OAUTH=true
+               shift
            ;;
            --help)
                echo -e "$HELP"
