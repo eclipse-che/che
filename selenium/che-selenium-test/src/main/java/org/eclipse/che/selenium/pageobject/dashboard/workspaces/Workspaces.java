@@ -434,6 +434,20 @@ public class Workspaces {
         .until((ExpectedCondition<Boolean>) driver -> expectedCount == getVisibleWorkspacesCount());
   }
 
+  /**
+   * Returns all workspaces which don't match with specified.
+   *
+   * @param expectedWorkspacesNames names of workspaces which should be present in the list
+   * @return all workspaces which are present in the list and don't matches with provided
+   */
+  public List<Workspaces.WorkspaceListItem> getUnexpectedWorkspaces(
+      List<String> expectedWorkspacesNames) {
+    return getVisibleWorkspaces()
+        .stream()
+        .filter(workspace -> !expectedWorkspacesNames.contains(workspace.getWorkspaceName()))
+        .collect(Collectors.toList());
+  }
+
   public static class WorkspaceListItem {
     private String ownerName;
     private String workspaceName;

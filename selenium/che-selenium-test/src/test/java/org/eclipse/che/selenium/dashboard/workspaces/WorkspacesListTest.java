@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -387,15 +386,6 @@ public class WorkspacesListTest {
     return testWorkspaceServiceClient.getAll().size();
   }
 
-  private List<Workspaces.WorkspaceListItem> getUnexpectedWorkspaces(
-      List<String> expectedWorkspacesNames) {
-    return workspaces
-        .getVisibleWorkspaces()
-        .stream()
-        .filter(workspace -> !expectedWorkspacesNames.contains(workspace.getWorkspaceName()))
-        .collect(Collectors.toList());
-  }
-
   private void waitOfOpositeCheckboxState(String workspaceName, boolean currentCheckboxState) {
     if (currentCheckboxState) {
       workspaces.waitWorkspaceCheckboxDisabled(workspaceName);
@@ -407,7 +397,7 @@ public class WorkspacesListTest {
 
   private void clickOnUnexpectedWorkspacesCheckboxes(List<String> expectedWorkspaces) {
     List<Workspaces.WorkspaceListItem> unexpectedWorkspaces =
-        getUnexpectedWorkspaces(expectedWorkspaces);
+        workspaces.getUnexpectedWorkspaces(expectedWorkspaces);
 
     if (unexpectedWorkspaces.isEmpty()) {
       return;
