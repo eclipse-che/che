@@ -22,7 +22,14 @@
     <artifactId>org.eclipse.jdt.ui</artifactId>
     <packaging>jar</packaging>
     <name>Che Plugin :: Java :: Eclipse JDT UI</name>
+    <properties>
+        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
+    </properties>
     <dependencies>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+  			<artifactId>gson</artifactId>
+		</dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -181,6 +188,68 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-server-dto</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <dtoPackages>
+                                <package>org.eclipse.che.ide.ext.java.shared</package>
+                            </dtoPackages>
+                            <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                            <genClassName>org.eclipse.che.plugin.java.server.dto.DtoServerImpls</genClassName>
+                            <impl>server</impl>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>${project.artifactId}</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${dto-generator-out-directory}/META-INF</directory>
+                                    <targetPath>META-INF</targetPath>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${dto-generator-out-directory}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
         </plugins>
     </build>
 </project>

@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -38,6 +39,7 @@ public class ConfigureClasspathBaseTest {
   @Inject private ConfigureClasspath configureClasspath;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -48,6 +50,7 @@ public class ConfigureClasspathBaseTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_JAVA_MULTIMODULE);
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
