@@ -40,6 +40,32 @@ import org.eclipse.che.selenium.pageobject.site.FirstBrokerProfilePage;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
+/**
+ * This test checks user can be registered in Eclipse Che Multiuser deployed on OCP with OCP OAuth
+ * server identity provider and work with workspace as own OCP resource.<br>
+ * <br>
+ * <b>Test environment</b>: <br>
+ * Eclipse Che Multiuser deployed on OCP with support of OpenShift OAuth server.<br>
+ * If you are going to deploy Eclipse Che on OCP with {@code deploy/openshift/ocp.sh} script, use
+ * {@code --setup-ocp-oauth} parameter to setup OCP OAuth identity provider.<br>
+ * <br>
+ * <b>Test case</b>:<br>
+ * - go to login page of Eclipse Che;<br>
+ * - click on button to login with OpenShift OAuth;<br>
+ * - login to OCP with new Eclipse Che test user credentials;<br>
+ * - authorize ocp-client to access OpenShift account;<br>
+ * - fill first broker profile page;<br>
+ * - create and open workspace of java type;<br>
+ * - switch to the Eclipse Che IDE and wait until workspace is ready to use;<br>
+ * - go to OCP and check there if there is a project with name starts from "workspace";<br>
+ * - remove test workspace from Eclipse Che Dashboard;<br>
+ * - go to OCP and check there if there is no project with name starts from "workspace".<br>
+ * <br>
+ * <a href="https://github.com/eclipse/che/issues/8178">Feature reference.</a> <br>
+ * <br>
+ *
+ * @author Dmytro Nochevnov
+ */
 @Test(groups = {TestGroup.OPENSHIFT, TestGroup.MULTIUSER})
 public class LoginNewUserWithOpenShiftOAuthTest {
 
@@ -77,20 +103,20 @@ public class LoginNewUserWithOpenShiftOAuthTest {
 
   @Test
   public void checkNewCheUserOcpProjectCreationAndRemoval() {
-    // go to login page
-    // we can't use dashboatd.open() here to login with OAuth
+    // go to login page of Eclipse Che
+    // (we can't use dashboard.open() here to login with OAuth)
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
 
     // click on button to login with OpenShift OAuth
     cheLoginPage.loginWithOpenShiftOAuth();
 
-    // login to OCP login page with default test user credentials
+    // login to OCP from login page with new test user credentials
     openShiftLoginPage.login(NEW_TEST_USER.getName(), NEW_TEST_USER.getPassword());
 
     // authorize ocp-client to access OpenShift account
     authorizeOpenShiftAccessPage.allowPermissions();
 
-    // fill first broker login page
+    // fill first broker profile page
     firstBrokerProfilePage.submit(NEW_TEST_USER);
 
     // create and open workspace of java type
@@ -102,17 +128,17 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    // switch to the IDE and wait for workspace is ready to use
+    // switch to the Eclipse Che IDE and wait until workspace is ready to use
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
 
-    // go to OCP and check there is a project with name starts from "workspace"
+    // go to OCP and check if there is a project with name starts from "workspace"
     openShiftProjectCatalogPage.open();
     openShiftLoginPage.login(NEW_TEST_USER.getName(), NEW_TEST_USER.getPassword());
     openShiftProjectCatalogPage.waitProject(WORKSPACE_ID_PREFIX);
 
-    // remove test workspace from Che Dashboard
+    // remove test workspace from Eclipse Che Dashboard
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectAllWorkspacesByBulk();
@@ -120,7 +146,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     workspaces.clickOnDeleteButtonInDialogWindow();
     workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
 
-    // go to OCP and check there is no project with name starts from "workspace"
+    // go to OCP and check if there is no project with name starts from "workspace"
     openShiftProjectCatalogPage.open();
     openShiftProjectCatalogPage.waitProjectAbsence(WORKSPACE_ID_PREFIX);
   }
