@@ -59,8 +59,8 @@ public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
     workspaces.waitWorkspaceIsPresent(workspaceForStarting.getName());
 
-    workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Statuses.RUNNING);
-    workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Statuses.STOPPED);
+    workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
+    workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Status.STOPPED);
 
     // execute rollout command
     executeRolloutUpdateCommand();
@@ -71,8 +71,8 @@ public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.clickOnWorkspaceStopStartButton(workspaceForStopping.getName());
 
     // wait successful results of the stop-start requests
-    workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Statuses.STOPPED);
-    workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Statuses.RUNNING);
+    workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.STOPPED);
+    workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Status.RUNNING);
 
     // check that che is updated
     waitRevision(currentRevision + 1);
