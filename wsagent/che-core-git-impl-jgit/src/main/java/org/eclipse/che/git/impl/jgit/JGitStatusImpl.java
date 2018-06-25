@@ -14,6 +14,7 @@ package org.eclipse.che.git.impl.jgit;
 import static java.lang.System.lineSeparator;
 import static org.eclipse.che.api.git.ReferenceType.BRANCH;
 import static org.eclipse.che.api.git.ReferenceType.COMMIT;
+import static org.eclipse.jgit.lib.Constants.HEAD;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,6 +35,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 public class JGitStatusImpl implements Status, InfoPage {
 
   private final Reference reference;
+  private String branchName;
   private String refName;
   private boolean clean;
   private List<String> added;
@@ -54,6 +56,7 @@ public class JGitStatusImpl implements Status, InfoPage {
   JGitStatusImpl(Reference reference, StatusCommand statusCommand) throws GitException {
     this.reference = reference;
     this.refName = reference.getName();
+    this.branchName = reference.getType() == BRANCH ? refName : HEAD;
 
     org.eclipse.jgit.api.Status gitStatus;
     try {
@@ -137,6 +140,16 @@ public class JGitStatusImpl implements Status, InfoPage {
   @Override
   public void setRefName(String refName) {
     this.refName = refName;
+  }
+
+  @Override
+  public String getBranchName() {
+    return branchName;
+  }
+
+  @Override
+  public void setBranchName(String branchName) {
+    this.branchName = branchName;
   }
 
   @Override

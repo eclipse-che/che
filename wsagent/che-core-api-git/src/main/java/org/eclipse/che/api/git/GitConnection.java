@@ -394,6 +394,15 @@ public interface GitConnection extends Closeable {
   void setOutputLineConsumerFactory(LineConsumerFactory outputPublisherFactory);
 
   /**
+   * Get the current branch on the current directory
+   *
+   * @deprecated Use {@link #getCurrentReference()} instead.
+   * @return the name of the branch or <i>HEAD</i> if the repo points to tag or commit
+   * @throws GitException if any exception occurs
+   */
+  String getCurrentBranch() throws GitException;
+
+  /**
    * Get the current reference on the current directory
    *
    * @return reference object with branch, tag or commit id

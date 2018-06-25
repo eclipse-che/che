@@ -2251,6 +2251,15 @@ class JGitConnection implements GitConnection {
     return getRepository().getDirectory().getPath();
   }
 
+  @Override
+  public String getCurrentBranch() throws GitException {
+    try {
+      return Repository.shortenRefName(repository.exactRef(HEAD).getLeaf().getName());
+    } catch (IOException exception) {
+      throw new GitException(exception.getMessage(), exception);
+    }
+  }
+
   /**
    * Get the current reference on the current directory
    *
