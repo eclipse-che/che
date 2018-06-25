@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.hotupdate;
 
+import static org.testng.Assert.assertEquals;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import org.eclipse.che.api.system.shared.SystemStatus;
@@ -23,11 +25,11 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
-
+  private static final int TIMEOUT_FOR_ROLLING_UPDATE_FINISH = 100;
+  private static final String ROLLOUT_COMMAND = "rollout latest che";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
 
@@ -64,7 +66,7 @@ public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
     executeRolloutUpdateCommand();
 
     // execute stop-start commands for existing workspaces
-    Assert.assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
+    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
     workspaces.clickOnWorkspaceStopStartButton(workspaceForStarting.getName());
     workspaces.clickOnWorkspaceStopStartButton(workspaceForStopping.getName());
 
@@ -87,11 +89,11 @@ public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
 
   private void waitRevision(int expectedRevision) {
     webDriverWaitFactory
-        .get(100)
+        .get(TIMEOUT_FOR_ROLLING_UPDATE_FINISH)
         .until((ExpectedCondition<Boolean>) driver -> expectedRevision == getRevision());
   }
 
   private void executeRolloutUpdateCommand() throws Exception {
-    openShiftCliCommandExecutor.execute("rollout latest che");
+    openShiftCliCommandExecutor.execute(ROLLOUT_COMMAND);
   }
 }

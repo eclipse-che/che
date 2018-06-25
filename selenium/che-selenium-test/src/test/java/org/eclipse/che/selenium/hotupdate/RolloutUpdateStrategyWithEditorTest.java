@@ -11,13 +11,13 @@
 package org.eclipse.che.selenium.hotupdate;
 
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.api.system.shared.SystemStatus;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
@@ -30,17 +30,18 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class RolloutUpdateStrategyWithEditorTest {
-  private static final String NAME_OF_ARTIFACT = NameGenerator.generate("quickStart", 4);
+  private static final int TIMEOUT_FOR_ROLLING_UPDATE_FINISH = 100;
   private static final String PROJECT_NAME = "default-spring-project";
+  private static final String ROLLOUT_COMMAND = "rollout latest che";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
 
   private static final String NAME_OF_CHECKED_CLASS = "AppController";
+  private static final String NAME_OF_CHECKED_CLASS_FILE = NAME_OF_CHECKED_CLASS + ".java";
   private static final String TEXT_FOR_TYPING = "test\n";
   private static final String EXPECTED_DEFAULT_TEXT =
       "/*\n"
@@ -58,22 +59,7 @@ public class RolloutUpdateStrategyWithEditorTest {
           + "import java.util.Random;\n"
           + "\n";
 
-  private static final String EXPECTED_CHANGED_TEXT =
-      "test\n"
-          + "/*\n"
-          + " * Copyright (c) 2012-2018 Red Hat, Inc.\n"
-          + " * All rights reserved. This program and the accompanying materials\n"
-          + " * are made available under the terms of the Eclipse Public License v1.0\n"
-          + " * which accompanies this distribution, and is available at\n"
-          + " * http://www.eclipse.org/legal/epl-v10.html\n"
-          + " *\n"
-          + " * Contributors:\n"
-          + " *   Red Hat, Inc. - initial API and implementation\n"
-          + " */\n"
-          + "package org.eclipse.qa.examples;\n"
-          + "\n"
-          + "import java.util.Random;\n"
-          + "\n";
+  private static final String EXPECTED_CHANGED_TEXT = TEXT_FOR_TYPING + EXPECTED_DEFAULT_TEXT;
 
   @Inject private Wizard projectWizard;
   @Inject private Menu menu;
@@ -108,18 +94,18 @@ public class RolloutUpdateStrategyWithEditorTest {
 
     projectExplorer.quickExpandWithJavaScript();
 
-    projectExplorer.openItemByVisibleNameInExplorer(NAME_OF_CHECKED_CLASS + ".java");
+    projectExplorer.openItemByVisibleNameInExplorer(NAME_OF_CHECKED_CLASS_FILE);
     editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_DEFAULT_TEXT);
 
     // check master status
-    Assert.assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
+    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
 
     // execute rollout
     executeRolloutUpdateCommand();
 
     // check editor availability during rollout updating
-    Assert.assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
+    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
     editor.selectTabByName(NAME_OF_CHECKED_CLASS);
     editor.waitActive();
     editor.typeTextIntoEditor(TEXT_FOR_TYPING);
@@ -129,7 +115,7 @@ public class RolloutUpdateStrategyWithEditorTest {
     editor.closeAllTabs();
     editor.waitTabIsNotPresent(NAME_OF_CHECKED_CLASS);
 
-    projectExplorer.openItemByVisibleNameInExplorer(NAME_OF_CHECKED_CLASS + ".java");
+    projectExplorer.openItemByVisibleNameInExplorer(NAME_OF_CHECKED_CLASS_FILE);
     editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_CHANGED_TEXT);
 
@@ -148,11 +134,11 @@ public class RolloutUpdateStrategyWithEditorTest {
 
   private void waitRevision(int expectedRevision) {
     webDriverWaitFactory
-        .get(100)
+        .get(TIMEOUT_FOR_ROLLING_UPDATE_FINISH)
         .until((ExpectedCondition<Boolean>) driver -> expectedRevision == getRevision());
   }
 
   private void executeRolloutUpdateCommand() throws Exception {
-    openShiftCliCommandExecutor.execute("rollout latest che");
+    openShiftCliCommandExecutor.execute(ROLLOUT_COMMAND);
   }
 }
