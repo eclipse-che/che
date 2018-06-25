@@ -420,10 +420,21 @@ public class JavaLanguageServerExtensionService {
    * @param entries classpath entries
    */
   public void updateClasspath(String projectUri, List<ClasspathEntry> entries) {
+    List<ClasspathEntry> fixedEntries =
+        entries.stream().map(this::fixEntry).collect(Collectors.toList());
     UpdateClasspathParameters params = new UpdateClasspathParameters();
     params.setProjectUri(projectUri);
-    params.setEntries(entries);
+    params.setEntries(fixedEntries);
     executeCommand(UPDATE_PROJECT_CLASSPATH, singletonList(params));
+  }
+
+  private ClasspathEntry fixEntry(ClasspathEntry e) {
+    ClasspathEntry fixed =
+        new ClasspathEntry().withPath(prefixURI(e.getPath())).withEntryKind(e.getEntryKind());
+    if (e.getChildren() != null) {
+      fixed.setChildren(e.getChildren().stream().map(this::fixEntry).collect(Collectors.toList()));
+    }
+    return fixed;
   }
 
   /**
@@ -437,7 +448,8 @@ public class JavaLanguageServerExtensionService {
 
     String projectUri = LanguageServiceUtils.prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
-    return doGetList(GET_SOURCE_FOLDERS, projectUri, type);
+    List<String> result = doGetList(GET_SOURCE_FOLDERS, projectUri, type);
+    return result.stream().map(LanguageServiceUtils::removePrefixUri).collect(Collectors.toList());
   }
 
   private void checkLanguageServerInitialized() {
@@ -674,7 +686,15 @@ public class JavaLanguageServerExtensionService {
   private List<ClasspathEntry> getClasspathTree(String projectPath) {
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
-    return doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
+    List<ClasspathEntry> result = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
+    return result
+        .stream()
+        .map(
+            cpe -> {
+              cpe.setPath(LanguageServiceUtils.removePrefixUri(cpe.getPath()));
+              return cpe;
+            })
+        .collect(Collectors.toList());
   }
 
   private JarEntry getLibraryEntry(String resourceUri) {
