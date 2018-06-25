@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -89,7 +88,6 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
   @Inject private ToastLoader toastLoader;
   @Inject private Ide ide;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private TestUserServiceClient testUserServiceClient;
   @Inject private OpenShiftProjectCatalogPage openShiftProjectCatalogPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
