@@ -38,12 +38,11 @@ public class AuthorizeOpenShiftAccessPage {
   }
 
   public void allowPermissions() {
-    waitOnOpen();
     seleniumWebDriverHelper.waitAndClick(allowPermissionsButton);
     waitOnClose();
   }
 
-  private void waitOnOpen() {
+  public void waitOnOpen() {
     seleniumWebDriverHelper.waitVisibility(allowPermissionsButton);
   }
 

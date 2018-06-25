@@ -18,13 +18,11 @@ import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locator
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.site.LoginPage;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-public class OpenShiftLoginPage implements LoginPage {
+public class OpenShiftLoginPage {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   protected interface Locators {
@@ -50,7 +48,6 @@ public class OpenShiftLoginPage implements LoginPage {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  @Override
   public void login(String username, String password) {
     waitOnOpen();
 
@@ -59,17 +56,6 @@ public class OpenShiftLoginPage implements LoginPage {
     seleniumWebDriverHelper.waitAndClick(loginButton);
 
     waitOnClose();
-  }
-
-  @Override
-  public boolean isOpened() {
-    try {
-      waitOnOpen();
-    } catch (TimeoutException e) {
-      return false;
-    }
-
-    return true;
   }
 
   private void waitOnOpen() {

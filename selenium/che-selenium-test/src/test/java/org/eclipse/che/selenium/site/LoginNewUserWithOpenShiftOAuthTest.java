@@ -110,6 +110,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     openShiftLoginPage.login(NEW_TEST_USER.getName(), NEW_TEST_USER.getPassword());
 
     // authorize ocp-client to access OpenShift account
+    authorizeOpenShiftAccessPage.waitOnOpen();
     authorizeOpenShiftAccessPage.allowPermissions();
 
     // fill first broker profile page
