@@ -11,6 +11,7 @@
 @eval dropdownListBackground org.eclipse.che.ide.api.theme.Style.getDropdownListBackground();
 @eval dropdownListExecLabelColor org.eclipse.che.ide.api.theme.Style.theme.getDropdownListExecLabelColor();
 @eval dropdownListExecLabelBackground org.eclipse.che.ide.api.theme.Style.theme.getDropdownListExecLabelBackground();
+@eval windowTitleFontColor org.eclipse.che.ide.api.theme.Style.theme.getWindowTitleFontColor();
 
 .toolbarButton {
     float: left;
@@ -153,7 +154,7 @@
     font-size: 11px;
     line-height: 22px;
     text-align: left;
-    color: #e3e3e3;
+    color: windowTitleFontColor;
     cursor: default;
 }
 
