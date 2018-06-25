@@ -22,8 +22,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -51,7 +51,7 @@ public class CreateFactoryTest {
   private static final String TOO_LONG_NAME = "The name has to be less than 20 characters long.";
   private static final String WORKSPACE_NAME = generate("workspace", 4);
 
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
   @Inject private DashboardFactories dashboardFactories;
   @Inject private ProjectSourcePage projectSourcePage;

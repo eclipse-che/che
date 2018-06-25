@@ -20,10 +20,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
@@ -58,7 +58,7 @@ public class RollingUpdateStrategyWithEditorTest {
   @Inject private CheTestSystemClient cheTestSystemClient;
   @Inject private OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private AbstractTestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private DefaultTestUser defaultTestUser;
 

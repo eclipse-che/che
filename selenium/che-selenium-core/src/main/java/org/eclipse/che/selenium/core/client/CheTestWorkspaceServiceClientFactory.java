@@ -8,16 +8,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.entrance;
+package org.eclipse.che.selenium.core.client;
 
+import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.selenium.core.user.TestUser;
 
-/** @author Dmytro Nochevnov */
-public interface Entrance {
-  /**
-   * Login to product.
-   *
-   * @param user user to login
-   */
-  void login(TestUser user);
+public interface CheTestWorkspaceServiceClientFactory extends TestWorkspaceServiceClientFactory {
+  @Override
+  CheTestWorkspaceServiceClient create(@Assisted TestUser testUser);
 }

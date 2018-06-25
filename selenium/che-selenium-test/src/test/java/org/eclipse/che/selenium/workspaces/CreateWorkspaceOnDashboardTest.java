@@ -19,7 +19,7 @@ import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SP
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -44,7 +44,7 @@ public class CreateWorkspaceOnDashboardTest {
   private static final String PATH_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private ProjectExplorer projectExplorer;

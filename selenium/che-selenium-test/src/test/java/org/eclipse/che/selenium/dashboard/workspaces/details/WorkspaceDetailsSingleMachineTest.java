@@ -30,8 +30,8 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -79,7 +79,7 @@ public class WorkspaceDetailsSingleMachineTest {
   @Inject private Loader loader;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private WorkspaceProjects workspaceProjects;
   @Inject private Workspaces workspaces;
   @Inject private ProjectSourcePage projectSourcePage;

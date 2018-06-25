@@ -28,10 +28,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -93,7 +93,7 @@ public class PullRequestPluginTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private ImportProjectFromLocation importWidget;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 

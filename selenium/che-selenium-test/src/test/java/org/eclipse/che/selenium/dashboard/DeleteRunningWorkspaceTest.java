@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -35,7 +35,7 @@ public class DeleteRunningWorkspaceTest {
   @Inject private TestWorkspace ws;
   @Inject private Loader loader;
   @Inject private DefaultTestUser user;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;
 

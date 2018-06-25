@@ -14,7 +14,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.A
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
@@ -36,7 +36,7 @@ public class CreateWorkspaceWithAndroidStackTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CheTerminal terminal;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
 
   @BeforeClass

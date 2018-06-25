@@ -24,7 +24,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public abstract class TestWorkspaceLogsReader {
 
   @VisibleForTesting Logger log = LoggerFactory.getLogger(this.getClass());
 
-  @Inject @VisibleForTesting TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject @VisibleForTesting AbstractTestWorkspaceServiceClient workspaceServiceClient;
 
   @Inject @VisibleForTesting ProcessAgent processAgent;
 

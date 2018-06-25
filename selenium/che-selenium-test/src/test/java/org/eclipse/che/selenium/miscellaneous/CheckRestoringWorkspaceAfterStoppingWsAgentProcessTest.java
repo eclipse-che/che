@@ -19,9 +19,9 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRIN
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -46,7 +46,7 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private ToastLoader toastLoader;
 
   @BeforeClass

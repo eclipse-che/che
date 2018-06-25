@@ -34,8 +34,8 @@ import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
@@ -53,7 +53,7 @@ public class TestFactoryInitializer {
   @Inject private TestApiEndpointUrlProvider apiEndpointProvider;
   @Inject private HttpJsonRequestFactory requestFactory;
   @Inject private TestFactoryServiceClient testFactoryServiceClient;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private AbstractTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Entrance entrance;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;

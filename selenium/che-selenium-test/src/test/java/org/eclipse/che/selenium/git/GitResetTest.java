@@ -20,9 +20,9 @@ import static org.eclipse.che.selenium.pageobject.git.Git.ResetModes.SOFT;
 import com.google.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -54,7 +54,7 @@ public class GitResetTest {
   @Inject private GitRevertCommit gitRevertCommit;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private GitStatusBar gitStatusBar;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
   @InjectTestWorkspace(template = DEFAULT_WITH_GITHUB_PROJECTS)

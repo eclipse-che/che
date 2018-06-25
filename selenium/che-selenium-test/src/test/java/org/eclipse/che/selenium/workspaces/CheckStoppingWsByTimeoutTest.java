@@ -18,7 +18,7 @@ import static org.testng.Assert.assertEquals;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -34,7 +34,7 @@ public class CheckStoppingWsByTimeoutTest {
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private ToastLoader toastLoader;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestWorkspace testWorkspace;
   @Inject private DefaultTestUser testUser;
 

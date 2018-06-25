@@ -19,7 +19,7 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import java.io.IOException;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -47,7 +47,7 @@ public class RenameWorkspaceTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private TestWorkspace ws;
   @Inject private DefaultTestUser user;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;
 

@@ -12,15 +12,10 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,14 +25,11 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
@@ -48,29 +40,28 @@ import org.slf4j.LoggerFactory;
  * @author Musienko Maxim
  * @author Dmytro Nochevnov
  */
-public class TestWorkspaceServiceClient {
+public abstract class AbstractTestWorkspaceServiceClient {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TestWorkspaceServiceClient.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(AbstractTestWorkspaceServiceClient.class);
 
-  private final TestApiEndpointUrlProvider apiEndpointProvider;
-  private final HttpJsonRequestFactory requestFactory;
+  protected final TestApiEndpointUrlProvider apiEndpointProvider;
+  protected final HttpJsonRequestFactory requestFactory;
 
-  @Inject
-  public TestWorkspaceServiceClient(
+  public AbstractTestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpointProvider = apiEndpointProvider;
     this.requestFactory = requestFactory;
   }
 
-  @AssistedInject
-  public TestWorkspaceServiceClient(
+  public AbstractTestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted TestUser testUser) {
+      TestUser testUser) {
     this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(testUser));
   }
 
-  private String getBaseUrl() {
+  protected String getBaseUrl() {
     return apiEndpointProvider.get() + "workspace";
   }
 
@@ -160,36 +151,9 @@ public class TestWorkspaceServiceClient {
   }
 
   /** Creates a new workspace. */
-  public Workspace createWorkspace(
+  public abstract Workspace createWorkspace(
       String workspaceName, int memory, MemoryMeasure memoryUnit, WorkspaceConfigDto workspace)
-      throws Exception {
-    EnvironmentDto environment = workspace.getEnvironments().get("replaced_name");
-    environment
-        .getMachines()
-        .values()
-        .stream()
-        .filter(WsAgentMachineFinderUtil::containsWsAgentServerOrInstaller)
-        .forEach(
-            m ->
-                m.getAttributes()
-                    .put(MEMORY_LIMIT_ATTRIBUTE, Long.toString(convertToByte(memory, memoryUnit))));
-    workspace.getEnvironments().remove("replaced_name");
-    workspace.getEnvironments().put(workspaceName, environment);
-    workspace.setName(workspaceName);
-    workspace.setDefaultEnv(workspaceName);
-
-    WorkspaceDto workspaceDto =
-        requestFactory
-            .fromUrl(getBaseUrl())
-            .usePostMethod()
-            .setBody(workspace)
-            .request()
-            .asDto(WorkspaceDto.class);
-
-    LOG.info("Workspace name='{}' and id='{}' created", workspaceName, workspaceDto.getId());
-
-    return workspaceDto;
-  }
+      throws Exception;
 
   /** Sends start workspace request. */
   public void sendStartRequest(String workspaceId, String workspaceName) throws Exception {
@@ -201,11 +165,8 @@ public class TestWorkspaceServiceClient {
   }
 
   /** Starts workspace. */
-  public void start(String workspaceId, String workspaceName, DefaultTestUser workspaceOwner)
-      throws Exception {
-    sendStartRequest(workspaceId, workspaceName);
-    waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
-  }
+  public abstract void start(String workspaceId, String workspaceName, TestUser workspaceOwner)
+      throws Exception;
 
   /** Gets workspace by its id. */
   public WorkspaceDto getById(String workspaceId) throws Exception {
@@ -278,15 +239,15 @@ public class TestWorkspaceServiceClient {
     }
   }
 
-  private String getNameBasedUrl(String workspaceName, String username) {
+  protected String getNameBasedUrl(String workspaceName, String username) {
     return getBaseUrl() + "/" + username + "/" + workspaceName;
   }
 
-  private String getIdBasedUrl(String workspaceId) {
+  protected String getIdBasedUrl(String workspaceId) {
     return getBaseUrl() + "/" + workspaceId;
   }
 
-  private long convertToByte(int numberOfMemValue, MemoryMeasure desiredMeasureMemory) {
+  protected long convertToByte(int numberOfMemValue, MemoryMeasure desiredMeasureMemory) {
     long calculatedValue = 0;
     // represents values of bytes in 1 megabyte (2x20)
     final long MEGABYTES_CONST = 1048576;

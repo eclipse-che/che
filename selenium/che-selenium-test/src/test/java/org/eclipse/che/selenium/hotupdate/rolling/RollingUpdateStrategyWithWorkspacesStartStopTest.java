@@ -15,8 +15,8 @@ import static org.testng.Assert.assertEquals;
 import com.google.inject.Inject;
 import java.io.IOException;
 import org.eclipse.che.api.system.shared.SystemStatus;
+import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
@@ -37,7 +37,7 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
   private TestWorkspace workspaceForStarting;
 
   @Inject private TestWorkspace workspaceForStopping;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private AbstractTestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private WebDriverWaitFactory webDriverWaitFactory;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CheTestSystemClient cheTestSystemClient;

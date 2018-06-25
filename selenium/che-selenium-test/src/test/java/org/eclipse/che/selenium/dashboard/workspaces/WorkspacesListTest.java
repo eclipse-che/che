@@ -22,8 +22,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -31,9 +31,15 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.*;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author Sergey Skorik
@@ -57,7 +63,7 @@ public class WorkspacesListTest {
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private DocumentationPage documentationPage;
