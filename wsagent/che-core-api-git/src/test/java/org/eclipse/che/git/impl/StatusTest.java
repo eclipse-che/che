@@ -14,6 +14,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.eclipse.che.git.impl.GitTestUtil.deleteFile;
 import static org.testng.Assert.assertEquals;
@@ -27,8 +28,10 @@ import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.params.RmParams;
-import org.eclipse.che.api.git.shared.*;
+import org.eclipse.che.api.git.params.TagCreateParams;
+import org.eclipse.che.api.git.shared.Status;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -324,5 +327,58 @@ public class StatusTest {
     assertTrue(status.getMissing().isEmpty());
     assertTrue(status.getUntracked().isEmpty());
     assertTrue(status.getUntrackedFolders().isEmpty());
+  }
+
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
+  )
+  public void shouldReturnCurrentBranch(GitConnectionFactory connectionFactory) throws Exception {
+    // given
+    GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+    final String branchName = "newBranch";
+    connection.branchCreate(branchName, null);
+    connection.checkout(CheckoutParams.create(branchName));
+
+    // when
+    final Status status = connection.status(emptyList());
+
+    // then
+    assertEquals(status.getRefName(), branchName);
+  }
+
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
+  )
+  public void shouldReturnTagName(GitConnectionFactory connectionFactory) throws Exception {
+    // given
+    GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+    final String tagName = "newTag";
+    connection.tagCreate(TagCreateParams.create(tagName));
+    connection.checkout(CheckoutParams.create(tagName));
+
+    // when
+    final Status status = connection.status(emptyList());
+
+    // then
+    assertEquals(status.getRefName(), tagName);
+  }
+
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
+  )
+  public void shouldReturnCommitId(GitConnectionFactory connectionFactory) throws Exception {
+    // given
+    GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+    final String commitId = connection.log(LogParams.create()).getCommits().get(0).getId();
+    connection.checkout(CheckoutParams.create(commitId));
+
+    // when
+    final Status status = connection.status(emptyList());
+
+    // then
+    assertEquals(status.getRefName(), commitId);
   }
 }

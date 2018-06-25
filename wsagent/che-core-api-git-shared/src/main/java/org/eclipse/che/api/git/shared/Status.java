@@ -20,9 +20,9 @@ public interface Status {
 
   void setClean(boolean isClean);
 
-  String getBranchName();
+  String getRefName();
 
-  void setBranchName(String branchName);
+  void setRefName(String refName);
 
   /** New files that are staged in index. */
   List<String> getAdded();

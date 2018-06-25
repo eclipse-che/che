@@ -394,12 +394,12 @@ public interface GitConnection extends Closeable {
   void setOutputLineConsumerFactory(LineConsumerFactory outputPublisherFactory);
 
   /**
-   * Get the current branch on the current directory
+   * Get the current reference on the current directory
    *
-   * @return the name of the branch
+   * @return reference object with branch, tag or commit id
    * @throws GitException if any exception occurs
    */
-  String getCurrentBranch() throws GitException;
+  Reference getCurrentReference() throws GitException;
 
   /**
    * Revert the specified commit
