@@ -17,6 +17,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
+import org.eclipse.che.ide.theme.ThemeAgentImpl;
 
 /** @author Evgen Vidolob */
 @Singleton
@@ -85,6 +86,7 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
   @Override
   public void storeChanges() {
     preferencesManager.setValue(PREF_IDE_GENERAL_THEME, themeId);
+    ((ThemeAgentImpl) themeAgent).applyUserTheme();
     preferencesManager.setValue(
         PREF_IDE_GENERAL_TAB_CLOSING, String.valueOf(isAskBeforeClosingTab));
   }
