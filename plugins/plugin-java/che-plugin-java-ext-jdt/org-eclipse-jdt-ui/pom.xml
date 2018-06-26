@@ -25,10 +25,10 @@
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <dependencies>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-  			<artifactId>gson</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -248,7 +248,6 @@
                     </execution>
                 </executions>
             </plugin>
-            
         </plugins>
     </build>
 </project>
