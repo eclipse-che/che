@@ -128,9 +128,9 @@ public class Util {
   public static ICompilationUnit getCompilationUnit(DataModel renameData) {
     ICompilationUnit compilationUnit = null;
 
-    String projectName = renameData.projectName;
-    String packageName = renameData.packageName;
-    String typeName = renameData.typeName;
+    String projectName = renameData.getProjectName();
+    String packageName = renameData.getPackageName();
+    String typeName = renameData.getTypeName();
     List<IPackageFragment> packageFragments = getIPackages(projectName);
 
     for (IPackageFragment packageFragment : packageFragments) {
@@ -153,9 +153,9 @@ public class Util {
 
   public static ICompilationUnit getCompilationUnit1(DataModel renameData) {
     ICompilationUnit compilationUnit = null;
-    String projectName = renameData.projectName;
-    String packageName = renameData.packageName;
-    String typeName = renameData.typeName;
+    String projectName = renameData.getProjectName();
+    String packageName = renameData.getPackageName();
+    String typeName = renameData.getTypeName();
     // String typeName = renameData.subsequentName;
     List<IPackageFragment> packageFragments = getIPackages(projectName);
     for (IPackageFragment packageFragment : packageFragments) {
@@ -175,7 +175,7 @@ public class Util {
 
   public static List<ICompilationUnit> getAllCompilationUnit(DataModel renameData) {
     List<ICompilationUnit> iCompilationUnits = new ArrayList<ICompilationUnit>();
-    String projectName = renameData.projectName;
+    String projectName = renameData.getProjectName();
     List<IPackageFragment> packageFragments = getIPackages(projectName);
     for (IPackageFragment packageFragment : packageFragments) {
       List<ICompilationUnit> compilationUnits = getCompilationUnits(packageFragment);
@@ -195,7 +195,7 @@ public class Util {
           if (type != null) {
             IMethod[] methods = type.getMethods();
             for (IMethod method : methods) {
-              if (renameData.methodName.equals(method.getElementName())) return method;
+              if (renameData.getMethodName().equals(method.getElementName())) return method;
             }
           }
         }
@@ -214,10 +214,10 @@ public class Util {
       String methodName,
       String candidateName) {
     for (DataModel renameData : renameDatas) {
-      if (renameData.originalName.equals(candidateName)
-          && renameData.packageName.equals(packageName)
-          && renameData.typeName.equals(typeName)
-          && renameData.methodName.equals(methodName)) return true;
+      if (renameData.getOriginalName().equals(candidateName)
+          && renameData.getPackageName().equals(packageName)
+          && renameData.getTypeName().equals(typeName)
+          && renameData.getMethodName().equals(methodName)) return true;
     }
     return false;
   }
@@ -245,15 +245,15 @@ public class Util {
 
   public static boolean isOverriding(IMethodBinding iMethod, DataModel ignoreRenameData) {
 
-    if (ignoreRenameData.refactorType.equals("method")) {
+    if (ignoreRenameData.getRefactorType().equals("method")) {
       ICompilationUnit compilationUnit = getCompilationUnit(ignoreRenameData);
       if (compilationUnit == null) return false;
       CompilationUnit unit = createCompilationUnit(compilationUnit);
       if (unit == null) return false;
       OverrideVisitor visitor = new OverrideVisitor();
-      visitor.methodName = ignoreRenameData.methodName;
+      visitor.setMethodName(ignoreRenameData.getMethodName());
       unit.accept(visitor);
-      IMethodBinding iMethodbinding = visitor.iMethodbinding;
+      IMethodBinding iMethodbinding = visitor.getiMethodbinding();
       if (iMethodbinding == null) return false;
 
       ArrayList<IType> iMethodbindingSuperTypes = getAllSubTypes(ignoreRenameData, iMethodbinding);
@@ -279,7 +279,6 @@ public class Util {
         }
       }
     }
-
     return false;
   }
 
@@ -315,7 +314,7 @@ public class Util {
   public static ArrayList<IType> getSubTypes(DataModel ignoreRenameData, ArrayList<IType> subType) {
     final ArrayList<IType> subTypes = new ArrayList<IType>();
 
-    String projectName = ignoreRenameData.projectName;
+    String projectName = ignoreRenameData.getProjectName();
     IJavaProject javaProject = getIJavaProject(projectName);
 
     for (IType iType : subType) {
@@ -350,7 +349,7 @@ public class Util {
 
     final ArrayList<IType> subType = new ArrayList<IType>();
 
-    String projectName = ignoreRenameData.projectName;
+    String projectName = ignoreRenameData.getProjectName();
     IJavaProject javaProject = getIJavaProject(projectName);
 
     ITypeBinding iTypeBinding = iMethodbinding.getDeclaringClass();

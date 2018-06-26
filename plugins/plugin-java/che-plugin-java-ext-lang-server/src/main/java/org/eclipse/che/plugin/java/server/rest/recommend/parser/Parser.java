@@ -16,36 +16,44 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class Parser {
 
-  public ResultModel result = null;
-  public List<ResultModel> results = null;
+  private ResultModel result;
+  private List<ResultModel> results;
 
-  public ITypeBinding typeBinding = null;
-  public ITypeBinding[] superInterfaces = null;
-  public ITypeBinding superClass = null;
-  public String originalPackageName = "";
+  private ITypeBinding typeBinding;
+  private ITypeBinding[] superInterfaces;
+  private ITypeBinding superClass;
+  private String originalPackageName = "";
 
   public Parser() {
     result = new ResultModel();
     results = new ArrayList<ResultModel>();
   }
 
+  public void setResult(ResultModel result) {
+    this.result = result;
+  }
+
+  public ResultModel getResult() {
+    return result;
+  }
+
   public void parse(DataModel renameData) {
-    if (renameData.refactorType.equals("org.eclipse.jdt.ui.recommend.method")) {
+    if (renameData.getRefactorType().equals("org.eclipse.jdt.ui.recommend.method")) {
       ICompilationUnit icu = Util.getCompilationUnit(renameData);
       if (icu == null) return;
       methodRefactorParse(renameData, icu);
 
-    } else if (renameData.refactorType.equals("org.eclipse.jdt.ui.recommend.field")) {
+    } else if (renameData.getRefactorType().equals("org.eclipse.jdt.ui.recommend.field")) {
 
       ICompilationUnit icu = Util.getCompilationUnit(renameData);
 
       if (icu != null) fieldRefactorParse(renameData, icu);
 
-    } else if (renameData.refactorType.equals("org.eclipse.jdt.ui.recommend.local.variable")) {
+    } else if (renameData.getRefactorType().equals("org.eclipse.jdt.ui.recommend.local.variable")) {
       ICompilationUnit icu = Util.getCompilationUnit(renameData);
       if (icu != null) localVariableRefactorParse(renameData, icu);
 
-    } else if (renameData.refactorType.equals("org.eclipse.jdt.ui.recommend.type")) {
+    } else if (renameData.getRefactorType().equals("org.eclipse.jdt.ui.recommend.type")) {
       ICompilationUnit icu = Util.getCompilationUnit1(renameData);
       if (icu == null) return;
       typeRefactorParse(renameData, icu, true);
@@ -68,11 +76,11 @@ public class Parser {
     }
     double maxSimilarity = 0.0;
     for (ResultModel candidateResult : results) {
-      if (candidateResult.sim > maxSimilarity
-          || (candidateResult.sim == maxSimilarity
+      if (candidateResult.getSim() > maxSimilarity
+          || (candidateResult.getSim() == maxSimilarity
               && maxSimilarity > 0.0
               && Similarity.isMoreSim(candidateResult, result))) {
-        maxSimilarity = candidateResult.sim;
+        maxSimilarity = candidateResult.getSim();
         result = candidateResult;
       }
     }
@@ -83,12 +91,11 @@ public class Parser {
     if (unit == null) return;
 
     MethodRefactorVisitor visitor = new MethodRefactorVisitor();
-    visitor.projectName = compilationUnit.getJavaProject().getProject().getName();
-    visitor.renameData = renameData;
+    visitor.setRenameData(renameData);
     unit.accept(visitor);
-    ResultModel result = visitor.result;
-    result.recommendProjectName = renameData.projectName;
-    result.renameOriginalName = renameData.originalName;
+    ResultModel result = visitor.getResult();
+    result.setRecommendProjectName(renameData.getProjectName());
+    result.setRenameOriginalName(renameData.getOriginalName());
     results.add(result);
   }
 
@@ -97,12 +104,11 @@ public class Parser {
     if (unit == null) return;
 
     LocalVariableRefactorVisitor visitor = new LocalVariableRefactorVisitor();
-    visitor.projectName = compilationUnit.getJavaProject().getProject().getName();
-    visitor.renameData = renameData;
+    visitor.setRenameData(renameData);
     unit.accept(visitor);
-    ResultModel result = visitor.result;
-    result.recommendProjectName = renameData.projectName;
-    result.renameOriginalName = renameData.originalName;
+    ResultModel result = visitor.getResult();
+    result.setRecommendProjectName(renameData.getProjectName());
+    result.setRenameOriginalName(renameData.getOriginalName());
     results.add(result);
   }
 
@@ -111,13 +117,12 @@ public class Parser {
     if (unit == null) return;
 
     FieldRefactorVisitor visitor = new FieldRefactorVisitor();
-    visitor.projectName = compilationUnit.getJavaProject().getProject().getName();
-    visitor.renameData = renameData;
+    visitor.setRenameData(renameData);
     unit.accept(visitor);
 
-    ResultModel result = visitor.result;
-    result.recommendProjectName = renameData.projectName;
-    result.renameOriginalName = renameData.originalName;
+    ResultModel result = visitor.getResult();
+    result.setRecommendProjectName(renameData.getProjectName());
+    result.setRenameOriginalName(renameData.getOriginalName());
     results.add(result);
   }
 
@@ -127,25 +132,24 @@ public class Parser {
     if (unit == null) return;
 
     TypeRefactorVisitor visitor = new TypeRefactorVisitor();
-    visitor.projectName = compilationUnit.getJavaProject().getProject().getName();
-    visitor.renameData = renameData;
-    visitor.isTypeSelf = isTypeSelf;
+    visitor.setRenameData(renameData);
+    visitor.setTypeSelf(isTypeSelf);
     if (!isTypeSelf) {
-      visitor.typeBinding = typeBinding;
-      visitor.superInterfaces = superInterfaces;
-      visitor.superClass = superClass;
-      visitor.originalPackageName = originalPackageName;
+      visitor.setTypeBinding(typeBinding);
+      visitor.setSuperInterfaces(superInterfaces);
+      visitor.setSuperClass(superClass);
+      visitor.setOriginalPackageName(originalPackageName);
     }
     unit.accept(visitor);
     if (isTypeSelf) {
-      typeBinding = visitor.typeBinding;
-      superInterfaces = visitor.superInterfaces;
-      superClass = visitor.superClass;
-      originalPackageName = visitor.originalPackageName;
+      typeBinding = visitor.getTypeBinding();
+      superInterfaces = visitor.getSuperInterfaces();
+      superClass = visitor.getSuperClass();
+      originalPackageName = visitor.getOriginalPackageName();
     }
-    ResultModel result = visitor.result;
-    result.recommendProjectName = renameData.projectName;
-    result.renameOriginalName = renameData.originalName;
+    ResultModel result = visitor.getResult();
+    result.setRecommendProjectName(renameData.getProjectName());
+    result.setRenameOriginalName(renameData.getOriginalName());
     results.add(result);
   }
 }

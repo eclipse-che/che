@@ -26,8 +26,8 @@ public class Similarity {
 
   public static double calculateSim(DataModel ignorerenameData, String candidateName) {
 
-    String originalName = ignorerenameData.originalName;
-    String subsequentName = ignorerenameData.subsequentName;
+    String originalName = ignorerenameData.getOriginalName();
+    String subsequentName = ignorerenameData.getSubsequentName();
 
     String[] originalNames = Word.splitWords(originalName);
     String[] originalNamesDiff = Word.splitWordsToLowerCase(originalName);
@@ -498,8 +498,9 @@ public class Similarity {
   public static boolean isMoreSim(ResultModel candidateResult, ResultModel result) {
     double candidateSim =
         calculateSimilary(
-            candidateResult.renameOriginalName, candidateResult.recommendOriginalName);
-    double resultSim = calculateSimilary(result.renameOriginalName, result.recommendOriginalName);
+            candidateResult.getRenameOriginalName(), candidateResult.getRecommendOriginalName());
+    double resultSim =
+        calculateSimilary(result.getRenameOriginalName(), result.getRecommendOriginalName());
     if (candidateSim > resultSim) {
       return true;
     }
@@ -507,8 +508,9 @@ public class Similarity {
   }
 
   public static boolean isMoreSim(String candidateName, ResultModel result, DataModel renameData) {
-    double candidateSim = calculateSimilary(renameData.originalName, candidateName);
-    double resultSim = calculateSimilary(renameData.originalName, result.recommendOriginalName);
+    double candidateSim = calculateSimilary(renameData.getOriginalName(), candidateName);
+    double resultSim =
+        calculateSimilary(renameData.getOriginalName(), result.getRecommendOriginalName());
     if (candidateSim > resultSim) {
       return true;
     }
@@ -554,8 +556,8 @@ public class Similarity {
 
   private static double calculate(
       DataModel renameData, String candidateName, String[] commonA, String[] commonB) {
-    String originalName = renameData.originalName;
-    String subsequentName = renameData.subsequentName;
+    String originalName = renameData.getOriginalName();
+    String subsequentName = renameData.getSubsequentName();
     return calculate(originalName, subsequentName, candidateName, commonA, commonB);
   }
 
@@ -644,7 +646,7 @@ public class Similarity {
   private static boolean wordEqual(String word1, String word2) {
     int distance = LevenshteinDistance.computeLevenshteinDistance(word1, word2);
     int maxLength = Math.max(word1.length(), word2.length());
-    return (1 - distance / (1.0 * maxLength)) >= Config.MIN_SAME_WORD_SIMILARITY;
+    return (1 - distance / (1.0 * maxLength)) >= Config.getMIN_SAME_WORD_SIMILARITY();
   }
 
   private static Map<String, String[]> getCommonWords(List<DataModel> ignoreRenameDataList) {
@@ -655,8 +657,8 @@ public class Similarity {
     boolean firstFlag = true;
 
     for (DataModel ignoreRenameData : ignoreRenameDataList) {
-      String originalName = ignoreRenameData.originalName;
-      String subsequentName = ignoreRenameData.subsequentName;
+      String originalName = ignoreRenameData.getOriginalName();
+      String subsequentName = ignoreRenameData.getSubsequentName();
       Map<String, String> originalMap = Word.splitAXB(originalName, subsequentName);
       String a = originalMap.get("A");
       String b = originalMap.get("B");
@@ -725,9 +727,5 @@ public class Similarity {
     map.put("commonB", commonB);
 
     return map;
-  }
-
-  public static void main(String[] args) {
-    System.out.println(Word.splitWordsToLowerCase("m_Dataset"));
   }
 }
