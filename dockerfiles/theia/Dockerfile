@@ -15,49 +15,41 @@ ARG THEIA_VERSION=next
 ENV GITHUB_TOKEN=${GITHUB_TOKEN} \
     THEIA_VERSION=${THEIA_VERSION} \
     USE_LOCAL_GIT=true \
-    YARN_CACHE_FOLDER=/usr/local/share/.cache/yarn
+    HOME=/home/theia
 
 RUN apk update && apk add --no-cache make gcc g++ python git openssh bash supervisor jq && \
     rm -rf /tmp/* /var/cache/apk/*
 
-# Add the upstream package.json
-# Packages to be cached in the image
-# ==TODO== after release replace with release depending link, e.g. https://raw.githubusercontent.com/theia-ide/theia/v${THEIA_VERSION}/examples/browser/package.json
-ADD https://raw.githubusercontent.com/theia-ide/theia-apps/master/theia-docker/next.package.json /home/theia/package.json
-# Subset of packages above which will be included into default build of Theia
-ADD theia-default-package.json /home/default/theia/package.json
+# Packages which will be included into default build of Theia
+ADD theia-default-package.json ${HOME}/package.json
 
-# Change version of Theia to specified in ARG
-ADD versions.sh /home/default/versions.sh
-RUN /home/default/versions.sh && rm /home/default/versions.sh
+# Change version of Theia to specified in THEIA_VERSION
+ADD src/versions.sh ${HOME}/versions.sh
+RUN ${HOME}/versions.sh && rm ${HOME}/versions.sh
 
 # Add extensions
-ADD src/add-extensions.js /home/default
+ADD src/add-extensions.js ${HOME}
 #RUN git clone https://github.com/eclipse/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
 # ==TODO== replace with eclipse official version after release
 RUN git clone https://github.com/mmorhun/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
-    node /home/default/add-extensions.js \
+    node ${HOME}/add-extensions.js \
         @eclipse-che/che-theia-hosted-plugin-manager-extension:file:///tmp/hosted-plugin-extension \
 #       che-theia-ssh-extension:https://github.com/eclipse/che-theia-ssh-plugin.git \
-    && rm /home/default/add-extensions.js
+    && rm ${HOME}/add-extensions.js
 
-# Build Theia with all extensions to persist yarn cache in the image and
-# have default Theia build in the workspace in case no plugins are requested
-RUN cat /home/theia/package.json && \
-    cd /home/theia && \
-    yarn && \
-    yarn theia build && \
-    rm -rf * && \
-    cd /home/default/theia && \
+# Build Theia with all extensions
+RUN cat ${HOME}/package.json && \
+    cd ${HOME} && \
     yarn && \
     yarn theia build
     # ==TODO== add after generator-theia-plugin release
     # npm install -g yo @wiptheia/generator-theia-plugin
-RUN find ${YARN_CACHE_FOLDER} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
+# Change permissions to allow editing of files for openshift user
+RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
 EXPOSE 3000 3030
-ADD src/main.js /theia_launcher/theia_launcher.js
+WORKDIR ${HOME}
 ADD supervisord.conf /etc/
+ADD src/start.sh ${HOME}/start.sh
+RUN touch /var/log/supervisord.log && chmod g+rwX /var/log/supervisord.log && chgrp 0 /var/log/supervisord.log
 ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
-WORKDIR /home/theia
-ENV HOME=/home/theia

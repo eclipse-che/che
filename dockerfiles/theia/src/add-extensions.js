@@ -13,8 +13,8 @@
 const fs = require("fs");
 const cp = require("child_process");
 
-const DEFAULT_THEIA_ROOT = '/home/default/theia';
-const EXTENSIONS_DIR = '/home/default/theia-extensions';
+const DEFAULT_THEIA_ROOT = '/home/theia';
+const EXTENSIONS_DIR = '/home/theia/extensions';
 
 const givenExtensions = process.argv;
 // remove nodejs binary path
