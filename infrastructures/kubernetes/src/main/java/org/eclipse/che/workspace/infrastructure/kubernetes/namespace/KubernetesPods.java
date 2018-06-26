@@ -53,10 +53,10 @@ import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.ContainerEvents;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +89,7 @@ public class KubernetesPods {
   private final String namespace;
   private final KubernetesClientFactory clientFactory;
   private final ConcurrentLinkedQueue<PodActionHandler> podActionHandlers;
-  private final ConcurrentLinkedQueue<ContainerEventHandler> containerEventsHandlers;
+  private final ConcurrentLinkedQueue<PodEventHandler> containerEventsHandlers;
   private final String workspaceId;
   private Watch podWatch;
   private Watch containerWatch;
@@ -350,39 +350,33 @@ public class KubernetesPods {
    * @param handler pod container events handler
    * @throws InfrastructureException if any error occurs while watcher starting
    */
-  public void watchContainers(ContainerEventHandler handler) throws InfrastructureException {
+  public void watchEvents(PodEventHandler handler) throws InfrastructureException {
     if (containerWatch == null) {
       final Watcher<Event> watcher =
           new Watcher<Event>() {
             @Override
             public void eventReceived(Action action, Event event) {
               ObjectReference involvedObject = event.getInvolvedObject();
-              String fieldPath = involvedObject.getFieldPath();
 
-              // check that event related to
-              if (POD_OBJECT_KIND.equals(involvedObject.getKind()) && fieldPath != null) {
-                Matcher containerFieldMatcher = CONTAINER_FIELD_PATH_PATTERN.matcher(fieldPath);
-                if (containerFieldMatcher.matches()) {
+              if (POD_OBJECT_KIND.equals(involvedObject.getKind())) {
 
-                  String podName = involvedObject.getName();
-                  String containerName = containerFieldMatcher.group(CONTAINER_NAME_GROUP);
+                String podName = involvedObject.getName();
 
-                  ContainerEvent containerEvent =
-                      new ContainerEvent(
-                          podName,
-                          containerName,
-                          event.getReason(),
-                          event.getMessage(),
-                          event.getMetadata().getCreationTimestamp(),
-                          event.getLastTimestamp());
+                PodEvent podEvent =
+                    new PodEvent(
+                        podName,
+                        getContainerName(involvedObject.getFieldPath()),
+                        event.getReason(),
+                        event.getMessage(),
+                        event.getMetadata().getCreationTimestamp(),
+                        event.getLastTimestamp());
 
-                  try {
-                    if (happenedAfterWatcherInitialization(containerEvent)) {
-                      containerEventsHandlers.forEach(h -> h.handle(containerEvent));
-                    }
-                  } catch (ParseException e) {
-                    LOG.error("Failed to parse last timestamp of the event: {}", containerEvent);
+                try {
+                  if (happenedAfterWatcherInitialization(podEvent)) {
+                    containerEventsHandlers.forEach(h -> h.handle(podEvent));
                   }
+                } catch (ParseException e) {
+                  LOG.error("Failed to parse last timestamp of the event: {}", podEvent);
                 }
               }
             }
@@ -391,14 +385,30 @@ public class KubernetesPods {
             public void onClose(KubernetesClientException ignored) {}
 
             /**
+             * Returns the container name if the event is related to container. When the event is
+             * related to container `fieldPath` field contain information in the following format:
+             * `spec.container{web}`, where `web` is container name
+             */
+            private String getContainerName(String fieldPath) {
+              String containerName = null;
+              if (fieldPath != null) {
+                Matcher containerFieldMatcher = CONTAINER_FIELD_PATH_PATTERN.matcher(fieldPath);
+                if (containerFieldMatcher.matches()) {
+                  containerName = containerFieldMatcher.group(CONTAINER_NAME_GROUP);
+                }
+              }
+              return containerName;
+            }
+
+            /**
              * Returns true if 'lastTimestamp' of the event is *after* the time of the watcher
              * initialization
              */
-            private boolean happenedAfterWatcherInitialization(ContainerEvent event)
+            private boolean happenedAfterWatcherInitialization(PodEvent event)
                 throws ParseException {
               String eventLastTimestamp = event.getLastTimestamp();
               Date eventLastTimestampDate =
-                  ContainerEvents.convertEventTimestampToDate(eventLastTimestamp);
+                  PodEvents.convertEventTimestampToDate(eventLastTimestamp);
               return eventLastTimestampDate.after(watcherInitializationDate);
             }
           };

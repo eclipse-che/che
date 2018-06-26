@@ -14,30 +14,26 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 
 /**
- * Helps to simplify the interaction with the {@link ContainerEvent}.
+ * Helps to simplify the interaction with the {@link PodEvent}.
  *
  * @author Ilya Buziuk
  */
-public final class ContainerEvents {
+public final class PodEvents {
   private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 
-  private ContainerEvents() {}
+  private PodEvents() {}
 
   /**
-   * Converts the time of {@link ContainerEvent} e.g. '2018-05-15T16:17:54Z' to the {@link Date}
-   * format
+   * Converts the time of {@link PodEvent} e.g. '2018-05-15T16:17:54Z' to the {@link Date} format
    */
   public static Date convertEventTimestampToDate(String timestamp) throws ParseException {
     return dateFormat.parse(timestamp);
   }
 
-  /**
-   * Converts the {@link Date} to {@link ContainerEvent} timestamp format e.g.
-   * '2018-05-15T16:17:54Z'
-   */
+  /** Converts the {@link Date} to {@link PodEvent} timestamp format e.g. '2018-05-15T16:17:54Z' */
   public static String convertDateToEventTimestamp(Date date) {
     return dateFormat.format(date);
   }
