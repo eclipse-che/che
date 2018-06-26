@@ -91,7 +91,7 @@ public class Workspaces {
         "(//div[@class='workspace-name-clip']/parent::div/parent::div/parent::div)[%s]";
   }
 
-  public interface Statuses {
+  public interface Status {
     String STARTING = "STARTING";
     String RUNNING = "RUNNING";
     String STOPPING = "STOPPING";

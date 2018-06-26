@@ -31,7 +31,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.*;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
 import org.testng.annotations.*;
 
 /**
@@ -315,10 +315,10 @@ public class WorkspacesListTest {
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
-    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Statuses.STOPPED);
+    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Status.STOPPED);
 
     workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
-    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Statuses.RUNNING);
+    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Status.RUNNING);
 
     // check adding the workspace to list
     workspaces.clickOnAddWorkspaceBtn();
