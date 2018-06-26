@@ -19,6 +19,8 @@ ENV GITHUB_TOKEN=${GITHUB_TOKEN} \
     USE_LOCAL_GIT=true \
     HOME=/home/theia
 
+WORKDIR ${HOME}
+
 ADD src/ ${HOME}/
 ADD supervisord.conf /etc/
 
@@ -29,9 +31,8 @@ RUN \
     # Change version of Theia to specified in THEIA_VERSION
     ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
     # Add Theia extensions
-    #==TODO== replace with Eclipse official version after Theia release
-    #git clone https://github.com/eclipse/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
-    git clone https://github.com/mmorhun/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
+    #==TODO== replace with master branch after Theia release
+    git clone --depth=1 -b latest-deps https://github.com/eclipse/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
     node ${HOME}/add-extensions.js \
         @eclipse-che/che-theia-hosted-plugin-manager-extension:file:///tmp/hosted-plugin-extension \
         #che-theia-ssh-extension:https://github.com/eclipse/che-theia-ssh-plugin.git \
@@ -49,5 +50,4 @@ RUN \
     # Grant permissions for modifying supervisor log file
     touch /var/log/supervisord.log && chmod g+rwX /var/log/supervisord.log && chgrp 0 /var/log/supervisord.log
 
-WORKDIR ${HOME}
 ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
