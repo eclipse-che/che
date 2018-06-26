@@ -27,9 +27,9 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.testng.annotations.Test;
 
-public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
+public class RollingUpdateStrategyWithWorkspacesStartStopTest {
   private static final int TIMEOUT_FOR_ROLLING_UPDATE_FINISH = 100;
-  private static final String ROLLOUT_COMMAND = "rollout latest che";
+  private static final String UPDATE_COMMAND = "rollout latest che";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
 
@@ -62,8 +62,8 @@ public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
     workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Status.STOPPED);
 
-    // execute rollout command
-    executeRolloutUpdateCommand();
+    // execute rolling update command
+    executeRollingUpdateCommand();
 
     // execute stop-start commands for existing workspaces
     assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
@@ -93,7 +93,7 @@ public class RolloutUpdateStrategyWithWorkspacesStartStopTest {
         .until((ExpectedCondition<Boolean>) driver -> expectedRevision == getRevision());
   }
 
-  private void executeRolloutUpdateCommand() throws Exception {
-    openShiftCliCommandExecutor.execute(ROLLOUT_COMMAND);
+  private void executeRollingUpdateCommand() throws Exception {
+    openShiftCliCommandExecutor.execute(UPDATE_COMMAND);
   }
 }

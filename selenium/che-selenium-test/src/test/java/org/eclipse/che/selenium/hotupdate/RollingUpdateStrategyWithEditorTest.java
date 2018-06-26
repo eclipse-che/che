@@ -38,11 +38,11 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class RolloutUpdateStrategyWithEditorTest {
+public class RollingUpdateStrategyWithEditorTest {
   private static final int TIMEOUT_FOR_ROLLING_UPDATE_FINISH = 100;
   private static final int RESTORE_IDE_AFTER_REFRESH_TIMEOUT = 10;
   private static final String PROJECT_NAME = "default-spring-project";
-  private static final String ROLLOUT_COMMAND = "rollout latest che";
+  private static final String UPDATE_COMMAND = "rollout latest che";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
 
@@ -72,7 +72,7 @@ public class RolloutUpdateStrategyWithEditorTest {
   }
 
   @Test
-  public void shouldUpdateMasterByRolloutStrategyWithAccessibleEditorInProcess() throws Exception {
+  public void shouldUpdateMasterByRollingStrategyWithAccessibleEditorInProcess() throws Exception {
     // prepare
     int currentRevision = getRevision();
     ide.open(workspace);
@@ -82,7 +82,7 @@ public class RolloutUpdateStrategyWithEditorTest {
     // check that master is running
     assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
 
-    executeRolloutUpdateCommand();
+    executeRollingUpdateCommand();
 
     checkIdeAvailability();
 
@@ -110,8 +110,8 @@ public class RolloutUpdateStrategyWithEditorTest {
         .until((ExpectedCondition<Boolean>) driver -> expectedRevision == getRevision());
   }
 
-  private void executeRolloutUpdateCommand() throws Exception {
-    openShiftCliCommandExecutor.execute(ROLLOUT_COMMAND);
+  private void executeRollingUpdateCommand() throws Exception {
+    openShiftCliCommandExecutor.execute(UPDATE_COMMAND);
   }
 
   private void checkIdeAvailability() {
