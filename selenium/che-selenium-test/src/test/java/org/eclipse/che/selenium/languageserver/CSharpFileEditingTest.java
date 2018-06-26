@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.IN
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
@@ -69,12 +68,12 @@ public class CSharpFileEditingTest {
 
   @AfterMethod
   public void restartWorkspace() throws Exception {
-      editor.closeAllTabs();
-      testWorkspaceServiceClient.stop(workspace.getName(), workspace.getOwner().getName());
-      ide.open(workspace);
-      ide.waitOpenedWorkspaceIsReadyToUse();
-      restoreDependenciesForLanguageServerByCommand();
-      projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
+    editor.closeAllTabs();
+    testWorkspaceServiceClient.stop(workspace.getName(), workspace.getOwner().getName());
+    ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    restoreDependenciesForLanguageServerByCommand();
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
   }
 
   @Test
