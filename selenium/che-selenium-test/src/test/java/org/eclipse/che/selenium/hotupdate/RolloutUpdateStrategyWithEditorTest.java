@@ -41,7 +41,6 @@ import org.testng.annotations.Test;
 public class RolloutUpdateStrategyWithEditorTest {
   private static final int TIMEOUT_FOR_ROLLING_UPDATE_FINISH = 100;
   private static final int RESTORE_IDE_AFTER_REFRESH_TIMEOUT = 10;
-  private static final int EXPECTED_PREFERENCES_RESPONCE_CODE = 200;
   private static final String PROJECT_NAME = "default-spring-project";
   private static final String ROLLOUT_COMMAND = "rollout latest che";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
@@ -74,38 +73,26 @@ public class RolloutUpdateStrategyWithEditorTest {
 
   @Test
   public void shouldUpdateMasterByRolloutStrategyWithAccessibleEditorInProcess() throws Exception {
+    // prepare
     int currentRevision = getRevision();
-
-    // check editor availability
-
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
 
-    // check master status
+    // check that master is running
     assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
 
-    // execute rollout
     executeRolloutUpdateCommand();
 
-    // check IDE availability
-    /*assertEquals(
-    testUserPreferencesServiceClient.getPreferencesResponseCode(),
-    EXPECTED_PREFERENCES_RESPONCE_CODE);*/
-
-    seleniumWebDriver.navigate().refresh();
-
-    projectExplorer.waitProjectExplorer(RESTORE_IDE_AFTER_REFRESH_TIMEOUT);
-    projectExplorer.waitItem(PROJECT_NAME);
+    checkIdeAvailability();
 
     // check that che is updated
     waitRevision(currentRevision + 1);
+
+    // check that workspace is successfully migrated to the new master
     assertTrue(testWorkspaceServiceClient.exists(workspace.getName(), defaultTestUser.getName()));
 
-    seleniumWebDriver.navigate().refresh();
-
-    projectExplorer.waitProjectExplorer(RESTORE_IDE_AFTER_REFRESH_TIMEOUT);
-    projectExplorer.waitItem(PROJECT_NAME);
+    checkIdeAvailability();
   }
 
   private int getRevision() {
@@ -125,5 +112,22 @@ public class RolloutUpdateStrategyWithEditorTest {
 
   private void executeRolloutUpdateCommand() throws Exception {
     openShiftCliCommandExecutor.execute(ROLLOUT_COMMAND);
+  }
+
+  private void checkIdeAvailability() {
+    checkMasterAvailabilityByPreferencesRequest();
+
+    seleniumWebDriver.navigate().refresh();
+
+    projectExplorer.waitProjectExplorer(RESTORE_IDE_AFTER_REFRESH_TIMEOUT);
+    projectExplorer.waitItem(PROJECT_NAME);
+  }
+
+  private void checkMasterAvailabilityByPreferencesRequest() {
+    try {
+      testUserPreferencesServiceClient.getPreferences();
+    } catch (Exception ex) {
+      throw new RuntimeException("Master is not available", ex);
+    }
   }
 }
