@@ -435,10 +435,11 @@ public class Workspaces {
   }
 
   /**
-   * Returns all workspaces which don't match with specified.
+   * Compares specified {@code expectedWorkspacesNames} with an existing workspaces list and gets
+   * difference between them.
    *
    * @param expectedWorkspacesNames names of workspaces which should be present in the list
-   * @return all workspaces which are present in the list and don't matches with provided
+   * @return all workspaces which are present in the workspaces list and don't matches with provided
    */
   public List<Workspaces.WorkspaceListItem> getUnexpectedWorkspaces(
       List<String> expectedWorkspacesNames) {
@@ -446,6 +447,46 @@ public class Workspaces {
         .stream()
         .filter(workspace -> !expectedWorkspacesNames.contains(workspace.getWorkspaceName()))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Waits until checkbox of the workspace with specified {@code workspaceName} has an opposite
+   * state than {@code currentCheckboxState}.
+   *
+   * @param workspaceName name of the workspace where checkbox is placed
+   * @param currentCheckboxState current state of the checkbox
+   *     <p><b>true</b> - if checkbox is enabled,
+   *     <p><b>false</b> - if checkbox is disabled.
+   */
+  public void waitOnOppositeCheckboxState(String workspaceName, boolean currentCheckboxState) {
+    if (currentCheckboxState) {
+      waitWorkspaceCheckboxDisabled(workspaceName);
+      return;
+    }
+
+    waitWorkspaceCheckboxEnabled(workspaceName);
+  }
+
+  /**
+   * Clicks on checkboxes of the unexpected workspaces {@link
+   * Workspaces#getUnexpectedWorkspaces(List)}.
+   *
+   * @param expectedWorkspaces names of the expected workspaces in the workspaces list
+   */
+  public void clickOnUnexpectedWorkspacesCheckboxes(List<String> expectedWorkspaces) {
+    List<Workspaces.WorkspaceListItem> unexpectedWorkspaces =
+        getUnexpectedWorkspaces(expectedWorkspaces);
+
+    if (unexpectedWorkspaces.isEmpty()) {
+      return;
+    }
+
+    unexpectedWorkspaces.forEach(
+        workspace -> {
+          boolean checkboxState = isWorkspaceChecked(workspace.getWorkspaceName());
+          selectWorkspaceByCheckbox(workspace.getWorkspaceName());
+          waitOnOppositeCheckboxState(workspace.getWorkspaceName(), checkboxState);
+        });
   }
 
   public static class WorkspaceListItem {

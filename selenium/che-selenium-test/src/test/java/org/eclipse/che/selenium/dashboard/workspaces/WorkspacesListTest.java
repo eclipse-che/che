@@ -41,7 +41,6 @@ import org.testng.annotations.*;
  */
 @Test(groups = TestGroup.OSIO)
 public class WorkspacesListTest {
-  private static final int EXPECTED_WORKSPACES_COUNT = 2;
   private static final int BLANK_WS_MB = 2048;
   private static final int JAVA_WS_MB = 3072;
   private static final int BLANK_WS_PROJECTS_COUNT = 0;
@@ -164,8 +163,9 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceCheckboxDisabled(blankWorkspaceName);
     workspaces.waitBulkCheckboxDisabled();
 
-    // for avoid of failing in the multi-thread mode
-    clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
+    // for avoid of failing in the multi-thread mode when unexpected workspaces can appear in the
+    // workspaces list
+    workspaces.clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
 
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
@@ -182,7 +182,7 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceCheckboxEnabled(blankWorkspaceName);
 
     // for avoid of failing in the multi-thread mode
-    clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
+    workspaces.clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
 
     workspaces.waitBulkCheckboxEnabled();
     workspaces.waitDeleteWorkspaceBtn();
@@ -384,30 +384,5 @@ public class WorkspacesListTest {
 
   private int getWorkspacesCount() throws Exception {
     return testWorkspaceServiceClient.getAll().size();
-  }
-
-  private void waitOfOpositeCheckboxState(String workspaceName, boolean currentCheckboxState) {
-    if (currentCheckboxState) {
-      workspaces.waitWorkspaceCheckboxDisabled(workspaceName);
-      return;
-    }
-
-    workspaces.waitWorkspaceCheckboxEnabled(workspaceName);
-  }
-
-  private void clickOnUnexpectedWorkspacesCheckboxes(List<String> expectedWorkspaces) {
-    List<Workspaces.WorkspaceListItem> unexpectedWorkspaces =
-        workspaces.getUnexpectedWorkspaces(expectedWorkspaces);
-
-    if (unexpectedWorkspaces.isEmpty()) {
-      return;
-    }
-
-    unexpectedWorkspaces.forEach(
-        workspace -> {
-          boolean checkboxState = workspaces.isWorkspaceChecked(workspace.getWorkspaceName());
-          workspaces.selectWorkspaceByCheckbox(workspace.getWorkspaceName());
-          waitOfOpositeCheckboxState(workspace.getWorkspaceName(), checkboxState);
-        });
   }
 }
