@@ -90,7 +90,7 @@ public class RolloutUpdateStrategyWithEditorTest {
 
     // check IDE availability
     assertEquals(
-        testUserPreferencesServiceClient.getPreferencesResponceCode(),
+        testUserPreferencesServiceClient.getPreferencesResponseCode(),
         EXPECTED_PREFERENCES_RESPONCE_CODE);
 
     seleniumWebDriver.navigate().refresh();

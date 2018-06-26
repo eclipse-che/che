@@ -42,15 +42,15 @@ public class TestUserPreferencesServiceClient {
         .request();
   }
 
-  private HttpJsonResponse doPreferenceRequest() throws Exception {
+  private HttpJsonResponse doPreferencesRequest() throws Exception {
     return httpRequestFactory.fromUrl(apiEndpoint + "preferences").useGetMethod().request();
   }
 
   public String getPreferences() throws Exception {
-    return doPreferenceRequest().asString();
+    return doPreferencesRequest().asString();
   }
 
-  public int getPreferencesResponceCode() throws Exception {
-    return doPreferenceRequest().getResponseCode();
+  public int getPreferencesResponseCode() throws Exception {
+    return doPreferencesRequest().getResponseCode();
   }
 }
