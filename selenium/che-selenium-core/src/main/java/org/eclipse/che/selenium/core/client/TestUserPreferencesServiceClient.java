@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 
 /** @author Musienko Maxim */
@@ -41,11 +42,15 @@ public class TestUserPreferencesServiceClient {
         .request();
   }
 
+  private HttpJsonResponse doPreferenceRequest() throws Exception {
+    return httpRequestFactory.fromUrl(apiEndpoint + "preferences").useGetMethod().request();
+  }
+
   public String getPreferences() throws Exception {
-    return httpRequestFactory
-        .fromUrl(apiEndpoint + "preferences")
-        .useGetMethod()
-        .request()
-        .asString();
+    return doPreferenceRequest().asString();
+  }
+
+  public int getPreferencesResponceCode() throws Exception {
+    return doPreferenceRequest().getResponseCode();
   }
 }
