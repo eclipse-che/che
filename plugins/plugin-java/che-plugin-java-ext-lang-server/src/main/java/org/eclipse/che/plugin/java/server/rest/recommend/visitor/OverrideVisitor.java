@@ -7,19 +7,11 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 public class OverrideVisitor extends ASTVisitor {
 
-  private IMethodBinding iMethodbinding;
-  private String methodName;
+  public IMethodBinding iMethodbinding = null;
+  public String methodName = null;
 
   public OverrideVisitor() {
     super();
-  }
-
-  public void setMethodName(String methodName) {
-    this.methodName = methodName;
-  }
-
-  public IMethodBinding getiMethodbinding() {
-    return iMethodbinding;
   }
 
   @Override

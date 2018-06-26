@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
@@ -66,7 +67,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSess
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
- * Class for rename refactoring java classes
+ * Class for recommend refactoring java classes
  *
  * @author Alexander Andrienko
  * @author Valeriy Svydenko
@@ -114,7 +115,7 @@ public class JavaRefactoringRename implements FileEventHandler {
   }
 
   /**
-   * Launch java rename refactoring process
+   * Launch java recommend refactoring process
    *
    * @param textEditorPresenter editor where user makes refactoring
    */
@@ -309,11 +310,62 @@ public class JavaRefactoringRename implements FileEventHandler {
                                   .then(clientServerEventService.sendFileTrackingResumeEvent());
                             });
 
-                    JavaRenameRecommend javaRenameRecommend = new JavaRenameRecommend();
-                    javaRenameRecommend.setNotificationManager(notificationManager);
-                    javaRenameRecommend.setRefactoringServiceClient(refactoringServiceClient);
-                    javaRenameRecommend.setTextEditor(textEditor);
-                    javaRenameRecommend.recommend();
+                    refactoringServiceClient
+                        .getRecommendationPosition()
+                        .then(
+                            new Operation<String>() {
+                              @Override
+                              public void apply(String info) throws OperationException {
+
+                                refactoringServiceClient
+                                    .getRecommendation()
+                                    .then(
+                                        new Operation<String>() {
+                                          @Override
+                                          public void apply(String text) throws OperationException {
+
+                                            if (text.equals("$$null")) return;
+
+                                            String[] args = info.split(",");
+
+                                            int from = Integer.parseInt(args[0]);
+                                            int len = Integer.parseInt(args[1]);
+
+                                            RecommendNotificationListener
+                                                recommendNotificationListener =
+                                                    new RecommendNotificationListener(
+                                                        textEditor, from, len);
+
+                                            notificationManager.notify(
+                                                "Rename Recommendation",
+                                                text,
+                                                SUCCESS,
+                                                FLOAT_MODE,
+                                                recommendNotificationListener);
+                                          }
+                                        })
+                                    .catchError(
+                                        new Operation<PromiseError>() {
+                                          @Override
+                                          public void apply(PromiseError arg)
+                                              throws OperationException {
+                                            notificationManager.notify(
+                                                "Fail to recommend",
+                                                arg.getMessage(),
+                                                FAIL,
+                                                FLOAT_MODE);
+                                          }
+                                        });
+                              }
+                            })
+                        .catchError(
+                            new Operation<PromiseError>() {
+                              @Override
+                              public void apply(PromiseError arg) throws OperationException {
+                                notificationManager.notify(
+                                    "Fail to recommend", arg.getMessage(), FAIL, FLOAT_MODE);
+                              }
+                            });
 
                     break;
                   case WARNING:

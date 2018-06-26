@@ -14,8 +14,8 @@ public class Recommend {
 
   public static String detect(DataModel renameData, String candidateName) {
 
-    String originalName = renameData.getOriginalName();
-    String subsequentName = renameData.getSubsequentName();
+    String originalName = renameData.originalName;
+    String subsequentName = renameData.subsequentName;
     return detect(originalName, subsequentName, candidateName);
   }
 

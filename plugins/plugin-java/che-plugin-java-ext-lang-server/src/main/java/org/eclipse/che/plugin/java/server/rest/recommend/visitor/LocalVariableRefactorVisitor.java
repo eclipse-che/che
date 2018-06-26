@@ -1,5 +1,6 @@
 package org.eclipse.che.plugin.java.server.rest.recommend.visitor;
 
+import java.util.List;
 import org.eclipse.che.plugin.java.server.rest.recommend.common.Config;
 import org.eclipse.che.plugin.java.server.rest.recommend.model.DataModel;
 import org.eclipse.che.plugin.java.server.rest.recommend.model.ResultModel;
@@ -23,25 +24,25 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 public class LocalVariableRefactorVisitor extends ASTVisitor {
 
-  private ResultModel result;
-  private double maxSimilarity = 0.0;
-  private DataModel renameData;
-  private String visitingTypeName = null;
-  private String packageName = "";
-  private String typeName = "";
-  private String methodName = "";
+  public String projectName = null;
+  public List<ResultModel> results = null;
+  public ResultModel result = null;
+  public double maxSimilarity = 0.0;
+  public DataModel renameData = null;
+
+  public String visitingTypeName = null;
+  public boolean isItSelf = false;
+  public boolean isSuperOrSub = false;
+  public ITypeBinding typeBinding = null;
+  public ITypeBinding[] superInterfaces = null;
+  public ITypeBinding superClass = null;
+  public String packageName = "";
+  public String typeName = "";
+  public String methodName = "";
 
   public LocalVariableRefactorVisitor() {
     super();
     result = new ResultModel();
-  }
-
-  public void setRenameData(DataModel renameData) {
-    this.renameData = renameData;
-  }
-
-  public ResultModel getResult() {
-    return result;
   }
 
   @Override
@@ -86,7 +87,8 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
             .toString()
             .substring(0, iMethod.getJavaElement().toString().indexOf("{") - 1);
     String candidateName = node.getName().toString();
-    if (!this.methodName.equals(renameData.getMethodName())) return false;
+    if (!this.methodName.equals(renameData.methodName)) return false;
+    // System.out.println("-------------method: " + candidateName);
 
     double similarity = Similarity.calculateSim(renameData, candidateName);
     if (similarity > maxSimilarity
@@ -96,17 +98,17 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
 
       if (!Util.isOverriding(iMethod, renameData)) {
         maxSimilarity = similarity;
-        if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
+        if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
           String suggestion = Recommend.detect(renameData, candidateName);
 
           SimpleName simpleName = node.getName();
-          result.setRecommendStartPosition(simpleName.getStartPosition());
-          result.setRecommendPackageName(this.packageName);
-          result.setRecommendTypeName(this.typeName);
-          result.setRecommendOriginalName(candidateName);
-          result.setRecommendSubsequentName(suggestion);
-          result.setRecommendRefactorType("method");
-          result.setSim(maxSimilarity);
+          result.recommendStartPosition = simpleName.getStartPosition();
+          result.recommendPackageName = this.packageName;
+          result.recommendTypeName = this.typeName;
+          result.recommendOriginalName = candidateName;
+          result.recommendSubsequentName = suggestion;
+          result.recommendRefactorType = "method";
+          result.sim = maxSimilarity;
         }
       }
     }
@@ -116,24 +118,24 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
   @Override
   public boolean visit(SingleVariableDeclaration node) {
     String candidateName = node.getName().toString();
-
+    // System.out.println("-------------parameter: " + candidateName);
     double similarity = Similarity.calculateSim(renameData, candidateName);
     if (similarity > maxSimilarity
         || (similarity == maxSimilarity
             && maxSimilarity > 0.0
             && Similarity.isMoreSim(candidateName, result, renameData))) {
       maxSimilarity = similarity;
-      if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
+      if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
         String suggestion = Recommend.detect(renameData, candidateName);
 
         SimpleName simpleName = node.getName();
-        result.setRecommendStartPosition(simpleName.getStartPosition());
-        result.setRecommendPackageName(this.packageName);
-        result.setRecommendTypeName(this.typeName);
-        result.setRecommendOriginalName(candidateName);
-        result.setRecommendSubsequentName(suggestion);
-        result.setRecommendRefactorType("localVariable");
-        result.setSim(maxSimilarity);
+        result.recommendStartPosition = simpleName.getStartPosition();
+        result.recommendPackageName = this.packageName;
+        result.recommendTypeName = this.typeName;
+        result.recommendOriginalName = candidateName;
+        result.recommendSubsequentName = suggestion;
+        result.recommendRefactorType = "localVariable";
+        result.sim = maxSimilarity;
       }
     }
     return true;
@@ -144,6 +146,7 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
     Object obj = node.fragments().get(0);
     if (obj instanceof VariableDeclarationFragment) {
       String candidateName = ((VariableDeclarationFragment) obj).getName().toString();
+      // System.out.println("-------------variable: " + candidateName);
 
       double similarity = Similarity.calculateSim(renameData, candidateName);
       if (similarity > maxSimilarity
@@ -151,17 +154,17 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
               && maxSimilarity > 0.0
               && Similarity.isMoreSim(candidateName, result, renameData))) {
         maxSimilarity = similarity;
-        if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
+        if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
           String suggestion = Recommend.detect(renameData, candidateName);
 
           SimpleName simpleName = ((VariableDeclarationFragment) obj).getName();
-          result.setRecommendStartPosition(simpleName.getStartPosition());
-          result.setRecommendPackageName(this.packageName);
-          result.setRecommendTypeName(this.typeName);
-          result.setRecommendOriginalName(candidateName);
-          result.setRecommendSubsequentName(suggestion);
-          result.setRecommendRefactorType("localVariable");
-          result.setSim(maxSimilarity);
+          result.recommendStartPosition = simpleName.getStartPosition();
+          result.recommendPackageName = this.packageName;
+          result.recommendTypeName = this.typeName;
+          result.recommendOriginalName = candidateName;
+          result.recommendSubsequentName = suggestion;
+          result.recommendRefactorType = "localVariable";
+          result.sim = maxSimilarity;
         }
       }
     }
@@ -172,6 +175,7 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
   @Override
   public boolean visit(MethodInvocation node) {
     String candidateName = node.getName().toString();
+    // System.out.println("-------------methodInvocation: " + candidateName);
     IMethodBinding iMethod = node.resolveMethodBinding();
     if (iMethod == null) return true;
     if (!iMethod.getDeclaringClass().isFromSource()) return true;
@@ -191,17 +195,17 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
 
       if (!Util.isOverriding(iMethod, renameData)) {
         maxSimilarity = similarity;
-        if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
+        if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
           String suggestion = Recommend.detect(renameData, candidateName);
 
-          result.setRecommendStartPosition(
-              ((MethodDeclaration) iMethod.getMethodDeclaration()).getStartPosition());
-          result.setRecommendPackageName(packageName);
-          result.setRecommendTypeName(typeName);
-          result.setRecommendOriginalName(candidateName);
-          result.setRecommendSubsequentName(suggestion);
-          result.setRecommendRefactorType("method");
-          result.setSim(maxSimilarity);
+          result.recommendStartPosition =
+              ((MethodDeclaration) iMethod.getMethodDeclaration()).getStartPosition();
+          result.recommendPackageName = packageName;
+          result.recommendTypeName = typeName;
+          result.recommendOriginalName = candidateName;
+          result.recommendSubsequentName = suggestion;
+          result.recommendRefactorType = "method";
+          result.sim = maxSimilarity;
         }
       }
     }
@@ -212,10 +216,12 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
   public boolean visit(FieldAccess node) {
     if (!(node.getExpression() instanceof ThisExpression)) {
       String candidateName = node.getName().toString();
+      // System.out.println("-------------fieldAccess: " + candidateName);
       ITypeBinding iType = node.resolveTypeBinding();
       if (!iType.isFromSource()) return true;
       String packageName = iType.getPackage().getName();
       String typeName = iType.getName();
+      String methodName = "";
 
       double similarity = Similarity.calculateSim(renameData, candidateName);
       if (similarity > maxSimilarity
@@ -223,17 +229,17 @@ public class LocalVariableRefactorVisitor extends ASTVisitor {
               && maxSimilarity > 0.0
               && Similarity.isMoreSim(candidateName, result, renameData))) {
         maxSimilarity = similarity;
-        if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
+        if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
           String suggestion = Recommend.detect(renameData, candidateName);
 
           SimpleName simpleName = node.getName();
-          result.setRecommendStartPosition(simpleName.getStartPosition());
-          result.setRecommendPackageName(packageName);
-          result.setRecommendTypeName(typeName);
-          result.setRecommendOriginalName(candidateName);
-          result.setRecommendSubsequentName(suggestion);
-          result.setRecommendRefactorType("field");
-          result.setSim(maxSimilarity);
+          result.recommendStartPosition = simpleName.getStartPosition();
+          result.recommendPackageName = packageName;
+          result.recommendTypeName = typeName;
+          result.recommendOriginalName = candidateName;
+          result.recommendSubsequentName = suggestion;
+          result.recommendRefactorType = "field";
+          result.sim = maxSimilarity;
         }
       }
     }
