@@ -11,22 +11,23 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event;
 
 import java.util.Objects;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * The event that should be published when container change occurs, e.g. image pulled, container
- * started.
+ * The event that should be published when the pod event occurs, e.g. pulling image, created
+ * container
  *
  * @author Sergii Leshchenko
  */
-public class ContainerEvent {
+public class PodEvent {
   private final String podName;
-  private final String containerName;
+  @Nullable private final String containerName;
   private final String reason;
   private final String message;
   private final String creationTimestamp;
   private final String lastTimestamp;
 
-  public ContainerEvent(
+  public PodEvent(
       String podName,
       String containerName,
       String reason,
@@ -41,12 +42,16 @@ public class ContainerEvent {
     this.lastTimestamp = lastTimestamp;
   }
 
-  /** Returns name of pod related to container. */
+  /** Returns name of pod related to the event. */
   public String getPodName() {
     return podName;
   }
 
-  /** Returns container name which produced event. */
+  /**
+   * Returns container name produced by the event. Could be null if the event is related to the pod
+   * but not any particular 'container'
+   */
+  @Nullable
   public String getContainerName() {
     return containerName;
   }
@@ -79,7 +84,7 @@ public class ContainerEvent {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ContainerEvent that = (ContainerEvent) o;
+    PodEvent that = (PodEvent) o;
     return Objects.equals(podName, that.podName)
         && Objects.equals(containerName, that.containerName)
         && Objects.equals(reason, that.reason)
@@ -95,7 +100,7 @@ public class ContainerEvent {
 
   @Override
   public String toString() {
-    return "ContainerEvent{"
+    return "PodEvent{"
         + "podName='"
         + podName
         + '\''
