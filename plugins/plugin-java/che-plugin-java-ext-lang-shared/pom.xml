@@ -25,7 +25,7 @@
         <findbugs.failonerror>false</findbugs.failonerror>
     </properties>
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
         </dependency>
@@ -70,6 +70,6 @@
                     </execution>
                 </executions>
             </plugin>
-         </plugins>
+        </plugins>
     </build>
 </project>
