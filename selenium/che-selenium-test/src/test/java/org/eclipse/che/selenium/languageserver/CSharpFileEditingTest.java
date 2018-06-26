@@ -10,14 +10,15 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.INFO;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -30,11 +31,9 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.TimeoutException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -56,16 +55,65 @@ public class CSharpFileEditingTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
-
+  @Inject TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
+    createDotNetAppFromWizard();
+    restoreDependenciesForLanguageServerByCommand();
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
+  }
+
+  @AfterMethod
+  public void restartWorkspace() throws Exception {
+    editor.closeAllTabs();
+    testWorkspaceServiceClient.stop(workspace.getName(), workspace.getOwner().getName());
+    ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    restoreDependenciesForLanguageServerByCommand();
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
   }
 
   @Test
-  public void checkLaunchingCodeserver() {
+  public void checkCodeEditing() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
+    checkCodeValidation();
+  }
+
+  @Test(priority = 1)
+  public void checkInitializingAfterFirstStarting() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
+    try {
+      editor.waitMarkerInPosition(INFO, 1);
+      editor.waitMarkerInPosition(INFO, 2);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue: https://github.com/eclipse/che/issues/10151", ex);
+    }
+  }
+
+  public void checkCodeValidation() {
+    editor.goToCursorPositionVisible(24, 12);
+    for (int i = 0; i < 9; i++) {
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+    }
+    editor.waitMarkerInPosition(INFO, 23);
+    editor.waitMarkerInPosition(ERROR, 21);
+    checkAutocompletion();
+  }
+
+  private void checkAutocompletion() {
+    editor.goToCursorPositionVisible(23, 49);
+    editor.typeTextIntoEditor(".");
+    editor.launchAutocomplete();
+    editor.enterAutocompleteProposal("Build ");
+    editor.typeTextIntoEditor("();");
+    editor.waitAllMarkersInvisibility(INFO);
+  }
+
+  private void createDotNetAppFromWizard() {
     projectExplorer.waitProjectExplorer();
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
@@ -74,51 +122,11 @@ public class CSharpFileEditingTest {
     wizard.typeProjectNameOnWizard(PROJECT_NAME);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.waitItem(PROJECT_NAME + "/Program.cs", 240);
-    projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
-    loader.waitOnClosed();
-    checkLanguageServerInitStateAndLaunch();
-    editor.goToCursorPositionVisible(24, 12);
-    for (int i = 0; i < 9; i++) {
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-    }
-    editor.waitMarkerInPosition(ERROR, 23);
-    editor.waitMarkerInPosition(ERROR, 21);
-    editor.goToCursorPositionVisible(23, 49);
-    editor.typeTextIntoEditor(".");
-    editor.launchAutocomplete();
-    editor.enterAutocompleteProposal("Build() ");
-    editor.typeTextIntoEditor(";");
-    editor.waitAllMarkersInvisibility(ERROR);
   }
 
-  private void checkLanguageServerInitStateAndLaunch() {
-    if (isLanguageServerInitFailed()) {
-      reInitLanguageServer();
-    }
-  }
-
-  private void reInitLanguageServer() {
+  private void restoreDependenciesForLanguageServerByCommand() {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(COMMAND_NAME_FOR_RESTORE_LS);
     consoles.waitExpectedTextIntoConsole("Restore completed");
-    editor.closeAllTabs();
-    projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
-    loader.waitOnClosed();
-  }
-
-  private boolean isLanguageServerInitFailed() {
-    String xpathLocatorForEventMessages =
-        "//div[contains(@id,'gwt-debug-notification-wrappergwt-uid')]";
-    List<WebElement> textMessages =
-        new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
-            .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
-                    By.xpath(xpathLocatorForEventMessages)));
-    return textMessages
-        .stream()
-        .anyMatch(
-            message -> message.getAttribute("textContent").contains("Timeout initializing error"));
   }
 }

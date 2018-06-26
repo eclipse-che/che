@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.context;
 
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -83,7 +84,7 @@ public class BrowserAddress {
     if (urlParts.length < NAMESPACE_START_SEGMENT) {
       return "";
     } else {
-      return urlParts[NAMESPACE_START_SEGMENT];
+      return SimpleHtmlSanitizer.sanitizeHtml(urlParts[NAMESPACE_START_SEGMENT]).asString();
     }
   }
 
