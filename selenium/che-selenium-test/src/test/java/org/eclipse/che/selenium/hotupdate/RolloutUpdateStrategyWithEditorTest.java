@@ -89,9 +89,9 @@ public class RolloutUpdateStrategyWithEditorTest {
     executeRolloutUpdateCommand();
 
     // check IDE availability
-    assertEquals(
-        testUserPreferencesServiceClient.getPreferencesResponseCode(),
-        EXPECTED_PREFERENCES_RESPONCE_CODE);
+    /*assertEquals(
+    testUserPreferencesServiceClient.getPreferencesResponseCode(),
+    EXPECTED_PREFERENCES_RESPONCE_CODE);*/
 
     seleniumWebDriver.navigate().refresh();
 
@@ -101,6 +101,11 @@ public class RolloutUpdateStrategyWithEditorTest {
     // check that che is updated
     waitRevision(currentRevision + 1);
     assertTrue(testWorkspaceServiceClient.exists(workspace.getName(), defaultTestUser.getName()));
+
+    seleniumWebDriver.navigate().refresh();
+
+    projectExplorer.waitProjectExplorer(RESTORE_IDE_AFTER_REFRESH_TIMEOUT);
+    projectExplorer.waitItem(PROJECT_NAME);
   }
 
   private int getRevision() {
