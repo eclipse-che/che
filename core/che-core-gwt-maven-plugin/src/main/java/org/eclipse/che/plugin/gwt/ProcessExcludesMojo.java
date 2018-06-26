@@ -160,7 +160,7 @@ public class ProcessExcludesMojo extends AbstractMojo {
         String[] split = pattern.split(":");
         String groupId = split[0];
         String artifactId = split[1];
-        String version = fullIdeArtifact.getVersion();
+        String version = fullIdeArtifact.getBaseVersion();
 
         Artifact artifact = repositorySystem.createArtifact(groupId, artifactId, version, "jar");
         String gwtModule = readGwtModuleName(artifact);
