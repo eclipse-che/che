@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.hotupdate;
+package org.eclipse.che.selenium.hotupdate.rolling;
 
 import static org.testng.Assert.assertEquals;
 
