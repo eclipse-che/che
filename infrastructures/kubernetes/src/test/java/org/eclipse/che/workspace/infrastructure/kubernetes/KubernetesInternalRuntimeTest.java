@@ -98,7 +98,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.UnrecoverableEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.UnrecoverablePodEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -114,11 +114,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.ContainerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -293,8 +293,7 @@ public class KubernetesInternalRuntimeTest {
     verify(pods).create(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    verify(secrets).create(any());
-    verify(namespace.pods(), times(2)).watchContainers(any());
+    verify(namespace.pods(), times(2)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -322,7 +321,7 @@ public class KubernetesInternalRuntimeTest {
     verify(pods).create(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    verify(namespace.pods(), times(1)).watchContainers(any());
+    verify(namespace.pods(), times(1)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -436,14 +435,14 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
-    final ContainerEvent out1 =
+    final PodEvent out1 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulling",
             "pulling image",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    final ContainerEvent out2 =
+    final PodEvent out2 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulled",
@@ -465,9 +464,9 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testHandleUnrecoverableEventByReason() throws Exception {
     final String unrecoverableEventReason = "Failed Mount";
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent unrecoverableEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent unrecoverableEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             unrecoverableEventReason,
@@ -483,9 +482,9 @@ public class KubernetesInternalRuntimeTest {
   public void testHandleUnrecoverableEventByMessage() throws Exception {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent unrecoverableEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent unrecoverableEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulling",
@@ -501,9 +500,9 @@ public class KubernetesInternalRuntimeTest {
   public void testDoNotHandleUnrecoverableEventFromNonWorkspacePod() throws Exception {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent unrecoverableEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent unrecoverableEvent =
         mockContainerEvent(
             "NonWorkspacePod",
             "Pulling",
@@ -518,9 +517,9 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void testHandleRegularEvent() throws Exception {
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent regularEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent regularEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulling",
@@ -535,7 +534,7 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testDoNotPublishForeignMachineOutput() throws ParseException {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
-    final ContainerEvent out1 =
+    final PodEvent out1 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Created",
@@ -833,13 +832,13 @@ public class KubernetesInternalRuntimeTest {
     return metadata;
   }
 
-  private static ContainerEvent mockContainerEvent(
+  private static PodEvent mockContainerEvent(
       String podName,
       String reason,
       String message,
       String creationTimestamp,
       String lastTimestamp) {
-    final ContainerEvent event = mock(ContainerEvent.class);
+    final PodEvent event = mock(PodEvent.class);
     when(event.getPodName()).thenReturn(podName);
     when(event.getContainerName()).thenReturn(CONTAINER_NAME_1);
     when(event.getReason()).thenReturn(reason);
@@ -849,7 +848,7 @@ public class KubernetesInternalRuntimeTest {
     return event;
   }
 
-  private static MachineLogEvent asMachineLogEvent(ContainerEvent event) {
+  private static MachineLogEvent asMachineLogEvent(PodEvent event) {
     return newDto(MachineLogEvent.class)
         .withRuntimeId(DtoConverter.asDto(IDENTITY))
         .withText(event.getMessage())
@@ -859,7 +858,7 @@ public class KubernetesInternalRuntimeTest {
 
   private String getCurrentTimestampWithOneHourShiftAhead() throws ParseException {
     Date currentTimestampWithOneHourShiftAhead = new Date(new Date().getTime() + 3600 * 1000);
-    return ContainerEvents.convertDateToEventTimestamp(currentTimestampWithOneHourShiftAhead);
+    return PodEvents.convertDateToEventTimestamp(currentTimestampWithOneHourShiftAhead);
   }
 
   private static IntOrString intOrString(int port) {

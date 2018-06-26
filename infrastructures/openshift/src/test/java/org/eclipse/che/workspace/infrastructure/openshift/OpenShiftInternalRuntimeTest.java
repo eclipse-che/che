@@ -235,7 +235,7 @@ public class OpenShiftInternalRuntimeTest {
     verify(services).create(any());
     verify(secrets).create(any());
 
-    verify(project.pods(), times(2)).watchContainers(any());
+    verify(project.pods(), times(2)).watchEvents(any());
     verify(eventService, times(2)).publish(any());
     verifyEventsOrder(newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING));
   }
@@ -254,7 +254,7 @@ public class OpenShiftInternalRuntimeTest {
     verify(routes).create(any());
     verify(services).create(any());
 
-    verify(project.pods(), times(1)).watchContainers(any());
+    verify(project.pods(), times(1)).watchEvents(any());
     verify(eventService, times(2)).publish(any());
     verifyEventsOrder(newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING));
   }

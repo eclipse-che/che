@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.pageobject;
+package org.eclipse.che.selenium.pageobject.site;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
@@ -27,7 +27,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Andrey Chizhikov */
 @Singleton
-public class Profile {
+public class ProfilePage {
 
   private interface Locators {
     String GET_STARTED = "//input[@value='Get Started']";
@@ -90,7 +90,7 @@ public class Profile {
   private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
-  public Profile(SeleniumWebDriver seleniumWebDriver) {
+  public ProfilePage(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -169,11 +169,11 @@ public class Profile {
   public void handleProfileOnboardingWithTestData() {
     if (isGetStartedButtonPresent()) {
       if (profileFormExists()) {
-        enterValueInField("Test", Profile.Field.FirstName);
-        enterValueInField("Account", Profile.Field.LastName);
-        enterValueInField("AnyCompany", Profile.Field.Company);
-        selectRole(Profile.Role.Developer);
-        selectCountry(Profile.Country.Ukraine);
+        enterValueInField("Test", ProfilePage.Field.FirstName);
+        enterValueInField("Account", ProfilePage.Field.LastName);
+        enterValueInField("AnyCompany", ProfilePage.Field.Company);
+        selectRole(ProfilePage.Role.Developer);
+        selectCountry(ProfilePage.Country.Ukraine);
         clickOnGetStarted();
       }
     }

@@ -69,9 +69,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -479,10 +479,10 @@ public class KubernetesInternalRuntime<
 
     // TODO https://github.com/eclipse/che/issues/7653
     // namespace.pods().watch(new AbnormalStopHandler());
-    namespace.pods().watchContainers(new MachineLogsPublisher());
+    namespace.pods().watchEvents(new MachineLogsPublisher());
     if (!unrecoverableEvents.isEmpty()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      namespace.pods().watchContainers(new UnrecoverableEventHandler(pods));
+      namespace.pods().watchEvents(new UnrecoverablePodEventHandler(pods));
     }
 
     final KubernetesServerResolver serverResolver =
@@ -706,11 +706,11 @@ public class KubernetesInternalRuntime<
     }
   }
 
-  /** Listens container's events and terminates workspace if unrecoverable event occurs. */
-  public class UnrecoverableEventHandler implements ContainerEventHandler {
+  /** Listens Pod events and terminates workspace if unrecoverable event occurs. */
+  public class UnrecoverablePodEventHandler implements PodEventHandler {
     private Map<String, Pod> workspacePods;
 
-    public UnrecoverableEventHandler(Map<String, Pod> workspacePods) {
+    public UnrecoverablePodEventHandler(Map<String, Pod> workspacePods) {
       this.workspacePods = workspacePods;
     }
 
@@ -719,7 +719,7 @@ public class KubernetesInternalRuntime<
      * and 'lastTimestamp' of the event is *after* the time of handler initialization
      */
     @Override
-    public void handle(ContainerEvent event) {
+    public void handle(PodEvent event) {
       if (isWorkspaceEvent(event) && isUnrecoverable(event)) {
         String reason = event.getReason();
         String message = event.getMessage();
@@ -740,7 +740,7 @@ public class KubernetesInternalRuntime<
     }
 
     /** Returns true if event belongs to one of the workspace pods, false otherwise */
-    private boolean isWorkspaceEvent(ContainerEvent event) {
+    private boolean isWorkspaceEvent(PodEvent event) {
       String podName = event.getPodName();
       return workspacePods.containsKey(podName);
     }
@@ -751,7 +751,7 @@ public class KubernetesInternalRuntime<
      *
      * @param event event to check
      */
-    private boolean isUnrecoverable(ContainerEvent event) {
+    private boolean isUnrecoverable(PodEvent event) {
       boolean isUnrecoverable = false;
       String reason = event.getReason();
       String message = event.getMessage();
@@ -773,10 +773,10 @@ public class KubernetesInternalRuntime<
   }
 
   /** Listens container's events and publish them as machine logs. */
-  public class MachineLogsPublisher implements ContainerEventHandler {
+  public class MachineLogsPublisher implements PodEventHandler {
 
     @Override
-    public void handle(ContainerEvent event) {
+    public void handle(PodEvent event) {
       final String podName = event.getPodName();
       final String containerName = event.getContainerName();
       try {
