@@ -26,6 +26,7 @@ public final class TestProjectExplorerContextMenuConstants {
     GO_INTO("gwt-debug-contextMenu/goInto"),
     GO_BACK("gwt-debug-contextMenu/goInto"),
     CUT("gwt-debug-contextMenu/cut"),
+    COPY("gwt-debug-contextMenu/copy"),
     PASTE("gwt-debug-contextMenu/paste"),
     RENAME("gwt-debug-contextMenu/renameResource"),
     DELETE("gwt-debug-contextMenu/deleteItem"),
