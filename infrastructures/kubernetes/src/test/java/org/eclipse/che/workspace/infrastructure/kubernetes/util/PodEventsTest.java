@@ -16,31 +16,31 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link ContainerEvents}.
+ * Tests {@link PodEvents}.
  *
  * @author Ilya Buziuk
  */
-public class ContainerEventsTest {
+public class PodEventsTest {
 
   @Test
   public void eventDateShouldBeBeforeCurrentDate() throws ParseException {
     String eventTime = "2018-05-15T16:17:54Z";
-    Date eventDate = ContainerEvents.convertEventTimestampToDate(eventTime);
+    Date eventDate = PodEvents.convertEventTimestampToDate(eventTime);
     Assert.assertTrue(eventDate.before(new Date()));
   }
 
   @Test(expectedExceptions = ParseException.class)
   public void throwsParseExceptionWhenDateFormatIsInvalid() throws ParseException {
     String eventTime = "2018-05-15T16:143435Z";
-    ContainerEvents.convertEventTimestampToDate(eventTime);
+    PodEvents.convertEventTimestampToDate(eventTime);
   }
 
   @Test
   public void getEventTimestampFromDate() throws ParseException {
     String timestamp = "2018-05-15T16:17:54Z";
-    Date date = ContainerEvents.convertEventTimestampToDate(timestamp);
-    String timestampFromDate = ContainerEvents.convertDateToEventTimestamp(date);
-    Date dateAfterParsingTimestamp = ContainerEvents.convertEventTimestampToDate(timestampFromDate);
+    Date date = PodEvents.convertEventTimestampToDate(timestamp);
+    String timestampFromDate = PodEvents.convertDateToEventTimestamp(date);
+    Date dateAfterParsingTimestamp = PodEvents.convertEventTimestampToDate(timestampFromDate);
     Assert.assertEquals(date, dateAfterParsingTimestamp);
   }
 }

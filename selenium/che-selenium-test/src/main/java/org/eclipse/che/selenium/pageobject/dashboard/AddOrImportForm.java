@@ -38,6 +38,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -245,7 +246,11 @@ public class AddOrImportForm {
     String locator = format(PROJECT_TAB_XPATH_TEMPLATE, tabName);
     seleniumWebDriverHelper.moveCursorTo(By.xpath(locator));
 
-    waitTextInTooltip(tabName);
+    try {
+      waitTextInTooltip(tabName);
+    } catch (TimeoutException ex) {
+      // sometimes the tooltip does not display on the CI
+    }
 
     seleniumWebDriverHelper.waitAndClick(By.xpath(locator));
   }
