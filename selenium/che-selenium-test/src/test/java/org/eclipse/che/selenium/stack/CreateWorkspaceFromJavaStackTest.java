@@ -39,6 +39,7 @@ public class CreateWorkspaceFromJavaStackTest {
   private static final String WEB_JAVA_SPRING = "web-java-spring";
 
   private ArrayList<String> projects = new ArrayList<>();
+  private String currentWindow;
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -64,22 +65,29 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @Test
   public void checkWorkspaceCreationFromJavaStack() {
-    String currentWindow;
-
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(JAVA, WORKSPACE_NAME, projects);
 
     currentWindow = ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     projectExplorer.waitProjectInitialization(CONSOLE_JAVA_SIMPLE);
     projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING);
+  }
 
+  @Test(priority = 1)
+  public void checkConsoleJavaSimpleCommands() {
     consoles.startCommandAndCheckResult(CONSOLE_JAVA_SIMPLE, BUILD, "build", BUILD_SUCCESS);
+
     consoles.startCommandAndCheckResult(
         CONSOLE_JAVA_SIMPLE, BUILD, "console-java-simple:build", BUILD_SUCCESS);
+
     consoles.startCommandAndCheckResult(
         CONSOLE_JAVA_SIMPLE, RUN, "console-java-simple:run", "Hello World Che!");
+  }
 
+  @Test(priority = 1)
+  public void checkWebJavaSpringCommands() {
     consoles.startCommandAndCheckResult(WEB_JAVA_SPRING, BUILD, "build", BUILD_SUCCESS);
+
     consoles.startCommandAndCheckResult(
         WEB_JAVA_SPRING, BUILD, "web-java-spring:build", BUILD_SUCCESS);
 
@@ -87,9 +95,11 @@ public class CreateWorkspaceFromJavaStackTest {
         WEB_JAVA_SPRING, RUN, "web-java-spring:build and run", "Server startup in");
     consoles.startCommandAndCheckApp(currentWindow, "//span[text()='Enter your name: ']");
     consoles.closeProcessTabWithAskDialog("web-java-spring:build and run");
+
     consoles.startCommandAndCheckResult(
         WEB_JAVA_SPRING, RUN, "web-java-spring:run tomcat", "Server startup in");
     consoles.startCommandAndCheckApp(currentWindow, "//span[text()='Enter your name: ']");
+
     // start 'stop apache' command and check that apache not running
     projectExplorer.invokeCommandWithContextMenu(
         RUN, WEB_JAVA_SPRING, "web-java-spring:stop tomcat");

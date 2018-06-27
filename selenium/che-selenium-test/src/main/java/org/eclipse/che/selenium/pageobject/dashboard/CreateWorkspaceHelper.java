@@ -11,52 +11,22 @@
 
 package org.eclipse.che.selenium.pageobject.dashboard;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-
 import com.google.inject.Inject;
 import java.util.ArrayList;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.AskDialog;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 
-/**
- * Cross dashboard-IDE operations with workspace
- *
- * @author Skoryk Serhii
- */
+/** @author Skoryk Serhii */
 public class CreateWorkspaceHelper {
 
-  @Inject private Ide ide;
-  @Inject private Consoles consoles;
   @Inject private Dashboard dashboard;
-  @Inject private AskDialog askDialog;
-  @Inject private CodenvyEditor editor;
   @Inject private Workspaces workspaces;
-  @Inject private ToastLoader toastLoader;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   public void createWorkspaceFromStackWithProject(
       NewWorkspace.Stack stack, String workspaceName, String projectName) {
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnAddWorkspaceBtn();
+    createWorkspace(stack, workspaceName);
 
-    newWorkspace.waitToolbar();
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(stack);
-    newWorkspace.typeWorkspaceName(workspaceName);
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(projectName);
     projectSourcePage.clickOnAddProjectButton();
@@ -66,28 +36,15 @@ public class CreateWorkspaceHelper {
 
   public void createWorkspaceFromStackWithoutProject(
       NewWorkspace.Stack stack, String workspaceName) {
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnAddWorkspaceBtn();
-
-    newWorkspace.waitToolbar();
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(stack);
-    newWorkspace.typeWorkspaceName(workspaceName);
+    createWorkspace(stack, workspaceName);
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
   }
 
   public void createWorkspaceFromStackWithProjects(
       NewWorkspace.Stack stack, String workspaceName, ArrayList<String> projectNames) {
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnAddWorkspaceBtn();
+    createWorkspace(stack, workspaceName);
 
-    newWorkspace.waitToolbar();
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(stack);
-    newWorkspace.typeWorkspaceName(workspaceName);
     projectSourcePage.clickOnAddOrImportProjectButton();
 
     projectNames.forEach(
@@ -99,15 +56,15 @@ public class CreateWorkspaceHelper {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
   }
 
-  // Open file and check LS initialization message in "dev-machine" process
-  public void checkLanguageServerInitialization(
-      String projectName, String fileName, String textInTerminal) {
-    consoles.selectProcessByTabName("dev-machine");
-    projectExplorer.waitAndSelectItem(projectName);
-    projectExplorer.openItemByPath(projectName);
-    projectExplorer.openItemByPath(projectName + "/" + fileName);
-    editor.waitTabIsPresent(fileName);
+  private void createWorkspace(NewWorkspace.Stack stack, String workspaceName) {
+    dashboard.waitDashboardToolbarTitle();
 
-    consoles.waitExpectedTextIntoConsole(textInTerminal, ELEMENT_TIMEOUT_SEC);
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.clickOnAddWorkspaceBtn();
+
+    newWorkspace.waitToolbar();
+    newWorkspace.clickOnAllStacksTab();
+    newWorkspace.selectStack(stack);
+    newWorkspace.typeWorkspaceName(workspaceName);
   }
 }
