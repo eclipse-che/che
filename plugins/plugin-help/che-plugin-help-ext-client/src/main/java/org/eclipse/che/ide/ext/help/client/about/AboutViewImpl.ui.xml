@@ -15,19 +15,16 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field='res' type='org.eclipse.che.ide.ext.help.client.AboutResources'/>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.help.client.about.AboutLocalizationConstant'/>
+    <ui:with field='buildDetailsLocale' type='org.eclipse.che.ide.ext.help.client.about.info.BuildDetailsLocalizationConstant'/>
 
-    <g:DockLayoutPanel unit="PX" width="270px" height="165px" addStyleNames="{res.aboutCss.emptyBorder}">
+    <g:DockLayoutPanel unit="PX" width="270px" height="135px" addStyleNames="{res.aboutCss.emptyBorder}">
         <g:north size="70">
             <g:FlowPanel ui:field="logoPanel" addStyleNames="{res.aboutCss.logo}"/>
         </g:north>
         <g:center>
             <g:FlowPanel addStyleNames="{res.aboutCss.spacing} {res.aboutCss.mainText}">
-                <g:Label addStyleNames="{res.aboutCss.label}" text="{locale.aboutVersion}"/>
                 <g:Label ui:field="version" addStyleNames="{res.aboutCss.value}"/>
-                <g:Label addStyleNames="{res.aboutCss.label}" text="{locale.aboutRevision}"/>
-                <g:Label ui:field="revision" addStyleNames="{res.aboutCss.value}"/>
-                <g:Label addStyleNames="{res.aboutCss.label}" text="{locale.aboutBuildTime}"/>
-                <g:Label ui:field="buildTime" addStyleNames="{res.aboutCss.value}"/>
+                <g:Anchor ui:field="buildDetailsAnchor" addStyleNames="{res.aboutCss.label}" text="{buildDetailsLocale.title}"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>

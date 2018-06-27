@@ -85,7 +85,7 @@ public class WorkspaceProbesFactoryTest {
         "localhost",
         4040,
         "https",
-        singletonMap(HttpHeaders.AUTHORIZATION, TOKEN));
+        singletonMap(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN));
   }
 
   @Test

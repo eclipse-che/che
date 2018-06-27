@@ -22,6 +22,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesI
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
@@ -44,8 +45,9 @@ public class OpenShiftProject extends KubernetesNamespace {
       KubernetesServices services,
       OpenShiftRoutes routes,
       KubernetesPersistentVolumeClaims pvcs,
-      KubernetesIngresses ingresses) {
-    super(clientFactory, workspaceId, name, pods, services, pvcs, ingresses);
+      KubernetesIngresses ingresses,
+      KubernetesSecrets secrets) {
+    super(clientFactory, workspaceId, name, pods, services, pvcs, ingresses, secrets);
     this.clientFactory = clientFactory;
     this.routes = routes;
   }
@@ -82,7 +84,7 @@ public class OpenShiftProject extends KubernetesNamespace {
 
   /** Removes all object except persistent volume claims inside project. */
   public void cleanUp() throws InfrastructureException {
-    doRemove(routes::delete, services()::delete, pods()::delete);
+    doRemove(routes::delete, services()::delete, pods()::delete, secrets()::delete);
   }
 
   private void create(String projectName, KubernetesClient kubeClient, OpenShiftClient ocClient)

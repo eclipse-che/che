@@ -27,7 +27,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class DialogAbout {
 
   private static final String ABOUT_DIALOG = "gwt-debug-aboutView-window";
-  private static final String BUTTON_OK = "help-about-ok";
+  private static final String ABOUT_DIALOG_OK_BUTTON = "help-about-ok";
+  private static final String BUILD_DETAILS_OK_BUTTON = "build-details-ok";
+  private static final String BUILD_DETAILS_ANCHOR = "gwt-debug-build-details-anchor";
+  private static final String BUILD_DETAILS_WINDOW = "gwt-debug-build-details";
   private static final String TEXT_VERSION =
       "//div[@id='gwt-debug-aboutView-window']//div[text()='Version :']/following-sibling::div[1]";
 
@@ -42,15 +45,24 @@ public class DialogAbout {
   @FindBy(id = ABOUT_DIALOG)
   private WebElement aboutDialog;
 
-  @FindBy(id = BUTTON_OK)
-  private WebElement buttonOK;
+  @FindBy(id = ABOUT_DIALOG_OK_BUTTON)
+  private WebElement aboutDialogOkButton;
+
+  @FindBy(id = BUILD_DETAILS_OK_BUTTON)
+  private WebElement buildDetailsOkButton;
 
   @FindBy(xpath = TEXT_VERSION)
   private WebElement textVersion;
 
+  @FindBy(id = BUILD_DETAILS_ANCHOR)
+  WebElement buildDetailsAnchor;
+
+  @FindBy(id = BUILD_DETAILS_WINDOW)
+  WebElement buildDetailsWindow;
+
   public void closeAboutDialog() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(buttonOK))
+        .until(ExpectedConditions.elementToBeClickable(aboutDialogOkButton))
         .click();
     new WebDriverWait(seleniumWebDriver, 3)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(ABOUT_DIALOG)));
@@ -70,5 +82,25 @@ public class DialogAbout {
   public void waitVerifyTextElements(String text) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.textToBePresentInElement(aboutDialog, text));
+  }
+
+  public void clickOnBuildDetailsAnchor() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(buildDetailsAnchor))
+        .click();
+  }
+
+  public void waitBuildDetailsDialogIsOpen() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(BUILD_DETAILS_WINDOW)));
+  }
+
+  public void closeBuildDetailsDialog() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(buildDetailsOkButton))
+        .click();
+    new WebDriverWait(seleniumWebDriver, 3)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(BUILD_DETAILS_WINDOW)));
   }
 }

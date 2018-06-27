@@ -345,15 +345,15 @@ Update strategy: ${UPDATE_STRATEGY}
 Setup OpenShift oAuth: ${SETUP_OCP_OAUTH}
 Environment variables:
 ${CHE_VAR_ARRAY}"
+    CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
+    CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=NULL
+
     if [ "${CHE_MULTIUSER}" == "true" ]; then
       if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
         export KEYCLOAK_PARAM="-p CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=false"
       fi
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml
       wait_for_postgres
-
-      CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
-      CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=NULL
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
         # create secret with OpenShift certificate

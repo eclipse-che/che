@@ -15,6 +15,7 @@ import static java.util.Objects.nonNull;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -39,8 +40,7 @@ public class AboutViewImpl extends Window implements AboutView {
 
   Button btnOk;
   @UiField Label version;
-  @UiField Label revision;
-  @UiField Label buildTime;
+  @UiField Anchor buildDetailsAnchor;
 
   @UiField(provided = true)
   AboutLocalizationConstant locale;
@@ -71,6 +71,9 @@ public class AboutViewImpl extends Window implements AboutView {
     if (nonNull(logo)) {
       logoPanel.add(new SVGImage(logo));
     }
+
+    buildDetailsAnchor.ensureDebugId("build-details-anchor");
+    buildDetailsAnchor.addClickHandler(event -> delegate.onShowBuildDetailsClicked());
   }
 
   /** {@inheritDoc} */
@@ -100,17 +103,5 @@ public class AboutViewImpl extends Window implements AboutView {
   @Override
   public void setVersion(String version) {
     this.version.setText(version);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void setRevision(String revision) {
-    this.revision.setText(revision);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void setTime(String time) {
-    this.buildTime.setText(time);
   }
 }
