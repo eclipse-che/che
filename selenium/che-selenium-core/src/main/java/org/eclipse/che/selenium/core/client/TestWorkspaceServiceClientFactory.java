@@ -15,5 +15,5 @@ import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Dmytro Nochevnov */
 public interface TestWorkspaceServiceClientFactory {
-  AbstractTestWorkspaceServiceClient create(@Assisted TestUser testUser);
+  TestWorkspaceServiceClient create(@Assisted TestUser testUser);
 }

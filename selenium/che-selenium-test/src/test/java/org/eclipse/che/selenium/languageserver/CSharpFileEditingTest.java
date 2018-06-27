@@ -17,8 +17,8 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -55,7 +55,7 @@ public class CSharpFileEditingTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
-  @Inject AbstractTestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private Consoles consoles;
 
   @BeforeClass

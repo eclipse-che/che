@@ -27,13 +27,13 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
-import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
@@ -105,10 +105,10 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestWorkspaceProvider.class).to(CheTestWorkspaceProvider.class).asEagerSingleton();
     bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
 
-    bind(AbstractTestWorkspaceServiceClient.class).to(CheTestWorkspaceServiceClient.class);
+    bind(TestWorkspaceServiceClient.class).to(CheTestWorkspaceServiceClient.class);
 
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
-    install(new FactoryModuleBuilder().build(CheTestWorkspaceServiceClientFactory.class));
+    install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(TestUserServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(WebDriverLogsReaderFactory.class));
 

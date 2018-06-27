@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Musienko Maxim
  * @author Dmytro Nochevnov
  */
-public abstract class AbstractTestWorkspaceServiceClient {
+public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspaceServiceClient {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(AbstractTestWorkspaceServiceClient.class);
@@ -66,31 +65,22 @@ public abstract class AbstractTestWorkspaceServiceClient {
   }
 
   /** Returns the list of workspaces names that belongs to the user. */
+  @Override
   public List<String> getAll() throws Exception {
     List<WorkspaceDto> workspaces =
         requestFactory.fromUrl(getBaseUrl()).request().asList(WorkspaceDto.class);
     return workspaces.stream().map(ws -> ws.getConfig().getName()).collect(Collectors.toList());
   }
 
-  /** Sends stop workspace request. */
-  private void sendStopRequest(String workspaceName, String userName) throws Exception {
-    if (!exists(workspaceName, userName)) {
-      return;
-    }
-
-    Workspace workspace = getByName(workspaceName, userName);
-    String apiUrl = getIdBasedUrl(workspace.getId()) + "/runtime/";
-
-    requestFactory.fromUrl(apiUrl).useDeleteMethod().request();
-  }
-
   /** Stops workspace. */
+  @Override
   public void stop(String workspaceName, String userName) throws Exception {
     sendStopRequest(workspaceName, userName);
     waitStatus(workspaceName, userName, STOPPED);
   }
 
   /** Returns workspace of default user by its name. */
+  @Override
   public Workspace getByName(String workspace, String username) throws Exception {
     return requestFactory
         .fromUrl(getNameBasedUrl(workspace, username))
@@ -99,6 +89,7 @@ public abstract class AbstractTestWorkspaceServiceClient {
   }
 
   /** Indicates if workspace exists. */
+  @Override
   public boolean exists(String workspace, String username) throws Exception {
     try {
       requestFactory.fromUrl(getNameBasedUrl(workspace, username)).request();
@@ -110,6 +101,7 @@ public abstract class AbstractTestWorkspaceServiceClient {
   }
 
   /** Deletes workspace of default user. */
+  @Override
   public void delete(String workspaceName, String userName) throws Exception {
     if (!exists(workspaceName, userName)) {
       return;
@@ -132,6 +124,7 @@ public abstract class AbstractTestWorkspaceServiceClient {
   }
 
   /** Waits needed status. */
+  @Override
   public void waitStatus(String workspaceName, String userName, WorkspaceStatus expectedStatus)
       throws Exception {
 
@@ -150,12 +143,8 @@ public abstract class AbstractTestWorkspaceServiceClient {
             "Workspace %s, status=%s, expected status=%s", workspaceName, status, expectedStatus));
   }
 
-  /** Creates a new workspace. */
-  public abstract Workspace createWorkspace(
-      String workspaceName, int memory, MemoryMeasure memoryUnit, WorkspaceConfigDto workspace)
-      throws Exception;
-
   /** Sends start workspace request. */
+  @Override
   public void sendStartRequest(String workspaceId, String workspaceName) throws Exception {
     requestFactory
         .fromUrl(getIdBasedUrl(workspaceId) + "/runtime")
@@ -164,16 +153,14 @@ public abstract class AbstractTestWorkspaceServiceClient {
         .request();
   }
 
-  /** Starts workspace. */
-  public abstract void start(String workspaceId, String workspaceName, TestUser workspaceOwner)
-      throws Exception;
-
   /** Gets workspace by its id. */
+  @Override
   public WorkspaceDto getById(String workspaceId) throws Exception {
     return requestFactory.fromUrl(getIdBasedUrl(workspaceId)).request().asDto(WorkspaceDto.class);
   }
 
   /** Gets workspace status by id. */
+  @Override
   public WorkspaceStatus getStatus(String workspaceId) throws Exception {
     return getById(workspaceId).getStatus();
   }
@@ -184,6 +171,7 @@ public abstract class AbstractTestWorkspaceServiceClient {
    * @deprecated use {@link #getServerFromDevMachineBySymbolicName(String, String)} to retrieve
    *     server URL from instead
    */
+  @Override
   @Deprecated
   @Nullable
   public String getServerAddressByPort(String workspaceId, int port) throws Exception {
@@ -206,6 +194,7 @@ public abstract class AbstractTestWorkspaceServiceClient {
    * @param serverName server name
    * @return ServerDto object
    */
+  @Override
   @Nullable
   public Server getServerFromDevMachineBySymbolicName(String workspaceId, String serverName)
       throws Exception {
@@ -230,6 +219,7 @@ public abstract class AbstractTestWorkspaceServiceClient {
    * @throws IllegalStateException if workspace with certain workspaceId doesn't have RUNNING
    *     status.
    */
+  @Override
   public void ensureRunningStatus(Workspace workspace) throws IllegalStateException {
     if (workspace.getStatus() != WorkspaceStatus.RUNNING) {
       throw new IllegalStateException(
@@ -237,6 +227,40 @@ public abstract class AbstractTestWorkspaceServiceClient {
               "Workspace with id='%s' should has '%s' status, but its actual state='%s'",
               workspace.getId(), WorkspaceStatus.RUNNING, workspace.getStatus()));
     }
+  }
+
+  /**
+   * Delete workspaces which could be created from factory
+   *
+   * @param originalName name workspace which was used to create factory
+   */
+  @Override
+  public void deleteFactoryWorkspaces(String originalName, String username) throws Exception {
+    String workspace2delete = originalName;
+    for (int i = 1; ; i++) {
+      if (!exists(workspace2delete, username)) {
+        break;
+      }
+
+      delete(workspace2delete, username);
+      workspace2delete = originalName + "_" + i;
+    }
+  }
+
+  // ================= //
+  //  PRIVATE METHODS  //
+  // ================= //
+
+  /** Sends stop workspace request. */
+  private void sendStopRequest(String workspaceName, String userName) throws Exception {
+    if (!exists(workspaceName, userName)) {
+      return;
+    }
+
+    Workspace workspace = getByName(workspaceName, userName);
+    String apiUrl = getIdBasedUrl(workspace.getId()) + "/runtime/";
+
+    requestFactory.fromUrl(apiUrl).useDeleteMethod().request();
   }
 
   protected String getNameBasedUrl(String workspaceName, String username) {
@@ -264,22 +288,5 @@ public abstract class AbstractTestWorkspaceServiceClient {
         break;
     }
     return calculatedValue;
-  }
-
-  /**
-   * Delete workspaces which could be created from factory
-   *
-   * @param originalName name workspace which was used to create factory
-   */
-  public void deleteFactoryWorkspaces(String originalName, String username) throws Exception {
-    String workspace2delete = originalName;
-    for (int i = 1; ; i++) {
-      if (!exists(workspace2delete, username)) {
-        break;
-      }
-
-      delete(workspace2delete, username);
-      workspace2delete = originalName + "_" + i;
-    }
   }
 }

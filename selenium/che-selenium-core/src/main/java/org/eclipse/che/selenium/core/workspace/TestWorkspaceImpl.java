@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.selenium.core.client.AbstractTestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
   private final CompletableFuture<Void> future;
   private final TestUser owner;
   private final AtomicReference<String> id;
-  private final AbstractTestWorkspaceServiceClient workspaceServiceClient;
+  private final TestWorkspaceServiceClient workspaceServiceClient;
 
   public TestWorkspaceImpl(
       String name,
@@ -40,7 +40,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
       int memoryInGB,
       boolean startAfterCreation,
       WorkspaceConfigDto template,
-      AbstractTestWorkspaceServiceClient testWorkspaceServiceClient) {
+      TestWorkspaceServiceClient testWorkspaceServiceClient) {
     if (template == null) {
       throw new IllegalStateException("Workspace template cannot be null");
     }

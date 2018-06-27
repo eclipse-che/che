@@ -12,16 +12,18 @@ package org.eclipse.che.selenium.core.workspace;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
-import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClientFactory;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 
+@Singleton
 public class CheTestWorkspaceProvider extends AbstractTestWorkspaceProvider {
 
   @Inject
@@ -31,8 +33,8 @@ public class CheTestWorkspaceProvider extends AbstractTestWorkspaceProvider {
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
       DefaultTestUser defaultUser,
       WorkspaceDtoDeserializer workspaceDtoDeserializer,
-      CheTestWorkspaceServiceClient testWorkspaceServiceClient,
-      CheTestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
+      TestWorkspaceServiceClient testWorkspaceServiceClient,
+      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
     super(
         poolSize,
         threads,
