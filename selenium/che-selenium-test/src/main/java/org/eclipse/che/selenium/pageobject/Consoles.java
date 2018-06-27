@@ -466,7 +466,7 @@ public class Consoles {
         .click();
   }
 
-  public void startCommandFromProcessesArea(
+  public void executeCommandInsideProcessesArea(
       String machineName,
       ContextMenuCommandGoals goal,
       String commandName,
@@ -477,21 +477,23 @@ public class Consoles {
     waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
   }
 
-  // Open web page by url and check visibility of web element on opened page
-  public void startCommandAndCheckApp(String currentWindow, String webElementXpath) {
+  // Click on preview url and check visibility of web element on opened page
+  public void checkWebElementVisibilityAtPreviewPage(By webElement) {
+    String currentWindow = seleniumWebDriver.getWindowHandle();
+
     waitPreviewUrlIsPresent();
     clickOnPreviewUrl();
     seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
-    seleniumWebDriverHelper.waitVisibility(By.xpath(webElementXpath));
+    seleniumWebDriverHelper.waitVisibility(webElement);
 
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
   }
 
-  // Start command from project context menu and check expected message in Terminal
-  public void startCommandAndCheckResult(
+  // Start command from project context menu and check expected message in Console
+  public void executeCommandFromProjectExplorer(
       String projectName,
       ContextMenuCommandGoals goal,
       String commandName,

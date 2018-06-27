@@ -12,10 +12,14 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import com.google.inject.Inject;
-import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 
-/** @author Skoryk Serhii */
+/**
+ * Class cover creation of workspaces on Dashboard
+ *
+ * @author Skoryk Serhii
+ */
 public class CreateWorkspaceHelper {
 
   @Inject private Dashboard dashboard;
@@ -25,7 +29,7 @@ public class CreateWorkspaceHelper {
 
   public void createWorkspaceFromStackWithProject(
       NewWorkspace.Stack stack, String workspaceName, String projectName) {
-    createWorkspace(stack, workspaceName);
+    prepareWorkspace(stack, workspaceName);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(projectName);
@@ -36,14 +40,14 @@ public class CreateWorkspaceHelper {
 
   public void createWorkspaceFromStackWithoutProject(
       NewWorkspace.Stack stack, String workspaceName) {
-    createWorkspace(stack, workspaceName);
+    prepareWorkspace(stack, workspaceName);
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
   }
 
   public void createWorkspaceFromStackWithProjects(
-      NewWorkspace.Stack stack, String workspaceName, ArrayList<String> projectNames) {
-    createWorkspace(stack, workspaceName);
+      NewWorkspace.Stack stack, String workspaceName, List<String> projectNames) {
+    prepareWorkspace(stack, workspaceName);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
 
@@ -56,7 +60,7 @@ public class CreateWorkspaceHelper {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
   }
 
-  private void createWorkspace(NewWorkspace.Stack stack, String workspaceName) {
+  private void prepareWorkspace(NewWorkspace.Stack stack, String workspaceName) {
     dashboard.waitDashboardToolbarTitle();
 
     dashboard.selectWorkspacesItemOnDashboard();

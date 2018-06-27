@@ -12,14 +12,16 @@ package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.BUILD_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.openqa.selenium.Keys.ENTER;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
@@ -28,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.openqa.selenium.By;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,8 +41,7 @@ public class CreateWorkspaceFromJavaStackTest {
   private static final String CONSOLE_JAVA_SIMPLE = "console-java-simple";
   private static final String WEB_JAVA_SPRING = "web-java-spring";
 
-  private ArrayList<String> projects = new ArrayList<>();
-  private String currentWindow;
+  private List<String> projects = ImmutableList.of(CONSOLE_JAVA_SIMPLE, WEB_JAVA_SPRING);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -67,7 +69,7 @@ public class CreateWorkspaceFromJavaStackTest {
   public void checkWorkspaceCreationFromJavaStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(JAVA, WORKSPACE_NAME, projects);
 
-    currentWindow = ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     projectExplorer.waitProjectInitialization(CONSOLE_JAVA_SIMPLE);
     projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING);
@@ -75,32 +77,34 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @Test(priority = 1)
   public void checkConsoleJavaSimpleCommands() {
-    consoles.startCommandAndCheckResult(CONSOLE_JAVA_SIMPLE, BUILD, "build", BUILD_SUCCESS);
+    consoles.executeCommandFromProjectExplorer(
+        CONSOLE_JAVA_SIMPLE, BUILD, BUILD_COMMAND, BUILD_SUCCESS);
 
-    consoles.startCommandAndCheckResult(
+    consoles.executeCommandFromProjectExplorer(
         CONSOLE_JAVA_SIMPLE, BUILD, "console-java-simple:build", BUILD_SUCCESS);
 
-    consoles.startCommandAndCheckResult(
+    consoles.executeCommandFromProjectExplorer(
         CONSOLE_JAVA_SIMPLE, RUN, "console-java-simple:run", "Hello World Che!");
   }
 
   @Test(priority = 1)
   public void checkWebJavaSpringCommands() {
-    consoles.startCommandAndCheckResult(WEB_JAVA_SPRING, BUILD, "build", BUILD_SUCCESS);
+    consoles.executeCommandFromProjectExplorer(
+        WEB_JAVA_SPRING, BUILD, BUILD_COMMAND, BUILD_SUCCESS);
 
-    consoles.startCommandAndCheckResult(
+    consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING, BUILD, "web-java-spring:build", BUILD_SUCCESS);
 
-    consoles.startCommandAndCheckResult(
+    consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING, RUN, "web-java-spring:build and run", "Server startup in");
-    consoles.startCommandAndCheckApp(currentWindow, "//span[text()='Enter your name: ']");
+    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
     consoles.closeProcessTabWithAskDialog("web-java-spring:build and run");
 
-    consoles.startCommandAndCheckResult(
+    consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING, RUN, "web-java-spring:run tomcat", "Server startup in");
-    consoles.startCommandAndCheckApp(currentWindow, "//span[text()='Enter your name: ']");
+    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
 
-    // start 'stop apache' command and check that apache not running
+    // execute 'stop tomcat' command and check that tomcat is not running
     projectExplorer.invokeCommandWithContextMenu(
         RUN, WEB_JAVA_SPRING, "web-java-spring:stop tomcat");
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
@@ -108,7 +112,7 @@ public class CreateWorkspaceFromJavaStackTest {
     terminal.typeIntoTerminal(ENTER.toString());
     terminal.waitExpectedTextNotPresentTerminal("/bin/bash -c $TOMCAT_HOME/bin/catalina.sh");
 
-    consoles.startCommandAndCheckResult(
+    consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING,
         DEBUG,
         "web-java-spring:debug",

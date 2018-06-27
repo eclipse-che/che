@@ -1073,7 +1073,7 @@ public class ProjectExplorer {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.MAXIMIZE_BUTTON_XPATH));
   }
 
-  // Wait for project has PROJECT_FOLDER status
+  // Wait project is completely initialized
   public void waitProjectInitialization(String projectName) {
     waitItem(projectName);
     notificationsPopupPanel.waitPopupPanelsAreClosed();

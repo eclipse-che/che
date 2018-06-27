@@ -15,4 +15,7 @@ public interface TestCommandsConstants {
   String CUSTOM = "custom";
   String MAVEN = "mvn";
   String GWT = "gwt";
+  String RUN_COMMAND = "run";
+  String BUILD_COMMAND = "build";
+  String DEBUG_COMMAND = "debug";
 }
