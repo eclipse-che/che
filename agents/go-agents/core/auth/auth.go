@@ -131,13 +131,13 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 		handler.delegate.ServeHTTP(w, req)
 		return
 	}
-	token := req.URL.Query().Get("token")
-    if token == "" {
-      header := req.Header.Get("Authorization")
-      if header != "" && strings.HasPrefix(strings.ToUpper(header), strings.ToUpper("bearer")) {
-       token = header[7:]
-      }
+  token := req.URL.Query().Get("token")
+  if token == "" {
+     header := req.Header.Get("Authorization")
+     if header != "" && strings.HasPrefix(strings.ToUpper(header), strings.ToUpper("bearer")) {
+     token = header[7:]
     }
+  }
 	if handler.cache.Contains(token) {
 		handler.delegate.ServeHTTP(w, req)
 	} else if err := authenticate(token); err == nil {
@@ -150,7 +150,7 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 
 func authenticate(token string) error {
 	if token == "" {
-		return errors.New("Authentication failed because: missing 'token' parameter")
+		return errors.New("Authentication failed because: missing authentication token")
 	}
 
 	claims := &JWTClaims{}
