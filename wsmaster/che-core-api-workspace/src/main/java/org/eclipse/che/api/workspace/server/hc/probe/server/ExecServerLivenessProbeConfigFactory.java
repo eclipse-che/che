@@ -66,7 +66,7 @@ public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFact
           10);
     } catch (MachineTokenException e) {
       throw new InternalInfrastructureException(
-          "Failed to retrieve workspace token for ws-agent server liveness probe. Error: "
+          "Failed to retrieve workspace token for exec-agent server liveness probe. Error: "
               + e.getMessage());
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
