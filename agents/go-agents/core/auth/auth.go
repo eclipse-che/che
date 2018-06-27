@@ -131,13 +131,13 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 		handler.delegate.ServeHTTP(w, req)
 		return
 	}
-  token := req.URL.Query().Get("token")
-  if token == "" {
-     header := req.Header.Get("Authorization")
-     if header != "" && strings.HasPrefix(strings.ToUpper(header), strings.ToUpper("bearer")) {
-     token = header[7:]
-    }
-  }
+	token := req.URL.Query().Get("token")
+	if token == "" {
+	  header := req.Header.Get("Authorization")
+	  if header != "" && strings.HasPrefix(strings.ToUpper(header), strings.ToUpper("bearer")) {
+	   token = header[7:]
+	  }
+	}
 	if handler.cache.Contains(token) {
 		handler.delegate.ServeHTTP(w, req)
 	} else if err := authenticate(token); err == nil {
