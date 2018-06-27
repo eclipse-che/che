@@ -71,7 +71,8 @@ public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigF
           uri.getScheme(),
           uri.getPath(),
           singletonMap(
-              HttpHeaders.AUTHORIZATION, machineTokenProvider.getToken(userId, workspaceId)),
+              HttpHeaders.AUTHORIZATION,
+              "Bearer " + machineTokenProvider.getToken(userId, workspaceId)),
           successThreshold,
           3,
           120,
