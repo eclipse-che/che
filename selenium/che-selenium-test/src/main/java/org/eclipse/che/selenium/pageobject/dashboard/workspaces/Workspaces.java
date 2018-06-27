@@ -290,7 +290,7 @@ public class Workspaces {
   public void clickOnWorkspaceStopStartButton(String workspaceName) {
     String buttonXpath = String.format(WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON, workspaceName);
 
-    // for avoid clicking on the tooltip
+    // to avoid clicking on the tooltip
     moveCursorToWorkspaceRamSection(workspaceName);
     waitWorkspaceActionTooltipDisappearance();
 
