@@ -35,7 +35,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class RollingUpdateStrategyWithEditorTest {
@@ -62,7 +62,7 @@ public class RollingUpdateStrategyWithEditorTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private DefaultTestUser defaultTestUser;
 
-  @BeforeMethod
+  @BeforeClass
   public void prepare() throws Exception {
     Path pathToProject =
         Paths.get(getClass().getResource("/projects/default-spring-project").toURI());
