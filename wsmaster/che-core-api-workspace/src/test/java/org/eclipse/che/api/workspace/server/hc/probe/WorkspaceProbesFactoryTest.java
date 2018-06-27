@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
@@ -109,7 +108,7 @@ public class WorkspaceProbesFactoryTest {
         "localhost",
         4040,
         "https",
-        emptyMap());
+        singletonMap(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN));
   }
 
   @Test
@@ -134,7 +133,7 @@ public class WorkspaceProbesFactoryTest {
         "localhost",
         4040,
         "https",
-        emptyMap());
+        singletonMap(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN));
   }
 
   public void verifyHttpProbeConfig(

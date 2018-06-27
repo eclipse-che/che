@@ -52,9 +52,11 @@ public class WorkspaceProbesFactory {
             new WsAgentServerLivenessProbeConfigFactory(
                 machineTokenProvider, serverPingSuccessThreshold),
             Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE,
-            new ExecServerLivenessProbeConfigFactory(serverPingSuccessThreshold),
+            new ExecServerLivenessProbeConfigFactory(
+                machineTokenProvider, serverPingSuccessThreshold),
             Constants.SERVER_TERMINAL_REFERENCE,
-            new TerminalServerLivenessProbeConfigFactory(serverPingSuccessThreshold));
+            new TerminalServerLivenessProbeConfigFactory(
+                machineTokenProvider, serverPingSuccessThreshold));
   }
 
   /**
