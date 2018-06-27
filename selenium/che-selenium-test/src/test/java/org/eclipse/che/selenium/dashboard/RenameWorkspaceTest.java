@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses.STOPPED;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.STOPPED;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 

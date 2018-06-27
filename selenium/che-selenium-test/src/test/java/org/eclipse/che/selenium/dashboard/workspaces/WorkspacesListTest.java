@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 import static org.testng.Assert.assertEquals;
@@ -31,7 +32,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.*;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
 import org.testng.annotations.*;
 
 /**
@@ -40,7 +41,6 @@ import org.testng.annotations.*;
  */
 @Test(groups = TestGroup.OSIO)
 public class WorkspacesListTest {
-  private static final int EXPECTED_WORKSPACES_COUNT = 2;
   private static final int BLANK_WS_MB = 2048;
   private static final int JAVA_WS_MB = 3072;
   private static final int BLANK_WS_PROJECTS_COUNT = 0;
@@ -162,6 +162,11 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceCheckboxDisabled(javaWorkspaceName);
     workspaces.waitWorkspaceCheckboxDisabled(blankWorkspaceName);
     workspaces.waitBulkCheckboxDisabled();
+
+    // for avoid of failing in the multi-thread mode when unexpected workspaces can appear in the
+    // workspaces list
+    workspaces.clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
+
     workspaces.waitDeleteWorkspaceBtnDisappearance();
 
     // select one checkbox
@@ -175,6 +180,10 @@ public class WorkspacesListTest {
     workspaces.selectWorkspaceByCheckbox(javaWorkspaceName);
     workspaces.waitWorkspaceCheckboxEnabled(javaWorkspaceName);
     workspaces.waitWorkspaceCheckboxEnabled(blankWorkspaceName);
+
+    // for avoid of failing in the multi-thread mode
+    workspaces.clickOnUnexpectedWorkspacesCheckboxes(asList(blankWorkspaceName, javaWorkspaceName));
+
     workspaces.waitBulkCheckboxEnabled();
     workspaces.waitDeleteWorkspaceBtn();
 
@@ -315,10 +324,10 @@ public class WorkspacesListTest {
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
-    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Statuses.STOPPED);
+    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Status.STOPPED);
 
     workspaces.clickOnWorkspaceStopStartButton(expectedJavaItem.getWorkspaceName());
-    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Statuses.RUNNING);
+    workspaces.waitWorkspaceStatus(expectedJavaItem.getWorkspaceName(), Status.RUNNING);
 
     // check adding the workspace to list
     workspaces.clickOnAddWorkspaceBtn();
@@ -326,7 +335,7 @@ public class WorkspacesListTest {
     newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
-    workspaces.waitVisibleWorkspacesCount(getWorkspacesCount());
+    dashboard.waitWorkspacesCountInWorkspacesItem(getWorkspacesCount());
 
     dashboard.selectWorkspacesItemOnDashboard();
 

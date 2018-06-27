@@ -24,27 +24,28 @@
                   "attributes": {
                     "type": "ide"
                   }
+                },
+                "theia-dev": {
+                  "protocol": "http",
+                  "port": "3030",
+                  "attributes": {
+                    "type": "ide-dev"
+                  }
                 }
               },
               "volumes": {
                 "projects": {
                   "path": "/projects"
-                },
-                "theia": {
-                  "path": "/home/theia"
                 }
               },
               "installers": [],
-              "env": {}
+              "env": {
+                "HOSTED_PLUGIN_HOSTNAME": "0.0.0.0"
+              }
             },
             "dev-machine": {
               "attributes": {},
-              "servers": {
-                "theia-dev": {
-                  "protocol": "http",
-                  "port": "3030"
-                }
-              },
+              "servers": {},
               "volumes": {
                 "projects": {
                   "path": "/projects"
@@ -56,7 +57,7 @@
           },
           "recipe": {
             "type": "compose",
-            "content": "services:\n theia:\n  image: eclipse/che-theia:0.3.10-nightly\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/che-dev:nightly\n  mem_limit: 2147483648\n  depends_on:\n    - theia",
+            "content": "services:\n theia:\n  image: eclipse/che-theia:0.4.0-next.b17727c1-nightly\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/che-dev:nightly\n  mem_limit: 2147483648\n  depends_on:\n    - theia",
             "contentType": "application/x-yaml"
           }
         }
@@ -89,7 +90,6 @@
           "machines": {
             "ws/theia": {
               "attributes": {},
-
               "servers": {
                 "theia": {
                   "protocol": "http",
@@ -97,27 +97,28 @@
                   "attributes": {
                     "type": "ide"
                   }
+                },
+                "theia-dev": {
+                  "protocol": "http",
+                  "port": "3030",
+                  "attributes": {
+                    "type": "ide-dev"
+                  }
                 }
               },
               "volumes": {
                 "projects": {
                   "path": "/projects"
-                },
-                "theia": {
-                  "path": "/home/theia"
                 }
               },
               "installers": [],
-              "env": {}
+              "env": {
+                "HOSTED_PLUGIN_HOSTNAME": "0.0.0.0"
+              }
             },
             "ws/dev": {
               "attributes": {},
-              "servers": {
-                "theia-dev": {
-                  "protocol": "http",
-                  "port": "3030"
-                }
-              },
+              "servers": {},
               "volumes": {
                 "projects": {
                   "path": "/projects"
@@ -129,7 +130,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.3.10-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.4.0-next.b17727c1-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
             "contentType": "application/x-yaml"
           }
         }

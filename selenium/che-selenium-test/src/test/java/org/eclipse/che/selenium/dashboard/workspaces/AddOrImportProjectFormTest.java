@@ -70,8 +70,6 @@ public class AddOrImportProjectFormTest {
       ImmutableMap.of(
           SPRING_SAMPLE_NAME,
           "A basic example using Spring servlets. The app returns values entered into a submit form.",
-          CHE_SAMPLE_NAME,
-          "The Eclipse Che source code. Build Che-in-Che.",
           CONSOLE_SAMPLE_NAME,
           "A hello world Java application.");
   private static final String EXPECTED_TEXT_IN_EDITOR =
@@ -147,8 +145,8 @@ public class AddOrImportProjectFormTest {
 
   @Test
   public void checkOfCheckboxes() {
+    // preparing
     newWorkspace.waitPageLoad();
-
     newWorkspace.selectStack(JAVA);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
@@ -158,24 +156,28 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitCancelButtonDisabled();
     addOrImportForm.waitAddButtonDisabled();
 
+    // click on single disabled checkbox
     addOrImportForm.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitCancelButtonEnabled();
     addOrImportForm.waitAddButtonEnabled();
 
+    // unselect checkbox by "Cancel" button
     addOrImportForm.clickOnCancelButton();
     addOrImportForm.waitSampleCheckboxDisabled(CONSOLE_SAMPLE_NAME);
 
-    addOrImportForm.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxEnabled(CHE_SAMPLE_NAME);
+    // select and unselect single checkbox by clicking on it
+    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
     addOrImportForm.waitCancelButtonEnabled();
     addOrImportForm.waitAddButtonEnabled();
 
-    addOrImportForm.clickOnSampleCheckbox(CHE_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxDisabled(CHE_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitSampleCheckboxDisabled(SPRING_SAMPLE_NAME);
     addOrImportForm.waitCancelButtonDisabled();
     addOrImportForm.waitAddButtonDisabled();
 
+    // unselect multiple checkboxes by "Cancel" button
     clickOnEachCheckbox();
     waitAllCheckboxesEnabled();
     addOrImportForm.waitCancelButtonEnabled();
@@ -189,13 +191,14 @@ public class AddOrImportProjectFormTest {
 
   @Test(priority = 1)
   public void checkProjectSamples() {
+    // preparing
     newWorkspace.waitPageLoad();
-
     newWorkspace.selectStack(JAVA);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
 
+    // add single sample to workspace
     addOrImportForm.clickOnSampleCheckbox(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitSampleCheckboxEnabled(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitCancelButtonEnabled();
@@ -207,6 +210,7 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
+    // remove added sample by "Remove" button
     projectOptions.clickOnRemoveButton();
     addOrImportForm.waitProjectTabDisappearance(CONSOLE_SAMPLE_NAME);
     addOrImportForm.waitAddOrImportFormOpened();
@@ -216,6 +220,7 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitCancelButtonDisabled();
     addOrImportForm.waitAddButtonDisabled();
 
+    // add multiple samples
     clickOnEachCheckbox();
     waitAllCheckboxesEnabled();
     addOrImportForm.waitCancelButtonEnabled();
@@ -223,7 +228,6 @@ public class AddOrImportProjectFormTest {
 
     addOrImportForm.clickOnAddButton();
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitProjectTabAppearance(CHE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
 
     addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
@@ -238,19 +242,14 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
         EXPECTED_SPRING_REPOSITORY_URL);
 
-    addOrImportForm.clickOnProjectTab(CHE_SAMPLE_NAME);
-    checkProjectTabAppearanceAndFields(
-        CHE_SAMPLE_NAME,
-        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CHE_SAMPLE_NAME),
-        EXPECTED_CHE_REPOSITORY_URL);
-
+    // remove sample
     projectOptions.clickOnRemoveButton();
-    addOrImportForm.waitProjectTabDisappearance(CHE_SAMPLE_NAME);
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitProjectTabDisappearance(SPRING_SAMPLE_NAME);
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
 
+    // check name field of the project tab
     addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
     projectOptions.waitProjectOptionsForm();
 
@@ -285,6 +284,7 @@ public class AddOrImportProjectFormTest {
     projectOptions.waitSaveButtonDisabling();
     projectOptions.waitCancelButtonEnabling();
 
+    // check of restoring the previous values of the tab after click "Cancel" button
     projectOptions.typeTextInDescriptionField("");
     projectOptions.clickOnCancelButton();
     checkProjectTabAppearanceAndFields(
@@ -292,16 +292,29 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
+    // Check "Url" field
     projectOptions.typeTextInRepositoryUrlField("");
     projectOptions.waitRepositoryUrlErrorMessage("Invalid Git URL");
     projectOptions.waitSaveButtonDisabling();
     projectOptions.waitCancelButtonEnabling();
 
+    // check of restoring the previous values of the tab after click "Cancel" button
     projectOptions.clickOnCancelButton();
     checkProjectTabAppearanceAndFields(
         CONSOLE_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
+
+    // check of restoring the previous values of the tab after click on the another project tab
+    // without saving
+    addOrImportForm.clickOnAddOrImportProjectButton();
+    addOrImportForm.waitAddOrImportFormOpened();
+    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnAddButton();
+    addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
+    projectOptions.waitProjectNameFieldValue(CONSOLE_SAMPLE_NAME);
 
     projectOptions.setValueOfNameField("");
     projectOptions.typeTextInDescriptionField("");
@@ -316,6 +329,7 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
+    // check ability of creation the sample with specified valid name
     projectOptions.setValueOfNameField(RENAMED_CONSOLE_SAMPLE_NAME);
     projectOptions.clickOnSaveButton();
     addOrImportForm.waitProjectTabAppearance(RENAMED_CONSOLE_SAMPLE_NAME);
@@ -325,16 +339,15 @@ public class AddOrImportProjectFormTest {
 
   @Test(priority = 2)
   public void checkProjectsBlank() throws Exception {
+    // preparing
     newWorkspace.waitPageLoad();
-
     newWorkspace.selectStack(BLANK);
     newWorkspace.waitStackSelected(BLANK);
-
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
-
     addOrImportForm.clickOnBlankButton();
 
+    // check name field
     addOrImportForm.typeToBlankNameField(NAME_WITH_MAX_AVAILABLE_LENGTH);
     addOrImportForm.waitErrorMessageDissappearanceInBlankNameField();
     addOrImportForm.waitAddButtonEnabled();
@@ -356,6 +369,7 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitAddButtonDisabled();
     addOrImportForm.waitCancelButtonEnabled();
 
+    // check description field
     addOrImportForm.typeToBlankDescriptionField(BLANK_FORM_DESCRIPTION);
     addOrImportForm.waitTextInBlankDescriptionField(BLANK_FORM_DESCRIPTION);
 
@@ -363,6 +377,7 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitTextInBlankNameField("");
     addOrImportForm.waitTextInBlankDescriptionField("");
 
+    // add sample with specified valid name and description
     addOrImportForm.typeToBlankNameField(CUSTOM_BLANK_PROJECT_NAME);
     addOrImportForm.typeToBlankDescriptionField(BLANK_FORM_DESCRIPTION);
     addOrImportForm.clickOnAddButton();
@@ -371,6 +386,7 @@ public class AddOrImportProjectFormTest {
     checkProjectTabAppearanceAndFields(
         CUSTOM_BLANK_PROJECT_NAME, BLANK_FORM_DESCRIPTION, BLANK_DEFAULT_URL);
 
+    // check that added by "Git" button project has an expected name and description
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
 
@@ -394,10 +410,10 @@ public class AddOrImportProjectFormTest {
 
   @Test(priority = 3)
   public void checkCreatingProject() throws Exception {
+    // check that name field saves it state after choosing another stack
     newWorkspace.waitPageLoad();
-
+    newWorkspace.waitStackSelected(BLANK);
     newWorkspace.typeWorkspaceName(TEST_BLANK_WORKSPACE_NAME);
-
     newWorkspace.selectStack(DOT_NET);
     newWorkspace.waitStackSelected(DOT_NET);
     assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
@@ -406,6 +422,7 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitStackSelected(JAVA);
     assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
+    // add workspace with specified "RAM" value
     newWorkspace.setMachineRAM("dev-machine", 3.0);
     newWorkspace.waitRamValue("dev-machine", 3.0);
 
@@ -418,6 +435,7 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.clickOnAddButton();
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
 
+    // check closing of "Workspace Is Created" dialog window
     newWorkspace.clickOnBottomCreateButton();
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
 

@@ -10,41 +10,49 @@
 FROM node:8-alpine
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION=0.3.10
-ENV USE_LOCAL_GIT=true \
-    GITHUB_TOKEN=${GITHUB_TOKEN} \
+ARG THEIA_VERSION=0.4.0-next.b17727c1
+
+EXPOSE 3000 3030
+
+ENV GITHUB_TOKEN=${GITHUB_TOKEN} \
     THEIA_VERSION=${THEIA_VERSION} \
-    YARN_CACHE_FOLDER=/usr/local/share/.cache/yarn
+    USE_LOCAL_GIT=true \
+    HOME=/home/theia
 
-# build dependencies requireed to compile a custom Theia
-RUN apk add --no-cache make gcc g++ python git openssh bash supervisor jq
-WORKDIR /home/theia
-# build Theia with all extensions to persist yarn cache in the image and
-# have default Theia build in the workspace in case no plugins are requested
-ADD https://raw.githubusercontent.com/theia-ide/theia/v${THEIA_VERSION}/examples/browser/package.json /home/theia/package.json
-ADD theia-default-package.json /home/default/theia/package.json
-ADD src/versions.sh /home/default/versions.sh
-ADD src/resolutions-provider.js /home/default/resolutions-provider.js
-ADD src/resolutions-applier.js /home/default/resolutions-applier.js
+WORKDIR ${HOME}
+
+ADD src/ ${HOME}/
 ADD supervisord.conf /etc/
-RUN cd /home/default && \
-    ./versions.sh /home/theia/package.json && \
-    ./versions.sh /home/default/theia/package.json && \
-    node resolutions-provider.js /home/theia/package.json /home/default/resolutions.json && \
-    node resolutions-applier.js /home/default/resolutions.json /home/theia/package.json && \
-    node resolutions-applier.js /home/default/resolutions.json /home/default/theia/package.json && \
-    cd /home/theia && \
-    yarn && \
-    yarn theia build --mode development && \
-    rm -rf * && \
-    cd /home/default/theia && \
-    yarn && \
-    yarn theia build
 
-RUN find ${YARN_CACHE_FOLDER} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
-RUN mkdir -p /.yarn && chgrp 0 /.yarn && chmod g+rwX /.yarn && \
-    touch /.yarnrc && chgrp 0 /.yarnrc && chmod g+rwX /.yarnrc
-ADD src/main.js /theia_launcher/theia_launcher.js
-EXPOSE 3000
+RUN \
+    # Install needed software
+    apk update && apk add --no-cache make gcc g++ python git bash supervisor jq && \
+    rm -rf /tmp/* /var/cache/apk/* && \
+
+    # Change version of Theia to specified in THEIA_VERSION
+    ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
+
+    # Modificate pack
+
+
+    # Add Theia extensions
+    #==TODO== replace with master branch after Theia release
+    git clone --depth=1 -b latest-deps https://github.com/eclipse/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
+    node ${HOME}/add-extensions.js \
+        @eclipse-che/che-theia-hosted-plugin-manager-extension:file:///tmp/hosted-plugin-extension \
+        #che-theia-ssh-extension:https://github.com/eclipse/che-theia-ssh-plugin.git \
+    && rm ${HOME}/add-extensions.js && \
+    # Build Theia with all the extensions
+    cd ${HOME} && \
+    cat package.json && \
+    yarn && \
+    yarn theia build && \
+    # Install Theia plugin generator
+    #==TODO== add after generator-theia-plugin release
+    #npm install -g yo @wiptheia/generator-theia-plugin && \
+    # Change permissions to allow editing of files for openshift user
+    find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; && \
+    # Grant permissions for modifying supervisor log file
+    touch /var/log/supervisord.log && chmod g+rwX /var/log/supervisord.log && chgrp 0 /var/log/supervisord.log
 
 ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]

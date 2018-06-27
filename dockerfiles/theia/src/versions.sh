@@ -14,7 +14,8 @@ if [ -z "${THEIA_VERSION}" ]; then
     exit 1;
 fi
 
-PACKAGE_JSON_PATH="/home/default/theia/package.json"
+LATEST_VERSION="latest"
+PACKAGE_JSON_PATH="/home/theia/package.json"
 if [ "$1" ]; then
     PACKAGE_JSON_PATH="$1";
 fi
