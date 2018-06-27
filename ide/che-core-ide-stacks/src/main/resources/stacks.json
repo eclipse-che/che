@@ -732,6 +732,15 @@
             "goal": "Run"
           }
         }
+        {
+          "name": "test",
+          "type": "custom",
+          "commandLine": "cd ${current.project.path} && go get -d && go test",
+          "attributes": {
+            "previewUrl": "${server.8080/tcp}",
+            "goal": "Test"
+          }
+        }
       ]
     },
     "stackIcon": {
