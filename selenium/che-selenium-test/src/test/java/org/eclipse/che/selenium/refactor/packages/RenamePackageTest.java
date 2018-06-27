@@ -132,10 +132,10 @@ public class RenamePackageTest {
           + "}\n";
 
   private static String TEST9_HIERAR_OUT =
-      "package your;\n"
+      "package my2;\n"
           + "\n"
-          + "import your.a.ATest;\n"
-          + "import your.b.B;\n"
+          + "import my2.a.ATest;\n"
+          + "import my2.b.B;\n"
           + "\n"
           + "public class MyA {\n"
           + "}\n";
@@ -201,9 +201,9 @@ public class RenamePackageTest {
           + "Mine.pack\n";
 
   private static String TEST12_RENAME_WITH_RESOURCE_OUT =
-      "mine\n"
-          + "mine.\n"
-          + "mine.subpack\n"
+      "main\n"
+          + "main.\n"
+          + "main.subpack\n"
           + "mine.pack2\n"
           + "mine.pack2.subpack\n"
           + "not.mine.pack.subpack\n"
@@ -363,14 +363,9 @@ public class RenamePackageTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
-    loader.waitOnClosed();
-    refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
-    refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test3/fred");
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test3/r");
-    editor.waitTextIntoEditor(TEST3_R_OUT);
-    editor.closeFileByNameWithSaving("A");
+    refactor.waitTextInErrorMessage("Package already exists");
+    refactor.clickCancelButtonRefactorForm();
+    refactor.waitRenameFieldFormIsClosed();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/r/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/r/r/B.java");
     editor.waitTextIntoEditor(TEST3_R_R_OUT);
@@ -555,8 +550,8 @@ public class RenamePackageTest {
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
     refactor.waitRenamePackageFormIsOpen();
-    refactor.sendKeysIntoField("your");
-    refactor.waitTextIntoNewNameField("your");
+    refactor.sendKeysIntoField("my2");
+    refactor.waitTextIntoNewNameField("my2");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
@@ -565,8 +560,8 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/your");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/your/MyA.java");
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/my2");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my2/MyA.java");
     editor.waitTextIntoEditor(TEST9_HIERAR_OUT);
     editor.closeFileByNameWithSaving("MyA");
   }
@@ -636,8 +631,8 @@ public class RenamePackageTest {
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     loader.waitOnClosed();
-    refactor.sendKeysIntoField("mine");
-    refactor.waitTextIntoNewNameField("mine");
+    refactor.sendKeysIntoField("main");
+    refactor.waitTextIntoNewNameField("main");
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(true);
@@ -646,8 +641,8 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenamePackageFormIsClosed();
     loader.waitOnClosed();
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/mine");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/Textfile.txt");
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/main");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/main/Textfile.txt");
     editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_OUT);
     editor.closeFileByNameWithSaving("Textfile.txt");
   }

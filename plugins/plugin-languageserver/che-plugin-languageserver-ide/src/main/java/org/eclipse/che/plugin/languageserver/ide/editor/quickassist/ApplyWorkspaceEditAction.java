@@ -51,6 +51,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.ResourceKind;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange;
@@ -264,7 +265,7 @@ public class ApplyWorkspaceEditAction extends BaseAction {
         .getResource(path)
         .then(
             resource -> {
-              if (ResourceKind.FOLDER.equals(kind)) {
+              if (ResourceKind.FOLDER.equals(kind) && !resource.isPresent()) {
                 projectService
                     .createFolder(path)
                     .catchError(
@@ -292,6 +293,7 @@ public class ApplyWorkspaceEditAction extends BaseAction {
         .move(path)
         .then(
             movedResource -> {
+              eventBus.fireEvent(new RevealResourceEvent(movedResource.getLocation()));
               if (movedResource.isFolder()) {
                 return;
               }
