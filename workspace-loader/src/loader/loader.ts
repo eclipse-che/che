@@ -47,6 +47,26 @@ export class Loader {
         }
     }
 
+    /**
+     * Adds an error message to output console.
+     *
+     * @param message error message
+     */
+    error(message: string): void {
+        let container = document.getElementById("workspace-console-container");
+        if (container.childElementCount > 500) {
+            container.removeChild(container.firstChild)
+        }
+
+        let element = document.createElement("pre");
+        element.className = "error";
+        element.innerHTML = message;
+        container.appendChild(element);
+        if (element.scrollIntoView) {
+            element.scrollIntoView();
+        }
+    }
+
     onclick(): void {
         if (document.getElementById('workspace-loader').hasAttribute("max")) {
             document.getElementById('workspace-loader').removeAttribute("max");

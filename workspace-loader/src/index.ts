@@ -126,9 +126,6 @@ export class WorkspaceLoader {
         window.parent.postMessage("show-ide", "*");
     }
 
-    /**
-     * Loads the workspace.
-     */
     load(): Promise<void> {
         let workspaceKey = this.getWorkspaceKey();
 
@@ -140,15 +137,7 @@ export class WorkspaceLoader {
         return this.getWorkspace(workspaceKey)
             .then((workspace) => {
                 this.workspace = workspace;
-
-                if (this.hasPreconfiguredIDE()) {
-                    return this.handleWorkspace();
-                } else {
-                    return new Promise<void>((resolve) => {
-                        this.openURL(workspace.links.ide + this.getQueryString());
-                        resolve();
-                    });
-                }
+                return this.handleWorkspace();
             })
             .catch(err => {
                 console.error(err);
@@ -297,7 +286,13 @@ export class WorkspaceLoader {
                     (message: any) => this.onEnvironmentOutput(message.text));
 
                 master.subscribeWorkspaceStatus(this.workspace.id, 
-                    (message: any) => this.onWorkspaceStatusChanged(message.status));
+                    (message: any) => {
+                    if (message.error) {
+                       this.loader.error(message.error);
+                    } else {
+                        this.onWorkspaceStatusChanged(message.status);
+                    }
+                });
 
                 resolve();
             });
@@ -320,7 +315,6 @@ export class WorkspaceLoader {
                     }
                 }
             }
-
             this.openURL(workspace.links.ide + this.getQueryString());
         });
     }
@@ -332,7 +326,7 @@ export class WorkspaceLoader {
      * @param url url to be opened
      */
     openURL(url) : void {
-        // Preconfigured IDE may use dedicated port. In this case Chrome browser fails 
+        // Preconfigured IDE may use dedicated port. In this case Chrome browser fails
         // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
         setTimeout(() => {
             window.location.href = url;
