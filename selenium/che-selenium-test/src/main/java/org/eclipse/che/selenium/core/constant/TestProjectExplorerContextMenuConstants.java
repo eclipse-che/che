@@ -122,7 +122,8 @@ public final class TestProjectExplorerContextMenuConstants {
   public enum ContextMenuCommandGoals implements ContextMenuItems {
     COMMON("gwt-debug-contextMenu/Commands/goal_Common"),
     BUILD("gwt-debug-contextMenu/Commands/goal_Build"),
-    RUN("gwt-debug-contextMenu/Commands/goal_Run");
+    RUN("gwt-debug-contextMenu/Commands/goal_Run"),
+    DEBUG("gwt-debug-contextMenu/Commands/goal_Debug");
 
     private final String itemId;
 

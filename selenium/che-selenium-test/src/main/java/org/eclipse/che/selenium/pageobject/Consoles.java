@@ -15,6 +15,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
@@ -31,6 +32,7 @@ import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -49,6 +51,9 @@ public class Consoles {
   private final WebDriverWait redrawDriverWait;
   private final WebDriverWait loadPageDriverWait;
   private final WebDriverWait updateProjDriverWait;
+  private final ProjectExplorer projectExplorer;
+  private final AskDialog askDialog;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   public static final String PROCESS_NAME_XPATH = "//span[text()='%s']";
   public static final String PROCESSES_MAIN_AREA = "gwt-debug-consolesPanel";
@@ -96,10 +101,18 @@ public class Consoles {
 
   @Inject
   public Consoles(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      ProjectExplorer projectExplorer,
+      AskDialog askDialog) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.projectExplorer = projectExplorer;
+    this.askDialog = askDialog;
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -451,5 +464,54 @@ public class Consoles {
     loadPageDriverWait
         .until(visibilityOfElementLocated(By.id("gwt-debug-terminal_clear_output")))
         .click();
+  }
+
+  public void startCommandFromProcessesArea(
+      String machineName,
+      ContextMenuCommandGoals goal,
+      String commandName,
+      String expectedMessageInTerminal) {
+    startCommandFromProcessesArea(machineName, goal, commandName);
+    waitTabNameProcessIsPresent(commandName);
+    waitProcessInProcessConsoleTree(commandName);
+    waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
+  }
+
+  // Open web page by url and check visibility of web element on opened page
+  public void startCommandAndCheckApp(String currentWindow, String webElementXpath) {
+    waitPreviewUrlIsPresent();
+    clickOnPreviewUrl();
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(webElementXpath));
+
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(currentWindow);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+  }
+
+  // Start command from project context menu and check expected message in Terminal
+  public void startCommandAndCheckResult(
+      String projectName,
+      ContextMenuCommandGoals goal,
+      String commandName,
+      String expectedMessageInTerminal) {
+    projectExplorer.waitAndSelectItem(projectName);
+    projectExplorer.invokeCommandWithContextMenu(goal, projectName, commandName);
+
+    waitTabNameProcessIsPresent(commandName);
+    waitProcessInProcessConsoleTree(commandName);
+    waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
+  }
+
+  public void closeProcessTabWithAskDialog(String tabName) {
+    String message =
+        format(
+            "The process %s will be terminated after closing console. Do you want to continue?",
+            tabName);
+    waitProcessInProcessConsoleTree(tabName);
+    closeProcessByTabName(tabName);
+    askDialog.acceptDialogWithText(message);
+    waitProcessIsNotPresentInProcessConsoleTree(tabName);
   }
 }
