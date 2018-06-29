@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
-import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 
 /**
  * The mechanism for handling all messages from the jdt.ls server and applying registered consumers.
@@ -35,7 +35,7 @@ public class ProgressorJsonRpcHandler {
   private final RequestHandlerConfigurator configurator;
   private final RequestTransmitter requestTransmitter;
 
-  private Set<Consumer<ProgressReportDto>> progressReportConsumers = new HashSet<>();
+  private Set<Consumer<ProgressReport>> progressReportConsumers = new HashSet<>();
 
   @Inject
   public ProgressorJsonRpcHandler(
@@ -63,11 +63,11 @@ public class ProgressorJsonRpcHandler {
   }
 
   /**
-   * Adds consumer for the event with {@link ProgressReportDto}.
+   * Adds consumer for the event with {@link ProgressReport}.
    *
    * @param consumer new consumer
    */
-  void addProgressReportHandler(Consumer<ProgressReportDto> consumer) {
+  void addProgressReportHandler(Consumer<ProgressReport> consumer) {
     progressReportConsumers.add(consumer);
   }
 
@@ -75,7 +75,7 @@ public class ProgressorJsonRpcHandler {
     configurator
         .newConfiguration()
         .methodName(PROGRESS_REPORT_METHOD)
-        .paramsAsDto(ProgressReportDto.class)
+        .paramsAsDto(ProgressReport.class)
         .noResult()
         .withConsumer(
             progressNotification ->
