@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 
 /**
  * Implementation of {@link ProgressView}.
@@ -40,7 +40,7 @@ public class ProgressViewImpl implements ProgressView {
   }
 
   @Override
-  public void updateProgressBar(ProgressReportDto progressor) {
+  public void updateProgressBar(ProgressReport progressor) {
     String label =
         isNullOrEmpty(progressor.getSubTask()) ? progressor.getStatus() : progressor.getSubTask();
     operationLabel.setText(label);

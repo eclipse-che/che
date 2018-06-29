@@ -17,8 +17,8 @@ import com.google.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.ide.ext.java.client.inject.factories.ProgressWidgetFactory;
-import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
 import org.eclipse.che.ide.util.Pair;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 
 /**
  * Presenter of the window which describes information about all running tasks.
@@ -50,7 +50,7 @@ public class ProgressMonitorPresenter {
    *
    * @param progress updated progress
    */
-  public void updateProgress(ProgressReportDto progress) {
+  public void updateProgress(ProgressReport progress) {
     String taskId = progress.getId();
     if (!progresses.containsKey(taskId)) {
       return;
@@ -79,7 +79,7 @@ public class ProgressMonitorPresenter {
    *
    * @param progress information about progress
    */
-  public void addProgress(ProgressReportDto progress) {
+  public void addProgress(ProgressReport progress) {
     String taskId = progress.getId();
     if (progresses.containsKey(taskId)) {
       updateProgress(progress);
@@ -96,7 +96,7 @@ public class ProgressMonitorPresenter {
    *
    * @param progress information about progress
    */
-  public void removeProgress(ProgressReportDto progress) {
+  public void removeProgress(ProgressReport progress) {
     String taskId = progress.getId();
     if (!progresses.containsKey(taskId)) {
       return;
