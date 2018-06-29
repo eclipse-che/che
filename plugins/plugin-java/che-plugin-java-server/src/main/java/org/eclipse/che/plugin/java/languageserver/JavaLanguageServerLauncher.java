@@ -43,6 +43,8 @@ import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
+import org.eclipse.che.jdt.ls.extension.api.dto.StatusReport;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
