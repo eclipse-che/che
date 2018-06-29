@@ -22,8 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.ext.java.client.progressor.background.BackgroundLoaderPresenter;
-import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
 import org.eclipse.che.ide.util.Pair;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 
 /**
  * Handler which receives messages from the jdt.ls server.
@@ -35,9 +35,9 @@ public class ProgressMessagesHandler {
   private static final int DELAY_MS = 20_000; // wait before check if task was update
   private final EventBus eventBus;
   private final BackgroundLoaderPresenter backgroundLoader;
-  private Map<String, Pair<ProgressReportDto, Long>> progresses = new LinkedHashMap<>();
+  private Map<String, Pair<ProgressReport, Long>> progresses = new LinkedHashMap<>();
 
-  private ProgressReportDto currentProgress;
+  private ProgressReport currentProgress;
 
   @Inject
   public ProgressMessagesHandler(
@@ -55,7 +55,7 @@ public class ProgressMessagesHandler {
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> backgroundLoader.hide());
   }
 
-  private void handleProgressNotification(ProgressReportDto progress) {
+  private void handleProgressNotification(ProgressReport progress) {
     if (isNullOrEmpty(progress.getId())) {
       return;
     }
@@ -96,12 +96,12 @@ public class ProgressMessagesHandler {
     Scheduler.get()
         .scheduleFixedDelay(
             () -> {
-              for (Iterator<Map.Entry<String, Pair<ProgressReportDto, Long>>> it =
+              for (Iterator<Map.Entry<String, Pair<ProgressReport, Long>>> it =
                       progresses.entrySet().iterator();
                   it.hasNext(); ) {
-                Map.Entry<String, Pair<ProgressReportDto, Long>> entry = it.next();
+                Map.Entry<String, Pair<ProgressReport, Long>> entry = it.next();
                 long lastUpdate = entry.getValue().getSecond();
-                ProgressReportDto progress = entry.getValue().getFirst();
+                ProgressReport progress = entry.getValue().getFirst();
                 if ((currentTimeMillis() - lastUpdate) > DELAY_MS) {
                   it.remove();
                   backgroundLoader.removeProgress(progress);
@@ -126,12 +126,12 @@ public class ProgressMessagesHandler {
     }
   }
 
-  private boolean progressFinished(ProgressReportDto progress) {
+  private boolean progressFinished(ProgressReport progress) {
     return progresses.containsKey(progress.getId())
         && (progress.isComplete() || progress.getTotalWork() == progress.getWorkDone());
   }
 
-  private void addFirstProgress(ProgressReportDto progress) {
+  private void addFirstProgress(ProgressReport progress) {
     currentProgress = progress;
     progresses.put(currentProgress.getId(), Pair.of(progress, currentTimeMillis()));
     startProcessesCleaner();
