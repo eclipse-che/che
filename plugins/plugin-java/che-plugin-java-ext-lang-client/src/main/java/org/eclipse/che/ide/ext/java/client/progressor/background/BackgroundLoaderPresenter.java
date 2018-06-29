@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.ext.java.client.progressor.ProgressMonitorPresenter;
-import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 
 /**
  * Loader for displaying information about resolving task from the jdt.ls server.
@@ -51,7 +51,7 @@ public class BackgroundLoaderPresenter implements BackgroundLoaderView.ActionDel
   }
 
   /** Change the value of resolved modules of the project. */
-  public void updateProgressBar(ProgressReportDto progress) {
+  public void updateProgressBar(ProgressReport progress) {
     view.setOperationLabel(progress.getTask());
     int totalWork = progress.getTotalWork();
     if (totalWork > 0) {
@@ -71,7 +71,7 @@ public class BackgroundLoaderPresenter implements BackgroundLoaderView.ActionDel
    *
    * @param progress information about the task
    */
-  public void addProgress(ProgressReportDto progress) {
+  public void addProgress(ProgressReport progress) {
     progressMonitorPresenter.addProgress(progress);
   }
 
@@ -80,7 +80,7 @@ public class BackgroundLoaderPresenter implements BackgroundLoaderView.ActionDel
    *
    * @param progress information about the task
    */
-  public void removeProgress(ProgressReportDto progress) {
+  public void removeProgress(ProgressReport progress) {
     progressMonitorPresenter.removeProgress(progress);
   }
 }

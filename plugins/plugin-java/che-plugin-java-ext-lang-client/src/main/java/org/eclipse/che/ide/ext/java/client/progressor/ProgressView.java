@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.java.client.progressor;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.ImplementedBy;
-import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 
 /**
  * The widget which describes one progress from the progress monitor.
@@ -26,5 +26,5 @@ public interface ProgressView extends IsWidget {
    *
    * @param progress information about progress
    */
-  void updateProgressBar(ProgressReportDto progress);
+  void updateProgressBar(ProgressReport progress);
 }

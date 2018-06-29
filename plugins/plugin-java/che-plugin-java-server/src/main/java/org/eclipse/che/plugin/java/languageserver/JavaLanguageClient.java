@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.java.languageserver;
 
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
+import org.eclipse.che.jdt.ls.extension.api.dto.StatusReport;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;

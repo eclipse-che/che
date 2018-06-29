@@ -21,7 +21,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 
 /** Send jdt.ls events using JSON RPC to the clients. */
 @Singleton
@@ -52,7 +52,7 @@ public class ProcessorJsonRpcCommunication {
   }
 
   public void sendProgressNotification(ProgressReport report) {
-    ProgressReportDto reportDto = DtoFactory.newDto(ProgressReportDto.class);
+    ProgressReport reportDto = DtoFactory.newDto(ProgressReport.class);
     reportDto.setComplete(report.isComplete());
     reportDto.setStatus(report.getStatus());
     reportDto.setTask(report.getTask());
