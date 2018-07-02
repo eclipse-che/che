@@ -18,4 +18,7 @@ public interface TestCommandsConstants {
   String RUN_COMMAND = "run";
   String BUILD_COMMAND = "build";
   String DEBUG_COMMAND = "debug";
+  String BUILD_AND_RUN_COMMAND = "build and run";
+  String STOP_TOMCAT_COMMAND = "stop tomcat";
+  String RUN_TOMCAT_COMMAND = "run tomcat";
 }

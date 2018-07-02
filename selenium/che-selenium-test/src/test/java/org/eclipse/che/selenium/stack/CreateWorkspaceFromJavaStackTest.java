@@ -12,10 +12,18 @@ package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.LISTENING_AT_ADDRESS_8000;
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.SERVER_STARTUP_IN;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.BUILD_COMMAND;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_AND_RUN_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.DEBUG_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_TOMCAT_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.STOP_TOMCAT_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.openqa.selenium.Keys.ENTER;
 
@@ -54,8 +62,6 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @BeforeClass
   public void setUp() {
-    projects.add(CONSOLE_JAVA_SIMPLE);
-    projects.add(WEB_JAVA_SPRING);
 
     dashboard.open();
   }
@@ -78,35 +84,47 @@ public class CreateWorkspaceFromJavaStackTest {
   @Test(priority = 1)
   public void checkConsoleJavaSimpleCommands() {
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_SIMPLE, BUILD, BUILD_COMMAND, BUILD_SUCCESS);
+        CONSOLE_JAVA_SIMPLE, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_SIMPLE, BUILD, "console-java-simple:build", BUILD_SUCCESS);
+        CONSOLE_JAVA_SIMPLE,
+        BUILD_GOAL,
+        BUILD_COMMAND_ITEM.getItem(CONSOLE_JAVA_SIMPLE),
+        BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_SIMPLE, RUN, "console-java-simple:run", "Hello World Che!");
+        CONSOLE_JAVA_SIMPLE,
+        RUN_GOAL,
+        RUN_COMMAND_ITEM.getItem(CONSOLE_JAVA_SIMPLE),
+        "Hello World Che!");
   }
 
   @Test(priority = 1)
   public void checkWebJavaSpringCommands() {
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING, BUILD, BUILD_COMMAND, BUILD_SUCCESS);
+        WEB_JAVA_SPRING, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING, BUILD, "web-java-spring:build", BUILD_SUCCESS);
+        WEB_JAVA_SPRING, BUILD_GOAL, BUILD_COMMAND_ITEM.getItem(WEB_JAVA_SPRING), BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING, RUN, "web-java-spring:build and run", "Server startup in");
+        WEB_JAVA_SPRING,
+        RUN_GOAL,
+        BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING),
+        SERVER_STARTUP_IN);
     consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
-    consoles.closeProcessTabWithAskDialog("web-java-spring:build and run");
+    consoles.closeProcessTabWithAskDialog(BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING));
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING, RUN, "web-java-spring:run tomcat", "Server startup in");
+        WEB_JAVA_SPRING,
+        RUN_GOAL,
+        RUN_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING),
+        SERVER_STARTUP_IN);
     consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
 
     // execute 'stop tomcat' command and check that tomcat is not running
     projectExplorer.invokeCommandWithContextMenu(
-        RUN, WEB_JAVA_SPRING, "web-java-spring:stop tomcat");
+        RUN_GOAL, WEB_JAVA_SPRING, STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING));
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
     terminal.typeIntoTerminal("ps ax");
     terminal.typeIntoTerminal(ENTER.toString());
@@ -114,8 +132,8 @@ public class CreateWorkspaceFromJavaStackTest {
 
     consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING,
-        DEBUG,
-        "web-java-spring:debug",
-        "Listening for transport dt_socket at address: 8000");
+        DEBUG_GOAL,
+        DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_SPRING),
+        LISTENING_AT_ADDRESS_8000);
   }
 }

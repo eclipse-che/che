@@ -143,7 +143,7 @@ public class WorkspaceDetails {
         .until(textToBePresentInElement(workspaceState, stateWorkspace.getStatus()));
   }
 
-  /** click on 'RUN' button in 'Workspace Information' */
+  /** click on 'RUN_GOAL' button in 'Workspace Information' */
   public void clickOnRunWorkspace() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(elementToBeClickable(runWorkspaceBtn))

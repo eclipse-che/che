@@ -14,7 +14,6 @@ import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.CUSTOM_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.CUSTOM_TYPE;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 
 import com.google.inject.Inject;
@@ -24,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -82,7 +82,8 @@ public class CheckMacrosFeatureTest {
     editor.waitActive();
     editor.waitTabIsPresent("README.md");
 
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, COMMAND_NAME);
+    projectExplorer.invokeCommandWithContextMenu(
+        ContextMenuCommandGoals.COMMON_GOAL, PROJECT_NAME, COMMAND_NAME);
     console.waitIsCommandConsoleOpened(20);
     console.waitExpectedTextIntoConsole(expectedText);
 
