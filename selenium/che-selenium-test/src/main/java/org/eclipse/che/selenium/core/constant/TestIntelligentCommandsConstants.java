@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.core.constant;
 
+import static java.lang.String.format;
+
 /** */
 public final class TestIntelligentCommandsConstants {
 
@@ -33,7 +35,7 @@ public final class TestIntelligentCommandsConstants {
     }
 
     public String getItem(String projectName) {
-      return String.format(itemTemplate, projectName);
+      return format(itemTemplate, projectName);
     }
   }
 

@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -485,7 +486,7 @@ public class Consoles {
     clickOnPreviewUrl();
     seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
-    seleniumWebDriverHelper.waitVisibility(webElement);
+    seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
 
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
