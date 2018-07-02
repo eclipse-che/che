@@ -29,10 +29,12 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
+import org.eclipse.che.selenium.core.utils.HttpUtil;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -41,9 +43,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Aleksandr Shmaraev */
 @Singleton
@@ -99,6 +104,7 @@ public class Consoles {
   private final ActionsFactory actionsFactory;
   private final Loader loader;
   private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
+  private static final Logger LOG = LoggerFactory.getLogger(Consoles.class);
 
   @Inject
   public Consoles(
@@ -239,6 +245,21 @@ public class Consoles {
   /** Get url for preview. */
   public String getPreviewUrl() {
     return loadPageDriverWait.until(visibilityOf(previewUrl)).getText();
+  }
+
+  /** Wait until url for preview is responsive. */
+  public void waitPreviewUrlIsResponsive(int timeoutInSec) {
+    new WebDriverWait(seleniumWebDriver, timeoutInSec)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  try {
+                    return (HttpUtil.getUrlResponseCode(getPreviewUrl()) == 200);
+                  } catch (IOException ex) {
+                    LOG.warn(format("Url %s is inaccessible", getPreviewUrl()));
+                    return false;
+                  }
+                });
   }
 
   /** click on the 'Close' icon of the terminal into "Consoles' area */
@@ -483,7 +504,9 @@ public class Consoles {
     String currentWindow = seleniumWebDriver.getWindowHandle();
 
     waitPreviewUrlIsPresent();
+    waitPreviewUrlIsResponsive(10);
     clickOnPreviewUrl();
+
     seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
     seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
