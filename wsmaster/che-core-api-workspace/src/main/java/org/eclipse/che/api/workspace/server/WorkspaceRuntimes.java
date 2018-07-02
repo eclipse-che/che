@@ -68,7 +68,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -760,7 +760,7 @@ public class WorkspaceRuntimes {
       Map<String, String> workspaceAttributes,
       String recipeType)
       throws InfrastructureException {
-    Collection<CheService> cheServices = workspaceNextObjectsRetriever.get(workspaceAttributes);
+    Collection<ChePlugin> cheServices = workspaceNextObjectsRetriever.get(workspaceAttributes);
     if (cheServices.isEmpty()) {
       return;
     }

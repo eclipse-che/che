@@ -14,7 +14,7 @@ import com.google.common.annotations.Beta;
 import java.util.Collection;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 
 /**
  * Applies Workspace.Next configuration to an internal runtime object that represents workspace
@@ -33,6 +33,6 @@ public interface WorkspaceNextApplier {
    * @param cheServices Workspace.Next configuration to apply to {@code internalEnvironment}
    * @throws InfrastructureException when applying Workspace.Next objects fails
    */
-  void apply(InternalEnvironment internalEnvironment, Collection<CheService> cheServices)
+  void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> cheServices)
       throws InfrastructureException;
 }
