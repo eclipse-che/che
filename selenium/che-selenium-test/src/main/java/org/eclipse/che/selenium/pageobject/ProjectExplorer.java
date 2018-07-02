@@ -68,6 +68,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,9 @@ public class ProjectExplorer {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory waitFactory;
   private final int DEFAULT_TIMEOUT;
+
+  @FindBy(id = "git.reference.name")
+  WebElement projectReference;
 
   @Inject
   public ProjectExplorer(
@@ -285,6 +289,12 @@ public class ProjectExplorer {
 
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
+  }
+
+  public void waitReferenceName(String reference) {
+    loader.waitOnClosed();
+
+    seleniumWebDriverHelper.waitTextEqualsTo(projectReference, "(" + reference + ")");
   }
 
   /**
