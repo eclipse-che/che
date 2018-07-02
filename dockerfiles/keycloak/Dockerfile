@@ -5,7 +5,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-FROM jboss/keycloak-openshift:3.3.0.CR2-3
+FROM jboss/keycloak-openshift:3.4.3.Final
 ADD che /opt/jboss/keycloak/themes/che
 ADD . /scripts/
 ADD cli /scripts/cli

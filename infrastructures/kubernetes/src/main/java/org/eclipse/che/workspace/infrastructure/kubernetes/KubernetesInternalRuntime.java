@@ -772,19 +772,17 @@ public class KubernetesInternalRuntime<
     }
   }
 
-  /** Listens container's events and publish them as machine logs. */
+  /** Listens pod events and publish them as machine logs. */
   public class MachineLogsPublisher implements PodEventHandler {
 
     @Override
     public void handle(PodEvent event) {
       final String podName = event.getPodName();
-      final String containerName = event.getContainerName();
       try {
         for (Entry<String, KubernetesMachineImpl> entry :
             machines.getMachines(getContext().getIdentity()).entrySet()) {
           final KubernetesMachineImpl machine = entry.getValue();
-          if (machine.getPodName().equals(podName)
-              && machine.getContainerName().equals(containerName)) {
+          if (machine.getPodName().equals(podName)) {
             eventPublisher.sendMachineLogEnvent(
                 entry.getKey(),
                 event.getMessage(),
