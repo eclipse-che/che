@@ -28,7 +28,7 @@ public final class TestIntelligentCommandsConstants {
     RUN_TOMCAT_COMMAND_ITEM("%s:run tomcat"),
     DEBUG_COMMAND_ITEM("%s:debug");
 
-    private String itemTemplate;
+    private final String itemTemplate;
 
     CommandItem(String itemTemplate) {
       this.itemTemplate = itemTemplate;

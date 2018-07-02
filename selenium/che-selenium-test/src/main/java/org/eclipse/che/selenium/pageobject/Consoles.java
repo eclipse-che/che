@@ -31,11 +31,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
+import javax.ws.rs.core.Response.Status;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.utils.HttpUtil;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -247,16 +249,18 @@ public class Consoles {
     return loadPageDriverWait.until(visibilityOf(previewUrl)).getText();
   }
 
-  /** Wait until url for preview is responsive. */
+  /** Wait until url for preview is responsive, that is requesting by url returns Status.OK. */
   public void waitPreviewUrlIsResponsive(int timeoutInSec) {
-    new WebDriverWait(seleniumWebDriver, timeoutInSec)
+    new WebDriverWaitFactory(seleniumWebDriver)
+        .get(timeoutInSec)
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
                   try {
-                    return (HttpUtil.getUrlResponseCode(getPreviewUrl()) == 200);
+                    return (HttpUtil.getUrlResponseCode(getPreviewUrl())
+                        == Status.OK.getStatusCode());
                   } catch (IOException ex) {
-                    LOG.warn(format("Url %s is inaccessible", getPreviewUrl()));
+                    LOG.warn(format("Preview URL %s is still inaccessible.", getPreviewUrl()));
                     return false;
                   }
                 });

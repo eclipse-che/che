@@ -10,34 +10,23 @@
  */
 package org.eclipse.che.selenium.core.utils;
 
-import static java.lang.String.format;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpUtil {
-
-  private static final Logger LOG = LoggerFactory.getLogger(HttpUtil.class);
 
   /**
    * Gets the status code from URL.
    *
    * @param url url to check
-   * @return the HTTP Status-Code, or -1
+   * @return {@link HttpURLConnection#getResponseCode()}
    */
   public static int getUrlResponseCode(String url) throws IOException {
-    try {
-      URL connectionUrl = new URL(url);
-      HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
-      connection.setRequestMethod("GET");
+    URL connectionUrl = new URL(url);
+    HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
+    connection.setRequestMethod("GET");
 
-      return connection.getResponseCode();
-    } catch (IOException ex) {
-      LOG.error(format("There was a problem with connecting to URL '%s'", url), ex);
-      throw new IOException(ex.getMessage(), ex);
-    }
+    return connection.getResponseCode();
   }
 }
