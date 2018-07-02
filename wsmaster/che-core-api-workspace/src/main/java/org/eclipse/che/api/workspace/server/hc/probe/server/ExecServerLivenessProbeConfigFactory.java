@@ -10,17 +10,11 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import static java.util.Collections.singletonMap;
-
 import java.net.MalformedURLException;
 import java.net.URL;
-import javax.inject.Inject;
-import javax.ws.rs.core.HttpHeaders;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.token.MachineTokenException;
-import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 /**
@@ -29,15 +23,10 @@ import org.eclipse.che.commons.env.EnvironmentContext;
  * @author Alexander Garagatyi
  */
 public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFactory {
-
   private final int successThreshold;
-  private final MachineTokenProvider machineTokenProvider;
 
-  @Inject
-  public ExecServerLivenessProbeConfigFactory(
-      MachineTokenProvider machineTokenProvider, int successThreshold) {
+  public ExecServerLivenessProbeConfigFactory(int successThreshold) {
     this.successThreshold = successThreshold;
-    this.machineTokenProvider = machineTokenProvider;
   }
 
   @Override
@@ -56,18 +45,12 @@ public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFact
           url.getHost(),
           url.getProtocol(),
           url.getPath().replaceFirst("/process$", "/liveness"),
-          singletonMap(
-              HttpHeaders.AUTHORIZATION,
-              "Bearer " + machineTokenProvider.getToken(userId, workspaceId)),
+          null,
           successThreshold,
           3,
           120,
           10,
           10);
-    } catch (MachineTokenException e) {
-      throw new InternalInfrastructureException(
-          "Failed to retrieve workspace token for exec-agent server liveness probe. Error: "
-              + e.getMessage());
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Exec agent server liveness probe url is invalid. Error: " + e.getMessage());
