@@ -54,7 +54,8 @@ export class CheFactoryTemplates {
             'machines': {
               'dev-machine': {
                 'installers': [
-                  'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'
+                  'org.eclipse.che.terminal',
+                  'org.eclipse.che.ws-agent'
                 ],
                 'servers': {},
                 'attributes': {
@@ -63,7 +64,7 @@ export class CheFactoryTemplates {
               }
             },
             'recipe': {
-              'content': 'codenvy/ubuntu_jdk8',
+              'content': 'eclipse/ubuntu_jdk8',
               'type': 'dockerimage'
             }
           }
@@ -114,8 +115,7 @@ export class CheFactoryTemplates {
               'dev-machine': {
                 'installers': [
                   'org.eclipse.che.terminal',
-                  'org.eclipse.che.ws-agent',
-                  'org.eclipse.che.ssh'
+                  'org.eclipse.che.ws-agent'
                 ],
                 'servers': {},
                 'attributes': {
@@ -124,7 +124,7 @@ export class CheFactoryTemplates {
               }
             },
             'recipe': {
-              'content': 'codenvy/ubuntu_jdk8',
+              'content': 'eclipse/ubuntu_jdk8',
               'type': 'dockerimage'
             }
           }

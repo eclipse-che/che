@@ -22,7 +22,7 @@ public interface AboutResources extends ClientBundle {
   @Source("actions/support.svg")
   SVGResource getSupport();
 
-  @Source("About.css")
+  @Source({"org/eclipse/che/ide/api/ui/style.css", "About.css"})
   AboutCss aboutCss();
 
   interface AboutCss extends CssResource {
@@ -37,5 +37,7 @@ public interface AboutResources extends ClientBundle {
     String mainText();
 
     String logo();
+
+    String debugSummaryTextArea();
   }
 }

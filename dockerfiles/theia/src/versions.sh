@@ -15,7 +15,7 @@ if [ -z "${THEIA_VERSION}" ]; then
 fi
 
 LATEST_VERSION="latest"
-PACKAGE_JSON_PATH="/home/default/theia/package.json"
+PACKAGE_JSON_PATH="/home/theia/package.json"
 
 # modify  package json files according to provided THEIA_VERSION. Check if included packages are available before running sed
 PACKAGES_FULL=$(cat ${PACKAGE_JSON_PATH} | jq -r '.dependencies | keys | .[]')

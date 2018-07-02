@@ -8,15 +8,21 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event;
+package org.eclipse.che.ide.ext.help.client.about.info;
+
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * Defines the handling mechanism for Kubernetes container events.
+ * View for the {@link BuildDetailsViewImpl}.
  *
- * @author Sergii Leshchenko
+ * @author Vlad Zhukovskyi
+ * @since 6.7.0
  */
-public interface ContainerEventHandler {
+public interface BuildDetailsView extends View<BuildDetailsView.ActionDelegate> {
 
-  /** Handles the container event. */
-  void handle(ContainerEvent event);
+  void setBuildDetails(String details);
+
+  void showDialog();
+
+  interface ActionDelegate {}
 }

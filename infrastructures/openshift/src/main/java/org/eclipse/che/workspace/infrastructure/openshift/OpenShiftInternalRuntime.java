@@ -110,10 +110,10 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     // TODO https://github.com/eclipse/che/issues/7653
     // project.pods().watch(new AbnormalStopHandler());
 
-    project.pods().watchContainers(new MachineLogsPublisher());
+    project.pods().watchEvents(new MachineLogsPublisher());
     if (!unrecoverableEvents.isEmpty()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      project.pods().watchContainers(new UnrecoverableEventHandler(pods));
+      project.pods().watchEvents(new UnrecoverablePodEventHandler(pods));
     }
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
