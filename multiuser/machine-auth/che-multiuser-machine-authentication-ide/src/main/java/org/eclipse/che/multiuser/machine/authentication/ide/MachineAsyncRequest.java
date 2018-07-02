@@ -38,7 +38,7 @@ public class MachineAsyncRequest extends AsyncRequest {
   @Override
   public Promise<Void> send() {
     requestBuilder.setIncludeCredentials(true);
-    header(AUTHORIZATION, token);
+    header(AUTHORIZATION, "Bearer " + token);
     return super.send();
   }
 
@@ -67,7 +67,7 @@ public class MachineAsyncRequest extends AsyncRequest {
   @Override
   public void send(final AsyncRequestCallback<?> callback) {
     requestBuilder.setIncludeCredentials(true);
-    header(AUTHORIZATION, token);
+    header(AUTHORIZATION, "Bearer " + token);
     super.send(callback);
   }
 }
