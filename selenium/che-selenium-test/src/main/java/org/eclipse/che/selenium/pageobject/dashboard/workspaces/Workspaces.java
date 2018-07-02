@@ -289,7 +289,17 @@ public class Workspaces {
 
   public void clickOnWorkspaceStopStartButton(String workspaceName) {
     String buttonXpath = String.format(WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON, workspaceName);
+
+    // to avoid clicking on the tooltip
+    moveCursorToWorkspaceRamSection(workspaceName);
+    waitWorkspaceActionTooltipDisappearance();
+
     seleniumWebDriverHelper.waitAndClick(By.xpath(buttonXpath));
+  }
+
+  public void waitWorkspaceActionTooltipDisappearance() {
+    String tooltipXpath = "//che-workspace-status//div[contains(@class, 'tooltip')]";
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(tooltipXpath));
   }
 
   public void moveCursorToWorkspaceRamSection(String workspaceName) {

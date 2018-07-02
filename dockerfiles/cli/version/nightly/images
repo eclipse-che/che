@@ -3,4 +3,4 @@ IMAGE_CHE=eclipse/che-server:nightly
 IMAGE_COMPOSE=docker/compose:1.10.1
 IMAGE_TRAEFIK=traefik:v1.5.0
 IMAGE_POSTGRES=centos/postgresql-96-centos7:9.6
-IMAGE_KEYCLOACK=jboss/keycloak-openshift:3.3.0.CR2-3
+IMAGE_KEYCLOACK=jboss/keycloak-openshift:3.4.3.Final

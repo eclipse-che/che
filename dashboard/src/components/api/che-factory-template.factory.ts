@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheFactoryTemplates} from './complete-factory-template';
+import {CheFactoryTemplates} from './factory-templates';
 
 /**
  * This class is handling the factory template retrieval
