@@ -30,10 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
@@ -91,8 +88,7 @@ public class OpenShiftInfraModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(LogsRootEnvVariableProvider.class);
 
-    bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
-    bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
+    install(new JpaKubernetesRuntimeCacheModule());
 
     Multibinder.newSetBinder(binder(), ServiceTermination.class)
         .addBinding()
