@@ -114,7 +114,7 @@ func (handler handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	token := req.URL.Query().Get("token")
 	if token == "" {
 	  header := req.Header.Get("Authorization")
-	  if header != "" && strings.HasPrefix(strings.ToUpper(header), strings.ToUpper("bearer")) {
+	  if header != "" && strings.HasPrefix(strings.ToLower(header), "bearer") {
 	   token = header[7:]
 	  }
 	}
@@ -134,7 +134,7 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	token := req.URL.Query().Get("token")
 	if token == "" {
 	  header := req.Header.Get("Authorization")
-	  if header != "" && strings.HasPrefix(strings.ToUpper(header), strings.ToUpper("bearer")) {
+	  if header != "" && strings.HasPrefix(strings.ToLower(header), "bearer") {
 	   token = header[7:]
 	  }
 	}
