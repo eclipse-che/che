@@ -132,10 +132,10 @@ public class RenamePackageTest {
           + "}\n";
 
   private static String TEST9_HIERAR_OUT =
-      "package my2;\n"
+      "package your;\n"
           + "\n"
-          + "import my2.a.ATest;\n"
-          + "import my2.b.B;\n"
+          + "import your.a.ATest;\n"
+          + "import your.b.B;\n"
           + "\n"
           + "public class MyA {\n"
           + "}\n";
@@ -349,27 +349,29 @@ public class RenamePackageTest {
 
   @Test
   public void checkTest3() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/fred");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/fred/A.java");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack/Textfile.txt");
     editor.waitActive();
-    editor.waitTextNotPresentIntoEditor(TEST3_R_OUT);
-    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test3/fred");
+    editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_IN);
+    editor.closeFileByNameWithSaving("Textfile.txt");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/mine/pack");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
-    refactor.sendKeysIntoField("test3.r");
-    refactor.waitTextIntoNewNameField("test3.r");
     loader.waitOnClosed();
+    refactor.sendKeysIntoField("main");
+    refactor.waitTextIntoNewNameField("main");
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
-    refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
-    refactor.waitTextInErrorMessage("Package already exists");
-    refactor.clickCancelButtonRefactorForm();
-    refactor.waitRenameFieldFormIsClosed();
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/r/r");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/r/r/B.java");
-    editor.waitTextIntoEditor(TEST3_R_R_OUT);
-    editor.closeFileByNameWithSaving("B");
+    refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(true);
+    refactor.typeAndWaitFileNamePatterns("*.txt");
+    loader.waitOnClosed();
+    refactor.clickOkButtonRefactorForm();
+    refactor.waitRenamePackageFormIsClosed();
+    loader.waitOnClosed();
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/main");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/main/Textfile.txt");
+    editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_OUT);
+    editor.closeFileByNameWithSaving("Textfile.txt");
   }
 
   @Test
@@ -550,8 +552,8 @@ public class RenamePackageTest {
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
     refactor.waitRenamePackageFormIsOpen();
-    refactor.sendKeysIntoField("my2");
-    refactor.waitTextIntoNewNameField("my2");
+    refactor.sendKeysIntoField("your");
+    refactor.waitTextIntoNewNameField("your");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
@@ -560,8 +562,8 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/my2");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my2/MyA.java");
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/your");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/your/MyA.java");
     editor.waitTextIntoEditor(TEST9_HIERAR_OUT);
     editor.closeFileByNameWithSaving("MyA");
   }
@@ -621,30 +623,33 @@ public class RenamePackageTest {
   }
 
   @Test
-  public void checkTestPackageRenameWithResource12() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack/Textfile.txt");
+  public void checkTest12() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/fred");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/fred/A.java");
     editor.waitActive();
-    editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_IN);
-    editor.closeFileByNameWithSaving("Textfile.txt");
-    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/mine/pack");
+    editor.waitTextNotPresentIntoEditor(TEST3_R_OUT);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test3/fred");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
+    refactor.sendKeysIntoField("test3.r");
+    refactor.waitTextIntoNewNameField("test3.r");
     loader.waitOnClosed();
-    refactor.sendKeysIntoField("main");
-    refactor.waitTextIntoNewNameField("main");
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(false);
-    refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(true);
-    refactor.typeAndWaitFileNamePatterns("*.txt");
+    refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
-    refactor.waitRenamePackageFormIsClosed();
     loader.waitOnClosed();
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/main");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/main/Textfile.txt");
-    editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_OUT);
-    editor.closeFileByNameWithSaving("Textfile.txt");
+    refactor.waitRenamePackageFormIsClosed();
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test3/fred");
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test3/r");
+    editor.waitTextIntoEditor(TEST3_R_OUT);
+    editor.closeFileByNameWithSaving("A");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/r/r");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/r/r/B.java");
+    editor.waitTextIntoEditor(TEST3_R_R_OUT);
+    editor.closeFileByNameWithSaving("B");
   }
 
   private void expandTestProject(String projectName) {
