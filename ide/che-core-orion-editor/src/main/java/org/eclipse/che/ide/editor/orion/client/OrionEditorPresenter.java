@@ -914,7 +914,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       }
     }
     if (TextEditorOperations.FORMAT == operation) {
-      if (getConfiguration().getContentFormatter() != null) {
+      ContentFormatter contentFormatter = getConfiguration().getContentFormatter();
+      if (contentFormatter != null && contentFormatter.canFormat(document)) {
         return true;
       }
     }
