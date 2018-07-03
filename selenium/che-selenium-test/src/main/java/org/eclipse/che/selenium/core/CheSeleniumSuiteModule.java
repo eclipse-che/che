@@ -102,17 +102,20 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestWorkspaceAgentApiEndpointUrlProvider.class)
         .to(CheTestWorkspaceAgentApiEndpointUrlProvider.class);
 
-    bind(TestWorkspaceProvider.class).to(CheTestWorkspaceProvider.class).asEagerSingleton();
     bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
 
+    install(
+        new FactoryModuleBuilder()
+            .implement(TestWorkspaceServiceClient.class, CheTestWorkspaceServiceClient.class)
+            .build(TestWorkspaceServiceClientFactory.class));
+
     bind(TestWorkspaceServiceClient.class).to(CheTestWorkspaceServiceClient.class);
+    bind(TestWorkspaceProvider.class).to(CheTestWorkspaceProvider.class).asEagerSingleton();
 
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
-    install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(TestUserServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(WebDriverLogsReaderFactory.class));
 
-    bind(TestWorkspaceProvider.class).to(CheTestWorkspaceProvider.class).asEagerSingleton();
     bind(PageObjectsInjector.class).to(PageObjectsInjectorImpl.class);
 
     if (parseBoolean(System.getenv(CHE_MULTIUSER_VARIABLE))) {
