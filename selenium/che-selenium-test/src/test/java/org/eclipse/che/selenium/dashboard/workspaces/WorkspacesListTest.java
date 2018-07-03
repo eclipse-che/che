@@ -22,8 +22,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -63,7 +63,7 @@ public class WorkspacesListTest {
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private CheTestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private DocumentationPage documentationPage;

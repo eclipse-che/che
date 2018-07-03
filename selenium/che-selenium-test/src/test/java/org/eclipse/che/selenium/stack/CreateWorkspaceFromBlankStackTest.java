@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PR
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.*;
@@ -44,7 +44,7 @@ public class CreateWorkspaceFromBlankStackTest {
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @BeforeClass
   public void setUp() {
