@@ -34,69 +34,68 @@ public class PreviewRefactoringTest {
 
   private static final String EXPECTED_TEXT_BEFORE_CHANGE =
       "import javax.servlet.http.HttpServletResponse;\n"
-          + " public class AppController implements Controller \n"
-          + "    private static final String secretNum \n"
+          + " public class AppController implements Controller {\n"
+          + "    private static final String secretNum = Integer.toString(new Random().nextInt(10));\n"
           + "     @Override \n"
-          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response\n"
-          + "        String a = request.getParameter\n"
+          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {\n"
+          + "        String a = request.getParameter(\"numGuess\");\n"
           + "        String result = \"\"; \n"
-          + "                 if (a != null && a.equals(secretNum\n"
-          + "            result = \"Congrats! The number is \"\n"
+          + "                 if (a != null && a.equals(secretNum)) {\n"
+          + "            result = \"Congrats! The number is \" + secretNum;\n"
           + "        }  \n"
           + "                 else if (a != null) { \n"
-          + "            result = \"Sorry, you failed. Try again later!\"\n"
+          + "            result = \"Sorry, you failed. Try again later!\";\n"
           + "        } \n"
-          + "         ModelAndView view = new ModelAndView\n"
-          + "        view.addObject(\"num\", result); ";
+          + "         ModelAndView view = new ModelAndView(\"guess_num\");\n"
+          + "        view.addObject(\"num\", result);";
 
   private static final String EXPECTED_TEXT_BEFORE_FIRST_SELECT_CHANGE =
       "    @Override \n"
-          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response\n"
-          + "        String numGuessByUser = request.getParameter\n"
+          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {\n"
+          + "        String numGuessByUser = request.getParameter(\"numGuess\");\n"
           + "        String result = \"\"; \n"
-          + "                 if (a != null && numGuessByUser.equals\n"
-          + "            result = \"Congrats! The number is \"\n"
+          + "                 if (a != null && numGuessByUser.equals(secretNum)) {\n"
+          + "            result = \"Congrats! The number is \" + secretNum;\n"
           + "        }  \n"
-          + "                 else if (numGuessByUser != null)\n"
-          + "            result = \"Sorry, you failed. Try again later!\"\n"
+          + "                 else if (numGuessByUser != null) {\n"
+          + "            result = \"Sorry, you failed. Try again later!\";\n"
           + "        } \n"
-          + "         ModelAndView view = new ModelAndView\n"
-          + "        view.addObject(\"num\", result); \n"
+          + "         ModelAndView view = new ModelAndView(\"guess_num\");\n"
+          + "        view.addObject(\"num\", result);\n"
           + "        return view; \n"
-          + "    }";
+          + "    } \n"
+          + "} ";
 
   private static final String EXPECTED_TEXT_BEFORE_SECOND_SELECT_CHANGE =
       "    @Override \n"
-          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response\n"
-          + "        String numGuessByUser = request.getParameter\n"
+          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {\n"
+          + "        String numGuessByUser = request.getParameter(\"numGuess\");\n"
           + "        String result = \"\"; \n"
-          + "                 if (numGuessByUser != null && a.equals\n"
-          + "            result = \"Congrats! The number is \"\n"
+          + "                 if (numGuessByUser != null && \n"
+          + "            result = \"Congrats! The number is \" + secretNum;\n"
           + "        }  \n"
-          + "                 else if (numGuessByUser != null)\n"
-          + "            result = \"Sorry, you failed. Try again later!\"\n"
+          + "                 else if (numGuessByUser != null) {\n"
+          + "            result = \"Sorry, you failed. Try again later!\";\n"
           + "        } \n"
-          + "         ModelAndView view = new ModelAndView\n"
-          + "        view.addObject(\"num\", result); \n"
+          + "         ModelAndView view = new ModelAndView(\"guess_num\");\n"
+          + "        view.addObject(\"num\", result);\n"
           + "        return view; \n"
-          + "    }";
+          + "    } \n"
+          + "}";
 
-  private static final String EXPECTED_TEXT_IN_RIGHT_EDITOR =
+  private static final String EXPECTED_TEXT_IN_LEFT_EDITOR =
       "import javax.servlet.http.HttpServletResponse;\n"
-          + " public class AppController implements\n"
-          + "    private static final String secretNum \n"
+          + " public class AppController implements Controller {\n"
+          + "    private static final String secretNum = Integer.toString(new Random().nextInt(10));\n"
           + "     @Override \n"
-          + "    public ModelAndView handleRequest\n"
-          + "        String numGuessByUser =\n"
+          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {\n"
+          + "        String numGuessByUser = request.getParameter(\"numGuess\");\n"
           + "        String result = \"\"; \n"
-          + "                 if (numGuessByUser != null\n"
-          + "            result = \"Congrats! The number is \"\n"
+          + "                 if (numGuessByUser != null && numGuessByUser\n"
+          + "            result = \"Congrats! The number is \" + secretNum;\n"
           + "        }  \n"
-          + "                 else if (numGuessByUser\n"
-          + "            result = \"Sorry, you failed. Try again later!\"\n"
-          + "        } \n"
-          + "         ModelAndView view = new\n"
-          + "        view.addObject(\"num\", result";
+          + "                 else if (numGuessByUser != null) {\n"
+          + "            result = \"Sorry, you failed. Try again later!\";";
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer explorer;
@@ -136,19 +135,17 @@ public class PreviewRefactoringTest {
     refactorPanel.clickPreviewButtonRefactorForm();
     refactorPanel.clickOnItemByNameAndPosition("AppController.java", 0);
     loader.waitOnClosed();
-    refactorPanel.checkTextFromLeftEditor(EXPECTED_TEXT_BEFORE_CHANGE);
-    refactorPanel.checkTextFromRightEditor(EXPECTED_TEXT_IN_RIGHT_EDITOR);
+    refactorPanel.checkTextFromLeftEditor(EXPECTED_TEXT_IN_LEFT_EDITOR);
+    refactorPanel.checkTextFromRightEditor(EXPECTED_TEXT_BEFORE_CHANGE);
     Assert.assertEquals(refactorPanel.getQuantityLeasedLineInLeftEditor(), 3);
     Assert.assertEquals(refactorPanel.getQuantityLeasedLineInRightEditor(), 3);
     refactorPanel.clickOnExpandItemByNameAndPosition("AppController", 0);
-    refactorPanel.clickOnExpandItemByNameAndPosition("AppController", 1);
-    refactorPanel.clickOnExpandItemByNameAndPosition("handleRequest", 0);
-    refactorPanel.clickOnItemByNameAndPosition("Update local variable reference", 1);
+    refactorPanel.clickOnItemByNameAndPosition("Textual change", 1);
     loader.waitOnClosed();
-    refactorPanel.checkTextFromLeftEditor(EXPECTED_TEXT_BEFORE_FIRST_SELECT_CHANGE);
-    refactorPanel.clickOnItemByNameAndPosition("Update local variable reference", 2);
+    refactorPanel.checkTextFromRightEditor(EXPECTED_TEXT_BEFORE_FIRST_SELECT_CHANGE);
+    refactorPanel.clickOnItemByNameAndPosition("Textual change", 2);
     loader.waitOnClosed();
-    refactorPanel.checkTextFromLeftEditor(EXPECTED_TEXT_BEFORE_SECOND_SELECT_CHANGE);
+    refactorPanel.checkTextFromRightEditor(EXPECTED_TEXT_BEFORE_SECOND_SELECT_CHANGE);
     Assert.assertEquals(refactorPanel.getQuantityLeasedLineInLeftEditor(), 1);
     Assert.assertEquals(refactorPanel.getQuantityLeasedLineInRightEditor(), 1);
   }

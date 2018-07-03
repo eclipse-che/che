@@ -173,6 +173,10 @@ public class RenameMethodInInterfaceTest {
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.clickOkButtonRefactorForm();
+    loader.waitOnClosed();
+    refactor.waitRenameMethodFormIsClosed();
+    loader.waitOnClosed();
+    editor.waitTextIntoEditor(contentFromOutA);
   }
 
   private void doRefactorByWizardWithExpectedWarningMessage(
