@@ -41,7 +41,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
 import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareInitializer;
