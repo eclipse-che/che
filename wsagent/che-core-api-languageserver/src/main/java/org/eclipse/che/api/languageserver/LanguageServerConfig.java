@@ -38,6 +38,13 @@ public interface LanguageServerConfig {
   RegexProvider getRegexpProvider();
 
   /**
+   * Get a file system location of a projects root folder
+   *
+   * @return sting representation of a projects root location
+   */
+  String getProjectsRoot();
+
+  /**
    * Language server related attributes.
    *
    * @return map of attributes
