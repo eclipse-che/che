@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
@@ -85,7 +86,7 @@ public class InstallerConfigProvisionerTest {
     machine2Env.put("existingEnv", "value");
 
     // when
-    installerConfigProvisioner.provision(runtimeIdentity, internalEnvironment);
+    installerConfigProvisioner.provision(runtimeIdentity, internalEnvironment, emptyList());
 
     // then
     assertEquals(machine1Env, ImmutableMap.of("envVar1", "value1", "envVar2", "value2"));
@@ -125,7 +126,7 @@ public class InstallerConfigProvisionerTest {
     machine2Servers.put("machine2Server", machine2Server);
 
     // when
-    installerConfigProvisioner.provision(runtimeIdentity, internalEnvironment);
+    installerConfigProvisioner.provision(runtimeIdentity, internalEnvironment, emptyList());
 
     // then
     assertEquals(

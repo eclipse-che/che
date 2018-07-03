@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -71,7 +72,7 @@ public class EnvVarEnvironmentProvisionerTest {
     when(provider1.get(any())).thenReturn(Pair.of("test", "test"));
 
     // when
-    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment);
+    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment, emptyList());
 
     // then
     verify(provider1).get(eq(RUNTIME_IDENTITY));
@@ -86,7 +87,7 @@ public class EnvVarEnvironmentProvisionerTest {
     when(provider2.get(any())).thenReturn(Pair.of("test", "test"));
 
     // when
-    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment);
+    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment, emptyList());
 
     // then
     verify(provider1).get(eq(RUNTIME_IDENTITY));
@@ -108,7 +109,7 @@ public class EnvVarEnvironmentProvisionerTest {
     when(provider2.get(any(RuntimeIdentity.class))).thenReturn(envVar2);
 
     // when
-    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment);
+    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment, emptyList());
 
     // then
     assertEquals(machine1Env, envVarsFromProviders);
@@ -127,7 +128,7 @@ public class EnvVarEnvironmentProvisionerTest {
     when(provider1.get(any(RuntimeIdentity.class))).thenReturn(envVar1);
 
     // when
-    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment);
+    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment, emptyList());
 
     // then
     assertEquals(
@@ -149,7 +150,7 @@ public class EnvVarEnvironmentProvisionerTest {
         .thenReturn(Pair.of(existingEnvVarName, envVarValueFromProvider));
 
     // when
-    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment);
+    provisioner.provision(RUNTIME_IDENTITY, internalEnvironment, emptyList());
 
     // then
     assertEquals(ImmutableMap.of(existingEnvVarName, oldEnvVarValue), machine1Env);

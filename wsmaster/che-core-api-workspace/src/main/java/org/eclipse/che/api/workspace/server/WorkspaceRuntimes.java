@@ -186,7 +186,7 @@ public class WorkspaceRuntimes {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
     // try to create internal environment to check if the specified environment is valid
-    createInternalEnvironment(environment, null);
+    createInternalEnvironment(environment);
   }
 
   /**
@@ -310,9 +310,10 @@ public class WorkspaceRuntimes {
     final String ownerId = EnvironmentContext.getCurrent().getSubject().getUserId();
     final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
     try {
-      InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getAttributes());
-      RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
+      Collection<CheService> cheServices =
+          workspaceNextObjectsRetriever.get(workspace.getAttributes());
+      InternalEnvironment internalEnv = createInternalEnvironment(environment);
+      RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv, cheServices);
       InternalRuntime runtime = runtimeContext.getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspaceId)) {
@@ -585,9 +586,10 @@ public class WorkspaceRuntimes {
 
     InternalRuntime runtime;
     try {
-      InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getAttributes());
-      runtime = infra.prepare(identity, internalEnv).getRuntime();
+      Collection<CheService> cheServices =
+          workspaceNextObjectsRetriever.get(workspace.getAttributes());
+      InternalEnvironment internalEnv = createInternalEnvironment(environment);
+      runtime = infra.prepare(identity, internalEnv, cheServices).getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
         statuses.putIfAbsent(identity.getWorkspaceId(), runtime.getStatus());
@@ -739,8 +741,7 @@ public class WorkspaceRuntimes {
     return environmentFactories.keySet();
   }
 
-  private InternalEnvironment createInternalEnvironment(
-      Environment environment, Map<String, String> workspaceAttributes)
+  private InternalEnvironment createInternalEnvironment(Environment environment)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType = environment.getRecipe().getType();
     InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
@@ -748,11 +749,8 @@ public class WorkspaceRuntimes {
       throw new NotFoundException(
           format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
     }
-    InternalEnvironment internalEnvironment = factory.create(environment);
 
-    applyWorkspaceNext(internalEnvironment, workspaceAttributes, recipeType);
-
-    return internalEnvironment;
+    return factory.create(environment);
   }
 
   private void applyWorkspaceNext(
