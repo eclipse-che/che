@@ -18,10 +18,10 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -41,13 +41,13 @@ public class OpenShiftProject extends KubernetesNamespace {
       OpenShiftClientFactory clientFactory,
       String workspaceId,
       String name,
-      KubernetesPods pods,
+      KubernetesDeployments deployments,
       KubernetesServices services,
       OpenShiftRoutes routes,
       KubernetesPersistentVolumeClaims pvcs,
       KubernetesIngresses ingresses,
       KubernetesSecrets secrets) {
-    super(clientFactory, workspaceId, name, pods, services, pvcs, ingresses, secrets);
+    super(clientFactory, workspaceId, name, deployments, services, pvcs, ingresses, secrets);
     this.clientFactory = clientFactory;
     this.routes = routes;
   }
@@ -84,7 +84,7 @@ public class OpenShiftProject extends KubernetesNamespace {
 
   /** Removes all object except persistent volume claims inside project. */
   public void cleanUp() throws InfrastructureException {
-    doRemove(routes::delete, services()::delete, pods()::delete, secrets()::delete);
+    doRemove(routes::delete, services()::delete, deployments()::delete, secrets()::delete);
   }
 
   private void create(String projectName, KubernetesClient kubeClient, OpenShiftClient ocClient)

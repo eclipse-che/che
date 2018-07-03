@@ -46,7 +46,8 @@ public class TerminalHttpConnectionServerCheckerTest {
             10,
             1,
             TimeUnit.SECONDS,
-            timer);
+            timer,
+            null);
   }
 
   @Test

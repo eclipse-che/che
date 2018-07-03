@@ -21,7 +21,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
@@ -85,7 +84,8 @@ public class ServersCheckerTest {
                 servers,
                 machineTokenProvider,
                 SERVER_PING_SUCCESS_THRESHOLD));
-    when(checker.doCreateChecker(any(URL.class), anyString())).thenReturn(connectionChecker);
+    when(checker.doCreateChecker(any(URL.class), anyString(), anyString()))
+        .thenReturn(connectionChecker);
     when(machineTokenProvider.getToken(anyString(), anyString())).thenReturn(MACHINE_TOKEN);
   }
 
@@ -98,7 +98,7 @@ public class ServersCheckerTest {
   }
 
   @Test(timeOut = 1000)
-  public void shouldUseMachineTokenWhenConstructionUrlToCheck() throws Exception {
+  public void shouldUseMachineTokenWhenCallChecker() throws Exception {
     servers.clear();
     servers.put("wsagent/http", new ServerImpl().withUrl("http://localhost"));
 
@@ -106,10 +106,11 @@ public class ServersCheckerTest {
     connectionChecker.getReportCompFuture().complete("wsagent/http");
 
     verify(machineTokenProvider).getToken(USER_ID, WORKSPACE_ID);
-    ArgumentCaptor<URL> urlCaptor = ArgumentCaptor.forClass(URL.class);
-    verify(checker).doCreateChecker(urlCaptor.capture(), eq("wsagent/http"));
-    URL urlToCheck = urlCaptor.getValue();
-    assertNotEquals(urlToCheck.getQuery().indexOf("token=" + MACHINE_TOKEN), -1);
+    ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
+    verify(checker)
+        .doCreateChecker(
+            eq(new URL("http://localhost/")), eq("wsagent/http"), tokenCaptor.capture());
+    assertEquals(tokenCaptor.getValue(), MACHINE_TOKEN);
   }
 
   @Test(timeOut = 1000)

@@ -58,7 +58,7 @@ public class KubernetesNamespace {
   private final String workspaceId;
   private final String name;
 
-  private final KubernetesPods pods;
+  private final KubernetesDeployments deployments;
   private final KubernetesServices services;
   private final KubernetesPersistentVolumeClaims pvcs;
   private final KubernetesIngresses ingresses;
@@ -70,7 +70,7 @@ public class KubernetesNamespace {
       KubernetesClientFactory clientFactory,
       String workspaceId,
       String name,
-      KubernetesPods pods,
+      KubernetesDeployments deployments,
       KubernetesServices services,
       KubernetesPersistentVolumeClaims pvcs,
       KubernetesIngresses kubernetesIngresses,
@@ -78,7 +78,7 @@ public class KubernetesNamespace {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
-    this.pods = pods;
+    this.deployments = deployments;
     this.services = services;
     this.pvcs = pvcs;
     this.ingresses = kubernetesIngresses;
@@ -90,7 +90,7 @@ public class KubernetesNamespace {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
-    this.pods = new KubernetesPods(name, workspaceId, clientFactory);
+    this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
@@ -122,8 +122,8 @@ public class KubernetesNamespace {
   }
 
   /** Returns object for managing {@link Pod} instances inside namespace. */
-  public KubernetesPods pods() {
-    return pods;
+  public KubernetesDeployments deployments() {
+    return deployments;
   }
 
   /** Returns object for managing {@link Service} instances inside namespace. */
@@ -148,7 +148,7 @@ public class KubernetesNamespace {
 
   /** Removes all object except persistent volume claims inside namespace. */
   public void cleanUp() throws InfrastructureException {
-    doRemove(ingresses::delete, services::delete, pods::delete, secrets::delete);
+    doRemove(ingresses::delete, services::delete, deployments::delete, secrets::delete);
   }
 
   /**
