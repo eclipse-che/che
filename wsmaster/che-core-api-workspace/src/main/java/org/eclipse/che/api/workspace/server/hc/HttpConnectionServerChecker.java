@@ -24,9 +24,11 @@ import java.util.concurrent.TimeUnit;
  * @author Alexander Garagatyi
  */
 public class HttpConnectionServerChecker extends ServerChecker {
+  private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String CONNECTION_HEADER = "Connection";
   private static final String CONNECTION_CLOSE = "close";
   private final URL url;
+  private final String token;
 
   public HttpConnectionServerChecker(
       URL url,
@@ -36,9 +38,11 @@ public class HttpConnectionServerChecker extends ServerChecker {
       long timeout,
       int successThreshold,
       TimeUnit timeUnit,
-      Timer timer) {
+      Timer timer,
+      String token) {
     super(machineName, serverRef, period, timeout, successThreshold, timeUnit, timer);
     this.url = url;
+    this.token = token;
   }
 
   @Override
@@ -50,6 +54,9 @@ public class HttpConnectionServerChecker extends ServerChecker {
       httpURLConnection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(3));
       httpURLConnection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(3));
       httpURLConnection.setRequestProperty(CONNECTION_HEADER, CONNECTION_CLOSE);
+      if (token != null) {
+        httpURLConnection.setRequestProperty(AUTHORIZATION_HEADER, "Bearer " + token);
+      }
       return isConnectionSuccessful(httpURLConnection);
     } catch (IOException e) {
       return false;
