@@ -1,5 +1,6 @@
 package org.eclipse.che.plugin.java.server.rest.recommend.model;
 
+/** The result of Recommendation */
 public class ResultModel {
 
   private String renameOriginalName;

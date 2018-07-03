@@ -2,6 +2,7 @@ package org.eclipse.che.plugin.java.server.rest.recommend.model;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+/** Information of a rename operation */
 public class DataModel {
   private String projectName;
   private String packageName;

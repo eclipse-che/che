@@ -14,6 +14,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+/**
+ * According to different rename operation, this class will parse the source file and calculate the
+ * recommendation.
+ */
 public class Parser {
 
   private ResultModel result;

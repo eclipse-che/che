@@ -17,6 +17,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+/**
+ * AST parser. This parser will be used if the type of the java element which is renamed is "field".
+ */
 public class FieldRefactorVisitor extends ASTVisitor {
 
   private ResultModel result;

@@ -5,6 +5,10 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+/**
+ * AST parser. This parser will be used if the type of the java element which is renamed is
+ * "override method".
+ */
 public class OverrideVisitor extends ASTVisitor {
 
   private IMethodBinding iMethodbinding;

@@ -22,6 +22,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+/**
+ * AST parser. This parser will be used if the type of the java element which is renamed is
+ * "method".
+ */
 public class MethodRefactorVisitor extends ASTVisitor {
 
   private ResultModel result;
