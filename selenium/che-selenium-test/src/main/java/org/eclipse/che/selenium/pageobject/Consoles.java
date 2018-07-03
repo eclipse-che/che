@@ -62,6 +62,7 @@ public class Consoles {
   private final ProjectExplorer projectExplorer;
   private final AskDialog askDialog;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWaitFactory webDriverWaitFactory;
 
   public static final String PROCESS_NAME_XPATH = "//span[text()='%s']";
   public static final String PROCESSES_MAIN_AREA = "gwt-debug-consolesPanel";
@@ -115,13 +116,15 @@ public class Consoles {
       ActionsFactory actionsFactory,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       ProjectExplorer projectExplorer,
-      AskDialog askDialog) {
+      AskDialog askDialog,
+      WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.projectExplorer = projectExplorer;
     this.askDialog = askDialog;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -251,7 +254,7 @@ public class Consoles {
 
   /** Wait until url for preview is responsive, that is requesting by url returns Status.OK. */
   public void waitPreviewUrlIsResponsive(int timeoutInSec) {
-    new WebDriverWaitFactory(seleniumWebDriver)
+    webDriverWaitFactory
         .get(timeoutInSec)
         .until(
             (ExpectedCondition<Boolean>)

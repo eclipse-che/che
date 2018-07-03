@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -81,14 +82,16 @@ public class JavaTestRunnerPluginConsole extends Consoles {
       ActionsFactory actionsFactory,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       ProjectExplorer projectExplorer,
-      AskDialog askDialog) {
+      AskDialog askDialog,
+      WebDriverWaitFactory webDriverWaitFactory) {
     super(
         seleniumWebDriver,
         loader,
         actionsFactory,
         seleniumWebDriverHelper,
         projectExplorer,
-        askDialog);
+        askDialog,
+        webDriverWaitFactory);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
