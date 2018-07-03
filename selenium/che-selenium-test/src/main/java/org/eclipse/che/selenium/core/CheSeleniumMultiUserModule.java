@@ -16,12 +16,10 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import org.eclipse.che.selenium.core.client.CheTestDefaultOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestMachineServiceClient;
-import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestMachineServiceClient;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClientFactory;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.keycloak.KeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
@@ -41,7 +39,6 @@ public class CheSeleniumMultiUserModule extends AbstractModule {
   protected void configure() {
     bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
-    bind(TestWorkspaceServiceClient.class).to(CheTestWorkspaceServiceClient.class);
 
     bind(DefaultTestUserProvider.class).to(MultiUserCheDefaultTestUserProvider.class);
 
