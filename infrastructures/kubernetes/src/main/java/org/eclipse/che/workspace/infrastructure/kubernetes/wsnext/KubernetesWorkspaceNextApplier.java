@@ -60,9 +60,9 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
   }
 
   @Override
-  public void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> cheServices)
+  public void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> chePlugins)
       throws InfrastructureException {
-    if (cheServices.isEmpty()) {
+    if (chePlugins.isEmpty()) {
       return;
     }
     KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) internalEnvironment;
@@ -72,8 +72,8 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
           "Workspace.Next configuration can be applied to a workspace with one pod only");
     }
     Pod pod = pods.values().iterator().next();
-    for (ChePlugin cheService : cheServices) {
-      for (CheContainer container : cheService.getContainers()) {
+    for (ChePlugin chePlugin : chePlugins) {
+      for (CheContainer container : chePlugin.getContainers()) {
         io.fabric8.kubernetes.api.model.Container k8sContainer =
             addContainer(pod, container.getImage(), container.getEnv());
 
@@ -83,7 +83,7 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
             addMachine(
                 kubernetesEnvironment,
                 machineName,
-                getContainerEndpoints(container.getPorts(), cheService.getEndpoints()),
+                getContainerEndpoints(container.getPorts(), chePlugin.getEndpoints()),
                 container.getVolumes());
 
         normalizeMemory(k8sContainer, machineConfig);

@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +39,8 @@ import org.eclipse.che.api.workspace.server.wsnext.model.CheFeature;
 import org.eclipse.che.api.workspace.server.wsnext.model.CheFeatureSpec;
 import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginEndpoint;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheServiceParameter;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheServiceReference;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginParameter;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginReference;
 import org.eclipse.che.api.workspace.server.wsnext.model.EnvVar;
 import org.eclipse.che.api.workspace.server.wsnext.model.ObjectMeta;
 import org.eclipse.che.api.workspace.server.wsnext.model.Volume;
@@ -59,25 +58,24 @@ public class WorkspaceNextObjectsRetrieverTest {
   private static final String TEST_FEATURE_2_NAME = "org.eclipse.che.example-plugin2";
   private static final String TEST_FEATURE_VERSION = "1.0.2";
   private static final String TEST_FEATURE_2_VERSION = "0.0.16";
-  private static final String TEST_SERVICE = "my-service";
-  private static final String TEST_SERVICE_2 = "my-test-service-2";
-  private static final String TEST_SERVICE_VERSION = "0.0.0";
-  private static final String TEST_SERVICE_VERSION_2 = "1.0.0-SNAPSHOT";
-  private static final String TEST_SERVICE_ENV_NAME = "MY_ENV";
-  private static final String TEST_SERVICE_ENV_NAME_2 = "MY_ENV_2";
-  private static final String TEST_SERVICE_ENV_NAME_3 = "MY_ENV_3";
-  private static final String TEST_SERVICE_ENV_VALUE = "MY_VALUE";
-  private static final String TEST_SERVICE_PARAM_NAME = "MY_PARAMETER_1";
-  private static final String TEST_SERVICE_PARAM_2_NAME = "TEST_PARAM_2";
-  private static final String TEST_SERVICE_PARAM_PLACEHOLDER = "${" + TEST_SERVICE_PARAM_NAME + "}";
-  private static final String TEST_SERVICE_PARAM_2_PLACEHOLDER =
-      "${" + TEST_SERVICE_PARAM_2_NAME + "}";
-  private static final String TEST_SERVICE_PARAM_VALUE = "http://github.com/plugin1";
-  private static final String TEST_SERVICE_PARAM_VALUE_2 = "http://github.com/plugin2";
-  private static final String TEST_SERVICE_IMAGE = "test/image:tag";
+  private static final String TEST_PLUGIN = "my-plugin";
+  private static final String TEST_PLUGIN_2 = "my-test-plugin-2";
+  private static final String TEST_PLUGIN_VERSION = "0.0.0";
+  private static final String TEST_PLUGIN_VERSION_2 = "1.0.0-SNAPSHOT";
+  private static final String TEST_PLUGIN_ENV_NAME = "MY_ENV";
+  private static final String TEST_PLUGIN_ENV_NAME_2 = "MY_ENV_2";
+  private static final String TEST_PLUGIN_ENV_NAME_3 = "MY_ENV_3";
+  private static final String TEST_PLUGIN_ENV_VALUE = "MY_VALUE";
+  private static final String TEST_PLUGIN_PARAM_NAME = "MY_PARAMETER_1";
+  private static final String TEST_PLUGIN_PARAM_2_NAME = "TEST_PARAM_2";
+  private static final String TEST_PLUGIN_PARAM_PLACEHOLDER = "${" + TEST_PLUGIN_PARAM_NAME + "}";
+  private static final String TEST_PLUGIN_PARAM_2_PLACEHOLDER =
+      "${" + TEST_PLUGIN_PARAM_2_NAME + "}";
+  private static final String TEST_PLUGIN_PARAM_VALUE = "http://github.com/plugin1";
+  private static final String TEST_PLUGIN_PARAM_VALUE_2 = "http://github.com/plugin2";
+  private static final String TEST_PLUGIN_IMAGE = "test/image:tag";
   private static final String TEST_SERVER_NAME = "serv1";
   private static final int TEST_SERVER_PORT = 9090;
-  private static final String TEST_SERVER_PROTOCOL = "https";
   private static final Map<String, String> TEST_SERVER_ATTRIBUTES = ImmutableMap.of("type", "ide");
   private static final String TEST_VOLUME_NAME = "vol1";
   private static final String TEST_VOLUME_PATH = "/vol1/test";
@@ -96,37 +94,37 @@ public class WorkspaceNextObjectsRetrieverTest {
   public void doesNothingWhenFeatureApiIsNotSet() throws Exception {
     retriever = new WorkspaceNextObjectsRetriever(null);
 
-    Collection<ChePlugin> services = retriever.get(SINGLE_FEATURE_ATTRIBUTES);
+    Collection<ChePlugin> plugins = retriever.get(SINGLE_FEATURE_ATTRIBUTES);
 
-    assertTrue(services.isEmpty());
+    assertTrue(plugins.isEmpty());
   }
 
   @Test
   public void doesNothingWhenAttributesAreEmpty() throws Exception {
-    Collection<ChePlugin> services = retriever.get(emptyMap());
+    Collection<ChePlugin> plugins = retriever.get(emptyMap());
 
-    assertTrue(services.isEmpty());
+    assertTrue(plugins.isEmpty());
   }
 
   @Test
   public void doesNothingWhenAttributesAreNull() throws Exception {
-    Collection<ChePlugin> services = retriever.get(null);
+    Collection<ChePlugin> plugins = retriever.get(null);
 
-    assertTrue(services.isEmpty());
+    assertTrue(plugins.isEmpty());
   }
 
   @Test
   public void doesNothingWhenThereIsNoFeaturesAttribute() throws Exception {
-    Collection<ChePlugin> services = retriever.get(singletonMap("not_feature_attribute", "value"));
+    Collection<ChePlugin> plugins = retriever.get(singletonMap("not_feature_attribute", "value"));
 
-    assertTrue(services.isEmpty());
+    assertTrue(plugins.isEmpty());
   }
 
   @Test
   public void doesNothingWhenFeaturesAttributeIsEmpty() throws Exception {
-    Collection<ChePlugin> services = retriever.get(singletonMap(WORKSPACE_NEXT_FEATURES, ""));
+    Collection<ChePlugin> plugins = retriever.get(singletonMap(WORKSPACE_NEXT_FEATURES, ""));
 
-    assertTrue(services.isEmpty());
+    assertTrue(plugins.isEmpty());
   }
 
   @Test(
@@ -181,9 +179,10 @@ public class WorkspaceNextObjectsRetrieverTest {
 
   @Test(
     expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Error occurred on retrieval of service .*. Error: test error"
+    expectedExceptionsMessageRegExp =
+        "Error occurred on retrieval of ChePlugin .*. Error: test error"
   )
-  public void throwsExceptionWhenServiceRetrievalFails() throws Exception {
+  public void throwsExceptionWhenPluginRetrievalFails() throws Exception {
     CheFeature cheFeature = testFeature();
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
     doThrow(new IOException("test error"))
@@ -196,14 +195,14 @@ public class WorkspaceNextObjectsRetrieverTest {
   @Test(
     expectedExceptions = InfrastructureException.class,
     expectedExceptionsMessageRegExp =
-        "Service '.*/.*' configuration is invalid. Version is missing."
+        "ChePlugin '.*/.*' configuration is invalid. Version is missing."
   )
-  public void throwExceptionIfServiceVersionIsNull() throws Exception {
+  public void throwExceptionIfPluginVersionIsNull() throws Exception {
     CheFeature cheFeature = testFeature();
-    ChePlugin service = testService();
-    service.setVersion(null);
+    ChePlugin plugin = testPlugin();
+    plugin.setVersion(null);
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
     retriever.get(SINGLE_FEATURE_ATTRIBUTES);
   }
@@ -211,42 +210,42 @@ public class WorkspaceNextObjectsRetrieverTest {
   @Test(
     expectedExceptions = InfrastructureException.class,
     expectedExceptionsMessageRegExp =
-        "Service '.*/.*' configuration is invalid. Version is missing."
+        "ChePlugin '.*/.*' configuration is invalid. Version is missing."
   )
-  public void throwExceptionIfServiceVersionIsEmpty() throws Exception {
+  public void throwExceptionIfPluginVersionIsEmpty() throws Exception {
     CheFeature cheFeature = testFeature();
-    ChePlugin service = testService();
-    service.setVersion("");
+    ChePlugin plugin = testPlugin();
+    plugin.setVersion("");
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
     retriever.get(SINGLE_FEATURE_ATTRIBUTES);
   }
 
   @Test(
     expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Service '.*/.*' configuration is invalid. Name is missing."
+    expectedExceptionsMessageRegExp = "ChePlugin '.*/.*' configuration is invalid. Name is missing."
   )
-  public void throwExceptionIfServiceNameIsNull() throws Exception {
+  public void throwExceptionIfPluginNameIsNull() throws Exception {
     CheFeature cheFeature = testFeature();
-    ChePlugin service = testService();
-    service.setName(null);
+    ChePlugin plugin = testPlugin();
+    plugin.setName(null);
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
     retriever.get(SINGLE_FEATURE_ATTRIBUTES);
   }
 
   @Test(
     expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Service '.*/.*' configuration is invalid. Name is missing."
+    expectedExceptionsMessageRegExp = "ChePlugin '.*/.*' configuration is invalid. Name is missing."
   )
-  public void throwExceptionIfServiceNameIsEmpty() throws Exception {
+  public void throwExceptionIfPluginNameIsEmpty() throws Exception {
     CheFeature cheFeature = testFeature();
-    ChePlugin service = testService();
-    service.setName("");
+    ChePlugin plugin = testPlugin();
+    plugin.setName("");
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
     retriever.get(SINGLE_FEATURE_ATTRIBUTES);
   }
@@ -254,15 +253,15 @@ public class WorkspaceNextObjectsRetrieverTest {
   @Test(
     expectedExceptions = InfrastructureException.class,
     expectedExceptionsMessageRegExp =
-        "Parameters not supported by services found: .*" + TEST_SERVICE_PARAM_NAME + ".*"
+        "Parameters not supported by che plugins found: .*" + TEST_PLUGIN_PARAM_NAME + ".*"
   )
-  public void throwExceptionIfValueForServiceParameterNotFound() throws Exception {
+  public void throwExceptionIfValueForPluginParameterNotFound() throws Exception {
     CheFeature cheFeature =
         testFeature(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_PARAM_NAME, TEST_SERVICE_PARAM_VALUE);
-    ChePlugin service = testServiceWithEnv(TEST_SERVICE_ENV_NAME, TEST_SERVICE_ENV_VALUE);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE);
+    ChePlugin plugin = testPluginWithEnv(TEST_PLUGIN_ENV_NAME, TEST_PLUGIN_ENV_VALUE);
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
     retriever.get(SINGLE_FEATURE_ATTRIBUTES);
   }
@@ -272,12 +271,12 @@ public class WorkspaceNextObjectsRetrieverTest {
     expectedExceptionsMessageRegExp = "Containers contain duplicated exposed ports."
   )
   public void throwExceptionIfContainerHasDuplicatedPorts() throws Exception {
-    ChePlugin service = testService();
-    List<CheContainerPort> containerPorts = service.getContainers().get(0).getPorts();
+    ChePlugin plugin = testPlugin();
+    List<CheContainerPort> containerPorts = plugin.getContainers().get(0).getPorts();
     CheContainerPort containerPort = new CheContainerPort().exposedPort(101010);
     containerPorts.add(containerPort);
     containerPorts.add(containerPort);
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
     CheFeature cheFeature = testFeature();
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
 
@@ -290,11 +289,11 @@ public class WorkspaceNextObjectsRetrieverTest {
         "Ports in containers and endpoints don't match. Difference: .*"
   )
   public void throwExceptionIfContainersAndEndpointsPortsDoNotMatch() throws Exception {
-    ChePlugin service = testService();
-    List<CheContainerPort> containerPorts = service.getContainers().get(0).getPorts();
+    ChePlugin plugin = testPlugin();
+    List<CheContainerPort> containerPorts = plugin.getContainers().get(0).getPorts();
     CheContainerPort containerPort = new CheContainerPort().exposedPort(101010);
     containerPorts.add(containerPort);
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
     CheFeature cheFeature = testFeature();
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
 
@@ -304,46 +303,43 @@ public class WorkspaceNextObjectsRetrieverTest {
   @Test
   public void testFeaturesWithoutParameters() throws Exception {
     CheFeature cheFeature = testFeature();
-    ChePlugin service = testService();
+    ChePlugin plugin = testPlugin();
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
-    Collection<ChePlugin> services = retriever.get(SINGLE_FEATURE_ATTRIBUTES);
+    Collection<ChePlugin> plugins = retriever.get(SINGLE_FEATURE_ATTRIBUTES);
 
-    assertEquals(services, singletonList(expectedService()));
+    assertEquals(plugins, singletonList(expectedPlugin()));
   }
 
   @Test
   public void testFeaturesWithParameter() throws Exception {
     CheFeature cheFeature =
         testFeature(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_PARAM_NAME, TEST_SERVICE_PARAM_VALUE);
-    ChePlugin service = testServiceWithEnv(TEST_SERVICE_ENV_NAME, TEST_SERVICE_PARAM_PLACEHOLDER);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE);
+    ChePlugin plugin = testPluginWithEnv(TEST_PLUGIN_ENV_NAME, TEST_PLUGIN_PARAM_PLACEHOLDER);
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
-    Collection<ChePlugin> services = retriever.get(SINGLE_FEATURE_ATTRIBUTES);
+    Collection<ChePlugin> plugins = retriever.get(SINGLE_FEATURE_ATTRIBUTES);
 
     assertEquals(
-        services,
-        singletonList(expectedServiceWithEnv(TEST_SERVICE_ENV_NAME, TEST_SERVICE_PARAM_VALUE)));
+        plugins,
+        singletonList(expectedPluginWithEnv(TEST_PLUGIN_ENV_NAME, TEST_PLUGIN_PARAM_VALUE)));
   }
 
   @Test
-  public void testFeaturesWithTheSameServicesAndTheSameParameters() throws Exception {
+  public void testFeaturesWithTheSamePluginsAndTheSameParameters() throws Exception {
     Map<String, String> featuresAttributes =
         featuresAttribute(
             TEST_FEATURE_NAME, TEST_FEATURE_VERSION, TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION);
     CheFeature feature1 =
         testFeature(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_PARAM_NAME, TEST_SERVICE_PARAM_VALUE);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE);
     CheFeature feature2 =
         testFeature(
-            TEST_SERVICE,
-            TEST_SERVICE_VERSION,
-            TEST_SERVICE_PARAM_NAME,
-            TEST_SERVICE_PARAM_VALUE_2);
-    ChePlugin service = testServiceWithEnv(TEST_SERVICE_ENV_NAME_2, TEST_SERVICE_PARAM_PLACEHOLDER);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE_2);
+    ChePlugin plugin = testPluginWithEnv(TEST_PLUGIN_ENV_NAME_2, TEST_PLUGIN_PARAM_PLACEHOLDER);
     doReturn(feature1)
         .when(retriever)
         .getBody(eq(getFeatureURI(TEST_FEATURE_NAME, TEST_FEATURE_VERSION)), eq(CheFeature.class));
@@ -351,47 +347,43 @@ public class WorkspaceNextObjectsRetrieverTest {
         .when(retriever)
         .getBody(
             eq(getFeatureURI(TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION)), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
 
-    Collection<ChePlugin> services = retriever.get(featuresAttributes);
+    Collection<ChePlugin> plugins = retriever.get(featuresAttributes);
 
     // we don't know the order of values in env var from feature, so we have to match it separately
     // - can't assert whole object
-    assertEquals(services.size(), 1);
-    ChePlugin actualService = services.iterator().next();
-    assertEquals(actualService.getContainers().size(), 1);
-    List<EnvVar> envVars = actualService.getContainers().iterator().next().getEnv();
+    assertEquals(plugins.size(), 1);
+    ChePlugin actualPlugin = plugins.iterator().next();
+    assertEquals(actualPlugin.getContainers().size(), 1);
+    List<EnvVar> envVars = actualPlugin.getContainers().iterator().next().getEnv();
     envVars
         .stream()
-        .filter(envVar -> envVar.getName().equals(TEST_SERVICE_ENV_NAME_2))
+        .filter(envVar -> envVar.getName().equals(TEST_PLUGIN_ENV_NAME_2))
         .forEach(
-            envVar -> {
-              assertEqualsNoOrder(
-                  envVar.getValue().split(","),
-                  new String[] {TEST_SERVICE_PARAM_VALUE_2, TEST_SERVICE_PARAM_VALUE});
-            });
+            envVar ->
+                assertEqualsNoOrder(
+                    envVar.getValue().split(","),
+                    new String[] {TEST_PLUGIN_PARAM_VALUE_2, TEST_PLUGIN_PARAM_VALUE}));
   }
 
   @Test
-  public void testFeaturesWithTheSameServicesButDifferentParameters() throws Exception {
+  public void testFeaturesWithTheSamePluginsButDifferentParameters() throws Exception {
     Map<String, String> featuresAttributes =
         featuresAttribute(
             TEST_FEATURE_NAME, TEST_FEATURE_VERSION, TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION);
     CheFeature feature1 =
         testFeature(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_PARAM_NAME, TEST_SERVICE_PARAM_VALUE);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE);
     CheFeature feature2 =
         testFeature(
-            TEST_SERVICE,
-            TEST_SERVICE_VERSION,
-            TEST_SERVICE_PARAM_2_NAME,
-            TEST_SERVICE_PARAM_VALUE_2);
-    ChePlugin service =
-        testService(
-            TEST_SERVICE_ENV_NAME_2,
-            TEST_SERVICE_PARAM_PLACEHOLDER,
-            TEST_SERVICE_ENV_NAME_3,
-            TEST_SERVICE_PARAM_2_PLACEHOLDER);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_2_NAME, TEST_PLUGIN_PARAM_VALUE_2);
+    ChePlugin plugin =
+        testPlugin(
+            TEST_PLUGIN_ENV_NAME_2,
+            TEST_PLUGIN_PARAM_PLACEHOLDER,
+            TEST_PLUGIN_ENV_NAME_3,
+            TEST_PLUGIN_PARAM_2_PLACEHOLDER);
     doReturn(feature1)
         .when(retriever)
         .getBody(eq(getFeatureURI(TEST_FEATURE_NAME, TEST_FEATURE_VERSION)), eq(CheFeature.class));
@@ -399,45 +391,42 @@ public class WorkspaceNextObjectsRetrieverTest {
         .when(retriever)
         .getBody(
             eq(getFeatureURI(TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION)), eq(CheFeature.class));
-    doReturn(service).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
-    ChePlugin expectedService =
-        expectedServiceWithEnv(
-            TEST_SERVICE_ENV_NAME_2,
-            TEST_SERVICE_PARAM_VALUE,
-            TEST_SERVICE_ENV_NAME_3,
-            TEST_SERVICE_PARAM_VALUE_2);
+    doReturn(plugin).when(retriever).getBody(any(URI.class), eq(ChePlugin.class));
+    ChePlugin expectedPlugin =
+        expectedPluginWithEnv(
+            TEST_PLUGIN_ENV_NAME_2,
+            TEST_PLUGIN_PARAM_VALUE,
+            TEST_PLUGIN_ENV_NAME_3,
+            TEST_PLUGIN_PARAM_VALUE_2);
 
-    Collection<ChePlugin> services = retriever.get(featuresAttributes);
+    Collection<ChePlugin> plugins = retriever.get(featuresAttributes);
 
-    assertEquals(services, singletonList(expectedService));
+    assertEquals(plugins, singletonList(expectedPlugin));
   }
 
   @Test
-  public void testFeaturesWithDifferentServicesButTheSameParameter() throws Exception {
+  public void testFeaturesWithDifferentPluginsButTheSameParameter() throws Exception {
     Map<String, String> featuresAttributes =
         featuresAttribute(
             TEST_FEATURE_NAME, TEST_FEATURE_VERSION, TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION);
     CheFeature feature1 =
         testFeature(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_PARAM_NAME, TEST_SERVICE_PARAM_VALUE);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE);
     CheFeature feature2 =
         testFeature(
-            TEST_SERVICE_2,
-            TEST_SERVICE_VERSION_2,
-            TEST_SERVICE_PARAM_NAME,
-            TEST_SERVICE_PARAM_VALUE);
-    ChePlugin service1 =
-        testServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE,
-            TEST_SERVICE_VERSION,
-            TEST_SERVICE_ENV_NAME_2,
-            TEST_SERVICE_PARAM_PLACEHOLDER);
-    ChePlugin service2 =
-        testServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE_2,
-            TEST_SERVICE_VERSION_2,
-            TEST_SERVICE_ENV_NAME_3,
-            TEST_SERVICE_PARAM_PLACEHOLDER);
+            TEST_PLUGIN_2, TEST_PLUGIN_VERSION_2, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE);
+    ChePlugin plugin1 =
+        testPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN,
+            TEST_PLUGIN_VERSION,
+            TEST_PLUGIN_ENV_NAME_2,
+            TEST_PLUGIN_PARAM_PLACEHOLDER);
+    ChePlugin plugin2 =
+        testPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN_2,
+            TEST_PLUGIN_VERSION_2,
+            TEST_PLUGIN_ENV_NAME_3,
+            TEST_PLUGIN_PARAM_PLACEHOLDER);
     doReturn(feature1)
         .when(retriever)
         .getBody(eq(getFeatureURI(TEST_FEATURE_NAME, TEST_FEATURE_VERSION)), eq(CheFeature.class));
@@ -445,53 +434,50 @@ public class WorkspaceNextObjectsRetrieverTest {
         .when(retriever)
         .getBody(
             eq(getFeatureURI(TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION)), eq(CheFeature.class));
-    doReturn(service1)
+    doReturn(plugin1)
         .when(retriever)
-        .getBody(eq(getServiceURI(TEST_SERVICE, TEST_SERVICE_VERSION)), eq(ChePlugin.class));
-    doReturn(service2)
+        .getBody(eq(getPluginURI(TEST_PLUGIN, TEST_PLUGIN_VERSION)), eq(ChePlugin.class));
+    doReturn(plugin2)
         .when(retriever)
-        .getBody(eq(getServiceURI(TEST_SERVICE_2, TEST_SERVICE_VERSION_2)), eq(ChePlugin.class));
-    ChePlugin expectedService1 =
-        expectedServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_ENV_NAME_2, TEST_SERVICE_PARAM_VALUE);
-    ChePlugin expectedService2 =
-        expectedServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE_2,
-            TEST_SERVICE_VERSION_2,
-            TEST_SERVICE_ENV_NAME_3,
-            TEST_SERVICE_PARAM_VALUE);
+        .getBody(eq(getPluginURI(TEST_PLUGIN_2, TEST_PLUGIN_VERSION_2)), eq(ChePlugin.class));
+    ChePlugin expectedPlugin1 =
+        expectedPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_ENV_NAME_2, TEST_PLUGIN_PARAM_VALUE);
+    ChePlugin expectedPlugin2 =
+        expectedPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN_2, TEST_PLUGIN_VERSION_2, TEST_PLUGIN_ENV_NAME_3, TEST_PLUGIN_PARAM_VALUE);
 
-    Collection<ChePlugin> services = retriever.get(featuresAttributes);
+    Collection<ChePlugin> plugins = retriever.get(featuresAttributes);
 
-    assertEquals(services, Arrays.asList(expectedService1, expectedService2));
+    assertEqualsNoOrder(plugins.toArray(), new Object[] {expectedPlugin1, expectedPlugin2});
   }
 
   @Test
-  public void testFeaturesWithDifferentServicesAndDifferentParameters() throws Exception {
+  public void testFeaturesWithDifferentPluginsAndDifferentParameters() throws Exception {
     Map<String, String> featuresAttributes =
         featuresAttribute(
             TEST_FEATURE_NAME, TEST_FEATURE_VERSION, TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION);
     CheFeature feature1 =
         testFeature(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_PARAM_NAME, TEST_SERVICE_PARAM_VALUE);
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_PARAM_NAME, TEST_PLUGIN_PARAM_VALUE);
     CheFeature feature2 =
         testFeature(
-            TEST_SERVICE_2,
-            TEST_SERVICE_VERSION_2,
-            TEST_SERVICE_PARAM_2_NAME,
-            TEST_SERVICE_PARAM_VALUE_2);
-    ChePlugin service1 =
-        testServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE,
-            TEST_SERVICE_VERSION,
-            TEST_SERVICE_ENV_NAME_2,
-            TEST_SERVICE_PARAM_PLACEHOLDER);
-    ChePlugin service2 =
-        testServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE_2,
-            TEST_SERVICE_VERSION_2,
-            TEST_SERVICE_ENV_NAME_3,
-            TEST_SERVICE_PARAM_2_PLACEHOLDER);
+            TEST_PLUGIN_2,
+            TEST_PLUGIN_VERSION_2,
+            TEST_PLUGIN_PARAM_2_NAME,
+            TEST_PLUGIN_PARAM_VALUE_2);
+    ChePlugin plugin1 =
+        testPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN,
+            TEST_PLUGIN_VERSION,
+            TEST_PLUGIN_ENV_NAME_2,
+            TEST_PLUGIN_PARAM_PLACEHOLDER);
+    ChePlugin plugin2 =
+        testPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN_2,
+            TEST_PLUGIN_VERSION_2,
+            TEST_PLUGIN_ENV_NAME_3,
+            TEST_PLUGIN_PARAM_2_PLACEHOLDER);
     doReturn(feature1)
         .when(retriever)
         .getBody(eq(getFeatureURI(TEST_FEATURE_NAME, TEST_FEATURE_VERSION)), eq(CheFeature.class));
@@ -499,84 +485,86 @@ public class WorkspaceNextObjectsRetrieverTest {
         .when(retriever)
         .getBody(
             eq(getFeatureURI(TEST_FEATURE_2_NAME, TEST_FEATURE_2_VERSION)), eq(CheFeature.class));
-    doReturn(service1)
+    doReturn(plugin1)
         .when(retriever)
-        .getBody(eq(getServiceURI(TEST_SERVICE, TEST_SERVICE_VERSION)), eq(ChePlugin.class));
-    doReturn(service2)
+        .getBody(eq(getPluginURI(TEST_PLUGIN, TEST_PLUGIN_VERSION)), eq(ChePlugin.class));
+    doReturn(plugin2)
         .when(retriever)
-        .getBody(eq(getServiceURI(TEST_SERVICE_2, TEST_SERVICE_VERSION_2)), eq(ChePlugin.class));
-    ChePlugin expectedService1 =
-        expectedServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE, TEST_SERVICE_VERSION, TEST_SERVICE_ENV_NAME_2, TEST_SERVICE_PARAM_VALUE);
-    ChePlugin expectedService2 =
-        expectedServiceWithSpecifiedServiceAndEnv(
-            TEST_SERVICE_2,
-            TEST_SERVICE_VERSION_2,
-            TEST_SERVICE_ENV_NAME_3,
-            TEST_SERVICE_PARAM_VALUE_2);
+        .getBody(eq(getPluginURI(TEST_PLUGIN_2, TEST_PLUGIN_VERSION_2)), eq(ChePlugin.class));
+    ChePlugin expectedPlugin1 =
+        expectedPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN, TEST_PLUGIN_VERSION, TEST_PLUGIN_ENV_NAME_2, TEST_PLUGIN_PARAM_VALUE);
+    ChePlugin expectedPlugin2 =
+        expectedPluginWithSpecifiedPluginAndEnv(
+            TEST_PLUGIN_2,
+            TEST_PLUGIN_VERSION_2,
+            TEST_PLUGIN_ENV_NAME_3,
+            TEST_PLUGIN_PARAM_VALUE_2);
 
-    Collection<ChePlugin> services = retriever.get(featuresAttributes);
+    Collection<ChePlugin> plugins = retriever.get(featuresAttributes);
 
-    assertEquals(services, Arrays.asList(expectedService1, expectedService2));
+    assertEqualsNoOrder(plugins.toArray(), new Object[] {expectedPlugin1, expectedPlugin2});
   }
 
-  private ChePlugin expectedService() {
-    return expectedService(TEST_SERVICE, TEST_SERVICE_VERSION);
+  private ChePlugin expectedPlugin() {
+    return expectedPlugin(TEST_PLUGIN, TEST_PLUGIN_VERSION);
   }
 
-  private ChePlugin expectedService(String serviceName, String serviceVersion) {
-    ChePlugin expectedService = new ChePlugin();
-    expectedService.setName(serviceName);
+  private ChePlugin expectedPlugin(String pluginName, String pluginVersion) {
+    ChePlugin expectedPlugin = new ChePlugin();
+    expectedPlugin.setName(pluginName);
     CheContainer expectedContainer = new CheContainer();
     expectedContainer.setEnv(
         new ArrayList<>(
-            singletonList(new EnvVar().name(TEST_SERVICE_ENV_NAME).value(TEST_SERVICE_ENV_VALUE))));
-    expectedContainer.setImage(TEST_SERVICE_IMAGE);
+            singletonList(new EnvVar().name(TEST_PLUGIN_ENV_NAME).value(TEST_PLUGIN_ENV_VALUE))));
+    expectedContainer.setImage(TEST_PLUGIN_IMAGE);
     expectedContainer.setVolumes(
         singletonList(new Volume().name(TEST_VOLUME_NAME).mountPath(TEST_VOLUME_PATH)));
     expectedContainer.setPorts(
         new ArrayList<>(singletonList(new CheContainerPort().exposedPort(TEST_SERVER_PORT))));
-    expectedService.setContainers(new ArrayList<>(singletonList(expectedContainer)));
-    expectedService.setEndpoints(
+    expectedPlugin.setContainers(new ArrayList<>(singletonList(expectedContainer)));
+    expectedPlugin.setEndpoints(
         new ArrayList<>(
             singletonList(
                 new ChePluginEndpoint()
                     .name(TEST_SERVER_NAME)
                     .targetPort(TEST_SERVER_PORT)
                     .attributes(TEST_SERVER_ATTRIBUTES))));
-    expectedService.setVersion(serviceVersion);
-    return expectedService;
+    expectedPlugin.setVersion(pluginVersion);
+    return expectedPlugin;
   }
 
-  private ChePlugin expectedServiceWithEnv(String envName, String envValue) {
-    ChePlugin service = expectedService();
-    service.getContainers().get(0).getEnv().add(new EnvVar().name(envName).value(envValue));
-    return service;
+  @SuppressWarnings("SameParameterValue")
+  private ChePlugin expectedPluginWithEnv(String envName, String envValue) {
+    ChePlugin plugin = expectedPlugin();
+    plugin.getContainers().get(0).getEnv().add(new EnvVar().name(envName).value(envValue));
+    return plugin;
   }
 
-  private ChePlugin expectedServiceWithSpecifiedServiceAndEnv(
-      String serviceName, String serviceVersion, String envName, String envValue) {
-    ChePlugin service = expectedService(serviceName, serviceVersion);
-    service.getContainers().get(0).getEnv().add(new EnvVar().name(envName).value(envValue));
-    return service;
+  private ChePlugin expectedPluginWithSpecifiedPluginAndEnv(
+      String pluginName, String pluginVersion, String envName, String envValue) {
+    ChePlugin plugin = expectedPlugin(pluginName, pluginVersion);
+    plugin.getContainers().get(0).getEnv().add(new EnvVar().name(envName).value(envValue));
+    return plugin;
   }
 
-  private ChePlugin expectedServiceWithEnv(
+  @SuppressWarnings("SameParameterValue")
+  private ChePlugin expectedPluginWithEnv(
       String envName, String envValue, String envName2, String envValue2) {
-    ChePlugin service = expectedService();
-    service.getContainers().get(0).getEnv().add(new EnvVar().name(envName).value(envValue));
-    service.getContainers().get(0).getEnv().add(new EnvVar().name(envName2).value(envValue2));
-    return service;
+    ChePlugin plugin = expectedPlugin();
+    plugin.getContainers().get(0).getEnv().add(new EnvVar().name(envName).value(envValue));
+    plugin.getContainers().get(0).getEnv().add(new EnvVar().name(envName2).value(envValue2));
+    return plugin;
   }
 
   private static CheFeature testFeature() {
     CheFeature cheFeature = new CheFeature();
     CheFeatureSpec cheFeatureSpec = new CheFeatureSpec();
-    CheServiceReference theiaServiceReference = new CheServiceReference();
-    theiaServiceReference.setName(TEST_SERVICE);
-    theiaServiceReference.setVersion(TEST_SERVICE_VERSION);
-    theiaServiceReference.setParameters(new ArrayList<>());
-    cheFeatureSpec.setServices(new ArrayList<>(singletonList(theiaServiceReference)));
+    ChePluginReference theiaPluginReference = new ChePluginReference();
+    theiaPluginReference.setName(TEST_PLUGIN);
+    theiaPluginReference.setVersion(TEST_PLUGIN_VERSION);
+    theiaPluginReference.setParameters(new ArrayList<>());
+    cheFeatureSpec.setServices(new ArrayList<>(singletonList(theiaPluginReference)));
     cheFeatureSpec.setVersion(TEST_FEATURE_VERSION);
     cheFeature.setSpec(cheFeatureSpec);
     cheFeature.setMetadata(new ObjectMeta().name(TEST_FEATURE_NAME));
@@ -584,85 +572,85 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   private static CheFeature testFeature(
-      String serviceName, String serviceVersion, String paramName, String paramValue) {
-    CheServiceReference theiaServiceReference = new CheServiceReference();
-    theiaServiceReference.setName(serviceName);
-    theiaServiceReference.setVersion(serviceVersion);
-    theiaServiceReference.setParameters(
-        new ArrayList<>(
-            singletonList(new CheServiceParameter().name(paramName).value(paramValue))));
+      String pluginName, String pluginVersion, String paramName, String paramValue) {
+    ChePluginReference theiaPluginReference = new ChePluginReference();
+    theiaPluginReference.setName(pluginName);
+    theiaPluginReference.setVersion(pluginVersion);
+    theiaPluginReference.setParameters(
+        new ArrayList<>(singletonList(new ChePluginParameter().name(paramName).value(paramValue))));
     CheFeature feature = testFeature();
-    feature.getSpec().getServices().add(theiaServiceReference);
+    feature.getSpec().getServices().add(theiaPluginReference);
     return feature;
   }
 
-  private static ChePlugin testService() {
-    return testService(TEST_SERVICE, TEST_SERVICE_VERSION);
+  private static ChePlugin testPlugin() {
+    return testPlugin(TEST_PLUGIN, TEST_PLUGIN_VERSION);
   }
 
-  private static ChePlugin testService(String serviceName, String serviceVersion) {
-    ChePlugin service = new ChePlugin();
+  private static ChePlugin testPlugin(String pluginName, String pluginVersion) {
+    ChePlugin plugin = new ChePlugin();
     CheContainer container = new CheContainer();
     container.setCommands(new ArrayList<>());
     container.setEnv(
         new ArrayList<>(
             ImmutableList.of(
-                new EnvVar().name(TEST_SERVICE_ENV_NAME).value(TEST_SERVICE_ENV_VALUE))));
-    container.setImage(TEST_SERVICE_IMAGE);
+                new EnvVar().name(TEST_PLUGIN_ENV_NAME).value(TEST_PLUGIN_ENV_VALUE))));
+    container.setImage(TEST_PLUGIN_IMAGE);
     container.setPorts(
         new ArrayList<>(singletonList(new CheContainerPort().exposedPort(TEST_SERVER_PORT))));
     container.setVolumes(
         new ArrayList<>(
             singletonList(new Volume().name(TEST_VOLUME_NAME).mountPath(TEST_VOLUME_PATH))));
-    service.setContainers(new ArrayList<>(singletonList(container)));
-    service.setEndpoints(
+    plugin.setContainers(new ArrayList<>(singletonList(container)));
+    plugin.setEndpoints(
         new ArrayList<>(
             singletonList(
                 new ChePluginEndpoint()
                     .name(TEST_SERVER_NAME)
                     .targetPort(TEST_SERVER_PORT)
                     .attributes(TEST_SERVER_ATTRIBUTES))));
-    service.setVersion(serviceVersion);
-    service.setName(serviceName);
-    return service;
+    plugin.setVersion(pluginVersion);
+    plugin.setName(pluginName);
+    return plugin;
   }
 
-  private static ChePlugin testServiceWithEnv(String envVarName, String envVarValue) {
-    ChePlugin service = testService();
-    for (CheContainer container : service.getContainers()) {
+  private static ChePlugin testPluginWithEnv(String envVarName, String envVarValue) {
+    ChePlugin plugin = testPlugin();
+    for (CheContainer container : plugin.getContainers()) {
       container.getEnv().add(new EnvVar().name(envVarName).value(envVarValue));
     }
-    return service;
+    return plugin;
   }
 
-  private ChePlugin testServiceWithSpecifiedServiceAndEnv(
-      String serviceName, String serviceVersion, String envVarName, String envVarValue) {
-    ChePlugin service = testService(serviceName, serviceVersion);
-    for (CheContainer container : service.getContainers()) {
+  private ChePlugin testPluginWithSpecifiedPluginAndEnv(
+      String pluginName, String pluginVersion, String envVarName, String envVarValue) {
+    ChePlugin plugin = testPlugin(pluginName, pluginVersion);
+    for (CheContainer container : plugin.getContainers()) {
       container.getEnv().add(new EnvVar().name(envVarName).value(envVarValue));
     }
-    return service;
+    return plugin;
   }
 
-  private ChePlugin testService(
+  @SuppressWarnings("SameParameterValue")
+  private ChePlugin testPlugin(
       String envVarName, String envVarValue, String envVarName2, String envVarValue2) {
-    ChePlugin service = testService();
-    for (CheContainer container : service.getContainers()) {
+    ChePlugin plugin = testPlugin();
+    for (CheContainer container : plugin.getContainers()) {
       container.getEnv().add(new EnvVar().name(envVarName).value(envVarValue));
       container.getEnv().add(new EnvVar().name(envVarName2).value(envVarValue2));
     }
-    return service;
+    return plugin;
   }
 
   private URI getFeatureURI(String featureName, String featureVersion) throws URISyntaxException {
     return new URI(API_ENDPOINT + "/feature/" + featureName + '/' + featureVersion);
   }
 
-  private URI getServiceURI(String testService, String testServiceVersion)
-      throws URISyntaxException {
-    return new URI(API_ENDPOINT + "/service/" + testService + '/' + testServiceVersion);
+  private URI getPluginURI(String testPlugin, String testPluginVersion) throws URISyntaxException {
+    return new URI(API_ENDPOINT + "/service/" + testPlugin + '/' + testPluginVersion);
   }
 
+  @SuppressWarnings("SameParameterValue")
   private Map<String, String> featuresAttribute(
       String feature1Name, String feature1Version, String feature2Name, String feature2Version) {
     return ImmutableMap.of(

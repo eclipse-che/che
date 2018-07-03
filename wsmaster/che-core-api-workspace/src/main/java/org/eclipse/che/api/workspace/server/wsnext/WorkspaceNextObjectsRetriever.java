@@ -45,8 +45,8 @@ import org.eclipse.che.api.workspace.server.wsnext.model.CheContainerPort;
 import org.eclipse.che.api.workspace.server.wsnext.model.CheFeature;
 import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginEndpoint;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheServiceParameter;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheServiceReference;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginParameter;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginReference;
 import org.eclipse.che.api.workspace.server.wsnext.model.EnvVar;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -65,7 +65,8 @@ public class WorkspaceNextObjectsRetriever {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceNextObjectsRetriever.class);
   private static final Pattern PARAMETER_ENV_VAR_VALUE = Pattern.compile("^\\$\\{.+}$");
   private static final String FEATURE_OBJECT_ERROR = "Feature '%s/%s' configuration is invalid. %s";
-  private static final String SERVICE_OBJECT_ERROR = "Service '%s/%s' configuration is invalid. %s";
+  private static final String CHE_PLUGIN_OBJECT_ERROR =
+      "ChePlugin '%s/%s' configuration is invalid. %s";
 
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 
@@ -89,7 +90,7 @@ public class WorkspaceNextObjectsRetriever {
    * functionality in a workspace.
    *
    * <p>This method resolves feature dependencies and parameters, so returned list of {@code
-   * CheServices} is ready to be applied to a workspace runtime.
+   * ChePlugins} is ready to be applied to a workspace runtime.
    *
    * @param attributes workspace attributes
    * @throws InfrastructureException when features list contains invalid entries or Workspace.Next
@@ -110,7 +111,7 @@ public class WorkspaceNextObjectsRetriever {
 
     Collection<Pair<String, String>> featuresNameVersion = parseFeatures(features);
 
-    return toServices(getFeatures(featuresNameVersion));
+    return toPlugins(getFeatures(featuresNameVersion));
   }
 
   private Collection<Pair<String, String>> parseFeatures(String[] features)
@@ -164,25 +165,25 @@ public class WorkspaceNextObjectsRetriever {
     }
   }
 
-  private Collection<ChePlugin> toServices(Collection<CheFeature> features)
+  private Collection<ChePlugin> toPlugins(Collection<CheFeature> features)
       throws InfrastructureException {
-    Collection<ChePlugin> services = getServices(features);
-    Map<String, List<String>> parameters = getServicesParameters(features);
+    Collection<ChePlugin> plugins = getPlugins(features);
+    Map<String, List<String>> parameters = getPluginsParameters(features);
 
-    for (ChePlugin service : services) {
-      String serviceName = service.getName();
-      String serviceVersion = service.getVersion();
-      String serviceKey = serviceName + '/' + serviceVersion;
+    for (ChePlugin plugin : plugins) {
+      String pluginName = plugin.getName();
+      String pluginVersion = plugin.getVersion();
+      String pluginKey = pluginName + '/' + pluginVersion;
 
       // for now we match whole env variable value against '${<parameter name>}'
-      service
+      plugin
           .getContainers()
           .stream()
           .flatMap(container -> container.getEnv().stream())
           .filter(this::isParameter)
           .forEach(
               envVar -> {
-                String parameterKey = serviceKey + '/' + envVar.getValue();
+                String parameterKey = pluginKey + '/' + envVar.getValue();
                 List<String> remove = parameters.remove(parameterKey);
                 String envVarValue;
                 if (remove != null) {
@@ -196,27 +197,27 @@ public class WorkspaceNextObjectsRetriever {
 
     if (!parameters.isEmpty()) {
       throw new InfrastructureException(
-          "Parameters not supported by services found: " + parameters.keySet());
+          "Parameters not supported by che plugins found: " + parameters.keySet());
     }
 
-    return services;
+    return plugins;
   }
 
-  private Collection<ChePlugin> getServices(Collection<CheFeature> features)
+  private Collection<ChePlugin> getPlugins(Collection<CheFeature> features)
       throws InfrastructureException {
-    Map<String, ChePlugin> services = new HashMap<>();
+    Map<String, ChePlugin> plugins = new HashMap<>();
     for (CheFeature feature : features) {
-      for (CheServiceReference serviceReference : feature.getSpec().getServices()) {
-        String serviceName = serviceReference.getName();
-        String serviceVersion = serviceReference.getVersion();
-        String key = serviceName + '/' + serviceVersion;
-        if (!services.containsKey(key)) {
-          ChePlugin service = getService(serviceName, serviceVersion);
-          services.put(key, service);
+      for (ChePluginReference pluginReference : feature.getSpec().getServices()) {
+        String pluginName = pluginReference.getName();
+        String pluginVersion = pluginReference.getVersion();
+        String key = pluginName + '/' + pluginVersion;
+        if (!plugins.containsKey(key)) {
+          ChePlugin plugin = getPlugin(pluginName, pluginVersion);
+          plugins.put(key, plugin);
         }
       }
     }
-    return services.values();
+    return plugins.values();
   }
 
   private boolean isParameter(EnvVar envVar) {
@@ -224,51 +225,51 @@ public class WorkspaceNextObjectsRetriever {
   }
 
   /**
-   * Returns map where key is concatenation of service name, version and parameter name separated by
-   * slash symbol. < serviceName/serviceVersion/${parameter} > to < parameterValue >
+   * Returns map where key is concatenation of plugin name, version and parameter name separated by
+   * slash symbol. < pluginName/pluginVersion/${parameter} > to < parameterValue >
    */
-  private Map<String, List<String>> getServicesParameters(Collection<CheFeature> features) {
+  private Map<String, List<String>> getPluginsParameters(Collection<CheFeature> features) {
     Map<String, List<String>> parameters = new HashMap<>();
     for (CheFeature feature : features) {
-      for (CheServiceReference serviceReference : feature.getSpec().getServices()) {
-        if (serviceReference.getParameters().isEmpty()) {
+      for (ChePluginReference pluginReference : feature.getSpec().getServices()) {
+        if (pluginReference.getParameters().isEmpty()) {
           continue;
         }
 
-        String serviceName = serviceReference.getName();
-        String serviceVersion = serviceReference.getVersion();
+        String pluginName = pluginReference.getName();
+        String pluginVersion = pluginReference.getVersion();
 
-        for (CheServiceParameter cheServiceParameter : serviceReference.getParameters()) {
+        for (ChePluginParameter chePluginParameter : pluginReference.getParameters()) {
           // add dollar sign and curly brackets because parameter is easier to find with these signs
           // in the map keys
           String parameterKey =
-              serviceName + "/" + serviceVersion + "/${" + cheServiceParameter.getName() + "}";
-          List<String> cheServiceParameters =
+              pluginName + "/" + pluginVersion + "/${" + chePluginParameter.getName() + "}";
+          List<String> chePluginParameters =
               parameters.computeIfAbsent(parameterKey, key -> new ArrayList<>());
-          cheServiceParameters.add(cheServiceParameter.getValue());
+          chePluginParameters.add(chePluginParameter.getValue());
         }
       }
     }
     return parameters;
   }
 
-  private ChePlugin getService(String serviceName, String serviceVersion)
+  private ChePlugin getPlugin(String pluginName, String pluginVersion)
       throws InfrastructureException {
     try {
-      URI getServiceURI =
-          featureApi.clone().path("service").path(serviceName).path(serviceVersion).build();
+      URI getPluginURI =
+          featureApi.clone().path("service").path(pluginName).path(pluginVersion).build();
 
-      ChePlugin service = getBody(getServiceURI, ChePlugin.class);
-      validateService(service, serviceName, serviceVersion);
-      return service;
+      ChePlugin plugin = getBody(getPluginURI, ChePlugin.class);
+      validatePlugin(plugin, pluginName, pluginVersion);
+      return plugin;
     } catch (IllegalArgumentException | UriBuilderException e) {
       throw new InternalInfrastructureException(
-          format("Service %s/%s retrieval failed", serviceName, serviceVersion));
+          format("ChePlugin %s/%s retrieval failed", pluginName, pluginVersion));
     } catch (IOException e) {
       throw new InfrastructureException(
           format(
-              "Error occurred on retrieval of service %s. Error: %s",
-              serviceName + '/' + serviceVersion, e.getMessage()));
+              "Error occurred on retrieval of ChePlugin %s. Error: %s",
+              pluginName + '/' + pluginVersion, e.getMessage()));
     }
   }
 
@@ -286,47 +287,50 @@ public class WorkspaceNextObjectsRetriever {
         FEATURE_OBJECT_ERROR,
         name,
         version,
-        "Services are missing.");
-    for (CheServiceReference serviceReference : feature.getSpec().getServices()) {
-      requireNotNull(
-          serviceReference, FEATURE_OBJECT_ERROR, name, version, "A service is missing.");
+        "Che plugins are missing.");
+    for (ChePluginReference pluginReference : feature.getSpec().getServices()) {
+      requireNotNull(pluginReference, FEATURE_OBJECT_ERROR, name, version, "A plugin is missing.");
       requireNotNullNorEmpty(
-          serviceReference.getVersion(),
+          pluginReference.getVersion(),
           FEATURE_OBJECT_ERROR,
           name,
           version,
-          "Service version is missing.");
+          "Plugin version is missing.");
       requireNotNullNorEmpty(
-          serviceReference.getName(),
+          pluginReference.getName(),
           FEATURE_OBJECT_ERROR,
           name,
           version,
-          "Service name is missing.");
+          "Plugin name is missing.");
     }
   }
 
-  private void validateService(ChePlugin service, String name, String version)
+  private void validatePlugin(ChePlugin plugin, String name, String version)
       throws InfrastructureException {
     requireNotNullNorEmpty(
-        service.getName(), SERVICE_OBJECT_ERROR, name, version, "Name is missing.");
+        plugin.getName(), CHE_PLUGIN_OBJECT_ERROR, name, version, "Name is missing.");
     requireEqual(
         name,
-        service.getName(),
-        "Service name in feature and Service objects didn't match. Service object seems broken.");
+        plugin.getName(),
+        "Plugin name in feature and ChePlugin objects didn't match. ChePlugin object seems broken.");
     requireNotNullNorEmpty(
-        service.getVersion(), SERVICE_OBJECT_ERROR, name, version, "Version is missing.");
+        plugin.getVersion(), CHE_PLUGIN_OBJECT_ERROR, name, version, "Version is missing.");
     requireEqual(
         version,
-        service.getVersion(),
-        "Service version in feature and Service objects didn't match. Service object seems broken.");
+        plugin.getVersion(),
+        "Plugin version in feature and ChePlugin objects didn't match. ChePlugin object seems broken.");
     requireNotNullNorEmpty(
-        service.getContainers(), SERVICE_OBJECT_ERROR, name, version, "Containers are missing.");
-    for (CheContainer container : service.getContainers()) {
-      requireNotNull(container, SERVICE_OBJECT_ERROR, name, version, "A container is missing.");
+        plugin.getContainers(), CHE_PLUGIN_OBJECT_ERROR, name, version, "Containers are missing.");
+    for (CheContainer container : plugin.getContainers()) {
+      requireNotNull(container, CHE_PLUGIN_OBJECT_ERROR, name, version, "A container is missing.");
       requireNotNullNorEmpty(
-          container.getImage(), SERVICE_OBJECT_ERROR, name, version, "Container image is missing.");
+          container.getImage(),
+          CHE_PLUGIN_OBJECT_ERROR,
+          name,
+          version,
+          "Container image is missing.");
     }
-    validatePorts(service.getEndpoints(), service.getContainers());
+    validatePorts(plugin.getEndpoints(), plugin.getContainers());
   }
 
   private void validatePorts(List<ChePluginEndpoint> endpoints, List<CheContainer> containers)

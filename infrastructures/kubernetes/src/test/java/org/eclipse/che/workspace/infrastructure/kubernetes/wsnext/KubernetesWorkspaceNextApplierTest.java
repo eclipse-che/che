@@ -85,7 +85,7 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test
-  public void doesNothingIfServicesListIsEmpty() throws Exception {
+  public void doesNothingIfChePluginsListIsEmpty() throws Exception {
     applier.apply(internalEnvironment, emptyList());
 
     verifyZeroInteractions(internalEnvironment);
@@ -112,8 +112,8 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test
-  public void canAddMultipleToolingContainersToAPodFromOneService() throws Exception {
-    applier.apply(internalEnvironment, singletonList(testServiceWith2Containers()));
+  public void canAddMultipleToolingContainersToAPodFromOnePlugin() throws Exception {
+    applier.apply(internalEnvironment, singletonList(testChePluginWith2Containers()));
 
     assertEquals(containers.size(), 2);
     for (Container container : containers) {
@@ -122,7 +122,7 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test
-  public void canAddMultipleToolingContainersToAPodFromSeveralServices() throws Exception {
+  public void canAddMultipleToolingContainersToAPodFromSeveralPlugins() throws Exception {
     applier.apply(internalEnvironment, ImmutableList.of(testChePlugin(), testChePlugin()));
 
     assertEquals(containers.size(), 2);
@@ -168,80 +168,6 @@ public class KubernetesWorkspaceNextApplierTest {
             80, "test-port", emptyMap(), true, 8090, "another-test-port", emptyMap(), false));
   }
 
-  private void addPortToSingleContainerPlugin(
-      ChePlugin plugin,
-      int port,
-      String portName,
-      Map<String, String> attributes,
-      boolean isPublic) {
-
-    assertEquals(plugin.getContainers().size(), 1);
-
-    ChePluginEndpoint endpoint =
-        new ChePluginEndpoint()
-            .attributes(attributes)
-            .name(portName)
-            .setPublic(isPublic)
-            .targetPort(port);
-    plugin.getEndpoints().add(endpoint);
-    List<CheContainerPort> ports = plugin.getContainers().get(0).getPorts();
-    if (ports
-        .stream()
-        .map(CheContainerPort::getExposedPort)
-        .noneMatch(integer -> integer == port)) {
-      ports.add(new CheContainerPort().exposedPort(port));
-    }
-  }
-
-  private Map<String, ServerConfig> expectedSingleServer(
-      int port, String portName, Map<String, String> attributes, boolean isExternal) {
-    Map<String, ServerConfig> servers = new HashMap<>();
-    addExpectedServer(servers, port, portName, attributes, isExternal, null, null);
-    return servers;
-  }
-
-  private Map<String, ServerConfig> expectedSingleServer(
-      int port,
-      String portName,
-      Map<String, String> attributes,
-      boolean isExternal,
-      String protocol,
-      String path) {
-    Map<String, ServerConfig> servers = new HashMap<>();
-    addExpectedServer(servers, port, portName, attributes, isExternal, protocol, path);
-    return servers;
-  }
-
-  private Map<String, ServerConfig> expectedTwoServers(
-      int port,
-      String portName,
-      Map<String, String> attributes,
-      boolean isExternal,
-      int port2,
-      String portName2,
-      Map<String, String> attributes2,
-      boolean isExternal2) {
-    Map<String, ServerConfig> servers = new HashMap<>();
-    addExpectedServer(servers, port, portName, attributes, isExternal, null, null);
-    addExpectedServer(servers, port2, portName2, attributes2, isExternal2, null, null);
-    return servers;
-  }
-
-  private void addExpectedServer(
-      Map<String, ServerConfig> servers,
-      int port,
-      String portName,
-      Map<String, String> attributes,
-      boolean isExternal,
-      String protocol,
-      String path) {
-    Map<String, String> serverAttributes = new HashMap<>(attributes);
-    serverAttributes.put("internal", Boolean.toString(!isExternal));
-    servers.put(
-        portName,
-        new ServerConfigImpl(Integer.toString(port) + "/tcp", protocol, path, serverAttributes));
-  }
-
   @Test
   public void addsMachineWithServersThatUseSamePortButDifferentNames() throws Exception {
     ChePlugin chePlugin = testChePlugin();
@@ -284,21 +210,21 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   private ChePlugin testChePlugin() {
-    ChePlugin service = new ChePlugin();
-    service.setName("some-name");
-    service.setId("some-id");
-    service.setVersion("0.0.3");
-    service.setContainers(singletonList(testContainer()));
-    return service;
+    ChePlugin plugin = new ChePlugin();
+    plugin.setName("some-name");
+    plugin.setId("some-id");
+    plugin.setVersion("0.0.3");
+    plugin.setContainers(singletonList(testContainer()));
+    return plugin;
   }
 
-  private ChePlugin testServiceWith2Containers() {
-    ChePlugin service = new ChePlugin();
-    service.setName("some-name");
-    service.setId("some-id");
-    service.setVersion("0.0.3");
-    service.setContainers(asList(testContainer(), testContainer()));
-    return service;
+  private ChePlugin testChePluginWith2Containers() {
+    ChePlugin plugin = new ChePlugin();
+    plugin.setName("some-name");
+    plugin.setId("some-id");
+    plugin.setVersion("0.0.3");
+    plugin.setContainers(asList(testContainer(), testContainer()));
+    return plugin;
   }
 
   private CheContainer testContainer() {
@@ -321,5 +247,82 @@ public class KubernetesWorkspaceNextApplierTest {
     Map<String, InternalMachineConfig> machines = internalEnvironment.getMachines();
     assertEquals(machines.size(), 1);
     return machines.values().iterator().next();
+  }
+
+  private void addPortToSingleContainerPlugin(
+      ChePlugin plugin,
+      int port,
+      String portName,
+      Map<String, String> attributes,
+      boolean isPublic) {
+
+    assertEquals(plugin.getContainers().size(), 1);
+
+    ChePluginEndpoint endpoint =
+        new ChePluginEndpoint()
+            .attributes(attributes)
+            .name(portName)
+            .setPublic(isPublic)
+            .targetPort(port);
+    plugin.getEndpoints().add(endpoint);
+    List<CheContainerPort> ports = plugin.getContainers().get(0).getPorts();
+    if (ports
+        .stream()
+        .map(CheContainerPort::getExposedPort)
+        .noneMatch(integer -> integer == port)) {
+      ports.add(new CheContainerPort().exposedPort(port));
+    }
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private Map<String, ServerConfig> expectedSingleServer(
+      int port, String portName, Map<String, String> attributes, boolean isExternal) {
+    Map<String, ServerConfig> servers = new HashMap<>();
+    addExpectedServer(servers, port, portName, attributes, isExternal, null, null);
+    return servers;
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private Map<String, ServerConfig> expectedSingleServer(
+      int port,
+      String portName,
+      Map<String, String> attributes,
+      boolean isExternal,
+      String protocol,
+      String path) {
+    Map<String, ServerConfig> servers = new HashMap<>();
+    addExpectedServer(servers, port, portName, attributes, isExternal, protocol, path);
+    return servers;
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private Map<String, ServerConfig> expectedTwoServers(
+      int port,
+      String portName,
+      Map<String, String> attributes,
+      boolean isExternal,
+      int port2,
+      String portName2,
+      Map<String, String> attributes2,
+      boolean isExternal2) {
+    Map<String, ServerConfig> servers = new HashMap<>();
+    addExpectedServer(servers, port, portName, attributes, isExternal, null, null);
+    addExpectedServer(servers, port2, portName2, attributes2, isExternal2, null, null);
+    return servers;
+  }
+
+  private void addExpectedServer(
+      Map<String, ServerConfig> servers,
+      int port,
+      String portName,
+      Map<String, String> attributes,
+      boolean isExternal,
+      String protocol,
+      String path) {
+    Map<String, String> serverAttributes = new HashMap<>(attributes);
+    serverAttributes.put("internal", Boolean.toString(!isExternal));
+    servers.put(
+        portName,
+        new ServerConfigImpl(Integer.toString(port) + "/tcp", protocol, path, serverAttributes));
   }
 }

@@ -30,9 +30,9 @@ public interface WorkspaceNextApplier {
    *
    * @param internalEnvironment infrastructure specific representation of workspace runtime
    *     environment
-   * @param cheServices Workspace.Next configuration to apply to {@code internalEnvironment}
+   * @param chePlugins Workspace.Next configuration to apply to {@code internalEnvironment}
    * @throws InfrastructureException when applying Workspace.Next objects fails
    */
-  void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> cheServices)
+  void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> chePlugins)
       throws InfrastructureException;
 }
