@@ -29,7 +29,6 @@ import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringActionDelegate;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit;
@@ -131,7 +130,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
               .getContent()
               .then(
                   content -> {
-                    ChangePreview changePreview = dtoFactory.createDto(ChangePreview.class);
+                    ChangePreview changePreview = new ChangePreview();
                     changePreview.setFileName(existingFile.getName());
                     changePreview.setOldContent(content);
 
