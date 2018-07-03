@@ -174,6 +174,7 @@ public class ServersChecker {
     // workaround needed because we don't have server readiness check in the model
     // Create server readiness endpoint URL
     URL url;
+    String token;
     try {
       String serverUrl = server.getUrl();
 
@@ -186,32 +187,44 @@ public class ServersChecker {
         serverUrl = serverUrl + '/';
       }
 
-      url =
-          UriBuilder.fromUri(serverUrl)
-              .queryParam(
-                  "token",
-                  machineTokenProvider.getToken(
-                      runtimeIdentity.getOwnerId(), runtimeIdentity.getWorkspaceId()))
-              .build()
-              .toURL();
+      token =
+          machineTokenProvider.getToken(
+              runtimeIdentity.getOwnerId(), runtimeIdentity.getWorkspaceId());
+      url = UriBuilder.fromUri(serverUrl).build().toURL();
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Server " + serverRef + " URL is invalid. Error: " + e.getMessage(), e);
     }
 
-    return doCreateChecker(url, serverRef);
+    return doCreateChecker(url, serverRef, token);
   }
 
   @VisibleForTesting
-  ServerChecker doCreateChecker(URL url, String serverRef) {
+  ServerChecker doCreateChecker(URL url, String serverRef, String token) {
     // TODO add readiness endpoint to terminal and remove this
     // workaround needed because terminal server doesn't have endpoint to check it readiness
     if ("terminal".equals(serverRef)) {
       return new TerminalHttpConnectionServerChecker(
-          url, machineName, serverRef, 3, 180, serverPingSuccessThreshold, TimeUnit.SECONDS, timer);
+          url,
+          machineName,
+          serverRef,
+          3,
+          180,
+          serverPingSuccessThreshold,
+          TimeUnit.SECONDS,
+          timer,
+          token);
     }
     // TODO do not hardcode timeouts, use server conf instead
     return new HttpConnectionServerChecker(
-        url, machineName, serverRef, 3, 180, serverPingSuccessThreshold, TimeUnit.SECONDS, timer);
+        url,
+        machineName,
+        serverRef,
+        3,
+        180,
+        serverPingSuccessThreshold,
+        TimeUnit.SECONDS,
+        timer,
+        token);
   }
 }
