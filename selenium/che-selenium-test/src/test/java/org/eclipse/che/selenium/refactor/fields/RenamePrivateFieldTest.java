@@ -23,6 +23,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -52,6 +53,7 @@ public class RenamePrivateFieldTest {
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private Refactor refactor;
+  @Inject private AskDialog askDialog;
   @Inject private Consoles consoles;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
@@ -334,6 +336,8 @@ public class RenamePrivateFieldTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
+    askDialog.acceptDialogWithText(
+        "Code modification may not be accurate as affected resource 'qa-spring-sample/src/main/java/test11/A.java' has compile errors.");
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     waitTextIntoEditor(contentFromOutA);

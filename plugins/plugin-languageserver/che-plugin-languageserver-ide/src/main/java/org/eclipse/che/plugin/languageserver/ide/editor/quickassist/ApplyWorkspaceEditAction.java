@@ -13,13 +13,13 @@ package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import elemental.util.ArrayOf;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -28,6 +28,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.FileEditParamsDto;
 import org.eclipse.che.api.languageserver.shared.model.FileEditParams;
 import org.eclipse.che.api.languageserver.shared.util.RangeComparator;
+import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.*;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
@@ -38,6 +39,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -52,6 +54,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.ResourceKind;
 import org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange;
@@ -157,20 +160,30 @@ public class ApplyWorkspaceEditAction extends BaseAction {
 
     done.then(
             v -> {
-              if (edit instanceof CheWorkspaceEdit) {
-                applyResourceChanges(notification, (CheWorkspaceEdit) edit)
-                    .then(
-                        ignored -> {
-                          Log.debug(getClass(), "done applying changes");
-                          notification.setStatus(Status.SUCCESS);
-                          notification.setContent(
-                              localization.applyWorkspaceActionNotificationDone());
-                        });
-              } else {
-                Log.debug(getClass(), "done applying changes");
-                notification.setStatus(Status.SUCCESS);
-                notification.setContent(localization.applyWorkspaceActionNotificationDone());
-              }
+              updateEditors()
+                  .then(
+                      new Operation<Void>() {
+                        @Override
+                        public void apply(Void arg) {
+                          if (edit instanceof CheWorkspaceEdit) {
+                            appResourceChanges(
+                                    ((CheWorkspaceEdit) edit).getCheResourceChanges().iterator(),
+                                    notification)
+                                .then(
+                                    ignored -> {
+                                      Log.debug(getClass(), "done applying changes");
+                                      notification.setStatus(Status.SUCCESS);
+                                      notification.setContent(
+                                          localization.applyWorkspaceActionNotificationDone());
+                                    });
+                          } else {
+                            Log.debug(getClass(), "done applying changes");
+                            notification.setStatus(Status.SUCCESS);
+                            notification.setContent(
+                                localization.applyWorkspaceActionNotificationDone());
+                          }
+                        }
+                      });
             })
         .catchError(
             (error) -> {
@@ -193,124 +206,148 @@ public class ApplyWorkspaceEditAction extends BaseAction {
             });
   }
 
-  private Promise<Void> applyResourceChanges(
-      StatusNotification notification, CheWorkspaceEdit edit) {
-    List<CheResourceChange> resourceChanges = edit.getCheResourceChanges();
-    if (resourceChanges.isEmpty()) {
-      return promises.resolve(null);
-    }
-
-    ArrayOf<Promise<?>> changesPromises = elemental.util.Collections.arrayOf();
-
-    for (CheResourceChange change : resourceChanges) {
-      if (change == null) {
-        continue;
-      }
-      String newUri = change.getNewUri();
-      String current = change.getCurrent();
-
-      Path path = Path.valueOf(newUri).makeAbsolute();
-      if (isNullOrEmpty(current)) {
-        createResource(path, change.getResourceKind(), notification);
-        continue;
-      }
-      Path oldPath = Path.valueOf(current).makeAbsolute();
-
-      Container workspaceRoot = appContext.getWorkspaceRoot();
-      changesPromises.push(
-          workspaceRoot
-              .getResource(oldPath)
-              .then(
-                  resourceOptional -> {
-                    if (!resourceOptional.isPresent()) {
-                      return;
-                    }
-
-                    Resource resource = resourceOptional.get();
-
-                    editorAgent.saveAll(
-                        new AsyncCallback<Void>() {
-                          @Override
-                          public void onFailure(Throwable throwable) {
-                            notification.setContent("Can't save files.");
-                          }
-
-                          @Override
-                          public void onSuccess(Void aVoid) {
-                            final List<EditorPartPresenter> openedEditors =
-                                editorAgent.getOpenedEditors();
-                            for (EditorPartPresenter editor : openedEditors) {
-                              if (resource
-                                  .getLocation()
-                                  .isPrefixOf(editor.getEditorInput().getFile().getLocation())) {
-                                TextDocumentIdentifier documentId =
-                                    dtoHelper.createTDI(editor.getEditorInput().getFile());
-                                DidCloseTextDocumentParams closeEvent =
-                                    dtoFactory.createDto(DidCloseTextDocumentParams.class);
-                                closeEvent.setTextDocument(documentId);
-                                textDocumentService.didClose(closeEvent);
-                              }
-                            }
-                            moveResource(resource, path, notification);
-                          }
-                        });
-                  }));
-    }
-    return promises.all2(changesPromises).thenPromise(ignored -> promises.resolve(null));
+  private Promise<Void> deleteResouce(Path oldPath) {
+    return projectService.deleteItem(oldPath);
   }
 
-  private void createResource(Path path, ResourceKind kind, StatusNotification notification) {
+  private Promise<Void> updateEditors() {
+    return promises.create(
+        callback ->
+            Scheduler.get()
+                .scheduleDeferred(
+                    () -> {
+                      editorAgent
+                          .getOpenedEditors()
+                          .forEach(
+                              editor -> {
+                                updateFileContent(editor.getEditorInput().getFile());
+                                editor.doSave();
+                              });
+                      callback.onSuccess(null);
+                    }));
+  }
+
+  private void updateFileContent(VirtualFile virtualFile) {
+    String path = virtualFile.getLocation().toString();
+    eventBus.fireEvent(new FileContentUpdateEvent(path));
+  }
+
+  private Promise<?> appResourceChanges(
+      Iterator<CheResourceChange> resourceChangesIterator, StatusNotification notification) {
+    if (!resourceChangesIterator.hasNext()) {
+      return promises.resolve(null);
+    }
+    CheResourceChange change = resourceChangesIterator.next();
+    if (change == null) {
+      return appResourceChanges(resourceChangesIterator, notification);
+    }
+    String newUri = change.getNewUri();
+    String current = change.getCurrent();
+
+    if (isNullOrEmpty(current) && isNullOrEmpty(newUri)) {
+      return appResourceChanges(resourceChangesIterator, notification);
+    }
+
+    if (isNullOrEmpty(newUri)) {
+      Path oldPath = Path.valueOf(current).makeAbsolute();
+      return deleteResouce(oldPath)
+          .then(
+              (Function<Void, Promise<?>>)
+                  ignored -> appResourceChanges(resourceChangesIterator, notification));
+    }
+
+    Path path = Path.valueOf(newUri).makeAbsolute();
+    if (isNullOrEmpty(current)) {
+      return createResource(path, change.getResourceKind(), notification)
+          .then(
+              (Function<ItemReference, Promise<?>>)
+                  ignored -> appResourceChanges(resourceChangesIterator, notification));
+    }
+
+    Path oldPath = Path.valueOf(current).makeAbsolute();
+
     Container workspaceRoot = appContext.getWorkspaceRoot();
-    workspaceRoot
-        .getResource(path)
-        .then(
-            resource -> {
-              if (ResourceKind.FOLDER.equals(kind)) {
-                projectService
-                    .createFolder(path)
-                    .catchError(
-                        error -> {
-                          notification.setStatus(Status.FAIL);
-                          notification.setContent(error.getMessage());
-                        });
-              } else if (ResourceKind.FILE.equals(kind)) {
-                projectService
-                    .createFile(path, "")
-                    .catchError(
-                        error -> {
-                          notification.setStatus(Status.FAIL);
-                          notification.setContent(error.getMessage());
-                        });
+
+    return workspaceRoot
+        .getResource(oldPath)
+        .thenPromise(
+            resourceOptional -> {
+              if (!resourceOptional.isPresent()) {
+                return promises.resolve(null);
               }
+              Resource resource = resourceOptional.get();
+
+              if (resource.isProject()) {
+                closeRelatedEditors(resource);
+              }
+
+              for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
+                if (resource
+                    .getLocation()
+                    .isPrefixOf(editor.getEditorInput().getFile().getLocation())) {
+                  TextDocumentIdentifier documentId =
+                      dtoHelper.createTDI(editor.getEditorInput().getFile());
+                  DidCloseTextDocumentParams closeEvent =
+                      dtoFactory.createDto(DidCloseTextDocumentParams.class);
+                  closeEvent.setTextDocument(documentId);
+                  textDocumentService.didClose(closeEvent);
+                }
+              }
+              return moveResource(resourceChangesIterator, notification, path, resource);
             });
   }
 
-  private void moveResource(Resource resource, Path path, StatusNotification notification) {
-    if (resource.isProject()) {
-      closeRelatedEditors(resource);
-    }
-    resource
+  private Promise<Object> moveResource(
+      Iterator<CheResourceChange> resourceChangesIterator,
+      StatusNotification notification,
+      Path path,
+      Resource resource) {
+    return resource
         .move(path)
         .then(
-            movedResource -> {
-              if (movedResource.isFolder()) {
-                return;
-              }
-              final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
+            (Function<Resource, Object>)
+                movedResource -> {
+                  eventBus.fireEvent(new RevealResourceEvent(movedResource.getLocation()));
+                  if (movedResource.isFolder()) {
+                    return appResourceChanges(resourceChangesIterator, notification);
+                  }
+                  final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
 
-              for (EditorPartPresenter editor : openedEditors) {
-                VirtualFile file = editor.getEditorInput().getFile();
-                if (movedResource.getLocation().equals(file.getLocation())) {
-                  eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
-                  return;
-                }
-              }
-            })
+                  for (EditorPartPresenter editor : openedEditors) {
+                    VirtualFile file = editor.getEditorInput().getFile();
+                    if (movedResource.getLocation().equals(file.getLocation())) {
+                      eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
+                      return appResourceChanges(resourceChangesIterator, notification);
+                    }
+                  }
+                  return appResourceChanges(resourceChangesIterator, notification);
+                })
         .catchError(
             error -> {
               notification.setStatus(Status.FAIL);
               notification.setContent(error.getMessage());
             });
+  }
+
+  private Promise<ItemReference> createResource(
+      Path path, ResourceKind kind, StatusNotification notification) {
+    if (ResourceKind.FOLDER.equals(kind)) {
+      return projectService
+          .createFolder(path)
+          .catchError(
+              error -> {
+                notification.setStatus(Status.FAIL);
+                notification.setContent(error.getMessage());
+              });
+    } else {
+      return projectService
+          .createFile(path, "")
+          .catchError(
+              error -> {
+                notification.setStatus(Status.FAIL);
+                notification.setContent(error.getMessage());
+              });
+    }
   }
 
   private void closeRelatedEditors(Resource resource) {
@@ -336,27 +373,26 @@ public class ApplyWorkspaceEditAction extends BaseAction {
         undoRedo.endCompoundChange();
 
         Supplier<Promise<Void>> value =
-            () -> {
-              return promiseProvider.create(
-                  Executor.create(
-                      (ResolveFunction<Void> resolve, RejectFunction reject) -> {
-                        try {
-                          undoRedo.undo();
-                          resolve.apply(null);
-                        } catch (Exception e) {
-                          reject.apply(
-                              new PromiseError() {
-                                public String getMessage() {
-                                  return "Error during undo";
-                                }
+            () ->
+                promiseProvider.create(
+                    Executor.create(
+                        (ResolveFunction<Void> resolve, RejectFunction reject) -> {
+                          try {
+                            undoRedo.undo();
+                            resolve.apply(null);
+                          } catch (Exception e) {
+                            reject.apply(
+                                new PromiseError() {
+                                  public String getMessage() {
+                                    return "Error during undo";
+                                  }
 
-                                public Throwable getCause() {
-                                  return e;
-                                }
-                              });
-                        }
-                      }));
-            };
+                                  public Throwable getCause() {
+                                    return e;
+                                  }
+                                });
+                          }
+                        }));
         return promiseProvider.resolve(value);
       }
     }
