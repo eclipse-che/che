@@ -38,6 +38,9 @@ public interface ThemeAgent {
   /** @return current theme */
   String getCurrentThemeId();
 
-  /** Sets current theme by theme id. If there is no such theme by given id, then default theme is activated. */
+  /**
+   * Sets current theme by theme id. If there is no such theme by given id, then default theme is
+   * activated.
+   */
   void setTheme(String themeId);
 }
