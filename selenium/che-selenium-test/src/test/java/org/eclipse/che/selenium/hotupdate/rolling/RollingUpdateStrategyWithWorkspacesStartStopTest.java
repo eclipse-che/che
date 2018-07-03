@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 public class RollingUpdateStrategyWithWorkspacesStartStopTest {
   private static final int TIMEOUT_FOR_ROLLING_UPDATE_FINISH = 100;
   private static final String UPDATE_COMMAND = "rollout latest che";
+  private static final String PODS_LIST_COMMAND = "oc get pods";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
 
@@ -95,5 +96,17 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
 
   private void executeRollingUpdateCommand() throws Exception {
     openShiftCliCommandExecutor.execute(UPDATE_COMMAND);
+  }
+
+  // -------------------------------------------------------------------
+
+  private String getPodsList() throws Exception {
+    return openShiftCliCommandExecutor.execute(PODS_LIST_COMMAND);
+  }
+
+  private void printPodsList() throws Exception {
+    System.out.println("============================================");
+    System.out.println(getPodsList());
+    System.out.println("============================================");
   }
 }

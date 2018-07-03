@@ -43,6 +43,7 @@ public class RollingUpdateStrategyWithEditorTest {
   private static final int RESTORE_IDE_AFTER_REFRESH_TIMEOUT = 10;
   private static final String PROJECT_NAME = "default-spring-project";
   private static final String UPDATE_COMMAND = "rollout latest che";
+  private static final String PODS_LIST_COMMAND = "oc get pods";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
 
@@ -129,5 +130,15 @@ public class RollingUpdateStrategyWithEditorTest {
     } catch (Exception ex) {
       throw new RuntimeException("Master is not available", ex);
     }
+  }
+
+  private String getPodsList() throws Exception {
+    return openShiftCliCommandExecutor.execute(PODS_LIST_COMMAND);
+  }
+
+  private void printPodsList() throws Exception {
+    System.out.println("============================================");
+    System.out.println(getPodsList());
+    System.out.println("============================================");
   }
 }
