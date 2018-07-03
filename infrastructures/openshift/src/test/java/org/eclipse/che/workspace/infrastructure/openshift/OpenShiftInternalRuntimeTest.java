@@ -70,7 +70,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.Kubernet
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -126,7 +126,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private KubernetesServices services;
   @Mock private KubernetesSecrets secrets;
   @Mock private OpenShiftRoutes routes;
-  @Mock private KubernetesPods pods;
+  @Mock private KubernetesDeployments deployments;
   @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
@@ -195,7 +195,7 @@ public class OpenShiftInternalRuntimeTest {
     when(project.services()).thenReturn(services);
     when(project.routes()).thenReturn(routes);
     when(project.secrets()).thenReturn(secrets);
-    when(project.pods()).thenReturn(pods);
+    when(project.deployments()).thenReturn(deployments);
     when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
         .thenReturn(bootstrapper);
     doReturn(
@@ -213,7 +213,7 @@ public class OpenShiftInternalRuntimeTest {
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container)));
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
     when(osEnv.getServices()).thenReturn(allServices);
     when(osEnv.getRoutes()).thenReturn(allRoutes);
     when(osEnv.getPods()).thenReturn(allPods);
@@ -230,12 +230,12 @@ public class OpenShiftInternalRuntimeTest {
 
     internalRuntime.startMachines();
 
-    verify(pods).create(any());
+    verify(deployments).deploy(any());
     verify(routes).create(any());
     verify(services).create(any());
     verify(secrets).create(any());
 
-    verify(project.pods(), times(2)).watchEvents(any());
+    verify(project.deployments(), times(2)).watchEvents(any());
     verify(eventService, times(2)).publish(any());
     verifyEventsOrder(newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING));
   }
@@ -250,11 +250,11 @@ public class OpenShiftInternalRuntimeTest {
 
     internalRuntimeWithoutUnrecoverableEventHandler.startMachines();
 
-    verify(pods).create(any());
+    verify(deployments).deploy(any());
     verify(routes).create(any());
     verify(services).create(any());
 
-    verify(project.pods(), times(1)).watchEvents(any());
+    verify(project.deployments(), times(1)).watchEvents(any());
     verify(eventService, times(2)).publish(any());
     verifyEventsOrder(newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING));
   }

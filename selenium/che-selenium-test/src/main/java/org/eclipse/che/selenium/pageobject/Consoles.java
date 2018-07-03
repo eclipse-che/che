@@ -14,7 +14,9 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
@@ -27,10 +29,15 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.List;
+import javax.ws.rs.core.Response.Status;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
+import org.eclipse.che.selenium.core.utils.HttpUtil;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -38,9 +45,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Aleksandr Shmaraev */
 @Singleton
@@ -49,6 +59,10 @@ public class Consoles {
   private final WebDriverWait redrawDriverWait;
   private final WebDriverWait loadPageDriverWait;
   private final WebDriverWait updateProjDriverWait;
+  private final ProjectExplorer projectExplorer;
+  private final AskDialog askDialog;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWaitFactory webDriverWaitFactory;
 
   public static final String PROCESS_NAME_XPATH = "//span[text()='%s']";
   public static final String PROCESSES_MAIN_AREA = "gwt-debug-consolesPanel";
@@ -93,13 +107,24 @@ public class Consoles {
   private final ActionsFactory actionsFactory;
   private final Loader loader;
   private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
+  private static final Logger LOG = LoggerFactory.getLogger(Consoles.class);
 
   @Inject
   public Consoles(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      ProjectExplorer projectExplorer,
+      AskDialog askDialog,
+      WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.projectExplorer = projectExplorer;
+    this.askDialog = askDialog;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -225,6 +250,23 @@ public class Consoles {
   /** Get url for preview. */
   public String getPreviewUrl() {
     return loadPageDriverWait.until(visibilityOf(previewUrl)).getText();
+  }
+
+  /** Wait until url for preview is responsive, that is requesting by url returns Status.OK. */
+  public void waitPreviewUrlIsResponsive(int timeoutInSec) {
+    webDriverWaitFactory
+        .get(timeoutInSec)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  try {
+                    return (HttpUtil.getUrlResponseCode(getPreviewUrl())
+                        == Status.OK.getStatusCode());
+                  } catch (IOException ex) {
+                    LOG.warn(format("Preview URL %s is still inaccessible.", getPreviewUrl()));
+                    return false;
+                  }
+                });
   }
 
   /** click on the 'Close' icon of the terminal into "Consoles' area */
@@ -451,5 +493,58 @@ public class Consoles {
     loadPageDriverWait
         .until(visibilityOfElementLocated(By.id("gwt-debug-terminal_clear_output")))
         .click();
+  }
+
+  public void executeCommandInsideProcessesArea(
+      String machineName,
+      ContextMenuCommandGoals goal,
+      String commandName,
+      String expectedMessageInTerminal) {
+    startCommandFromProcessesArea(machineName, goal, commandName);
+    waitTabNameProcessIsPresent(commandName);
+    waitProcessInProcessConsoleTree(commandName);
+    waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
+  }
+
+  // Click on preview url and check visibility of web element on opened page
+  public void checkWebElementVisibilityAtPreviewPage(By webElement) {
+    String currentWindow = seleniumWebDriver.getWindowHandle();
+
+    waitPreviewUrlIsPresent();
+    waitPreviewUrlIsResponsive(10);
+    clickOnPreviewUrl();
+
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
+
+    seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
+
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(currentWindow);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+  }
+
+  // Start command from project context menu and check expected message in Console
+  public void executeCommandFromProjectExplorer(
+      String projectName,
+      ContextMenuCommandGoals goal,
+      String commandName,
+      String expectedMessageInTerminal) {
+    projectExplorer.waitAndSelectItem(projectName);
+    projectExplorer.invokeCommandWithContextMenu(goal, projectName, commandName);
+
+    waitTabNameProcessIsPresent(commandName);
+    waitProcessInProcessConsoleTree(commandName);
+    waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
+  }
+
+  public void closeProcessTabWithAskDialog(String tabName) {
+    String message =
+        format(
+            "The process %s will be terminated after closing console. Do you want to continue?",
+            tabName);
+    waitProcessInProcessConsoleTree(tabName);
+    closeProcessByTabName(tabName);
+    askDialog.acceptDialogWithText(message);
+    waitProcessIsNotPresentInProcessConsoleTree(tabName);
   }
 }

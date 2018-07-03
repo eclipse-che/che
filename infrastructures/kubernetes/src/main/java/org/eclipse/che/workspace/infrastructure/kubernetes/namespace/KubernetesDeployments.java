@@ -18,18 +18,24 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_SUCCEEDED;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectReference;
+import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.extensions.Deployment;
+import io.fabric8.kubernetes.api.model.extensions.DoneableDeployment;
+import io.fabric8.kubernetes.api.model.extensions.ReplicaSet;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.ScalableResource;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -38,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -61,15 +68,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Defines an internal API for managing {@link Pod} instances in {@link KubernetesPods#namespace
- * predefined namespace}.
+ * Defines an internal API for managing {@link Pod} and {@link Deployment} instances in {@link
+ * KubernetesDeployments#namespace predefined namespace}.
  *
  * @author Sergii Leshchenko
  * @author Anton Korneta
+ * @author Angel Misevski
  */
-public class KubernetesPods {
+public class KubernetesDeployments {
 
-  private static final Logger LOG = LoggerFactory.getLogger(KubernetesPods.class);
+  private static final Logger LOG = LoggerFactory.getLogger(KubernetesDeployments.class);
 
   private static final String CONTAINER_NAME_GROUP = "name";
   // when event is related to container `fieldPath` field contains
@@ -79,6 +87,7 @@ public class KubernetesPods {
 
   // TODO https://github.com/eclipse/che/issues/7656
   public static final int POD_REMOVAL_TIMEOUT_MIN = 5;
+  public static final int POD_CREATION_TIMEOUT_MIN = 5;
 
   private static final String POD_OBJECT_KIND = "Pod";
   // error stream data initial capacity
@@ -86,16 +95,17 @@ public class KubernetesPods {
   public static final String STDOUT = "stdout";
   public static final String STDERR = "stderr";
 
-  private final String namespace;
+  protected final String namespace;
+  protected final String workspaceId;
   private final KubernetesClientFactory clientFactory;
   private final ConcurrentLinkedQueue<PodActionHandler> podActionHandlers;
   private final ConcurrentLinkedQueue<PodEventHandler> containerEventsHandlers;
-  private final String workspaceId;
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
 
-  KubernetesPods(String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
+  protected KubernetesDeployments(
+      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
@@ -104,11 +114,45 @@ public class KubernetesPods {
   }
 
   /**
-   * Creates specified pod.
+   * Starts the specified Pod via a Deployment.
    *
-   * @param pod pod to create
+   * @param pod pod to deploy
    * @return created pod
    * @throws InfrastructureException when any exception occurs
+   */
+  public Pod deploy(Pod pod) throws InfrastructureException {
+    putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
+    ObjectMeta metadata = pod.getMetadata();
+    PodSpec podSpec = pod.getSpec();
+    podSpec.setRestartPolicy("Always"); // Only allowable value
+    try {
+      Deployment deployment =
+          clientFactory
+              .create(workspaceId)
+              .extensions()
+              .deployments()
+              .createNew()
+              .withMetadata(metadata)
+              .withNewSpec()
+              .withReplicas(1)
+              .withNewTemplate()
+              .withMetadata(metadata)
+              .withSpec(podSpec)
+              .endTemplate()
+              .endSpec()
+              .done();
+      return awaitAndGetPod(deployment);
+    } catch (KubernetesClientException e) {
+      throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  /**
+   * Create a terminating pod that is not part of a Deployment.
+   *
+   * @param pod the Pod to create
+   * @return the created pod
+   * @throws InfrastructureException when any error occurs
    */
   public Pod create(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
@@ -139,14 +183,17 @@ public class KubernetesPods {
   }
 
   /**
-   * Returns optional with pod that have specified name.
+   * Returns optional with pod that either has specified name or is controlled by Deployment with
+   * specified name.
    *
+   * @param name name of the Pod or Deployment
    * @throws InfrastructureException when any exception occurs
    */
   public Optional<Pod> get(String name) throws InfrastructureException {
+    String podName = getPodName(name);
     try {
       return Optional.ofNullable(
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get());
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName).get());
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
@@ -155,22 +202,23 @@ public class KubernetesPods {
   /**
    * Waits until pod state will suit for specified predicate.
    *
-   * @param name name of pod that should be watched
+   * @param name name of pod or deployment containing pod that should be watched
    * @param timeoutMin waiting timeout in minutes
    * @param predicate predicate to perform state check
-   * @return pod that suit for specified predicate
+   * @return pod that satisifes the specified predicate
    * @throws InfrastructureException when specified timeout is reached
    * @throws InfrastructureException when {@link Thread} is interrupted while waiting
    * @throws InfrastructureException when any other exception occurs
    */
   public Pod wait(String name, int timeoutMin, Predicate<Pod> predicate)
       throws InfrastructureException {
+    String podName = getPodName(name);
     CompletableFuture<Pod> future = new CompletableFuture<>();
     Watch watch = null;
     try {
 
       PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name);
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
 
       watch =
           podResource.watch(
@@ -186,13 +234,17 @@ public class KubernetesPods {
                 public void onClose(KubernetesClientException cause) {
                   future.completeExceptionally(
                       new InfrastructureException(
-                          "Waiting for pod '" + name + "' was interrupted"));
+                          "Waiting for pod '" + podName + "' was interrupted"));
                 }
               });
 
       Pod actualPod = podResource.get();
       if (actualPod == null) {
-        throw new InfrastructureException("Specified pod " + name + " doesn't exist");
+        if (name.equals(podName)) { // `name` refers to a bare pod
+          throw new InfrastructureException("Specified pod " + podName + " doesn't exist");
+        } else { // `name` refers to a deployment
+          throw new InfrastructureException("No pod in deployment " + name + " found.");
+        }
       }
       if (predicate.test(actualPod)) {
         return actualPod;
@@ -202,10 +254,10 @@ public class KubernetesPods {
       } catch (ExecutionException e) {
         throw new InfrastructureException(e.getCause().getMessage(), e);
       } catch (TimeoutException e) {
-        throw new InfrastructureException("Waiting for pod '" + name + "' reached timeout");
+        throw new InfrastructureException("Waiting for pod '" + podName + "' reached timeout");
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
-        throw new InfrastructureException("Waiting for pod '" + name + "' was interrupted");
+        throw new InfrastructureException("Waiting for pod '" + podName + "' was interrupted");
       }
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
@@ -223,7 +275,8 @@ public class KubernetesPods {
    * <p>Note that the resulting future must be explicitly cancelled when its completion no longer
    * important because of finalization allocated resources.
    *
-   * @param name the pod name that should be watched
+   * @param name the pod or deployment (that contains pod) name that should be watched
+   * @param predicate a function that performs pod state check
    * @return completable future that is completed when one of the following conditions is met:
    *     <ul>
    *       <li>complete successfully in case of "Running" pod state.
@@ -239,8 +292,9 @@ public class KubernetesPods {
   public CompletableFuture<Void> waitRunningAsync(String name) {
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
+      final String podName = getPodName(name);
       final PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create().pods().inNamespace(namespace).withName(name);
+          clientFactory.create().pods().inNamespace(namespace).withName(podName);
       final Watch watch =
           podResource.watch(
               new Watcher<Pod>() {
@@ -253,15 +307,20 @@ public class KubernetesPods {
                 public void onClose(KubernetesClientException cause) {
                   podRunningFuture.completeExceptionally(
                       new InfrastructureException(
-                          "Waiting for pod '" + name + "' was interrupted"));
+                          "Waiting for pod '" + podName + "' was interrupted"));
                 }
               });
 
       podRunningFuture.whenComplete((ok, ex) -> watch.close());
       final Pod pod = podResource.get();
       if (pod == null) {
-        podRunningFuture.completeExceptionally(
-            new InfrastructureException("Specified pod " + name + " doesn't exist"));
+        InfrastructureException ex;
+        if (name.equals(podName)) { // `name` refers to bare pod
+          ex = new InfrastructureException("Specified pod " + podName + " doesn't exist");
+        } else {
+          ex = new InfrastructureException("No pod in deployment " + name + " found.");
+        }
+        podRunningFuture.completeExceptionally(ex);
       } else {
         handleStartingPodStatus(podRunningFuture, pod);
       }
@@ -451,7 +510,7 @@ public class KubernetesPods {
   /**
    * Executes command in specified container.
    *
-   * @param podName pod name where command will be executed
+   * @param name pod name (or name of deployment containing pod) where command will be executed
    * @param containerName container name where command will be executed
    * @param timeoutMin timeout to wait until process will be done
    * @param command command to execute
@@ -462,12 +521,13 @@ public class KubernetesPods {
    * @throws InfrastructureException when any other exception occurs
    */
   public void exec(
-      String podName,
+      String name,
       String containerName,
       int timeoutMin,
       String[] command,
       BiConsumer<String, String> outputConsumer)
       throws InfrastructureException {
+    final String podName = getPodName(name);
     final ExecWatchdog watchdog = new ExecWatchdog();
     final ByteArrayOutputStream errStream = new ByteArrayOutputStream(ERROR_BUFF_INITIAL_CAP);
     try (ExecWatch watch =
@@ -502,7 +562,7 @@ public class KubernetesPods {
   /**
    * Executes command in specified container.
    *
-   * @param podName pod name where command will be executed
+   * @param name pod name (or name of deployment containing pod) where command will be executed
    * @param containerName container name where command will be executed
    * @param timeoutMin timeout to wait until process will be done
    * @param command command to execute
@@ -510,8 +570,9 @@ public class KubernetesPods {
    * @throws InfrastructureException when {@link Thread} is interrupted while command executing
    * @throws InfrastructureException when any other exception occurs
    */
-  public void exec(String podName, String containerName, int timeoutMin, String[] command)
+  public void exec(String name, String containerName, int timeoutMin, String[] command)
       throws InfrastructureException {
+    final String podName = getPodName(name);
     final ExecWatchdog watchdog = new ExecWatchdog();
     try (ExecWatch watch =
         clientFactory
@@ -536,12 +597,13 @@ public class KubernetesPods {
   }
 
   /**
-   * Deletes pod with given name.
+   * Deletes pod or deployment with given name. If a Pod controlled by a Deployment is specified,
+   * the owning Deployment will be deleted instead.
    *
    * <p>Note that this method will mark Kubernetes pod as interrupted and then will wait until pod
    * will be killed.
    *
-   * @param name name of pod to remove
+   * @param name name of pod or deployment to remove
    * @throws InfrastructureException when {@link Thread} is interrupted while command executing
    * @throws InfrastructureException when pod removal timeout is reached
    * @throws InfrastructureException when any other exception occurs
@@ -562,7 +624,7 @@ public class KubernetesPods {
   }
 
   /**
-   * Deletes all existing pods.
+   * Deletes all existing pods and the Deployments that control them.
    *
    * <p>Note that this method will mark Kubernetes pods as interrupted and then will wait until all
    * pods will be killed.
@@ -582,7 +644,7 @@ public class KubernetesPods {
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
               .list()
               .getItems();
-      final List<CompletableFuture> deleteFutures = new ArrayList<>();
+      final List<CompletableFuture<Void>> deleteFutures = new ArrayList<>();
       for (Pod pod : pods) {
         deleteFutures.add(doDelete(pod.getMetadata().getName()));
       }
@@ -605,23 +667,40 @@ public class KubernetesPods {
     }
   }
 
-  @VisibleForTesting
-  CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
+  protected CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
+    final String podName = getPodName(name);
     Watch toCloseOnException = null;
     try {
-      final PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name);
+      PodResource<Pod, DoneablePod> podResource =
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
+      Pod pod = podResource.get();
+      if (pod == null) {
+        throw new InfrastructureException(
+            String.format("No pod found to delete for name %s", name));
+      }
+      List<OwnerReference> ownerReferences = pod.getMetadata().getOwnerReferences();
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
       final Watch watch = podResource.watch(new DeleteWatcher(deleteFuture));
       toCloseOnException = watch;
-      Boolean deleteSucceeded = podResource.delete();
+
+      Boolean deleteSucceeded = false;
+      if (ownerReferences != null && ownerReferences.size() > 0) {
+        // Part of deployment
+        ScalableResource<Deployment, DoneableDeployment> deploymentResource =
+            getDeploymentResource(pod);
+        deleteSucceeded = deploymentResource.delete();
+      } else {
+        // Bare pod
+        deleteSucceeded = podResource.delete();
+      }
+
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }
       return deleteFuture.whenComplete(
           (v, e) -> {
             if (e != null) {
-              LOG.warn("Failed to remove pod {} cause {}", name, e.getMessage());
+              LOG.warn("Failed to remove pod {} cause {}", podName, e.getMessage());
             }
             watch.close();
           });
@@ -648,6 +727,117 @@ public class KubernetesPods {
       }
     }
     return encoded;
+  }
+
+  /**
+   * Wait until deployment is ready and return created Pod
+   *
+   * @param deploy the deployment responsible for creating the pod
+   * @return the created Pod
+   * @throws InfrastructureException if timeout elapses while waiting.
+   */
+  private Pod awaitAndGetPod(Deployment deploy) throws InfrastructureException {
+    String deploymentName = deploy.getMetadata().getName();
+    try {
+      clientFactory
+          .create(workspaceId)
+          .extensions()
+          .deployments()
+          .withName(deploymentName)
+          .waitUntilReady(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
+      return get(deploymentName)
+          .orElseThrow(
+              () ->
+                  new InfrastructureException(
+                      String.format("Failed to create Deployment %s", deploymentName)));
+    } catch (InterruptedException e) {
+      throw new InfrastructureException(
+          String.format("Timeout while creating Deployment %s", deploymentName));
+    }
+  }
+
+  /**
+   * Get the Deployment resource that owns a specified Pod via the Pod's owner references.
+   *
+   * @param pod the pod controlled by desired deployment
+   * @return the deployment that manages the specified pod
+   * @throws InfrastructureException if any error occurs.
+   */
+  private ScalableResource<Deployment, DoneableDeployment> getDeploymentResource(Pod pod)
+      throws InfrastructureException {
+    List<OwnerReference> podOwners = pod.getMetadata().getOwnerReferences();
+    String podName = pod.getMetadata().getName();
+    String replicaSetName =
+        podOwners
+            .stream()
+            .filter(owner -> "ReplicaSet".equals(owner.getKind()))
+            .map(owner -> owner.getName())
+            .findAny()
+            .orElseThrow(
+                () ->
+                    new InfrastructureException(
+                        String.format("Failed to get ReplicaSet controlling Pod %s", podName)));
+
+    ReplicaSet replicaSet =
+        clientFactory.create(workspaceId).extensions().replicaSets().withName(replicaSetName).get();
+    List<OwnerReference> rsOwners = replicaSet.getMetadata().getOwnerReferences();
+    String deploymentName =
+        rsOwners
+            .stream()
+            .filter(owner -> "Deployment".equals(owner.getKind()))
+            .map(owner -> owner.getName())
+            .findAny()
+            .orElseThrow(
+                () ->
+                    new InfrastructureException(
+                        String.format("Failed to get Deployment controlling Pod %s", podName)));
+    return clientFactory.create(workspaceId).extensions().deployments().withName(deploymentName);
+  }
+
+  /**
+   * Returns the name of a specified Pod given either the actual Pod name or the name of the
+   * DeploymentConfig that controls it. <br>
+   * This is necessary because we are trying to transparently wrap Pods in DeploymentConfigs;
+   * attempting to create a Pod named {@code testPod} will result in a DeploymentConfig with name
+   * {@code testPod}, which will in turn create a Pod named e.g {@code testPod-1-xxxxx}.
+   *
+   * @param name Pod or DeploymentConfig name
+   * @return the name of the intended pod.
+   * @see
+   */
+  private String getPodName(String name) throws InfrastructureException {
+    if (clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get()
+        != null) {
+      return name;
+    }
+    Deployment deployment =
+        clientFactory
+            .create(workspaceId)
+            .extensions()
+            .deployments()
+            .inNamespace(namespace)
+            .withName(name)
+            .get();
+    if (deployment == null) {
+      throw new InfrastructureException("Failed to get deployment for pod");
+    }
+    Map<String, String> selector = deployment.getSpec().getSelector().getMatchLabels();
+    List<Pod> pods =
+        clientFactory
+            .create(workspaceId)
+            .pods()
+            .inNamespace(namespace)
+            .withLabels(selector)
+            .list()
+            .getItems();
+    if (pods.isEmpty()) {
+      throw new InfrastructureException(String.format("Failed to find pod with name %s", name));
+    } else if (pods.size() > 1) {
+      throw new InfrastructureException(
+          String.format("Found multiple pods in DeploymentConfig %s", name));
+    }
+
+    return pods.get(0).getMetadata().getName();
   }
 
   private static class DeleteWatcher implements Watcher<Pod> {

@@ -50,7 +50,7 @@ public class HttpConnectionServerCheckerTest {
     checker =
         spy(
             new HttpConnectionServerChecker(
-                SERVER_URL, MACHINE_NAME, SERVER_REF, 1, 10, 1, TimeUnit.SECONDS, timer));
+                SERVER_URL, MACHINE_NAME, SERVER_REF, 1, 10, 1, TimeUnit.SECONDS, timer, null));
 
     doReturn(conn).when(checker).createConnection(nullable(URL.class));
     when(conn.getResponseCode()).thenReturn(200);

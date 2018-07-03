@@ -12,8 +12,8 @@ package org.eclipse.che.selenium.stack;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
@@ -112,14 +112,14 @@ public class WorkingWithJavaMySqlStackTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // Select the db machine and perform 'show databases'
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, "show databases", "db");
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT_NAME, "show databases", "db");
     consoles.waitTabNameProcessIsPresent("show databases");
     for (String text : infoDataBases) {
       consoles.waitExpectedTextIntoConsole(text);
     }
 
     // Build and deploy the web application
-    consoles.startCommandFromProcessesArea("dev-machine", RUN, BUILD_AND_DEPLOY_PROCESS);
+    consoles.startCommandFromProcessesArea("dev-machine", RUN_GOAL, BUILD_AND_DEPLOY_PROCESS);
     consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
     consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, UPDATING_PROJECT_TIMEOUT_SEC);
