@@ -103,19 +103,34 @@ public class PreviewNode {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj) {
+      return true;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
     PreviewNode other = (PreviewNode) obj;
     if (this.children == null) {
-      if (other.children != null) return false;
-    } else if (!this.children.equals(other.children)) return false;
+      if (other.children != null) {
+        return false;
+      }
+    } else if (!this.children.equals(other.children)) {
+      return false;
+    }
     if (this.id == null) {
-      if (other.id != null) return false;
-    } else if (!this.id.equals(other.id)) return false;
+      if (other.id != null) {
+        return false;
+      }
+    } else if (!this.id.equals(other.id)) {
+      return false;
+    }
     if (this.uri == null) {
-      if (other.uri != null) return false;
-    } else if (!this.uri.equals(other.uri)) return false;
+      if (other.uri != null) {
+        return false;
+      }
+    } else if (!this.uri.equals(other.uri)) {
+      return false;
+    }
     return true;
   }
 

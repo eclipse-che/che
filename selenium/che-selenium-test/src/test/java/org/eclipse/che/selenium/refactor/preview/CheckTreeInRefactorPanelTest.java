@@ -74,20 +74,18 @@ public class CheckTreeInRefactorPanelTest {
     refactorPanel.clickOnItemByNameAndPosition("AppController.java", 0);
     loader.waitOnClosed();
     refactorPanel.clickOnExpandItemByNameAndPosition("AppController", 0);
-    refactorPanel.clickOnExpandItemByNameAndPosition("AppController", 1);
-    refactorPanel.clickOnExpandItemByNameAndPosition("handleRequest", 0);
-    refactorPanel.setFlagItemByNameAndPosition("handleRequest", 0);
+    refactorPanel.setFlagItemByNameAndPosition("AppController", 0);
     Assert.assertFalse(
-        refactorPanel.itemIsSelectedByNameAndPosition("Update local variable reference", 0),
+        refactorPanel.itemIsSelectedByNameAndPosition("Textual change", 0),
         "This item in tree mustn't be selected.");
     Assert.assertFalse(
-        refactorPanel.itemIsSelectedByNameAndPosition("Update local variable reference", 1),
+        refactorPanel.itemIsSelectedByNameAndPosition("Textual change", 1),
         "This item in tree mustn't be selected.");
     Assert.assertFalse(
-        refactorPanel.itemIsSelectedByNameAndPosition("Update local variable reference", 2),
+        refactorPanel.itemIsSelectedByNameAndPosition("Textual change", 2),
         "This item in tree mustn't be selected.");
     Assert.assertFalse(
-        refactorPanel.itemIsSelectedByNameAndPosition("Update local variable reference", 3),
+        refactorPanel.itemIsSelectedByNameAndPosition("Textual change", 3),
         "This item in tree mustn't be selected.");
   }
 }
