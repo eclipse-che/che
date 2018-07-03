@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -91,11 +91,13 @@ public class CheckHiddenFolderAndFileCreatedFromCommandTest {
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project
             .SHOW_HIDE_HIDDEN_FILES); // all hidden files and folders are visible
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, COMMAND_CREATE_FOLDER_NAME);
+    projectExplorer.invokeCommandWithContextMenu(
+        COMMON_GOAL, PROJECT_NAME, COMMAND_CREATE_FOLDER_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItem(PATH_TO_FOLDER);
     projectExplorer.openItemByPath(PATH_TO_FOLDER); // the created hidden folder is visible
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, COMMAND_CREATE_FILE_NAME);
+    projectExplorer.invokeCommandWithContextMenu(
+        COMMON_GOAL, PROJECT_NAME, COMMAND_CREATE_FILE_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItem(PATH_TO_FILE);
     projectExplorer.openItemByPath(PATH_TO_FILE); // the created hidden file is visible

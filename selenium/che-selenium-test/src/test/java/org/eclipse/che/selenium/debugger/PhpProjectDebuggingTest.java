@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class PhpProjectDebuggingTest {
     debugPanel.removeAllBreakpoints();
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.END_DEBUG_SESSION);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, STOP_APACHE_COMMAND_NAME);
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT, STOP_APACHE_COMMAND_NAME);
 
     // remove debug configuration
     menu.runCommand(
@@ -127,7 +127,8 @@ public class PhpProjectDebuggingTest {
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
+    projectExplorer.invokeCommandWithContextMenu(
+        COMMON_GOAL, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
 
     debugPanel.openDebugPanel();
 
@@ -176,7 +177,7 @@ public class PhpProjectDebuggingTest {
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, START_APACHE_COMMAND_NAME);
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT, START_APACHE_COMMAND_NAME);
 
     startWebPhpScriptInDebugMode();
 

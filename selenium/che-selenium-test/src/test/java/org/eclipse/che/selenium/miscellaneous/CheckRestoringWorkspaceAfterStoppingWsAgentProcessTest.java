@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 
 import com.google.inject.Inject;
@@ -64,7 +64,8 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
 
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, nameCommandForKillWsAgent);
+    projectExplorer.invokeCommandWithContextMenu(
+        COMMON_GOAL, PROJECT_NAME, nameCommandForKillWsAgent);
 
     toastLoader.waitToastLoaderIsOpen();
     toastLoader.waitExpectedTextInToastLoader("Workspace agent is not running");
