@@ -71,11 +71,14 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 public class CheSeleniumSuiteModule extends AbstractModule {
 
   public static final String AUXILIARY = "auxiliary";
+
   public static final String DOCKER_INFRASTRUCTURE = "docker";
   public static final String OPENSHIFT_INFRASTRUCTURE = "openshift";
 
   private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
   private static final String CHE_INFRASTRUCTURE_VARIABLE = "CHE_INFRASTRUCTURE";
+
+  public enum Infrastructure {}
 
   @Override
   public void configure() {

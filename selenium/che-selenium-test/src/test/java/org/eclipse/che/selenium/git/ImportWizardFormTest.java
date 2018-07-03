@@ -119,7 +119,7 @@ public class ImportWizardFormTest {
     dashboard.open(); // to login
     keycloakFederatedIdentitiesPage.open();
     keycloakFederatedIdentitiesPage.ensureGithubIdentityIsAbsent();
-    assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), "");
+    assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue().toLowerCase(), "");
   }
 
   @BeforeClass

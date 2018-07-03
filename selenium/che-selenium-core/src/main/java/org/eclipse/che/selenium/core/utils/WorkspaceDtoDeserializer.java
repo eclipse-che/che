@@ -10,20 +10,22 @@
  */
 package org.eclipse.che.selenium.core.utils;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.gson.JsonSyntaxException;
-import java.io.IOException;
-import java.net.URL;
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Named;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Creates workspace config from JSON stored in resources. Takes into account current infrastructure
@@ -34,30 +36,52 @@ import org.slf4j.LoggerFactory;
  */
 public class WorkspaceDtoDeserializer {
 
-  private static final Logger LOG = LoggerFactory.getLogger(WorkspaceDtoDeserializer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkspaceDtoDeserializer.class);
 
-  @Inject
-  @Named("che.infrastructure")
-  private String infrastructure;
+    @Inject
+    @Named("che.infrastructure")
+    private Infrastructure infrastructure;
 
-  public WorkspaceConfigDto deserializeWorkspaceTemplate(String templateName) {
-    requireNonNull(templateName);
 
-    try {
+    public WorkspaceConfigDto deserializeWorkspaceTemplate(String templateName) {
+        requireNonNull(templateName);
 
-      URL url =
-          Resources.getResource(
-              WorkspaceDtoDeserializer.class,
-              format("/templates/workspace/%s/%s", infrastructure, templateName));
-      return DtoFactory.getInstance()
-          .createDtoFromJson(Resources.toString(url, Charsets.UTF_8), WorkspaceConfigDto.class);
-    } catch (IOException | IllegalArgumentException | JsonSyntaxException e) {
-      LOG.error(
-          "Fail to read workspace template {} for infrastructure {} because {} ",
-          templateName,
-          infrastructure,
-          e.getMessage());
-      throw new RuntimeException(e.getLocalizedMessage(), e);
+        try {
+
+            URL url =
+                    Resources.getResource(
+                            WorkspaceDtoDeserializer.class,
+                            getTemplateDirectory(templateName));
+            return DtoFactory.getInstance()
+                             .createDtoFromJson(Resources.toString(url, Charsets.UTF_8), WorkspaceConfigDto.class);
+        } catch (IOException | IllegalArgumentException | JsonSyntaxException e) {
+            LOG.error(
+                    "Fail to read workspace template {} for infrastructure {} because {} ",
+                    templateName,
+                    getTemplateDirectory(templateName),
+                    e.getMessage());
+            throw new RuntimeException(e.getLocalizedMessage(), e);
+        }
     }
-  }
+
+
+    private String getTemplateDirectory(String template) {
+        String templateDirectoryName;
+        switch (infrastructure) {
+            case OPENSHIFT:
+            case K8S:
+                templateDirectoryName = Infrastructure.OPENSHIFT.toString().toLowerCase();
+                break;
+
+            case DOCKER:
+            default:
+                templateDirectoryName = infrastructure.toString().toLowerCase();
+        }
+
+        return String.format("/templates/workspace/%s/%s", templateDirectoryName, template);
+    }
 }
+
+
+
+
