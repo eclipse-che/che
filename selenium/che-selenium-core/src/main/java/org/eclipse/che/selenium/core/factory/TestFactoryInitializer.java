@@ -70,9 +70,7 @@ public class TestFactoryInitializer {
    */
   public TestFactoryBuilder fromTemplate(String template) throws Exception {
     String name = NameGenerator.generate("factory", 6);
-    InputStream resource =
-        TestFactory.class.getResourceAsStream(
-                getTemplateDirectory(template));
+    InputStream resource = TestFactory.class.getResourceAsStream(getTemplateDirectory(template));
     if (resource == null) {
       throw new IOException(format("Factory template '%s' not found", template));
     }
@@ -87,9 +85,19 @@ public class TestFactoryInitializer {
   }
 
   private String getTemplateDirectory(String template) {
+    String templateDirectoryName;
+    switch (infrastructure) {
+      case openshift:
+      case k8s:
+        templateDirectoryName = Infrastructure.docker.toString().toLowerCase();
+        break;
 
+      case docker:
+      default:
+        templateDirectoryName = infrastructure.toString().toLowerCase();
+    }
 
-    return format("/templates/factory/%s/%s", infrastructure, template);
+    return String.format("/templates/factory/%s/%s", templateDirectoryName, template);
   }
 
   /** Initialize {@link TestFactory} base upon url. Can't be modified. */

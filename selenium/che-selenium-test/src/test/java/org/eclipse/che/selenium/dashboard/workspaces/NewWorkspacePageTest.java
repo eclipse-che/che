@@ -343,7 +343,7 @@ public class NewWorkspacePageTest {
     checkValidNames();
   }
 
-  @Test(groups = TestGroup.OPENSHIFT)
+  @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
   public void checkOpenshiftStackButtons() {
     checkStackButtons(
         EXPECTED_OPENSHIFT_QUICK_START_STACKS,
@@ -363,7 +363,7 @@ public class NewWorkspacePageTest {
         EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
-  @Test(groups = TestGroup.OPENSHIFT)
+  @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
   public void checkOpenshiftFiltersButton() {
     checkFiltersButton(EXPECTED_OPENSHIFT_QUICK_START_STACKS);
   }
