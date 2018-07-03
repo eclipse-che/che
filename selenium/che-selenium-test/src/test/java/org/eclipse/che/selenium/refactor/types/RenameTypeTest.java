@@ -81,6 +81,7 @@ public class RenameTypeTest {
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
+    loader.waitOnClosed();
   }
 
   @BeforeMethod
