@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -26,7 +26,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class CreateWorkspaceFromBlankStackTest {
+public class CreateWorkspaceFromCentosBlankStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String PROJECT_NAME = "blank-project";
@@ -50,8 +50,9 @@ public class CreateWorkspaceFromBlankStackTest {
   }
 
   @Test
-  public void createWorkspaceFromBlankStackTest() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(BLANK, WORKSPACE_NAME, PROJECT_NAME);
+  public void createWorkspaceFromCentosBlankStack() {
+    createWorkspaceHelper.createWorkspaceFromStackWithProject(
+        CENTOS_BLANK, WORKSPACE_NAME, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

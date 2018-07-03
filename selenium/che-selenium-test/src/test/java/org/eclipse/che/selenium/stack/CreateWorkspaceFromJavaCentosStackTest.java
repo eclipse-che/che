@@ -24,7 +24,7 @@ import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsCons
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.common.collect.ImmutableList;
@@ -44,7 +44,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class CreateWorkspaceFromJavaStackTest {
+public class CreateWorkspaceFromJavaCentosStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String CONSOLE_JAVA_SIMPLE = "console-java-simple";
@@ -63,7 +63,6 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @BeforeClass
   public void setUp() {
-
     dashboard.open();
   }
 
@@ -74,7 +73,8 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @Test
   public void checkWorkspaceCreationFromJavaStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProjects(JAVA, WORKSPACE_NAME, projects);
+    createWorkspaceHelper.createWorkspaceFromStackWithProjects(
+        JAVA_CENTOS, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
