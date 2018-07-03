@@ -207,6 +207,10 @@ public class PostgreSqlTckModule extends TckModule {
 
     bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
     bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
+    bind(JpaKubernetesRuntimeStateCache.RemoveKubernetesRuntimeBeforeWorkspaceRemoved.class)
+        .asEagerSingleton();
+    bind(JpaKubernetesMachineCache.RemoveKubernetesMachinesBeforeRuntimesRemoved.class)
+        .asEagerSingleton();
   }
 
   private static void waitConnectionIsEstablished(String dbUrl, String dbUser, String dbPassword) {
