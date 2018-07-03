@@ -1,6 +1,5 @@
 package org.eclipse.che.plugin.java.server.rest.recommend.visitor;
 
-import java.util.List;
 import org.eclipse.che.plugin.java.server.rest.recommend.common.Config;
 import org.eclipse.che.plugin.java.server.rest.recommend.model.DataModel;
 import org.eclipse.che.plugin.java.server.rest.recommend.model.ResultModel;
@@ -20,22 +19,83 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 public class TypeRefactorVisitor extends ASTVisitor {
 
-  public String projectName = null;
-  public List<ResultModel> results = null;
-  public ResultModel result = null;
-  public double maxSimilarity = 0.0;
-  public DataModel renameData = null;
-  public String visitingTypeName = null;
-  public boolean isTypeSelf = false;
-  public boolean isSuperOrSub = false;
-  public boolean isSamePackage = false;
-  public ITypeBinding typeBinding = null;
-  public ITypeBinding[] superInterfaces = null;
-  public ITypeBinding superClass = null;
-  public String originalPackageName = "";
-  public String packageName = "";
-  public String typeName = "";
-  public String methodName = "";
+  private ResultModel result;
+  private double maxSimilarity = 0.0;
+  private DataModel renameData;
+  private String visitingTypeName;
+  private boolean isTypeSelf = false;
+  private boolean isSamePackage = false;
+  private ITypeBinding typeBinding;
+  private ITypeBinding[] superInterfaces;
+  private ITypeBinding superClass;
+  private String originalPackageName;
+  private String packageName;
+  private String typeName;
+  private String methodName;
+
+  public void setRenameData(DataModel renameData) {
+    this.renameData = renameData;
+  }
+
+  public void setResult(ResultModel result) {
+    this.result = result;
+  }
+
+  public void setMethodName(String methodName) {
+    this.methodName = methodName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public void setOriginalPackageName(String originalPackageName) {
+    this.originalPackageName = originalPackageName;
+  }
+
+  public void setSuperClass(ITypeBinding superClass) {
+    this.superClass = superClass;
+  }
+
+  public void setSuperInterfaces(ITypeBinding[] superInterfaces) {
+    this.superInterfaces = superInterfaces;
+  }
+
+  public void setTypeBinding(ITypeBinding typeBinding) {
+    this.typeBinding = typeBinding;
+  }
+
+  public void setTypeSelf(boolean typeSelf) {
+    isTypeSelf = typeSelf;
+  }
+
+  public String getTypeName() {
+    return typeName;
+  }
+
+  public String getMethodName() {
+    return methodName;
+  }
+
+  public String getOriginalPackageName() {
+    return originalPackageName;
+  }
+
+  public ResultModel getResult() {
+    return result;
+  }
+
+  public ITypeBinding getSuperClass() {
+    return superClass;
+  }
+
+  public ITypeBinding getTypeBinding() {
+    return typeBinding;
+  }
+
+  public ITypeBinding[] getSuperInterfaces() {
+    return superInterfaces;
+  }
 
   public TypeRefactorVisitor() {
     super();
@@ -127,17 +187,17 @@ public class TypeRefactorVisitor extends ASTVisitor {
               && maxSimilarity > 0.0
               && Similarity.isMoreSim(candidateName, result, renameData))) {
         maxSimilarity = similarity;
-        if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
+        if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
           String suggestion = Recommend.detect(renameData, candidateName);
 
           SimpleName simpleName = ((VariableDeclarationFragment) obj).getName();
-          result.recommendStartPosition = simpleName.getStartPosition();
-          result.recommendPackageName = this.packageName;
-          result.recommendTypeName = this.typeName;
-          result.recommendOriginalName = candidateName;
-          result.recommendSubsequentName = suggestion;
-          result.recommendRefactorType = "field";
-          result.sim = maxSimilarity;
+          result.setRecommendStartPosition(simpleName.getStartPosition());
+          result.setRecommendPackageName(this.packageName);
+          result.setRecommendTypeName(this.typeName);
+          result.setRecommendOriginalName(candidateName);
+          result.setRecommendSubsequentName(suggestion);
+          result.setRecommendRefactorType("field");
+          result.setSim(maxSimilarity);
         }
       }
     }
@@ -164,17 +224,17 @@ public class TypeRefactorVisitor extends ASTVisitor {
 
       if (!Util.isOverriding(iMethod, renameData)) {
         maxSimilarity = similarity;
-        if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
+        if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
           String suggestion = Recommend.detect(renameData, candidateName);
 
           SimpleName simpleName = node.getName();
-          result.recommendStartPosition = simpleName.getStartPosition();
-          result.recommendPackageName = this.packageName;
-          result.recommendTypeName = this.typeName;
-          result.recommendOriginalName = candidateName;
-          result.recommendSubsequentName = suggestion;
-          result.recommendRefactorType = "method";
-          result.sim = maxSimilarity;
+          result.setRecommendStartPosition(simpleName.getStartPosition());
+          result.setRecommendPackageName(this.packageName);
+          result.setRecommendTypeName(this.typeName);
+          result.setRecommendOriginalName(candidateName);
+          result.setRecommendSubsequentName(suggestion);
+          result.setRecommendRefactorType("method");
+          result.setSim(maxSimilarity);
         }
       }
     }
@@ -190,17 +250,17 @@ public class TypeRefactorVisitor extends ASTVisitor {
             && maxSimilarity > 0.0
             && Similarity.isMoreSim(candidateName, result, renameData))) {
       maxSimilarity = similarity;
-      if (maxSimilarity >= Config.MIN_RECOMMEND_SIMILARITY) {
+      if (maxSimilarity >= Config.getMIN_RECOMMEND_SIMILARITY()) {
         String suggestion = Recommend.detect(renameData, candidateName);
 
         SimpleName simpleName = node.getName();
-        result.recommendStartPosition = simpleName.getStartPosition();
-        result.recommendPackageName = packageName;
-        result.recommendTypeName = typeName;
-        result.recommendOriginalName = candidateName;
-        result.recommendSubsequentName = suggestion;
-        result.recommendRefactorType = "type";
-        result.sim = maxSimilarity;
+        result.setRecommendStartPosition(simpleName.getStartPosition());
+        result.setRecommendPackageName(packageName);
+        result.setRecommendTypeName(typeName);
+        result.setRecommendOriginalName(candidateName);
+        result.setRecommendSubsequentName(suggestion);
+        result.setRecommendRefactorType("type");
+        result.setSim(maxSimilarity);
       }
     }
     return false;

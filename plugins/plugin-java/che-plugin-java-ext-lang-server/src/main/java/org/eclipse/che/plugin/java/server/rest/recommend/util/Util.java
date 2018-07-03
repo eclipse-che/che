@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 public class Util {
 
   public static IProject[] getIProjects() {
-    IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
     return ResourcesPlugin.getWorkspace().getRoot().getProjects();
   }
 
@@ -128,9 +127,9 @@ public class Util {
   public static ICompilationUnit getCompilationUnit(DataModel renameData) {
     ICompilationUnit compilationUnit = null;
 
-    String projectName = renameData.projectName;
-    String packageName = renameData.packageName;
-    String typeName = renameData.typeName;
+    String projectName = renameData.getProjectName();
+    String packageName = renameData.getPackageName();
+    String typeName = renameData.getTypeName();
     List<IPackageFragment> packageFragments = getIPackages(projectName);
 
     for (IPackageFragment packageFragment : packageFragments) {
@@ -153,9 +152,9 @@ public class Util {
 
   public static ICompilationUnit getCompilationUnit1(DataModel renameData) {
     ICompilationUnit compilationUnit = null;
-    String projectName = renameData.projectName;
-    String packageName = renameData.packageName;
-    String typeName = renameData.typeName;
+    String projectName = renameData.getProjectName();
+    String packageName = renameData.getPackageName();
+    String typeName = renameData.getTypeName();
     // String typeName = renameData.subsequentName;
     List<IPackageFragment> packageFragments = getIPackages(projectName);
     for (IPackageFragment packageFragment : packageFragments) {
@@ -175,7 +174,7 @@ public class Util {
 
   public static List<ICompilationUnit> getAllCompilationUnit(DataModel renameData) {
     List<ICompilationUnit> iCompilationUnits = new ArrayList<ICompilationUnit>();
-    String projectName = renameData.projectName;
+    String projectName = renameData.getProjectName();
     List<IPackageFragment> packageFragments = getIPackages(projectName);
     for (IPackageFragment packageFragment : packageFragments) {
       List<ICompilationUnit> compilationUnits = getCompilationUnits(packageFragment);
@@ -195,7 +194,7 @@ public class Util {
           if (type != null) {
             IMethod[] methods = type.getMethods();
             for (IMethod method : methods) {
-              if (renameData.methodName.equals(method.getElementName())) return method;
+              if (renameData.getMethodName().equals(method.getElementName())) return method;
             }
           }
         }
@@ -214,10 +213,10 @@ public class Util {
       String methodName,
       String candidateName) {
     for (DataModel renameData : renameDatas) {
-      if (renameData.originalName.equals(candidateName)
-          && renameData.packageName.equals(packageName)
-          && renameData.typeName.equals(typeName)
-          && renameData.methodName.equals(methodName)) return true;
+      if (renameData.getOriginalName().equals(candidateName)
+          && renameData.getPackageName().equals(packageName)
+          && renameData.getTypeName().equals(typeName)
+          && renameData.getMethodName().equals(methodName)) return true;
     }
     return false;
   }
@@ -245,15 +244,15 @@ public class Util {
 
   public static boolean isOverriding(IMethodBinding iMethod, DataModel ignoreRenameData) {
 
-    if (ignoreRenameData.refactorType.equals("method")) {
+    if (ignoreRenameData.getRefactorType().equals("method")) {
       ICompilationUnit compilationUnit = getCompilationUnit(ignoreRenameData);
       if (compilationUnit == null) return false;
       CompilationUnit unit = createCompilationUnit(compilationUnit);
       if (unit == null) return false;
       OverrideVisitor visitor = new OverrideVisitor();
-      visitor.methodName = ignoreRenameData.methodName;
+      visitor.setMethodName(ignoreRenameData.getMethodName());
       unit.accept(visitor);
-      IMethodBinding iMethodbinding = visitor.iMethodbinding;
+      IMethodBinding iMethodbinding = visitor.getiMethodbinding();
       if (iMethodbinding == null) return false;
 
       ArrayList<IType> iMethodbindingSuperTypes = getAllSubTypes(ignoreRenameData, iMethodbinding);
@@ -279,7 +278,6 @@ public class Util {
         }
       }
     }
-
     return false;
   }
 
@@ -315,10 +313,49 @@ public class Util {
   public static ArrayList<IType> getSubTypes(DataModel ignoreRenameData, ArrayList<IType> subType) {
     final ArrayList<IType> subTypes = new ArrayList<IType>();
 
-    String projectName = ignoreRenameData.projectName;
+    String projectName = ignoreRenameData.getProjectName();
+    IJavaProject javaProject = getIJavaProject(projectName);
+    if (javaProject != null && javaProject.exists()) {
+      for (IType iType : subType) {
+        SearchPattern pattern =
+            SearchPattern.createPattern(iType, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
+        IJavaSearchScope scope =
+            SearchEngine.createJavaSearchScope(new IJavaElement[] {javaProject});
+        SearchRequestor requestor =
+            new SearchRequestor() {
+              public void acceptSearchMatch(SearchMatch match) {
+                Object obj = match.getElement();
+                if (obj instanceof IType) {
+                  subTypes.add((IType) obj);
+                }
+              }
+            };
+
+        SearchParticipant[] participants =
+            new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
+        SearchEngine searchEngine = new SearchEngine();
+        try {
+          searchEngine.search(pattern, participants, scope, requestor, null);
+        } catch (CoreException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    return subTypes;
+  }
+
+  public static ArrayList<IType> getSubType(
+      DataModel ignoreRenameData, IMethodBinding iMethodbinding) {
+
+    final ArrayList<IType> subType = new ArrayList<IType>();
+
+    String projectName = ignoreRenameData.getProjectName();
     IJavaProject javaProject = getIJavaProject(projectName);
 
-    for (IType iType : subType) {
+    if (javaProject != null && javaProject.exists()) {
+      ITypeBinding iTypeBinding = iMethodbinding.getDeclaringClass();
+      IType iType = (IType) iTypeBinding.getJavaElement();
+
       SearchPattern pattern =
           SearchPattern.createPattern(iType, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
       IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {javaProject});
@@ -327,7 +364,7 @@ public class Util {
             public void acceptSearchMatch(SearchMatch match) {
               Object obj = match.getElement();
               if (obj instanceof IType) {
-                subTypes.add((IType) obj);
+                subType.add((IType) obj);
               }
             }
           };
@@ -340,42 +377,6 @@ public class Util {
       } catch (CoreException e) {
         e.printStackTrace();
       }
-    }
-
-    return subTypes;
-  }
-
-  public static ArrayList<IType> getSubType(
-      DataModel ignoreRenameData, IMethodBinding iMethodbinding) {
-
-    final ArrayList<IType> subType = new ArrayList<IType>();
-
-    String projectName = ignoreRenameData.projectName;
-    IJavaProject javaProject = getIJavaProject(projectName);
-
-    ITypeBinding iTypeBinding = iMethodbinding.getDeclaringClass();
-    IType iType = (IType) iTypeBinding.getJavaElement();
-
-    SearchPattern pattern =
-        SearchPattern.createPattern(iType, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
-    IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {javaProject});
-    SearchRequestor requestor =
-        new SearchRequestor() {
-          public void acceptSearchMatch(SearchMatch match) {
-            Object obj = match.getElement();
-            if (obj instanceof IType) {
-              subType.add((IType) obj);
-            }
-          }
-        };
-
-    SearchParticipant[] participants =
-        new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
-    SearchEngine searchEngine = new SearchEngine();
-    try {
-      searchEngine.search(pattern, participants, scope, requestor, null);
-    } catch (CoreException e) {
-      e.printStackTrace();
     }
     return subType;
   }

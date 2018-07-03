@@ -74,7 +74,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     final String url =
         appContext.getWsAgentServerApiEndpoint()
             + pathToService
-            + "recommend/linked/extension/recommendation";
+            + "rename/linked/extension/recommendation";
     return asyncRequestFactory
         .createPostRequest(url, null)
         .header(ACCEPT, APPLICATION_JSON)
@@ -88,7 +88,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     final String url =
         appContext.getWsAgentServerApiEndpoint()
             + pathToService
-            + "recommend/linked/extension/position";
+            + "rename/linked/extension/position";
     return asyncRequestFactory
         .createPostRequest(url, null)
         .header(ACCEPT, APPLICATION_JSON)
