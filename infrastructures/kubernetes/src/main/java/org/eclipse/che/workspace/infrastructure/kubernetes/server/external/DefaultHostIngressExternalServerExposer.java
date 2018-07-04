@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
  * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
@@ -45,7 +46,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
  * @author Guy Daich
  */
 public class DefaultHostIngressExternalServerExposer
-    extends AbstractIngressExternalServerExposerStrategy {
+    implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
   public static final String DEFAULT_HOST_STRATEGY = "default-host";
   private final Map<String, String> ingressAnnotations;
@@ -57,7 +58,17 @@ public class DefaultHostIngressExternalServerExposer
   }
 
   @Override
-  protected Ingress generateIngress(
+  public void expose(
+      KubernetesEnvironment k8sEnv,
+      String machineName,
+      String serviceName,
+      ServicePort servicePort,
+      Map<String, ServerConfig> externalServers) {
+    Ingress ingress = generateIngress(machineName, serviceName, servicePort, externalServers);
+    k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
+  }
+
+  private Ingress generateIngress(
       String machineName,
       String serviceName,
       ServicePort servicePort,

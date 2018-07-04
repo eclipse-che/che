@@ -10,9 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.server;
 
-import static java.lang.Integer.parseInt;
-import static java.util.stream.Collectors.toMap;
-
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -91,31 +88,21 @@ public class OpenShiftExternalServerExposer
     implements ExternalServerExposerStrategy<OpenShiftEnvironment> {
 
   @Override
-  public void exposeExternalServers(
+  public void expose(
       OpenShiftEnvironment openShiftEnvironment,
       String machineName,
       String serviceName,
-      Map<String, ServicePort> portToServicePort,
+      ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-    for (ServicePort servicePort : portToServicePort.values()) {
-      int port = servicePort.getTargetPort().getIntVal();
-      Map<String, ServerConfig> routesServers =
-          externalServers
-              .entrySet()
-              .stream()
-              .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
-              .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-      Route route =
-          new RouteBuilder()
-              .withName(serviceName + '-' + servicePort.getName())
-              .withMachineName(machineName)
-              .withTargetPort(servicePort.getName())
-              .withServers(routesServers)
-              .withTo(serviceName)
-              .build();
-      openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
-    }
+    Route route =
+        new RouteBuilder()
+            .withName(serviceName + '-' + servicePort.getName())
+            .withMachineName(machineName)
+            .withTargetPort(servicePort.getName())
+            .withServers(externalServers)
+            .withTo(serviceName)
+            .build();
+    openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
   }
 
   private static class RouteBuilder {

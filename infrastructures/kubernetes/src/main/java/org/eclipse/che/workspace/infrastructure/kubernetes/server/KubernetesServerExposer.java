@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.lang.Integer.parseInt;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -99,23 +101,23 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
 
-  private final ExternalServerExposerStrategy<T> kubernetesExternalServerExposerStrategy;
+  private final ExternalServerExposerStrategy<T> externalServerExposer;
   private final String machineName;
   private final Container container;
   private final Pod pod;
-  private final T kubernetesEnvironment;
+  private final T k8sEnv;
 
   public KubernetesServerExposer(
-      ExternalServerExposerStrategy<T> kubernetesExternalServerExposerStrategy,
+      ExternalServerExposerStrategy<T> externalServerExposer,
       String machineName,
       Pod pod,
       Container container,
-      T kubernetesEnvironment) {
-    this.kubernetesExternalServerExposerStrategy = kubernetesExternalServerExposerStrategy;
+      T k8sEnv) {
+    this.externalServerExposer = externalServerExposer;
     this.machineName = machineName;
     this.pod = pod;
     this.container = container;
-    this.kubernetesEnvironment = kubernetesEnvironment;
+    this.k8sEnv = k8sEnv;
   }
 
   /**
@@ -128,7 +130,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
    * @param servers servers to expose
    * @see UniqueNamesProvisioner#provision(KubernetesEnvironment, RuntimeIdentity)
    */
-  public void expose(Map<String, ? extends ServerConfig> servers) {
+  public void expose(Map<String, ? extends ServerConfig> servers) throws InfrastructureException {
     Map<String, ServerConfig> internalServers = new HashMap<>();
     Map<String, ServerConfig> externalServers = new HashMap<>();
 
@@ -141,22 +143,40 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
           }
         });
 
-    Map<String, ServicePort> portToServicePort = exposePort(servers.values());
+    Collection<ServicePort> servicePorts = exposePorts(servers.values());
     Service service =
         new ServerServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
             .withMachineName(machineName)
             .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
-            .withPorts(new ArrayList<>(portToServicePort.values()))
+            .withPorts(new ArrayList<>(servicePorts))
             .withServers(internalServers)
             .build();
 
     String serviceName = service.getMetadata().getName();
-    kubernetesEnvironment.getServices().put(serviceName, service);
-    exposeExternalServers(serviceName, portToServicePort, externalServers);
+    k8sEnv.getServices().put(serviceName, service);
+
+    for (ServicePort servicePort : servicePorts) {
+      // expose service port related external servers if exist
+      Map<String, ServerConfig> matchedExternalServers = match(externalServers, servicePort);
+      if (!matchedExternalServers.isEmpty()) {
+        externalServerExposer.expose(
+            k8sEnv, machineName, serviceName, servicePort, matchedExternalServers);
+      }
+    }
   }
 
-  private Map<String, ServicePort> exposePort(Collection<? extends ServerConfig> serverConfig) {
+  private Map<String, ServerConfig> match(
+      Map<String, ServerConfig> servers, ServicePort servicePort) {
+    int port = servicePort.getTargetPort().getIntVal();
+    return servers
+        .entrySet()
+        .stream()
+        .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
+        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
+
+  private Collection<ServicePort> exposePorts(Collection<? extends ServerConfig> serverConfig) {
     Map<String, ServicePort> exposedPorts = new HashMap<>();
     Set<String> portsToExpose =
         serverConfig.stream().map(ServerConfig::getPort).collect(Collectors.toSet());
@@ -171,8 +191,8 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
               .stream()
               .filter(p -> p.getContainerPort().equals(port) && protocol.equals(p.getProtocol()))
               .findAny();
-      ContainerPort containerPort;
 
+      ContainerPort containerPort;
       if (exposedOpt.isPresent()) {
         containerPort = exposedOpt.get();
       } else {
@@ -190,16 +210,6 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
               .withNewTargetPort(containerPort.getContainerPort())
               .build());
     }
-    return exposedPorts;
+    return exposedPorts.values();
   }
-
-  private void exposeExternalServers(
-      String serviceName,
-      Map<String, ServicePort> portToServicePort,
-      Map<String, ServerConfig> externalServers) {
-
-    kubernetesExternalServerExposerStrategy.exposeExternalServers(
-        kubernetesEnvironment, machineName, serviceName, portToServicePort, externalServers);
-  }
-
 }

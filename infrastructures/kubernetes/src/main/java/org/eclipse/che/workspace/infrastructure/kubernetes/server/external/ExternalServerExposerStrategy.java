@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 
 /**
  * Defines a basic set of operations for exposing external servers.
@@ -30,13 +31,13 @@ public interface ExternalServerExposerStrategy<T extends KubernetesEnvironment> 
    * @param k8sEnv Kubernetes environment
    * @param machineName machine containing servers
    * @param serviceName service associated with machine, mapping all machine server ports
-   * @param portToServicePort specific service ports to be exposed externally
+   * @param servicePort specific service port to be exposed externally
    * @param externalServers server configs of servers to be exposed externally
    */
-  void exposeExternalServers(
+  void expose(
       T k8sEnv,
       String machineName,
       String serviceName,
-      Map<String, ServicePort> portToServicePort,
+      ServicePort servicePort,
       Map<String, ServerConfig> externalServers);
 }
