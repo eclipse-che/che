@@ -91,9 +91,8 @@ public class CreateWorkspaceFromSpringBootStackTest {
         By.xpath("//h2[text()='Health Check Booster']"));
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
-    projectExplorer.openItemByPath(SPRING_BOOT_HEALTH_CHECK_BOOSTER);
-    consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HEALTH_CHECK_BOOSTER, DEBUG_GOAL, DEBUG_COMMAND, LISTENING_AT_ADDRESS);
+    consoles.executeCommandFromProcessesArea(
+        "dev-machine", DEBUG_GOAL, DEBUG_COMMAND, LISTENING_AT_ADDRESS);
     consoles.closeProcessTabWithAskDialog(DEBUG_COMMAND);
   }
 
@@ -113,9 +112,8 @@ public class CreateWorkspaceFromSpringBootStackTest {
     consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//h2[text()='HTTP Booster']"));
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
-    projectExplorer.openItemByPath(SPRING_BOOT_HTTP_BOOSTER);
-    consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HTTP_BOOSTER, DEBUG_GOAL, DEBUG_COMMAND, LISTENING_AT_ADDRESS);
+    consoles.executeCommandFromProcessesArea(
+        "dev-machine", DEBUG_GOAL, DEBUG_COMMAND, LISTENING_AT_ADDRESS);
     consoles.closeProcessTabWithAskDialog(DEBUG_COMMAND);
   }
 }

@@ -86,8 +86,8 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
     consoles.checkWebElementVisibilityAtPreviewPage(By.id("_vert_x_health_check_booster"));
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
-    consoles.executeCommandFromProjectExplorer(
-        VERTX_HEALTH_CHECKS_BOOSTER,
+    consoles.executeCommandFromProcessesArea(
+        "dev-machine",
         DEBUG_GOAL,
         DEBUG_COMMAND,
         "[INFO] Listening for transport dt_socket at address: 5005");
@@ -104,8 +104,8 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
     consoles.checkWebElementVisibilityAtPreviewPage(By.id("_vert_x_health_check_booster"));
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
-    consoles.executeCommandFromProjectExplorer(
-        VERTX_HTTP_BOOSTER,
+    consoles.executeCommandFromProcessesArea(
+        "dev-machine",
         DEBUG_GOAL,
         DEBUG_COMMAND,
         "[INFO] Listening for transport dt_socket at address: 5005");
