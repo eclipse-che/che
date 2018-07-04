@@ -41,6 +41,7 @@ export class MachineAgentsController {
   private selectedMachine: IEnvironmentManagerMachine;
   private environmentManager: EnvironmentManager;
   private agents: Array<string>;
+  private agentsToUpdate: Array<IAgentItem> = [];
 
   /**
    * Default constructor that is using resource
@@ -90,15 +91,20 @@ export class MachineAgentsController {
   updateAgent(agent: IAgentItem): void {
     this.$timeout.cancel(this.timeoutPromise);
 
+    this.agentsToUpdate.push(agent);
+
     this.timeoutPromise = this.$timeout(() => {
-      const index = this.agents.indexOf(agent.id);
-      if (agent.isEnabled) {
-        if (index === -1) {
-          this.agents.push(agent.id);
+      this.agentsToUpdate.forEach((agent: IAgentItem) => {
+        const index = this.agents.indexOf(agent.id);
+        if (agent.isEnabled) {
+          if (index === -1) {
+            this.agents.push(agent.id);
+          }
+        } else if (index >= 0) {
+          this.agents.splice(index, 1);
         }
-      } else if (index >= 0) {
-        this.agents.splice(index, 1);
-      }
+      });
+      this.agentsToUpdate.length = 0;
       this.environmentManager.setAgents(this.selectedMachine, this.agents);
       this.onChange();
     }, 500);
