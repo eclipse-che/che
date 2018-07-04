@@ -16,5 +16,6 @@ import com.google.inject.Singleton;
 public enum Infrastructure {
   docker,
   openshift,
-  k8s
+  k8s,
+  supershift
 }

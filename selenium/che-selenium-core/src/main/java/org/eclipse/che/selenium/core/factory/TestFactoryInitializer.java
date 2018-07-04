@@ -89,7 +89,7 @@ public class TestFactoryInitializer {
     switch (infrastructure) {
       case openshift:
       case k8s:
-        templateDirectoryName = Infrastructure.docker.toString().toLowerCase();
+        templateDirectoryName = Infrastructure.k8s.toString().toLowerCase();
         break;
 
       case docker:
