@@ -33,7 +33,7 @@ export class Loader {
      * 
      * @param message message to log
      */
-    log(message: string): void {
+    log(message: string): HTMLElement {
         let container = document.getElementById("workspace-console-container");
         if (container.childElementCount > 500) {
             container.removeChild(container.firstChild)
@@ -45,6 +45,7 @@ export class Loader {
         if (element.scrollIntoView) {
             element.scrollIntoView();
         }
+        return element;
     }
 
     /**
@@ -53,18 +54,8 @@ export class Loader {
      * @param message error message
      */
     error(message: string): void {
-        let container = document.getElementById("workspace-console-container");
-        if (container.childElementCount > 500) {
-            container.removeChild(container.firstChild)
-        }
-
-        let element = document.createElement("pre");
+        let element = this.log(message);
         element.className = "error";
-        element.innerHTML = message;
-        container.appendChild(element);
-        if (element.scrollIntoView) {
-            element.scrollIntoView();
-        }
     }
 
     onclick(): void {
