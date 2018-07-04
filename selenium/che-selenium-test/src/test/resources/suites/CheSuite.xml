@@ -278,6 +278,18 @@
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
           <class name="org.eclipse.che.selenium.stack.WorkingWithJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.stack.WorkingWithNodeWsTest"/>
+
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaMySqlCentosStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromSpringBootStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromEclipseVertxStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromCentosWildFlySwarmStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromCentosNodeStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromCentosGoStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromCentosBlankStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromAndroidStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaCentosStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromCeylonWithJavaStackTest"/>
+
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
           <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
