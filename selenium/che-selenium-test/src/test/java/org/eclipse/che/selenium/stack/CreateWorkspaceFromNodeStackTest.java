@@ -66,7 +66,7 @@ public class CreateWorkspaceFromNodeStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromCentosNodeStack() {
+  public void checkWorkspaceCreationFromNodeStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(NODE, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();

@@ -61,7 +61,7 @@ public class CreateWorkspaceFromGoStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromCentosGoStack() {
+  public void checkWorkspaceCreationFromGoStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(GO, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse(PREPARING_WS_TIMEOUT_SEC * 2);
