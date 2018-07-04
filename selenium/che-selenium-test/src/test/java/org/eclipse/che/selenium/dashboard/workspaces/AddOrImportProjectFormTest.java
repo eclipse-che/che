@@ -11,9 +11,6 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectOptions;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
@@ -147,7 +145,7 @@ public class AddOrImportProjectFormTest {
   public void checkOfCheckboxes() {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(Stack.JAVA);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
@@ -193,7 +191,7 @@ public class AddOrImportProjectFormTest {
   public void checkProjectSamples() {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(Stack.JAVA);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
@@ -341,8 +339,8 @@ public class AddOrImportProjectFormTest {
   public void checkProjectsBlank() throws Exception {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(BLANK);
-    newWorkspace.waitStackSelected(BLANK);
+    newWorkspace.selectStack(Stack.BLANK);
+    newWorkspace.waitStackSelected(Stack.BLANK);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.clickOnBlankButton();
@@ -412,14 +410,14 @@ public class AddOrImportProjectFormTest {
   public void checkCreatingProject() throws Exception {
     // check that name field saves it state after choosing another stack
     newWorkspace.waitPageLoad();
-    newWorkspace.waitStackSelected(BLANK);
+    newWorkspace.waitStackSelected(Stack.BLANK);
     newWorkspace.typeWorkspaceName(TEST_BLANK_WORKSPACE_NAME);
-    newWorkspace.selectStack(DOT_NET);
-    newWorkspace.waitStackSelected(DOT_NET);
+    newWorkspace.selectStack(Stack.DOT_NET);
+    newWorkspace.waitStackSelected(Stack.DOT_NET);
     assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
-    newWorkspace.selectStack(JAVA);
-    newWorkspace.waitStackSelected(JAVA);
+    newWorkspace.selectStack(Stack.JAVA);
+    newWorkspace.waitStackSelected(Stack.JAVA);
     assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
     // add workspace with specified "RAM" value
@@ -499,8 +497,8 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(workspaceName);
 
-    newWorkspace.selectStack(JAVA);
-    newWorkspace.waitStackSelected(JAVA);
+    newWorkspace.selectStack(Stack.JAVA);
+    newWorkspace.waitStackSelected(Stack.JAVA);
 
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
