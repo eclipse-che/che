@@ -20,7 +20,7 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**

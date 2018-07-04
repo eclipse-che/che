@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;

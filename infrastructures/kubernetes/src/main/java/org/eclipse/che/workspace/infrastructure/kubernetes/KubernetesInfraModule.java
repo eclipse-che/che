@@ -12,9 +12,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.DefaultHostIngressExternalServerExposer.DEFAULT_HOST_STRATEGY;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.SingleHostIngressExternalServerExposer.SINGLE_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostIngressExternalServerExposer.DEFAULT_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostIngressExternalServerExposer.SINGLE_HOST_STRATEGY;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -45,12 +45,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.DefaultHostIngressExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.MultiHostIngressExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.SingleHostIngressExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostIngressExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostIngressExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostIngressExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
 
 /** @author Sergii Leshchenko */

@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.util.Collections.singletonMap;
 import static org.testng.Assert.*;
