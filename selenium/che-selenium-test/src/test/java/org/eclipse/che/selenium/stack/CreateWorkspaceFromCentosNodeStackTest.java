@@ -66,6 +66,8 @@ public class CreateWorkspaceFromCentosNodeStackTest {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(
         CENTOS_NODEJS, WORKSPACE_NAME, projects);
 
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+
     projectExplorer.waitProjectInitialization(ANGULAR_PATTERNFLY_STARTER);
     projectExplorer.waitProjectInitialization(NODEJS_HELLO_WORLD);
     projectExplorer.waitProjectInitialization(WEB_NODEJS_SIMPLE);

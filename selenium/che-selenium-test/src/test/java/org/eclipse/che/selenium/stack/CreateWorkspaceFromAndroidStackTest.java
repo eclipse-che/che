@@ -11,11 +11,13 @@
 package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_COMMAND;
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.BUILD_COMMAND;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -27,20 +29,19 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.openqa.selenium.By;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class CreateWorkspaceFromCentosGoStackTest {
+public class CreateWorkspaceFromAndroidStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String DESKTOP_GO_SIMPLE_PROJECT = "desktop-go-simple";
-  private static final String WEB_GO_SIMPLE_PROJECT = "web-go-simple";
+  private static final String MOBILE_ANDROID_HELLO_WORLD = "mobile-android-hello-world";
+  private static final String MOBILE_ANDROID_SIMPLE = "mobile-android-simple";
 
   private List<String> projects =
-      ImmutableList.of(DESKTOP_GO_SIMPLE_PROJECT, DESKTOP_GO_SIMPLE_PROJECT);
+      ImmutableList.of(MOBILE_ANDROID_HELLO_WORLD, MOBILE_ANDROID_SIMPLE);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -61,39 +62,32 @@ public class CreateWorkspaceFromCentosGoStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromCentosGoStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProjects(CENTOS_GO, WORKSPACE_NAME, projects);
+  public void checkWorkspaceCreationFromAndroidStack() {
+    createWorkspaceHelper.createWorkspaceFromStackWithProjects(ANDROID, WORKSPACE_NAME, projects);
 
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse(PREPARING_WS_TIMEOUT_SEC * 2);
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(DESKTOP_GO_SIMPLE_PROJECT);
-    projectExplorer.waitProjectInitialization(WEB_GO_SIMPLE_PROJECT);
+    projectExplorer.waitProjectInitialization(MOBILE_ANDROID_HELLO_WORLD);
+    projectExplorer.waitProjectInitialization(MOBILE_ANDROID_SIMPLE);
   }
 
   @Test(priority = 1)
-  public void checkDesktopGoSimpleProjectCommandsStack() {
+  public void checkMobileAndroidHelloWorldProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        DESKTOP_GO_SIMPLE_PROJECT,
+        MOBILE_ANDROID_HELLO_WORLD, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+    consoles.executeCommandFromProjectExplorer(
+        MOBILE_ANDROID_HELLO_WORLD,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(DESKTOP_GO_SIMPLE_PROJECT),
-        "Hello, world. Sqrt(2) = 1.4142135623730951");
+        RUN_COMMAND_ITEM.getItem(MOBILE_ANDROID_HELLO_WORLD),
+        BUILD_SUCCESS);
   }
 
   @Test(priority = 1)
-  public void checkWebGoSimpleProjectCommandsStack() {
+  public void checkMobileAndroidSimpleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        WEB_GO_SIMPLE_PROJECT, RUN_GOAL, RUN_COMMAND, "listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//pre[contains(text(),'Hello there')]"));
-    consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
-
-    consoles.executeCommandFromProjectExplorer(
-        WEB_GO_SIMPLE_PROJECT,
+        MOBILE_ANDROID_SIMPLE,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(WEB_GO_SIMPLE_PROJECT),
-        "listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//pre[contains(text(),'Hello there')]"));
-    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_GO_SIMPLE_PROJECT));
+        BUILD_COMMAND_ITEM.getItem(MOBILE_ANDROID_SIMPLE),
+        BUILD_SUCCESS);
   }
 }
