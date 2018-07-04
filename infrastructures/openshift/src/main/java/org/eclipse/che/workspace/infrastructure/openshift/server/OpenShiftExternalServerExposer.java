@@ -75,6 +75,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  * spec:
  *   to:
  *     name: dev-machine              ---->> Service.metadata.name
+ *   port:
  *     targetPort: [8080|web-app]     ---->> Service.spec.ports[0].[port|name]
  * </pre>
  *
