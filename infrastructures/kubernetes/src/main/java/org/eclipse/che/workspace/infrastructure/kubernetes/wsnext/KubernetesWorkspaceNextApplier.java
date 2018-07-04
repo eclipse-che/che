@@ -10,18 +10,19 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsnext;
 
-import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -31,11 +32,11 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheService;
-import org.eclipse.che.api.workspace.server.wsnext.model.Container;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheContainer;
+import org.eclipse.che.api.workspace.server.wsnext.model.CheContainerPort;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsnext.model.EnvVar;
-import org.eclipse.che.api.workspace.server.wsnext.model.ResourceRequirements;
-import org.eclipse.che.api.workspace.server.wsnext.model.Server;
 import org.eclipse.che.api.workspace.server.wsnext.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -59,9 +60,9 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
   }
 
   @Override
-  public void apply(InternalEnvironment internalEnvironment, Collection<CheService> cheServices)
+  public void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> chePlugins)
       throws InfrastructureException {
-    if (cheServices.isEmpty()) {
+    if (chePlugins.isEmpty()) {
       return;
     }
     KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) internalEnvironment;
@@ -71,16 +72,19 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
           "Workspace.Next configuration can be applied to a workspace with one pod only");
     }
     Pod pod = pods.values().iterator().next();
-    for (CheService cheService : cheServices) {
-      for (Container container : cheService.getSpec().getContainers()) {
+    for (ChePlugin chePlugin : chePlugins) {
+      for (CheContainer container : chePlugin.getContainers()) {
         io.fabric8.kubernetes.api.model.Container k8sContainer =
-            addContainer(pod, container.getImage(), container.getEnv(), container.getResources());
+            addContainer(pod, container.getImage(), container.getEnv());
 
         String machineName = Names.machineName(pod, k8sContainer);
 
         InternalMachineConfig machineConfig =
             addMachine(
-                kubernetesEnvironment, machineName, container.getServers(), container.getVolumes());
+                kubernetesEnvironment,
+                machineName,
+                getContainerEndpoints(container.getPorts(), chePlugin.getEndpoints()),
+                container.getVolumes());
 
         normalizeMemory(k8sContainer, machineConfig);
       }
@@ -88,41 +92,48 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
   }
 
   private io.fabric8.kubernetes.api.model.Container addContainer(
-      Pod toolingPod, String image, List<EnvVar> env, ResourceRequirements resources) {
+      Pod toolingPod, String image, List<EnvVar> env) {
     io.fabric8.kubernetes.api.model.Container container =
         new ContainerBuilder()
             .withImage(image)
             .withName(Names.generateName("tooling"))
             .withEnv(toK8sEnv(env))
-            .withResources(toK8sResources(resources))
             .build();
     toolingPod.getSpec().getContainers().add(container);
     return container;
   }
 
-  private io.fabric8.kubernetes.api.model.ResourceRequirements toK8sResources(
-      ResourceRequirements resources) {
-    io.fabric8.kubernetes.api.model.ResourceRequirements result =
-        new io.fabric8.kubernetes.api.model.ResourceRequirements();
-    String memory = resources.getRequests().get("memory");
-    if (memory != null) {
-      result.setRequests(singletonMap("memory", new Quantity(memory)));
-    }
-    return result;
-  }
-
   private InternalMachineConfig addMachine(
       KubernetesEnvironment kubernetesEnvironment,
       String machineName,
-      List<Server> servers,
+      List<ChePluginEndpoint> endpoints,
       List<Volume> volumes) {
 
     InternalMachineConfig machineConfig =
         new InternalMachineConfig(
-            null, toWorkspaceServers(servers), null, null, toWorkspaceVolumes(volumes));
+            null, toWorkspaceServers(endpoints), null, null, toWorkspaceVolumes(volumes));
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
     return machineConfig;
+  }
+
+  private List<ChePluginEndpoint> getContainerEndpoints(
+      List<CheContainerPort> ports, List<ChePluginEndpoint> endpoints) {
+
+    if (ports != null) {
+      return ports
+          .stream()
+          .flatMap(
+              cheContainerPort ->
+                  endpoints
+                      .stream()
+                      .filter(
+                          chePluginEndpoint ->
+                              chePluginEndpoint.getTargetPort()
+                                  == cheContainerPort.getExposedPort()))
+          .collect(Collectors.toList());
+    }
+    return Collections.emptyList();
   }
 
   private void normalizeMemory(
@@ -146,19 +157,30 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
     return result;
   }
 
-  private Map<String, ? extends ServerConfig> toWorkspaceServers(List<Server> servers) {
-    HashMap<String, ServerConfigImpl> result = new HashMap<>();
-    for (Server server : servers) {
-      result.put(
-          server.getName(),
-          normalizeServer(
-              new ServerConfigImpl(
-                  server.getPort().toString(),
-                  server.getProtocol(),
-                  null,
-                  server.getAttributes())));
-    }
-    return result;
+  private Map<String, ? extends ServerConfig> toWorkspaceServers(
+      List<ChePluginEndpoint> endpoints) {
+    return endpoints
+        .stream()
+        .collect(
+            toMap(ChePluginEndpoint::getName, endpoint -> normalizeServer(toServer(endpoint))));
+  }
+
+  private ServerConfigImpl toServer(ChePluginEndpoint endpoint) {
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put("internal", Boolean.toString(!endpoint.isPublic()));
+    endpoint
+        .getAttributes()
+        .forEach(
+            (k, v) -> {
+              if (!"protocol".equals(k) && !"path".equals(k)) {
+                attributes.put(k, v);
+              }
+            });
+    return new ServerConfigImpl(
+        Integer.toString(endpoint.getTargetPort()),
+        endpoint.getAttributes().get("protocol"),
+        endpoint.getAttributes().get("path"),
+        attributes);
   }
 
   private List<io.fabric8.kubernetes.api.model.EnvVar> toK8sEnv(List<EnvVar> env) {
