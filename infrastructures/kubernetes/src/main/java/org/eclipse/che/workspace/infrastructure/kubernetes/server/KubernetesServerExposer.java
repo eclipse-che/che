@@ -25,9 +25,7 @@ import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -145,7 +143,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     Map<String, ServicePort> portToServicePort = exposePort(servers.values());
     Service service =
-        new ServiceBuilder()
+        new ServerServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
             .withMachineName(machineName)
             .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
@@ -204,55 +202,4 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
         kubernetesEnvironment, machineName, serviceName, portToServicePort, externalServers);
   }
 
-  private static class ServiceBuilder {
-    private String name;
-    private String machineName;
-    private final Map<String, String> selector = new HashMap<>();
-    private List<ServicePort> ports = Collections.emptyList();
-    private Map<String, ? extends ServerConfig> serversConfigs = Collections.emptyMap();
-
-    private ServiceBuilder withName(String name) {
-      this.name = name;
-      return this;
-    }
-
-    private ServiceBuilder withSelectorEntry(String key, String value) {
-      selector.put(key, value);
-      return this;
-    }
-
-    private ServiceBuilder withPorts(List<ServicePort> ports) {
-      this.ports = ports;
-      return this;
-    }
-
-    private ServiceBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
-      this.serversConfigs = serversConfigs;
-      return this;
-    }
-
-    private Service build() {
-      io.fabric8.kubernetes.api.model.ServiceBuilder builder =
-          new io.fabric8.kubernetes.api.model.ServiceBuilder();
-      return builder
-          .withNewMetadata()
-          .withName(name.replace("/", "-"))
-          .withAnnotations(
-              Annotations.newSerializer()
-                  .servers(serversConfigs)
-                  .machineName(machineName)
-                  .annotations())
-          .endMetadata()
-          .withNewSpec()
-          .withSelector(selector)
-          .withPorts(ports)
-          .endSpec()
-          .build();
-    }
-
-    public ServiceBuilder withMachineName(String machineName) {
-      this.machineName = machineName;
-      return this;
-    }
-  }
 }
