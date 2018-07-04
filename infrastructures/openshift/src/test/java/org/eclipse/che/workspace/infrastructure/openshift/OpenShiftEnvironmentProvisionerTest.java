@@ -48,7 +48,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private RouteTlsProvisioner tlsRouteProvisioner;
   @Mock private EnvVarsConverter envVarsProvisioner;
-  @Mock private ServersConverter serversProvisioner;
+  @Mock private ServersConverter<OpenShiftEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
   @Mock private RamLimitProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
