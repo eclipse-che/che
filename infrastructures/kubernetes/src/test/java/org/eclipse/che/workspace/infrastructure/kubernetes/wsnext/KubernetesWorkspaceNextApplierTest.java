@@ -99,12 +99,12 @@ public class KubernetesWorkspaceNextApplierTest {
   public void throwsExceptionWhenTheNumberOfPodsIsNot1() throws Exception {
     when(internalEnvironment.getPods()).thenReturn(of("pod1", pod, "pod2", pod));
 
-    applier.apply(internalEnvironment, singletonList(testChePlugin()));
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
   }
 
   @Test
   public void addToolingContainerToAPod() throws Exception {
-    applier.apply(internalEnvironment, singletonList(testChePlugin()));
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
     assertEquals(containers.size(), 1);
     Container toolingContainer = containers.get(0);
@@ -113,7 +113,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void canAddMultipleToolingContainersToAPodFromOnePlugin() throws Exception {
-    applier.apply(internalEnvironment, singletonList(testChePluginWith2Containers()));
+    applier.apply(internalEnvironment, singletonList(createChePluginWith2Containers()));
 
     assertEquals(containers.size(), 2);
     for (Container container : containers) {
@@ -123,7 +123,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void canAddMultipleToolingContainersToAPodFromSeveralPlugins() throws Exception {
-    applier.apply(internalEnvironment, ImmutableList.of(testChePlugin(), testChePlugin()));
+    applier.apply(internalEnvironment, ImmutableList.of(createChePlugin(), createChePlugin()));
 
     assertEquals(containers.size(), 2);
     for (Container container : containers) {
@@ -133,7 +133,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void addsMachineWithVolumeForEachContainer() throws Exception {
-    applier.apply(internalEnvironment, singletonList(testChePlugin()));
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
     InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
     Map<String, org.eclipse.che.api.core.model.workspace.config.Volume> volumes =
@@ -145,7 +145,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void addsMachineWithServersForContainer() throws Exception {
-    ChePlugin chePlugin = testChePlugin();
+    ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port", emptyMap(), true);
     applier.apply(internalEnvironment, singletonList(chePlugin));
 
@@ -156,7 +156,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void addsTwoServersForContainers() throws Exception {
-    ChePlugin chePlugin = testChePlugin();
+    ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port", emptyMap(), true);
     addPortToSingleContainerPlugin(chePlugin, 8090, "another-test-port", emptyMap(), false);
     applier.apply(internalEnvironment, singletonList(chePlugin));
@@ -170,7 +170,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void addsMachineWithServersThatUseSamePortButDifferentNames() throws Exception {
-    ChePlugin chePlugin = testChePlugin();
+    ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port/http", emptyMap(), true);
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port/ws", emptyMap(), true);
     applier.apply(internalEnvironment, singletonList(chePlugin));
@@ -184,7 +184,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void addsMachineWithServersThatSetProtocolAndPath() throws Exception {
-    ChePlugin chePlugin = testChePlugin();
+    ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(
         chePlugin,
         443,
@@ -202,32 +202,32 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void setsDefaultMemoryLimitForMachineAssociatedWithContainer() throws Exception {
-    applier.apply(internalEnvironment, singletonList(testChePlugin()));
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
     InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
     String memoryLimitAttribute = machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE);
     assertEquals(memoryLimitAttribute, Integer.toString(MEMORY_LIMIT_MB * 1024 * 1024));
   }
 
-  private ChePlugin testChePlugin() {
+  private ChePlugin createChePlugin() {
     ChePlugin plugin = new ChePlugin();
     plugin.setName("some-name");
     plugin.setId("some-id");
     plugin.setVersion("0.0.3");
-    plugin.setContainers(singletonList(testContainer()));
+    plugin.setContainers(singletonList(createContainer()));
     return plugin;
   }
 
-  private ChePlugin testChePluginWith2Containers() {
+  private ChePlugin createChePluginWith2Containers() {
     ChePlugin plugin = new ChePlugin();
     plugin.setName("some-name");
     plugin.setId("some-id");
     plugin.setVersion("0.0.3");
-    plugin.setContainers(asList(testContainer(), testContainer()));
+    plugin.setContainers(asList(createContainer(), createContainer()));
     return plugin;
   }
 
-  private CheContainer testContainer() {
+  private CheContainer createContainer() {
     CheContainer cheContainer = new CheContainer();
     cheContainer.setImage(TEST_IMAGE);
     cheContainer.setEnv(singletonList(new EnvVar().name(ENV_VAR).value(ENV_VAR_VALUE)));

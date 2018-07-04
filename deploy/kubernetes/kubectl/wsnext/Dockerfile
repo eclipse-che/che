@@ -13,5 +13,5 @@ RUN mkdir /tmp/marketplace-storage && \
       cp -r /tmp/local-marketplace-storage/* /tmp/marketplace-storage/; \
     fi
 
-FROM httpd:2.4
-COPY --from=clonning /tmp/marketplace-storage/ /usr/local/apache2/htdocs/
+FROM centos/httpd-24-centos7
+COPY --from=clonning /tmp/marketplace-storage/ /var/www/html/

@@ -70,10 +70,10 @@ public class ChePluginReference {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ChePluginReference cheServiceReference = (ChePluginReference) o;
-    return Objects.equals(name, cheServiceReference.name)
-        && Objects.equals(version, cheServiceReference.version)
-        && Objects.equals(parameters, cheServiceReference.parameters);
+    ChePluginReference chePluginReference = (ChePluginReference) o;
+    return Objects.equals(name, chePluginReference.name)
+        && Objects.equals(version, chePluginReference.version)
+        && Objects.equals(parameters, chePluginReference.parameters);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class ChePluginReference {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CheServiceReference {\n");
+    sb.append("class ChePluginReference {\n");
 
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

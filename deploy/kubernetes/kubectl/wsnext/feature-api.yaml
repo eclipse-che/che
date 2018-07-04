@@ -19,7 +19,7 @@ items:
     - name: marketplace
       port: 80
       protocol: TCP
-      targetPort: 80
+      targetPort: 8080
     selector:
       app: marketplace
 - apiVersion: extensions/v1beta1
@@ -42,11 +42,11 @@ items:
           app: marketplace
       spec:
         containers:
-          - image: garagatyi/che-marketplace:1
+          - image: garagatyi/che-marketplace:os
             imagePullPolicy: Always
             name: marketplace-apache
             ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: marketplace
             resources:
               limits:
