@@ -295,6 +295,11 @@ public class ProjectExplorer {
         By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
   }
 
+  /**
+   * Wait the specified reference to be present near the project name in the project explorer.
+   *
+   * @param reference git reference e.g. branch, tag or commit
+   */
   public void waitReferenceName(String reference) {
     loader.waitOnClosed();
 
