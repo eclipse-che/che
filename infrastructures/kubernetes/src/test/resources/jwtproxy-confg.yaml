@@ -1,0 +1,40 @@
+jwtproxy:
+  verifier_proxies:
+  - listen_addr: :8080
+    verifier:
+      upstream: http://tomcat:8080/
+      audience: http://workspace123
+      max_skew: 1m
+      max_ttl: 3h
+      key_server:
+        type: preshared
+        options:
+          issuer: wsmaster
+          key_id: mykey
+          public_key_path: /config/mykey.pub
+      claims_verifiers:
+      - type: static
+        options:
+          iss: wsmaster
+      nonce_storage:
+        type: void
+  - listen_addr: :4101
+    verifier:
+      upstream: ws://terminal:4101/
+      audience: http://workspace123
+      max_skew: 1m
+      max_ttl: 3h
+      key_server:
+        type: preshared
+        options:
+          issuer: wsmaster
+          key_id: mykey
+          public_key_path: /config/mykey.pub
+      claims_verifiers:
+      - type: static
+        options:
+          iss: wsmaster
+      nonce_storage:
+        type: void
+  signer_proxy:
+    enabled: false
