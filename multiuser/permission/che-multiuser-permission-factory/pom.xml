@@ -34,10 +34,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-factory</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-test</artifactId>
         </dependency>
         <dependency>
@@ -60,6 +56,11 @@
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-factory</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,8 +95,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoreDependenvy>org.eclipse.che.multiuser:che-multiuser-permission-workspace</ignoreDependenvy>
-                                <ignoreDependenvy>org.eclipse.che.multiuser:che-multiuser-api-permission</ignoreDependenvy>
+                                <ignoreDependency>org.eclipse.che.multiuser:che-multiuser-api-permission</ignoreDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
