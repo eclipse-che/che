@@ -25,10 +25,14 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 @Entity(name = "KubernetesRuntime")
 @Table(name = "che_k8s_runtime")
 @NamedQueries({
-  @NamedQuery(name = "KubernetesRuntime.getAll", query = "SELECT r FROM KubernetesRuntime r")
+  @NamedQuery(name = "KubernetesRuntime.getAll", query = "SELECT r FROM KubernetesRuntime r"),
+  @NamedQuery(
+    name = "KubernetesRuntime.getByWorkspaceId",
+    query = "SELECT r FROM KubernetesRuntime r WHERE r.runtimeId.workspaceId = :workspaceId"
+  )
 })
 public class KubernetesRuntimeState {
-  @EmbeddedId private RuntimeId runtimeRuntimeId;
+  @EmbeddedId private RuntimeId runtimeId;
 
   @Column(name = "namespace")
   private String namespace;
@@ -40,7 +44,7 @@ public class KubernetesRuntimeState {
 
   public KubernetesRuntimeState(
       RuntimeIdentity runtimeIdentity, String namespace, WorkspaceStatus status) {
-    this.runtimeRuntimeId =
+    this.runtimeId =
         new RuntimeId(
             runtimeIdentity.getWorkspaceId(),
             runtimeIdentity.getEnvName(),
@@ -58,7 +62,7 @@ public class KubernetesRuntimeState {
   }
 
   public RuntimeId getRuntimeId() {
-    return runtimeRuntimeId;
+    return runtimeId;
   }
 
   public WorkspaceStatus getStatus() {
@@ -83,7 +87,7 @@ public class KubernetesRuntimeState {
       return false;
     }
     final KubernetesRuntimeState that = (KubernetesRuntimeState) obj;
-    return Objects.equals(runtimeRuntimeId, that.runtimeRuntimeId)
+    return Objects.equals(runtimeId, that.runtimeId)
         && Objects.equals(namespace, that.namespace)
         && Objects.equals(status, that.status);
   }
@@ -91,7 +95,7 @@ public class KubernetesRuntimeState {
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 31 * hash + Objects.hashCode(runtimeRuntimeId);
+    hash = 31 * hash + Objects.hashCode(runtimeId);
     hash = 31 * hash + Objects.hashCode(namespace);
     hash = 31 * hash + Objects.hashCode(status);
     return hash;
@@ -100,8 +104,8 @@ public class KubernetesRuntimeState {
   @Override
   public String toString() {
     return "KubernetesRuntimeState{"
-        + "runtimeRuntimeId="
-        + runtimeRuntimeId
+        + "runtimeId="
+        + runtimeId
         + ", namespace='"
         + namespace
         + '\''

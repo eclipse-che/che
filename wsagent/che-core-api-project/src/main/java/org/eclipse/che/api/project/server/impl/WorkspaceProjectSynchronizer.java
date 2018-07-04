@@ -185,7 +185,9 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer, Worksp
     final UriBuilder builder =
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
-            .path(WorkspaceService.class, "getByKey");
+            .path(WorkspaceService.class, "getByKey")
+            .queryParam("includeInternalServers", "true");
+
     final String href = builder.build(workspaceId).toString();
     try {
       return httpJsonRequestFactory

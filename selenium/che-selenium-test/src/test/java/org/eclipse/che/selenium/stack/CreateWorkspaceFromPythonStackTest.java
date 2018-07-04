@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.stack;
 
 import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
@@ -81,9 +81,9 @@ public class CreateWorkspaceFromPythonStackTest {
 
     waitProjectInitialization(PROJECT_NAME);
 
-    startCommandAndCheckMessageInTerminal(PROJECT_NAME, RUN, "run", "Hello, world!");
+    startCommandAndCheckMessageInTerminal(PROJECT_NAME, RUN_GOAL, "run", "Hello, world!");
     startCommandAndCheckMessageInTerminal(
-        PROJECT_NAME, RUN, "console-python3-simple:run", "Hello, world!");
+        PROJECT_NAME, RUN_GOAL, "console-python3-simple:run", "Hello, world!");
 
     checkLanguageServerInitialization(PROJECT_NAME, PYTHON_FILE_NAME, LS_INIT_MESSAGE);
   }
