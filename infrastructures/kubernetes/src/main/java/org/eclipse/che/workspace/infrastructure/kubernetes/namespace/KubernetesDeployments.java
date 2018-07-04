@@ -780,7 +780,13 @@ public class KubernetesDeployments {
                         String.format("Failed to get ReplicaSet controlling Pod %s", podName)));
 
     ReplicaSet replicaSet =
-        clientFactory.create(workspaceId).extensions().replicaSets().inNamespace(namespace).withName(replicaSetName).get();
+        clientFactory
+            .create(workspaceId)
+            .extensions()
+            .replicaSets()
+            .inNamespace(namespace)
+            .withName(replicaSetName)
+            .get();
     List<OwnerReference> rsOwners = replicaSet.getMetadata().getOwnerReferences();
     String deploymentName =
         rsOwners
@@ -792,7 +798,12 @@ public class KubernetesDeployments {
                 () ->
                     new InfrastructureException(
                         String.format("Failed to get Deployment controlling Pod %s", podName)));
-    return clientFactory.create(workspaceId).extensions().deployments().inNamespace(namespace).withName(deploymentName);
+    return clientFactory
+        .create(workspaceId)
+        .extensions()
+        .deployments()
+        .inNamespace(namespace)
+        .withName(deploymentName);
   }
 
   /**
