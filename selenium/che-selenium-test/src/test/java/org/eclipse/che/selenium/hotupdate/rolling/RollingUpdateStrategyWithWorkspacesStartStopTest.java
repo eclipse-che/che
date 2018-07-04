@@ -13,42 +13,29 @@ package org.eclipse.che.selenium.hotupdate.rolling;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
-import java.io.IOException;
 import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
+import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.testng.annotations.Test;
 
 public class RollingUpdateStrategyWithWorkspacesStartStopTest {
-  private static final int TIMEOUT_FOR_ROLLING_UPDATE_FINISH = 100;
-  private static final String UPDATE_COMMAND = "rollout latest che";
-  private static final String PODS_LIST_COMMAND = "oc get pods";
-  private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
-      "get dc | grep che | awk '{print $2}'";
 
   @InjectTestWorkspace(startAfterCreation = false)
   private TestWorkspace workspaceForStarting;
 
   @Inject private TestWorkspace workspaceForStopping;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
-  @Inject private WebDriverWaitFactory webDriverWaitFactory;
-  @Inject private DefaultTestUser defaultTestUser;
   @Inject private CheTestSystemClient cheTestSystemClient;
-  @Inject private OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
+  @Inject private HotUpdateUtil hotUpdateUtil;
 
   @Test
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
-    int currentRevision = getRevision();
+    int currentRevision = hotUpdateUtil.getMasterPodRevision();
 
     // open 'Workspaces' page
     dashboard.open();
@@ -64,7 +51,7 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Status.STOPPED);
 
     // execute rolling update command
-    executeRollingUpdateCommand();
+    hotUpdateUtil.executeMasterPodUpdateCommand();
 
     // execute stop-start commands for existing workspaces
     assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
@@ -76,37 +63,7 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Status.RUNNING);
 
     // check that che is updated
-    waitRevision(currentRevision + 1);
-  }
-
-  private int getRevision() {
-    try {
-      return Integer.parseInt(
-          openShiftCliCommandExecutor.execute(COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE));
-    } catch (IOException ex) {
-      throw new RuntimeException(ex.getLocalizedMessage(), ex);
-    }
-  }
-
-  private void waitRevision(int expectedRevision) {
-    webDriverWaitFactory
-        .get(TIMEOUT_FOR_ROLLING_UPDATE_FINISH)
-        .until((ExpectedCondition<Boolean>) driver -> expectedRevision == getRevision());
-  }
-
-  private void executeRollingUpdateCommand() throws Exception {
-    openShiftCliCommandExecutor.execute(UPDATE_COMMAND);
-  }
-
-  // -------------------------------------------------------------------
-
-  private String getPodsList() throws Exception {
-    return openShiftCliCommandExecutor.execute(PODS_LIST_COMMAND);
-  }
-
-  private void printPodsList() throws Exception {
-    System.out.println("============================================");
-    System.out.println(getPodsList());
-    System.out.println("============================================");
+    hotUpdateUtil.waitMasterPodRevision(currentRevision + 1);
+    hotUpdateUtil.waitFullMasterPodUpdate(currentRevision);
   }
 }
