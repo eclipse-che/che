@@ -18,7 +18,7 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 
 public class CamelLanguageDescriptionProvider implements Provider<LanguageDescription> {
   private static final String LANGUAGE_ID = "LANGUAGE_ID_APACHE_CAMEL";
-  private static final String[] EXTENSIONS = new String[] {"xml"};
+  private static final String[] EXTENSIONS = new String[] {"xml", "java"};
   private static final String MIME_TYPE = "text/xml";
 
   @Override
