@@ -20,14 +20,14 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 
 @Singleton
 public class CheTestWorkspaceAgentApiEndpointUrlProvider
     implements TestWorkspaceAgentApiEndpointUrlProvider {
 
   @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CheTestWorkspaceServiceClient workspaceServiceClient;
 
   @Override
   public URL get(String workspaceId) throws Exception {

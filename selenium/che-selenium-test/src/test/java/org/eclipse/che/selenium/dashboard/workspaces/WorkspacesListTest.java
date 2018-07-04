@@ -31,9 +31,15 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.*;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author Sergey Skorik

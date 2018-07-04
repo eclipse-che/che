@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.core.workspace;
 
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /**
  * Workspace provider.
@@ -28,8 +28,7 @@ public interface TestWorkspaceProvider {
    * @param startAfterCreation start workspace just after creation, if <bold>true</bold>
    */
   TestWorkspace createWorkspace(
-      DefaultTestUser owner, int memoryGB, String template, boolean startAfterCreation)
-      throws Exception;
+      TestUser owner, int memoryGB, String template, boolean startAfterCreation) throws Exception;
 
   /** Release all allocated resources. */
   void shutdown();
