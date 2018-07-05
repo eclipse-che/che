@@ -72,7 +72,7 @@ public class CreateWorkspaceFromJavaCentosStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaStack() {
+  public void checkWorkspaceCreationFromJavaCentosStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(
         JAVA_CENTOS, WORKSPACE_NAME, projects);
 

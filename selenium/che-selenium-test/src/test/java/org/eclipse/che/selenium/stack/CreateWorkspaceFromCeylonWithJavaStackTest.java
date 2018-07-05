@@ -56,7 +56,7 @@ public class CreateWorkspaceFromCeylonWithJavaStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromCeylonStack() {
+  public void checkWorkspaceCreationFromCeylonWithJavaStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProject(
         CEYLON_WITH_JAVA_JAVASCRIPT, WORKSPACE_NAME, PROJECT_NAME);
 

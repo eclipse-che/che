@@ -67,7 +67,7 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaStack() {
+  public void checkWorkspaceCreationFromJavaMySqlCentosStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProject(
         JAVA_MYSQL_CENTOS, WORKSPACE_NAME, WEB_JAVA_PETCLINIC);
 
@@ -77,7 +77,7 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
   }
 
   @Test(priority = 1)
-  public void checkWebNodejsSimpleProjectCommands() {
+  public void checkWebJavaPetclinicProjectCommands() {
     projectExplorer.openItemByPath(WEB_JAVA_PETCLINIC);
 
     consoles.executeCommandFromProcessesArea(
