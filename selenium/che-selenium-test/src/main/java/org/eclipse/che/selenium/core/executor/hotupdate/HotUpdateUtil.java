@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
@@ -31,6 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Singleton
 public class HotUpdateUtil {
   private static final int TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS = 600;
+  private static final int DELAY_BETWEEN_ATTEMPTS_IN_SECONDS = 5;
   private static final String UPDATE_COMMAND = "rollout latest che";
   private static final String PODS_LIST_COMMAND = "get pods | awk 'NR > 1 {print $1}'";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
@@ -151,14 +151,10 @@ public class HotUpdateUtil {
 
   private void waitPodNameDisappearance(String podName, int timeout) {
     webDriverWaitFactory
-        .get(timeout)
+        .get(timeout, DELAY_BETWEEN_ATTEMPTS_IN_SECONDS)
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-
-                  // for avoiding "FluentWait" class
-                  WaitUtils.sleepQuietly(5);
-
                   try {
                     return !isAnyPodNameHasPatternOccurrence(podName);
                   } catch (Exception ex) {
@@ -173,14 +169,10 @@ public class HotUpdateUtil {
 
   private void waitPodNamePatternHasSingleOccurrence(String podName, int timeout) {
     webDriverWaitFactory
-        .get(timeout)
+        .get(timeout, DELAY_BETWEEN_ATTEMPTS_IN_SECONDS)
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-
-                  // for avoiding "FluentWait" class
-                  WaitUtils.sleepQuietly(5);
-
                   try {
                     return isPodNamePatternHasSingleOccurrence(podName);
                   } catch (Exception ex) {

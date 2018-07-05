@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core.webdriver;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
@@ -44,5 +45,18 @@ public class WebDriverWaitFactory {
     webDriverWaits.put(timeout, webDriverWait);
 
     return webDriverWait;
+  }
+
+  /**
+   * Creates an instance of the {@link WebDriverWait} with specified {@code timeout} and frequency
+   * of attempts.
+   *
+   * @param timeout waiting time for condition in seconds.
+   * @param pollingEvery delay between attempts.
+   * @return instance of the {@link WebDriverWait} initialized by specified values.
+   */
+  public WebDriverWait get(int timeout, int pollingEvery) {
+    long delayBetweenAttempts = SECONDS.toMillis(pollingEvery);
+    return new WebDriverWait(seleniumWebDriver, timeout, delayBetweenAttempts);
   }
 }
