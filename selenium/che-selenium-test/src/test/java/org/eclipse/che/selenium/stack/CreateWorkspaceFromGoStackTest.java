@@ -40,7 +40,7 @@ public class CreateWorkspaceFromGoStackTest {
   private static final String WEB_GO_SIMPLE_PROJECT = "web-go-simple";
 
   private List<String> projects =
-      ImmutableList.of(DESKTOP_GO_SIMPLE_PROJECT, DESKTOP_GO_SIMPLE_PROJECT);
+      ImmutableList.of(DESKTOP_GO_SIMPLE_PROJECT, WEB_GO_SIMPLE_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;

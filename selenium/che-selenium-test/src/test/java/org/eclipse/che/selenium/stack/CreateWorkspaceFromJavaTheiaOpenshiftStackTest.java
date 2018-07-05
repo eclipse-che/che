@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
 
@@ -55,6 +56,6 @@ public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
     seleniumWebDriverHelper.waitAndSwitchToFrame(
         By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
 
-    seleniumWebDriverHelper.waitVisibility(By.id("theia-app-shell"), PREPARING_WS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitVisibility(By.id("theia-app-shell"), APPLICATION_START_TIMEOUT_SEC);
   }
 }

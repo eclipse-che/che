@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.stack;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_AND_RUN_COMMAND_ITEM;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 
@@ -75,7 +74,7 @@ public class CreateWorkspaceFromCppStackTest {
     consoles.executeCommandFromProjectExplorer(
         CONSOLE_CPP_SIMPLE,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(CONSOLE_CPP_SIMPLE),
+        BUILD_AND_RUN_COMMAND_ITEM.getItem(CONSOLE_CPP_SIMPLE),
         EXPECTED_MESSAGE);
   }
 

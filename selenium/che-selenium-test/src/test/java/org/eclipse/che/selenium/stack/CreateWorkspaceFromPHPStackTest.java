@@ -76,7 +76,7 @@ public class CreateWorkspaceFromPHPStackTest {
   @Test(priority = 1)
   public void checkWebPhpSimpleCommands() {
     projectExplorer.openItemByPath(WEB_PHP_SIMPLE);
-    projectExplorer.openItemByPath(PHP_FILE_NAME);
+    projectExplorer.openItemByPath(WEB_PHP_SIMPLE + "/" + PHP_FILE_NAME);
 
     consoles.executeCommandFromProjectExplorer(
         WEB_PHP_SIMPLE, RUN_GOAL, "run php script", "Hello World!");
