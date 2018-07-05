@@ -223,7 +223,7 @@ public class JGitConnectionTest {
     when(repository.exactRef(Constants.HEAD)).thenReturn(ref);
     when(ref.getLeaf()).thenReturn(ref);
     when(ref.getName()).thenReturn(branchTest);
-    String branchName = jGitConnection.getCurrentBranch();
+    String branchName = jGitConnection.getCurrentReference().getName();
 
     assertEquals(branchName, branchTest);
   }
