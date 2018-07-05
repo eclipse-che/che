@@ -87,6 +87,32 @@ public class LanguageServerFormatter implements ContentFormatter {
   }
 
   @Override
+  public boolean canFormat(Document document) {
+    TextRange selectedRange = document.getSelectedTextRange();
+
+    boolean requiresFullDocumentFormatting;
+    if (selectedRange == null) {
+      requiresFullDocumentFormatting = true;
+    } else {
+      requiresFullDocumentFormatting = selectedRange.getFrom().equals(selectedRange.getTo());
+    }
+
+    if (requiresFullDocumentFormatting) {
+      try {
+        return capabilities.getDocumentFormattingProvider();
+      } catch (NullPointerException e) {
+        return false;
+      }
+    } else {
+      try {
+        return capabilities.getDocumentRangeFormattingProvider();
+      } catch (NullPointerException e) {
+        return false;
+      }
+    }
+  }
+
+  @Override
   public void install(TextEditor editor) {
     this.editor = editor;
     if (capabilities.getDocumentOnTypeFormattingProvider() != null

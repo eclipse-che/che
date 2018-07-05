@@ -24,4 +24,14 @@ public interface ContentFormatter {
   void format(Document document);
 
   void install(TextEditor editor);
+
+  /**
+   * Indicates if the content formatter implementation can format the document at its current state.
+   *
+   * @param document the document to be formatted
+   * @return
+   */
+  default boolean canFormat(Document document) {
+    return true;
+  }
 }
