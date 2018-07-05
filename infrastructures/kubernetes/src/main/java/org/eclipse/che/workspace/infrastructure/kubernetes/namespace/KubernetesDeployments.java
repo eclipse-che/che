@@ -131,6 +131,7 @@ public class KubernetesDeployments {
               .create(workspaceId)
               .extensions()
               .deployments()
+              .inNamespace(namespace)
               .createNew()
               .withMetadata(metadata)
               .withNewSpec()
@@ -276,7 +277,6 @@ public class KubernetesDeployments {
    * important because of finalization allocated resources.
    *
    * @param name the pod or deployment (that contains pod) name that should be watched
-   * @param predicate a function that performs pod state check
    * @return completable future that is completed when one of the following conditions is met:
    *     <ul>
    *       <li>complete successfully in case of "Running" pod state.
@@ -743,6 +743,7 @@ public class KubernetesDeployments {
           .create(workspaceId)
           .extensions()
           .deployments()
+          .inNamespace(namespace)
           .withName(deploymentName)
           .waitUntilReady(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
       return get(deploymentName)
@@ -779,7 +780,13 @@ public class KubernetesDeployments {
                         String.format("Failed to get ReplicaSet controlling Pod %s", podName)));
 
     ReplicaSet replicaSet =
-        clientFactory.create(workspaceId).extensions().replicaSets().withName(replicaSetName).get();
+        clientFactory
+            .create(workspaceId)
+            .extensions()
+            .replicaSets()
+            .inNamespace(namespace)
+            .withName(replicaSetName)
+            .get();
     List<OwnerReference> rsOwners = replicaSet.getMetadata().getOwnerReferences();
     String deploymentName =
         rsOwners
@@ -791,7 +798,12 @@ public class KubernetesDeployments {
                 () ->
                     new InfrastructureException(
                         String.format("Failed to get Deployment controlling Pod %s", podName)));
-    return clientFactory.create(workspaceId).extensions().deployments().withName(deploymentName);
+    return clientFactory
+        .create(workspaceId)
+        .extensions()
+        .deployments()
+        .inNamespace(namespace)
+        .withName(deploymentName);
   }
 
   /**

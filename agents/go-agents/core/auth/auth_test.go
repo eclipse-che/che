@@ -74,7 +74,7 @@ func TestAuthenticationFailedWhenEmptyTokenProvided(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expecting error when no empty token provided")
 	}
-	expectedError := "Authentication failed because: missing 'token' query parameter"
+	expectedError := "Authentication failed because: missing authentication token in 'Authorization' header or 'token' query param"
 	if err.Error() != expectedError {
 		t.Fatalf("Expecting error message: '%v'", expectedError)
 	}
