@@ -107,10 +107,10 @@ public abstract class ServerChecker {
   }
 
   private class ServerCheckingTask extends TimerTask {
-    private int currentNumberOfSequentialSuccessfullPings;
+    private int currentNumberOfSequentialSuccessfulPings;
 
-    public ServerCheckingTask(int currentNumberOfSequentialSuccessfullPings) {
-      this.currentNumberOfSequentialSuccessfullPings = currentNumberOfSequentialSuccessfullPings;
+    public ServerCheckingTask(int currentNumberOfSequentialSuccessfulPings) {
+      this.currentNumberOfSequentialSuccessfulPings = currentNumberOfSequentialSuccessfulPings;
     }
 
     @Override
@@ -121,11 +121,11 @@ public abstract class ServerChecker {
                 String.format(
                     "Server '%s' in machine '%s' not available.", serverRef, machineName)));
       } else if (isAvailable()) {
-        currentNumberOfSequentialSuccessfullPings++;
-        if (currentNumberOfSequentialSuccessfullPings == successThreshold) {
+        currentNumberOfSequentialSuccessfulPings++;
+        if (currentNumberOfSequentialSuccessfulPings == successThreshold) {
           reportFuture.complete(serverRef);
         } else {
-          timer.schedule(new ServerCheckingTask(currentNumberOfSequentialSuccessfullPings), period);
+          timer.schedule(new ServerCheckingTask(currentNumberOfSequentialSuccessfulPings), period);
         }
       } else {
         timer.schedule(new ServerCheckingTask(0), period);

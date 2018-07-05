@@ -17,6 +17,8 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * Implementation of {@link org.eclipse.che.api.core.rest.HttpJsonRequestFactory} that add
@@ -34,11 +36,20 @@ public class AgentHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
 
   @Override
   public HttpJsonRequest fromUrl(@NotNull String url) {
-    return super.fromUrl(url).setAuthorizationHeader(machineToken);
+    return super.fromUrl(url).setAuthorizationHeader(getMachineToken());
   }
 
   @Override
   public HttpJsonRequest fromLink(@NotNull Link link) {
-    return super.fromLink(link).setAuthorizationHeader(machineToken);
+    return super.fromLink(link).setAuthorizationHeader(getMachineToken());
+  }
+
+  private String getMachineToken() {
+    Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (subject != null && subject.getToken() != null) {
+      return subject.getToken();
+    } else {
+      return machineToken;
+    }
   }
 }

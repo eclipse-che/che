@@ -25,10 +25,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
@@ -55,6 +51,11 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,7 +95,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoreDependenvy>org.eclipse.che.multiuser:che-multiuser-api-permission</ignoreDependenvy>
+                                <ignoreDependency>org.eclipse.che.core:che-core-api-system</ignoreDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>

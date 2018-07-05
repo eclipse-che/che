@@ -20,7 +20,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +30,13 @@ public class TestWorkspaceImpl implements TestWorkspace {
 
   private final String name;
   private final CompletableFuture<Void> future;
-  private final DefaultTestUser owner;
+  private final TestUser owner;
   private final AtomicReference<String> id;
   private final TestWorkspaceServiceClient workspaceServiceClient;
 
   public TestWorkspaceImpl(
       String name,
-      DefaultTestUser owner,
+      TestUser owner,
       int memoryInGB,
       boolean startAfterCreation,
       WorkspaceConfigDto template,
@@ -97,7 +97,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
   }
 
   @Override
-  public DefaultTestUser getOwner() {
+  public TestUser getOwner() {
     return owner;
   }
 

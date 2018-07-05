@@ -248,21 +248,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
-                    <execution>
-                        <id>analyze</id>
-                        <configuration>
-                            <ignoredDependencies>
-                                <ignoreDependenvy>org.eclipse.che.multiuser:che-multiuser-keycloak-shared</ignoreDependenvy>
-                            </ignoredDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

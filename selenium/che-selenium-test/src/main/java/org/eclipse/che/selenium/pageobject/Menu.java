@@ -27,7 +27,6 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -46,6 +45,7 @@ public class Menu {
   private final Loader loader;
   private final ActionsFactory actionsFactory;
   private WebDriverWait redrawMenuItemsWait;
+  private WebDriverWait loadMenuItemsWait;
 
   @Inject
   public Menu(SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
@@ -54,6 +54,7 @@ public class Menu {
     this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
     redrawMenuItemsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    loadMenuItemsWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }
 
   private static String ENABLED_CSS_VALUE = "rgba(255, 255, 255, 1)";
@@ -95,13 +96,11 @@ public class Menu {
   public void runAndWaitCommand(final String idTopMenuCommand, final String idCommandName) {
 
     redrawMenuItemsWait.until(
-        new ExpectedCondition<Boolean>() {
-          @Override
-          public Boolean apply(WebDriver driver) {
-            driver.findElement(By.id(idTopMenuCommand)).click();
-            return driver.findElement(By.id(idCommandName)).isDisplayed();
-          }
-        });
+        (ExpectedCondition<Boolean>)
+            driver -> {
+              driver.findElement(By.id(idTopMenuCommand)).click();
+              return driver.findElement(By.id(idCommandName)).isDisplayed();
+            });
     seleniumWebDriver.findElement(By.id(idCommandName)).click();
     redrawMenuItemsWait.until(invisibilityOfElementLocated(By.id(idCommandName)));
   }
@@ -128,7 +127,7 @@ public class Menu {
       seleniumWebDriver.findElement(By.id(idTopMenuCommand)).click();
       redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idCommandName))).click();
     }
-    redrawMenuItemsWait.until(invisibilityOfElementLocated(By.id(idCommandName)));
+    loadMenuItemsWait.until(invisibilityOfElementLocated(By.id(idCommandName)));
     loader.waitOnClosed();
   }
 
@@ -213,16 +212,14 @@ public class Menu {
   public void clickOnCommand(final String idTopMenuCommand) {
     // TODO Use attributes enabled/disabled instead of css values
     redrawMenuItemsWait.until(
-        new ExpectedCondition<Boolean>() {
-          @Override
-          public Boolean apply(WebDriver driver) {
-            WebElement element = driver.findElement(By.id(idTopMenuCommand));
-            boolean isTrue = element.getCssValue("color").equals(ENABLED_CSS_VALUE);
-            Actions actions = actionsFactory.createAction(seleniumWebDriver);
-            actions.moveToElement(element).click().perform();
-            return isTrue;
-          }
-        });
+        (ExpectedCondition<Boolean>)
+            driver -> {
+              WebElement element = driver.findElement(By.id(idTopMenuCommand));
+              boolean isTrue = element.getCssValue("color").equals(ENABLED_CSS_VALUE);
+              Actions actions = actionsFactory.createAction(seleniumWebDriver);
+              actions.moveToElement(element).click().perform();
+              return isTrue;
+            });
   }
 
   /**

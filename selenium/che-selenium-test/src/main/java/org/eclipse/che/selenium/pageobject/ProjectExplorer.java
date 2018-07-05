@@ -21,6 +21,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.COLOURED_ITEM_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
@@ -68,6 +69,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +87,11 @@ public class ProjectExplorer {
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory waitFactory;
+  private final NotificationsPopupPanel notificationsPopupPanel;
   private final int DEFAULT_TIMEOUT;
+
+  @FindBy(id = "git.reference.name")
+  WebElement projectReference;
 
   @Inject
   public ProjectExplorer(
@@ -96,7 +102,8 @@ public class ProjectExplorer {
       CodenvyEditor editor,
       TestWebElementRenderChecker testWebElementRenderChecker,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
-      WebDriverWaitFactory webDriverWaitFactory) {
+      WebDriverWaitFactory webDriverWaitFactory,
+      NotificationsPopupPanel notificationsPopupPanel) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
@@ -105,6 +112,7 @@ public class ProjectExplorer {
     this.testWebElementRenderChecker = testWebElementRenderChecker;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.waitFactory = webDriverWaitFactory;
+    this.notificationsPopupPanel = notificationsPopupPanel;
     this.DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -285,6 +293,17 @@ public class ProjectExplorer {
 
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
+  }
+
+  /**
+   * Wait the specified reference to be present near the project name in the project explorer.
+   *
+   * @param reference git reference e.g. branch, tag or commit
+   */
+  public void waitReferenceName(String reference) {
+    loader.waitOnClosed();
+
+    seleniumWebDriverHelper.waitTextEqualsTo(projectReference, "(" + reference + ")");
   }
 
   /**
@@ -1067,5 +1086,12 @@ public class ProjectExplorer {
   /** click on the 'Maximize' button */
   public void clickOnMaximizeButton() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.MAXIMIZE_BUTTON_XPATH));
+  }
+
+  // Wait project is completely initialized
+  public void waitProjectInitialization(String projectName) {
+    waitItem(projectName);
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
+    waitDefinedTypeOfFolder(projectName, PROJECT_FOLDER);
   }
 }

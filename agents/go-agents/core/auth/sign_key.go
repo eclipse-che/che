@@ -12,10 +12,10 @@
 package auth
 
 import (
-	"encoding/base64"
-	"os"
-	"errors"
 	"crypto/x509"
+	"encoding/base64"
+	"errors"
+	"os"
 )
 
 const SignatureKeyEnv = "CHE_MACHINE_AUTH_SIGNATURE__PUBLIC__KEY"

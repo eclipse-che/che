@@ -10,12 +10,33 @@
  */
 package org.eclipse.che.selenium.core.constant;
 
+import static java.lang.String.format;
+
 /** */
 public final class TestIntelligentCommandsConstants {
 
   private TestIntelligentCommandsConstants() {
     // this prevents class instance creation
     throw new AssertionError();
+  }
+
+  public enum CommandItem {
+    RUN_COMMAND_ITEM("%s:run"),
+    BUILD_COMMAND_ITEM("%s:build"),
+    BUILD_AND_RUN_COMMAND_ITEM("%s:build and run"),
+    STOP_TOMCAT_COMMAND_ITEM("%s:stop tomcat"),
+    RUN_TOMCAT_COMMAND_ITEM("%s:run tomcat"),
+    DEBUG_COMMAND_ITEM("%s:debug");
+
+    private final String itemTemplate;
+
+    CommandItem(String itemTemplate) {
+      this.itemTemplate = itemTemplate;
+    }
+
+    public String getItem(String projectName) {
+      return format(itemTemplate, projectName);
+    }
   }
 
   public static class CommandsGoals {

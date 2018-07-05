@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -196,7 +196,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     projectExplorer.waitItem(PROJECT);
     loader.waitOnClosed();
     projectExplorer.waitAndSelectItem(PROJECT);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, BUILD);
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT, BUILD);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.quickRevealToItemWithJavaScript(absPathToClass);
     projectExplorer.openItemByPath(absPathToClass);

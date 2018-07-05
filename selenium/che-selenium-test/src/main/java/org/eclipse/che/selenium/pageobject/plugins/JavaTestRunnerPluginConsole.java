@@ -20,8 +20,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
+import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -73,8 +77,21 @@ public class JavaTestRunnerPluginConsole extends Consoles {
 
   @Inject
   public JavaTestRunnerPluginConsole(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
-    super(seleniumWebDriver, loader, actionsFactory);
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      ProjectExplorer projectExplorer,
+      AskDialog askDialog,
+      WebDriverWaitFactory webDriverWaitFactory) {
+    super(
+        seleniumWebDriver,
+        loader,
+        actionsFactory,
+        seleniumWebDriverHelper,
+        projectExplorer,
+        askDialog,
+        webDriverWaitFactory);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 

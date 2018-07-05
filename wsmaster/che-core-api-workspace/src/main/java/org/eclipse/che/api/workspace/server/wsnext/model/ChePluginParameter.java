@@ -10,31 +10,39 @@
  */
 package org.eclipse.che.api.workspace.server.wsnext.model;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
-/** Compute Resources required by this container. Cannot be updated. More */
-public class ResourceRequirements {
+public class ChePluginParameter {
 
-  private Map<String, String> requests = new HashMap<String, String>();
+  private String name = null;
+  private String value = null;
 
-  /**
-   * Requests describes the minimum amount of compute resources required. If Requests is omitted for
-   * a container, it defaults to Limits if that is explicitly specified, otherwise to an
-   * implementation-defined value.
-   */
-  public ResourceRequirements requests(Map<String, String> requests) {
-    this.requests = requests;
+  /** */
+  public ChePluginParameter name(String name) {
+    this.name = name;
     return this;
   }
 
-  public Map<String, String> getRequests() {
-    return requests;
+  public String getName() {
+    return name;
   }
 
-  public void setRequests(Map<String, String> requests) {
-    this.requests = requests;
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  /** */
+  public ChePluginParameter value(String value) {
+    this.value = value;
+    return this;
+  }
+
+  public String getValue() {
+    return value;
+  }
+
+  public void setValue(String value) {
+    this.value = value;
   }
 
   @Override
@@ -45,21 +53,23 @@ public class ResourceRequirements {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ResourceRequirements resourceRequirements = (ResourceRequirements) o;
-    return Objects.equals(requests, resourceRequirements.requests);
+    ChePluginParameter cheServiceParameter = (ChePluginParameter) o;
+    return Objects.equals(name, cheServiceParameter.name)
+        && Objects.equals(value, cheServiceParameter.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(requests);
+    return Objects.hash(name, value);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ResourceRequirements {\n");
+    sb.append("class CheServiceParameter {\n");
 
-    sb.append("    requests: ").append(toIndentedString(requests)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("}");
     return sb.toString();
   }
