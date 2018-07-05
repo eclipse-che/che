@@ -34,15 +34,15 @@ public class WebDriverWaitFactory {
     return get(LOAD_PAGE_TIMEOUT_SEC);
   }
 
-  public WebDriverWait get(int timeout) {
+  public WebDriverWait get(int timeoutInSec) {
     if (!webDriverWaits.isEmpty()) {
-      if (webDriverWaits.containsKey(timeout)) {
-        return webDriverWaits.get(timeout);
+      if (webDriverWaits.containsKey(timeoutInSec)) {
+        return webDriverWaits.get(timeoutInSec);
       }
     }
 
-    WebDriverWait webDriverWait = new WebDriverWait(seleniumWebDriver, timeout);
-    webDriverWaits.put(timeout, webDriverWait);
+    WebDriverWait webDriverWait = new WebDriverWait(seleniumWebDriver, timeoutInSec);
+    webDriverWaits.put(timeoutInSec, webDriverWait);
 
     return webDriverWait;
   }
@@ -51,12 +51,12 @@ public class WebDriverWaitFactory {
    * Creates an instance of the {@link WebDriverWait} with specified {@code timeout} and frequency
    * of attempts.
    *
-   * @param timeout waiting time for condition in seconds.
-   * @param pollingEvery delay between attempts.
+   * @param timeoutInSec waiting time for condition in seconds.
+   * @param delayBetweenAttemptsInSec delay between attempts.
    * @return instance of the {@link WebDriverWait} initialized by specified values.
    */
-  public WebDriverWait get(int timeout, int pollingEvery) {
-    long delayBetweenAttempts = SECONDS.toMillis(pollingEvery);
-    return new WebDriverWait(seleniumWebDriver, timeout, delayBetweenAttempts);
+  public WebDriverWait get(int timeoutInSec, int delayBetweenAttemptsInSec) {
+    long delayBetweenAttempts = SECONDS.toMillis(delayBetweenAttemptsInSec);
+    return new WebDriverWait(seleniumWebDriver, timeoutInSec, delayBetweenAttempts);
   }
 }
