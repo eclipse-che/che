@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
@@ -16,15 +16,17 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
- * Provides a path-based strategy for exposing service ports outside the cluster using Ingress.
- * Ingresses will be created with a common host name for all workspaces.
+ * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
+ * Ingresses will be created without an explicit host (defaulting to *).
  *
  * <p>This strategy uses different Ingress path entries <br>
  * Each external server is exposed with a unique path prefix.
  *
  * <p>This strategy imposes limitation on user-developed applications. <br>
+ * It should only be used for local development with a single IP address
  *
  * <pre>
  *   Path-Based Ingress exposing service's port:
@@ -32,8 +34,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
  * ...
  * spec:
  *   rules:
- *     - host: CHE_HOST
- *       http:
+ *     - http:
  *         paths:
  *           - path: service123/webapp        ---->> Service.metadata.name + / + Service.spec.ports[0].name
  *             backend:
@@ -44,29 +45,35 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class SingleHostIngressExternalServerExposer
-    extends AbstractIngressExternalServerExposerStrategy {
+public class DefaultHostIngressExternalServerExposer
+    implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
-  public static final String SINGLE_HOST_STRATEGY = "single-host";
+  public static final String DEFAULT_HOST_STRATEGY = "default-host";
   private final Map<String, String> ingressAnnotations;
-  private final String cheHost;
 
   @Inject
-  public SingleHostIngressExternalServerExposer(
-      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations,
-      @Named("che.host") String cheHost) {
+  public DefaultHostIngressExternalServerExposer(
+      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations) {
     this.ingressAnnotations = ingressAnnotations;
-    this.cheHost = cheHost;
   }
 
   @Override
-  protected Ingress generateIngress(
+  public void expose(
+      KubernetesEnvironment k8sEnv,
+      String machineName,
+      String serviceName,
+      ServicePort servicePort,
+      Map<String, ServerConfig> externalServers) {
+    Ingress ingress = generateIngress(machineName, serviceName, servicePort, externalServers);
+    k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
+  }
+
+  private Ingress generateIngress(
       String machineName,
       String serviceName,
       ServicePort servicePort,
       Map<String, ServerConfig> ingressesServers) {
     return new ExternalServerIngressBuilder()
-        .withHost(cheHost)
         .withPath(generateExternalServerIngressPath(serviceName, servicePort))
         .withName(generateExternalServerIngressName(serviceName, servicePort))
         .withMachineName(machineName)

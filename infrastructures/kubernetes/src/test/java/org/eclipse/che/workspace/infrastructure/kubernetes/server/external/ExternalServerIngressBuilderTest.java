@@ -8,10 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.util.Collections.singletonMap;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
@@ -64,7 +65,7 @@ public class ExternalServerIngressBuilderTest {
             .build();
 
     // then
-    AssertIngressSpec(path, host, ingress);
+    assertIngressSpec(path, host, ingress);
   }
 
   @Test
@@ -85,7 +86,7 @@ public class ExternalServerIngressBuilderTest {
             .build();
 
     // then
-    AssertIngressSpec(null, host, ingress);
+    assertIngressSpec(null, host, ingress);
   }
 
   @Test
@@ -106,10 +107,10 @@ public class ExternalServerIngressBuilderTest {
             .build();
 
     // then
-    AssertIngressSpec(path, null, ingress);
+    assertIngressSpec(path, null, ingress);
   }
 
-  private void AssertIngressSpec(String path, String host, Ingress ingress) {
+  private void assertIngressSpec(String path, String host, Ingress ingress) {
     assertEquals(ingress.getSpec().getRules().get(0).getHost(), host);
     HTTPIngressPath httpIngressPath =
         ingress.getSpec().getRules().get(0).getHttp().getPaths().get(0);
