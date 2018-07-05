@@ -41,6 +41,7 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -109,6 +110,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -172,6 +174,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesSecrets secrets;
+  @Mock private KubernetesConfigsMaps configMaps;
   @Mock private KubernetesDeployments deployments;
   @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
@@ -256,6 +259,7 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.ingresses()).thenReturn(ingresses);
     when(namespace.deployments()).thenReturn(deployments);
     when(namespace.secrets()).thenReturn(secrets);
+    when(namespace.configMaps()).thenReturn(configMaps);
     when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
         .thenReturn(bootstrapper);
     doReturn(
@@ -288,12 +292,15 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void startsKubernetesEnvironment() throws Exception {
     when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
+    when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
+
     internalRuntime.internalStart(emptyMap());
 
     verify(deployments).deploy(any());
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(secrets).create(any());
+    verify(configMaps).create(any());
     verify(namespace.deployments(), times(2)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());

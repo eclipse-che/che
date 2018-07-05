@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -38,6 +39,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
   private final Map<String, Ingress> ingresses;
   private final Map<String, PersistentVolumeClaim> persistentVolumeClaims;
   private final Map<String, Secret> secrets;
+  private final Map<String, ConfigMap> configMaps;
 
   public KubernetesEnvironment(KubernetesEnvironment k8sEnv) {
     this(
@@ -48,7 +50,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
         k8sEnv.getServices(),
         k8sEnv.getIngresses(),
         k8sEnv.getPersistentVolumeClaims(),
-        k8sEnv.getSecrets());
+        k8sEnv.getSecrets(),
+        k8sEnv.getConfigMaps());
   }
 
   public static Builder builder() {
@@ -63,13 +66,15 @@ public class KubernetesEnvironment extends InternalEnvironment {
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> persistentVolumeClaims,
-      Map<String, Secret> secrets) {
+      Map<String, Secret> secrets,
+      Map<String, ConfigMap> configMaps) {
     super(internalRecipe, machines, warnings);
     this.pods = pods;
     this.services = services;
     this.ingresses = ingresses;
     this.persistentVolumeClaims = persistentVolumeClaims;
     this.secrets = secrets;
+    this.configMaps = configMaps;
   }
 
   /** Returns pods that should be created when environment starts. */
@@ -97,6 +102,11 @@ public class KubernetesEnvironment extends InternalEnvironment {
     return secrets;
   }
 
+  /** Returns config maps that should be created when environment starts. */
+  public Map<String, ConfigMap> getConfigMaps() {
+    return configMaps;
+  }
+
   public static class Builder {
     protected InternalRecipe internalRecipe;
     protected final Map<String, InternalMachineConfig> machines = new HashMap<>();
@@ -106,6 +116,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
     protected final Map<String, Ingress> ingresses = new HashMap<>();
     protected final Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     protected final Map<String, Secret> secrets = new HashMap<>();
+    protected final Map<String, ConfigMap> configMaps = new HashMap<>();
 
     protected Builder() {}
 
@@ -149,9 +160,14 @@ public class KubernetesEnvironment extends InternalEnvironment {
       return this;
     }
 
+    public Builder setConfigMaps(Map<String, ConfigMap> configMaps) {
+      this.configMaps.putAll(configMaps);
+      return this;
+    }
+
     public KubernetesEnvironment build() {
       return new KubernetesEnvironment(
-          internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets);
+          internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
     }
   }
 }

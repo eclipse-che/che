@@ -18,6 +18,8 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.CONFIG_MAP_IGNORED_WARNING_CODE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.CONFIG_MAP_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.ROUTES_IGNORED_WARNING_MESSAGE;
@@ -33,6 +35,7 @@ import static org.testng.Assert.assertTrue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.DoneableKubernetesList;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -59,6 +62,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.Mock;
@@ -137,7 +141,7 @@ public class OpenShiftEnvironmentFactoryTest {
     final OpenShiftEnvironment parsed =
         osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertTrue(parsed.getRoutes().isEmpty());
+    assertTrue(parsed.getPersistentVolumeClaims().isEmpty());
     assertEquals(parsed.getWarnings().size(), 1);
     assertEquals(
         parsed.getWarnings().get(0),
@@ -152,11 +156,26 @@ public class OpenShiftEnvironmentFactoryTest {
     final OpenShiftEnvironment parsed =
         osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertTrue(parsed.getRoutes().isEmpty());
+    assertTrue(parsed.getSecrets().isEmpty());
     assertEquals(parsed.getWarnings().size(), 1);
     assertEquals(
         parsed.getWarnings().get(0),
         new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
+  }
+
+  @Test
+  public void ignoreConfigMapsWhenRecipeContainsThem() throws Exception {
+    final List<HasMetadata> recipeObjects = singletonList(new ConfigMap());
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertTrue(parsed.getConfigMaps().isEmpty());
+    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(
+        parsed.getWarnings().get(0),
+        new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
   }
 
   @Test

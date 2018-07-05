@@ -13,39 +13,40 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
-import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 
 /**
- * Defines an internal API for managing {@link Secret} instances in {@link
- * KubernetesSecrets#namespace predefined namespace}.
+ * Defines an internal API for managing {@link ConfigMap} instances in {@link
+ * KubernetesConfigsMaps#namespace predefined namespace}.
  *
  * @author Sergii Leshchenko
  */
-public class KubernetesSecrets {
+public class KubernetesConfigsMaps {
   private final String namespace;
   private final String workspaceId;
   private final KubernetesClientFactory clientFactory;
 
-  KubernetesSecrets(String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
+  KubernetesConfigsMaps(
+      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
   }
 
   /**
-   * Creates specified secret.
+   * Creates specified config map.
    *
-   * @param secret secret to create
+   * @param configMap config map to create
    * @throws InfrastructureException when any exception occurs
    */
-  public void create(Secret secret) throws InfrastructureException {
-    putLabel(secret, CHE_WORKSPACE_ID_LABEL, workspaceId);
+  public void create(ConfigMap configMap) throws InfrastructureException {
+    putLabel(configMap, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
-      clientFactory.create(workspaceId).secrets().inNamespace(namespace).create(secret);
+      clientFactory.create(workspaceId).configMaps().inNamespace(namespace).create(configMap);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
@@ -60,7 +61,7 @@ public class KubernetesSecrets {
     try {
       clientFactory
           .create(workspaceId)
-          .secrets()
+          .configMaps()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
           .delete();

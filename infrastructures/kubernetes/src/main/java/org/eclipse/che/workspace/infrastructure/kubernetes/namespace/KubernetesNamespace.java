@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -64,6 +65,7 @@ public class KubernetesNamespace {
   private final KubernetesIngresses ingresses;
   private final KubernetesClientFactory clientFactory;
   private final KubernetesSecrets secrets;
+  private final KubernetesConfigsMaps configMaps;
 
   @VisibleForTesting
   protected KubernetesNamespace(
@@ -74,7 +76,8 @@ public class KubernetesNamespace {
       KubernetesServices services,
       KubernetesPersistentVolumeClaims pvcs,
       KubernetesIngresses kubernetesIngresses,
-      KubernetesSecrets secrets) {
+      KubernetesSecrets secrets,
+      KubernetesConfigsMaps configMaps) {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
@@ -83,6 +86,7 @@ public class KubernetesNamespace {
     this.pvcs = pvcs;
     this.ingresses = kubernetesIngresses;
     this.secrets = secrets;
+    this.configMaps = configMaps;
   }
 
   public KubernetesNamespace(
@@ -95,6 +99,7 @@ public class KubernetesNamespace {
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
     this.secrets = new KubernetesSecrets(name, workspaceId, clientFactory);
+    this.configMaps = new KubernetesConfigsMaps(name, workspaceId, clientFactory);
   }
 
   /**
@@ -146,9 +151,19 @@ public class KubernetesNamespace {
     return secrets;
   }
 
+  /** Returns object for managing {@link ConfigMap} instances inside namespace. */
+  public KubernetesConfigsMaps configMaps() {
+    return configMaps;
+  }
+
   /** Removes all object except persistent volume claims inside namespace. */
   public void cleanUp() throws InfrastructureException {
-    doRemove(ingresses::delete, services::delete, deployments::delete, secrets::delete);
+    doRemove(
+        ingresses::delete,
+        services::delete,
+        deployments::delete,
+        secrets::delete,
+        configMaps::delete);
   }
 
   /**
