@@ -22,6 +22,12 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+/**
+ * This is a set of methods which make easier to do updating of the che pod and wait of the updating
+ * results.
+ *
+ * @author Ihor Okhrimenko
+ */
 @Singleton
 public class HotUpdateUtil {
   private static final int TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS = 600;

@@ -30,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/** @author Ihor Okhrimenko */
 public class RollingUpdateStrategyWithEditorTest {
   private static final int RESTORE_IDE_AFTER_REFRESH_TIMEOUT = 10;
   private static final String PROJECT_NAME = "default-spring-project";

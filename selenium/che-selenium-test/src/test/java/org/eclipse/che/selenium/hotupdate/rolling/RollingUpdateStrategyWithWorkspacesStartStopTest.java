@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.Test;
 
+/** @author Ihor Okhrimenko */
 public class RollingUpdateStrategyWithWorkspacesStartStopTest {
 
   @InjectTestWorkspace(startAfterCreation = false)
@@ -46,11 +47,9 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitPageLoading();
     workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
     workspaces.waitWorkspaceIsPresent(workspaceForStarting.getName());
-
     workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
     workspaces.waitWorkspaceStatus(workspaceForStarting.getName(), Workspaces.Status.STOPPED);
 
-    // execute rolling update command
     hotUpdateUtil.executeMasterPodUpdateCommand();
 
     // execute stop-start commands for existing workspaces
