@@ -35,7 +35,7 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
   @Inject private HotUpdateUtil hotUpdateUtil;
 
   @Test
-  public void createMavenArchetypeStartProjectByWizard() throws Exception {
+  public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
     int currentRevision = hotUpdateUtil.getMasterPodRevision();
 
     // open 'Workspaces' page
