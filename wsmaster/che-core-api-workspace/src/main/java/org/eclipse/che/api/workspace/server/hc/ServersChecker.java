@@ -182,8 +182,8 @@ public class ServersChecker {
         serverUrl = serverUrl.replaceFirst("^ws", "http").replaceFirst("/pty$", "/");
       }
 
-      if ("wsagent/http".equals(serverRef)) {
-        // add trailing slash
+      if ("wsagent/http".equals(serverRef) && !serverUrl.endsWith("/")) {
+        // add trailing slash if it is not present
         serverUrl = serverUrl + '/';
       }
 
