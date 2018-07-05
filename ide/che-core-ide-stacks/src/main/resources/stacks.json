@@ -309,6 +309,83 @@
     }
   },
   {
+    "id": "java-mongo",
+    "creator": "ide",
+    "name": "Java-MongoDB",
+    "description": "Multi-machine environment with Default Java Stack and MongoDB NoSQL",
+    "scope": "general",
+    "tags": [
+      "Java 1.8, Tomcat 8, MongoDB 3.7.3"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+              ],
+              "servers": {
+                "tomcat8" : {
+                  "port" : "8080",
+                  "protocol" : "http"
+                },
+                "tomcat8-debug" : {
+                  "port" : "8000",
+                  "protocol" : "http"
+                },
+                "codeserver" : {
+                  "port" : "9876",
+                  "protocol" : "http"
+                }
+              },
+              "attributes" : {}
+            },
+            "db": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal"
+              ],
+              "servers": {
+                "mongodb" : {
+                  "port" : "27017",
+                  "protocol" : "tcp"
+                }
+              },
+              "attributes" : {}
+            }
+          },
+          "recipe": {
+            "content": "services:\n db:\n  image: mongo:3.7.3\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/ubuntu_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
+            "contentType": "application/x-yaml",
+            "type": "compose"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-java-mysql.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "java-default",
     "creator": "ide",
     "name": "Java",
