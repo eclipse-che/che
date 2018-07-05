@@ -14,7 +14,6 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
 
 import com.google.common.collect.ImmutableList;
@@ -40,7 +39,7 @@ public class CreateWorkspaceFromCentosGoStackTest {
   private static final String WEB_GO_SIMPLE_PROJECT = "web-go-simple";
 
   private List<String> projects =
-      ImmutableList.of(DESKTOP_GO_SIMPLE_PROJECT, DESKTOP_GO_SIMPLE_PROJECT);
+      ImmutableList.of(DESKTOP_GO_SIMPLE_PROJECT, WEB_GO_SIMPLE_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -64,7 +63,7 @@ public class CreateWorkspaceFromCentosGoStackTest {
   public void checkWorkspaceCreationFromCentosGoStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(CENTOS_GO, WORKSPACE_NAME, projects);
 
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse(PREPARING_WS_TIMEOUT_SEC * 2);
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     projectExplorer.waitProjectInitialization(DESKTOP_GO_SIMPLE_PROJECT);
     projectExplorer.waitProjectInitialization(WEB_GO_SIMPLE_PROJECT);
