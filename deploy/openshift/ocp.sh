@@ -94,7 +94,7 @@ get_tools() {
     TOOLS_DIR="/tmp"
     OC_BINARY="$TOOLS_DIR/oc"
     JQ_BINARY="$TOOLS_DIR/jq"
-    OC_VERSION=$(echo $DEFAULT_OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
+    OC_VERSION=$(echo $OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
     #OS specific extract archives
     if [[ "$OSTYPE" == "darwin"* ]]; then
         OC_PACKAGE="openshift-origin-client-tools.zip"
