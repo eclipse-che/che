@@ -79,14 +79,10 @@ public class OpenExternalLibraryFileAfterRefreshTest {
   }
 
   private void openFileFromExternalLibraryAndCheckDisplayedText() {
-    projectExplorer.waitVisibilityByName("README.md");
-    projectExplorer.waitVisibilityByName("pom.xml");
-    projectExplorer.waitVisibilityByName("External Libraries");
+    projectExplorer.waitVisibilitySeveralItemsByName("README.md", "pom.xml", "External Libraries");
 
-    projectExplorer.openItemByVisibleNameInExplorer("External Libraries");
-    projectExplorer.openItemByVisibleNameInExplorer("servlet-api-2.5.jar");
-    projectExplorer.openItemByVisibleNameInExplorer("javax.servlet");
-    projectExplorer.openItemByVisibleNameInExplorer(CHECKING_FILE_NAME);
+    projectExplorer.openSeveralItemsByVisibleNameInExplorer(
+        "External Libraries", "servlet-api-2.5.jar", "javax.servlet", CHECKING_FILE_NAME);
 
     editor.waitActive();
     editor.waitTabIsPresent(CHECKING_FILE_NAME);
