@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 public class OpenExternalLibraryFileAfterRefreshTest {
   private static final String PROJECT_NAME = NameGenerator.generate("ExternalFileTest", 4);
+  private static final String CHECKING_FILE_NAME = "Filter";
   private static final String EXPECTED_EDITOR_TEXT =
       "\n"
           + " // Failed to get sources. Instead, stub sources have been generated.\n"
@@ -71,7 +72,7 @@ public class OpenExternalLibraryFileAfterRefreshTest {
 
     seleniumWebDriver.navigate().refresh();
 
-    // check that after browser refresh is still possible to open the same file
+    // check that after browser refresh it is still possible to open the same file
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     openFileFromExternalLibraryAndCheckDisplayedText();
@@ -85,10 +86,10 @@ public class OpenExternalLibraryFileAfterRefreshTest {
     projectExplorer.openItemByVisibleNameInExplorer("External Libraries");
     projectExplorer.openItemByVisibleNameInExplorer("servlet-api-2.5.jar");
     projectExplorer.openItemByVisibleNameInExplorer("javax.servlet");
-    projectExplorer.openItemByVisibleNameInExplorer("Filter");
+    projectExplorer.openItemByVisibleNameInExplorer(CHECKING_FILE_NAME);
 
     editor.waitActive();
-    editor.waitTabIsPresent("Filter");
+    editor.waitTabIsPresent(CHECKING_FILE_NAME);
     editor.waitTextIntoEditor(EXPECTED_EDITOR_TEXT);
   }
 }
