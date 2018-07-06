@@ -123,9 +123,7 @@ public class EditorWorkingCopyManager {
     } catch (NotFoundException e) {
       String errorMessage = "Can not handle editor changes: " + e.getLocalizedMessage();
 
-      LOG.error(errorMessage);
-
-      transmitError(400, errorMessage, endpointId);
+      LOG.debug(errorMessage);
     }
   }
 
