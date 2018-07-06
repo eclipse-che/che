@@ -248,9 +248,7 @@ public class JavaReconciler {
     } catch (NotFoundException e) {
       String errorMessage = "Can not handle file operation: " + e.getMessage();
 
-      LOG.error(errorMessage);
-
-      transmitError(400, errorMessage, endpointId);
+      LOG.debug(errorMessage);
     }
   }
 
