@@ -201,7 +201,7 @@ public class CodenvyEditor {
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
-    String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
+    String TOOLTIP_TITLE_CSS = ".textViewTooltipOnHover";
   }
 
   public enum TabActionLocator {

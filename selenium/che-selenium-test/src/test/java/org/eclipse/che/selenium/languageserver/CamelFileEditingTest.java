@@ -16,20 +16,24 @@ import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_C
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class CamelFileEditingTest {
-  private static final String PROJECT_NAME = "console-python3-simple";
+  private static final String PROJECT_NAME = "spring-project-for-camel-ls";
   private static final String CAMEL_XML_FILE = "camel.xml";
   private static final String PATH_TO_CAMEL_FILE = PROJECT_NAME + "/" + CAMEL_XML_FILE;
   private static final String LS_INIT_MESSAGE =
@@ -38,19 +42,22 @@ public class CamelFileEditingTest {
   @InjectTestWorkspace(template = UBUNTU_CAMEL)
   private TestWorkspace workspace;
 
-  @Inject
-  private Ide ide;
-  @Inject private Menu menu;
+  @Inject private Ide ide;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = CamelFileEditingTest.class.getResource("/projects/spring-project-for-camel-ls");
     testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.CONSOLE_JAVA_SIMPLE);
+        workspace.getId(),
+        Paths.get(resource.toURI()),
+        PROJECT_NAME,
+        ProjectTemplates.CONSOLE_JAVA_SIMPLE);
     ide.open(workspace);
   }
 
@@ -61,18 +68,47 @@ public class CamelFileEditingTest {
     projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
     editor.waitTabIsPresent(CAMEL_XML_FILE);
 
-    // check python language sever initialized
+    // check camel language sever initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
   @Test(priority = 1)
-  public void checkHoverFeature() {
-
-  }
-
-  @Test(priority = 1)
   public void checkAutocompleteFeature() {
+    editor.selectTabByName(CAMEL_XML_FILE);
 
+    editor.goToPosition(49, 21);
+
+    editor.launchAutocomplete();
+    editor.waitTextIntoEditor("timer:timerName");
+
+    // TODO check hover feature
+    WebElement we =
+        seleniumWebDriver.findElement(
+            By.xpath("//div[@contenteditable='true']//span[contains(text(),'timer')]"));
+    Actions action = new Actions(seleniumWebDriver);
+    action.moveToElement(we).build().perform();
+
+    editor.waitTextInToolTipPopup("timer");
+    //    WebElement toolTipElement =
+    // seleniumWebDriver.findElement(By.cssSelector("span.tooltipTitle"));
+    //    Assert.assertEquals(toolTipElement.getText(), "timer");
+
+    editor.typeTextIntoEditor("?");
+    editor.launchAutocompleteAndWaitContainer();
+    editor.waitTextIntoAutocompleteContainer("fixedRate ");
+    editor.enterAutocompleteProposal("fixedRate ");
+    editor.waitTextIntoEditor("timer:timerName?fixedRate=false");
+
+    editor.typeTextIntoEditor("&amp;");
+    editor.launchAutocompleteAndWaitContainer();
+    editor.waitTextIntoAutocompleteContainer("exchangePattern ");
+    editor.enterAutocompleteProposal("exchangePattern ");
+    editor.waitTextIntoEditor("timer:timerName?fixedRate=false&amp;exchangePattern=");
+
+    editor.launchAutocompleteAndWaitContainer();
+    editor.waitTextIntoAutocompleteContainer("InOnly");
+    editor.enterAutocompleteProposal("InOnly");
+    editor.waitTextIntoEditor("timer:timerName?fixedRate=false&amp;exchangePattern=InOnly");
   }
 }
