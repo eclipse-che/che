@@ -31,6 +31,7 @@ DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/jdt.ls.tar.g
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-java
 LS_LAUNCHER=${LS_DIR}/launch.sh
+LS_DATA_DIR=$HOME/jdtls/data
 
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"
@@ -137,4 +138,4 @@ curl -sL ${DOWNLOAD_AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 echo writing start script to ${LS_LAUNCHER}
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4  -Declipse.product=org.eclipse.jdt.ls.core.product -noverify -Xmx1G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4410 -jar ${LS_DIR}/plugins/org.eclipse.equinox.launcher_1.5.100.v20180611-1436.jar -configuration ./config_linux -data ${LS_DIR}/data" > ${LS_LAUNCHER}
+echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4  -Declipse.product=org.eclipse.jdt.ls.core.product -noverify -Xmx1G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4410 -jar ${LS_DIR}/plugins/org.eclipse.equinox.launcher_1.5.100.v20180611-1436.jar -configuration ./config_linux -data ${LS_DATA_DIR}" > ${LS_LAUNCHER}
