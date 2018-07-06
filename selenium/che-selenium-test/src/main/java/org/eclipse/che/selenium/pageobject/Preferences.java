@@ -24,6 +24,7 @@ import static org.eclipse.che.selenium.pageobject.Preferences.Locators.ERRORS_WA
 import static org.eclipse.che.selenium.pageobject.Preferences.Locators.MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM;
 import static org.eclipse.che.selenium.pageobject.Preferences.Locators.SSH_DELETE_BUTTON_FOR_HOST;
 import static org.openqa.selenium.Keys.ALT;
+import static org.openqa.selenium.Keys.COMMAND;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.utils.PlatformUtils;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
@@ -421,7 +423,7 @@ public class Preferences {
 
   /** call the 'Contribute' by hot key */
   public void callContributeActionByHotKey() {
-    webDriverHelper.sendKeys(Keys.chord(CONTROL, ALT, "6"));
+    webDriverHelper.sendKeys(Keys.chord(CONTROL, PlatformUtils.isMac() ? COMMAND : ALT, "6"));
   }
 
   /** wait the 'Contribute' checkbox is selected */
