@@ -202,7 +202,7 @@ public class CodenvyEditor {
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
-    String TOOLTIP_TITLE_CSS = ".textViewTooltipOnHover";
+    String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
     String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip']";
@@ -430,9 +430,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait text in tooltip pop-up (after clicking or hovering warning/error marker)
+   * wait text in hover pop-up (after hovering on text)
    *
-   * @param expectedText the expected text into tooltip pop-up
+   * @param expectedText the expected text into hover pop-up
    */
   public void waitTextInHoverPopup(String expectedText) {
     seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
