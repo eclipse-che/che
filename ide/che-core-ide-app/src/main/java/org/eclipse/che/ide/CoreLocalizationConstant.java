@@ -1333,4 +1333,13 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("gwt_recompile.dialog.message.no_server")
   String gwtRecompileDialogNoServerMessage();
+
+  @Key("resource.copy.move.error.title")
+  String resourceCopyMoveErrorTitle();
+
+  @Key("resource.copy.move.same.path.error.message")
+  String resourceCopyMoveSamePathErrorMessage(String sourceName);
+
+  @Key("resource.copy.move.already.exist.error.message")
+  String resourceCopyMoveAlreadyExistErrorMessage(String sourceName, String path);
 }

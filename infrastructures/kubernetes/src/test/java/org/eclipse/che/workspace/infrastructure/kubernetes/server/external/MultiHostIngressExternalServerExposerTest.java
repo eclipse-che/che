@@ -8,12 +8,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -78,12 +78,11 @@ public class MultiHostIngressExternalServerExposerTest {
             .withProtocol("TCP")
             .withTargetPort(targetPort)
             .build();
-    Map<String, ServicePort> portToServicePort = ImmutableMap.of("8080/tcp", servicePort);
     Map<String, ServerConfig> serversToExpose = ImmutableMap.of("http-server", httpServerConfig);
 
     // when
-    externalServerExposer.exposeExternalServers(
-        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, portToServicePort, serversToExpose);
+    externalServerExposer.expose(
+        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
 
     // then
     assertThatExternalServerIsExposed(
@@ -112,7 +111,6 @@ public class MultiHostIngressExternalServerExposerTest {
             .withProtocol("TCP")
             .withTargetPort(targetPort)
             .build();
-    Map<String, ServicePort> portToServicePort = ImmutableMap.of("8080/tcp", servicePort);
 
     Map<String, ServerConfig> serversToExpose =
         ImmutableMap.of(
@@ -120,8 +118,8 @@ public class MultiHostIngressExternalServerExposerTest {
             "ws-server", wsServerConfig);
 
     // when
-    externalServerExposer.exposeExternalServers(
-        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, portToServicePort, serversToExpose);
+    externalServerExposer.expose(
+        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
 
     // then
     assertEquals(kubernetesEnvironment.getIngresses().size(), 1);
@@ -140,61 +138,6 @@ public class MultiHostIngressExternalServerExposerTest {
         "tcp",
         8080,
         servicePort,
-        new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
-  }
-
-  @Test
-  public void shouldCreateIngressesForServerWhenTwoServersHasDifferentPorts() {
-    // given
-    ServerConfigImpl httpServerConfig =
-        new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
-    ServerConfigImpl wsServerConfig =
-        new ServerConfigImpl("8081/tcp", "ws", "/connect", ATTRIBUTES_MAP);
-    IntOrString httpTargetPort = new IntOrString(8080);
-    IntOrString wsTargetPort = new IntOrString(8081);
-    ServicePort httpServicePort =
-        new ServicePortBuilder()
-            .withName("server-8080")
-            .withPort(8080)
-            .withProtocol("TCP")
-            .withTargetPort(httpTargetPort)
-            .build();
-    ServicePort wsServicePort =
-        new ServicePortBuilder()
-            .withName("server-8081")
-            .withPort(8081)
-            .withProtocol("TCP")
-            .withTargetPort(wsTargetPort)
-            .build();
-    Map<String, ServicePort> portToServicePort =
-        ImmutableMap.of("8080/tcp", httpServicePort, "8081/tcp", wsServicePort);
-
-    Map<String, ServerConfig> serversToExpose =
-        ImmutableMap.of(
-            "http-server", httpServerConfig,
-            "ws-server", wsServerConfig);
-
-    // when
-    externalServerExposer.exposeExternalServers(
-        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, portToServicePort, serversToExpose);
-
-    // then
-    assertEquals(kubernetesEnvironment.getIngresses().size(), 2);
-    assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        SERVICE_NAME,
-        "http-server",
-        "tcp",
-        8080,
-        httpServicePort,
-        new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
-    assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        SERVICE_NAME,
-        "ws-server",
-        "tcp",
-        8081,
-        wsServicePort,
         new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
