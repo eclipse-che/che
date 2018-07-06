@@ -36,12 +36,12 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceFromCentosNodeStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String ANGULAR_PATTERNFLY_STARTER = "angular-patternfly-starter";
-  private static final String NODEJS_HELLO_WORLD = "nodejs-hello-world";
-  private static final String WEB_NODEJS_SIMPLE = "web-nodejs-simple";
+  private static final String ANGULAR_PROJECT = "angular-patternfly-starter";
+  private static final String NODE_JS_PROJECT = "nodejs-hello-world";
+  private static final String WEB_NODE_JS_PROJECT = "web-nodejs-simple";
 
   private List<String> projects =
-      ImmutableList.of(ANGULAR_PATTERNFLY_STARTER, NODEJS_HELLO_WORLD, WEB_NODEJS_SIMPLE);
+      ImmutableList.of(ANGULAR_PROJECT, NODE_JS_PROJECT, WEB_NODE_JS_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -68,52 +68,57 @@ public class CreateWorkspaceFromCentosNodeStackTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(ANGULAR_PATTERNFLY_STARTER);
-    projectExplorer.waitProjectInitialization(NODEJS_HELLO_WORLD);
-    projectExplorer.waitProjectInitialization(WEB_NODEJS_SIMPLE);
+    projectExplorer.waitProjectInitialization(ANGULAR_PROJECT);
+    projectExplorer.waitProjectInitialization(NODE_JS_PROJECT);
+    projectExplorer.waitProjectInitialization(WEB_NODE_JS_PROJECT);
   }
 
   @Test(priority = 1)
   public void checkAngularPatternfyStarterProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        ANGULAR_PATTERNFLY_STARTER,
+        ANGULAR_PROJECT,
         BUILD_GOAL,
-        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(ANGULAR_PATTERNFLY_STARTER),
+        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(ANGULAR_PROJECT),
         "bower_components/font-awesome");
+
     consoles.executeCommandFromProjectExplorer(
-        ANGULAR_PATTERNFLY_STARTER,
-        RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(ANGULAR_PATTERNFLY_STARTER),
-        "Waiting...");
+        ANGULAR_PROJECT, RUN_GOAL, RUN_COMMAND_ITEM.getItem(ANGULAR_PROJECT), "Waiting...");
+
     consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//*[@id='pf-app']"));
-    consoles.closeProcessTabWithAskDialog("angular-patternfly-starter:run");
+
+    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(ANGULAR_PROJECT));
   }
 
   @Test(priority = 1)
   public void checkNodejsHelloWorldProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        NODEJS_HELLO_WORLD,
+        NODE_JS_PROJECT,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(NODEJS_HELLO_WORLD),
+        RUN_COMMAND_ITEM.getItem(NODE_JS_PROJECT),
         "Example app listening on port 3000!");
+
     consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//*[text()='Hello World!']"));
-    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(NODEJS_HELLO_WORLD));
+
+    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(NODE_JS_PROJECT));
   }
 
   @Test(priority = 1)
   public void checkWebNodejsSimpleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        WEB_NODEJS_SIMPLE,
+        WEB_NODE_JS_PROJECT,
         BUILD_GOAL,
-        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(WEB_NODEJS_SIMPLE),
+        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT),
         "bower_components/angular");
+
     consoles.executeCommandFromProjectExplorer(
-        WEB_NODEJS_SIMPLE,
+        WEB_NODE_JS_PROJECT,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(WEB_NODEJS_SIMPLE),
+        RUN_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT),
         "Started connect web server");
+
     consoles.checkWebElementVisibilityAtPreviewPage(
         By.xpath("//p[text()=' from the Yeoman team']"));
-    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_NODEJS_SIMPLE));
+
+    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT));
   }
 }

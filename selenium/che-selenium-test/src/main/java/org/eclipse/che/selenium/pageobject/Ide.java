@@ -79,10 +79,10 @@ public class Ide {
     return switchToIdeAndWaitWorkspaceIsReadyToUse(APPLICATION_START_TIMEOUT_SEC);
   }
 
-  public String switchToIdeAndWaitWorkspaceIsReadyToUse(int timeout) {
+  public String switchToIdeAndWaitWorkspaceIsReadyToUse(int timeoutInSec) {
     String currentWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
-    waitOpenedWorkspaceIsReadyToUse(timeout);
+    waitOpenedWorkspaceIsReadyToUse(timeoutInSec);
 
     return currentWindow;
   }

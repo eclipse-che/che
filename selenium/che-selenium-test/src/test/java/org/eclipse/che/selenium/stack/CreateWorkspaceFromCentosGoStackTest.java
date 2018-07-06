@@ -40,6 +40,7 @@ public class CreateWorkspaceFromCentosGoStackTest {
 
   private List<String> projects =
       ImmutableList.of(DESKTOP_GO_SIMPLE_PROJECT, WEB_GO_SIMPLE_PROJECT);
+  private By webElementOnPreviewPage = By.xpath("//pre[contains(text(),'Hello there')]");
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -82,8 +83,9 @@ public class CreateWorkspaceFromCentosGoStackTest {
   public void checkWebGoSimpleProjectCommandsStack() {
     consoles.executeCommandFromProjectExplorer(
         WEB_GO_SIMPLE_PROJECT, RUN_GOAL, RUN_COMMAND, "listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//pre[contains(text(),'Hello there')]"));
+
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProjectExplorer(
@@ -91,8 +93,9 @@ public class CreateWorkspaceFromCentosGoStackTest {
         RUN_GOAL,
         RUN_COMMAND_ITEM.getItem(WEB_GO_SIMPLE_PROJECT),
         "listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//pre[contains(text(),'Hello there')]"));
+
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_GO_SIMPLE_PROJECT));
   }
 }

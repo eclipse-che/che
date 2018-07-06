@@ -45,7 +45,7 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceFromJavaMySqlCentosStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String WEB_JAVA_PETCLINIC = "web-java-petclinic";
+  private static final String WEB_JAVA_PROJECT = "web-java-petclinic";
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -69,16 +69,16 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
   @Test
   public void checkWorkspaceCreationFromJavaMySqlCentosStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProject(
-        JAVA_MYSQL_CENTOS, WORKSPACE_NAME, WEB_JAVA_PETCLINIC);
+        JAVA_MYSQL_CENTOS, WORKSPACE_NAME, WEB_JAVA_PROJECT);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(WEB_JAVA_PETCLINIC);
+    projectExplorer.waitProjectInitialization(WEB_JAVA_PROJECT);
   }
 
   @Test(priority = 1)
   public void checkWebJavaPetclinicProjectCommands() {
-    projectExplorer.openItemByPath(WEB_JAVA_PETCLINIC);
+    projectExplorer.openItemByPath(WEB_JAVA_PROJECT);
 
     consoles.executeCommandFromProcessesArea(
         "db", COMMON_GOAL, "show databases", "information_schema");
@@ -86,19 +86,19 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
     consoles.executeCommandFromProcessesArea(
         "dev-machine", COMMON_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
     consoles.executeCommandFromProcessesArea(
-        "dev-machine", BUILD_GOAL, BUILD_COMMAND_ITEM.getItem(WEB_JAVA_PETCLINIC), BUILD_SUCCESS);
+        "dev-machine", BUILD_GOAL, BUILD_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT), BUILD_SUCCESS);
 
     consoles.executeCommandFromProcessesArea(
         "dev-machine",
         RUN_GOAL,
-        BUILD_AND_DEPLOY_COMMAND_ITEM.getItem(WEB_JAVA_PETCLINIC),
+        BUILD_AND_DEPLOY_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
         "Server startup in");
     consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//h2[text()='Welcome']"));
 
     projectExplorer.invokeCommandWithContextMenu(
         RUN_GOAL,
-        WEB_JAVA_PETCLINIC,
-        STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_PETCLINIC),
+        WEB_JAVA_PROJECT,
+        STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
         "dev-machine");
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
     terminal.typeIntoTerminal("ps ax");
@@ -108,7 +108,7 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
     consoles.executeCommandFromProcessesArea(
         "dev-machine",
         DEBUG_GOAL,
-        DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_PETCLINIC),
+        DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
         LISTENING_AT_ADDRESS_8000);
   }
 }

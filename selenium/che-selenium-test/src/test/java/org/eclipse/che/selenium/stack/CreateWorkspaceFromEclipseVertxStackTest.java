@@ -39,10 +39,11 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceFromEclipseVertxStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String VERTX_HEALTH_CHECKS_BOOSTER = "vertx-health-checks-booster";
-  private static final String VERTX_HTTP_BOOSTER = "vertx-http-booster";
+  private static final String HEALTH_CHECKS_BOOSTER_PROJECT = "vertx-health-checks-booster";
+  private static final String HEALTH_HTTP_BOOSTER_PROJECT = "vertx-http-booster";
 
-  private List<String> projects = ImmutableList.of(VERTX_HEALTH_CHECKS_BOOSTER, VERTX_HTTP_BOOSTER);
+  private List<String> projects =
+      ImmutableList.of(HEALTH_CHECKS_BOOSTER_PROJECT, HEALTH_HTTP_BOOSTER_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -69,17 +70,17 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(VERTX_HEALTH_CHECKS_BOOSTER);
-    projectExplorer.waitProjectInitialization(VERTX_HTTP_BOOSTER);
+    projectExplorer.waitProjectInitialization(HEALTH_CHECKS_BOOSTER_PROJECT);
+    projectExplorer.waitProjectInitialization(HEALTH_HTTP_BOOSTER_PROJECT);
   }
 
   @Test(priority = 1)
   public void checkVertxHealthChecksBoosterProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        VERTX_HEALTH_CHECKS_BOOSTER, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+        HEALTH_CHECKS_BOOSTER_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        VERTX_HEALTH_CHECKS_BOOSTER,
+        HEALTH_CHECKS_BOOSTER_PROJECT,
         RUN_GOAL,
         RUN_COMMAND,
         "[INFO] INFO: Succeeded in deploying verticle");
@@ -97,10 +98,13 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
   @Test(priority = 1)
   public void checkVertxHttpBoosterProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        VERTX_HTTP_BOOSTER, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+        HEALTH_HTTP_BOOSTER_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        VERTX_HTTP_BOOSTER, RUN_GOAL, RUN_COMMAND, "[INFO] INFO: Succeeded in deploying verticle");
+        HEALTH_HTTP_BOOSTER_PROJECT,
+        RUN_GOAL,
+        RUN_COMMAND,
+        "[INFO] INFO: Succeeded in deploying verticle");
     consoles.checkWebElementVisibilityAtPreviewPage(By.id("_vert_x_health_check_booster"));
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 

@@ -20,7 +20,7 @@ import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_C
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
 
 import com.google.common.collect.ImmutableList;
@@ -42,11 +42,11 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceFromSpringBootStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String SPRING_BOOT_HEALTH_CHECK_BOOSTER = "spring-boot-health-check-booster";
-  private static final String SPRING_BOOT_HTTP_BOOSTER = "spring-boot-http-booster";
+  private static final String SPRING_BOOT_HEALTH_CHECK_PROJECT = "spring-boot-health-check-booster";
+  private static final String SPRING_BOOT_HTTP_PROJECT = "spring-boot-http-booster";
 
   private List<String> projects =
-      ImmutableList.of(SPRING_BOOT_HEALTH_CHECK_BOOSTER, SPRING_BOOT_HTTP_BOOSTER);
+      ImmutableList.of(SPRING_BOOT_HEALTH_CHECK_PROJECT, SPRING_BOOT_HTTP_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -71,22 +71,22 @@ public class CreateWorkspaceFromSpringBootStackTest {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(
         SPRING_BOOT, WORKSPACE_NAME, projects);
 
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse(PREPARING_WS_TIMEOUT_SEC * 2);
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse(APPLICATION_START_TIMEOUT_SEC);
 
-    projectExplorer.waitProjectInitialization(SPRING_BOOT_HEALTH_CHECK_BOOSTER);
-    projectExplorer.waitProjectInitialization(SPRING_BOOT_HTTP_BOOSTER);
+    projectExplorer.waitProjectInitialization(SPRING_BOOT_HEALTH_CHECK_PROJECT);
+    projectExplorer.waitProjectInitialization(SPRING_BOOT_HTTP_PROJECT);
   }
 
   @Test(priority = 1)
   public void checkSpringBootHealthCheckBoosterProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HEALTH_CHECK_BOOSTER, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+        SPRING_BOOT_HEALTH_CHECK_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HEALTH_CHECK_BOOSTER, BUILD_GOAL, CLEAN_BUILD_COMMAND, BUILD_SUCCESS);
+        SPRING_BOOT_HEALTH_CHECK_PROJECT, BUILD_GOAL, CLEAN_BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HEALTH_CHECK_BOOSTER, RUN_GOAL, RUN_COMMAND, "Started BoosterApplication in");
+        SPRING_BOOT_HEALTH_CHECK_PROJECT, RUN_GOAL, RUN_COMMAND, "Started BoosterApplication in");
     consoles.checkWebElementVisibilityAtPreviewPage(
         By.xpath("//h2[text()='Health Check Booster']"));
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
@@ -99,13 +99,13 @@ public class CreateWorkspaceFromSpringBootStackTest {
   @Test(priority = 1)
   public void checkSpringBooHttpBoosterProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HTTP_BOOSTER, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+        SPRING_BOOT_HTTP_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HTTP_BOOSTER, BUILD_GOAL, CLEAN_BUILD_COMMAND, BUILD_SUCCESS);
+        SPRING_BOOT_HTTP_PROJECT, BUILD_GOAL, CLEAN_BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        SPRING_BOOT_HTTP_BOOSTER,
+        SPRING_BOOT_HTTP_PROJECT,
         RUN_GOAL,
         RUN_COMMAND,
         "INFO: Setting the server's publish address to be");
