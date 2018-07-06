@@ -8,10 +8,10 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategyProvider.STRATEGY_PROPERTY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategyProvider.STRATEGY_PROPERTY;
 
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.inject.ConfigurationException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
  * Provides a host-based strategy for exposing service ports outside the cluster using Ingress
@@ -47,7 +48,7 @@ import org.eclipse.che.inject.ConfigurationException;
  * @author Guy Daich
  */
 public class MultiHostIngressExternalServerExposer
-    extends AbstractIngressExternalServerExposerStrategy {
+    implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
   public static final String MULTI_HOST_STRATEGY = "multi-host";
   private static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
@@ -72,7 +73,17 @@ public class MultiHostIngressExternalServerExposer
   }
 
   @Override
-  protected Ingress generateIngress(
+  public void expose(
+      KubernetesEnvironment k8sEnv,
+      String machineName,
+      String serviceName,
+      ServicePort servicePort,
+      Map<String, ServerConfig> externalServers) {
+    Ingress ingress = generateIngress(machineName, serviceName, servicePort, externalServers);
+    k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
+  }
+
+  private Ingress generateIngress(
       String machineName,
       String serviceName,
       ServicePort servicePort,

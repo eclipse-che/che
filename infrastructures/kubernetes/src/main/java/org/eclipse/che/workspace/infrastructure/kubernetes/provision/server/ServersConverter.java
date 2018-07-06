@@ -23,8 +23,8 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 
 /**
  * Converts {@link ServerConfig} to Kubernetes related objects to add a server into Kubernetes
