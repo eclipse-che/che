@@ -16,19 +16,14 @@ import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_C
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -46,8 +41,6 @@ public class CamelFileEditingTest {
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -82,18 +75,6 @@ public class CamelFileEditingTest {
     editor.launchAutocomplete();
     editor.waitTextIntoEditor("timer:timerName");
 
-    // TODO check hover feature
-    WebElement we =
-        seleniumWebDriver.findElement(
-            By.xpath("//div[@contenteditable='true']//span[contains(text(),'timer')]"));
-    Actions action = new Actions(seleniumWebDriver);
-    action.moveToElement(we).build().perform();
-
-    editor.waitTextInToolTipPopup("timer");
-    //    WebElement toolTipElement =
-    // seleniumWebDriver.findElement(By.cssSelector("span.tooltipTitle"));
-    //    Assert.assertEquals(toolTipElement.getText(), "timer");
-
     editor.typeTextIntoEditor("?");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("fixedRate ");
@@ -110,5 +91,13 @@ public class CamelFileEditingTest {
     editor.waitTextIntoAutocompleteContainer("InOnly");
     editor.enterAutocompleteProposal("InOnly");
     editor.waitTextIntoEditor("timer:timerName?fixedRate=false&amp;exchangePattern=InOnly");
+  }
+
+  @Test(priority = 2)
+  public void checkHoverFeature() {
+    editor.moveCursorToText("timer");
+
+    editor.waitTextInHoverPopup(
+        "The timer component is used for generating message exchanges when a timer fires.");
   }
 }
