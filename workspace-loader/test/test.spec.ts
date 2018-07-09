@@ -106,68 +106,49 @@ describe('Workspace Loader', () => {
         beforeEach((done) => {
             let loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
-    
+
             spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
             spyOn(workspaceLoader, 'getQueryString').and.returnValue("");
-    
+
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
+                    fakeWorkspaceConfig.status = 'STOPPED';
                     fakeWorkspaceConfig.config.environments["default"].machines = {};
+                    fakeWorkspaceConfig.runtime = {};
                     resolve(fakeWorkspaceConfig);
                 });
             });
-    
-            spyOn(workspaceLoader, "handleWorkspace");
 
-            spyOn(workspaceLoader, "openURL").and.callFake(() => {
+            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callFake(() => {
+                return new Promise((resolve) => {
+                    resolve();
+                });
+            });
+
+            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
                 done();
             });
+
+            spyOn(workspaceLoader, "openIDE");
 
             workspaceLoader.load();
         });
 
-        it('basic workspace function must be called', () => {
-            expect(workspaceLoader.getWorkspaceKey).toHaveBeenCalled();
-            expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith("foo/bar");
+        it('openIDE must not be called if status is STOPPED', () => {
+            expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
         });
 
-        it('handleWorkspace must not be called', () => {
-            expect(workspaceLoader.handleWorkspace).not.toHaveBeenCalled();
+        it('must subscribe to events', () => {
+            expect(workspaceLoader.subscribeWorkspaceEvents).toHaveBeenCalled();
         });
 
-        it('must open IDE with `test url`', () => {
-            expect(workspaceLoader.openURL).toHaveBeenCalledWith("test url");
-        });
-    });
-
-    describe('must open default IDE with query parameters when workspace does not have IDE server', () => {
-        let workspaceLoader;
-
-        beforeEach((done) => {
-            let loader = new Loader();
-            workspaceLoader = new WorkspaceLoader(loader);
-    
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-            spyOn(workspaceLoader, 'getQueryString').and.returnValue("?param=value");
-    
-            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                return new Promise((resolve) => {
-                    fakeWorkspaceConfig.config.environments["default"].machines = {};
-                    resolve(fakeWorkspaceConfig);
-                });
-            });
-    
-            spyOn(workspaceLoader, "handleWorkspace");
-
-            spyOn(workspaceLoader, "openURL").and.callFake(() => {
-                done();
-            });
-
-            workspaceLoader.load();
+        it('must start the workspace', () => {
+            expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
         });
 
-        it('must open IDE with `test url` and query param `param=value`', () => {
-            expect(workspaceLoader.openURL).toHaveBeenCalledWith("test url?param=value");
+        it('must open IDE when workspace become RUNNING', () => {
+            workspaceLoader.onWorkspaceStatusChanged("RUNNING");
+            expect(workspaceLoader.openIDE).toHaveBeenCalled();
         });
     });
 
@@ -185,7 +166,7 @@ describe('Workspace Loader', () => {
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
                     fakeWorkspaceConfig.status = 'RUNNING';
-                    fakeWorkspaceConfig.runtime = {machines: {ide: {servers: {server1: {attributes: {type: "ide"}, url: ideURL}}}}}
+                    fakeWorkspaceConfig.runtime = {machines: {ide: {servers: {server1: {attributes: {type: "ide"}, url: ideURL}}}}};
                     resolve(fakeWorkspaceConfig);
                     done();
                 });
