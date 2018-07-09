@@ -80,7 +80,7 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
 
   @Test(priority = 1)
   public void checkWebJavaPetclinicProjectCommands() {
-    By webElementOnPreviewPage = By.xpath("//h2[text()='Welcome']");
+    By textOnPreviewPage = By.xpath("//h2[text()='Welcome']");
     String tomcatIsRunning = "$TOMCAT_HOME/bin/catalina.sh";
 
     projectExplorer.openItemByPath(WEB_JAVA_PROJECT);
@@ -103,7 +103,7 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
         "Server startup in");
 
     // Run the application
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     // execute 'stop tomcat' command and check that tomcat process is not running
     projectExplorer.invokeCommandWithContextMenu(

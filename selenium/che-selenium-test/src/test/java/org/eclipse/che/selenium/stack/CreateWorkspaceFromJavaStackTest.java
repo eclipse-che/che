@@ -51,7 +51,7 @@ public class CreateWorkspaceFromJavaStackTest {
   private static final String WEB_JAVA_SPRING_PROJECT = "web-java-spring";
 
   private List<String> projects = ImmutableList.of(CONSOLE_JAVA_PROJECT, WEB_JAVA_SPRING_PROJECT);
-  private By webElementOnPreviewPage = By.xpath("//span[text()='Enter your name: ']");
+  private By textOnPreviewPage = By.xpath("//span[text()='Enter your name: ']");
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -119,7 +119,7 @@ public class CreateWorkspaceFromJavaStackTest {
         RUN_GOAL,
         BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         SERVER_STARTUP_IN);
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
     consoles.closeProcessTabWithAskDialog(
         BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT));
 
@@ -128,7 +128,7 @@ public class CreateWorkspaceFromJavaStackTest {
         RUN_GOAL,
         RUN_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         SERVER_STARTUP_IN);
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     // execute 'stop tomcat' command and check that tomcat process is not running
     projectExplorer.invokeCommandWithContextMenu(

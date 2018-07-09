@@ -67,12 +67,12 @@ public class CreateWorkspaceFromCentosWildFlySwarmStackTest {
 
   @Test(priority = 1)
   public void checkWfswarmRestHttpProjectCommands() {
-    By webElementOnPreviewPage = By.xpath("//h2[@id='_http_booster']");
+    By textOnPreviewPage = By.xpath("//h2[@id='_http_booster']");
 
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, RUN_GOAL, RUN_COMMAND, "WildFly Swarm is Ready");
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
   }
 }

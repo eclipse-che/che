@@ -82,7 +82,7 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
   @Test(priority = 1)
   public void checkVertxHealthChecksBoosterProjectCommands() {
-    By webElementOnPreviewPage = By.id("_vert_x_health_check_booster");
+    By textOnPreviewPage = By.id("_vert_x_health_check_booster");
 
     // build and run web application
     consoles.executeCommandFromProjectExplorer(
@@ -92,7 +92,7 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
         RUN_GOAL,
         RUN_COMMAND,
         "[INFO] INFO: Succeeded in deploying verticle");
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProcessesArea(
@@ -105,7 +105,7 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
   @Test(priority = 2)
   public void checkVertxHttpBoosterProjectCommands() {
-    By webElementOnPreviewPage = By.id("_http_booster");
+    By textOnPreviewPage = By.id("_http_booster");
 
     // build and run web application
     consoles.executeCommandFromProjectExplorer(
@@ -117,7 +117,7 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
         "[INFO] INFO: Succeeded in deploying verticle");
 
     // refresh application web page and check visibility of web element on opened page
-    checkApplicationPage(webElementOnPreviewPage);
+    checkApplicationPage(textOnPreviewPage);
 
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 

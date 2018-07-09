@@ -75,7 +75,7 @@ public class CreateWorkspaceFromCentosNodeStackTest {
 
   @Test(priority = 1)
   public void checkAngularPatternfyStarterProjectCommands() {
-    By webElementOnPreviewPage = By.xpath("//*[@id='pf-app']");
+    By textOnPreviewPage = By.xpath("//span[text()='UNIFIED MANAGEMENT EXPERIENCE']");
 
     consoles.executeCommandFromProjectExplorer(
         ANGULAR_PROJECT,
@@ -86,14 +86,14 @@ public class CreateWorkspaceFromCentosNodeStackTest {
     consoles.executeCommandFromProjectExplorer(
         ANGULAR_PROJECT, RUN_GOAL, RUN_COMMAND_ITEM.getItem(ANGULAR_PROJECT), "Waiting...");
 
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(ANGULAR_PROJECT));
   }
 
   @Test(priority = 1)
   public void checkNodejsHelloWorldProjectCommands() {
-    By webElementOnPreviewPage = By.xpath("//*[text()='Hello World!']");
+    By textOnPreviewPage = By.xpath("//*[text()='Hello World!']");
 
     consoles.executeCommandFromProjectExplorer(
         NODE_JS_PROJECT,
@@ -101,14 +101,14 @@ public class CreateWorkspaceFromCentosNodeStackTest {
         RUN_COMMAND_ITEM.getItem(NODE_JS_PROJECT),
         "Example app listening on port 3000!");
 
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(NODE_JS_PROJECT));
   }
 
   @Test(priority = 1)
   public void checkWebNodejsSimpleProjectCommands() {
-    By webElementOnPreviewPage = By.xpath("//p[text()=' from the Yeoman team']");
+    By textOnPreviewPage = By.xpath("//p[text()=' from the Yeoman team']");
 
     consoles.executeCommandFromProjectExplorer(
         WEB_NODE_JS_PROJECT,
@@ -122,7 +122,7 @@ public class CreateWorkspaceFromCentosNodeStackTest {
         RUN_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT),
         "Started connect web server");
 
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT));
   }

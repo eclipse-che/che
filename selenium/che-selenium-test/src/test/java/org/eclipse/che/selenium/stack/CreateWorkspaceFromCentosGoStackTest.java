@@ -39,7 +39,7 @@ public class CreateWorkspaceFromCentosGoStackTest {
   private static final String WEB_GO_PROJECT = "web-go-simple";
 
   private List<String> projects = ImmutableList.of(DESKTOP_GO_PROJECT, WEB_GO_PROJECT);
-  private By webElementOnPreviewPage = By.xpath("//pre[contains(text(),'Hello there')]");
+  private By textOnPreviewPage = By.xpath("//pre[contains(text(),'Hello there')]");
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -83,14 +83,14 @@ public class CreateWorkspaceFromCentosGoStackTest {
     consoles.executeCommandFromProjectExplorer(
         WEB_GO_PROJECT, RUN_GOAL, RUN_COMMAND, "listening on");
 
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProjectExplorer(
         WEB_GO_PROJECT, RUN_GOAL, RUN_COMMAND_ITEM.getItem(WEB_GO_PROJECT), "listening on");
 
-    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_GO_PROJECT));
   }
