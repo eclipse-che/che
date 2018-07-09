@@ -46,6 +46,8 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String WEB_JAVA_PROJECT = "web-java-petclinic";
+  private static final String DEV_MACHINE_NAME = "dev-machine";
+  private static final String DB_MACHINE_NAME = "db";
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -78,35 +80,44 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
 
   @Test(priority = 1)
   public void checkWebJavaPetclinicProjectCommands() {
+    By webElementOnPreviewPage = By.xpath("//h2[text()='Welcome']");
+    String tomcatIsRunning = "$TOMCAT_HOME/bin/catalina.sh";
+
     projectExplorer.openItemByPath(WEB_JAVA_PROJECT);
 
+    // Select the db machine and perform 'show databases' command
     consoles.executeCommandFromProcessesArea(
-        "db", COMMON_GOAL, "show databases", "information_schema");
+        DB_MACHINE_NAME, COMMON_GOAL, "show databases", "information_schema");
+
+    // Build and deploy the web application
+    consoles.executeCommandFromProcessesArea(
+        DEV_MACHINE_NAME, COMMON_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProcessesArea(
-        "dev-machine", COMMON_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
-    consoles.executeCommandFromProcessesArea(
-        "dev-machine", BUILD_GOAL, BUILD_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT), BUILD_SUCCESS);
+        DEV_MACHINE_NAME, BUILD_GOAL, BUILD_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT), BUILD_SUCCESS);
 
     consoles.executeCommandFromProcessesArea(
-        "dev-machine",
+        DEV_MACHINE_NAME,
         RUN_GOAL,
         BUILD_AND_DEPLOY_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
         "Server startup in");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//h2[text()='Welcome']"));
 
+    // Run the application
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
+
+    // execute 'stop tomcat' command and check that tomcat process is not running
     projectExplorer.invokeCommandWithContextMenu(
         RUN_GOAL,
         WEB_JAVA_PROJECT,
         STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
-        "dev-machine");
+        DEV_MACHINE_NAME);
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
     terminal.typeIntoTerminal("ps ax");
     terminal.typeIntoTerminal(ENTER.toString());
-    terminal.waitExpectedTextNotPresentTerminal("$TOMCAT_HOME/bin/catalina.sh");
+    terminal.waitExpectedTextNotPresentTerminal(tomcatIsRunning);
 
     consoles.executeCommandFromProcessesArea(
-        "dev-machine",
+        DEV_MACHINE_NAME,
         DEBUG_GOAL,
         DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
         LISTENING_AT_ADDRESS_8000);

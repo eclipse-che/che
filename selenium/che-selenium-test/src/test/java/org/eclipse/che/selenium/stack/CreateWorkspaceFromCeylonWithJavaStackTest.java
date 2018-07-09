@@ -67,21 +67,25 @@ public class CreateWorkspaceFromCeylonWithJavaStackTest {
 
   @Test(priority = 1)
   public void checkCeylonHelloWorldProjectCommands() {
+    // compile and start project on JVM
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, BUILD_GOAL, "compile for JVM", MODULE_COMPILED_MESSAGE);
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, RUN_GOAL, "Run on JVM", MODULE_STARTED_MESSAGE + "jvm !");
 
+    // compile and start project on NodeJS
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, BUILD_GOAL, "compile for JS", MODULE_COMPILED_MESSAGE);
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, RUN_GOAL, "Run on NodeJS", MODULE_STARTED_MESSAGE + "js !");
 
+    // compile and start project on Dart
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, BUILD_GOAL, "compile for Dart", MODULE_COMPILED_MESSAGE);
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, RUN_GOAL, "Run on Dart", MODULE_STARTED_MESSAGE + "dartvm !");
 
+    // clean all created modules
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.isItemVisible(PROJECT_NAME + "/modules");
     projectExplorer.invokeCommandWithContextMenu(BUILD_GOAL, PROJECT_NAME, "clean module");

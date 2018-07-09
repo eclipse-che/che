@@ -79,6 +79,9 @@ public class CreateWorkspaceFromSpringBootStackTest {
 
   @Test(priority = 1)
   public void checkSpringBootHealthCheckBoosterProjectCommands() {
+    By webElementOnPreviewPage = By.xpath("//h2[text()='Health Check Booster']");
+
+    // build and run 'spring-boot-health-check-booster' project
     consoles.executeCommandFromProjectExplorer(
         SPRING_BOOT_HEALTH_CHECK_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
@@ -87,8 +90,7 @@ public class CreateWorkspaceFromSpringBootStackTest {
 
     consoles.executeCommandFromProjectExplorer(
         SPRING_BOOT_HEALTH_CHECK_PROJECT, RUN_GOAL, RUN_COMMAND, "Started BoosterApplication in");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//h2[text()='Health Check Booster']"));
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProcessesArea(
@@ -98,6 +100,9 @@ public class CreateWorkspaceFromSpringBootStackTest {
 
   @Test(priority = 1)
   public void checkSpringBooHttpBoosterProjectCommands() {
+    By webElementOnPreviewPage = By.xpath("//h2[text()='HTTP Booster']");
+
+    // build and run 'spring-boot-http-booster' project
     consoles.executeCommandFromProjectExplorer(
         SPRING_BOOT_HTTP_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
@@ -109,7 +114,7 @@ public class CreateWorkspaceFromSpringBootStackTest {
         RUN_GOAL,
         RUN_COMMAND,
         "INFO: Setting the server's publish address to be");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//h2[text()='HTTP Booster']"));
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProcessesArea(

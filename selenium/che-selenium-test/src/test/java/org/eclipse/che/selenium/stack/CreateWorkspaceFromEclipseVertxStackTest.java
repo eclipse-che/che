@@ -18,13 +18,16 @@ import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_C
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_VERTX;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import java.util.List;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -44,12 +47,15 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
   private List<String> projects =
       ImmutableList.of(HEALTH_CHECKS_BOOSTER_PROJECT, HEALTH_HTTP_BOOSTER_PROJECT);
+  private String currentWindow;
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
   @Inject private Dashboard dashboard;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
@@ -68,7 +74,7 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(
         ECLIPSE_VERTX, WORKSPACE_NAME, projects);
 
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+    currentWindow = ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     projectExplorer.waitProjectInitialization(HEALTH_CHECKS_BOOSTER_PROJECT);
     projectExplorer.waitProjectInitialization(HEALTH_HTTP_BOOSTER_PROJECT);
@@ -76,15 +82,17 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
   @Test(priority = 1)
   public void checkVertxHealthChecksBoosterProjectCommands() {
+    By webElementOnPreviewPage = By.id("_vert_x_health_check_booster");
+
+    // build and run web application
     consoles.executeCommandFromProjectExplorer(
         HEALTH_CHECKS_BOOSTER_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
-
     consoles.executeCommandFromProjectExplorer(
         HEALTH_CHECKS_BOOSTER_PROJECT,
         RUN_GOAL,
         RUN_COMMAND,
         "[INFO] INFO: Succeeded in deploying verticle");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.id("_vert_x_health_check_booster"));
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProcessesArea(
@@ -95,17 +103,22 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
     consoles.closeProcessTabWithAskDialog(DEBUG_COMMAND);
   }
 
-  @Test(priority = 1)
+  @Test(priority = 2)
   public void checkVertxHttpBoosterProjectCommands() {
+    By webElementOnPreviewPage = By.id("_http_booster");
+
+    // build and run web application
     consoles.executeCommandFromProjectExplorer(
         HEALTH_HTTP_BOOSTER_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
-
     consoles.executeCommandFromProjectExplorer(
         HEALTH_HTTP_BOOSTER_PROJECT,
         RUN_GOAL,
         RUN_COMMAND,
         "[INFO] INFO: Succeeded in deploying verticle");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.id("_vert_x_health_check_booster"));
+
+    // refresh application web page and check visibility of web element on opened page
+    checkApplicationPage(webElementOnPreviewPage);
+
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProcessesArea(
@@ -114,5 +127,20 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
         DEBUG_COMMAND,
         "[INFO] Listening for transport dt_socket at address: 5005");
     consoles.closeProcessTabWithAskDialog(DEBUG_COMMAND);
+  }
+
+  private void checkApplicationPage(By webElement) {
+    consoles.waitPreviewUrlIsPresent();
+    consoles.waitPreviewUrlIsResponsive(10);
+    consoles.clickOnPreviewUrl();
+
+    seleniumWebDriverHelper.switchToNextWindow(currentWindow);
+
+    seleniumWebDriver.navigate().refresh();
+    seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
+
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(currentWindow);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
   }
 }

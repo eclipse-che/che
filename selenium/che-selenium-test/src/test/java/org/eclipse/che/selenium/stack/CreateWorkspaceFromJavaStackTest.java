@@ -51,6 +51,7 @@ public class CreateWorkspaceFromJavaStackTest {
   private static final String WEB_JAVA_SPRING_PROJECT = "web-java-spring";
 
   private List<String> projects = ImmutableList.of(CONSOLE_JAVA_PROJECT, WEB_JAVA_SPRING_PROJECT);
+  private By webElementOnPreviewPage = By.xpath("//span[text()='Enter your name: ']");
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -102,6 +103,8 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @Test(priority = 1)
   public void checkWebJavaSpringProjectCommands() {
+    String tomcatIsRunning = "/bin/bash -c $TOMCAT_HOME/bin/catalina.sh";
+
     consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
@@ -116,7 +119,7 @@ public class CreateWorkspaceFromJavaStackTest {
         RUN_GOAL,
         BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         SERVER_STARTUP_IN);
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
     consoles.closeProcessTabWithAskDialog(
         BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT));
 
@@ -125,9 +128,9 @@ public class CreateWorkspaceFromJavaStackTest {
         RUN_GOAL,
         RUN_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         SERVER_STARTUP_IN);
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
+    consoles.checkWebElementVisibilityAtPreviewPage(webElementOnPreviewPage);
 
-    // execute 'stop tomcat' command and check that tomcat is not running
+    // execute 'stop tomcat' command and check that tomcat process is not running
     projectExplorer.invokeCommandWithContextMenu(
         RUN_GOAL,
         WEB_JAVA_SPRING_PROJECT,
@@ -135,7 +138,7 @@ public class CreateWorkspaceFromJavaStackTest {
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
     terminal.typeIntoTerminal("ps ax");
     terminal.typeIntoTerminal(ENTER.toString());
-    terminal.waitExpectedTextNotPresentTerminal("/bin/bash -c $TOMCAT_HOME/bin/catalina.sh");
+    terminal.waitExpectedTextNotPresentTerminal(tomcatIsRunning);
 
     consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING_PROJECT,

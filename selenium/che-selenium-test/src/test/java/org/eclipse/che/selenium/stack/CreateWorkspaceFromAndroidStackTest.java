@@ -75,6 +75,7 @@ public class CreateWorkspaceFromAndroidStackTest {
   public void checkMobileAndroidHelloWorldProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
         MOBILE_ANDROID_HELLO_WORLD, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+
     consoles.executeCommandFromProjectExplorer(
         MOBILE_ANDROID_HELLO_WORLD,
         RUN_GOAL,
