@@ -127,6 +127,11 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       install(new CheSeleniumSingleUserModule());
     }
 
+    configureInfrastructureRelatedDependencies();
+    configureTestExecutionModeRelatedDependencies();
+  }
+
+  private void configureInfrastructureRelatedDependencies() {
     String cheInfrastructure = System.getenv(CHE_INFRASTRUCTURE_VARIABLE);
     if (cheInfrastructure == null || cheInfrastructure.isEmpty()) {
       throw new RuntimeException(
@@ -141,7 +146,9 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       throw new RuntimeException(
           format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
     }
+  }
 
+  private void configureTestExecutionModeRelatedDependencies() {
     boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
     if (gridMode) {
       bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtil.class);
