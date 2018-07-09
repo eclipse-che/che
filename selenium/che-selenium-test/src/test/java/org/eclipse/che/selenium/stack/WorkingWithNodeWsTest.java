@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.stack;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
@@ -93,11 +93,11 @@ public class WorkingWithNodeWsTest {
 
     // Perform run web nodeJs application
     consoles.startCommandFromProcessesArea(
-        "dev-machine", ContextMenuCommandGoals.BUILD, INSTALL_DEPENDENCIES_PROCESS);
+        "dev-machine", ContextMenuCommandGoals.BUILD_GOAL, INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitTabNameProcessIsPresent(INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitExpectedTextIntoConsole("bower_components/angular", APPLICATION_START_TIMEOUT_SEC);
 
-    consoles.startCommandFromProcessesArea("dev-machine", RUN, RUN_PROCESS);
+    consoles.startCommandFromProcessesArea("dev-machine", RUN_GOAL, RUN_PROCESS);
     consoles.waitTabNameProcessIsPresent(RUN_PROCESS);
     consoles.waitExpectedTextIntoConsole("Started connect web server", PREPARING_WS_TIMEOUT_SEC);
 

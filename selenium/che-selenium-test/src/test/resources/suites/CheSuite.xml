@@ -229,6 +229,7 @@
           <class name="org.eclipse.che.selenium.projectexplorer.DeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.dependencies.TransitiveDependencyTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
+          <class name="org.eclipse.che.selenium.projectexplorer.dependencies.OpenExternalLibraryFileAfterRefreshTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.FileNotExistIntoEditorAfterDeleteTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.FileOpenedAfterCreationTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.JustCreatedFileNotExistIntoEditorAfterDeleteTest"/>
@@ -268,12 +269,14 @@
           <class name="org.eclipse.che.selenium.refactor.types.TestEnumerationsTest"/>
           <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRenameWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromBlankStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
           <class name="org.eclipse.che.selenium.stack.WorkingWithJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.stack.WorkingWithNodeWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>

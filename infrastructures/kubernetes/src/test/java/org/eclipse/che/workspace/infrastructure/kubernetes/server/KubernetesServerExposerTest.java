@@ -14,6 +14,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -35,6 +36,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -50,6 +52,7 @@ import org.testng.annotations.Test;
 public class KubernetesServerExposerTest {
 
   @Mock private ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy;
+
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final Map<String, String> INTERNAL_SERVER_ATTRIBUTE_MAP =
       singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.TRUE.toString());
@@ -83,7 +86,7 @@ public class KubernetesServerExposerTest {
   }
 
   @Test
-  public void shouldExposeContainerPortAndCreateServiceForServer() {
+  public void shouldExposeContainerPortAndCreateServiceForServer() throws Exception {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -96,14 +99,15 @@ public class KubernetesServerExposerTest {
     // then
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
-        "http-server",
         "tcp",
         8080,
+        "http-server",
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
   @Test
-  public void shouldExposeContainerPortAndCreateServiceAndForServerWhenTwoServersHasTheSamePort() {
+  public void shouldExposeContainerPortAndCreateServiceAndForServerWhenTwoServersHasTheSamePort()
+      throws Exception {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -120,22 +124,20 @@ public class KubernetesServerExposerTest {
     // then
     assertEquals(kubernetesEnvironment.getServices().size(), 1);
 
-    assertThatExternalServerIsExposed(
+    assertThatExternalServersAreExposed(
         MACHINE_NAME,
-        "http-server",
         "tcp",
         8080,
-        new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
-    assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        "ws-server",
-        "tcp",
-        8080,
-        new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
+        ImmutableMap.of(
+            "http-server",
+            new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP),
+            "ws-server",
+            new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP)));
   }
 
   @Test
-  public void shouldExposeContainerPortsAndCreateServiceForServerWhenTwoServersHasDifferentPorts() {
+  public void shouldExposeContainerPortsAndCreateServiceForServerWhenTwoServersHasDifferentPorts()
+      throws Exception {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -154,21 +156,21 @@ public class KubernetesServerExposerTest {
 
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
-        "http-server",
         "tcp",
         8080,
+        "http-server",
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
-        "ws-server",
         "tcp",
         8081,
+        "ws-server",
         new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
   @Test
-  public void
-      shouldExposeTcpContainerPortsAndCreateServiceAndForServerWhenProtocolIsMissedInPort() {
+  public void shouldExposeTcpContainerPortsAndCreateServiceAndForServerWhenProtocolIsMissedInPort()
+      throws Exception {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080", "http", "/api", ATTRIBUTES_MAP);
@@ -183,14 +185,14 @@ public class KubernetesServerExposerTest {
 
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
-        "http-server",
         "TCP",
         8080,
+        "http-server",
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
   @Test
-  public void shouldNotAddAdditionalContainerPortWhenItIsAlreadyExposed() {
+  public void shouldNotAddAdditionalContainerPortWhenItIsAlreadyExposed() throws Exception {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -210,14 +212,15 @@ public class KubernetesServerExposerTest {
     // then
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
-        "http-server",
         "tcp",
         8080,
+        "http-server",
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
   @Test
-  public void shouldAddAdditionalContainerPortWhenThereIsTheSameButWithDifferentProtocol() {
+  public void shouldAddAdditionalContainerPortWhenThereIsTheSameButWithDifferentProtocol()
+      throws Exception {
     // given
     ServerConfigImpl udpServerConfig =
         new ServerConfigImpl("8080/udp", "udp", "/api", ATTRIBUTES_MAP);
@@ -240,9 +243,9 @@ public class KubernetesServerExposerTest {
     assertEquals(container.getPorts().get(1).getProtocol(), "UDP");
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
-        "server",
         "udp",
         8080,
+        "server",
         new ServerConfigImpl(udpServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
@@ -288,18 +291,28 @@ public class KubernetesServerExposerTest {
         new ServerConfigImpl(internalServerConfig).withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP));
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
-        "ext-server",
         "tcp",
         9090,
+        "ext-server",
         new ServerConfigImpl(externalServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
   private void assertThatExternalServerIsExposed(
       String machineName,
-      String serverNameRegex,
       String portProtocol,
       Integer port,
-      ServerConfigImpl expected) {
+      String serverName,
+      ServerConfig expectedServer) {
+    assertThatExternalServersAreExposed(
+        machineName, portProtocol, port, ImmutableMap.of(serverName, expectedServer));
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void assertThatExternalServersAreExposed(
+      String machineName,
+      String portProtocol,
+      Integer port,
+      Map<String, ServerConfig> expectedServers) {
     // then
     assertTrue(
         container
@@ -337,8 +350,17 @@ public class KubernetesServerExposerTest {
     Annotations.Deserializer serviceAnnotations =
         Annotations.newDeserializer(service.getMetadata().getAnnotations());
     assertEquals(serviceAnnotations.machineName(), machineName);
+
+    verify(externalServerExposerStrategy)
+        .expose(
+            kubernetesEnvironment,
+            machineName,
+            service.getMetadata().getName(),
+            servicePort,
+            expectedServers);
   }
 
+  @SuppressWarnings("SameParameterValue")
   private void assertThatInternalServerIsExposed(
       String machineName,
       String serverNameRegex,

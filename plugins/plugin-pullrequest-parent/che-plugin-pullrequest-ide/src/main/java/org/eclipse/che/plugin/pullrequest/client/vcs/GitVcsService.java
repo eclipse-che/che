@@ -151,7 +151,7 @@ public class GitVcsService implements VcsService {
   public Promise<String> getBranchName(ProjectConfig project) {
     return service
         .getStatus(Path.valueOf(project.getPath()), emptyList())
-        .then((Function<Status, String>) status -> status.getBranchName());
+        .then((Function<Status, String>) status -> status.getRefName());
   }
 
   @Override

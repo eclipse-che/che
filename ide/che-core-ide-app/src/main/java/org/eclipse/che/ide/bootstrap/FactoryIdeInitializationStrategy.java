@@ -27,6 +27,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.QueryParameters;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -60,7 +61,8 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
       EventBus eventBus,
       QueryParameters queryParameters,
       DialogFactory dialogFactory,
-      FactoryServiceClient factoryServiceClient) {
+      FactoryServiceClient factoryServiceClient,
+      PreferencesManager preferencesManager) {
     super(
         workspaceServiceClient,
         appContext,
@@ -71,7 +73,8 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
         standardComponentsInitializerProvider,
         workspacePresenterProvider,
         eventBus,
-        dialogFactory);
+        dialogFactory,
+        preferencesManager);
 
     this.queryParameters = queryParameters;
     this.factoryServiceClient = factoryServiceClient;

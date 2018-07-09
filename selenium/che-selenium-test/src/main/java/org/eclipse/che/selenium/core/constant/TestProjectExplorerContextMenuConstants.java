@@ -26,6 +26,7 @@ public final class TestProjectExplorerContextMenuConstants {
     GO_INTO("gwt-debug-contextMenu/goInto"),
     GO_BACK("gwt-debug-contextMenu/goInto"),
     CUT("gwt-debug-contextMenu/cut"),
+    COPY("gwt-debug-contextMenu/copy"),
     PASTE("gwt-debug-contextMenu/paste"),
     RENAME("gwt-debug-contextMenu/renameResource"),
     DELETE("gwt-debug-contextMenu/deleteItem"),
@@ -120,9 +121,10 @@ public final class TestProjectExplorerContextMenuConstants {
 
   /** Submenu for {@link ContextMenuFirstLevelItems#COMMANDS} */
   public enum ContextMenuCommandGoals implements ContextMenuItems {
-    COMMON("gwt-debug-contextMenu/Commands/goal_Common"),
-    BUILD("gwt-debug-contextMenu/Commands/goal_Build"),
-    RUN("gwt-debug-contextMenu/Commands/goal_Run");
+    COMMON_GOAL("gwt-debug-contextMenu/Commands/goal_Common"),
+    BUILD_GOAL("gwt-debug-contextMenu/Commands/goal_Build"),
+    RUN_GOAL("gwt-debug-contextMenu/Commands/goal_Run"),
+    DEBUG_GOAL("gwt-debug-contextMenu/Commands/goal_Debug");
 
     private final String itemId;
 

@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -28,13 +31,18 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
+import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 
 /**
  * Defines method for creating tests object instances.
@@ -151,6 +159,29 @@ public final class TestObjectsFactory {
         .setStackIcon(
             new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
         .build();
+  }
+
+  public static KubernetesRuntimeState createK8sRuntimeState(String workspaceId) {
+    return new KubernetesRuntimeState(
+        new RuntimeIdentityImpl(workspaceId, "envName", "ownerId"),
+        "test-namespace",
+        WorkspaceStatus.RUNNING);
+  }
+
+  public static KubernetesMachineImpl createK8sMachine(KubernetesRuntimeState k8sRuntimeState) {
+    return new KubernetesMachineImpl(
+        k8sRuntimeState.getRuntimeId().getWorkspaceId(),
+        NameGenerator.generate("machine-", 5),
+        NameGenerator.generate("pod-", 5),
+        NameGenerator.generate("container-", 5),
+        MachineStatus.RUNNING,
+        ImmutableMap.of("test", "true"),
+        ImmutableMap.of(
+            "server",
+            new ServerImpl(
+                "http://localhost:8080/api",
+                ServerStatus.RUNNING,
+                ImmutableMap.of("key", "value"))));
   }
 
   private TestObjectsFactory() {}

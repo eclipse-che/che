@@ -10,22 +10,34 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
+import static java.lang.String.format;
+
 import com.google.inject.persist.Transactional;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.BeforeKubernetesRuntimeStateRemovedEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JPA based implementation of {@link KubernetesRuntimeStateCache}.
@@ -33,12 +45,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRunti
  * @author Sergii Leshchenko
  */
 public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCache {
+  private static final Logger LOG = LoggerFactory.getLogger(JpaKubernetesRuntimeStateCache.class);
 
   private final Provider<EntityManager> managerProvider;
+  private final EventService eventService;
 
   @Inject
-  public JpaKubernetesRuntimeStateCache(Provider<EntityManager> managerProvider) {
+  public JpaKubernetesRuntimeStateCache(
+      Provider<EntityManager> managerProvider, EventService eventService) {
     this.managerProvider = managerProvider;
+    this.eventService = eventService;
   }
 
   @Override
@@ -126,19 +142,42 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   public void remove(RuntimeIdentity runtimeId) throws InfrastructureException {
     try {
       doRemove(runtimeId);
+    } catch (ServerException | RuntimeException x) {
+      throw new InfrastructureException(x.getMessage(), x);
+    }
+  }
+
+  @Transactional(rollbackOn = InfrastructureException.class)
+  protected Optional<KubernetesRuntimeState> find(String workspaceId)
+      throws InfrastructureException {
+    try {
+      KubernetesRuntimeState queried =
+          managerProvider
+              .get()
+              .createNamedQuery("KubernetesRuntime.getByWorkspaceId", KubernetesRuntimeState.class)
+              .setParameter("workspaceId", workspaceId)
+              .getSingleResult();
+      return Optional.of(queried);
+    } catch (NoResultException e) {
+      return Optional.empty();
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getMessage(), x);
     }
   }
 
   @Transactional
-  protected void doRemove(RuntimeIdentity runtimeIdentity) {
+  protected void doRemove(RuntimeIdentity runtimeIdentity) throws ServerException {
     EntityManager em = managerProvider.get();
 
     KubernetesRuntimeState runtime =
         em.find(KubernetesRuntimeState.class, new RuntimeId(runtimeIdentity));
 
     if (runtime != null) {
+      eventService
+          .publish(
+              new BeforeKubernetesRuntimeStateRemovedEvent(new KubernetesRuntimeState(runtime)))
+          .propagateException();
+
       em.remove(runtime);
     }
   }
@@ -185,5 +224,40 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     EntityManager em = managerProvider.get();
     em.persist(runtimeState);
     em.flush();
+  }
+
+  @Singleton
+  public static class RemoveKubernetesRuntimeBeforeWorkspaceRemoved
+      extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
+
+    @Inject private EventService eventService;
+    @Inject private JpaKubernetesRuntimeStateCache k8sRuntimes;
+
+    @PostConstruct
+    public void subscribe() {
+      eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
+    }
+
+    @Override
+    public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+      Optional<KubernetesRuntimeState> k8sRuntimeStateOpt =
+          k8sRuntimes.find(event.getWorkspace().getId());
+      if (k8sRuntimeStateOpt.isPresent()) {
+        KubernetesRuntimeState existingK8sRuntimeState = k8sRuntimeStateOpt.get();
+        RuntimeId runtimeId = existingK8sRuntimeState.getRuntimeId();
+
+        // It is not normal case when non STOPPED workspace is going to be removed.
+        // Need to log error to investigate why it may happen
+        // and clean up existing runtime not to lock removing of workspace.
+        LOG.error(
+            format(
+                "Workspace is being removed while Kubernetes runtime state '%s:%s:%s' exists. "
+                    + "This situation indicates a bug that needs to be reported. Runtime state "
+                    + "will be removed from DB, but Kubernetes resources (pods, pvcs, etc.) "
+                    + "won't be cleaned up.",
+                runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()));
+        k8sRuntimes.remove(runtimeId);
+      }
+    }
   }
 }

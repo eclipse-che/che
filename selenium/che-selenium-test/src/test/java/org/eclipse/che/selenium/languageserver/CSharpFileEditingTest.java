@@ -110,7 +110,7 @@ public class CSharpFileEditingTest {
     editor.launchAutocomplete();
     editor.enterAutocompleteProposal("Build ");
     editor.typeTextIntoEditor("();");
-    editor.waitAllMarkersInvisibility(INFO);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void createDotNetAppFromWizard() {

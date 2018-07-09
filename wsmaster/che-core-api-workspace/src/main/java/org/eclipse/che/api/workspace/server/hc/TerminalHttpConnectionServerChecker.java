@@ -32,8 +32,9 @@ class TerminalHttpConnectionServerChecker extends HttpConnectionServerChecker {
       long timeout,
       int successThreshold,
       TimeUnit timeUnit,
-      Timer timer) {
-    super(url, machineName, serverRef, period, timeout, successThreshold, timeUnit, timer);
+      Timer timer,
+      String token) {
+    super(url, machineName, serverRef, period, timeout, successThreshold, timeUnit, timer, token);
   }
 
   @Override

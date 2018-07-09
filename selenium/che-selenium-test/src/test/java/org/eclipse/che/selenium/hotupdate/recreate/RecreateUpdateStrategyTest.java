@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
+import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.requestfactory.CheTestAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.utils.process.ProcessAgent;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -32,9 +33,6 @@ import org.testng.annotations.Test;
 
 @Test(groups = {TestGroup.OPENSHIFT, TestGroup.MULTIUSER})
 public class RecreateUpdateStrategyTest {
-  private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
-      "get dc | grep che | awk '{print $2}'";
-
   @Inject CheTestAdminHttpJsonRequestFactory testUserHttpJsonRequestFactory;
   @Inject CheTestSystemClient cheTestSystemClient;
   @Inject ProjectExplorer projectExplorer;
@@ -45,18 +43,17 @@ public class RecreateUpdateStrategyTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private CheTerminal terminal;
   @Inject private Menu menu;
+  @Inject private HotUpdateUtil hotUpdateUtil;
 
   private int cheDeploymentBeforeRollout;
 
   @BeforeClass
   public void setUp() throws IOException {
-    cheDeploymentBeforeRollout =
-        parseInt(openShiftCliCommandExecutor.execute(COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE));
+    cheDeploymentBeforeRollout = hotUpdateUtil.getMasterPodRevision();
   }
 
   @Test
   public void checkRecreateUpdateStrategy() throws Exception {
-    String ocClientRolloutCommand = "rollout latest che";
 
     int requestAttempts = 100;
     int requestTimeoutInSec = 6;
@@ -72,17 +69,12 @@ public class RecreateUpdateStrategyTest {
     terminal.waitTerminalIsNotPresent(requestTimeoutInSec);
 
     // performs rollout
-    openShiftCliCommandExecutor.execute(ocClientRolloutCommand);
+    hotUpdateUtil.executeMasterPodUpdateCommand();
     cheTestSystemClient.waitWorkspaceMasterStatus(
         requestAttempts, requestTimeoutInSec, SystemStatus.RUNNING);
 
-    // get current version of deployment after rollout
-    int cheDeploymentAfterRollout =
-        parseInt(openShiftCliCommandExecutor.execute(COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE));
-
-    // After rollout updating - deployment should be increased on 1. Previews version +1 should be
-    // equal current
-    assertEquals(cheDeploymentAfterRollout, cheDeploymentBeforeRollout + 1);
+    // After rollout updating - deployment should be increased on 1
+    hotUpdateUtil.waitMasterPodRevision(cheDeploymentBeforeRollout + 1);
 
     // make sure that CHE ide is available after updating again
     ide.open(workspace);

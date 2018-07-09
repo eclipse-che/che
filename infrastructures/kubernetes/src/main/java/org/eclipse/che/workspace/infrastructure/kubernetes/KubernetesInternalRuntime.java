@@ -197,7 +197,7 @@ public class KubernetesInternalRuntime<
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
       // stop watching before namespace cleaning up
-      namespace.pods().stopWatch();
+      namespace.deployments().stopWatch();
       try {
         namespace.cleanUp();
       } catch (InfrastructureException cleanUppingEx) {
@@ -213,7 +213,7 @@ public class KubernetesInternalRuntime<
       }
       wrapAndRethrow(startFailureCause);
     } finally {
-      namespace.pods().stopWatch();
+      namespace.deployments().stopWatch();
     }
   }
 
@@ -381,7 +381,9 @@ public class KubernetesInternalRuntime<
    */
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
-    CompletableFuture<Void> waitFuture = namespace.pods().waitRunningAsync(machine.getPodName());
+    CompletableFuture<Void> waitFuture =
+        namespace.deployments().waitRunningAsync(machine.getPodName());
+
     toCancelFutures.add(waitFuture);
     return waitFuture;
   }
@@ -479,10 +481,10 @@ public class KubernetesInternalRuntime<
 
     // TODO https://github.com/eclipse/che/issues/7653
     // namespace.pods().watch(new AbnormalStopHandler());
-    namespace.pods().watchEvents(new MachineLogsPublisher());
+    namespace.deployments().watchEvents(new MachineLogsPublisher());
     if (!unrecoverableEvents.isEmpty()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      namespace.pods().watchEvents(new UnrecoverablePodEventHandler(pods));
+      namespace.deployments().watchEvents(new UnrecoverablePodEventHandler(pods));
     }
 
     final KubernetesServerResolver serverResolver =
@@ -502,7 +504,7 @@ public class KubernetesInternalRuntime<
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
     for (Pod toCreate : environment.getPods().values()) {
-      final Pod createdPod = namespace.pods().create(toCreate);
+      final Pod createdPod = namespace.deployments().deploy(toCreate);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
         String machineName = Names.machineName(toCreate, container);
@@ -772,19 +774,17 @@ public class KubernetesInternalRuntime<
     }
   }
 
-  /** Listens container's events and publish them as machine logs. */
+  /** Listens pod events and publish them as machine logs. */
   public class MachineLogsPublisher implements PodEventHandler {
 
     @Override
     public void handle(PodEvent event) {
       final String podName = event.getPodName();
-      final String containerName = event.getContainerName();
       try {
         for (Entry<String, KubernetesMachineImpl> entry :
             machines.getMachines(getContext().getIdentity()).entrySet()) {
           final KubernetesMachineImpl machine = entry.getValue();
-          if (machine.getPodName().equals(podName)
-              && machine.getContainerName().equals(containerName)) {
+          if (machine.getPodName().equals(podName)) {
             eventPublisher.sendMachineLogEnvent(
                 entry.getKey(),
                 event.getMessage(),

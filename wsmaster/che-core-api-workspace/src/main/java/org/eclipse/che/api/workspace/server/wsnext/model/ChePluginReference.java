@@ -14,13 +14,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CheServiceSpec {
+public class ChePluginReference {
 
+  private String name = null;
   private String version = null;
-  private List<Container> containers = new ArrayList<Container>();
+  private List<ChePluginParameter> parameters = new ArrayList<ChePluginParameter>();
 
   /** */
-  public CheServiceSpec version(String version) {
+  public ChePluginReference name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  /** */
+  public ChePluginReference version(String version) {
     this.version = version;
     return this;
   }
@@ -34,17 +49,17 @@ public class CheServiceSpec {
   }
 
   /** */
-  public CheServiceSpec containers(List<Container> containers) {
-    this.containers = containers;
+  public ChePluginReference parameters(List<ChePluginParameter> parameters) {
+    this.parameters = parameters;
     return this;
   }
 
-  public List<Container> getContainers() {
-    return containers;
+  public List<ChePluginParameter> getParameters() {
+    return parameters;
   }
 
-  public void setContainers(List<Container> containers) {
-    this.containers = containers;
+  public void setParameters(List<ChePluginParameter> parameters) {
+    this.parameters = parameters;
   }
 
   @Override
@@ -55,23 +70,25 @@ public class CheServiceSpec {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CheServiceSpec cheServiceSpec = (CheServiceSpec) o;
-    return Objects.equals(version, cheServiceSpec.version)
-        && Objects.equals(containers, cheServiceSpec.containers);
+    ChePluginReference chePluginReference = (ChePluginReference) o;
+    return Objects.equals(name, chePluginReference.name)
+        && Objects.equals(version, chePluginReference.version)
+        && Objects.equals(parameters, chePluginReference.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(version, containers);
+    return Objects.hash(name, version, parameters);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CheServiceSpec {\n");
+    sb.append("class ChePluginReference {\n");
 
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
-    sb.append("    containers: ").append(toIndentedString(containers)).append("\n");
+    sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");
     return sb.toString();
   }
