@@ -2,13 +2,13 @@
     "extensions": [
         {
             "name": "theia-machines-extension",
-            "source": "https://github.com/AndrienkoAleksandr/che-theia-machines-plugin.git",
+            "source": "https://github.com/eclipse/che-theia-machines-plugin.git",
             "version": "0.3.12",
             "type": "git"
         },
         {
             "name": "@eclipse-che/che-theia-hosted-plugin-manager-extension",
-            "source": "https://github.com/AndrienkoAleksandr/che-theia-hosted-plugin-manager-extension.git",
+            "source": "https://github.com/eclipse/che-theia-hosted-plugin-manager-extension.git",
             "version": "0.3.12",
             "type": "git"
         }
