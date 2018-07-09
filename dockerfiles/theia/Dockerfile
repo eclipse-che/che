@@ -10,7 +10,7 @@
 FROM node:8-alpine
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION=0.4.0-next.b17727c1
+ARG THEIA_VERSION=3.12
 
 EXPOSE 3000 3030
 
@@ -26,26 +26,22 @@ ADD supervisord.conf /etc/
 
 RUN \
     # Install needed software
-    apk update && apk add --no-cache make gcc g++ python git bash supervisor jq && \
+    apk update && apk add --no-cache make gcc g++ python git bash supervisor jq openssl && \
     rm -rf /tmp/* /var/cache/apk/* && \
-
     # Change version of Theia to specified in THEIA_VERSION
-    ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
-
-    # Modificate pack
-
-
+    ${HOME}/versions.sh && rm ${HOME}/versions.sh
+    # Apply resolution section to the Theia package.json to use strict versions for Theia dependencies
+ RUN node ${HOME}/resolutions-provider.js ${HOME}/package.json && \
+    yarn --global-folder ${HOME}/node_modules/ --cache-folder ${HOME}/node_modules/ && \
     # Add Theia extensions
-    #==TODO== replace with master branch after Theia release
-    git clone --depth=1 -b latest-deps https://github.com/eclipse/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
-    node ${HOME}/add-extensions.js \
-        @eclipse-che/che-theia-hosted-plugin-manager-extension:file:///tmp/hosted-plugin-extension \
-        #che-theia-ssh-extension:https://github.com/eclipse/che-theia-ssh-plugin.git \
-    && rm ${HOME}/add-extensions.js && \
+    rm -rf ${HOME}/extensions && \
+    node ${HOME}/add-extensions.js && \
     # Build Theia with all the extensions
-    cd ${HOME} && \
-    cat package.json && \
-    yarn && \
+    # cd ${HOME} && \
+    # cat package.json 
+    # && \
+    yarn --global-folder ${HOME}/node_modules/ --cache-folder ${HOME}/node_modules/ && \
+    yarn theia clean && \
     yarn theia build && \
     # Install Theia plugin generator
     #==TODO== add after generator-theia-plugin release

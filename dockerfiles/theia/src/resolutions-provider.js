@@ -13,17 +13,28 @@ const fs = require("fs");
 const spawnSync = require("child_process").spawnSync;
 
 const PACKAGE_JSON_PATH = process.argv[2];
-const RESOLUTIONS_PATH = process.argv[3]; 
-console.log(`Generate resolutions from ${PACKAGE_JSON_PATH}`);
+console.log(`Generate resolutions for ${PACKAGE_JSON_PATH}`);
 
 const PACKAGE_JSON = require(PACKAGE_JSON_PATH);
 const THEIA_VERSION = process.env.THEIA_VERSION;
-const THEID_DEP_PREFIX = "@theia/";
+const HOME = process.env.HOME;
+const THEIA_DEP_PREFIX = "@theia/";
 
-const dependencies = PACKAGE_JSON['dependencies'];
-const devDependencies = PACKAGE_JSON['devDependencies'];
+const theiaFullPackageJsonLink=`https://raw.githubusercontent.com/theia-ide/theia/v${THEIA_VERSION}/examples/browser/package.json`
+const fullPackageJsonPath=`${HOME}/full-package.json`;
+
+spawnSync('wget', ['-O', `${fullPackageJsonPath}`, `${theiaFullPackageJsonLink}`]);
+
+if (fs.exists(`${fullPackageJsonPath}`)) {
+    console.log("Can't generate resolution, because we have not list all base theia dependencies.");
+    return;
+}
+const FULL_PACKAGE_JSON = require(`${fullPackageJsonPath}`);
+const fullDependenciesList = Object.keys(FULL_PACKAGE_JSON['dependencies']);
+const dependencies = listToResolutions(fullDependenciesList);
 let ALL_RESOLUTIONS = {...dependencies};
 
+const devDependencies = PACKAGE_JSON['devDependencies'];
 const depsToGetResolutions = {...devDependencies, ...{"@theia/core": THEIA_VERSION}};
 for (let dep in depsToGetResolutions) {
     const depResolsList = getResolutionsList(dep);
@@ -33,7 +44,10 @@ for (let dep in depsToGetResolutions) {
 }
 
 console.log(`Generated resolutions: `, ALL_RESOLUTIONS);
-writeJsonToFile(RESOLUTIONS_PATH, ALL_RESOLUTIONS);
+PACKAGE_JSON["resolutions"] = ALL_RESOLUTIONS;
+
+console.log(`Write generated resolutions to the package.json ${PACKAGE_JSON_PATH}`);
+writeJsonToFile(PACKAGE_JSON_PATH, PACKAGE_JSON);
 
 /**
  * Get list resolutions for theia dependency.
@@ -60,7 +74,7 @@ function filterResolutionsList(resolutions) {
     const theiaResolutions = [];
 
     for (const resolution of resolutions) {
-        if (resolution.startsWith(THEID_DEP_PREFIX)) {
+        if (resolution.startsWith(THEIA_DEP_PREFIX)) {
             theiaResolutions.push(resolution);
         }
     }
@@ -74,10 +88,10 @@ function filterResolutionsList(resolutions) {
  * @param resolutionsList - resolutions list.
  */
 function listToResolutions(resolutionsList) {
-    const RESOLUTIONS = {}
+    const RESOLUTIONS = {};
 
     for (const resolution of resolutionsList) {
-        ALL_RESOLUTIONS[resolution] = THEIA_VERSION;
+        RESOLUTIONS[resolution] = THEIA_VERSION;
     }
 
     return RESOLUTIONS;
