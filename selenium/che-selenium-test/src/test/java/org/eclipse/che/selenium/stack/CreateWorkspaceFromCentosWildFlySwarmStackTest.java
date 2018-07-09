@@ -11,29 +11,35 @@
 package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.BUILD_COMMAND;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_COMMAND;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WILDFLY_SWARM;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.openqa.selenium.By;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class CreateWorkspaceFromBlankStackTest {
+public class CreateWorkspaceFromCentosWildFlySwarmStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String PROJECT_NAME = "blank-project";
+  private static final String PROJECT_NAME = "wfswarm-rest-http";
 
   @Inject private Ide ide;
+  @Inject private Consoles consoles;
   @Inject private Dashboard dashboard;
-  @Inject private CodenvyEditor editor;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
@@ -50,8 +56,9 @@ public class CreateWorkspaceFromBlankStackTest {
   }
 
   @Test
-  public void createWorkspaceFromBlankStackTest() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(BLANK, WORKSPACE_NAME, PROJECT_NAME);
+  public void createWorkspaceFromCentosWildFlySwarmStack() {
+    createWorkspaceHelper.createWorkspaceFromStackWithProject(
+        CENTOS_WILDFLY_SWARM, WORKSPACE_NAME, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
@@ -59,10 +66,13 @@ public class CreateWorkspaceFromBlankStackTest {
   }
 
   @Test(priority = 1)
-  public void checkBlankProjectCommands() {
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
-    editor.waitActive();
-    editor.waitTabIsPresent("README.md");
+  public void checkWfswarmRestHttpProjectCommands() {
+    By textOnPreviewPage = By.xpath("//h2[@id='_http_booster']");
+
+    consoles.executeCommandFromProjectExplorer(
+        PROJECT_NAME, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+    consoles.executeCommandFromProjectExplorer(
+        PROJECT_NAME, RUN_GOAL, RUN_COMMAND, "WildFly Swarm is Ready");
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
   }
 }

@@ -24,7 +24,7 @@ import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsCons
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.common.collect.ImmutableList;
@@ -44,7 +44,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-public class CreateWorkspaceFromJavaStackTest {
+public class CreateWorkspaceFromJavaCentosStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String CONSOLE_JAVA_PROJECT = "console-java-simple";
@@ -74,8 +74,9 @@ public class CreateWorkspaceFromJavaStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProjects(JAVA, WORKSPACE_NAME, projects);
+  public void checkWorkspaceCreationFromJavaCentosStack() {
+    createWorkspaceHelper.createWorkspaceFromStackWithProjects(
+        JAVA_CENTOS, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
@@ -85,9 +86,10 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @Test(priority = 1)
   public void checkConsoleJavaSimpleProjectCommands() {
+
+    // build and run console-java-simple project
     consoles.executeCommandFromProjectExplorer(
         CONSOLE_JAVA_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
-
     consoles.executeCommandFromProjectExplorer(
         CONSOLE_JAVA_PROJECT,
         BUILD_GOAL,
@@ -105,15 +107,16 @@ public class CreateWorkspaceFromJavaStackTest {
   public void checkWebJavaSpringProjectCommands() {
     String tomcatIsRunning = "/bin/bash -c $TOMCAT_HOME/bin/catalina.sh";
 
+    // build web-java-spring project
     consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
-
     consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING_PROJECT,
         BUILD_GOAL,
         BUILD_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         BUILD_SUCCESS);
 
+    // build and run web-java-spring project
     consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING_PROJECT,
         RUN_GOAL,
