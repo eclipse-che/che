@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.core.webdriver;
 
 import java.io.IOException;
 import java.util.List;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 
 /**
  * This is set of methods to work with files which are downloaded by WebDriver.
@@ -23,28 +24,29 @@ public interface DownloadedFileUtil {
   /**
    * Get list of files which package holds.
    *
-   * @param webDriverSessionId ID of web driver session which holds downloaded package
+   * @param seleniumWebDriver which operates with UI
    * @param downloadedPackageName downloaded package to unzip
    * @return list of files which package holds
    */
-  List<String> getPackageFileList(String webDriverSessionId, String downloadedPackageName)
+  List<String> getPackageFileList(SeleniumWebDriver seleniumWebDriver, String downloadedPackageName)
       throws IOException;
 
   /**
    * Obtains content of downloaded file.
    *
-   * @param webDriverSessionId ID of web driver session which holds downloaded file
+   * @param seleniumWebDriver which operates with UI
    * @param downloadedFileName downloaded file name
    * @return content of file
    */
-  String getDownloadedFileContent(String webDriverSessionId, String downloadedFileName)
+  String getDownloadedFileContent(SeleniumWebDriver seleniumWebDriver, String downloadedFileName)
       throws IOException;
 
   /**
    * Removes downloaded file.
    *
-   * @param webDriverSessionId ID of web driver session which holds downloaded file
+   * @param seleniumWebDriver which operates with UI
    * @param filenames downloaded file name
    */
-  void removeDownloadedFiles(String webDriverSessionId, String... filenames) throws IOException;
+  void removeDownloadedFiles(SeleniumWebDriver seleniumWebDriver, String... filenames)
+      throws IOException;
 }
