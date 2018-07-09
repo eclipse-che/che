@@ -26,7 +26,6 @@ infrastructures/** @garagatyi @sleshchenko
 # multiuser che
 multiuser/** @skabashnyuk
 
-
 # plugins
 plugins/plugin*debugger/** @tolusha
 plugins/plugin-gdb/** @tolusha
