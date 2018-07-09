@@ -54,6 +54,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
@@ -415,6 +416,20 @@ public class ProjectExplorer {
   }
 
   /**
+   * Invokes the {@link ProjectExplorer#waitVisibilityByName(String)} method for each specified
+   * {@code names}.
+   *
+   * @param names visible names of project explorer items.
+   * @return found elements.
+   */
+  public List<WebElement> waitVisibilitySeveralItemsByName(String... names) {
+    return asList(names)
+        .stream()
+        .map(itemName -> waitVisibilityByName(itemName))
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Waits item with specified {@code name} in project explorer tree area, during specified {@code
    * timeOut}
    *
@@ -574,6 +589,18 @@ public class ProjectExplorer {
         .doubleClick()
         .perform();
     loader.waitOnClosed();
+  }
+
+  /**
+   * Invokes the {@link ProjectExplorer#openItemByVisibleNameInExplorer(String)} method for each
+   * specified {@code names}.
+   *
+   * @param names visible names of the project explorer items.
+   */
+  public void openSeveralItemsByVisibleNameInExplorer(String... names) {
+    for (String itemName : names) {
+      openItemByVisibleNameInExplorer(itemName);
+    }
   }
 
   /**
