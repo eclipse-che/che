@@ -29,6 +29,19 @@ If you are interested in fixing issues and contributing directly to the code bas
 - [Coding guidelines](https://github.com/eclipse/che/wiki/Coding-Guidelines)
 - [Contributor license agreement](https://github.com/eclipse/che/wiki/Contributor-License-Agreement)
 
+### Ecosystem
+The next generation of Eclipse Che is going to be built from multiple components and plugins (learn more in [the roadmap](https://github.com/eclipse/che/wiki/Roadmap) on the wiki). This list provides links to those components and plugins.
+
+| Project        | Description  |
+| ----------- |-----|
+| [Theia-IDE](https://github.com/theia-ide/theia) | Theia IDE integrated in Che.  |
+| [GitHub Plugin](https://github.com/eclipse/che-theia-github-plugin) | GitHub VCS support.  |
+| [Java Plugin](https://github.com/eclipse/che-theia-java-plugin) | Java language support. |
+| [SSH Plugin](https://github.com/eclipse/che-theia-ssh-plugin) | SSH public/private key pairs management. |
+| [Terminal Plugin](https://github.com/eclipse/che-theia-terminal-plugin) | Terminal plugin. |
+| [Machines Plugin](https://github.com/eclipse/che-theia-machines-plugin)| Workspace's containers controller plugin. |
+| [Hosted plugin manager](https://github.com/eclipse/che-theia-hosted-plugin-manager-extension)| IDE hosting handler for url changing and port forwarding. |
+
 ### Feedback
 * **Support:** You can ask questions, report bugs, and request features using [GitHub issues](https://github.com/eclipse/che/issues).
 * **Public Chat:** Join the public [eclipse-che](https://mattermost.eclipse.org/eclipse/channels/eclipse-che) Mattermost channel to discuss with community and contributors.

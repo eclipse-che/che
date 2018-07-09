@@ -263,6 +263,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             DivElement divElement = Document.get().createDivElement();
             divElement.setInnerText("(" + head + ")");
             divElement.setClassName(treeStyles.treeStylesCss().vcsHeadContainer());
+            divElement.setId("git.reference.name");
             nodeContainer.insertBefore(divElement, nodeContainer.getLastChild());
           }
         }

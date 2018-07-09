@@ -22,10 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -120,7 +116,7 @@ public class PreferencesPresenter
     for (PreferencePagePresenter preference : preferences) {
       Set<PreferencePagePresenter> prefsList = preferencesMap.get(preference.getCategory());
       if (prefsList == null) {
-        prefsList = new HashSet<PreferencePagePresenter>();
+        prefsList = new HashSet<>();
         preferencesMap.put(preference.getCategory(), prefsList);
       }
 
@@ -147,36 +143,26 @@ public class PreferencesPresenter
     for (final PreferencesManager preferencesManager : managers) {
       promise =
           promise.thenPromise(
-              new Function<Void, Promise<Void>>() {
-                @Override
-                public Promise<Void> apply(Void arg) throws FunctionException {
-                  return preferencesManager
+              ignored ->
+                  preferencesManager
                       .flushPreferences()
                       .catchError(
-                          new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError error) throws OperationException {
-                              notificationManagerProvider
-                                  .get()
-                                  .notify(
-                                      locale.unableToSavePreference(),
-                                      error.getMessage(),
-                                      FAIL,
-                                      FLOAT_MODE);
-                              promiseErrorList.add(error);
-                            }
-                          });
-                }
-              });
+                          error -> {
+                            notificationManagerProvider
+                                .get()
+                                .notify(
+                                    locale.unableToSavePreference(),
+                                    error.getMessage(),
+                                    FAIL,
+                                    FLOAT_MODE);
+                            promiseErrorList.add(error);
+                          }));
     }
 
     promise.then(
-        new Operation<Void>() {
-          @Override
-          public void apply(Void aVoid) throws OperationException {
-            if (promiseErrorList.isEmpty()) {
-              view.enableSaveButton(false);
-            }
+        ignored -> {
+          if (promiseErrorList.isEmpty()) {
+            view.enableSaveButton(false);
           }
         });
   }
@@ -187,38 +173,29 @@ public class PreferencesPresenter
     for (final PreferencesManager preferencesManager : managers) {
       promise =
           promise.thenPromise(
-              new Function<Map<String, String>, Promise<Map<String, String>>>() {
-                @Override
-                public Promise<Map<String, String>> apply(Map<String, String> arg)
-                    throws FunctionException {
-                  return preferencesManager
+              ignored ->
+                  preferencesManager
                       .loadPreferences()
                       .catchError(
-                          new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError error) throws OperationException {
-                              notificationManagerProvider
-                                  .get()
-                                  .notify(
-                                      locale.unableToLoadPreference(),
-                                      error.getMessage(),
-                                      FAIL,
-                                      FLOAT_MODE);
-                            }
-                          });
-                }
-              });
+                          error -> {
+                            notificationManagerProvider
+                                .get()
+                                .notify(
+                                    locale.unableToLoadPreference(),
+                                    error.getMessage(),
+                                    FAIL,
+                                    FLOAT_MODE);
+                          }));
     }
 
     /** Revert changes on every preference page */
     promise.then(
-        new Operation<Map<String, String>>() {
-          @Override
-          public void apply(Map<String, String> arg) throws OperationException {
-            for (PreferencePagePresenter p : PreferencesPresenter.this.preferences) {
-              p.revertChanges();
-            }
+        ignored -> {
+          for (PreferencePagePresenter p : PreferencesPresenter.this.preferences) {
+            p.revertChanges();
           }
+
+          view.enableSaveButton(false);
         });
   }
 
@@ -248,31 +225,25 @@ public class PreferencesPresenter
   }
 
   private ConfirmCallback getConfirmCallback() {
-    return new ConfirmCallback() {
-      @Override
-      public void accepted() {
-        for (PreferencePagePresenter preference : preferences) {
-          if (preference.isDirty()) {
-            preference.storeChanges();
-          }
+    return () -> {
+      for (PreferencePagePresenter preference : preferences) {
+        if (preference.isDirty()) {
+          preference.storeChanges();
         }
-        view.enableSaveButton(false);
-        view.close();
       }
+      view.enableSaveButton(false);
+      view.close();
     };
   }
 
   private CancelCallback getCancelCallback() {
-    return new CancelCallback() {
-      @Override
-      public void cancelled() {
-        for (PreferencePagePresenter preference : preferences) {
-          if (preference.isDirty()) {
-            preference.revertChanges();
-          }
+    return () -> {
+      for (PreferencePagePresenter preference : preferences) {
+        if (preference.isDirty()) {
+          preference.revertChanges();
         }
-        view.close();
       }
+      view.close();
     };
   }
 

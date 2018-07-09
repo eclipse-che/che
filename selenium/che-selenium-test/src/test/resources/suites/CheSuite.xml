@@ -229,6 +229,7 @@
           <class name="org.eclipse.che.selenium.projectexplorer.DeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.dependencies.TransitiveDependencyTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
+          <class name="org.eclipse.che.selenium.projectexplorer.dependencies.OpenExternalLibraryFileAfterRefreshTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.FileNotExistIntoEditorAfterDeleteTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.FileOpenedAfterCreationTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.JustCreatedFileNotExistIntoEditorAfterDeleteTest"/>
