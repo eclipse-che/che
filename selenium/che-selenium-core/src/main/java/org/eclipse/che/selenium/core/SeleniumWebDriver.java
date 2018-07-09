@@ -76,8 +76,8 @@ public class SeleniumWebDriver
 
   private TestBrowser browser;
   private boolean gridMode;
-  private String webDriverVersion;
   private String gridNodeContainerId;
+  private String webDriverPort;
   private final RemoteWebDriver driver;
   private final HttpJsonRequestFactory httpJsonRequestFactory;
   private final DockerUtil dockerUtil;
@@ -87,12 +87,11 @@ public class SeleniumWebDriver
       @Named("sys.browser") TestBrowser browser,
       @Named("sys.driver.port") String webDriverPort,
       @Named("sys.grid.mode") boolean gridMode,
-      @Named("sys.driver.version") String webDriverVersion,
       HttpJsonRequestFactory httpJsonRequestFactory,
       DockerUtil dockerUtil) {
     this.browser = browser;
+    this.webDriverPort = webDriverPort;
     this.gridMode = gridMode;
-    this.webDriverVersion = webDriverVersion;
     this.httpJsonRequestFactory = httpJsonRequestFactory;
     this.dockerUtil = dockerUtil;
 
@@ -193,10 +192,6 @@ public class SeleniumWebDriver
   @Override
   public Mouse getMouse() {
     return driver.getMouse();
-  }
-
-  public String getSessionId() {
-    return driver.getSessionId().toString();
   }
 
   private RemoteWebDriver createDriver(URL webDriverUrl) {
@@ -354,7 +349,9 @@ public class SeleniumWebDriver
 
     if (gridNodeContainerId == null) {
       String getGridNodeInfoUrl =
-          format("http://localhost:4444/grid/api/testsession?session=%s", getSessionId());
+          format(
+              "http://localhost:%s/grid/api/testsession?session=%s",
+              webDriverPort, driver.getSessionId());
 
       Map<String, String> gridNodeInfo;
       try {
