@@ -78,7 +78,6 @@ public class SeleniumWebDriver
   private boolean gridMode;
   private String webDriverVersion;
   private String gridNodeContainerId;
-  private final String downloadDirectory;
   private final RemoteWebDriver driver;
   private final HttpJsonRequestFactory httpJsonRequestFactory;
   private final DockerUtil dockerUtil;
@@ -89,13 +88,11 @@ public class SeleniumWebDriver
       @Named("sys.driver.port") String webDriverPort,
       @Named("sys.grid.mode") boolean gridMode,
       @Named("sys.driver.version") String webDriverVersion,
-      @Named("tests.tmp_dir") String downloadDirectory,
       HttpJsonRequestFactory httpJsonRequestFactory,
       DockerUtil dockerUtil) {
     this.browser = browser;
     this.gridMode = gridMode;
     this.webDriverVersion = webDriverVersion;
-    this.downloadDirectory = downloadDirectory;
     this.httpJsonRequestFactory = httpJsonRequestFactory;
     this.dockerUtil = dockerUtil;
 
