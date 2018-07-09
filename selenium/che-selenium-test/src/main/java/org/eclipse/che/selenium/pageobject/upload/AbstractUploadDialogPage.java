@@ -64,7 +64,9 @@ public abstract class AbstractUploadDialogPage {
   }
 
   public void clickOnUploadButton() {
-    getUploadButton().click();
+    WebElement uploadButton = getUploadButton();
+    seleniumWebDriverHelper.waitVisibility(uploadButton);
+    uploadButton.click();
   }
 
   abstract WebElement getTitle();
