@@ -593,7 +593,7 @@ public class ProjectExplorer {
 
   /**
    * Invokes the {@link ProjectExplorer#openItemByVisibleNameInExplorer(String)} method for each
-   * specified {@code name}.
+   * specified {@code names}.
    *
    * @param names visible names of the project explorer items.
    */
