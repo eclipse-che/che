@@ -29,19 +29,18 @@ RUN \
     apk update && apk add --no-cache make gcc g++ python git bash supervisor jq openssl && \
     rm -rf /tmp/* /var/cache/apk/* && \
     # Change version of Theia to specified in THEIA_VERSION
-    ${HOME}/versions.sh && rm ${HOME}/versions.sh
+    ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
     # Apply resolution section to the Theia package.json to use strict versions for Theia dependencies
- RUN node ${HOME}/resolutions-provider.js ${HOME}/package.json && \
+    node ${HOME}/resolutions-provider.js ${HOME}/package.json && \
+    # generate node_modules, should be reused with default extensions
     yarn --global-folder ${HOME}/node_modules/ --cache-folder ${HOME}/node_modules/ && \
-    # Add Theia extensions
     rm -rf ${HOME}/extensions && \
+    # Add default Theia extensions
     node ${HOME}/add-extensions.js && \
-    # Build Theia with all the extensions
-    # cd ${HOME} && \
-    # cat package.json 
-    # && \
+    # launch `yarn` again to apply default extensions to the Theia node_modules
     yarn --global-folder ${HOME}/node_modules/ --cache-folder ${HOME}/node_modules/ && \
     yarn theia clean && \
+    # Build Theia with all the extensions
     yarn theia build && \
     # Install Theia plugin generator
     #==TODO== add after generator-theia-plugin release

@@ -26,7 +26,7 @@ const fullPackageJsonPath=`${HOME}/full-package.json`;
 spawnSync('wget', ['-O', `${fullPackageJsonPath}`, `${theiaFullPackageJsonLink}`]);
 
 if (fs.exists(`${fullPackageJsonPath}`)) {
-    console.log("Can't generate resolution, because we have not list all base theia dependencies.");
+    console.log("Can't generate resolution, because we have not list all base Theia dependencies.");
     return;
 }
 const FULL_PACKAGE_JSON = require(`${fullPackageJsonPath}`);
@@ -50,7 +50,7 @@ console.log(`Write generated resolutions to the package.json ${PACKAGE_JSON_PATH
 writeJsonToFile(PACKAGE_JSON_PATH, PACKAGE_JSON);
 
 /**
- * Get list resolutions for theia dependency.
+ * Get list resolutions for Theia dependency.
  *
  * @param theiaDep - theia dependency
  */
@@ -83,7 +83,7 @@ function filterResolutionsList(resolutions) {
 }
 
 /**
- * Convert resolutions list to resolutions object with required versions.
+ * Convert resolutions list to resolutions object with required THEIA_VERSION.
  *
  * @param resolutionsList - resolutions list.
  */
