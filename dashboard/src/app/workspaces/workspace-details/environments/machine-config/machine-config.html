@@ -68,8 +68,7 @@
     <!-- Agents -->
     <che-label-container che-label-name="Agents">
       <div class="config-params-table">
-        <che-machine-agents environment-manager="workspaceMachineConfigController.environmentManager"
-                            selected-machine="workspaceMachineConfigController.machine"
+        <che-machine-agents agents="workspaceMachineConfigController.machineConfig.installers"
                             on-change="workspaceMachineConfigController.updateAgents()"></che-machine-agents>
       </div>
     </che-label-container>

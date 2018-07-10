@@ -9,8 +9,6 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
-import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {CheAgent} from '../../../../components/api/che-agent.factory';
 
 export interface IAgentItem extends che.IAgent {
@@ -33,14 +31,13 @@ export class MachineAgentsController {
 
   onChange: Function;
   agentOrderBy = 'name';
-  agentsList: Array<IAgentItem>;
+  agentItemsList: Array<IAgentItem>;
 
   private cheAgent: CheAgent;
   private $timeout: ng.ITimeoutService;
   private timeoutPromise: ng.IPromise<any>;
-  private selectedMachine: IEnvironmentManagerMachine;
-  private environmentManager: EnvironmentManager;
   private agents: Array<string>;
+  private availableAgents: Array<che.IAgent>;
   private agentsToUpdate: Array<IAgentItem> = [];
 
   /**
@@ -50,26 +47,30 @@ export class MachineAgentsController {
     this.cheAgent = cheAgent;
     this.$timeout = $timeout;
 
-    cheAgent.fetchAgents().then(() => {
-      this.agents = this.selectedMachine ? this.environmentManager.getAgents(this.selectedMachine) : [];
+    this.availableAgents = cheAgent.getAgents();
+    if (this.availableAgents && this.availableAgents.length) {
+      this.buildAgentsList();
+    } else {
+      cheAgent.fetchAgents().then(() => {
+        this.availableAgents = cheAgent.getAgents();
+        this.buildAgentsList();
+      });
+    }
+
+    const deRegistrationFn = $scope.$watch(() => {
+      return this.agents;
+    }, (newList: string[], oldList: string[]) => {
+      if (angular.equals(newList, oldList)) {
+        return;
+      }
       this.buildAgentsList();
     });
 
-    const deRegistrationFn = $scope.$watch(() => {
-      if (!this.environmentManager || !this.selectedMachine) {
-        return false;
-      }
-      return !angular.equals(this.agents, this.environmentManager.getAgents(this.selectedMachine));
-    }, (newVal: boolean) => {
-      if (!newVal) {
-        return;
-      }
-      this.agents = this.environmentManager.getAgents(this.selectedMachine);
-      this.buildAgentsList();
-    }, true);
-
     $scope.$on('$destroy', () => {
       deRegistrationFn();
+      if (this.timeoutPromise) {
+        this.$timeout.cancel(this.timeoutPromise);
+      }
     });
   }
 
@@ -77,8 +78,7 @@ export class MachineAgentsController {
    * Builds agents list.
    */
   buildAgentsList(): void {
-    const agents = this.cheAgent.getAgents();
-    this.agentsList = agents.map((agentItem: IAgentItem) => {
+    this.agentItemsList = this.availableAgents.map((agentItem: IAgentItem) => {
       this.checkAgentLatestVersion(agentItem);
       return agentItem;
     });
@@ -105,7 +105,8 @@ export class MachineAgentsController {
         }
       });
       this.agentsToUpdate.length = 0;
-      this.environmentManager.setAgents(this.selectedMachine, this.agents);
+
+      this.buildAgentsList();
       this.onChange();
     }, 500);
   }
