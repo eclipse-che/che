@@ -21,7 +21,10 @@ assembly/** @riuvshin @skabashnyuk
 core/** @skabashnyuk
 
 # workspace runtime infrastructure implementations
-infrastructures/** @garagatyi
+infrastructures/** @garagatyi @sleshchenko
+
+# multiuser che
+multiuser/** @skabashnyuk
 
 # plugins
 plugins/plugin*debugger/** @tolusha
