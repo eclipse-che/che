@@ -708,7 +708,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibility(element).getText().contains(expectedText));
+                driver -> waitVisibility(element, timeout).getText().contains(expectedText));
   }
 
   /**
