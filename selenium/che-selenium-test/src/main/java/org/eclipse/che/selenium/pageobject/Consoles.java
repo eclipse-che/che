@@ -480,6 +480,15 @@ public class Consoles {
         .click();
   }
 
+  public void executeCommandFromProcessesArea(
+      String machineName,
+      ContextMenuCommandGoals commandGoal,
+      String commandName,
+      String expectedMessageInConsole) {
+    startCommandFromProcessesArea(machineName, commandGoal, commandName);
+    waitExpectedTextIntoConsole(expectedMessageInConsole);
+  }
+
   public void startTerminalFromProcessesArea(String machineName) {
     WebElement machine =
         redrawDriverWait.until(

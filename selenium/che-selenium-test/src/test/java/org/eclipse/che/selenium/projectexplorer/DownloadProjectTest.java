@@ -89,9 +89,9 @@ public class DownloadProjectTest {
   }
 
   @BeforeMethod
-  private void cleanUpDownloads() throws IOException {
+  public void cleanUpDownloads() throws IOException {
     downloadedFileUtil.removeDownloadedFiles(
-        seleniumWebDriver.getSessionId(),
+        seleniumWebDriver,
         DOWNLOADED_PROJECTS_PACKAGE_NAME,
         DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME,
         DOWNLOADED_TEST_DIRECTORY_PACKAGE_NAME,
@@ -99,7 +99,7 @@ public class DownloadProjectTest {
   }
 
   @Test
-  private void downloadAllProjectsTest() throws IOException {
+  public void downloadAllProjectsTest() throws IOException {
     // given
     List<String> expectedPackageFileList =
         asList(
@@ -129,7 +129,7 @@ public class DownloadProjectTest {
   }
 
   @Test
-  private void downloadSingleProjectTest() throws IOException {
+  public void downloadSingleProjectTest() throws IOException {
     // given
     List<String> expectedPackageFileList =
         asList(
@@ -155,7 +155,7 @@ public class DownloadProjectTest {
 
     // when
     downloadedFileUtil.removeDownloadedFiles(
-        seleniumWebDriver.getSessionId(), DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME);
+        seleniumWebDriver, DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME);
 
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
@@ -168,7 +168,7 @@ public class DownloadProjectTest {
   }
 
   @Test
-  private void downloadDirectoryTest() throws IOException {
+  public void downloadDirectoryTest() throws IOException {
     // given
     String pathToTestDirectory = "TestProject1/" + TEST_DIRECTORY_NAME;
     List<String> expectedPackageFileList =
@@ -192,7 +192,7 @@ public class DownloadProjectTest {
   }
 
   @Test
-  private void downloadFileTest() throws IOException {
+  public void downloadFileTest() throws IOException {
     // given
     String pathToTestFile = "TestProject1/" + TEST_FILE_NAME;
     String testFileContent = "Developer Workspace";
@@ -213,8 +213,7 @@ public class DownloadProjectTest {
     IOException lastException = null;
     for (int i = 0; i < MAX_ATTEMPTS; i++) {
       try {
-        return downloadedFileUtil.getDownloadedFileContent(
-            seleniumWebDriver.getSessionId(), testFileName);
+        return downloadedFileUtil.getDownloadedFileContent(seleniumWebDriver, testFileName);
       } catch (IOException e) {
         lastException = e;
         sleepQuietly(TestTimeoutsConstants.MINIMUM_SEC);
@@ -229,7 +228,7 @@ public class DownloadProjectTest {
     for (int i = 0; i < MAX_ATTEMPTS; i++) {
       try {
         return downloadedFileUtil
-            .getPackageFileList(seleniumWebDriver.getSessionId(), downloadedTestProject1PackageName)
+            .getPackageFileList(seleniumWebDriver, downloadedTestProject1PackageName)
             .toString();
       } catch (IOException e) {
         lastException = e;
