@@ -54,6 +54,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
@@ -69,6 +70,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +90,9 @@ public class ProjectExplorer {
   private final WebDriverWaitFactory waitFactory;
   private final NotificationsPopupPanel notificationsPopupPanel;
   private final int DEFAULT_TIMEOUT;
+
+  @FindBy(id = "git.reference.name")
+  WebElement projectReference;
 
   @Inject
   public ProjectExplorer(
@@ -292,6 +297,17 @@ public class ProjectExplorer {
   }
 
   /**
+   * Wait the specified reference to be present near the project name in the project explorer.
+   *
+   * @param reference git reference e.g. branch, tag or commit
+   */
+  public void waitReferenceName(String reference) {
+    loader.waitOnClosed();
+
+    seleniumWebDriverHelper.waitTextEqualsTo(projectReference, "(" + reference + ")");
+  }
+
+  /**
    * Waits until library will be present in External Libraries folder
    *
    * @param libraryName visible name of library
@@ -397,6 +413,20 @@ public class ProjectExplorer {
    */
   public WebElement waitVisibilityByName(String name) {
     return waitVisibilityByName(name, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Invokes the {@link ProjectExplorer#waitVisibilityByName(String)} method for each specified
+   * {@code names}.
+   *
+   * @param names visible names of project explorer items.
+   * @return found elements.
+   */
+  public List<WebElement> waitVisibilitySeveralItemsByName(String... names) {
+    return asList(names)
+        .stream()
+        .map(itemName -> waitVisibilityByName(itemName))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -559,6 +589,18 @@ public class ProjectExplorer {
         .doubleClick()
         .perform();
     loader.waitOnClosed();
+  }
+
+  /**
+   * Invokes the {@link ProjectExplorer#openItemByVisibleNameInExplorer(String)} method for each
+   * specified {@code names}.
+   *
+   * @param names visible names of the project explorer items.
+   */
+  public void openSeveralItemsByVisibleNameInExplorer(String... names) {
+    for (String itemName : names) {
+      openItemByVisibleNameInExplorer(itemName);
+    }
   }
 
   /**

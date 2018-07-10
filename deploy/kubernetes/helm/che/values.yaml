@@ -36,3 +36,4 @@ global:
     secretName: che-tls
   gitHubClientID: ""
   gitHubClientSecret: ""
+  pvcClaim: "1Gi"

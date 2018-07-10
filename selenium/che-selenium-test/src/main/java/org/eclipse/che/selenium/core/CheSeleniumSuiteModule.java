@@ -54,8 +54,11 @@ import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFacto
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
-import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtilImpl;
-import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtilImpl;
+import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtil;
+import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadIntoGridUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadLocallyUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadUtil;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
@@ -124,6 +127,11 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       install(new CheSeleniumSingleUserModule());
     }
 
+    configureInfrastructureRelatedDependencies();
+    configureTestExecutionModeRelatedDependencies();
+  }
+
+  private void configureInfrastructureRelatedDependencies() {
     String cheInfrastructure = System.getenv(CHE_INFRASTRUCTURE_VARIABLE);
     if (cheInfrastructure == null || cheInfrastructure.isEmpty()) {
       throw new RuntimeException(
@@ -138,12 +146,16 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       throw new RuntimeException(
           format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
     }
+  }
 
+  private void configureTestExecutionModeRelatedDependencies() {
     boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
     if (gridMode) {
-      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtilImpl.class);
+      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtil.class);
+      bind(UploadUtil.class).to(UploadIntoGridUtil.class);
     } else {
-      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtilImpl.class);
+      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtil.class);
+      bind(UploadUtil.class).to(UploadLocallyUtil.class);
     }
   }
 

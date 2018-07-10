@@ -484,9 +484,9 @@ public class Consoles {
       String machineName,
       ContextMenuCommandGoals commandGoal,
       String commandName,
-      String expectedMessageInTerminal) {
+      String expectedMessageInConsole) {
     startCommandFromProcessesArea(machineName, commandGoal, commandName);
-    waitExpectedTextIntoConsole(expectedMessageInTerminal);
+    waitExpectedTextIntoConsole(expectedMessageInConsole);
   }
 
   public void startTerminalFromProcessesArea(String machineName) {

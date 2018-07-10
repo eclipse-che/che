@@ -17,6 +17,7 @@ public interface TestCommandsConstants {
   String GWT = "gwt";
   String RUN_COMMAND = "run";
   String BUILD_COMMAND = "build";
+  String CLEAN_BUILD_COMMAND = "clean build";
   String DEBUG_COMMAND = "debug";
   String CLEAN_BUILD_COMMAND = "clean build";
   String BUILD_AND_RUN_COMMAND = "build and run";

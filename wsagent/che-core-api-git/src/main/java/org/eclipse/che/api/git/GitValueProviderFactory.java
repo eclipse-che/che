@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.fs.server.PathTransformer;
-import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
@@ -59,15 +58,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
             case VCS_PROVIDER_NAME:
               return singletonList("git");
             case GIT_CURRENT_HEAD_NAME:
-              String currentBranch = gitConnection.getCurrentBranch();
-              return singletonList(
-                  "HEAD".equals(currentBranch)
-                      ? gitConnection
-                          .log(LogParams.create().withMaxCount(1))
-                          .getCommits()
-                          .get(0)
-                          .getId()
-                      : currentBranch);
+              return singletonList(gitConnection.getCurrentReference().getName());
             case GIT_REPOSITORY_REMOTES:
               return gitConnection
                   .remoteList(null, false)

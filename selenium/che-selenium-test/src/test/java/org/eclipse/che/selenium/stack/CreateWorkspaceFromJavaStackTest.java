@@ -45,19 +45,21 @@ import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
 public class CreateWorkspaceFromJavaStackTest {
-  private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String CONSOLE_JAVA_SIMPLE = "console-java-simple";
-  private static final String WEB_JAVA_SPRING = "web-java-spring";
 
-  private List<String> projects = ImmutableList.of(CONSOLE_JAVA_SIMPLE, WEB_JAVA_SPRING);
+  private static final String WORKSPACE_NAME = generate("workspace", 4);
+  private static final String CONSOLE_JAVA_PROJECT = "console-java-simple";
+  private static final String WEB_JAVA_SPRING_PROJECT = "web-java-spring";
+
+  private List<String> projects = ImmutableList.of(CONSOLE_JAVA_PROJECT, WEB_JAVA_SPRING_PROJECT);
+  private By textOnPreviewPage = By.xpath("//span[text()='Enter your name: ']");
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
   @Inject private Dashboard dashboard;
-  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
-  @Inject private DefaultTestUser defaultTestUser;
   @Inject private CheTerminal terminal;
+  @Inject private DefaultTestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @BeforeClass
@@ -77,63 +79,71 @@ public class CreateWorkspaceFromJavaStackTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(CONSOLE_JAVA_SIMPLE);
-    projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING);
+    projectExplorer.waitProjectInitialization(CONSOLE_JAVA_PROJECT);
+    projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING_PROJECT);
   }
 
   @Test(priority = 1)
-  public void checkConsoleJavaSimpleCommands() {
+  public void checkConsoleJavaSimpleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_SIMPLE, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+        CONSOLE_JAVA_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_SIMPLE,
+        CONSOLE_JAVA_PROJECT,
         BUILD_GOAL,
-        BUILD_COMMAND_ITEM.getItem(CONSOLE_JAVA_SIMPLE),
+        BUILD_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
         BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_SIMPLE,
+        CONSOLE_JAVA_PROJECT,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(CONSOLE_JAVA_SIMPLE),
+        RUN_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
         "Hello World Che!");
   }
 
   @Test(priority = 1)
-  public void checkWebJavaSpringCommands() {
-    consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
+  public void checkWebJavaSpringProjectCommands() {
+    String tomcatIsRunning = "/bin/bash -c $TOMCAT_HOME/bin/catalina.sh";
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING, BUILD_GOAL, BUILD_COMMAND_ITEM.getItem(WEB_JAVA_SPRING), BUILD_SUCCESS);
+        WEB_JAVA_SPRING_PROJECT, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING,
+        WEB_JAVA_SPRING_PROJECT,
+        BUILD_GOAL,
+        BUILD_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
+        BUILD_SUCCESS);
+
+    consoles.executeCommandFromProjectExplorer(
+        WEB_JAVA_SPRING_PROJECT,
         RUN_GOAL,
-        BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING),
+        BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         SERVER_STARTUP_IN);
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
-    consoles.closeProcessTabWithAskDialog(BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING));
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
+    consoles.closeProcessTabWithAskDialog(
+        BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT));
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING,
+        WEB_JAVA_SPRING_PROJECT,
         RUN_GOAL,
-        RUN_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING),
+        RUN_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         SERVER_STARTUP_IN);
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//span[text()='Enter your name: ']"));
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
-    // execute 'stop tomcat' command and check that tomcat is not running
+    // execute 'stop tomcat' command and check that tomcat process is not running
     projectExplorer.invokeCommandWithContextMenu(
-        RUN_GOAL, WEB_JAVA_SPRING, STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING));
+        RUN_GOAL,
+        WEB_JAVA_SPRING_PROJECT,
+        STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT));
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
     terminal.typeIntoTerminal("ps ax");
     terminal.typeIntoTerminal(ENTER.toString());
-    terminal.waitExpectedTextNotPresentTerminal("/bin/bash -c $TOMCAT_HOME/bin/catalina.sh");
+    terminal.waitExpectedTextNotPresentTerminal(tomcatIsRunning);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING,
+        WEB_JAVA_SPRING_PROJECT,
         DEBUG_GOAL,
-        DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_SPRING),
+        DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
         LISTENING_AT_ADDRESS_8000);
   }
 }

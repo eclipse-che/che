@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.plugin.pullrequest.client.actions.ContributePartDisplayingModeAction;
 
 /**
@@ -58,9 +59,18 @@ public class ContributionExtension {
     toolWindowGroup.add(
         contributePartDisplayingModeAction, new Constraints(BEFORE, EDITOR_DISPLAYING_MODE));
 
-    keyBinding
-        .getGlobal()
-        .addKey(
-            new KeyBuilder().action().alt().charCode('6').build(), CONTRIBUTE_PART_DISPLAYING_MODE);
+    if (UserAgent.isMac()) {
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().control().charCode('6').build(),
+              CONTRIBUTE_PART_DISPLAYING_MODE);
+    } else {
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().alt().charCode('6').build(),
+              CONTRIBUTE_PART_DISPLAYING_MODE);
+    }
   }
 }
