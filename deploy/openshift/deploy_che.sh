@@ -53,7 +53,7 @@ HELP="
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
-CHE_IMAGE_TAG - Set che-server image tag, defaults to "nightly"
+CHE_IMAGE_TAG - Set che-server image tag, defaults to "6.8.0"
 CHE_INFRA_OPENSHIFT_PROJECT - namespace for workspace objects (defaults to current namespace of Che pod (CHE_OPENSHIFT_PROJECT which defaults to eclipse-che)). It can be overriden with -p|--project param. A separate ws namespace can be used only if username/password or token is provided
 CHE_INFRA_KUBERNETES_USERNAME - OpenShift username to create workspace objects with. Not used by default (service account is used instead)
 CHE_INFRA_KUBERNETES_PASSWORD - OpenShift password
@@ -130,7 +130,7 @@ export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PR
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-DEFAULT_CHE_IMAGE_TAG="nightly"
+DEFAULT_CHE_IMAGE_TAG="6.8.0"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 
 DEFAULT_ENABLE_SSL="false"
