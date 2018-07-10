@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
@@ -33,12 +33,16 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
   public static String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
   private final JavaLanguageExtensionServiceClient extensionService;
+  private final PromiseProvider promiseProvider;
   private Map<String, Promise<List<ClasspathEntry>>> classpath;
 
   @Inject
   public ClasspathContainer(
-      JavaLanguageExtensionServiceClient extensionService, EventBus eventBus) {
+      JavaLanguageExtensionServiceClient extensionService,
+      EventBus eventBus,
+      PromiseProvider promiseProvider) {
     this.extensionService = extensionService;
+    this.promiseProvider = promiseProvider;
     classpath = new HashMap<>();
 
     eventBus.addHandler(ClasspathChangedEvent.TYPE, this);
@@ -55,7 +59,14 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
     if (classpath.containsKey(projectPath)) {
       return classpath.get(projectPath);
     } else {
-      Promise<List<ClasspathEntry>> result = extensionService.classpathTree(projectPath);
+      Promise<List<ClasspathEntry>> result =
+          extensionService
+              .classpathTree(projectPath)
+              .catchErrorPromise(
+                  error -> {
+                    classpath.remove(projectPath);
+                    return promiseProvider.reject(error);
+                  });
       classpath.put(projectPath, result);
       return result;
     }
@@ -63,6 +74,6 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
 
   @Override
   public void onClasspathChanged(ClasspathChangedEvent event) {
-    classpath.put(event.getPath(), Promises.resolve(event.getEntries()));
+    classpath.put(event.getPath(), promiseProvider.resolve(event.getEntries()));
   }
 }
