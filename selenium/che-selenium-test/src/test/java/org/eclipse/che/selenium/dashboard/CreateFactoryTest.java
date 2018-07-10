@@ -55,9 +55,9 @@ public class CreateFactoryTest {
   private static final String MINIMAL_TEMPLATE_FACTORY_NAME = generate("factoryMin", 4);
   private static final String COMPLETE_TEMPLATE_FACTORY_NAME = generate("factoryComplete", 4);
   private static final String FACTORY_CREATED_FROM_WORKSPACE_NAME = generate("factoryWs", 4);
-  private static final String FACTORY_CREATED_FROM_GIT = generate("factoryGit-", 4);
-  private static final String FACTORY_CREATED_FROM_CONFIG = generate("factoryConfig", 4);
-  private static final String FACTORY_CREATED_FROM_USER_JSON = generate("factoryUser", 4);
+  private static final String FACTORY_CREATED_FROM_GIT_NAME = generate("factoryGit", 4);
+  private static final String FACTORY_CREATED_FROM_CONFIG_NAME = generate("factoryConfig", 4);
+  private static final String FACTORY_CREATED_FROM_USER_JSON_NAME = generate("factoryUser", 4);
   private static final String MIN_FACTORY_NAME = generate("", 3);
   private static final String MAX_FACTORY_NAME = generate("", 20);
   private static final String RESOURCES_CONFIG_FILE =
@@ -103,17 +103,17 @@ public class CreateFactoryTest {
     workspaceServiceClient.delete(PROJECT_WS_NAME, defaultTestUser.getName());
     workspaceServiceClient.delete(NO_PROJECT_WS_NAME, defaultTestUser.getName());
 
-    List<String> listFactory =
+    List<String> factoryList =
         Arrays.asList(
             FACTORY_NAME_EXIST,
             MINIMAL_TEMPLATE_FACTORY_NAME,
             COMPLETE_TEMPLATE_FACTORY_NAME,
             FACTORY_CREATED_FROM_WORKSPACE_NAME,
-            FACTORY_CREATED_FROM_CONFIG,
-            FACTORY_CREATED_FROM_GIT,
-            FACTORY_CREATED_FROM_USER_JSON);
+            FACTORY_CREATED_FROM_CONFIG_NAME,
+            FACTORY_CREATED_FROM_GIT_NAME,
+            FACTORY_CREATED_FROM_USER_JSON_NAME);
 
-    for (String factory : listFactory) {
+    for (String factory : factoryList) {
       factoryServiceClient.deleteFactory(factory);
     }
   }
@@ -139,7 +139,7 @@ public class CreateFactoryTest {
     // open the  'Git' tab and fill the fields url and name
     createFactoryPage.clickOnSourceTab(GIT_TAB_ID);
     createFactoryPage.typeGitRepositoryUrl(repositoryUrl);
-    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_GIT);
+    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_GIT_NAME);
 
     assertTrue(
         createFactoryPage.isCreateFactoryButtonEnabled(),
@@ -147,11 +147,11 @@ public class CreateFactoryTest {
 
     // create factory
     createFactoryPage.clickOnCreateFactoryButton();
-    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_GIT);
+    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_GIT_NAME);
 
     // check present the id url and named url of the factory
     dashboardFactories.waitFactoryIdUrl();
-    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_GIT);
+    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_GIT_NAME);
   }
 
   @Test
@@ -160,8 +160,9 @@ public class CreateFactoryTest {
 
     // select the 'Config' tab
     createFactoryPage.clickOnSourceTab(CONFIG_TAB_ID);
-    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_CONFIG);
-    createFactoryPage.waitUploadFileButton();
+    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_CONFIG_NAME);
+
+    assertTrue(createFactoryPage.isUploadFileButtonEnabled());
 
     assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
 
@@ -175,15 +176,15 @@ public class CreateFactoryTest {
 
     // create factory
     createFactoryPage.clickOnCreateFactoryButton();
-    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_CONFIG);
+    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_CONFIG_NAME);
 
     // check present the id url and named url of the factory
-    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_CONFIG);
+    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_CONFIG_NAME);
     dashboardFactories.waitFactoryIdUrl();
   }
 
   @Test
-  public void checkHandlingOfNamesFactory() {
+  public void checkHandlingOfFactoryNames() {
     // create a factory from workspace with a project
     createFactoryFromWorkspaceWithProject(FACTORY_NAME_EXIST);
 
@@ -281,11 +282,11 @@ public class CreateFactoryTest {
   }
 
   @Test
-  public void checkEditorTemplateJson() throws Exception {
+  public void checkEditorOfTemplateJson() throws Exception {
     // select the minimal template
     createFactoryPage.waitToolbarTitle();
     createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
-    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_USER_JSON);
+    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_USER_JSON_NAME);
     createFactoryPage.waitTemplateButtons();
     createFactoryPage.clickOnMinimalTemplateButton();
 
@@ -301,15 +302,15 @@ public class CreateFactoryTest {
     assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
 
     createFactoryPage.clickOnCreateFactoryButton();
-    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_USER_JSON);
+    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_USER_JSON_NAME);
 
     // check present the factory url
-    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_USER_JSON);
+    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_USER_JSON_NAME);
     dashboardFactories.waitFactoryIdUrl();
   }
 
   @Test
-  public void shouldCreatingFactoryFromWorkspace() {
+  public void shouldCreateFactoryFromWorkspace() {
     // check error when create factory without a project
     createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
     createFactoryPage.clickOnWorkspaceFromList(NO_PROJECT_WS_NAME);

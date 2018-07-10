@@ -167,10 +167,12 @@ public class CreateFactoryPage {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.NEW_FACTORY_ERROR_MESSAGE));
   }
 
-  public void waitUploadFileButton() {
-    seleniumWebDriverHelper.waitVisibilityAndGetEnableState(uploadFileButton);
+  public boolean isUploadFileButtonEnabled() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetEnableState(uploadFileButton);
   }
 
+  // we have to use the hidden web-element, because the file is uploaded when we send the command to
+  // this element
   public void uploadSelectedConfigFile(Path resourcesUploadFile) throws IOException {
     seleniumWebDriverHelper.selectResourceToUpload(hiddenUploadInputButton, resourcesUploadFile);
   }
@@ -189,7 +191,6 @@ public class CreateFactoryPage {
 
   public void typeTextToSearchFactoryField(String expectedText) {
     seleniumWebDriverHelper.setValue(searchWorkspaceField, expectedText);
-    WaitUtils.sleepQuietly(1);
   }
 
   public void waitWorkspacesListIsEmpty() {
