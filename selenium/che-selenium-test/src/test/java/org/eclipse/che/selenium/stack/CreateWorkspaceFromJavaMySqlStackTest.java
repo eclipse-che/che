@@ -13,22 +13,19 @@ package org.eclipse.che.selenium.stack;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.LISTENING_AT_ADDRESS_8000;
-import static org.eclipse.che.selenium.core.constant.TestBuildConstants.SERVER_STARTUP_IN;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_AND_RUN_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_AND_DEPLOY_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.DEBUG_COMMAND_ITEM;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_TOMCAT_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.STOP_TOMCAT_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.openqa.selenium.Keys.ENTER;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import java.util.List;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
@@ -42,15 +39,14 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Skoryk Serhii */
-public class CreateWorkspaceFromEclipseCheStackTest {
+/** @author Aleksandr Shmaraev */
+@Test(groups = {TestGroup.DOCKER})
+public class CreateWorkspaceFromJavaMySqlStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String CONSOLE_JAVA_PROJECT = "console-java-simple";
-  private static final String WEB_JAVA_SPRING_PROJECT = "web-java-spring";
-
-  private List<String> projects = ImmutableList.of(CONSOLE_JAVA_PROJECT, WEB_JAVA_SPRING_PROJECT);
-  private By textOnPreviewPage = By.xpath("//span[text()='Enter your name: ']");
+  private static final String WEB_JAVA_PROJECT = "web-java-petclinic";
+  private static final String DEV_MACHINE_NAME = "dev-machine";
+  private static final String DB_MACHINE_NAME = "db";
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -63,7 +59,6 @@ public class CreateWorkspaceFromEclipseCheStackTest {
 
   @BeforeClass
   public void setUp() {
-
     dashboard.open();
   }
 
@@ -73,71 +68,54 @@ public class CreateWorkspaceFromEclipseCheStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProjects(
-        ECLIPSE_CHE, WORKSPACE_NAME, projects);
+  public void checkWorkspaceCreationFromJavaMySqlStack() {
+    createWorkspaceHelper.createWorkspaceFromStackWithProject(
+        JAVA_MYSQL, WORKSPACE_NAME, WEB_JAVA_PROJECT);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(CONSOLE_JAVA_PROJECT);
-    projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING_PROJECT);
+    projectExplorer.waitProjectInitialization(WEB_JAVA_PROJECT);
   }
 
   @Test(priority = 1)
-  public void checkConsoleJavaSimpleProjectCommands() {
-    consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_PROJECT,
-        BUILD_GOAL,
-        BUILD_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
-        BUILD_SUCCESS);
+  public void checkWebJavaPetclinicProjectCommands() {
+    By textOnPreviewPage = By.xpath("//h2[text()='Welcome']");
+    String tomcatIsRunning = "$TOMCAT_HOME/bin/catalina.sh";
 
-    consoles.executeCommandFromProjectExplorer(
-        CONSOLE_JAVA_PROJECT,
+    projectExplorer.openItemByPath(WEB_JAVA_PROJECT);
+
+    // Select the db machine and perform 'show databases' command
+    consoles.executeCommandFromProcessesArea(
+        DB_MACHINE_NAME, COMMON_GOAL, "show databases", "information_schema");
+
+    // Build and deploy the web application
+    consoles.executeCommandFromProcessesArea(
+        DEV_MACHINE_NAME, BUILD_GOAL, BUILD_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT), BUILD_SUCCESS);
+
+    consoles.executeCommandFromProcessesArea(
+        DEV_MACHINE_NAME,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
-        "Hello World Che!");
-  }
+        BUILD_AND_DEPLOY_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
+        "Server startup in");
 
-  @Test(priority = 1)
-  public void checkWebJavaSpringProjectCommands() {
-    String tomcatIsRunning = "/bin/bash -c $TOMCAT_HOME/bin/catalina.sh";
-
-    consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING_PROJECT,
-        BUILD_GOAL,
-        BUILD_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
-        BUILD_SUCCESS);
-
-    consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING_PROJECT,
-        RUN_GOAL,
-        BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
-        SERVER_STARTUP_IN);
-    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
-    consoles.closeProcessTabWithAskDialog(
-        BUILD_AND_RUN_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT));
-
-    consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING_PROJECT,
-        RUN_GOAL,
-        RUN_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
-        SERVER_STARTUP_IN);
+    // Run the application
     consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     // execute 'stop tomcat' command and check that tomcat process is not running
     projectExplorer.invokeCommandWithContextMenu(
         RUN_GOAL,
-        WEB_JAVA_SPRING_PROJECT,
-        STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT));
+        WEB_JAVA_PROJECT,
+        STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
+        DEV_MACHINE_NAME);
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
     terminal.typeIntoTerminal("ps ax");
     terminal.typeIntoTerminal(ENTER.toString());
     terminal.waitExpectedTextNotPresentTerminal(tomcatIsRunning);
 
-    consoles.executeCommandFromProjectExplorer(
-        WEB_JAVA_SPRING_PROJECT,
+    consoles.executeCommandFromProcessesArea(
+        DEV_MACHINE_NAME,
         DEBUG_GOAL,
-        DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT),
+        DEBUG_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
         LISTENING_AT_ADDRESS_8000);
   }
 }

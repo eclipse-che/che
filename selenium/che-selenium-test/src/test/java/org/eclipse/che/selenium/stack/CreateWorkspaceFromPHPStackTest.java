@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.START_APACHE_COMMAND;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RESTART_APACHE_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.STOP_APACHE_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
@@ -38,11 +38,11 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceFromPHPStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String WEB_PHP_SIMPLE = "web-php-simple";
-  private static final String WEB_PHP_GAE_SIMPLE = "web-php-gae-simple";
+  private static final String WEB_PHP_PROJECT = "web-php-simple";
+  private static final String WEB_PHP_GAE_PROJECT = "web-php-gae-simple";
   private static final String PHP_FILE_NAME = "index.php";
 
-  private List<String> projects = ImmutableList.of(WEB_PHP_SIMPLE, WEB_PHP_GAE_SIMPLE);
+  private List<String> projects = ImmutableList.of(WEB_PHP_PROJECT, WEB_PHP_GAE_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -69,43 +69,53 @@ public class CreateWorkspaceFromPHPStackTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(WEB_PHP_SIMPLE);
-    projectExplorer.waitProjectInitialization(WEB_PHP_GAE_SIMPLE);
+    projectExplorer.waitProjectInitialization(WEB_PHP_PROJECT);
+    projectExplorer.waitProjectInitialization(WEB_PHP_GAE_PROJECT);
   }
 
   @Test(priority = 1)
   public void checkWebPhpSimpleCommands() {
-    projectExplorer.openItemByPath(WEB_PHP_SIMPLE);
-    projectExplorer.openItemByPath(WEB_PHP_SIMPLE + "/" + PHP_FILE_NAME);
+    By textOnPreviewPage = By.xpath("//*[text()='Hello World!']");
+    String apacheIsRunning = "\"/usr/sbin/apache2 -k start\"";
+
+    projectExplorer.openItemByPath(WEB_PHP_PROJECT);
+    projectExplorer.openItemByPath(WEB_PHP_PROJECT + "/" + PHP_FILE_NAME);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_PHP_SIMPLE, RUN_GOAL, "run php script", "Hello World!");
+        WEB_PHP_PROJECT, RUN_GOAL, "run php script", "Hello World!");
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_PHP_SIMPLE, RUN_GOAL, START_APACHE_COMMAND, "Starting Apache httpd web server apache2");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//*[text()='Hello World!']"));
+        WEB_PHP_PROJECT,
+        RUN_GOAL,
+        RESTART_APACHE_COMMAND,
+        "Starting Apache httpd web server apache2");
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_PHP_SIMPLE, RUN_GOAL, "restart apache", "...done");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//*[text()='Hello World!']"));
+        WEB_PHP_PROJECT, RUN_GOAL, RESTART_APACHE_COMMAND, "...done");
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
     // start 'stop apache' command and check that apache not running
     consoles.executeCommandFromProjectExplorer(
-        WEB_PHP_SIMPLE, RUN_GOAL, STOP_APACHE_COMMAND, "Stopping Apache httpd web server apache2");
+        WEB_PHP_PROJECT, RUN_GOAL, STOP_APACHE_COMMAND, "Stopping Apache httpd web server apache2");
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
     terminal.typeIntoTerminal("ps ax");
     terminal.typeIntoTerminal(ENTER.toString());
-    terminal.waitExpectedTextNotPresentTerminal("/usr/sbin/apache2 -k start");
+    terminal.waitExpectedTextNotPresentTerminal(apacheIsRunning);
   }
 
   @Test(priority = 1)
   public void checkWebPhpGaeSimpleCommands() {
+    By textOnPreviewPage = By.xpath("//input[@value='Sign Guestbook']");
+
     consoles.executeCommandFromProjectExplorer(
-        WEB_PHP_GAE_SIMPLE,
+        WEB_PHP_GAE_PROJECT,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(WEB_PHP_GAE_SIMPLE),
+        RUN_COMMAND_ITEM.getItem(WEB_PHP_GAE_PROJECT),
         "Starting admin server");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//input[@value='Sign Guestbook']"));
-    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_PHP_GAE_SIMPLE));
+
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
+
+    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_PHP_GAE_PROJECT));
   }
 }

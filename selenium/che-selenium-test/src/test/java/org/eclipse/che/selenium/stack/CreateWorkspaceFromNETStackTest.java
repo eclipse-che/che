@@ -68,6 +68,8 @@ public class CreateWorkspaceFromNETStackTest {
 
   @Test(priority = 1)
   public void checkDotnetWebSimpleProjectCommands() {
+    By textOnPreviewPage = By.xpath("//pre[text()='Hello World!']");
+
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, BUILD_GOAL, UPDATE_DEPENDENCIES_COMMAND, "Restore completed");
     consoles.executeCommandFromProjectExplorer(
@@ -78,11 +80,11 @@ public class CreateWorkspaceFromNETStackTest {
 
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, RUN_GOAL, RUN_COMMAND, "Application started.");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//pre[text()='Hello World!']"));
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
     consoles.closeProcessTabWithAskDialog("run");
 
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, RUN_GOAL, RUN_COMMAND_ITEM.getItem(PROJECT_NAME), "Application started.");
-    consoles.checkWebElementVisibilityAtPreviewPage(By.xpath("//pre[text()='Hello World!']"));
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
   }
 }

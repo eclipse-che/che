@@ -37,11 +37,10 @@ import org.testng.annotations.Test;
 /** @author Skoryk Serhii */
 public class CreateWorkspaceFromRailsStackTest {
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String CONSOLE_RUBY_SIMPLE_PROJECT = "console-ruby-simple";
-  private static final String WEB_RAILS_SIMPLE_PROJECT = "web-rails-simple";
+  private static final String CONSOLE_RUBY_PROJECT = "console-ruby-simple";
+  private static final String WEB_RAILS_PROJECT = "web-rails-simple";
 
-  private List<String> projects =
-      ImmutableList.of(CONSOLE_RUBY_SIMPLE_PROJECT, WEB_RAILS_SIMPLE_PROJECT);
+  private List<String> projects = ImmutableList.of(CONSOLE_RUBY_PROJECT, WEB_RAILS_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -67,41 +66,38 @@ public class CreateWorkspaceFromRailsStackTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(CONSOLE_RUBY_SIMPLE_PROJECT);
-    projectExplorer.waitProjectInitialization(WEB_RAILS_SIMPLE_PROJECT);
+    projectExplorer.waitProjectInitialization(CONSOLE_RUBY_PROJECT);
+    projectExplorer.waitProjectInitialization(WEB_RAILS_PROJECT);
   }
 
   @Test(priority = 1)
   public void checkConsoleRubySimpleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_RUBY_SIMPLE_PROJECT,
+        CONSOLE_RUBY_PROJECT,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(CONSOLE_RUBY_SIMPLE_PROJECT),
+        RUN_COMMAND_ITEM.getItem(CONSOLE_RUBY_PROJECT),
         "Hello world!");
   }
 
   @Test(priority = 1)
   public void checkWebRailsSimpleProjectCommands() {
+    By textOnPreviewPage = By.xpath("//h1[text()='Yay! You’re on Rails!']");
+
     consoles.executeCommandFromProjectExplorer(
-        WEB_RAILS_SIMPLE_PROJECT, BUILD_GOAL, INSTALL_DEPENDENCIES_COMMAND, "Bundle complete!");
+        WEB_RAILS_PROJECT, BUILD_GOAL, INSTALL_DEPENDENCIES_COMMAND, "Bundle complete!");
     consoles.executeCommandFromProjectExplorer(
-        WEB_RAILS_SIMPLE_PROJECT,
+        WEB_RAILS_PROJECT,
         BUILD_GOAL,
-        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(WEB_RAILS_SIMPLE_PROJECT),
+        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(WEB_RAILS_PROJECT),
         "Bundle complete!");
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_RAILS_SIMPLE_PROJECT, RUN_GOAL, RUN_COMMAND, "* Listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//h1[text()='Yay! You’re on Rails!']"));
+        WEB_RAILS_PROJECT, RUN_GOAL, RUN_COMMAND, "* Listening on");
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_RAILS_SIMPLE_PROJECT,
-        RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(WEB_RAILS_SIMPLE_PROJECT),
-        "* Listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//h1[text()='Yay! You’re on Rails!']"));
+        WEB_RAILS_PROJECT, RUN_GOAL, RUN_COMMAND_ITEM.getItem(WEB_RAILS_PROJECT), "* Listening on");
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
   }
 }

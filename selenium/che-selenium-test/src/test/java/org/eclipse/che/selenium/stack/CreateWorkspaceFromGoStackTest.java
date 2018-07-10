@@ -14,7 +14,6 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
 
 import com.google.common.collect.ImmutableList;
@@ -36,11 +35,11 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceFromGoStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String DESKTOP_GO_SIMPLE_PROJECT = "desktop-go-simple";
-  private static final String WEB_GO_SIMPLE_PROJECT = "web-go-simple";
+  private static final String DESKTOP_GO_PROJECT = "desktop-go-simple";
+  private static final String WEB_GO_PROJECT = "web-go-simple";
 
-  private List<String> projects =
-      ImmutableList.of(DESKTOP_GO_SIMPLE_PROJECT, WEB_GO_SIMPLE_PROJECT);
+  private List<String> projects = ImmutableList.of(DESKTOP_GO_PROJECT, WEB_GO_PROJECT);
+  private By textOnPreviewPage = By.xpath("//pre[contains(text(),'Hello there')]");
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -64,36 +63,35 @@ public class CreateWorkspaceFromGoStackTest {
   public void checkWorkspaceCreationFromGoStack() {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(GO, WORKSPACE_NAME, projects);
 
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse(PREPARING_WS_TIMEOUT_SEC * 2);
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(DESKTOP_GO_SIMPLE_PROJECT);
-    projectExplorer.waitProjectInitialization(WEB_GO_SIMPLE_PROJECT);
+    projectExplorer.waitProjectInitialization(DESKTOP_GO_PROJECT);
+    projectExplorer.waitProjectInitialization(WEB_GO_PROJECT);
   }
 
   @Test(priority = 1)
-  public void checkDesktopGoSimpleProjectCommandsStack() {
+  public void checkDesktopGoSimpleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        DESKTOP_GO_SIMPLE_PROJECT,
+        DESKTOP_GO_PROJECT,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(DESKTOP_GO_SIMPLE_PROJECT),
+        RUN_COMMAND_ITEM.getItem(DESKTOP_GO_PROJECT),
         "Hello, world. Sqrt(2) = 1.4142135623730951");
   }
 
   @Test(priority = 1)
-  public void checkWebGoSimpleProjectCommandsStack() {
+  public void checkWebGoSimpleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        WEB_GO_SIMPLE_PROJECT, RUN_GOAL, RUN_COMMAND, "listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//pre[contains(text(),'Hello there')]"));
+        WEB_GO_PROJECT, RUN_GOAL, RUN_COMMAND, "listening on");
+
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
+
     consoles.closeProcessTabWithAskDialog(RUN_COMMAND);
 
     consoles.executeCommandFromProjectExplorer(
-        WEB_GO_SIMPLE_PROJECT,
-        RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(WEB_GO_SIMPLE_PROJECT),
-        "listening on");
-    consoles.checkWebElementVisibilityAtPreviewPage(
-        By.xpath("//pre[contains(text(),'Hello there')]"));
-    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_GO_SIMPLE_PROJECT));
+        WEB_GO_PROJECT, RUN_GOAL, RUN_COMMAND_ITEM.getItem(WEB_GO_PROJECT), "listening on");
+
+    consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
+
+    consoles.closeProcessTabWithAskDialog(RUN_COMMAND_ITEM.getItem(WEB_GO_PROJECT));
   }
 }

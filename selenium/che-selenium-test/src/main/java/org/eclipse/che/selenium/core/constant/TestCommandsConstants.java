@@ -19,7 +19,6 @@ public interface TestCommandsConstants {
   String BUILD_COMMAND = "build";
   String CLEAN_BUILD_COMMAND = "clean build";
   String DEBUG_COMMAND = "debug";
-  String CLEAN_BUILD_COMMAND = "clean build";
   String BUILD_AND_RUN_COMMAND = "build and run";
   String STOP_TOMCAT_COMMAND = "stop tomcat";
   String RUN_TOMCAT_COMMAND = "run tomcat";
@@ -27,4 +26,5 @@ public interface TestCommandsConstants {
   String UPDATE_DEPENDENCIES_COMMAND = "update dependencies";
   String START_APACHE_COMMAND = "start apache";
   String STOP_APACHE_COMMAND = "stop apache";
+  String RESTART_APACHE_COMMAND = "restart apache";
 }

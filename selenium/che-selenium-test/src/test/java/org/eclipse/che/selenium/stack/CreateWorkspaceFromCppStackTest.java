@@ -33,11 +33,11 @@ import org.testng.annotations.Test;
 /** @author Skoryk Serhii */
 public class CreateWorkspaceFromCppStackTest {
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String CONSOLE_CPP_SIMPLE = "console-cpp-simple";
-  private static final String C_SIMPLE_CONSOLE = "c-simple-console";
-  private static final String EXPECTED_MESSAGE = "Hello World";
+  private static final String CONSOLE_CPP_PROJECT = "console-cpp-simple";
+  private static final String C_SIMPLE_CONSOLE_PROJECT = "c-simple-console";
+  private static final String EXPECTED_MESSAGE_IN_CONSOLE = "Hello World";
 
-  private List<String> projects = ImmutableList.of(CONSOLE_CPP_SIMPLE, C_SIMPLE_CONSOLE);
+  private List<String> projects = ImmutableList.of(CONSOLE_CPP_PROJECT, C_SIMPLE_CONSOLE_PROJECT);
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -63,27 +63,28 @@ public class CreateWorkspaceFromCppStackTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
-    projectExplorer.waitProjectInitialization(CONSOLE_CPP_SIMPLE);
-    projectExplorer.waitProjectInitialization(C_SIMPLE_CONSOLE);
+    projectExplorer.waitProjectInitialization(CONSOLE_CPP_PROJECT);
+    projectExplorer.waitProjectInitialization(C_SIMPLE_CONSOLE_PROJECT);
   }
 
   @Test(priority = 1)
   public void checkConsoleCppSimpleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_CPP_SIMPLE, RUN_GOAL, RUN_COMMAND, EXPECTED_MESSAGE);
+        CONSOLE_CPP_PROJECT, RUN_GOAL, RUN_COMMAND, EXPECTED_MESSAGE_IN_CONSOLE);
+
     consoles.executeCommandFromProjectExplorer(
-        CONSOLE_CPP_SIMPLE,
+        CONSOLE_CPP_PROJECT,
         RUN_GOAL,
-        BUILD_AND_RUN_COMMAND_ITEM.getItem(CONSOLE_CPP_SIMPLE),
-        EXPECTED_MESSAGE);
+        BUILD_AND_RUN_COMMAND_ITEM.getItem(CONSOLE_CPP_PROJECT),
+        EXPECTED_MESSAGE_IN_CONSOLE);
   }
 
   @Test(priority = 1)
   public void checkCSimpleConsoleProjectCommands() {
     consoles.executeCommandFromProjectExplorer(
-        C_SIMPLE_CONSOLE,
+        C_SIMPLE_CONSOLE_PROJECT,
         RUN_GOAL,
-        BUILD_AND_RUN_COMMAND_ITEM.getItem(C_SIMPLE_CONSOLE),
-        EXPECTED_MESSAGE);
+        BUILD_AND_RUN_COMMAND_ITEM.getItem(C_SIMPLE_CONSOLE_PROJECT),
+        EXPECTED_MESSAGE_IN_CONSOLE);
   }
 }
