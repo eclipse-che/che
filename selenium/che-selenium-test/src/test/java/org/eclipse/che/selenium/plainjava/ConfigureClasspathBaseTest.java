@@ -90,7 +90,7 @@ public class ConfigureClasspathBaseTest {
         "/" + PROJECT_NAME + "/my-lib/src/test/java");
     configureClasspath.selectLibrariesCategory();
     configureClasspath.waitExpectedTextJarsAndFolderArea(
-        "org.eclipse.che.MAVEN2_CLASSPATH_CONTAINER");
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER");
     configureClasspath.waitExpectedTextJarsAndFolderArea("org.eclipse.jdt.launching.JRE_CONTAINER");
     configureClasspath.closeConfigureClasspathFormByIcon();
 
@@ -103,7 +103,7 @@ public class ConfigureClasspathBaseTest {
         "/" + PROJECT_NAME + "/my-webapp/src/main/java");
     configureClasspath.selectLibrariesCategory();
     configureClasspath.waitExpectedTextJarsAndFolderArea(
-        "org.eclipse.che.MAVEN2_CLASSPATH_CONTAINER");
+        "org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER");
     configureClasspath.waitExpectedTextJarsAndFolderArea("org.eclipse.jdt.launching.JRE_CONTAINER");
     configureClasspath.closeConfigureClasspathFormByIcon();
   }
