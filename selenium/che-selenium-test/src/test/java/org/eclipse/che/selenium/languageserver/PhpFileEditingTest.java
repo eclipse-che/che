@@ -31,8 +31,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
-import org.eclipse.che.selenium.pageobject.debug.PhpDebugConfig;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,7 +42,7 @@ public class PhpFileEditingTest {
   private static final URL RESOURCE =
       PhpFileEditingTest.class.getResource("/projects/plugins/DebuggerPlugin/php-tests");
 
-  private List<String> expectedText =
+  private List<String> expectedProposals =
       ImmutableList.of(
           "expm1 float", "exp float", "error_log bool", "explode array", "exec string");
 
@@ -55,8 +53,6 @@ public class PhpFileEditingTest {
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private DebugPanel debugPanel;
-  @Inject private PhpDebugConfig debugConfig;
   @Inject private NotificationsPopupPanel notificationPopup;
   @Inject private Menu menu;
   @Inject private CodenvyEditor editor;
@@ -109,9 +105,11 @@ public class PhpFileEditingTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("e");
     editor.launchAutocomplete();
-    expectedText.forEach(
-        item -> {
-          editor.waitTextIntoAutocompleteContainer(item);
+
+    // check expected proposals in Autocomplete container
+    expectedProposals.forEach(
+        proposal -> {
+          editor.waitTextIntoAutocompleteContainer(proposal);
         });
   }
 
