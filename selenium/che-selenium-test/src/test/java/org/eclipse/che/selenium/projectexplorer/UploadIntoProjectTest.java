@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -37,15 +38,7 @@ import org.testng.annotations.Test;
 public class UploadIntoProjectTest {
   private static final String PROJECT_NAME = "TestProject";
   private static final URL PROJECT_SOURCES =
-      UploadIntoProjectTest.class.getResource("/projects/simple-java-project");
-
-  private static final String FILE_TO_UPLOAD_NAME = "Main.java";
-  private static final URL FILE_TO_UPLOAD_PATH =
-      UploadIntoProjectTest.class.getResource(
-          "/projects/simple-java-project/src/com/company/" + FILE_TO_UPLOAD_NAME);
-
-  private static final URL FOLDER_TO_UPLOAD_PATH =
-      UploadIntoProjectTest.class.getResource("/projects/simple-java-project/src/com");
+      UploadIntoProjectTest.class.getResource("/projects/default-spring-project");
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -78,6 +71,13 @@ public class UploadIntoProjectTest {
 
   @Test
   public void shouldUploadFileWithDefaultOptions() throws URISyntaxException, IOException {
+    // given
+    final String uploadingFileName = "Aclass.java";
+    final Path localPathToFileToUpload =
+        Paths.get(PROJECT_SOURCES.getPath())
+            .resolve("src/main/java/che/eclipse/sample")
+            .resolve(uploadingFileName);
+
     // open upload file window
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FILE);
@@ -85,18 +85,33 @@ public class UploadIntoProjectTest {
     uploadFileDialogPage.waitOnOpen();
 
     // when
-    uploadFileDialogPage.selectResourceToUpload(Paths.get(FILE_TO_UPLOAD_PATH.toURI()));
+    uploadFileDialogPage.selectResourceToUpload(localPathToFileToUpload);
     uploadFileDialogPage.clickOnUploadButton();
 
     // then
     uploadFileDialogPage.waitOnClose();
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
-        format("File '%s' has uploaded successfully", FILE_TO_UPLOAD_NAME));
-    projectExplorer.waitVisibleItem(format("%s/%s", PROJECT_NAME, FILE_TO_UPLOAD_NAME));
+        format("File '%s' has uploaded successfully", uploadingFileName));
+    projectExplorer.waitVisibleItem(format("%s/%s", PROJECT_NAME, uploadingFileName));
   }
 
   @Test
-  public void shouldUploadDirectoryWithDefaultOptions() throws URISyntaxException, IOException {
+  public void shouldUploadFileWithOverwriting() {
+    // open upload file window
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FOLDER);
+
+    uploadDirectoryDialogPage.waitOnOpen();
+  }
+
+  @Test
+  public void shouldUploadDirectoryWithDefaultOptions() throws IOException {
+    // given
+    final String uploadingFileName = "Aclass.java";
+    final String uploadingFilePath = "che/eclipse/sample/" + uploadingFileName;
+    final Path localPathToFolderToUpload =
+        Paths.get(PROJECT_SOURCES.getPath()).resolve("src/main/java");
+
     // open upload file window
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FOLDER);
@@ -104,11 +119,11 @@ public class UploadIntoProjectTest {
     uploadDirectoryDialogPage.waitOnOpen();
 
     // when
-    uploadDirectoryDialogPage.selectResourceToUpload(Paths.get(FOLDER_TO_UPLOAD_PATH.toURI()));
+    uploadDirectoryDialogPage.selectResourceToUpload(localPathToFolderToUpload);
     uploadDirectoryDialogPage.clickOnUploadButton();
 
     // then
     projectExplorer.quickRevealToItemWithJavaScript(
-        format("%s/%s", PROJECT_NAME, "company/" + FILE_TO_UPLOAD_NAME));
+        format("%s/%s", PROJECT_NAME, uploadingFilePath));
   }
 }
