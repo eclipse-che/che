@@ -63,7 +63,6 @@ public class CreateWorkspaceFromEclipseCheStackTest {
 
   @BeforeClass
   public void setUp() {
-
     dashboard.open();
   }
 
