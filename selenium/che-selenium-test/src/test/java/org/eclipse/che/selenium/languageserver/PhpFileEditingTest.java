@@ -14,9 +14,11 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -29,21 +31,20 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
-import org.eclipse.che.selenium.pageobject.debug.PhpDebugConfig;
 import org.openqa.selenium.Keys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class PhpFileEditingTest {
-  private static final Logger LOG = LoggerFactory.getLogger(PhpFileEditingTest.class);
   private static final String PROJECT = "php-tests";
   private static final String PATH_TO_INDEX_PHP = PROJECT + "/index.php";
   private static final URL RESOURCE =
       PhpFileEditingTest.class.getResource("/projects/plugins/DebuggerPlugin/php-tests");
+
+  private List<String> expectedProposals =
+      ImmutableList.of(
+          "expm1 float", "exp float", "error_log bool", "explode array", "exec string");
 
   @InjectTestWorkspace(template = WorkspaceTemplate.ECLIPSE_PHP)
   private TestWorkspace ws;
@@ -52,8 +53,6 @@ public class PhpFileEditingTest {
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private DebugPanel debugPanel;
-  @Inject private PhpDebugConfig debugConfig;
   @Inject private NotificationsPopupPanel notificationPopup;
   @Inject private Menu menu;
   @Inject private CodenvyEditor editor;
@@ -106,8 +105,12 @@ public class PhpFileEditingTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("e");
     editor.launchAutocomplete();
-    editor.waitTextIntoAutocompleteContainer(
-        "expm1 float\nexp float\nerror_log bool\nexplode array\nexec string");
+
+    // check expected proposals in Autocomplete container
+    expectedProposals.forEach(
+        proposal -> {
+          editor.waitTextIntoAutocompleteContainer(proposal);
+        });
   }
 
   private void checkAutocompletion() {

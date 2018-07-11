@@ -246,6 +246,10 @@ public class TestGitHubRepository {
     return ghRepo.getHtmlUrl().toString();
   }
 
+  public String getHttpsTransportUrl() {
+    return ghRepo.gitHttpTransportUrl();
+  }
+
   public String getSshUrl() {
     return ghRepo.getSshUrl();
   }
