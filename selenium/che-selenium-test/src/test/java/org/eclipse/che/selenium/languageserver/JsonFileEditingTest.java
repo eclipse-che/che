@@ -11,7 +11,10 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.NODEJS_WITH_JSON_LS;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -19,8 +22,10 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -37,14 +42,16 @@ public class JsonFileEditingTest {
   private TestWorkspace workspace;
 
   @Inject private Ide ide;
+  @Inject private Menu menu;
+  @Inject private Wizard wizard;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
-  @Inject private Wizard wizard;
   @Inject private ProjectExplorer projectExplorer;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
+    createProjectFromWizard();
   }
 
   @Test
@@ -63,15 +70,47 @@ public class JsonFileEditingTest {
   public void checkCodeValidationFeature() {
     editor.selectTabByName(JSON_FILE_NAME);
 
-    // TODO Remove , symbol after last brace and check error marker.
-    // Make sure that error marker appears.
-    // Click on the marker and check message like Expected '(end)' and instead saw ':'.in
-    // the proposal window. Return the just deleted coma and wait disappearance the marker.
+    // delete ',' and check error marker with message
+    editor.goToCursorPositionVisible(8, 5);
+    editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+    editor.waitMarkerInPosition(ERROR, 9);
+    editor.moveToMarkerAndWaitAssistContent(ERROR);
+    editor.waitTextIntoAnnotationAssist("Expected '(end)' and instead saw ':'.");
+
+    // return ',' and check error marker invisibility
+    editor.goToCursorPositionVisible(8, 4);
+    editor.typeTextIntoEditor(",");
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   @Test(priority = 1)
   public void checkFormatCodeFeature() {
-    // TODO  Go to the line 9 and add fragment like: "newObj":[1,2,3],. Make sure that JSON does not
-    // have any errors.
+    editor.selectTabByName(JSON_FILE_NAME);
+
+    // add new object
+    editor.goToCursorPositionVisible(9, 16);
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
+    editor.waitAllMarkersInvisibility(ERROR);
+
+    // add duplicated object and check error marker with message
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
+    editor.waitMarkerInPosition(ERROR, 11);
+    editor.moveToMarkerAndWaitAssistContent(ERROR);
+    editor.waitTextIntoAnnotationAssist("Duplicate key 'newObj'.");
+
+    // delete the duplicated object and check error marker invisibility
+    editor.deleteCurrentLine();
+    editor.waitAllMarkersInvisibility(ERROR);
+  }
+
+  private void createProjectFromWizard() {
+    projectExplorer.waitProjectExplorer();
+    menu.runCommand(WORKSPACE, CREATE_PROJECT);
+    wizard.selectSample(Wizard.SamplesName.NODEJS_HELLO_WORLD);
+    wizard.typeProjectNameOnWizard(PROJECT_NAME);
+    wizard.clickCreateButton();
+    wizard.waitCloseProjectConfigForm();
   }
 }
