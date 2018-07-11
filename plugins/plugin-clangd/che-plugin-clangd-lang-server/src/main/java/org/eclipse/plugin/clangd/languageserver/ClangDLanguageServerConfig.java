@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class ClangDLanguageServerConfig implements LanguageServerConfig {
   private static final Logger LOG = LoggerFactory.getLogger(ClangDLanguageServerConfig.class);
 
-  private static final String REGEX = ".*\\.(c|h|cc|hh|cpp|hpp|cxx|hxx|C|H|CC|HH|CPP|HPP|CXX|HXX)";
+  private static final String REGEX = ".*\\.(c|h|cc|hh|cpp|hpp|cxx|hxx|C|H|CC|HH|CPP|HPP|CXX|HXX)$";
 
   private final Path launchScript;
 
