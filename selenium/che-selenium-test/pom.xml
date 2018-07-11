@@ -244,6 +244,7 @@
                         </goals>
                         <configuration>
                             <trimStackTrace>false</trimStackTrace>
+                            <parallel>classes</parallel>
                             <properties>
                                 <property>
                                     <name>configfailurepolicy</name>
