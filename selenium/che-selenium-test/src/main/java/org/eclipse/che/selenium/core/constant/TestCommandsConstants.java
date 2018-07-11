@@ -22,4 +22,9 @@ public interface TestCommandsConstants {
   String BUILD_AND_RUN_COMMAND = "build and run";
   String STOP_TOMCAT_COMMAND = "stop tomcat";
   String RUN_TOMCAT_COMMAND = "run tomcat";
+  String INSTALL_DEPENDENCIES_COMMAND = "install dependencies";
+  String UPDATE_DEPENDENCIES_COMMAND = "update dependencies";
+  String START_APACHE_COMMAND = "start apache";
+  String STOP_APACHE_COMMAND = "stop apache";
+  String RESTART_APACHE_COMMAND = "restart apache";
 }

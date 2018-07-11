@@ -28,7 +28,8 @@ public final class TestIntelligentCommandsConstants {
     STOP_TOMCAT_COMMAND_ITEM("%s:stop tomcat"),
     RUN_TOMCAT_COMMAND_ITEM("%s:run tomcat"),
     DEBUG_COMMAND_ITEM("%s:debug"),
-    INSTALL_DEPENDENCIES_COMMAND_ITEM("%s:install dependencies");
+    INSTALL_DEPENDENCIES_COMMAND_ITEM("%s:install dependencies"),
+    UPDATE_DEPENDENCIES_COMMAND_ITEM("%s:update dependencies");
 
     private final String itemTemplate;
 

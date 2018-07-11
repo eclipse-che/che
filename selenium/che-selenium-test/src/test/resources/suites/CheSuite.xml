@@ -278,7 +278,7 @@
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromBlankStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.WorkingWithJavaMySqlStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.stack.WorkingWithNodeWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
