@@ -17,7 +17,6 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -29,7 +28,6 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
  * Validator for {@link Workspace}.
@@ -48,13 +46,6 @@ public class WorkspaceValidator {
 
   private static final Pattern VOLUME_NAME = Pattern.compile("[a-z][a-z0-9]{1,18}");
   private static final Pattern VOLUME_PATH = Pattern.compile("/.+");
-
-  private final WorkspaceRuntimes runtimes;
-
-  @Inject
-  public WorkspaceValidator(WorkspaceRuntimes runtimes) {
-    this.runtimes = runtimes;
-  }
 
   /**
    * Checks whether given workspace configuration object is in application valid state, so it
@@ -93,12 +84,6 @@ public class WorkspaceValidator {
       for (Entry<String, ? extends MachineConfig> machineEntry :
           environment.getMachines().entrySet()) {
         validateMachine(machineEntry.getKey(), machineEntry.getValue());
-      }
-
-      try {
-        runtimes.validate(environment);
-      } catch (InfrastructureException e) {
-        throw new ServerException(e);
       }
     }
 
