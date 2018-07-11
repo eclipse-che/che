@@ -89,8 +89,6 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest {
   public void editorShouldBeInReadonlyModeAfterUnexpectedWsAgentStopping() throws Exception {
     goToFileAndCheckText();
 
-    waitWorkspaceRunningStatus();
-
     // execute kill ws agent command
     projectExplorer.invokeCommandWithContextMenu(
         COMMON_GOAL, PROJECT_NAME, nameCommandForKillWsAgent);
