@@ -22,6 +22,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsP
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -52,6 +53,7 @@ public class KubernetesEnvironmentProvisioner {
   private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   private final IngressTlsProvisioner externalServerIngressTlsProvisioner;
   private final ImagePullSecretProvisioner imagePullSecretProvisioner;
+  private final ProxySettingsProvisioner proxySettingsProvisioner;
 
   @Inject
   public KubernetesEnvironmentProvisioner(
@@ -67,7 +69,8 @@ public class KubernetesEnvironmentProvisioner {
       SecurityContextProvisioner securityContextProvisioner,
       PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
       IngressTlsProvisioner externalServerIngressTlsProvisioner,
-      ImagePullSecretProvisioner imagePullSecretProvisioner) {
+      ImagePullSecretProvisioner imagePullSecretProvisioner,
+      ProxySettingsProvisioner proxySettingsProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -81,6 +84,7 @@ public class KubernetesEnvironmentProvisioner {
     this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
     this.externalServerIngressTlsProvisioner = externalServerIngressTlsProvisioner;
     this.imagePullSecretProvisioner = imagePullSecretProvisioner;
+    this.proxySettingsProvisioner = proxySettingsProvisioner;
   }
 
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
@@ -106,5 +110,6 @@ public class KubernetesEnvironmentProvisioner {
     securityContextProvisioner.provision(k8sEnv, identity);
     podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
     imagePullSecretProvisioner.provision(k8sEnv, identity);
+    proxySettingsProvisioner.provision(k8sEnv, identity);
   }
 }

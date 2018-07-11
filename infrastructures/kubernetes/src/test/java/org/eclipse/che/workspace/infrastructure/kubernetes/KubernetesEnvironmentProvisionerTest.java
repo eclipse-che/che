@@ -21,6 +21,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsP
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -56,6 +57,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   @Mock private IngressTlsProvisioner externalServerIngressTlsProvisioner;
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
+  @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
 
   private KubernetesEnvironmentProvisioner osInfraProvisioner;
 
@@ -77,7 +79,8 @@ public class KubernetesEnvironmentProvisionerTest {
             securityContextProvisioner,
             podTerminationGracePeriodProvisioner,
             externalServerIngressTlsProvisioner,
-            imagePullSecretProvisioner);
+            imagePullSecretProvisioner,
+            proxySettingsProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,

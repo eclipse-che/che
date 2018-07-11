@@ -19,6 +19,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSe
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -54,6 +55,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
+  @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -74,7 +76,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             installerServersPortProvisioner,
             logsVolumeMachineProvisioner,
             podTerminationGracePeriodProvisioner,
-            imagePullSecretProvisioner);
+            imagePullSecretProvisioner,
+            proxySettingsProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
