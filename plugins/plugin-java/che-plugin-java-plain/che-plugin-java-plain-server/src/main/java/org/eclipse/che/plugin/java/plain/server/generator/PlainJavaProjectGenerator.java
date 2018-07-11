@@ -142,8 +142,7 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
   }
 
   private String getResource(String resourceName) throws ServerException {
-    try (InputStream resourceAsStream =
-        getClass().getClassLoader().getResourceAsStream(resourceName)) {
+    try (InputStream resourceAsStream = getClass().getResourceAsStream(resourceName)) {
       return IOUtils.toString(resourceAsStream);
     } catch (Exception e) {
       throw new ServerException(e.getMessage());
