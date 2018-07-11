@@ -917,33 +917,69 @@ public class StandardComponentInitializer {
     keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('z').build(), UNDO);
     keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('y').build(), REDO);
 
-    keyBinding
-        .getGlobal()
-        .addKey(
-            new KeyBuilder().action().alt().charCode('1').build(),
-            PROJECT_EXPLORER_DISPLAYING_MODE);
+    if (UserAgent.isMac()) {
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().control().charCode('1').build(),
+              PROJECT_EXPLORER_DISPLAYING_MODE);
 
-    keyBinding
-        .getGlobal()
-        .addKey(new KeyBuilder().action().alt().charCode('2').build(), EVENT_LOGS_DISPLAYING_MODE);
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().control().charCode('2').build(),
+              EVENT_LOGS_DISPLAYING_MODE);
 
-    keyBinding
-        .getGlobal()
-        .addKey(new KeyBuilder().action().alt().charCode('3').build(), FIND_RESULT_DISPLAYING_MODE);
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().control().charCode('3').build(),
+              FIND_RESULT_DISPLAYING_MODE);
 
-    keyBinding
-        .getGlobal()
-        .addKey(
-            new KeyBuilder().action().alt().charCode('4').build(),
-            COMMAND_EXPLORER_DISPLAYING_MODE);
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().control().charCode('4').build(),
+              COMMAND_EXPLORER_DISPLAYING_MODE);
 
-    keyBinding
-        .getGlobal()
-        .addKey(new KeyBuilder().alt().charCode('E').build(), EDITOR_DISPLAYING_MODE);
+      keyBinding
+          .getGlobal()
+          .addKey(new KeyBuilder().action().charCode('E').build(), EDITOR_DISPLAYING_MODE);
 
-    keyBinding
-        .getGlobal()
-        .addKey(new KeyBuilder().alt().charCode('T').build(), TERMINAL_DISPLAYING_MODE);
+      keyBinding
+          .getGlobal()
+          .addKey(new KeyBuilder().action().charCode('T').build(), TERMINAL_DISPLAYING_MODE);
+    } else {
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().alt().charCode('1').build(),
+              PROJECT_EXPLORER_DISPLAYING_MODE);
+
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().alt().charCode('2').build(), EVENT_LOGS_DISPLAYING_MODE);
+
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().alt().charCode('3').build(), FIND_RESULT_DISPLAYING_MODE);
+
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().alt().charCode('4').build(),
+              COMMAND_EXPLORER_DISPLAYING_MODE);
+
+      keyBinding
+          .getGlobal()
+          .addKey(new KeyBuilder().alt().charCode('E').build(), EDITOR_DISPLAYING_MODE);
+
+      keyBinding
+          .getGlobal()
+          .addKey(new KeyBuilder().alt().charCode('T').build(), TERMINAL_DISPLAYING_MODE);
+    }
 
     keyBinding
         .getGlobal()

@@ -20,9 +20,16 @@ public interface Status {
 
   void setClean(boolean isClean);
 
+  /** @deprecated Use {@link #getRefName()} instead. */
   String getBranchName();
 
+  /** @deprecated Use #setRefName(String) instead. */
   void setBranchName(String branchName);
+
+  /** Returns reference name e.g. branch, tag or commit id */
+  String getRefName();
+
+  void setRefName(String refName);
 
   /** New files that are staged in index. */
   List<String> getAdded();

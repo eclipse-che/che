@@ -140,7 +140,7 @@ public class NewWorkspace {
     CPP("cpp-default"),
     CENTOS_BLANK("centos"),
     CENTOS_GO("centos-go"),
-    CENTOS_NODEJS("nodejs4"),
+    CENTOS_NODEJS("nodejs6"),
     CENTOS_WILDFLY_SWARM("wildfly-swarm"),
     CEYLON_WITH_JAVA_JAVASCRIPT("ceylon-java-javascript-dart-centos"),
     DEBIAN("debian"),

@@ -29,6 +29,9 @@ fi
 export OC_PUBLIC_HOSTNAME=${OC_PUBLIC_HOSTNAME:-${DEFAULT_OC_PUBLIC_HOSTNAME}}
 export OC_PUBLIC_IP=${OC_PUBLIC_IP:-${DEFAULT_OC_PUBLIC_IP}}
 
+DEFAULT_OCP_TOOLS_DIR="/tmp"
+export OCP_TOOLS_DIR=${OCP_TOOLS_DIR:-${DEFAULT_OCP_TOOLS_DIR}}
+
 export OC_BINARY_DOWNLOAD_URL=${OC_BINARY_DOWNLOAD_URL:-${DEFAULT_OC_BINARY_DOWNLOAD_URL}}
 export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWNLOAD_URL}}
 
@@ -91,26 +94,25 @@ test_dns_provider() {
 }
 
 get_tools() {
-    TOOLS_DIR="/tmp"
-    OC_BINARY="$TOOLS_DIR/oc"
-    JQ_BINARY="$TOOLS_DIR/jq"
-    OC_VERSION=$(echo $DEFAULT_OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
+    OC_BINARY="$OCP_TOOLS_DIR/oc"
+    JQ_BINARY="$OCP_TOOLS_DIR/jq"
+    OC_VERSION=$(echo $OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
     #OS specific extract archives
     if [[ "$OSTYPE" == "darwin"* ]]; then
         OC_PACKAGE="openshift-origin-client-tools.zip"
-        ARCH="unzip -d $TOOLS_DIR"
+        ARCH="unzip -d $OCP_TOOLS_DIR"
         EXTRA_ARGS=""
     else
         OC_PACKAGE="openshift-origin-client-tools.tar.gz"
         ARCH="tar --strip 1 -xzf"
-        EXTRA_ARGS="-C $TOOLS_DIR"
+        EXTRA_ARGS="-C $OCP_TOOLS_DIR"
     fi
 
     download_oc() {
         echo "download oc client $OC_VERSION"
-        wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
-        eval "$ARCH" "$TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
-        rm -f "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+        wget -O $OCP_TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
+        eval "$ARCH" "$OCP_TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
+        rm -f "$OCP_TOOLS_DIR"/README.md "$OCP_TOOLS_DIR"/LICENSE "${OCP_TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
     }
 
     if [[ ! -f $OC_BINARY ]]; then
@@ -118,17 +120,17 @@ get_tools() {
     else
         # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
         if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
-            rm -f "$OC_BINARY" "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE
+            rm -f "$OC_BINARY" "$OCP_TOOLS_DIR"/README.md "$OCP_TOOLS_DIR"/LICENSE
             download_oc
         fi
     fi
 
     if [ ! -f $JQ_BINARY ]; then
         echo "download jq..."
-        wget -q -O $JQ_BINARY $JQ_BINARY_DOWNLOAD_URL
+        wget -O $JQ_BINARY $JQ_BINARY_DOWNLOAD_URL
         chmod +x $JQ_BINARY
     fi
-    export PATH=${PATH}:${TOOLS_DIR}
+    export PATH=${PATH}:${OCP_TOOLS_DIR}
 }
 
 ocp_is_booted() {

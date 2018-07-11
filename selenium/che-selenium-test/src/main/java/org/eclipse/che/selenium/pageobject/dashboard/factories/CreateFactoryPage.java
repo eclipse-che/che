@@ -12,14 +12,22 @@ package org.eclipse.che.selenium.pageobject.dashboard.factories;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.DELETE;
 
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -29,15 +37,20 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class CreateFactoryPage {
 
   private final SeleniumWebDriver seleniumWebDriver;
-  private final Loader loader;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWait redrawUiElementsTimeout;
+  protected final ActionsFactory actionsFactory;
 
   @Inject
-  public CreateFactoryPage(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public CreateFactoryPage(
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loader = loader;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -57,9 +70,11 @@ public class CreateFactoryPage {
     String WORKSPACE_NAME_XPATH = "//a[@id='workspace-name' and text()='%s']";
     String GIT_URL_ID = "git-url-input";
     String UPLOAD_FILE_BUTTON_ID = "upload-file-button";
+    String HIDDEN_UPLOAD_INPUT_BUTTON_XPATH = "//input[@uploader='factoryFromFileCtrl.uploader']";
     String MINIMAL_FACTORY_TEMPLATE_ID = "minimal-template-button";
     String COMPLETE_FACTORY_TEMPLATE_ID = "complete-template-button";
     String CREATE_FACTORY_BUTTON_ID = "create-factory-next-button";
+    String EDITOR_TEMPLATE_XPATH = "//div[@class='CodeMirror-code']";
   }
 
   @FindBy(id = Locators.NEW_FACTORY_PAGE_TITLE_ID)
@@ -77,6 +92,9 @@ public class CreateFactoryPage {
   @FindBy(id = Locators.UPLOAD_FILE_BUTTON_ID)
   WebElement uploadFileButton;
 
+  @FindBy(xpath = Locators.HIDDEN_UPLOAD_INPUT_BUTTON_XPATH)
+  WebElement hiddenUploadInputButton;
+
   @FindBy(id = Locators.COMPLETE_FACTORY_TEMPLATE_ID)
   WebElement completeTemplateButton;
 
@@ -86,95 +104,121 @@ public class CreateFactoryPage {
   @FindBy(xpath = Locators.SEARCH_WORKSPACE_FIELD)
   WebElement searchWorkspaceField;
 
+  @FindBy(id = Locators.GIT_URL_ID)
+  WebElement gitRepoUrlField;
+
+  @FindBy(xpath = Locators.EDITOR_TEMPLATE_XPATH)
+  WebElement editorTemplate;
+
   public void waitToolbarTitle() {
-    redrawUiElementsTimeout.until(visibilityOf(newFactoryPageTitle));
+    seleniumWebDriverHelper.waitVisibility(newFactoryPageTitle);
   }
 
   public void typeFactoryName(String name) {
-    redrawUiElementsTimeout.until(visibilityOf(factoryName));
-    factoryName.clear();
-    factoryName.sendKeys(name);
+    seleniumWebDriverHelper.setValue(factoryName, name);
     WaitUtils.sleepQuietly(1);
   }
 
   public void clickOnSourceTab(String tabName) {
-    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.id(tabName))).click();
+    seleniumWebDriverHelper.waitAndClick(By.id(tabName));
     WaitUtils.sleepQuietly(1);
   }
 
   public void clickOnMinimalTemplateButton() {
-    redrawUiElementsTimeout.until(visibilityOf(minimalTemplateButton)).click();
+    seleniumWebDriverHelper.waitAndClick(minimalTemplateButton);
   }
 
   public void clickOnCompleteTemplateButton() {
-    redrawUiElementsTimeout.until(visibilityOf(completeTemplateButton)).click();
+    seleniumWebDriverHelper.waitAndClick(completeTemplateButton);
   }
 
   public void waitTemplateButtons() {
-    redrawUiElementsTimeout.until(visibilityOf(minimalTemplateButton));
-    redrawUiElementsTimeout.until(visibilityOf(completeTemplateButton));
+    seleniumWebDriverHelper.waitVisibility(minimalTemplateButton);
+    seleniumWebDriverHelper.waitVisibility(completeTemplateButton);
   }
 
-  public Boolean isCreateFactoryButtonDisabled() {
+  public Boolean isCreateFactoryButtonEnabled() {
+    WaitUtils.sleepQuietly(1);
     String attrValue =
-        redrawUiElementsTimeout
-            .until(visibilityOf(createFactoryButton))
-            .getAttribute("aria-disabled");
-    return Boolean.parseBoolean(attrValue);
+        seleniumWebDriverHelper.waitVisibility(createFactoryButton).getAttribute("aria-disabled");
+    return !(Boolean.parseBoolean(attrValue));
   }
 
   public void clickOnCreateFactoryButton() {
-    redrawUiElementsTimeout.until(visibilityOf(createFactoryButton)).click();
+    seleniumWebDriverHelper.waitAndClick(createFactoryButton);
   }
 
   public void clickOnWorkspaceFromList(String workspaceName) {
-    redrawUiElementsTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_NAME_XPATH, workspaceName))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.WORKSPACE_NAME_XPATH, workspaceName)));
   }
 
   public void waitWorkspaceNameInList(String workspaceName) {
-    redrawUiElementsTimeout.until(
-        visibilityOfElementLocated(By.xpath(format(Locators.WORKSPACE_NAME_XPATH, workspaceName))));
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(Locators.WORKSPACE_NAME_XPATH, workspaceName)));
   }
 
-  public String getErrorMessage() {
-    return redrawUiElementsTimeout
-        .until(visibilityOfElementLocated(By.xpath(Locators.NEW_FACTORY_ERROR_MESSAGE)))
-        .getText();
+  public void waitErrorMessage(String expectedText) {
+    seleniumWebDriverHelper.waitTextEqualsTo(
+        By.xpath(Locators.NEW_FACTORY_ERROR_MESSAGE), expectedText);
   }
 
   public void waitErrorMessageNotVisible() {
-    redrawUiElementsTimeout.until(
-        invisibilityOfElementLocated(By.xpath(Locators.NEW_FACTORY_ERROR_MESSAGE)));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.NEW_FACTORY_ERROR_MESSAGE));
   }
 
-  public void waitUploadFileButton() {
-    redrawUiElementsTimeout.until(visibilityOf(uploadFileButton));
+  public boolean isUploadFileButtonEnabled() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetEnableState(uploadFileButton);
   }
 
-  public void waitGitUrlField() {
-    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.id(Locators.GIT_URL_ID)));
+  // we can't use 'uploadFileButton' element directly here because it is a DIV which just calls
+  // hidden input of file type 'hiddenUploadInputButton'
+  public void uploadSelectedConfigFile(Path resourcesUploadFile) throws IOException {
+    seleniumWebDriverHelper.selectResourceToUpload(hiddenUploadInputButton, resourcesUploadFile);
+  }
+
+  public void typeGitRepositoryUrl(String gitRepoUrl) {
+    seleniumWebDriverHelper.setValue(gitRepoUrlField, gitRepoUrl);
   }
 
   public void clickOnSearchFactoryButton() {
-    redrawUiElementsTimeout.until(visibilityOf(searchWorkspaceButton)).click();
+    seleniumWebDriverHelper.waitAndClick(searchWorkspaceButton);
   }
 
   public void waitSearchFactoryField() {
-    redrawUiElementsTimeout.until(visibilityOf(searchWorkspaceField));
+    seleniumWebDriverHelper.waitVisibility(searchWorkspaceField);
   }
 
-  public void typeTextToSearchFactoryField(String text) {
-    redrawUiElementsTimeout.until(visibilityOf(searchWorkspaceField));
-    searchWorkspaceField.clear();
-    searchWorkspaceField.sendKeys(text);
-    WaitUtils.sleepQuietly(1);
+  public void typeTextToSearchFactoryField(String expectedText) {
+    seleniumWebDriverHelper.setValue(searchWorkspaceField, expectedText);
   }
 
   public void waitWorkspacesListIsEmpty() {
-    redrawUiElementsTimeout.until(invisibilityOfElementLocated(By.id("workspace-name")));
+    seleniumWebDriverHelper.waitInvisibility(By.id("workspace-name"));
+  }
+
+  public void setFocusInEditorTemplate() {
+    seleniumWebDriverHelper.waitAndClick(editorTemplate);
+  }
+
+  public void typeConfigFileToTemplateEditor(String pathToFile)
+      throws IOException, URISyntaxException {
+    URL resourcesFile = getClass().getResource(pathToFile);
+
+    List<String> listWithAllLines =
+        Files.readAllLines(Paths.get(resourcesFile.toURI()), Charset.forName("UTF-8"));
+    for (String line : listWithAllLines) {
+      seleniumWebDriverHelper.sendKeys(line);
+    }
+  }
+
+  public void deleteAllContentFromTemplateEditor() {
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("a")
+        .keyUp(CONTROL)
+        .sendKeys(DELETE)
+        .perform();
   }
 }

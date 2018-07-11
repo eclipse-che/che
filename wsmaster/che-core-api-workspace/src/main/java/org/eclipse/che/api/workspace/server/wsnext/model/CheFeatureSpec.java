@@ -17,7 +17,7 @@ import java.util.Objects;
 public class CheFeatureSpec {
 
   private String version = null;
-  private List<CheServiceReference> services = new ArrayList<CheServiceReference>();
+  private List<ChePluginReference> services = new ArrayList<>();
 
   /** */
   public CheFeatureSpec version(String version) {
@@ -34,16 +34,16 @@ public class CheFeatureSpec {
   }
 
   /** */
-  public CheFeatureSpec services(List<CheServiceReference> services) {
+  public CheFeatureSpec services(List<ChePluginReference> services) {
     this.services = services;
     return this;
   }
 
-  public List<CheServiceReference> getServices() {
+  public List<ChePluginReference> getServices() {
     return services;
   }
 
-  public void setServices(List<CheServiceReference> services) {
+  public void setServices(List<ChePluginReference> services) {
     this.services = services;
   }
 

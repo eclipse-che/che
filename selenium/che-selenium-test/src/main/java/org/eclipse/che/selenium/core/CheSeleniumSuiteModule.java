@@ -13,8 +13,6 @@ package org.eclipse.che.selenium.core;
 import static com.google.inject.name.Names.named;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.Infrastructure.k8s;
-import static org.eclipse.che.selenium.core.constant.Infrastructure.openshift;
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
 
@@ -30,9 +28,11 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
@@ -55,13 +55,16 @@ import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFacto
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
-import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtilImpl;
-import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtilImpl;
+import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtil;
+import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadIntoGridUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadLocallyUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadUtil;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
+import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProviderImpl;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 
@@ -101,11 +104,17 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestWorkspaceAgentApiEndpointUrlProvider.class)
         .to(CheTestWorkspaceAgentApiEndpointUrlProvider.class);
 
-    bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
     bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
 
+    install(
+        new FactoryModuleBuilder()
+            .implement(TestWorkspaceServiceClient.class, CheTestWorkspaceServiceClient.class)
+            .build(TestWorkspaceServiceClientFactory.class));
+
+    bind(TestWorkspaceServiceClient.class).to(CheTestWorkspaceServiceClient.class);
+    bind(TestWorkspaceProvider.class).to(CheTestWorkspaceProvider.class).asEagerSingleton();
+
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
-    install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(TestUserServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(WebDriverLogsReaderFactory.class));
 
@@ -133,12 +142,17 @@ public class CheSeleniumSuiteModule extends AbstractModule {
         throw new RuntimeException(
             format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
     }
+    configureTestExecutionModeRelatedDependencies();
+  }
 
+  private void configureTestExecutionModeRelatedDependencies() {
     boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
     if (gridMode) {
-      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtilImpl.class);
+      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtil.class);
+      bind(UploadUtil.class).to(UploadIntoGridUtil.class);
     } else {
-      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtilImpl.class);
+      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtil.class);
+      bind(UploadUtil.class).to(UploadLocallyUtil.class);
     }
   }
 

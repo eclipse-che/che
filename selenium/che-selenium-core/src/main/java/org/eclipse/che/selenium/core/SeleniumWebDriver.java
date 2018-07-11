@@ -30,8 +30,16 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
+import org.eclipse.che.selenium.core.utils.DockerUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -68,21 +76,24 @@ public class SeleniumWebDriver
 
   private TestBrowser browser;
   private boolean gridMode;
-  private String webDriverVersion;
-  private final String downloadDirectory;
+  private String gridNodeContainerId;
+  private String webDriverPort;
   private final RemoteWebDriver driver;
+  private final HttpJsonRequestFactory httpJsonRequestFactory;
+  private final DockerUtil dockerUtil;
 
   @Inject
   public SeleniumWebDriver(
       @Named("sys.browser") TestBrowser browser,
       @Named("sys.driver.port") String webDriverPort,
       @Named("sys.grid.mode") boolean gridMode,
-      @Named("sys.driver.version") String webDriverVersion,
-      @Named("tests.download_dir") String downloadDirectory) {
+      HttpJsonRequestFactory httpJsonRequestFactory,
+      DockerUtil dockerUtil) {
     this.browser = browser;
+    this.webDriverPort = webDriverPort;
     this.gridMode = gridMode;
-    this.webDriverVersion = webDriverVersion;
-    this.downloadDirectory = downloadDirectory;
+    this.httpJsonRequestFactory = httpJsonRequestFactory;
+    this.dockerUtil = dockerUtil;
 
     try {
       URL webDriverUrl =
@@ -181,10 +192,6 @@ public class SeleniumWebDriver
   @Override
   public Mouse getMouse() {
     return driver.getMouse();
-  }
-
-  public String getSessionId() {
-    return driver.getSessionId().toString();
   }
 
   private RemoteWebDriver createDriver(URL webDriverUrl) {
@@ -333,5 +340,39 @@ public class SeleniumWebDriver
 
   private WebDriverWait wait(int timeOutInSeconds) {
     return new WebDriverWait(this, timeOutInSeconds);
+  }
+
+  public String getGridNodeContainerId() throws IOException {
+    if (!gridMode) {
+      throw new UnsupportedOperationException("We can't get grid node container id in local mode.");
+    }
+
+    if (gridNodeContainerId == null) {
+      String getGridNodeInfoUrl =
+          format(
+              "http://localhost:%s/grid/api/testsession?session=%s",
+              webDriverPort, driver.getSessionId());
+
+      Map<String, String> gridNodeInfo;
+      try {
+        gridNodeInfo = httpJsonRequestFactory.fromUrl(getGridNodeInfoUrl).request().asProperties();
+      } catch (ServerException
+          | UnauthorizedException
+          | ForbiddenException
+          | NotFoundException
+          | ConflictException
+          | BadRequestException e) {
+        throw new IOException(e);
+      }
+
+      if (!gridNodeInfo.containsKey("proxyId")) {
+        throw new IOException("Proxy ID of grid node wasn't found.");
+      }
+
+      URL proxyId = new URL(gridNodeInfo.get("proxyId"));
+      gridNodeContainerId = dockerUtil.findGridNodeContainerByIp(proxyId.getHost());
+    }
+
+    return gridNodeContainerId;
   }
 }

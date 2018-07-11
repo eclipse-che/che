@@ -60,9 +60,9 @@ public class KeycloakFederatedIdentitiesPage {
   }
 
   interface Locators {
-    String GITHUB_REMOVE_BUTTON_ID = "remove-github";
+    String GITHUB_REMOVE_BUTTON_ID = "remove-link-github";
     String TITLE_XPATH = "//div[@id='tab-content']//h2[text()='Federated Identities']";
-    String GITHUB_INPUT_XPATH = "//form[//label/text()='GitHub']//input";
+    String GITHUB_INPUT_XPATH = "*//div[@id='federated-identities']//input";
   }
 
   public void open() {

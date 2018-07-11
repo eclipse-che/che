@@ -10,7 +10,8 @@
         "@theia/file-search": "latest",
         "@theia/markers": "latest",
         "@theia/extension-manager": "latest",
-        "@theia/messages": "latest"
+        "@theia/messages": "latest",
+        "@eclipse-che/theia-factory-extension": "0.0.1-1530189818"
     },
     "devDependencies": {
         "@theia/cli": "latest"

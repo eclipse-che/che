@@ -50,9 +50,10 @@ data:
 {{- if and .Values.global.multiuser .Values.customOidcUsernameClaim }}
   CHE_KEYCLOAK_USERNAME__CLAIM: {{ .Values.customOidcUsernameClaim }}
 {{- end }}
-  CHE_INFRA_KUBERNETES_NAMESPACE: ""
+  CHE_INFRA_KUBERNETES_NAMESPACE: {{ .Values.global.cheInfraKubernetesNamespace }}
   CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
   CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
+  CHE_INFRA_KUBERNETES_PVC_QUANTITY: {{ .Values.global.pvcClaim }}
   CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "false"
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER: "0"
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "0"

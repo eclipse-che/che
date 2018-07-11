@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.gwt;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
@@ -126,9 +126,9 @@ public class CheckSimpleGwtAppTest {
     projectExplorer.waitItem(projectName);
     toastLoader.waitAppeareanceAndClosing();
     projectExplorer.waitAndSelectItem(projectName);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, projectName, BUILD_COMMAND);
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, projectName, BUILD_COMMAND);
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, 600);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, projectName, RUN_GWT_COMMAND);
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, projectName, RUN_GWT_COMMAND);
     consoles.waitExpectedTextIntoConsole("The code server is ready", APPLICATION_START_TIMEOUT_SEC);
 
     String url =

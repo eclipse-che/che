@@ -19,37 +19,22 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WILDFLY_SWARM;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CEYLON_WITH_JAVA_JAVASCRIPT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DEBIAN;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DEBIAN_LSP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_VERTX;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.HADOOP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_DEBIAN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_DOCKER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.KOTLIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODE;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.OPENSHIFT;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.OPENSHIFT_SQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP_5_6;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP_GAE;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PLATFORMIO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON_2_7;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON_GAE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SELENIUM;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.TOM_EE;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.UBUNTU;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ZEND;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -106,10 +91,7 @@ public class NewWorkspacePageTest {
           GO,
           JAVA_THEIA_OPENSHIFT,
           NODE,
-          OPENSHIFT,
-          OPENSHIFT_SQL,
           PHP,
-          PLATFORMIO,
           PYTHON,
           RAILS);
 
@@ -140,10 +122,7 @@ public class NewWorkspacePageTest {
           GO.getId(),
           JAVA_THEIA_OPENSHIFT.getId(),
           NODE.getId(),
-          OPENSHIFT.getId(),
-          OPENSHIFT_SQL.getId(),
           PHP.getId(),
-          PLATFORMIO.getId(),
           PYTHON.getId(),
           RAILS.getId());
 
@@ -175,30 +154,16 @@ public class NewWorkspacePageTest {
           CENTOS_NODEJS,
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
-          DEBIAN,
-          DEBIAN_LSP,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
-          HADOOP,
           JAVA_CENTOS,
-          JAVA_DEBIAN,
           KOTLIN,
           NODE,
-          OPENSHIFT,
           PHP,
-          PHP_GAE,
-          PHP_5_6,
-          PLATFORMIO,
           PYTHON,
-          PYTHON_2_7,
-          PYTHON_GAE,
           RAILS,
-          SELENIUM,
-          SPRING_BOOT,
-          TOM_EE,
-          UBUNTU,
-          ZEND);
+          SPRING_BOOT);
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
@@ -224,7 +189,7 @@ public class NewWorkspacePageTest {
           SPRING_BOOT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, OPENSHIFT_SQL);
+      asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
       asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
@@ -237,7 +202,6 @@ public class NewWorkspacePageTest {
           RAILS.getId(),
           PYTHON.getId(),
           PHP.getId(),
-          OPENSHIFT_SQL.getId(),
           NODE.getId(),
           JAVA_THEIA_OPENSHIFT.getId(),
           GO.getId(),
