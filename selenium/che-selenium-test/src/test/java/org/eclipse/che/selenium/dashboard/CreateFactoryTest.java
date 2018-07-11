@@ -20,12 +20,20 @@ import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFact
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
@@ -41,15 +49,31 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CreateFactoryTest {
-
-  private static final String MINIMAL_TEMPLATE_FACTORY_NAME = generate("factory", 4);
-  private static final String COMPLETE_TEMPLATE_FACTORY_NAME = generate("factory", 4);
-  private static final String FACTORY_CREATED_FROM_WORKSPACE_NAME = generate("factory", 4);
+  private static final String PROJECT_WS_NAME = generate("project-ws", 4);
+  private static final String NO_PROJECT_WS_NAME = generate("no-project-ws", 4);
+  private static final String FACTORY_NAME_EXIST = generate("factoryExist", 4);
+  private static final String MINIMAL_TEMPLATE_FACTORY_NAME = generate("factoryMin", 4);
+  private static final String COMPLETE_TEMPLATE_FACTORY_NAME = generate("factoryComplete", 4);
+  private static final String FACTORY_CREATED_FROM_WORKSPACE_NAME = generate("factoryWs", 4);
+  private static final String FACTORY_CREATED_FROM_GIT_NAME = generate("factoryGit", 4);
+  private static final String FACTORY_CREATED_FROM_CONFIG_NAME = generate("factoryConfig", 4);
+  private static final String FACTORY_CREATED_FROM_USER_JSON_NAME = generate("factoryUser", 4);
   private static final String MIN_FACTORY_NAME = generate("", 3);
   private static final String MAX_FACTORY_NAME = generate("", 20);
-  private static final String TOO_SHORT_NAME = "The name has to be more than 3 characters long.";
-  private static final String TOO_LONG_NAME = "The name has to be less than 20 characters long.";
-  private static final String WORKSPACE_NAME = generate("workspace", 4);
+  private static final String RESOURCES_CONFIG_FILE =
+      "/org/eclipse/che/selenium/dashboard/config-ws.json";
+  private static final String WS_HAS_NO_PROJECT_ERROR_MESSAGE =
+      "Factory can't be created. The selected workspace has no projects defined. Project sources must be available from an external storage.";
+  private static final String TOO_SHORT_NAME_MESAAGE =
+      "The name has to be more than 3 characters long.";
+  private static final String TOO_LONG_NAME_MESSAGE =
+      "The name has to be less than 20 characters long.";
+  private static final String SPECIAL_SYMBOLS_NAME = "***";
+  private static final String SPECIAL_SYMBOLS_ERROR_MESSAGE =
+      "Factory name may contain digits, latin letters, spaces, _ , . , - and should start only with digits, latin letters or underscores";
+  private static final String EXIST_NAME_ERROR_MESSAGE = "This factory name is already used.";
+  private static final String LOAD_FILE_CONFIGURATION_MESSAGE =
+      "Successfully loaded file's configuration config-ws.json.";
 
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
@@ -59,23 +83,39 @@ public class CreateFactoryTest {
   @Inject private FactoryDetails factoryDetails;
   @Inject private NewWorkspace newWorkspace;
   @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestGitHubRepository testRepo;
   @Inject private Workspaces workspaces;
   @Inject private CreateFactoryPage createFactoryPage;
   @Inject private Dashboard dashboard;
   @Inject private Loader loader;
 
+  public CreateFactoryTest() {}
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceWithProject(WORKSPACE_NAME);
+    createWorkspaceWithProject(PROJECT_WS_NAME);
+    createWorkspaceWithoutProject(NO_PROJECT_WS_NAME);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
-    factoryServiceClient.deleteFactory(MINIMAL_TEMPLATE_FACTORY_NAME);
-    factoryServiceClient.deleteFactory(COMPLETE_TEMPLATE_FACTORY_NAME);
-    factoryServiceClient.deleteFactory(FACTORY_CREATED_FROM_WORKSPACE_NAME);
+    workspaceServiceClient.delete(PROJECT_WS_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(NO_PROJECT_WS_NAME, defaultTestUser.getName());
+
+    List<String> factoryList =
+        Arrays.asList(
+            FACTORY_NAME_EXIST,
+            MINIMAL_TEMPLATE_FACTORY_NAME,
+            COMPLETE_TEMPLATE_FACTORY_NAME,
+            FACTORY_CREATED_FROM_WORKSPACE_NAME,
+            FACTORY_CREATED_FROM_CONFIG_NAME,
+            FACTORY_CREATED_FROM_GIT_NAME,
+            FACTORY_CREATED_FROM_USER_JSON_NAME);
+
+    for (String factory : factoryList) {
+      factoryServiceClient.deleteFactory(factory);
+    }
   }
 
   @BeforeMethod
@@ -88,61 +128,152 @@ public class CreateFactoryTest {
   }
 
   @Test
-  public void checkGitAndConfigTabs() {
-    // open tabs and check their fields
-    createFactoryPage.clickOnSourceTab(GIT_TAB_ID);
-    createFactoryPage.waitGitUrlField();
+  public void checkCreateFactoryFromGitTab() throws IOException {
+    // create the test repository and get url
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
+    testRepo.addContent(entryPath);
 
-    createFactoryPage.clickOnSourceTab(CONFIG_TAB_ID);
-    createFactoryPage.waitUploadFileButton();
+    String repositoryUrl = testRepo.getHttpsTransportUrl();
+
+    // open the  'Git' tab and fill the fields url and name
+    createFactoryPage.clickOnSourceTab(GIT_TAB_ID);
+    createFactoryPage.typeGitRepositoryUrl(repositoryUrl);
+    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_GIT_NAME);
+
+    assertTrue(
+        createFactoryPage.isCreateFactoryButtonEnabled(),
+        "Known issue https://github.com/eclipse/che/issues/9709");
+
+    // create factory
+    createFactoryPage.clickOnCreateFactoryButton();
+    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_GIT_NAME);
+
+    // check present the id url and named url of the factory
+    dashboardFactories.waitFactoryIdUrl();
+    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_GIT_NAME);
   }
 
   @Test
-  public void shouldHandleIncorrectFactoryNames() {
-    // select created workspace from list of workspaces
-    createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
+  public void checkCreateFactoryFromConfigTab() throws IOException, URISyntaxException {
+    URL resourcesUploadFile = getClass().getResource(RESOURCES_CONFIG_FILE);
 
-    // type valid factory names and check that the Create button is enabled
+    // select the 'Config' tab
+    createFactoryPage.clickOnSourceTab(CONFIG_TAB_ID);
+    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_CONFIG_NAME);
+
+    assertTrue(createFactoryPage.isUploadFileButtonEnabled());
+
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // upload the configuration file from resources
+    createFactoryPage.uploadSelectedConfigFile(Paths.get(resourcesUploadFile.toURI()));
+
+    dashboard.waitNotificationMessage(LOAD_FILE_CONFIGURATION_MESSAGE);
+    dashboard.waitNotificationIsClosed();
+
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // create factory
+    createFactoryPage.clickOnCreateFactoryButton();
+    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_CONFIG_NAME);
+
+    // check present the id url and named url of the factory
+    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_CONFIG_NAME);
+    dashboardFactories.waitFactoryIdUrl();
+  }
+
+  @Test
+  public void checkHandlingOfFactoryNames() {
+    // create a factory from workspace with a project
+    createFactoryFromWorkspaceWithProject(FACTORY_NAME_EXIST);
+
+    openNewFactoryPage();
+
+    // select created workspace from list of workspaces
+    createFactoryPage.clickOnWorkspaceFromList(PROJECT_WS_NAME);
+
+    // enter empty factory name
+    createFactoryPage.typeFactoryName("");
+    createFactoryPage.waitErrorMessageNotVisible();
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // enter factory name with a less than 3 symbols
+    createFactoryPage.typeFactoryName(generate("", 2));
+    createFactoryPage.waitErrorMessage(TOO_SHORT_NAME_MESAAGE);
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // enter factory name with exactly 3 symbols
     createFactoryPage.typeFactoryName(MIN_FACTORY_NAME);
     createFactoryPage.waitErrorMessageNotVisible();
-    assertFalse(createFactoryPage.isCreateFactoryButtonDisabled());
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // enter factory name with special symbols
+    createFactoryPage.typeFactoryName(SPECIAL_SYMBOLS_NAME);
+    createFactoryPage.waitErrorMessage(SPECIAL_SYMBOLS_ERROR_MESSAGE);
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // enter factory name with more than 20 symbols
+    createFactoryPage.typeFactoryName(generate("", 21));
+    createFactoryPage.waitErrorMessage(TOO_LONG_NAME_MESSAGE);
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // enter factory name with exactly 20 symbols
     createFactoryPage.typeFactoryName(MAX_FACTORY_NAME);
     createFactoryPage.waitErrorMessageNotVisible();
-    assertFalse(createFactoryPage.isCreateFactoryButtonDisabled());
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
 
-    // type incorrect factory names and check error messages
-    createFactoryPage.typeFactoryName(generate("", 2));
-    assertEquals(createFactoryPage.getErrorMessage(), TOO_SHORT_NAME);
-    createFactoryPage.typeFactoryName(generate("", 21));
-    assertEquals(createFactoryPage.getErrorMessage(), TOO_LONG_NAME);
+    // enter an already existing factory name
+    createFactoryPage.typeFactoryName(FACTORY_NAME_EXIST);
+    createFactoryPage.waitErrorMessage(EXIST_NAME_ERROR_MESSAGE);
+
+    assertFalse(
+        createFactoryPage.isCreateFactoryButtonEnabled(),
+        "Known issue https://github.com/eclipse/che/issues/10121");
   }
 
   @Test
   public void shouldCreateFactoryFromTemplate() {
-    // create a factory from minimal template
+    // select the 'Template' tab
     createFactoryPage.waitToolbarTitle();
-    createFactoryPage.typeFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
     createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
+    createFactoryPage.typeFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
     createFactoryPage.waitTemplateButtons();
     createFactoryPage.clickOnMinimalTemplateButton();
+
+    // create a factory from minimal template
     createFactoryPage.clickOnCreateFactoryButton();
     factoryDetails.waitFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
-    factoryDetails.clickOnBackToFactoriesListButton();
 
+    // check present the factory url
+    dashboardFactories.waitFactoryNamedUrl(MINIMAL_TEMPLATE_FACTORY_NAME);
+    dashboardFactories.waitFactoryIdUrl();
+
+    // go to the factory list
+    factoryDetails.clickOnBackToFactoriesListButton();
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.waitFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
+
     assertEquals(dashboardFactories.getFactoryRamLimit(MINIMAL_TEMPLATE_FACTORY_NAME), "2048 MB");
 
-    // create a factory from complete template
+    // go to the 'Template' tab
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.clickOnAddFactoryBtn();
     createFactoryPage.waitToolbarTitle();
     createFactoryPage.typeFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
     createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
+
+    // create a factory from complete template
     createFactoryPage.waitTemplateButtons();
     createFactoryPage.clickOnCompleteTemplateButton();
     createFactoryPage.clickOnCreateFactoryButton();
     factoryDetails.waitFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
+
+    // check present the factory url
+    dashboardFactories.waitFactoryNamedUrl(COMPLETE_TEMPLATE_FACTORY_NAME);
+    dashboardFactories.waitFactoryIdUrl();
+
+    // go to the factory list
     factoryDetails.clickOnBackToFactoriesListButton();
 
     dashboardFactories.waitAllFactoriesPage();
@@ -151,15 +282,53 @@ public class CreateFactoryTest {
   }
 
   @Test
-  public void shouldCreatingFactoryFromWorkspace() {
-    // create a new factory from a workspace
-    createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
-    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
-    createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
-    // wait that the Create Factory button is enabled after a workspace selecting
-    WaitUtils.sleepQuietly(1);
+  public void checkEditorOfTemplateJson() throws Exception {
+    // select the minimal template
+    createFactoryPage.waitToolbarTitle();
+    createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
+    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_USER_JSON_NAME);
+    createFactoryPage.waitTemplateButtons();
+    createFactoryPage.clickOnMinimalTemplateButton();
+
+    // delete content of the template
+    createFactoryPage.setFocusInEditorTemplate();
+    createFactoryPage.deleteAllContentFromTemplateEditor();
+
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // type the user json workspace
+    createFactoryPage.typeConfigFileToTemplateEditor(RESOURCES_CONFIG_FILE);
+
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
     createFactoryPage.clickOnCreateFactoryButton();
+    factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_USER_JSON_NAME);
+
+    // check present the factory url
+    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_USER_JSON_NAME);
+    dashboardFactories.waitFactoryIdUrl();
+  }
+
+  @Test
+  public void shouldCreateFactoryFromWorkspace() {
+    // check error when create factory without a project
+    createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
+    createFactoryPage.clickOnWorkspaceFromList(NO_PROJECT_WS_NAME);
+
+    dashboard.waitNotificationMessage(WS_HAS_NO_PROJECT_ERROR_MESSAGE);
+    dashboard.waitNotificationIsClosed();
+
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    // create a new factory from a workspace with a project
+    createFactoryFromWorkspaceWithProject(FACTORY_CREATED_FROM_WORKSPACE_NAME);
+
     factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
+
+    // check present the id url and named url of the factory
+    dashboardFactories.waitFactoryIdUrl();
+    dashboardFactories.waitFactoryNamedUrl(FACTORY_CREATED_FROM_WORKSPACE_NAME);
+
     factoryDetails.clickOnBackToFactoriesListButton();
 
     // check that the created factory exists in the Factories list
@@ -176,13 +345,13 @@ public class CreateFactoryTest {
     createFactoryPage.waitSearchFactoryField();
 
     // filter by full workspace name
-    createFactoryPage.typeTextToSearchFactoryField(WORKSPACE_NAME);
-    createFactoryPage.waitWorkspaceNameInList(WORKSPACE_NAME);
+    createFactoryPage.typeTextToSearchFactoryField(PROJECT_WS_NAME);
+    createFactoryPage.waitWorkspaceNameInList(PROJECT_WS_NAME);
 
     // filter by a part of workspace name
     createFactoryPage.typeTextToSearchFactoryField(
-        WORKSPACE_NAME.substring(WORKSPACE_NAME.length() / 2));
-    createFactoryPage.waitWorkspaceNameInList(WORKSPACE_NAME);
+        PROJECT_WS_NAME.substring(PROJECT_WS_NAME.length() / 2));
+    createFactoryPage.waitWorkspaceNameInList(PROJECT_WS_NAME);
 
     // filter by a nonexistent workspace name
     createFactoryPage.typeTextToSearchFactoryField(generate("", 8));
@@ -190,8 +359,6 @@ public class CreateFactoryTest {
   }
 
   private void createWorkspaceWithProject(String workspaceName) {
-    String machineName = "dev-machine";
-
     // create a workspace from the Java stack with the web-java-spring project
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -199,6 +366,7 @@ public class CreateFactoryTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     loader.waitOnClosed();
+
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA);
@@ -213,5 +381,36 @@ public class CreateFactoryTest {
 
     workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.checkStateOfWorkspace(STOPPED);
+  }
+
+  private void createWorkspaceWithoutProject(String workspaceName) {
+    // create a workspace from the Java stack with the web-java-spring project
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    dashboard.waitToolbarTitleName("Workspaces");
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitToolbar();
+    loader.waitOnClosed();
+
+    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
+    newWorkspace.clickOnAllStacksTab();
+    newWorkspace.selectStack(JAVA);
+    newWorkspace.typeWorkspaceName(workspaceName);
+
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
+
+    workspaceDetails.waitToolbarTitleName(workspaceName);
+    workspaceDetails.checkStateOfWorkspace(STOPPED);
+  }
+
+  private void createFactoryFromWorkspaceWithProject(String factoryName) {
+    createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
+    createFactoryPage.typeFactoryName(factoryName);
+    createFactoryPage.clickOnWorkspaceFromList(PROJECT_WS_NAME);
+
+    // check that the Create Factory button is enabled after a workspace selecting
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+
+    createFactoryPage.clickOnCreateFactoryButton();
   }
 }
