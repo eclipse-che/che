@@ -536,14 +536,17 @@ public class ProjectServiceApi {
 
     fsManager.unzip(wsPath, zip, skipFirstLevel);
 
-    return Response.created(
-            serviceContext
-                .getBaseUriBuilder()
-                .clone()
-                .path(ProjectService.class)
-                .path(ProjectService.class, "getChildren")
-                .build(new String[] {wsPath.substring(1)}, false))
-        .build();
+    Response response =
+        Response.created(
+                serviceContext
+                    .getBaseUriBuilder()
+                    .clone()
+                    .path(ProjectService.class)
+                    .path(ProjectService.class, "getChildren")
+                    .build(new String[] {wsPath.substring(1)}, false))
+            .build();
+    eventService.publish(new ProjectCreatedEvent(wsPath));
+    return response;
   }
 
   /** Zip content under specified location */

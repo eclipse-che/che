@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
-import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
 
 /**
@@ -48,9 +48,9 @@ public class ProjectsListener {
   @PostConstruct
   protected void initializeListeners() {
     eventService.subscribe(
-        new EventSubscriber<ProjectInitializedEvent>() {
+        new EventSubscriber<ProjectCreatedEvent>() {
           @Override
-          public void onEvent(ProjectInitializedEvent event) {
+          public void onEvent(ProjectCreatedEvent event) {
             onProjectCreated(event);
           }
         });
@@ -64,7 +64,7 @@ public class ProjectsListener {
         });
   }
 
-  private void onProjectCreated(ProjectInitializedEvent event) {
+  private void onProjectCreated(ProjectCreatedEvent event) {
     if (!isProjectRegistered(event.getProjectPath())) {
       return;
     }
