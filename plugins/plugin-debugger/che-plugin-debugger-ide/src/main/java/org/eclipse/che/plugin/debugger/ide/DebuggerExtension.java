@@ -236,18 +236,23 @@ public class DebuggerExtension {
         .getGlobal()
         .addKey(new KeyBuilder().charCode(KeyCodeMap.F2).build(), EDIT_DEBUG_VARIABLE_ID);
 
-    keyBinding
-        .getGlobal()
-        .addKey(new KeyBuilder().action().alt().charCode('5').build(), DEBUGGER_DISPLAYING_MODE_ID);
-
     if (UserAgent.isMac()) {
       keyBinding
           .getGlobal()
           .addKey(new KeyBuilder().action().charCode('5').build(), SHOW_HIDE_DEBUGGER_PANEL_ID);
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().control().charCode('5').build(),
+              DEBUGGER_DISPLAYING_MODE_ID);
     } else {
       keyBinding
           .getGlobal()
           .addKey(new KeyBuilder().alt().charCode('5').build(), SHOW_HIDE_DEBUGGER_PANEL_ID);
+      keyBinding
+          .getGlobal()
+          .addKey(
+              new KeyBuilder().action().alt().charCode('5').build(), DEBUGGER_DISPLAYING_MODE_ID);
     }
   }
 }

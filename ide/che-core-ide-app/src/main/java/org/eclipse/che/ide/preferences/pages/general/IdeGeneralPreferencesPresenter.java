@@ -23,7 +23,6 @@ import org.eclipse.che.ide.api.theme.ThemeAgent;
 public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresenter
     implements IdeGeneralPreferencesView.ActionDelegate {
 
-  public static final String PREF_IDE_GENERAL_THEME = "ide.theme";
   public static final String PREF_IDE_GENERAL_TAB_CLOSING = "ide.askBeforeClosingTab";
 
   private IdeGeneralPreferencesView view;
@@ -60,7 +59,7 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
   public void go(AcceptsOneWidget container) {
     container.setWidget(view);
 
-    String currentThemeId = preferencesManager.getValue(PREF_IDE_GENERAL_THEME);
+    String currentThemeId = preferencesManager.getValue(ThemeAgent.PREFERENCE_KEY);
     if (currentThemeId == null || currentThemeId.isEmpty()) {
       currentThemeId = themeAgent.getCurrentThemeId();
     }
@@ -84,7 +83,8 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
 
   @Override
   public void storeChanges() {
-    preferencesManager.setValue(PREF_IDE_GENERAL_THEME, themeId);
+    preferencesManager.setValue(ThemeAgent.PREFERENCE_KEY, themeId);
+    themeAgent.setTheme(themeId);
     preferencesManager.setValue(
         PREF_IDE_GENERAL_TAB_CLOSING, String.valueOf(isAskBeforeClosingTab));
   }
@@ -106,7 +106,7 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
   }
 
   private String getStoredThemeId() {
-    String currentThemeId = preferencesManager.getValue(PREF_IDE_GENERAL_THEME);
+    String currentThemeId = preferencesManager.getValue(ThemeAgent.PREFERENCE_KEY);
     if (currentThemeId == null || currentThemeId.isEmpty()) {
       currentThemeId = themeAgent.getCurrentThemeId();
     }

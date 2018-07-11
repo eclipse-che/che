@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.webdriver.UploadUtil;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 
@@ -34,11 +35,16 @@ public class PageObjectsInjectorImpl extends PageObjectsInjector {
   @Named("che.multiuser")
   private boolean isMultiuser;
 
+  @Inject private UploadUtil uploadUtil;
+
   @Override
   public Map<Class<?>, Object> getDependenciesWithWebdriver(SeleniumWebDriver seleniumWebDriver) {
     SeleniumWebDriverHelper seleniumWebDriverHelper =
         new SeleniumWebDriverHelper(
-            seleniumWebDriver, new WebDriverWaitFactory(seleniumWebDriver), actionsFactory);
+            seleniumWebDriver,
+            new WebDriverWaitFactory(seleniumWebDriver),
+            actionsFactory,
+            uploadUtil);
 
     Map<Class<?>, Object> dependencies = new HashMap<>();
     dependencies.put(

@@ -38,8 +38,9 @@ public final class TestProjectExplorerContextMenuConstants {
     REFRESH("gwt-debug-contextMenu/refreshPathAction"),
     REIMPORT("gwt-debug-contextMenu/Maven/reimportMavenDependenciesAction"),
     TEST("gwt-debug-contextMenu/TestingContextGroup"),
-    ADD_TO_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Add to File Watcher excludes"),
-    REMOVE_FROM_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Remove from File Watcher excludes");
+    ADD_TO_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Add to File Watcher exclusion list"),
+    REMOVE_FROM_FILE_WATCHER_EXCLUDES(
+        "gwt-debug-contextMenu/Remove from File Watcher exclusion list");
 
     private final String itemId;
 

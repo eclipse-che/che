@@ -100,6 +100,10 @@
     cursor: pointer;
 }
 
+#workspace-console pre.error {
+    color: #e22812;
+}
+
 #workspace-loader[max] {
     top: 5%;
 }
