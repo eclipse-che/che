@@ -57,12 +57,14 @@ export class MachineAgentsController {
       });
     }
 
+    let agentsCopy = [];
     const deRegistrationFn = $scope.$watch(() => {
       return this.agents;
-    }, (newList: string[], oldList: string[]) => {
-      if (angular.equals(newList, oldList)) {
+    }, (newList: string[]) => {
+      if (angular.equals(newList, agentsCopy)) {
         return;
       }
+      agentsCopy = angular.copy(newList);
       this.buildAgentsList();
     });
 
@@ -78,6 +80,10 @@ export class MachineAgentsController {
    * Builds agents list.
    */
   buildAgentsList(): void {
+    if (!this.agents) {
+      return;
+    }
+
     this.agentItemsList = this.availableAgents.map((agentItem: IAgentItem) => {
       this.checkAgentLatestVersion(agentItem);
       return agentItem;
