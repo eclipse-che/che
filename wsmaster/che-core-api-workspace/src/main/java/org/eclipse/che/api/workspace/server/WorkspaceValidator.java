@@ -55,8 +55,7 @@ public class WorkspaceValidator {
    * @throws ValidationException if any of validation constraints is violated
    * @throws ServerException when any other error occurs during environment validation
    */
-  public void validateConfig(WorkspaceConfig config)
-      throws ValidationException, ServerException {
+  public void validateConfig(WorkspaceConfig config) throws ValidationException, ServerException {
     // configuration object properties
     checkNotNull(config.getName(), "Workspace name required");
     check(
