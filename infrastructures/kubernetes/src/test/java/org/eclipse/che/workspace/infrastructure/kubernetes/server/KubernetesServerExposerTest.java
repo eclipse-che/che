@@ -37,6 +37,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -52,10 +53,14 @@ import org.testng.annotations.Test;
 public class KubernetesServerExposerTest {
 
   @Mock private ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy;
+  @Mock private SecureServerExposer<KubernetesEnvironment> secureServerExposer;
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final Map<String, String> INTERNAL_SERVER_ATTRIBUTE_MAP =
       singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.TRUE.toString());
+
+  private static final Map<String, String> SECURE_SERVER_ATTRIBUTE_MAP =
+      singletonMap(ServerConfig.SECURE_SERVER_ATTRIBUTE, Boolean.TRUE.toString());
 
   private static final Pattern SERVER_PREFIX_REGEX =
       Pattern.compile('^' + SERVER_PREFIX + "[A-z0-9]{" + SERVER_UNIQUE_PART_SIZE + "}-pod-main$");
@@ -82,7 +87,12 @@ public class KubernetesServerExposerTest {
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
     this.serverExposer =
         new KubernetesServerExposer<>(
-            externalServerExposerStrategy, MACHINE_NAME, pod, container, kubernetesEnvironment);
+            externalServerExposerStrategy,
+            secureServerExposer,
+            MACHINE_NAME,
+            pod,
+            container,
+            kubernetesEnvironment);
   }
 
   @Test
@@ -270,33 +280,36 @@ public class KubernetesServerExposerTest {
   }
 
   @Test
-  public void shouldExposeInternalAndExternalServers() throws Exception {
+  public void shouldExposeInternalAndExternalAndSecureServers() throws Exception {
     // given
+    ServerConfigImpl secureServerConfig =
+        new ServerConfigImpl("8282/tcp", "http", "/api", SECURE_SERVER_ATTRIBUTE_MAP);
     ServerConfigImpl internalServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", INTERNAL_SERVER_ATTRIBUTE_MAP);
     ServerConfigImpl externalServerConfig =
         new ServerConfigImpl("9090/tcp", "http", "/api", ATTRIBUTES_MAP);
     Map<String, ServerConfigImpl> serversToExpose =
-        ImmutableMap.of("int-server", internalServerConfig, "ext-server", externalServerConfig);
+        ImmutableMap.of(
+            "int-server",
+            internalServerConfig,
+            "ext-server",
+            externalServerConfig,
+            "secure-server",
+            secureServerConfig);
 
     // when
     serverExposer.expose(serversToExpose);
 
     // then
     assertThatInternalServerIsExposed(
-        MACHINE_NAME,
-        "int-server",
-        "tcp",
-        8080,
-        new ServerConfigImpl(internalServerConfig).withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP));
+        MACHINE_NAME, "int-server", "tcp", 8080, new ServerConfigImpl(internalServerConfig));
     assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        "tcp",
-        9090,
-        "ext-server",
-        new ServerConfigImpl(externalServerConfig).withAttributes(ATTRIBUTES_MAP));
+        MACHINE_NAME, "tcp", 9090, "ext-server", new ServerConfigImpl(externalServerConfig));
+    assertThatSecureServerIsExposed(
+        MACHINE_NAME, "tcp", 8282, "secure-server", new ServerConfigImpl(secureServerConfig));
   }
 
+  @SuppressWarnings("SameParameterValue")
   private void assertThatExternalServerIsExposed(
       String machineName,
       String portProtocol,
@@ -314,38 +327,14 @@ public class KubernetesServerExposerTest {
       Integer port,
       Map<String, ServerConfig> expectedServers) {
     // then
-    assertTrue(
-        container
-            .getPorts()
-            .stream()
-            .anyMatch(
-                p ->
-                    p.getContainerPort().equals(port)
-                        && p.getProtocol().equals(portProtocol.toUpperCase())));
+    assertThatContainerPortIsExposed(portProtocol, port);
     // ensure that service is created
 
-    Service service = null;
-    for (Entry<String, Service> entry : kubernetesEnvironment.getServices().entrySet()) {
-      if (SERVER_PREFIX_REGEX.matcher(entry.getKey()).matches()) {
-        service = entry.getValue();
-        break;
-      }
-    }
+    Service service = findContainerRelatedService();
     assertNotNull(service);
 
     // ensure that required service port is exposed
-    Optional<ServicePort> servicePortOpt =
-        service
-            .getSpec()
-            .getPorts()
-            .stream()
-            .filter(p -> p.getTargetPort().getIntVal().equals(port))
-            .findAny();
-    assertTrue(servicePortOpt.isPresent());
-    ServicePort servicePort = servicePortOpt.get();
-    assertEquals(servicePort.getTargetPort().getIntVal(), port);
-    assertEquals(servicePort.getPort(), port);
-    assertEquals(servicePort.getName(), SERVER_PREFIX + "-" + port);
+    ServicePort servicePort = assertThatServicePortIsExposed(port, service);
 
     Annotations.Deserializer serviceAnnotations =
         Annotations.newDeserializer(service.getMetadata().getAnnotations());
@@ -361,13 +350,63 @@ public class KubernetesServerExposerTest {
   }
 
   @SuppressWarnings("SameParameterValue")
+  private void assertThatSecureServerIsExposed(
+      String machineName,
+      String portProtocol,
+      Integer port,
+      String serverName,
+      ServerConfig serverConfig)
+      throws Exception {
+    // then
+    assertThatContainerPortIsExposed(portProtocol, port);
+    // ensure that service is created
+
+    Service service = findContainerRelatedService();
+    assertNotNull(service);
+
+    // ensure that required service port is exposed
+    ServicePort servicePort = assertThatServicePortIsExposed(port, service);
+
+    Annotations.Deserializer serviceAnnotations =
+        Annotations.newDeserializer(service.getMetadata().getAnnotations());
+    assertEquals(serviceAnnotations.machineName(), machineName);
+
+    verify(secureServerExposer)
+        .expose(
+            kubernetesEnvironment,
+            machineName,
+            service.getMetadata().getName(),
+            servicePort,
+            ImmutableMap.of(serverName, serverConfig));
+  }
+
+  @SuppressWarnings("SameParameterValue")
   private void assertThatInternalServerIsExposed(
       String machineName,
       String serverNameRegex,
       String portProtocol,
       Integer port,
       ServerConfigImpl expected) {
-    // then
+    assertThatContainerPortIsExposed(portProtocol, port);
+
+    // ensure that service is created
+
+    Service service = findContainerRelatedService();
+    assertNotNull(service);
+
+    // ensure that required service port is exposed
+    assertThatServicePortIsExposed(port, service);
+
+    Annotations.Deserializer serviceAnnotations =
+        Annotations.newDeserializer(service.getMetadata().getAnnotations());
+    assertEquals(serviceAnnotations.machineName(), machineName);
+
+    Map<String, ServerConfigImpl> servers = serviceAnnotations.servers();
+    ServerConfig serverConfig = servers.get(serverNameRegex);
+    assertEquals(serverConfig, expected);
+  }
+
+  private void assertThatContainerPortIsExposed(String portProtocol, Integer port) {
     assertTrue(
         container
             .getPorts()
@@ -376,8 +415,9 @@ public class KubernetesServerExposerTest {
                 p ->
                     p.getContainerPort().equals(port)
                         && p.getProtocol().equals(portProtocol.toUpperCase())));
-    // ensure that service is created
+  }
 
+  private Service findContainerRelatedService() {
     Service service = null;
     for (Entry<String, Service> entry : kubernetesEnvironment.getServices().entrySet()) {
       if (SERVER_PREFIX_REGEX.matcher(entry.getKey()).matches()) {
@@ -385,9 +425,10 @@ public class KubernetesServerExposerTest {
         break;
       }
     }
-    assertNotNull(service);
+    return service;
+  }
 
-    // ensure that required service port is exposed
+  private ServicePort assertThatServicePortIsExposed(Integer port, Service service) {
     Optional<ServicePort> servicePortOpt =
         service
             .getSpec()
@@ -400,13 +441,6 @@ public class KubernetesServerExposerTest {
     assertEquals(servicePort.getTargetPort().getIntVal(), port);
     assertEquals(servicePort.getPort(), port);
     assertEquals(servicePort.getName(), SERVER_PREFIX + "-" + port);
-
-    Annotations.Deserializer serviceAnnotations =
-        Annotations.newDeserializer(service.getMetadata().getAnnotations());
-    assertEquals(serviceAnnotations.machineName(), machineName);
-
-    Map<String, ServerConfigImpl> servers = serviceAnnotations.servers();
-    ServerConfig serverConfig = servers.get(serverNameRegex);
-    assertEquals(serverConfig, expected);
+    return servicePort;
   }
 }

@@ -17,6 +17,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -468,6 +469,10 @@ public class KubernetesInternalRuntime<
 
     for (Secret secret : k8sEnv.getSecrets().values()) {
       namespace.secrets().create(secret);
+    }
+
+    for (ConfigMap configMap : k8sEnv.getConfigMaps().values()) {
+      namespace.configMaps().create(configMap);
     }
 
     List<Service> createdServices = new ArrayList<>();
