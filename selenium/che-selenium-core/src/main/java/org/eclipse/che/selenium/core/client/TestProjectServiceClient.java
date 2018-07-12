@@ -152,9 +152,7 @@ public class TestProjectServiceClient {
                   Resources.toString(getResource("projects/jdt-ls-project-files/project"), UTF_8),
                   projectName)
               .getBytes());
-      write(
-          dotClasspath,
-          toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
+      write(dotClasspath, toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
     }
 
     Path zip = Files.createTempFile("project", projectName);
