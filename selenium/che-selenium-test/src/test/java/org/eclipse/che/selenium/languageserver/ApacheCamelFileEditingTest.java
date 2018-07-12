@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/** @author Skoryk Serhii */
 public class ApacheCamelFileEditingTest {
 
   private static final String PROJECT_NAME = "project-for-camel-ls";
@@ -59,7 +60,7 @@ public class ApacheCamelFileEditingTest {
     projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
     editor.waitTabIsPresent(CAMEL_FILE_NAME);
 
-    // check camel language sever initialized
+    // check Apache Camel language sever initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
