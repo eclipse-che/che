@@ -142,14 +142,18 @@ public class TestProjectServiceClient {
     }
 
     if (PLAIN_JAVA.equals(template)) {
+      Path dotClasspath = createFile(sourceFolder.resolve(".classpath"));
+      Path dotProject = Files.createFile(sourceFolder.resolve(".project"));
+      Files.deleteIfExists(dotProject);
+      Files.deleteIfExists(dotClasspath);
       write(
-          createFile(sourceFolder.resolve(".project")),
+          dotProject,
           format(
                   Resources.toString(getResource("projects/jdt-ls-project-files/project"), UTF_8),
                   projectName)
               .getBytes());
       write(
-          createFile(sourceFolder.resolve(".classpath")),
+          dotClasspath,
           toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
     }
 
