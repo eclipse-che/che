@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -19,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -28,7 +31,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class MoveJavaClassToSubpackageTest {
-
+  private static final String APPLY_WORKSPACE_CHANGES = "Apply Workspace Changes\nDone";
   private static final String PROJECT_NAME =
       NameGenerator.generate("MoveJavaClassToSubpackageProject-", 4);
 
@@ -39,6 +42,7 @@ public class MoveJavaClassToSubpackageTest {
   @Inject private Refactor refactor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
+  @Inject private Events events;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -51,6 +55,7 @@ public class MoveJavaClassToSubpackageTest {
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+    events.clickEventLogBtn();
   }
 
   @Test
@@ -66,8 +71,10 @@ public class MoveJavaClassToSubpackageTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("org.eclipse.qa");
     refactor.clickOkButtonRefactorForm();
+    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/AppController.java");
   }
 }
