@@ -81,11 +81,6 @@ public class JsonFileEditingTest {
     editor.goToCursorPositionVisible(8, 4);
     editor.typeTextIntoEditor(",");
     editor.waitAllMarkersInvisibility(ERROR);
-  }
-
-  @Test(priority = 1)
-  public void checkFormatCodeFeature() {
-    editor.selectTabByName(JSON_FILE_NAME);
 
     // add new object
     editor.goToCursorPositionVisible(9, 16);
@@ -102,6 +97,12 @@ public class JsonFileEditingTest {
 
     // delete the duplicated object and check error marker invisibility
     editor.deleteCurrentLine();
+    editor.waitAllMarkersInvisibility(ERROR);
+
+    // TODO add duplicated object in other {block} and check there is not error marker
+    editor.goToCursorPositionVisible(6, 15);
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
