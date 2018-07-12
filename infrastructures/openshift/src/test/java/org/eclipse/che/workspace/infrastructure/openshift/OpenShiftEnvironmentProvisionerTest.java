@@ -90,7 +90,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             restartPolicyRewriter,
             ramLimitProvisioner,
             podTerminationGracePeriodProvisioner,
-            imagePullSecretProvisioner);
+            imagePullSecretProvisioner,
+            proxySettingsProvisioner);
   }
 
   @Test
@@ -112,6 +113,7 @@ public class OpenShiftEnvironmentProvisionerTest {
         .verify(podTerminationGracePeriodProvisioner)
         .provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(imagePullSecretProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

@@ -94,7 +94,8 @@ public class KubernetesEnvironmentProvisionerTest {
             securityContextProvisioner,
             podTerminationGracePeriodProvisioner,
             externalServerIngressTlsProvisioner,
-            imagePullSecretProvisioner);
+            imagePullSecretProvisioner,
+            proxySettingsProvisioner);
   }
 
   @Test
@@ -119,6 +120,7 @@ public class KubernetesEnvironmentProvisionerTest {
         .verify(podTerminationGracePeriodProvisioner)
         .provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(imagePullSecretProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
