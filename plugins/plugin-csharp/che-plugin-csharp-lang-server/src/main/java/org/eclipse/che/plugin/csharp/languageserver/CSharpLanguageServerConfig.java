@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.plugin.csharp.languageserver;
 
-import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -63,7 +61,8 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
   private void onLSProxyInitialized(LanguageServerInitializedEvent event) {
     try {
       if ("org.eclipse.che.plugin.csharp.languageserver".equals(event.getId())) {
-        restoreDependencies(pathTransformer.transform(ROOT));
+        Path wsPath = Paths.get(event.getWsPath());
+        restoreDependencies(pathTransformer.transform(wsPath.getParent().toString()));
       }
     } catch (LanguageServerException e) {
       LOG.error(e.getMessage(), e);
@@ -71,33 +70,22 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
   }
 
   private void restoreDependencies(Path workspaceRootFsPath) throws LanguageServerException {
-    File[] files = workspaceRootFsPath.toFile().listFiles();
-    if (files == null) {
-      LOG.error("Something went wrong while listing workspace projects");
-      return;
-    }
+    File workspaceRootFile = workspaceRootFsPath.toFile();
+    if (workspaceRootFile.isDirectory()) {
+      ProcessBuilder processBuilder = new ProcessBuilder("dotnet", "restore");
+      processBuilder.directory(workspaceRootFile);
 
-    for (File file : files) {
-      if (file.isDirectory()) {
-        if (!file.toPath().resolve("dotnet").toFile().exists()) {
-          LOG.warn("An executable 'dotnet' is not present at '{}'", file.toPath().toString());
-          return;
+      try {
+        Process process = processBuilder.start();
+        int resultCode = process.waitFor();
+        if (resultCode != 0) {
+          String err = IoUtil.readStream(process.getErrorStream());
+          String in = IoUtil.readStream(process.getInputStream());
+          throw new LanguageServerException(
+              "Can't restore dependencies. Error: " + err + ". Output: " + in);
         }
-
-        ProcessBuilder processBuilder = new ProcessBuilder("dotnet", "restore");
-        processBuilder.directory(file);
-        try {
-          Process process = processBuilder.start();
-          int resultCode = process.waitFor();
-          if (resultCode != 0) {
-            String err = IoUtil.readStream(process.getErrorStream());
-            String in = IoUtil.readStream(process.getInputStream());
-            throw new LanguageServerException(
-                "Can't restore dependencies. Error: " + err + ". Output: " + in);
-          }
-        } catch (IOException | InterruptedException e) {
-          throw new LanguageServerException("Can't start CSharp language server", e);
-        }
+      } catch (IOException | InterruptedException e) {
+        throw new LanguageServerException("Can't start CSharp language server", e);
       }
     }
   }
