@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -120,8 +120,7 @@ public class MoveItemsTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A0.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A0.java");
@@ -143,8 +142,7 @@ public class MoveItemsTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A1.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A1.java");
@@ -177,7 +175,7 @@ public class MoveItemsTest {
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A2.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/fred2/B2.java");
@@ -207,7 +205,7 @@ public class MoveItemsTest {
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutB);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A3.java");
     editor.waitTextIntoEditor(contentFromOutA);
@@ -233,8 +231,7 @@ public class MoveItemsTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/r/A5.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A5.java");
@@ -256,8 +253,7 @@ public class MoveItemsTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A6.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A6.java");
@@ -284,8 +280,7 @@ public class MoveItemsTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/A7.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A7.java");
@@ -307,8 +302,7 @@ public class MoveItemsTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/Klass.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(
@@ -331,8 +325,7 @@ public class MoveItemsTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A9.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A9.java");

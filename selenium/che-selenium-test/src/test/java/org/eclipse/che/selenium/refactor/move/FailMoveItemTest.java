@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.common.base.Joiner;
@@ -97,8 +97,7 @@ public class FailMoveItemTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
-    loader.waitOnClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, LOAD_PAGE_TIMEOUT_SEC);
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.clickOnSelectedElementInEditor("r.A17");
     editor.waitMarkerInPosition(ERROR, 14);
