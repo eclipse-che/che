@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -54,12 +53,10 @@ public class WorkspaceValidator {
    *
    * @param config configuration to validate
    * @throws ValidationException if any of validation constraints is violated
-   * @throws NotFoundException when configuration contains a recipe with a type which is not
-   *     supported by currently available workspace infrastructures
    * @throws ServerException when any other error occurs during environment validation
    */
   public void validateConfig(WorkspaceConfig config)
-      throws ValidationException, NotFoundException, ServerException {
+      throws ValidationException, ServerException {
     // configuration object properties
     checkNotNull(config.getName(), "Workspace name required");
     check(
