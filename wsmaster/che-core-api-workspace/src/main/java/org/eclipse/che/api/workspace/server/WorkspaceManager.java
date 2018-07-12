@@ -344,7 +344,7 @@ public class WorkspaceManager {
             });
   }
 
-  /** @return set of supported recipe types */
+  /** Returns a set of supported recipe types */
   public Set<String> getSupportedRecipes() {
     return runtimes.getSupportedRecipes();
   }
