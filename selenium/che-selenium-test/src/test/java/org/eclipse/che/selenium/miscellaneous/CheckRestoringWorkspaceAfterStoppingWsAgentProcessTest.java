@@ -111,6 +111,9 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest {
     toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime...");
     waitWorkspaceRunningStatus();
     goToFileAndCheckText();
+    editor.waitActive();
+    editor.typeTextIntoEditor(TEXT_FOR_TYPING);
+    editor.waitTextIntoEditor(TEXT_FOR_TYPING);
   }
 
   private void waitWorkspaceRunningStatus() throws Exception {
