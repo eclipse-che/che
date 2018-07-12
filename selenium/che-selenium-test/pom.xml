@@ -244,6 +244,8 @@
                         </goals>
                         <configuration>
                             <trimStackTrace>false</trimStackTrace>
+                            <!-- we need to set 'parallel=classes' to prevent unexpected destroy of test objects in case of execution the package of tests -->
+                            <parallel>classes</parallel>
                             <properties>
                                 <property>
                                     <name>configfailurepolicy</name>
