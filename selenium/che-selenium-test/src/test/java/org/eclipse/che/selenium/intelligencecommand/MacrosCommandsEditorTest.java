@@ -82,7 +82,7 @@ public class MacrosCommandsEditorTest {
       "${current.project.relpath}",
       "${editor.current.file.relpath}",
       "${explorer.current.file.relpath}",
-      "Path relative to the /projects folder to the selected file in editor",
+      "Path relative to the /projects folder to the selected file in Editor",
       "Path relative to the /projects folder in project tree"
     };
     for (String macrosItem : macrosItems) {
