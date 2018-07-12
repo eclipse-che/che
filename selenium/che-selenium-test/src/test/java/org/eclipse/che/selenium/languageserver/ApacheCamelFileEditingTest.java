@@ -60,7 +60,7 @@ public class ApacheCamelFileEditingTest {
     projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
     editor.waitTabIsPresent(CAMEL_FILE_NAME);
 
-    // check Apache Camel language sever initialized
+    // check Apache Camel language server initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
