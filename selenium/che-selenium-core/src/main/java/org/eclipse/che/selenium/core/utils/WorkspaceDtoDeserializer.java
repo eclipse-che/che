@@ -62,12 +62,11 @@ public class WorkspaceDtoDeserializer {
   private String getTemplateDirectory(String template) {
     String templateDirectoryName;
     switch (infrastructure) {
-      case openshift:
-      case k8s:
-        templateDirectoryName = Infrastructure.openshift.toString().toLowerCase();
+      case OSIO:
+      case K8S:
+        templateDirectoryName = Infrastructure.OPENSHIFT.toString().toLowerCase();
         break;
 
-      case docker:
       default:
         templateDirectoryName = infrastructure.toString().toLowerCase();
     }

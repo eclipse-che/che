@@ -13,9 +13,10 @@ package org.eclipse.che.selenium.core.constant;
 import com.google.inject.Singleton;
 
 @Singleton
+/** Reflects values of environment variable CHE_INFRASTRUCTURE */
 public enum Infrastructure {
-  docker,
-  openshift,
-  k8s,
-  supershift
+  DOCKER,
+  OPENSHIFT,
+  K8S,
+  OSIO
 }

@@ -126,15 +126,21 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       install(new CheSeleniumSingleUserModule());
     }
 
+    configureInfrastructureRelatedDependencies();
+    configureTestExecutionModeRelatedDependencies();
+  }
+
+  private void configureInfrastructureRelatedDependencies() {
     final Infrastructure cheInfrastructure =
-        Infrastructure.valueOf(System.getenv(CHE_INFRASTRUCTURE_VARIABLE));
+        Infrastructure.valueOf(System.getenv(CHE_INFRASTRUCTURE_VARIABLE).toUpperCase());
     switch (cheInfrastructure) {
-      case openshift:
-      case k8s:
+      case OPENSHIFT:
+      case K8S:
+      case OSIO:
         install(new CheSeleniumOpenshiftModule());
         break;
 
-      case docker:
+      case DOCKER:
         install(new CheSeleniumDockerModule());
         break;
 
@@ -142,7 +148,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
         throw new RuntimeException(
             format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
     }
-    configureTestExecutionModeRelatedDependencies();
   }
 
   private void configureTestExecutionModeRelatedDependencies() {

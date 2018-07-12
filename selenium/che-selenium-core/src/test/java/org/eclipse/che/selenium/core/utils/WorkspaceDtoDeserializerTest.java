@@ -25,7 +25,7 @@ public class WorkspaceDtoDeserializerTest {
     deserializer = new WorkspaceDtoDeserializer();
     Field f1 = WorkspaceDtoDeserializer.class.getDeclaredField("infrastructure");
     f1.setAccessible(true);
-    f1.set(deserializer, Infrastructure.openshift);
+    f1.set(deserializer, Infrastructure.OPENSHIFT);
   }
 
   @Test

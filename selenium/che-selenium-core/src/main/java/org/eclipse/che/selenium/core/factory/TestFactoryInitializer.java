@@ -87,12 +87,10 @@ public class TestFactoryInitializer {
   private String getTemplateDirectory(String template) {
     String templateDirectoryName;
     switch (infrastructure) {
-      case openshift:
-      case k8s:
-        templateDirectoryName = Infrastructure.k8s.toString().toLowerCase();
+      case OSIO:
+        templateDirectoryName = Infrastructure.OPENSHIFT.toString().toLowerCase();
         break;
 
-      case docker:
       default:
         templateDirectoryName = infrastructure.toString().toLowerCase();
     }
