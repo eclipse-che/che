@@ -12,8 +12,12 @@ package org.eclipse.che.selenium.core.constant;
 
 import com.google.inject.Singleton;
 
+/**
+ * Reflects values of environment variable CHE_INFRASTRUCTURE
+ *
+ * @author Dmytro Nochevnov
+ */
 @Singleton
-/** Reflects values of environment variable CHE_INFRASTRUCTURE */
 public enum Infrastructure {
   DOCKER,
   OPENSHIFT,
