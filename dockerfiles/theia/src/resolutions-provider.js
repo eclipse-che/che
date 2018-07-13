@@ -25,7 +25,7 @@ const fullPackageJsonPath=`${HOME}/full-package.json`;
 
 spawnSync('wget', ['-O', `${fullPackageJsonPath}`, `${theiaFullPackageJsonLink}`]);
 
-if (fs.exists(`${fullPackageJsonPath}`)) {
+if (!fs.existsSync(`${fullPackageJsonPath}`)) {
     console.log("Can't generate resolution, because we have not list all base Theia dependencies.");
     return;
 }

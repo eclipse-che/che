@@ -26,7 +26,7 @@ ADD supervisord.conf /etc/
 
 RUN \
     # Install needed software
-    apk update && apk add --no-cache make gcc g++ python git bash supervisor jq openssl && \
+    apk update && apk add --no-cache make gcc g++ python git bash supervisor jq openssl wget && \
     rm -rf /tmp/* /var/cache/apk/* && \
     # Change version of Theia to specified in THEIA_VERSION
     ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
@@ -43,8 +43,7 @@ RUN \
     # Build Theia with all the extensions
     yarn theia build && \
     # Install Theia plugin generator
-    #==TODO== add after generator-theia-plugin release
-    #npm install -g yo @wiptheia/generator-theia-plugin && \
+    npm install -g yo @theia/generator-plugin && \
     # Change permissions to allow editing of files for openshift user
     find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; && \
     # Grant permissions for modifying supervisor log file
