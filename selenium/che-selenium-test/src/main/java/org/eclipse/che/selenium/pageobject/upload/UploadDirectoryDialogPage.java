@@ -22,10 +22,16 @@ import org.openqa.selenium.support.FindBy;
 public class UploadDirectoryDialogPage extends AbstractUploadDialogPage {
   private static final String UPLOAD_BUTTON_ID = "file-uploadFolder-upload";
   private static final String TITLE_XPATH = "//div[text()='Upload Folder']";
+
   private static final String OVERWRITE_FOLDER_CHECKBOX_ID =
       "gwt-debug-file-uploadFolder-overwrite-input";
   private static final String OVERWRITE_FOLDER_CHECKBOX_LABEL_ID =
       "gwt-debug-file-uploadFolder-overwrite-label";
+
+  private static final String SKIP_ROOT_FOLDER_CHECKBOX_ID =
+      "gwt-debug-file-uploadFolder-skipFirstLevel-input";
+  private static final String SKIP_ROOT_FOLDER_CHECKBOX_LABEL_ID =
+      "gwt-debug-file-uploadFolder-skipFirstLevel-label";
 
   @FindBy(id = UPLOAD_BUTTON_ID)
   private WebElement uploadButton;
@@ -39,12 +45,23 @@ public class UploadDirectoryDialogPage extends AbstractUploadDialogPage {
   @FindBy(id = OVERWRITE_FOLDER_CHECKBOX_LABEL_ID)
   private WebElement overwriteIfFolderExistsCheckboxLabel;
 
+  @FindBy(id = SKIP_ROOT_FOLDER_CHECKBOX_ID)
+  private WebElement skipRootFolderCheckbox;
+
+  @FindBy(id = SKIP_ROOT_FOLDER_CHECKBOX_LABEL_ID)
+  private WebElement skipRootFolderCheckboxLabel;
+
   @Inject
   public UploadDirectoryDialogPage(
       SeleniumWebDriver seleniumWebDriver,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       WebDriverWaitFactory webDriverWaitFactory) {
     super(seleniumWebDriver, seleniumWebDriverHelper, webDriverWaitFactory);
+  }
+
+  public void selectSkipRootFolderCheckbox() {
+    seleniumWebDriverHelper.waitAndSetCheckbox(
+        skipRootFolderCheckbox, skipRootFolderCheckboxLabel, true);
   }
 
   @Override
