@@ -15,6 +15,9 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.NODEJS_WITH_JSON_LS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.NODEJS_HELLO_WORLD;
+import static org.openqa.selenium.Keys.BACK_SPACE;
+import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -25,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -72,7 +74,7 @@ public class JsonFileEditingTest {
 
     // delete ',' and check error marker with message
     editor.goToCursorPositionVisible(8, 5);
-    editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+    editor.typeTextIntoEditor(BACK_SPACE.toString());
     editor.waitMarkerInPosition(ERROR, 9);
     editor.moveToMarkerAndWaitAssistContent(ERROR);
     editor.waitTextIntoAnnotationAssist("Expected '(end)' and instead saw ':'.");
@@ -84,12 +86,12 @@ public class JsonFileEditingTest {
 
     // add new object
     editor.goToCursorPositionVisible(9, 16);
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
     editor.waitAllMarkersInvisibility(ERROR);
 
     // add duplicated object and check error marker with message
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
     editor.waitMarkerInPosition(ERROR, 11);
     editor.moveToMarkerAndWaitAssistContent(ERROR);
@@ -99,17 +101,18 @@ public class JsonFileEditingTest {
     editor.deleteCurrentLine();
     editor.waitAllMarkersInvisibility(ERROR);
 
-    // TODO add duplicated object in other {block} and check there is not error marker
+    // add duplicated object in other {} block
     editor.goToCursorPositionVisible(6, 15);
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void createProjectFromWizard() {
     projectExplorer.waitProjectExplorer();
+
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
-    wizard.selectSample(Wizard.SamplesName.NODEJS_HELLO_WORLD);
+    wizard.selectSample(NODEJS_HELLO_WORLD);
     wizard.typeProjectNameOnWizard(PROJECT_NAME);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
