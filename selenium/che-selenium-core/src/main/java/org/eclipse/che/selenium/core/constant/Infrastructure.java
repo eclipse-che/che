@@ -8,15 +8,19 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core;
+package org.eclipse.che.selenium.core.constant;
 
-/** @author Dmytro Nochevnov */
-public interface TestGroup {
-  String MULTIUSER = "multiuser";
-  String SINGLEUSER = "singleuser";
-  String OPENSHIFT = "openshift";
-  String DOCKER = "docker";
-  String GITHUB = "github";
-  String OSIO = "osio";
-  String K8S = "k8s";
+import com.google.inject.Singleton;
+
+/**
+ * Reflects values of environment variable CHE_INFRASTRUCTURE
+ *
+ * @author Dmytro Nochevnov
+ */
+@Singleton
+public enum Infrastructure {
+  DOCKER,
+  OPENSHIFT,
+  K8S,
+  OSIO
 }
