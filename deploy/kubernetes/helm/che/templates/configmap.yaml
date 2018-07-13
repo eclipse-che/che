@@ -73,6 +73,6 @@ data:
 {{- end }}
   CHE_INFRA_KUBERNETES_SERVER__STRATEGY: {{ .Values.global.serverStrategy }}
   CHE_LOGS_APPENDERS_IMPL: "plaintext"
-  CHE_WORKSPACE_HTTP__PROXY: ""
-  CHE_WORKSPACE_HTTPS__PROXY: ""
-  CHE_WORKSPACE_NO__PROXY: ""
+  CHE_WORKSPACE_HTTP__PROXY: {{ .Values.cheWorkspaceHttpProxy }}
+  CHE_WORKSPACE_HTTPS__PROXY: {{ .Values.cheWorkspaceHttpsProxy }}
+  CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy }}

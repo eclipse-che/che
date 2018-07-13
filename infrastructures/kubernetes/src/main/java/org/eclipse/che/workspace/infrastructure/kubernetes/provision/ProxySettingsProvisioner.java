@@ -20,13 +20,16 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
-/** @author Mykhailo Kuznietsov */
+/**
+ * Add proxy configuration to pod containers
+ *
+ * @author Mykhailo Kuznietsov
+ */
 public class ProxySettingsProvisioner implements ConfigurationProvisioner {
   private static final String HTTPS_PROXY = "https_proxy";
   private static final String HTTP_PROXY = "http_proxy";
   private static final String NO_PROXY = "no_proxy";
 
-  // note that values are the same for now
   private final Map<String, String> proxyEnvVars;
 
   @Inject
@@ -49,12 +52,14 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    for (Pod pod : k8sEnv.getPods().values()) {
-      pod.getSpec()
-          .getContainers()
-          .forEach(
-              container ->
-                  proxyEnvVars.forEach((k, v) -> container.getEnv().add(new EnvVar(k, v, null))));
+    if (!proxyEnvVars.isEmpty()) {
+      for (Pod pod : k8sEnv.getPods().values()) {
+        pod.getSpec()
+            .getContainers()
+            .forEach(
+                container ->
+                    proxyEnvVars.forEach((k, v) -> container.getEnv().add(new EnvVar(k, v, null))));
+      }
     }
   }
 }

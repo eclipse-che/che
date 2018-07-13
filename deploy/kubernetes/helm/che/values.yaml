@@ -11,6 +11,9 @@
 #  username: myUser
 #  password: myPass
 
+cheWorkspaceHttpProxy: "test1"
+cheWorkspaceHttpsProxy: "test2"
+cheWorkspaceNoProxy: "test3"
 cheImage: eclipse/che-server:nightly
 cheImagePullPolicy: Always
 cheKeycloakRealm: "che"
