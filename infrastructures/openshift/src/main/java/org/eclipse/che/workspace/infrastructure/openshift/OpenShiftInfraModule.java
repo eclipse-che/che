@@ -45,7 +45,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
@@ -115,12 +114,5 @@ public class OpenShiftInfraModule extends AbstractModule {
     secureServerExposerFactories
         .addBinding("default")
         .to(new TypeLiteral<DefaultSecureServersFactory<OpenShiftEnvironment>>() {});
-
-    install(
-        new FactoryModuleBuilder()
-            .build(new TypeLiteral<JwtProxySecureServerExposerFactory<OpenShiftEnvironment>>() {}));
-    secureServerExposerFactories
-        .addBinding("jwtproxy")
-        .to(new TypeLiteral<JwtProxySecureServerExposerFactory<OpenShiftEnvironment>>() {});
   }
 }

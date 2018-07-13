@@ -18,54 +18,47 @@ import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
 @Listeners(MockitoTestNGListener.class)
 public class SecureServerExposerFactoryProviderTest {
-  @Mock private DefaultSecureServersFactory<KubernetesEnvironment> defaultSecureServersFactory;
+  @Mock private SecureServerExposerFactory<KubernetesEnvironment> secureServerExposer1;
+  @Mock private SecureServerExposerFactory<KubernetesEnvironment> secureServerExposer2;
 
-  @Mock private SecureServerExposerFactory<KubernetesEnvironment> customSecureServerExposer;
+  private Map<String, SecureServerExposerFactory<KubernetesEnvironment>> factories;
 
-  private Map<String, SecureServerExposerFactory<KubernetesEnvironment>> factories =
-      new HashMap<>();
+  @BeforeMethod
+  public void setUp() {
+    factories = new HashMap<>();
+    factories.put("exposer1", secureServerExposer1);
+    factories.put("exposer2", secureServerExposer2);
+  }
 
   @Test
-  public void shouldReturnDefaultSecureServerExposerWhenAgentAuthIsDisabled() {
+  public void shouldReturnConfiguredSecureServerExposer() {
     // given
     SecureServerExposerFactoryProvider<KubernetesEnvironment> factoryProvider =
-        new SecureServerExposerFactoryProvider<>(
-            false, "custom", defaultSecureServersFactory, factories);
+        new SecureServerExposerFactoryProvider<>("exposer1", factories);
 
     // when
     SecureServerExposerFactory<KubernetesEnvironment> factory = factoryProvider.get();
 
     // then
-    assertSame(factory, defaultSecureServersFactory);
+    assertSame(factory, secureServerExposer1);
   }
 
-  @Test
-  public void shouldReturnConfiguredSecureServerExposerWhenAgentAuthIsEnabled() {
-    // given
-    factories.put("custom", customSecureServerExposer);
-    SecureServerExposerFactoryProvider<KubernetesEnvironment> factoryProvider =
-        new SecureServerExposerFactoryProvider<>(
-            true, "custom", defaultSecureServersFactory, factories);
-
-    // when
-    SecureServerExposerFactory<KubernetesEnvironment> factory = factoryProvider.get();
-
-    // then
-    assertSame(factory, customSecureServerExposer);
-  }
-
-  @Test(expectedExceptions = ConfigurationException.class)
+  @Test(
+    expectedExceptions = ConfigurationException.class,
+    expectedExceptionsMessageRegExp =
+        "Unknown secure servers exposer is configured 'non-existing'. Currently supported: exposer1, exposer2."
+  )
   public void shouldThrowAnExceptionIfConfiguredSecureServerWasNotFound() {
     // given
     SecureServerExposerFactoryProvider<KubernetesEnvironment> factoryProvider =
-        new SecureServerExposerFactoryProvider<>(
-            true, "non-existing", defaultSecureServersFactory, factories);
+        new SecureServerExposerFactoryProvider<>("non-existing", factories);
 
     // when
     factoryProvider.get();
