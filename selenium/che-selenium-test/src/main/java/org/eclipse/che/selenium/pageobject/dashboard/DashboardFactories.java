@@ -217,11 +217,6 @@ public class DashboardFactories {
     loadPageTimeoutWait.until(visibilityOf(createFactoryBtn)).click();
   }
 
-  /** wait any factory url after creation a factory */
-  public void waitFactoryUrl() {
-    loadPageTimeoutWait.until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?id=")));
-  }
-
   /**
    * wait on the factory name field visibility and enter the name
    *
@@ -252,26 +247,21 @@ public class DashboardFactories {
 
   /** click on current factory id Url */
   public void clickFactoryIDUrl() {
-    waitFactoryUrl();
+    waitFactoryIdUrl();
     loadPageTimeoutWait
         .until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?id=")))
         .click();
   }
 
-  /** click on current factory id Url */
-  public void clickNamedFactoryUrl() {
-    waitFactoryUrl();
-    loadPageTimeoutWait
-        .until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?name=")))
-        .click();
+  /** wait factory id url after creation a factory */
+  public void waitFactoryIdUrl() {
+    loadPageTimeoutWait.until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?id=")));
   }
 
-  /** click on current factory id Url */
-  public void clickFactoryNamedUrl() {
-    waitFactoryUrl();
-    loadPageTimeoutWait
-        .until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?name=")))
-        .click();
+  /** wait id factory url after creation a factory */
+  public void waitFactoryNamedUrl(String factoryName) {
+    loadPageTimeoutWait.until(
+        visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?name=" + factoryName)));
   }
 
   /** Click on 'Workspaces' tab on 'Select Source' widget */

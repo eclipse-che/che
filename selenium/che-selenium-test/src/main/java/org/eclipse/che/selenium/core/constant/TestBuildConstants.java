@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.core.constant;
 
 /** Introduce text constants related to build project process */
 public class TestBuildConstants {
-  public static final String BUILD_SUCCESS = "[INFO] BUILD SUCCESS";
+  public static final String BUILD_SUCCESS = "BUILD SUCCESS";
   public static final String BUILD_FAILED = "[INFO] BUILD FAILURE";
   public static final String SERVER_STARTUP_IN = "Server startup in";
   public static final String LISTENING_AT_ADDRESS = "Listening for transport dt_socket at address";

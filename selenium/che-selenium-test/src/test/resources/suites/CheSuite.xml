@@ -52,6 +52,7 @@
           <class name="org.eclipse.che.selenium.languageserver.PythonFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
@@ -278,7 +279,7 @@
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromBlankStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.WorkingWithJavaMySqlStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.stack.WorkingWithNodeWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>

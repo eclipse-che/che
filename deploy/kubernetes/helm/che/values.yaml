@@ -40,3 +40,4 @@ global:
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
+  cheWorkspacesNamespace: ""

@@ -20,8 +20,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 
 /**
- * Defines an internal API for managing {@link Secret} instances in {@link KubernetesPods#namespace
- * predefined namespace}.
+ * Defines an internal API for managing {@link Secret} instances in {@link
+ * KubernetesSecrets#namespace predefined namespace}.
  *
  * @author Sergii Leshchenko
  */
