@@ -9,12 +9,18 @@
     "exec-agent/http": {
       "port": "4412/tcp",
       "protocol": "http",
-      "path" : "/process"
+      "path" : "/process",
+      "attributes": {
+        "secure": "true"
+      }
     },
     "exec-agent/ws": {
       "port": "4412/tcp",
       "protocol": "ws",
-      "path": "/connect"
+      "path": "/connect",
+      "attributes": {
+        "secure": "true"
+      }
     }
   }
 }

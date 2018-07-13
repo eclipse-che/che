@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -54,8 +55,9 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> pvcs,
       Map<String, Secret> secrets,
+      Map<String, ConfigMap> configMaps,
       Map<String, Route> routes) {
-    super(internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets);
+    super(internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
     this.routes = routes;
   }
 
@@ -117,6 +119,12 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       return this;
     }
 
+    @Override
+    public Builder setConfigMaps(Map<String, ConfigMap> configMaps) {
+      this.configMaps.putAll(configMaps);
+      return this;
+    }
+
     public Builder setRoutes(Map<String, Route> route) {
       this.routes.putAll(route);
       return this;
@@ -124,7 +132,16 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
 
     public OpenShiftEnvironment build() {
       return new OpenShiftEnvironment(
-          internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, routes);
+          internalRecipe,
+          machines,
+          warnings,
+          pods,
+          services,
+          ingresses,
+          pvcs,
+          secrets,
+          configMaps,
+          routes);
     }
   }
 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>6.8.0-SNAPSHOT</version>
+        <version>6.9.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
@@ -244,6 +244,8 @@
                         </goals>
                         <configuration>
                             <trimStackTrace>false</trimStackTrace>
+                            <!-- we need to set 'parallel=classes' to prevent unexpected destroy of test objects in case of execution the package of tests -->
+                            <parallel>classes</parallel>
                             <properties>
                                 <property>
                                     <name>configfailurepolicy</name>
