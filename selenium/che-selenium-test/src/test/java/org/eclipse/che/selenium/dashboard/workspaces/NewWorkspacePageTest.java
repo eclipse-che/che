@@ -2,7 +2,7 @@
  * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
+ * which accompanes this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
@@ -359,19 +359,11 @@ public class NewWorkspacePageTest {
     newWorkspace.closeCreateStackDialogByCloseButton();
     newWorkspace.waitCreateStackDialogClosing();
 
-    // close form by "No" button
+    // close form by "Cancel" button
     newWorkspace.clickOnAddStackButton();
     newWorkspace.waitCreateStackDialog();
     newWorkspace.clickOnNoButtonInCreateStackDialog();
     newWorkspace.waitCreateStackDialogClosing();
-
-    // click on "Yes" button
-    newWorkspace.clickOnAddStackButton();
-    newWorkspace.waitCreateStackDialog();
-    newWorkspace.clickOnYesButtonInCreateStackDialog();
-    stacks.waitToolbarTitleName();
-    seleniumWebDriver.navigate().back();
-    newWorkspace.waitPageLoad();
   }
 
   @Test(groups = TestGroup.OPENSHIFT)

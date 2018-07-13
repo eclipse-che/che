@@ -410,7 +410,7 @@ public class AddOrImportProjectFormTest {
   public void checkCreatingProject() throws Exception {
     // check that name field saves it state after choosing another stack
     newWorkspace.waitPageLoad();
-    newWorkspace.waitStackSelected(Stack.BLANK);
+    newWorkspace.waitStackSelected(Stack.JAVA_MYSQL);
     newWorkspace.typeWorkspaceName(TEST_BLANK_WORKSPACE_NAME);
     newWorkspace.selectStack(Stack.DOT_NET);
     newWorkspace.waitStackSelected(Stack.DOT_NET);

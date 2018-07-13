@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static java.lang.String.format;
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.BLANK;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
@@ -32,8 +31,6 @@ import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
 public class StacksListTest {
-
-  private static final String NEW_STACK_NAME = generate("", 8);
 
   @Inject private StackDetails stackDetails;
   @Inject private Dashboard dashboard;
@@ -85,17 +82,17 @@ public class StacksListTest {
 
   @Test
   public void checkStacksSelectingByCheckbox() {
-    createStack(NEW_STACK_NAME);
+    String newStackName = createDuplicatedStack(JAVA_MYSQL.getName());
 
     // select stacks by checkbox and check it is selected
-    stacks.selectStackByCheckbox(NEW_STACK_NAME);
-    assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
-    stacks.selectStackByCheckbox(NEW_STACK_NAME);
-    assertFalse(stacks.isStackChecked(NEW_STACK_NAME));
+    stacks.selectStackByCheckbox(newStackName);
+    assertTrue(stacks.isStackChecked(newStackName));
+    stacks.selectStackByCheckbox(newStackName);
+    assertFalse(stacks.isStackChecked(newStackName));
 
     // click on the Bulk button and check that created stack is checked
     stacks.selectAllStacksByBulk();
-    assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
+    assertTrue(stacks.isStackChecked(newStackName));
   }
 
   @Test
@@ -145,16 +142,15 @@ public class StacksListTest {
 
   @Test
   public void checkStackActionButtons() {
-    String stackName = generate("", 8);
+    String stackName;
 
     // create stack duplicate by Duplicate Stack button
-    stacks.clickOnDuplicateStackButton(JAVA.getName());
-    assertTrue(stacks.isDuplicatedStackExisted(JAVA.getName() + "-copy-"));
-    stacks.clickOnDuplicateStackButton(BLANK.getName());
-    assertTrue(stacks.isDuplicatedStackExisted(BLANK.getName() + "-copy-"));
+    stackName = createDuplicatedStack(JAVA.getName());
+    assertTrue(stacks.isDuplicatedStackExisted(stackName));
+    stackName = createDuplicatedStack(BLANK.getName());
+    assertTrue(stacks.isDuplicatedStackExisted(stackName));
 
     // delete stack by the Action delete stack button
-    createStack(stackName);
     stacks.clickOnDeleteActionButton(stackName);
     stacks.clickOnDeleteDialogButton();
     dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", stackName));
@@ -169,16 +165,21 @@ public class StacksListTest {
     dashboard.waitNotificationIsClosed();
   }
 
-  private void createStack(String stackName) {
+  private String createDuplicatedStack(String stack) {
+    ArrayList<String> stackNamesList;
+    String createdStackName = "";
+
     dashboard.selectStacksItemOnDashboard();
     stacks.waitToolbarTitleName();
+    stacks.clickOnDuplicateStackButton(stack);
+    stackNamesList = stacks.getStacksNamesList();
 
-    stacks.clickOnAddStackButton();
-    stackDetails.setStackName(stackName);
-    stackDetails.clickOnSaveChangesButton();
-    stackDetails.waitToolbar(stackName);
-    stackDetails.clickOnAllStacksButton();
-    stacks.waitToolbarTitleName();
-    stacks.waitStackItem(stackName);
+    for (String name : stackNamesList) {
+      if (name.contains(stack + "-copy-")) {
+        createdStackName = name;
+      }
+    }
+
+    return createdStackName;
   }
 }

@@ -38,7 +38,7 @@ public class Stacks {
   private interface Locators {
     String TOOLBAR_ID = "Stacks";
     String DOCUMENTATION_LINK_XPATH = "//div[@che-link-title='Learn more.']/a";
-    String ADD_STACK_BUTTON_ID = "add-item-button";
+    String ADD_STACK_BUTTON_ID = "import-item-button";
     String BUILD_STACK_FROM_RECIPE_BUTTON_ID = "import-item-button";
     String DELETE_STACK_BUTTON_ID = "delete-item-button";
     String DELETE_DIALOG_BUTTON_ID = "ok-dialog-button";
