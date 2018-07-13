@@ -48,12 +48,12 @@ public class UploadFileDialogPage extends AbstractUploadDialogPage {
   }
 
   @Override
-  public WebElement getTitle() {
+  WebElement getTitle() {
     return title;
   }
 
   @Override
-  public WebElement getUploadButton() {
+  WebElement getUploadButton() {
     return uploadButton;
   }
 

@@ -18,10 +18,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -50,6 +52,8 @@ public class UploadIntoProjectTest {
   @Inject private UploadFileDialogPage uploadFileDialogPage;
   @Inject private UploadDirectoryDialogPage uploadDirectoryDialogPage;
   @Inject private NotificationsPopupPanel notificationPopup;
+  @Inject private CodenvyEditor editor;
+  public static final String TEXT_TO_INSERT = NameGenerator.generate("", 10);
 
   @BeforeClass
   public void setup() throws Exception {
@@ -73,15 +77,17 @@ public class UploadIntoProjectTest {
   public void shouldUploadFileWithDefaultOptions() throws URISyntaxException, IOException {
     // given
     final String uploadingFileName = "Aclass.java";
+
     final Path localPathToFileToUpload =
         Paths.get(PROJECT_SOURCES.getPath())
             .resolve("src/main/java/che/eclipse/sample")
             .resolve(uploadingFileName);
 
+    final String pathToFileInsideTheProject = format("%s/%s", PROJECT_NAME, uploadingFileName);
+
     // open upload file window
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FILE);
-
     uploadFileDialogPage.waitOnOpen();
 
     // when
@@ -93,15 +99,77 @@ public class UploadIntoProjectTest {
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
         format("File '%s' has uploaded successfully", uploadingFileName));
     projectExplorer.waitVisibleItem(format("%s/%s", PROJECT_NAME, uploadingFileName));
+
+    // Check that uploading file doesn't overwrite existed one
+    // when change the file
+    projectExplorer.openItemByPath(pathToFileInsideTheProject);
+    editor.typeTextIntoEditor(TEXT_TO_INSERT);
+
+    // when re-upload the file
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FILE);
+    uploadFileDialogPage.waitOnOpen();
+    uploadFileDialogPage.selectResourceToUpload(localPathToFileToUpload);
+    uploadFileDialogPage.clickOnUploadButton();
+
+    // then there is changes remained after uploading
+    uploadFileDialogPage.waitOnClose();
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
+        format("File '%s' has uploaded successfully", uploadingFileName));
+    projectExplorer.waitVisibleItem(pathToFileInsideTheProject);
+    projectExplorer.openItemByPath(pathToFileInsideTheProject);
+    editor.waitTextIntoEditor(TEXT_TO_INSERT);
   }
 
   @Test
-  public void shouldUploadFileWithOverwriting() {
+  public void shouldUploadFileWithOverwriting() throws IOException {
+    // given
+    final String uploadingFileName = "AppController.java";
+
+    final Path localPathToFileToUpload =
+        Paths.get(PROJECT_SOURCES.getPath())
+            .resolve("src/main/java/org/eclipse/qa/examples")
+            .resolve(uploadingFileName);
+
+    final String pathToFileInsideTheProject = format("%s/%s", PROJECT_NAME, uploadingFileName);
+
     // open upload file window
     menu.runCommand(
-        TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FOLDER);
+        TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FILE);
+    uploadFileDialogPage.waitOnOpen();
 
-    uploadDirectoryDialogPage.waitOnOpen();
+    // when
+    uploadFileDialogPage.selectResourceToUpload(localPathToFileToUpload);
+    uploadFileDialogPage.clickOnUploadButton();
+
+    // then
+    uploadFileDialogPage.waitOnClose();
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
+        format("File '%s' has uploaded successfully", uploadingFileName));
+    projectExplorer.waitVisibleItem(format("%s/%s", PROJECT_NAME, uploadingFileName));
+
+    // Check that uploading file overwrites existed one
+    // when change the file
+    projectExplorer.openItemByPath(pathToFileInsideTheProject);
+    editor.typeTextIntoEditor(TEXT_TO_INSERT);
+
+    // when re-upload the file
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.UPLOAD_FILE);
+    uploadFileDialogPage.waitOnOpen();
+    uploadFileDialogPage.selectResourceToUpload(localPathToFileToUpload);
+    uploadFileDialogPage.selectOverwriteIfFileExistsCheckbox();
+    uploadFileDialogPage.clickOnUploadButton();
+
+    // then there are no changes remained after uploading
+    uploadFileDialogPage.waitOnClose();
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
+        format("File '%s' has uploaded successfully", uploadingFileName));
+    projectExplorer.waitVisibleItem(pathToFileInsideTheProject);
+    projectExplorer.openItemByPath(pathToFileInsideTheProject);
+    editor.waitTextNotPresentIntoEditor(TEXT_TO_INSERT);
   }
 
   @Test
