@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.notification.EventService;
@@ -28,6 +29,8 @@ import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.LanguageServerException;
 import org.eclipse.che.api.languageserver.LanguageServerInitializedEvent;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.csharp.inject.CSharpModule;
 import org.slf4j.Logger;
@@ -42,13 +45,16 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
 
   private final EventService eventService;
   private final PathTransformer pathTransformer;
+  private final ProjectManager projectManager;
 
   private final Path launchScript;
 
   @Inject
-  public CSharpLanguageServerConfig(EventService eventService, PathTransformer pathTransformer) {
+  public CSharpLanguageServerConfig(
+      EventService eventService, PathTransformer pathTransformer, ProjectManager projectManager) {
     this.eventService = eventService;
     this.pathTransformer = pathTransformer;
+    this.projectManager = projectManager;
 
     this.launchScript = Paths.get(System.getenv("HOME"), "che/ls-csharp/launch.sh");
   }
@@ -61,8 +67,10 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
   private void onLSProxyInitialized(LanguageServerInitializedEvent event) {
     try {
       if ("org.eclipse.che.plugin.csharp.languageserver".equals(event.getId())) {
-        Path wsPath = Paths.get(event.getWsPath());
-        restoreDependencies(pathTransformer.transform(wsPath.getParent().toString()));
+        Optional<RegisteredProject> project = projectManager.getClosest(event.getWsPath());
+        if (project.isPresent()) {
+          restoreDependencies(pathTransformer.transform(project.get().getPath()));
+        }
       }
     } catch (LanguageServerException e) {
       LOG.error(e.getMessage(), e);
