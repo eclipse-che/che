@@ -10,6 +10,7 @@
  */
 'use strict';
 import {CheAgent} from '../../../../components/api/che-agent.factory';
+import { IEnvironmentManagerMachine } from '../../../../../target/dist/components/api/environment/environment-manager-machine';
 
 export interface IAgentItem extends che.IAgent {
   isEnabled: boolean;
@@ -27,7 +28,7 @@ const LATEST: string = 'latest';
  */
 export class MachineAgentsController {
 
-  static $inject = ['$scope', 'cheAgent', '$timeout'];
+  static $inject = ['$scope', 'cheAgent', '$timeout', '$q'];
 
   onChange: Function;
   agentOrderBy = 'name';
@@ -36,37 +37,53 @@ export class MachineAgentsController {
   private cheAgent: CheAgent;
   private $timeout: ng.ITimeoutService;
   private timeoutPromise: ng.IPromise<any>;
-  private agents: Array<string>;
+  private machine: IEnvironmentManagerMachine;
+  private machineAgentsList: Array<string>;
   private availableAgents: Array<che.IAgent>;
   private agentsToUpdate: Array<IAgentItem> = [];
 
   /**
    * Default constructor that is using resource
    */
-  constructor($scope: ng.IScope, cheAgent: CheAgent, $timeout: ng.ITimeoutService) {
+  constructor($scope: ng.IScope, cheAgent: CheAgent, $timeout: ng.ITimeoutService, $q: ng.IQService) {
     this.cheAgent = cheAgent;
     this.$timeout = $timeout;
 
     this.availableAgents = cheAgent.getAgents();
+    const availableAgentsDefer = $q.defer();
     if (this.availableAgents && this.availableAgents.length) {
-      this.buildAgentsList();
+      availableAgentsDefer.resolve();
     } else {
       cheAgent.fetchAgents().then(() => {
         this.availableAgents = cheAgent.getAgents();
-        this.buildAgentsList();
+        availableAgentsDefer.resolve();
       });
     }
 
-    let agentsCopy = [];
+    let resolved = false;
+    const machineAgentsDefer = $q.defer();
     const deRegistrationFn = $scope.$watch(() => {
-      return this.agents;
-    }, (newList: string[]) => {
-      if (angular.equals(newList, agentsCopy)) {
+      return this.machine && this.machine.installers;
+    }, (newAgentsList: string[]) => {
+      if (!resolved && newAgentsList && newAgentsList.length) {
+        machineAgentsDefer.resolve();
+        resolved = true;
+
+        this.machineAgentsList = angular.copy(newAgentsList);
         return;
       }
-      agentsCopy = angular.copy(newList);
+
+      if (angular.equals(newAgentsList, this.machineAgentsList)) {
+        return;
+      }
+
+      this.machineAgentsList = angular.copy(newAgentsList);
       this.buildAgentsList();
     });
+
+    $q.all([availableAgentsDefer.promise, machineAgentsDefer.promise]).then(() => {
+      this.buildAgentsList();
+    }) ;
 
     $scope.$on('$destroy', () => {
       deRegistrationFn();
@@ -80,7 +97,7 @@ export class MachineAgentsController {
    * Builds agents list.
    */
   buildAgentsList(): void {
-    if (!this.agents) {
+    if (!this.machineAgentsList) {
       return;
     }
 
@@ -101,16 +118,17 @@ export class MachineAgentsController {
 
     this.timeoutPromise = this.$timeout(() => {
       this.agentsToUpdate.forEach((agent: IAgentItem) => {
-        const index = this.agents.indexOf(agent.id);
+        const index = this.machineAgentsList.indexOf(agent.id);
         if (agent.isEnabled) {
           if (index === -1) {
-            this.agents.push(agent.id);
+            this.machineAgentsList.push(agent.id);
           }
         } else if (index >= 0) {
-          this.agents.splice(index, 1);
+          this.machineAgentsList.splice(index, 1);
         }
       });
       this.agentsToUpdate.length = 0;
+      this.machine.installers = angular.copy(this.machineAgentsList);
 
       this.buildAgentsList();
       this.onChange();
@@ -132,8 +150,8 @@ export class MachineAgentsController {
    * @param agentItem {IAgentItem}
    */
   checkEnabled(agentItem: IAgentItem): void {
-    for (let i = 0; i < this.agents.length; i++) {
-      let agent = this.agents[i];
+    for (let i = 0; i < this.machineAgentsList.length; i++) {
+      let agent = this.machineAgentsList[i];
       // try to extract agent's version in format id:version:
       let groups = agent.match(/[^:]+(:(.+)){0,1}/);
       let id;

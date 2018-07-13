@@ -40,7 +40,7 @@ export class MachineAgents implements ng.IDirective {
   constructor() {
     // scope values
     this.scope = {
-      agents: '=',
+      machine: '=selectedMachine',
       onChange: '&'
     };
   }
