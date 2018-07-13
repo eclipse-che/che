@@ -52,6 +52,7 @@
           <class name="org.eclipse.che.selenium.languageserver.PythonFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
@@ -229,6 +230,7 @@
           <class name="org.eclipse.che.selenium.projectexplorer.DeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.dependencies.TransitiveDependencyTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
+          <class name="org.eclipse.che.selenium.projectexplorer.dependencies.OpenExternalLibraryFileAfterRefreshTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.FileNotExistIntoEditorAfterDeleteTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.FileOpenedAfterCreationTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.JustCreatedFileNotExistIntoEditorAfterDeleteTest"/>
@@ -241,6 +243,7 @@
           <class name="org.eclipse.che.selenium.projectexplorer.ShowFileReferenceTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.CheckDisplayingArtifactIdTest"/>
           <class name="org.eclipse.che.selenium.projectexplorer.DownloadProjectTest"/>
+          <class name="org.eclipse.che.selenium.projectexplorer.UploadIntoProjectTest"/>
           <class name="org.eclipse.che.selenium.refactor.fields.FailNotPrivateFieldTest"/>
           <class name="org.eclipse.che.selenium.refactor.fields.FailPrivateFieldTest"/>
           <class name="org.eclipse.che.selenium.refactor.fields.RenameNotPrivateFieldTest"/>
@@ -276,7 +279,7 @@
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromBlankStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.WorkingWithJavaMySqlStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.stack.WorkingWithNodeWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>

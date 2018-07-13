@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
@@ -96,6 +97,10 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
 
     for (Secret secret : osEnv.getSecrets().values()) {
       project.secrets().create(secret);
+    }
+
+    for (ConfigMap configMap : osEnv.getConfigMaps().values()) {
+      project.configMaps().create(configMap);
     }
 
     List<Service> createdServices = new ArrayList<>();

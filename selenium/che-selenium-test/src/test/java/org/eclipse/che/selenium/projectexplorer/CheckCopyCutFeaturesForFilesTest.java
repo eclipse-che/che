@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.COPY;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CUT;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.PASTE;
 
@@ -19,9 +20,11 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.ChoiceDialog;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -29,6 +32,7 @@ import org.testng.annotations.Test;
 public class CheckCopyCutFeaturesForFilesTest {
   private static final String PROJECT_NAME = CheckCopyCutFeaturesForFilesTest.class.getSimpleName();
   private static final String PATH_TO_JSP_FOLDER = PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp";
+  private static final String PATH_TO_WEB_INF_FOLDER = PROJECT_NAME + "/src/main/webapp/WEB-INF";
   private static final String PATH_TO_XML = PROJECT_NAME + "/src/main/webapp/WEB-INF/web.xml";
   private static final String PATH_TO_CSS = PROJECT_NAME + "/src/main/webapp/WEB-INF/cssFile.css";
   private static final String PATH_TO_HTML =
@@ -45,6 +49,8 @@ public class CheckCopyCutFeaturesForFilesTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private WarningDialog warningDialog;
+  @Inject private ChoiceDialog choiceDialog;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -77,10 +83,39 @@ public class CheckCopyCutFeaturesForFilesTest {
     projectExplorer.waitItem(PATH_TO_HTML_AFTER_MOVING);
   }
 
+  @Test
+  public void shouldShowErrorMessageDialogWhenPastingFileToOwnDirectory() {
+    moveFile(PATH_TO_CSS_AFTER_MOVING, PATH_TO_JSP_FOLDER);
+    warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(
+        "Cannot create cssFile.css. Resource already exists.");
+    warningDialog.clickOkBtn();
+    projectExplorer.waitItem(PATH_TO_CSS_AFTER_MOVING);
+  }
+
+  @Test
+  public void shouldShowErrorChoiceDialogWhenWhenFileExists() {
+    copyFile(PATH_TO_CSS_AFTER_MOVING, PATH_TO_WEB_INF_FOLDER);
+    moveFile(PATH_TO_CSS, PATH_TO_JSP_FOLDER);
+    choiceDialog.containsText(
+        "cssFile.css already exists in /CheckCopyCutFeaturesForFilesTest/src/main/webapp/WEB-INF/jsp.");
+    choiceDialog.clickSecondButton();
+    projectExplorer.waitItem(PATH_TO_CSS_AFTER_MOVING);
+  }
+
   private void moveFile(String filePath, String folderPath) {
     projectExplorer.waitAndSelectItem(filePath);
     projectExplorer.openContextMenuByPathSelectedItem(filePath);
     projectExplorer.clickOnNewContextMenuItem(CUT);
+    projectExplorer.waitAndSelectItem(folderPath);
+    projectExplorer.openContextMenuByPathSelectedItem(folderPath);
+    projectExplorer.clickOnNewContextMenuItem(PASTE);
+    loader.waitOnClosed();
+  }
+
+  private void copyFile(String filePath, String folderPath) {
+    projectExplorer.waitAndSelectItem(filePath);
+    projectExplorer.openContextMenuByPathSelectedItem(filePath);
+    projectExplorer.clickOnNewContextMenuItem(COPY);
     projectExplorer.waitAndSelectItem(folderPath);
     projectExplorer.openContextMenuByPathSelectedItem(folderPath);
     projectExplorer.clickOnNewContextMenuItem(PASTE);

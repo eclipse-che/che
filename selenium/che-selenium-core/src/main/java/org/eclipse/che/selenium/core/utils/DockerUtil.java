@@ -62,14 +62,31 @@ public class DockerUtil {
   /**
    * Copies files container to the host computer.
    *
-   * @param containerId ID of container which we is coping from
-   * @param pathInsideContainer destination of files to copy
-   * @param copyTo placement of files on the host computer
+   * @param containerId ID of container which we is being copped from
+   * @param pathInsideContainer destination of files in the container
+   * @param pathOnHost placement of files on the host computer
    * @throws IOException
    */
-  public void copy(String containerId, Path pathInsideContainer, Path copyTo) throws IOException {
+  public void copyFromContainer(String containerId, Path pathInsideContainer, Path pathOnHost)
+      throws IOException {
     String copyCommand =
-        format("docker cp %1$s:%2$s %3$s", containerId, pathInsideContainer, copyTo);
+        format("docker cp %1$s:%2$s %3$s", containerId, pathInsideContainer, pathOnHost);
+
+    processAgent.process(copyCommand);
+  }
+
+  /**
+   * Copies files from the the host computer to container.
+   *
+   * @param containerId ID of container which we is being copped to
+   * @param pathOnHost placement of files on the host computer
+   * @param pathInsideContainer destination of files in the container
+   * @throws IOException
+   */
+  public void copyIntoContainer(String containerId, Path pathOnHost, Path pathInsideContainer)
+      throws IOException {
+    String copyCommand =
+        format("docker cp %1$s %2$s:%3$s", pathOnHost, containerId, pathInsideContainer);
 
     processAgent.process(copyCommand);
   }

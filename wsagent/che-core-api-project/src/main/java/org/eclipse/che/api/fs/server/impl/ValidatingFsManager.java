@@ -137,7 +137,7 @@ public class ValidatingFsManager implements FsManager {
     }
 
     boolean dstExists = fsOperations.exists(dstFsPath);
-    if (!overwrite && dstExists) {
+    if (!overwrite && dstExists || srcFsPath.equals(dstFsPath)) {
       throw new ConflictException("Can't copy item, it already exists: " + dstWsPath);
     }
 
