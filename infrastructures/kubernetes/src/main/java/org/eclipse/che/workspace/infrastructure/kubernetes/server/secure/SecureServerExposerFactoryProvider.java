@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure;
 
+import static java.util.stream.Collectors.joining;
+
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -17,25 +19,24 @@ import javax.inject.Provider;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
-/** @author Sergii Leshchenko */
+/**
+ * Provides implementation of {@link SecureServerExposerFactory} according to configuration property
+ * with name `che.server.secure_exposer`.
+ *
+ * @author Sergii Leshchenko
+ */
 public class SecureServerExposerFactoryProvider<T extends KubernetesEnvironment>
     implements Provider<SecureServerExposerFactory<T>> {
 
-  private final boolean agentsAuthEnabled;
   private final String serverExposer;
 
-  private final DefaultSecureServersFactory<T> defaultSecureServersFactory;
   private final Map<String, SecureServerExposerFactory<T>> factories;
 
   @Inject
   public SecureServerExposerFactoryProvider(
-      @Named("che.agents.auth_enabled") boolean agentsAuthEnabled,
       @Named("che.server.secure_exposer") String serverExposer,
-      DefaultSecureServersFactory<T> defaultSecureServersFactory,
       Map<String, SecureServerExposerFactory<T>> factories) {
-    this.agentsAuthEnabled = agentsAuthEnabled;
     this.serverExposer = serverExposer;
-    this.defaultSecureServersFactory = defaultSecureServersFactory;
     this.factories = factories;
   }
 
@@ -45,15 +46,15 @@ public class SecureServerExposerFactoryProvider<T extends KubernetesEnvironment>
    */
   @Override
   public SecureServerExposerFactory<T> get() {
-    if (!agentsAuthEnabled) {
-      // return default secure server exposer because no need to protect servers with authentication
-      return defaultSecureServersFactory;
-    }
-
     SecureServerExposerFactory<T> serverExposerFactory = factories.get(serverExposer);
     if (serverExposerFactory == null) {
       throw new ConfigurationException(
-          "Unknown secure servers exposer is configured '" + serverExposer + "'. ");
+          "Unknown secure servers exposer is configured '"
+              + serverExposer
+              + "'. "
+              + "Currently supported: "
+              + factories.keySet().stream().collect(joining(", "))
+              + ".");
     }
 
     return serverExposerFactory;
