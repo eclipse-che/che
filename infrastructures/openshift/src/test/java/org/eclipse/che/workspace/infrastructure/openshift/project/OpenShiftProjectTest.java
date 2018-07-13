@@ -32,6 +32,7 @@ import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -61,6 +62,7 @@ public class OpenShiftProjectTest {
   @Mock private KubernetesPersistentVolumeClaims pvcs;
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesSecrets secrets;
+  @Mock private KubernetesConfigsMaps configsMaps;
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftClient openShiftClient;
   @Mock private KubernetesClient kubernetesClient;
@@ -93,7 +95,8 @@ public class OpenShiftProjectTest {
             routes,
             pvcs,
             ingresses,
-            secrets);
+            secrets,
+            configsMaps);
   }
 
   @Test
@@ -133,6 +136,7 @@ public class OpenShiftProjectTest {
     verify(services).delete();
     verify(deployments).delete();
     verify(secrets).delete();
+    verify(configsMaps).delete();
   }
 
   @Test

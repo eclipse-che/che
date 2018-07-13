@@ -29,6 +29,14 @@ public interface ServerConfig {
   String INTERNAL_SERVER_ATTRIBUTE = "internal";
 
   /**
+   * {@link ServerConfig} and {@link Server} attribute name which can identify server as secure or
+   * non-secure. Requests to secure servers will be authenticated and must contain machine token.
+   * Attribute value {@code true} makes a server secure, any other value or lack of the attribute
+   * makes the server non-secure.
+   */
+  String SECURE_SERVER_ATTRIBUTE = "secure";
+
+  /**
    * Port used by server.
    *
    * <p>It may contain protocol(tcp or udp) after '/' symbol. If protocol is missing tcp will be
