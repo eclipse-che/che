@@ -142,7 +142,8 @@ class InitializeParamsProvider {
         TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
         textDocument.setCodeAction(new CodeActionCapabilities());
         textDocument.setCodeLens(new CodeLensCapabilities());
-        textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities()));
+        textDocument.setCompletion(
+            new CompletionCapabilities(new CompletionItemCapabilities(true)));
         textDocument.setDefinition(new DefinitionCapabilities());
         textDocument.setDocumentHighlight(new DocumentHighlightCapabilities());
         textDocument.setDocumentLink(new DocumentLinkCapabilities());
