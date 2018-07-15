@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_NORMAL;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.user.client.Timer;
@@ -92,7 +93,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
    * Connects to special WebSocket which allows get information from terminal on server side. The
    * terminal is initialized only when the method is called the first time.
    */
-  public void connect() {
+  public void connect(TerminalOptionsJso options) {
     if (countRetry == 0) {
       return;
     }
@@ -111,7 +112,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                                     "Machine "
                                         + machine.getName()
                                         + " doesn't provide terminal server."));
-                connectToTerminal(agentURLModifier.modify(terminalServer.getUrl()));
+                connectToTerminal(agentURLModifier.modify(terminalServer.getUrl()), options);
               })
           .catchError(
               arg -> {
@@ -133,13 +134,17 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       new Timer() {
         @Override
         public void run() {
-          connect();
+          connect(TerminalOptionsJso.createDefault());
         }
       }.schedule(TIME_BETWEEN_CONNECTIONS);
     }
   }
 
-  private void connectToTerminal(@NotNull String wsUrl) {
+  public void sendCommand(String command) {
+    socket.send("{\"type\":\"data\",\"data\":\"" + command +"\"}");
+  }
+
+  private void connectToTerminal(@NotNull String wsUrl, TerminalOptionsJso options) {
     countRetry--;
 
     socket = WebSocket.create(wsUrl);
@@ -170,6 +175,9 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                 jso.addField("data", data);
                 socket.send(jso.serialize());
               });
+          if (!Strings.isNullOrEmpty(options.getCommand())) {
+            sendCommand(options.getCommand());
+          }
         });
 
     socket.setOnErrorHandler(

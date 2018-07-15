@@ -144,6 +144,7 @@ import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronized;
 import org.eclipse.che.ide.processes.NewTerminalAction;
+import org.eclipse.che.ide.processes.OpenInTerminalAction;
 import org.eclipse.che.ide.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.processes.actions.DisplayMachineOutputAction;
 import org.eclipse.che.ide.processes.actions.PreviewSSHAction;
@@ -402,6 +403,8 @@ public class StandardComponentInitializer {
   @Inject private RenameCommandAction renameCommandAction;
 
   @Inject private MoveCommandAction moveCommandAction;
+
+  @Inject private OpenInTerminalAction openInTerminalAction;
 
   @Inject
   @Named("XMLFileType")
@@ -744,6 +747,8 @@ public class StandardComponentInitializer {
     mainContextMenuGroup.add(newGroup, FIRST);
     mainContextMenuGroup.addSeparator();
     mainContextMenuGroup.add(resourceOperation);
+    mainContextMenuGroup.add(openInTerminalAction);
+    actionManager.registerAction("openInTerminal", openInTerminalAction);
 
     DefaultActionGroup partMenuGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_PART_MENU);
