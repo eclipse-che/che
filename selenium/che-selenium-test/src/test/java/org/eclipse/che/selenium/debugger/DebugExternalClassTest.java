@@ -137,10 +137,6 @@ public class DebugExternalClassTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
-    editor.waitActiveTabFileName(
-        "Logger"); // there should be class "Logger" opened in decompiled view with "Download
-    // sources" link at the top
-    editor.clickOnDownloadSourcesLink();
     editor.waitActiveTabFileName("Logger"); // there should be class "Logger" opened
     debugPanel.waitDebugHighlightedText(
         "filterAndLog_1(FQCN, null, Level.INFO, format, arg, null);");
@@ -177,15 +173,7 @@ public class DebugExternalClassTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
-    editor.waitActiveTabFileName(
-        "Category"); // there should be class "Category" opened in decompiled view with "Download
-    // sources" link at the top
-    editor.clickOnDownloadSourcesLink(); // there should be "Download sources" link displayed in at
-    // the top of editor. Download they.
-    notifications.waitExpectedMessageOnProgressPanelAndClose(
-        "Download sources for 'org.apache.log4j.Category' failed"); // there should an error of
-    // downloading the sources
-    editor.waitActiveTabFileName("Category"); // there should be class "Category" opened
+    editor.waitActiveTabFileName("Category");
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
