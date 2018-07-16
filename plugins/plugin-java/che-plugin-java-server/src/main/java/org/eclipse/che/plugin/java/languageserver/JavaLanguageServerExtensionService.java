@@ -122,7 +122,6 @@ import org.eclipse.che.jdt.ls.extension.api.dto.RenameSelectionParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenameSettings;
 import org.eclipse.che.jdt.ls.extension.api.dto.RenamingElementInfo;
 import org.eclipse.che.jdt.ls.extension.api.dto.Resource;
-import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
@@ -143,7 +142,6 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -872,8 +870,8 @@ public class JavaLanguageServerExtensionService {
   }
 
   public Location findResourcesByFqn(String fqn, int lineNumber) {
-    Type type = new TypeToken<List<Either<String, ResourceLocation>>>() {}.getType();
-    List<Either<String, ResourceLocation>> location =
+    Type type = new TypeToken<List<String>>() {}.getType();
+    List<String> location =
         doGetList(
             Commands.FIND_RESOURCES_BY_FQN,
             ImmutableList.of(fqn, String.valueOf(lineNumber)),
@@ -882,13 +880,12 @@ public class JavaLanguageServerExtensionService {
     if (location.isEmpty()) {
       throw new RuntimeException("Type with fully qualified name: " + fqn + " was not found");
     }
-    Either<String, ResourceLocation> l = location.get(0); // TODO let user choose sources
+    String l = location.get(0); // TODO let user choose sources
 
-    if (l.isLeft()) {
-      return new LocationImpl(removePrefixUri(l.getLeft()), lineNumber, null);
+    if (l.startsWith("jdt:/")) {
+      return new LocationImpl(removePrefixUri(l), lineNumber, true, l, null);
     } else {
-      return new LocationImpl(
-          l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
+      return new LocationImpl(removePrefixUri(l), lineNumber, null);
     }
   }
 

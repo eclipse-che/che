@@ -87,7 +87,7 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
     }
 
     service
-        .libraryEntry(location.getTarget())
+        .libraryEntry(location.getExternalResourceId())
         .then(
             jarEntry -> {
               final JarFileNode file =
