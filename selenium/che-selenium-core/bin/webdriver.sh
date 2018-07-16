@@ -743,6 +743,7 @@ getExcludedGroups() {
     done
 
     #if product based on "openshift" remove "k8s" from excluded groups
+    #added as workaround for issue #10430, but reason should be fixed later
     if [[ "${productConfigArray[@]}" =~ "openshift" ]]; then
     for i in ${!uncomplyingGroups[@]}; do
             if [[ "k8s" == "${uncomplyingGroups[i]}" ]]; then
@@ -752,6 +753,7 @@ getExcludedGroups() {
     fi
 
     #if product based on "k8s" remove "openshift" from excluded groups
+    #added as workaround for issue #10430, but reason should be fixed later
     if [[ "${productConfigArray[@]}" =~ "k8s" ]]; then
     for i in ${!uncomplyingGroups[@]}; do
             if [[ "openshift" == "${uncomplyingGroups[i]}" ]]; then
