@@ -82,7 +82,6 @@ public class ConditionalBreakpointsTest {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick("build");
     projectExplorer.quickExpandWithJavaScript();
-    debugPanel.openDebugPanel();
   }
 
   @Test
@@ -100,6 +99,7 @@ public class ConditionalBreakpointsTest {
     editor.waitInactiveBreakpoint(7);
 
     editor.closeAllTabs();
+    debugPanel.openDebugPanel();
 
     debugPanel.navigateToBreakpoint("com.oracle.net.Sdp", 7);
     editor.waitActiveTabFileName("Sdp");
