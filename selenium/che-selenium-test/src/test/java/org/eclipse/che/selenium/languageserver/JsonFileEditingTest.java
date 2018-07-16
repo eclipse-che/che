@@ -79,6 +79,10 @@ public class JsonFileEditingTest {
     editor.moveToMarkerAndWaitAssistContent(ERROR);
     editor.waitTextIntoAnnotationAssist("Expected '(end)' and instead saw ':'.");
 
+    // move cursor on text and check expected text in hover popup
+    editor.moveCursorToText("author");
+    editor.waitTextInHoverPopup("Expected comma or closing brace");
+
     // return ',' and check error marker invisibility
     editor.goToCursorPositionVisible(8, 4);
     editor.typeTextIntoEditor(",");
