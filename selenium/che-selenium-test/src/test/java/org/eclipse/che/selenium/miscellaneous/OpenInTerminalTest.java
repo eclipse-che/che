@@ -27,19 +27,35 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * @author Musienko Maxim
- * @author Aleksandr Shmaraev
+ * Test "Open in Terminal" action. Will check action calling from context menu on selected project,
+ * folder and file
+ *
+ * @author Vitalii Parfonov
  */
 public class OpenInTerminalTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String PATH_TO_EXPAND = "/src/main/java";
   private static final String FILE = "/README.md";
 
-  @Inject private TestWorkspace workspace;
-  @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private CheTerminal terminal;
+  @SuppressWarnings("unused")
+  @Inject
+  private TestWorkspace workspace;
+
+  @SuppressWarnings("unused")
+  @Inject
+  private Ide ide;
+
+  @SuppressWarnings("unused")
+  @Inject
+  private ProjectExplorer projectExplorer;
+
+  @SuppressWarnings("unused")
+  @Inject
+  private TestProjectServiceClient testProjectServiceClient;
+
+  @SuppressWarnings("unused")
+  @Inject
+  private CheTerminal terminal;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -53,13 +69,16 @@ public class OpenInTerminalTest {
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitVisibleItem(PROJECT_NAME);
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
   }
 
+  /**
+   * - Select project in project explorer - Open context menu on selected project - Click on "Open
+   * in Terminal" action - Wait on opening new terminal, number of opened terminal should increase -
+   * Check working directory in open terminal, should point to the selected project
+   */
   @Test
   public void openInTerminalTest() {
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
@@ -68,8 +87,19 @@ public class OpenInTerminalTest {
     Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + "$"));
   }
 
+  /**
+   * First check: - Expend project tree - Select some folder - Open context menu on selected folder
+   * - Click on "Open in Terminal" action - Wait on opening new terminal, number of opened terminal
+   * should increase - Check working directory in open terminal, should point to the selected folder
+   *
+   * <p>Second check: - Select some file in project tree - Open context menu on selected folder -
+   * Click on "Open in Terminal" action - Wait on opening new terminal, number of opened terminal
+   * should increase - Check working directory in open terminal, should point to the parent of
+   * selected file
+   */
   @Test
   public void openFolderInTerminalTest() {
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + PATH_TO_EXPAND);

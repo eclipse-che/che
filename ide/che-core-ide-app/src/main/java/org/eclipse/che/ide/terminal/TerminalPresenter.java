@@ -34,7 +34,6 @@ import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.websocket.WebSocket;
-import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 /**
@@ -140,8 +139,16 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     }
   }
 
+  /**
+   * Give command will be executed
+   *
+   * @param command
+   */
   public void sendCommand(String command) {
-    socket.send("{\"type\":\"data\",\"data\":\"" + command + "\"}");
+    Jso jso = Jso.create();
+    jso.addField("type", DATA_EVENT_NAME);
+    jso.addField(DATA_EVENT_NAME, command);
+    socket.send(jso.serialize());
   }
 
   private void connectToTerminal(@NotNull String wsUrl, TerminalOptionsJso options) {
@@ -171,31 +178,29 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
               DATA_EVENT_NAME,
               data -> {
                 Jso jso = Jso.create();
-                jso.addField("type", "data");
-                jso.addField("data", data);
+                jso.addField("type", DATA_EVENT_NAME);
+                jso.addField(DATA_EVENT_NAME, data);
                 socket.send(jso.serialize());
               });
           if (!Strings.isNullOrEmpty(options.getCommand())) {
             sendCommand(options.getCommand());
+            sendCommand("\r");
           }
         });
 
     socket.setOnErrorHandler(
-        new ConnectionErrorHandler() {
-          @Override
-          public void onError() {
-            connected = false;
+        () -> {
+          connected = false;
 
-            if (countRetry == 0) {
-              view.showErrorMessage(locale.terminalErrorStart());
-              notificationManager.notify(
-                  locale.connectionFailedWithTerminal(),
-                  locale.terminalErrorConnection(),
-                  FAIL,
-                  FLOAT_MODE);
-            } else {
-              reconnect();
-            }
+          if (countRetry == 0) {
+            view.showErrorMessage(locale.terminalErrorStart());
+            notificationManager.notify(
+                locale.connectionFailedWithTerminal(),
+                locale.terminalErrorConnection(),
+                FAIL,
+                FLOAT_MODE);
+          } else {
+            reconnect();
           }
         });
   }

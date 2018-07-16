@@ -10,12 +10,10 @@
  */
 package org.eclipse.che.ide.processes;
 
-import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import java.util.Collections;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -42,8 +40,7 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
   public OpenInTerminalAction(
       CoreLocalizationConstant locale,
       MachineResources machineResources,
-      ProcessesPanelPresenter processesPanelPresenter,
-      EventBus eventBus) {
+      ProcessesPanelPresenter processesPanelPresenter) {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.openInTerminalAction(),
@@ -62,17 +59,11 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent event) {
     Resource resource = appContext.get().getResource();
-
-    if (!(resource instanceof Container)) {
+    if (resource.isFile()) {
       final Container parent = resource.getParent();
-
-      checkState(parent != null, "Parent should be a container");
-
       resource = parent;
     }
-
     Path path = resource.getLocation().makeRelative();
-
     String command = locale.openInTerminalCommand(path.toString());
     processesPanelPresenter.newTerminal(
         TerminalOptionsJso.createDefault().withCommand(command).withFocusOnOpen(true));
