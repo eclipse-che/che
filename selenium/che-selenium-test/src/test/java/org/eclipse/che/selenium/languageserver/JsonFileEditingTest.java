@@ -37,6 +37,7 @@ public class JsonFileEditingTest {
   private static final String PROJECT_NAME = "nodejs-hello-world";
   private static final String JSON_FILE_NAME = "package.json";
   private static final String PATH_TO_JSON_FILE = PROJECT_NAME + "/" + JSON_FILE_NAME;
+  private static final String NEW_OBJECT = "\"newObj\":[1,2,3],";
   private static final String LS_INIT_MESSAGE =
       format("Finished language servers initialization, file path '/%s'", PATH_TO_JSON_FILE);
 
@@ -72,7 +73,7 @@ public class JsonFileEditingTest {
   public void checkCodeValidationFeature() {
     editor.selectTabByName(JSON_FILE_NAME);
 
-    // delete ',' and check error marker with message
+    // delete comma after bracket and check error marker with message
     editor.goToCursorPositionVisible(8, 5);
     editor.typeTextIntoEditor(BACK_SPACE.toString());
     editor.waitMarkerInPosition(ERROR, 9);
@@ -83,7 +84,7 @@ public class JsonFileEditingTest {
     editor.moveCursorToText("author");
     editor.waitTextInHoverPopup("Expected comma or closing brace");
 
-    // return ',' and check error marker invisibility
+    // return comma and check error marker invisibility
     editor.goToCursorPositionVisible(8, 4);
     editor.typeTextIntoEditor(",");
     editor.waitAllMarkersInvisibility(ERROR);
@@ -91,12 +92,12 @@ public class JsonFileEditingTest {
     // add new object
     editor.goToCursorPositionVisible(9, 16);
     editor.typeTextIntoEditor(ENTER.toString());
-    editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
+    editor.typeTextIntoEditor(NEW_OBJECT);
     editor.waitAllMarkersInvisibility(ERROR);
 
-    // add duplicated object and check error marker with message
+    // add duplicated object and check error marker with 'duplicate' message
     editor.typeTextIntoEditor(ENTER.toString());
-    editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
+    editor.typeTextIntoEditor(NEW_OBJECT);
     editor.waitMarkerInPosition(ERROR, 11);
     editor.moveToMarkerAndWaitAssistContent(ERROR);
     editor.waitTextIntoAnnotationAssist("Duplicate key 'newObj'.");
@@ -108,7 +109,7 @@ public class JsonFileEditingTest {
     // add duplicated object in other {} block
     editor.goToCursorPositionVisible(6, 15);
     editor.typeTextIntoEditor(ENTER.toString());
-    editor.typeTextIntoEditor("\"newObj\":[1,2,3],");
+    editor.typeTextIntoEditor(NEW_OBJECT);
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
