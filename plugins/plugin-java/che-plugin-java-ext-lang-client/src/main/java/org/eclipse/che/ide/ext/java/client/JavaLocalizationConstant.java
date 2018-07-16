@@ -412,12 +412,6 @@ public interface JavaLocalizationConstant extends Messages {
   @Key("unmark.directory.as.source.description")
   String unmarkDirectoryAsSourceDescription();
 
-  @Key("parameter.info")
-  String parameterInfo();
-
-  @Key("parameter.info.description")
-  String parameterInfoDescription();
-
   @Key("button.Save")
   String buttonSave();
 
