@@ -131,6 +131,7 @@ public class ContentAssistWidget implements EventListener {
     popupBodyElement.appendChild(listElement);
 
     docPopup = new FlowPanel();
+    docPopup.ensureDebugId("content-assist-doc-popup");
     docPopup.setStyleName(popupResources.popupStyle().popup());
     docPopup.setSize("370px", "180px");
 
