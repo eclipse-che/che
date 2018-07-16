@@ -22,32 +22,41 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 
 /**
- * @author Alexander Garagatyi
+ * Creates {@link InternalEnvironment} from provided environment configuration, then converts it
+ * using {@link InternalEnvironmentConverter} and applies {@link WorkspaceNextApplier} to the
+ * resulting {@code InternalEnvironment} to add sidecar tooling
+ *
+ * @author Oleksandr Garagatyi
  */
 public class SidecarBasedInternalEnvironmentProvider extends InternalEnvironmentProvider {
   private final Map<String, WorkspaceNextApplier> workspaceNextAppliers;
   private final WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
-
+  private final InternalEnvironmentConverter environmentConverter;
 
   public SidecarBasedInternalEnvironmentProvider(
       Map<String, WorkspaceNextApplier> workspaceNextAppliers,
       WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever,
-      Map<String, InternalEnvironmentFactory> environmentFactories) {
+      Map<String, InternalEnvironmentFactory> environmentFactories,
+      InternalEnvironmentConverter environmentConverter) {
     super(environmentFactories);
     this.workspaceNextAppliers = workspaceNextAppliers;
     this.workspaceNextObjectsRetriever = workspaceNextObjectsRetriever;
+    this.environmentConverter = environmentConverter;
   }
 
   @Override
-  public InternalEnvironment create(Environment environment,
-      Map<String, String> workspaceAttributes)
+  public InternalEnvironment create(
+      Environment environment, Map<String, String> workspaceAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
 
     InternalEnvironment internalEnvironment = super.create(environment, workspaceAttributes);
-    String recipeType = environment.getRecipe().getType();
-    applyWorkspaceNext(internalEnvironment, workspaceAttributes, recipeType);
 
-    return internalEnvironment;
+    InternalEnvironment convertedEnvironment = environmentConverter.convert(internalEnvironment);
+
+    applyWorkspaceNext(
+        convertedEnvironment, workspaceAttributes, environment.getRecipe().getType());
+
+    return convertedEnvironment;
   }
 
   private void applyWorkspaceNext(
