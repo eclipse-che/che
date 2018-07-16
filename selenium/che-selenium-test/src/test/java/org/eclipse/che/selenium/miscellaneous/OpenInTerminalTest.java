@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_IN_TERMINAL;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -88,5 +87,4 @@ public class OpenInTerminalTest {
     terminalWorkDir = terminal.getVisibleTextFromTerminal();
     Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + "$"));
   }
-
 }

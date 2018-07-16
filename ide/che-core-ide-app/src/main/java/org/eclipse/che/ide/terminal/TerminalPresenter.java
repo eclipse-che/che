@@ -141,7 +141,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   }
 
   public void sendCommand(String command) {
-    socket.send("{\"type\":\"data\",\"data\":\"" + command +"\"}");
+    socket.send("{\"type\":\"data\",\"data\":\"" + command + "\"}");
   }
 
   private void connectToTerminal(@NotNull String wsUrl, TerminalOptionsJso options) {

@@ -77,6 +77,4 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
     processesPanelPresenter.newTerminal(
         TerminalOptionsJso.createDefault().withCommand(command).withFocusOnOpen(true));
   }
-
-
 }
