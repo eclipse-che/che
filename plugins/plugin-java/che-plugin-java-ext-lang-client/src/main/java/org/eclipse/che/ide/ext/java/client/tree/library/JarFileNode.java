@@ -272,7 +272,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
   @Override
   public Location toLocation(int lineNumber) {
     return new LocationImpl(
-        getLocation().toString(), lineNumber, true, libId, getProject().toString());
+        getData().getPath(), lineNumber, true, getData().getUri(), getProject().toString());
   }
 
   @Override
