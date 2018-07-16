@@ -731,7 +731,7 @@
             "previewUrl": "${server.8080/tcp}",
             "goal": "Run"
           }
-        }
+        },
         {
           "name": "test",
           "type": "custom",
@@ -740,7 +740,7 @@
             "previewUrl": "${server.8080/tcp}",
             "goal": "Test"
           }
-        }
+        },
         {
           "name": "build",
           "type": "custom",
