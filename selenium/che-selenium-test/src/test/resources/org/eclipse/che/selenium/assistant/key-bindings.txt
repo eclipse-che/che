@@ -53,7 +53,6 @@ Rename Shift+F6
 Run Test Ctrl+Alt+Z
 Debug Test Ctrl+Alt+X
 Show a popup window with documentation Ctrl+Q
-Open editor for selected item F4
 Open Implementation(s) Ctrl+Alt+B
 Java rename refactoring Shift+F6
 Move item to another package F6
@@ -61,7 +60,6 @@ Move item to another package Ctrl+X
 Find usages of the symbol at cursor Alt+F7
 Open File Structure Window Ctrl+F12
 Organize Imports action generates the import statements in a compilation unit Ctrl+Alt+O
-Shows all parameters which constructor or method can accept Ctrl+P
 Show a popup window with quick fix proposals Alt+ENTER
 Switch Contribute part displaying mode Ctrl+Alt+6
 Line Up ↑
