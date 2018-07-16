@@ -30,7 +30,6 @@ import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.VolumeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -43,7 +42,6 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceValidatorTest {
-  @Mock private WorkspaceRuntimes workspaceRuntimes;
 
   @InjectMocks private WorkspaceValidator wsValidator;
 

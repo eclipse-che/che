@@ -78,7 +78,7 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
 
-    SUPPORTED_INFRASTRUCTURES=(docker openshift)
+    SUPPORTED_INFRASTRUCTURES=(docker openshift k8s osio)
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS

@@ -36,6 +36,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
@@ -60,7 +61,7 @@ public class TestFactoryInitializer {
 
   @Inject
   @Named("che.infrastructure")
-  private String infrastructure;
+  private Infrastructure infrastructure;
 
   /**
    * Initialize {@link TestFactory} base upon template.
@@ -69,9 +70,7 @@ public class TestFactoryInitializer {
    */
   public TestFactoryBuilder fromTemplate(String template) throws Exception {
     String name = NameGenerator.generate("factory", 6);
-    InputStream resource =
-        TestFactory.class.getResourceAsStream(
-            format("/templates/factory/%s/%s", infrastructure, template));
+    InputStream resource = TestFactory.class.getResourceAsStream(getTemplateDirectory(template));
     if (resource == null) {
       throw new IOException(format("Factory template '%s' not found", template));
     }
@@ -83,6 +82,20 @@ public class TestFactoryInitializer {
             .withName(name);
     factoryDto.getWorkspace().setName(name);
     return new TestFactoryBuilder(factoryDto);
+  }
+
+  private String getTemplateDirectory(String template) {
+    String templateDirectoryName;
+    switch (infrastructure) {
+      case OSIO:
+        templateDirectoryName = Infrastructure.OPENSHIFT.toString().toLowerCase();
+        break;
+
+      default:
+        templateDirectoryName = infrastructure.toString().toLowerCase();
+    }
+
+    return String.format("/templates/factory/%s/%s", templateDirectoryName, template);
   }
 
   /** Initialize {@link TestFactory} base upon url. Can't be modified. */
