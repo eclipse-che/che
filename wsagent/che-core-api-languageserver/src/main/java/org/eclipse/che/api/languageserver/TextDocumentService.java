@@ -81,6 +81,7 @@ import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -92,6 +93,9 @@ import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.MarkedString;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.SignatureHelp;
@@ -163,10 +167,7 @@ public class TextDocumentService {
         DocumentHighlight.class,
         this::documentHighlight);
     dtoToDto(
-        "completion",
-        TextDocumentPositionParams.class,
-        ExtendedCompletionListDto.class,
-        this::completion);
+        "completion", CompletionParams.class, ExtendedCompletionListDto.class, this::completion);
     dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
     dtoToDto(
         "signatureHelp",
@@ -228,8 +229,7 @@ public class TextDocumentService {
     return result;
   }
 
-  private ExtendedCompletionListDto completion(
-      TextDocumentPositionParams textDocumentPositionParams) {
+  private ExtendedCompletionListDto completion(CompletionParams textDocumentPositionParams) {
     TextDocumentIdentifier textDocument = textDocumentPositionParams.getTextDocument();
     String wsPath = textDocument.getUri();
     String uri = prefixURI(wsPath);
@@ -419,7 +419,7 @@ public class TextDocumentService {
     positionParams.getTextDocument().setUri(uri);
     positionParams.setUri(prefixURI(positionParams.getUri()));
     HoverDto result = new HoverDto();
-    result.setContents(new ArrayList<>());
+    StringBuilder content = new StringBuilder();
 
     Set<ExtendedLanguageServer> servers = findServer.byPath(uri);
     OperationUtil.doInParallel(
@@ -440,12 +440,28 @@ public class TextDocumentService {
           public boolean handleResult(ExtendedLanguageServer element, Hover hover) {
             if (hover != null) {
               HoverDto hoverDto = new HoverDto(hover);
-              result.getContents().addAll(hoverDto.getContents());
+              Either<List<Either<String, MarkedString>>, MarkupContent> contents =
+                  hoverDto.getContents();
+              if (contents.isLeft()) {
+
+              } else {
+                MarkupContent markup = contents.getRight();
+                if (MarkupKind.MARKDOWN.equals(markup.getKind())
+                    || MarkupKind.PLAINTEXT.equals(markup.getKind())) {
+                  content.append(markup.getValue());
+                } else {
+                  LOG.warn("Unknown markup type: {}", markup.getKind());
+                }
+              }
             }
             return true;
           }
         },
         10000);
+    MarkupContent markupContent = new MarkupContent();
+    markupContent.setKind(MarkupKind.MARKDOWN);
+    markupContent.setValue(content.toString());
+    result.setContents(markupContent);
     return result;
   }
 
