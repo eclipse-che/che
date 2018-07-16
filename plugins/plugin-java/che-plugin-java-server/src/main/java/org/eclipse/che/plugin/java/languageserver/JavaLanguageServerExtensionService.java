@@ -883,7 +883,7 @@ public class JavaLanguageServerExtensionService {
     String l = location.get(0); // TODO let user choose sources
 
     if (l.startsWith("jdt:/")) {
-      return new LocationImpl(l, lineNumber, true, l, null);
+      return new LocationImpl(removePrefixUri(l), lineNumber, true, l, null);
     } else {
       return new LocationImpl(removePrefixUri(l), lineNumber, null);
     }
