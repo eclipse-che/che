@@ -73,10 +73,10 @@ public class RevertCommitTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    URL resource = getClass().getResource("/projects/git-pull-test");
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+    URL resource = getClass().getResource("/projects/git-pull-test");
     testProjectServiceClient.importProject(
-        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
+        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.NODE_JS);
     ide.open(ws);
   }
 
