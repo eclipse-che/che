@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
@@ -66,6 +67,10 @@ public class KubernetesEnvironmentFactory
   static final int SECRET_IGNORED_WARNING_CODE = 4102;
   static final String SECRET_IGNORED_WARNING_MESSAGE =
       "Secrets specified in Kubernetes recipe are ignored.";
+
+  static final int CONFIG_MAP_IGNORED_WARNING_CODE = 4103;
+  static final String CONFIG_MAP_IGNORED_WARNING_MESSAGE =
+      "Config maps specified in Kubernetes recipe are ignored.";
 
   private final KubernetesClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
@@ -121,6 +126,7 @@ public class KubernetesEnvironmentFactory
     boolean isAnyIngressPresent = false;
     boolean isAnyPVCPresent = false;
     boolean isAnySecretPresent = false;
+    boolean isAnyConfigMapPresent = false;
     for (HasMetadata object : list.getItems()) {
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
@@ -134,6 +140,8 @@ public class KubernetesEnvironmentFactory
         isAnyPVCPresent = true;
       } else if (object instanceof Secret) {
         isAnySecretPresent = true;
+      } else if (object instanceof ConfigMap) {
+        isAnyConfigMapPresent = true;
       } else {
         throw new ValidationException(
             format("Found unknown object type '%s'", object.getMetadata()));
@@ -153,6 +161,11 @@ public class KubernetesEnvironmentFactory
       warnings.add(new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
     }
 
+    if (isAnyConfigMapPresent) {
+      warnings.add(
+          new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
+    }
+
     addRamLimitAttribute(machines, pods.values());
 
     KubernetesEnvironment k8sEnv =
@@ -165,6 +178,7 @@ public class KubernetesEnvironmentFactory
             .setIngresses(new HashMap<>())
             .setPersistentVolumeClaims(new HashMap<>())
             .setSecrets(new HashMap<>())
+            .setConfigMaps(new HashMap<>())
             .build();
 
     envValidator.validate(k8sEnv);

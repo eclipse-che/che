@@ -92,7 +92,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   @Test(
     priority = 1,
-    groups = {TestGroup.OPENSHIFT}
+    groups = {TestGroup.OPENSHIFT, TestGroup.K8S}
   )
   public void checkButtonsOnToolbarOnOpenshift() {
     checkButtonsOnToolbar("Application is not available");

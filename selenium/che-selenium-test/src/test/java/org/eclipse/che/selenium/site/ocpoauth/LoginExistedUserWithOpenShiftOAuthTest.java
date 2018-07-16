@@ -65,7 +65,7 @@ import org.testng.annotations.Test;
  *
  * @author Dmytro Nochevnov
  */
-@Test(groups = {TestGroup.OPENSHIFT, TestGroup.MULTIUSER})
+@Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S, TestGroup.MULTIUSER})
 public class LoginExistedUserWithOpenShiftOAuthTest {
 
   private static final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);

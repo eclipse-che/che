@@ -68,6 +68,7 @@ public class KubernetesNamespaceTest {
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
   @Mock private KubernetesSecrets secrets;
+  @Mock private KubernetesConfigsMaps configMaps;
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private NonNamespaceOperation namespaceOperation;
@@ -125,7 +126,8 @@ public class KubernetesNamespaceTest {
             services,
             pvcs,
             ingresses,
-            secrets);
+            secrets,
+            configMaps);
   }
 
   @Test
@@ -163,6 +165,7 @@ public class KubernetesNamespaceTest {
     verify(services).delete();
     verify(deployments).delete();
     verify(secrets).delete();
+    verify(configMaps).delete();
   }
 
   @Test

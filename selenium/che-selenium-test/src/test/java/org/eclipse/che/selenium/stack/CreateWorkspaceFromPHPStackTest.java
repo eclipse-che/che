@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RESTART_APACHE_COMMAND;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.START_APACHE_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.STOP_APACHE_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
@@ -76,7 +77,7 @@ public class CreateWorkspaceFromPHPStackTest {
   @Test(priority = 1)
   public void checkWebPhpSimpleCommands() {
     By textOnPreviewPage = By.xpath("//*[text()='Hello World!']");
-    String apacheIsRunning = "\"/usr/sbin/apache2 -k start\"";
+    String apacheIsRunning = "/usr/sbin/apache2 -k start";
 
     projectExplorer.openItemByPath(WEB_PHP_PROJECT);
     projectExplorer.openItemByPath(WEB_PHP_PROJECT + "/" + PHP_FILE_NAME);
@@ -87,7 +88,7 @@ public class CreateWorkspaceFromPHPStackTest {
     consoles.executeCommandFromProjectExplorer(
         WEB_PHP_PROJECT,
         RUN_GOAL,
-        RESTART_APACHE_COMMAND,
+        START_APACHE_COMMAND,
         "Starting Apache httpd web server apache2");
     consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 
