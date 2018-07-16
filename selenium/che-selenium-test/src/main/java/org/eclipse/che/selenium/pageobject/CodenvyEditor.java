@@ -35,7 +35,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGE
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEFINED_EDITOR_ACTIVE_LINE_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM_PATTERN;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HOVER_POPUP_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
@@ -85,14 +84,13 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -101,7 +99,6 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -113,7 +110,6 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
 import org.slf4j.Logger;
 
 @Singleton
@@ -210,7 +206,7 @@ public class CodenvyEditor {
     String DEBUGGER_BREAKPOINT_DISABLED = "//div[@class='breakpoint disabled' and text()='%d']";
     String JAVA_DOC_POPUP = "//div[contains(@class, 'textviewTooltip')]";
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
-        "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
+        "//div[@id='gwt-debug-content-assist-doc-popup']//div[@class='gwt-HTML']";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
@@ -2287,7 +2283,6 @@ public class CodenvyEditor {
    *     attribute of iframe of JavaDoc popup.
    */
   public String getAutocompleteProposalJavaDocHtml() throws IOException {
-    waitJavaDocPopupSrcAttributeIsNotEmpty();
     return getJavaDocPopupText();
   }
 
@@ -2297,8 +2292,6 @@ public class CodenvyEditor {
    * @param expectedText text which should be present in javadoc
    */
   public void waitContextMenuJavaDocText(String expectedText) {
-    waitJavaDocPopupSrcAttributeIsNotEmpty();
-
     webDriverWaitFactory
         .get()
         .until(
@@ -2316,58 +2309,12 @@ public class CodenvyEditor {
                 });
   }
 
-  private void waitJavaDocPopupSrcAttributeIsNotEmpty() {
-    new FluentWait<>(seleniumWebDriver)
-        .withTimeout(LOAD_PAGE_TIMEOUT_SEC * 2, SECONDS)
-        .pollingEvery(LOAD_PAGE_TIMEOUT_SEC / 2, SECONDS)
-        .ignoring(StaleElementReferenceException.class, NoSuchElementException.class)
-        .until(ExpectedConditions.attributeToBeNotEmpty(autocompleteProposalJavaDocPopup, "src"));
-  }
-
   private String getJavaDocPopupText() {
-    HttpURLConnection connection = null;
-
-    try {
-      URL connectionUrl = new URL(getElementSrcLink(autocompleteProposalJavaDocPopup));
-      connection = (HttpURLConnection) connectionUrl.openConnection();
-      connection.setRequestMethod("GET");
-
-      return openStreamAndGetAllText(connection);
-
-    } catch (IOException e) {
-      LOG.error("Can not open connection for src link ");
-    } finally {
-      if (connection != null) connection.disconnect();
-    }
-
-    return "";
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(autocompleteProposalJavaDocPopup);
   }
 
   private boolean verifyJavaDoc(String javaDocHtml, String regex) {
     return Pattern.compile(regex, Pattern.DOTALL).matcher(javaDocHtml).matches();
-  }
-
-  private String getElementSrcLink(WebElement element) {
-    FluentWait<WebDriver> srcLinkWait =
-        new FluentWait<WebDriver>(seleniumWebDriver)
-            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
-            .pollingEvery(500, MILLISECONDS)
-            .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
-
-    return srcLinkWait.until((ExpectedCondition<String>) driver -> element.getAttribute("src"));
-  }
-
-  private String openStreamAndGetAllText(HttpURLConnection httpURLConnection) {
-    if (httpURLConnection != null) {
-      try (BufferedReader br =
-          new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"))) {
-        return br.lines().collect(Collectors.joining());
-
-      } catch (IOException ex) {
-        LOG.error("Can not get stream in openConnectionAndSetRequestMethod");
-      }
-    }
-    return "";
   }
 
   private List<WebElement> getAllTabsWithProvidedName(String tabName) {
