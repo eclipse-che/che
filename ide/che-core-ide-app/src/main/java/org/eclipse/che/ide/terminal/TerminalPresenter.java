@@ -48,7 +48,6 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
   private final TerminalView view;
-  private final TerminalOptionsJso options;
   private final NotificationManager notificationManager;
   private final CoreLocalizationConstant locale;
   private final MachineImpl machine;
@@ -75,7 +74,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       final ModuleHolder moduleHolder,
       AgentURLModifier agentURLModifier) {
     this.view = view;
-    this.options = options != null ? options : TerminalOptionsJso.createDefault();
+    TerminalOptionsJso options1 = options != null ? options : TerminalOptionsJso.createDefault();
     this.agentURLModifier = agentURLModifier;
     view.setDelegate(this);
     this.notificationManager = notificationManager;
@@ -91,6 +90,10 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   /**
    * Connects to special WebSocket which allows get information from terminal on server side. The
    * terminal is initialized only when the method is called the first time.
+   *
+   * @param options with options param can be set some initial states for new terminal like: -
+   *     initial size (number of rows and cols); - set focused on open; - initial command (like
+   *     change working dir 'cd directory' and etc)
    */
   public void connect(TerminalOptionsJso options) {
     if (countRetry == 0) {
@@ -182,8 +185,8 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                 jso.addField(DATA_EVENT_NAME, data);
                 socket.send(jso.serialize());
               });
-          if (!Strings.isNullOrEmpty(options.getCommand())) {
-            sendCommand(options.getCommand());
+          if (!Strings.isNullOrEmpty(options.getStringField("command"))) {
+            sendCommand(options.getStringField("command"));
             sendCommand("\r");
           }
         });

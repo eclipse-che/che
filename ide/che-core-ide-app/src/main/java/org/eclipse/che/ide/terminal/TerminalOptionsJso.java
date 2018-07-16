@@ -26,17 +26,22 @@ public class TerminalOptionsJso extends Jso {
         }
     }-*/;
 
+  /**
+   * @param focusOnOpen set true it need to set focus on just opened terminal
+   * @return
+   */
   public final native TerminalOptionsJso withFocusOnOpen(boolean focusOnOpen) /*-{
         this.focusOnOpen = focusOnOpen;
         return this;
     }-*/;
 
+  /**
+   * @param command initial command what will be executed immediately after connection to the
+   *     terminal will established
+   * @return
+   */
   public final native TerminalOptionsJso withCommand(String command) /*-{
         this.command = command;
         return this;
-    }-*/;
-
-  public final native String getCommand() /*-{
-        return this.command;
     }-*/;
 }

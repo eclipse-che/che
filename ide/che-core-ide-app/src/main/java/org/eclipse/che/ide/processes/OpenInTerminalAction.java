@@ -26,7 +26,10 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 
 /**
- * Action to open new terminal and navigate to selected directory.
+ * Action to open new terminal and navigate to selected directory. E.g. if in Project Explorer will
+ * be selected 'project1/src/main/java' and action will be called MUST be opened new terminal with
+ * working dir '{workspace-root-folder}/project1/src/main/java'. (bash command cd
+ * project1/src/main/java)
  *
  * @author Vitalii Parfonov
  */
