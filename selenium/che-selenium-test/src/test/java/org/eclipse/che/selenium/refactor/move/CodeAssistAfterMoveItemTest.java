@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -22,6 +24,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -33,6 +36,7 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class CodeAssistAfterMoveItemTest {
 
+  private static final String APPLY_WORKSPACE_CHANGES = "Apply Workspace Changes\nDone";
   private static final String PROJECT_NAME = NameGenerator.generate("CodeAssistAfterMoveItem-", 4);
   private static final String pathToPackageInChePrefix = PROJECT_NAME + "/src/main/java";
 
@@ -44,6 +48,7 @@ public class CodeAssistAfterMoveItemTest {
   @Inject private Refactor refactor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
+  @Inject private Events events;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -81,7 +86,8 @@ public class CodeAssistAfterMoveItemTest {
     editor.enterTextIntoFixErrorPropByDoubleClick("Import 'A5' (r)");
     loader.waitOnClosed();
     editor.waitTextIntoEditor("import r.A5;");
-    editor.waitMarkerInvisibility(ERROR, 34);
+    editor.waitMarkerInPosition(WARNING, 34);
+    events.clickEventLogBtn();
 
     // move item 'A5' into package 'p1'
     projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");
@@ -93,6 +99,7 @@ public class CodeAssistAfterMoveItemTest {
     refactor.clickOkButtonRefactorForm();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.waitItem(pathToPackageInChePrefix + "/p1/A5.java");
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A5.java");
     editor.waitTextIntoEditor("import p1.A5;");
