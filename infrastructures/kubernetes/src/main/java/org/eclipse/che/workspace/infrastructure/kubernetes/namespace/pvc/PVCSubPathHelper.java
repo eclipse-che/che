@@ -18,11 +18,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodBuilder;
-import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.*;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -142,8 +138,13 @@ public class PVCSubPathHelper {
       deployments = factory.create(workspaceId).deployments();
       deployments.create(pod);
       final Pod finished = deployments.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
-      if (POD_PHASE_FAILED.equals(finished.getStatus().getPhase())) {
-        LOG.error("Job command '{}' execution is failed.", Arrays.toString(command));
+      PodStatus finishedStatus = finished.getStatus();
+      if (POD_PHASE_FAILED.equals(finishedStatus.getPhase())) {
+        LOG.error(
+            "Job command '{}' execution is failed. Reason '{}', message '{}'.",
+            Arrays.toString(command),
+            finishedStatus.getReason(),
+            finishedStatus.getMessage());
       }
     } catch (InfrastructureException ex) {
       LOG.error(
