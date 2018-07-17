@@ -89,6 +89,7 @@ public class NavigationByKeyboardTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     consoles.closeProcessesArea();
   }
 
@@ -147,8 +148,8 @@ public class NavigationByKeyboardTest {
 
     projectExplorer.sendToItemRightArrowKey();
     checkLibrariesIsVisible();
+    projectExplorer.waitAndSelectItemByName("servlet-api-2.5.jar");
 
-    projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
     projectExplorer.waitVisibilityByName("META-INF");
     projectExplorer.waitVisibilityByName("javax.servlet");
