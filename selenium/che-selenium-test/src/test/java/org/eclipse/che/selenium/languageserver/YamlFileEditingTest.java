@@ -15,11 +15,13 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS_YAML;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project;
@@ -38,7 +40,7 @@ import org.testng.annotations.Test;
 
 public class YamlFileEditingTest {
 
-  private static final String PROJECT_NAME = "node-js-simple";
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String YAML_FILE_NAME = "openshift.yaml";
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
@@ -58,7 +60,7 @@ public class YamlFileEditingTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/node-js-simple");
+    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/nodejs-with-yaml");
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, NODE_JS);
     ide.open(workspace);
@@ -71,9 +73,13 @@ public class YamlFileEditingTest {
   @Test
   public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
+
     menu.runCommand(Project.PROJECT, New.NEW, New.FILE);
     askForValueDialog.createNotJavaFileByName(YAML_FILE_NAME);
     editor.waitTabIsPresent(YAML_FILE_NAME);
+
+    projectExplorer.openItemByPath(PROJECT_NAME + "/deployment.yaml");
+    editor.waitTabIsPresent("deployment.yaml");
 
     // check Apache Camel language server initialized
     consoles.selectProcessByTabName("dev-machine");
@@ -88,7 +94,7 @@ public class YamlFileEditingTest {
 
     // launch autocomplete feature, select proposal and check expected text in the Editor
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("kind");
+    editor.waitTextIntoAutocompleteContainer("kind"); // TODO check proposal documentation
     editor.enterAutocompleteProposal("kind");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("PersistentVolume");
@@ -97,19 +103,19 @@ public class YamlFileEditingTest {
     editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor(ENTER.toString());
 
-    // launch autocomplete feature, select proposal and check expected text in the Editor
+    // launch autocomplete feature and check expected text in the Editor
     editor.typeTextIntoEditor("api");
-    editor.launchAutocompleteAndWaitContainer();
+    editor.launchAutocomplete();
     editor.waitTextIntoEditor("apiVersion: ");
-    editor.launchAutocompleteAndWaitContainer();
+    editor.launchAutocomplete();
     editor.waitTextIntoEditor("apiVersion: v1");
     editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor(ENTER.toString());
 
+    // launch autocomplete feature, select proposal and check expected text in the Editor
     editor.typeTextIntoEditor("me");
-    editor.launchAutocompleteAndWaitContainer();
+    editor.launchAutocomplete();
     editor.waitTextIntoEditor("metadata:");
-    editor.typeTextIntoEditor(ENTER.toString());
 
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("status");
@@ -117,20 +123,42 @@ public class YamlFileEditingTest {
     editor.waitMarkerInPosition(ERROR, 4);
     editor.moveToMarkerAndWaitAssistContent(ERROR);
     editor.waitTextIntoAnnotationAssist("Using tabs can lead to unpredictable results");
-    // TODO check error message
-    editor.deleteCurrentLine();
+
+    editor.goToPosition(4, 1);
+    editor.typeTextIntoEditor(DELETE.toString());
     editor.waitMarkerInvisibility(ERROR, 4);
+
+    editor.goToPosition(5, 1);
+    editor.launchAutocomplete();
+    editor.waitTextIntoEditor("spec:");
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
+  public void checkOpenshiftDelpoymentYamlFile() {
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/deployment.yaml");
+
+    editor.waitAllMarkersInvisibility(ERROR);
+  }
+
+  @Test(priority = 1)
   public void checkHoverFeature() {
+    editor.selectTabByName("deployment.yaml");
+
     // move cursor on text and check expected text in hover popup
-    editor.moveCursorToText("timer");
+    editor.moveCursorToText("namespace:");
+    editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
+
+    editor.moveCursorToText("kind:");
     editor.waitTextInHoverPopup(
-        "The timer component is used for generating message exchanges when a timer fires.");
+        "Kind is a string value representing the REST resource this object represents.");
+
+    editor.moveCursorToText("apiVersion:");
+    editor.waitTextInHoverPopup(
+        "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  private void addYamlSchema(String name) {
+  private void addYamlSchema(String schemaName) {
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
 
@@ -138,7 +166,7 @@ public class YamlFileEditingTest {
     preferences.selectDroppedMenuByName(Preferences.DropDownLanguageServerSettings.YAML);
 
     preferences.clickOnAddSchemaUrlButton();
-    preferences.addSchemaUrl(name);
+    preferences.addSchemaUrl(schemaName);
     preferences.clickOnOkBtn();
 
     preferences.closeForm();

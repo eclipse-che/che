@@ -205,7 +205,7 @@ public class CodenvyEditor {
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
-    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip']";
+    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
   }
 
   public enum TabActionLocator {
