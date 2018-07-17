@@ -123,6 +123,8 @@ public class Preferences {
         "gwt-debug-preferences-git-contribute-activateByProjectSelection";
     String SHOW_CONTRIBUTE_CHECKBOX_ID =
         "gwt-debug-preferences-git-contribute-activateByProjectSelection-input";
+    String ADD_SCHEMA_URL_BUTTON_ID = "gwt-debug-preferences-addUrl";
+    String ADD_SCHEMA_URL_INPUT_ID = "gwt-debug-askValueDialog-textBox";
   }
 
   public interface DropDownListsHeaders {
@@ -136,6 +138,10 @@ public class Preferences {
   public interface DropDownSshKeysMenu {
     String VCS = "VCS";
     String MACHINE = "Machine";
+  }
+
+  public interface DropDownLanguageServerSettings {
+    String YAML = "Yaml";
   }
 
   public interface DropDownGitInformationMenu {
@@ -215,6 +221,12 @@ public class Preferences {
 
   @FindBy(id = Locators.SHOW_CONTRIBUTE_CHECKBOX_ID)
   private WebElement showContributeCheckbox;
+
+  @FindBy(id = Locators.ADD_SCHEMA_URL_BUTTON_ID)
+  private WebElement addSchemaUrlButton;
+
+  @FindBy(id = Locators.ADD_SCHEMA_URL_INPUT_ID)
+  private WebElement addSchemaUrlInput;
 
   /** wait preferences form */
   public void waitPreferencesForm() {
@@ -308,6 +320,21 @@ public class Preferences {
   public void clickOnGenerateKeyButton() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOf(generateKeyBtn))
+        .click();
+  }
+
+  public void clickOnAddSchemaUrlButton() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOf(addSchemaUrlButton))
+        .click();
+  }
+
+  public void addSchemaUrl(String schemaName) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOf(addSchemaUrlInput));
+    addSchemaUrlInput.sendKeys(schemaName);
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id("askValue-dialog-ok")))
         .click();
   }
 
