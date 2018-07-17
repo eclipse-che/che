@@ -88,12 +88,17 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   }
 
   /**
-   * Connects to special WebSocket which allows get information from terminal on server side. The
+   * <pre>
+   * Connects to Terminal Server by WebSocket. Which allows get information from terminal on server side. The
    * terminal is initialized only when the method is called the first time.
    *
-   * @param options with options param can be set some initial states for new terminal like: -
-   *     initial size (number of rows and cols); - set focused on open; - initial command (like
-   *     change working dir 'cd directory' and etc)
+   * @param options with options param can be set some initial states for new terminal like:
+   *               - initial size (number of rows and cols);
+   *               - set focused on open;
+   *               - initial command (like change working dir 'cd directory' and etc)
+   *
+   * More details {@link TerminalOptionsJso}
+   * </pre>
    */
   public void connect(TerminalOptionsJso options) {
     if (countRetry == 0) {

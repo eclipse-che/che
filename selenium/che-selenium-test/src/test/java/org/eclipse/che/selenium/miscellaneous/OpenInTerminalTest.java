@@ -12,16 +12,22 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_IN_TERMINAL;
+import static org.openqa.selenium.Keys.ALT;
+import static org.openqa.selenium.Keys.F12;
+import static org.openqa.selenium.Keys.SHIFT;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.Keys;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -57,6 +63,14 @@ public class OpenInTerminalTest {
   @Inject
   private CheTerminal terminal;
 
+  @SuppressWarnings("unused")
+  @Inject
+  private SeleniumWebDriverHelper seleniumWebDriverHelper;
+
+  @SuppressWarnings("unused")
+  @Inject
+  private SeleniumWebDriver seleniumWebDriver;
+
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = this.getClass().getResource("/projects/default-spring-project");
@@ -65,19 +79,24 @@ public class OpenInTerminalTest {
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
-
     ide.open(workspace);
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitVisibleItem(PROJECT_NAME);
   }
 
   /**
-   * - Select project in project explorer - Open context menu on selected project - Click on "Open
-   * in Terminal" action - Wait on opening new terminal, number of opened terminal should increase -
-   * Check working directory in open terminal, should point to the selected project
+   *
+   *
+   * <pre>
+   *  - Select project in project explorer
+   *  - Open context menu on selected project
+   *  - Click on "Open in Terminal" action
+   *  - Wait on opening new terminal, number of opened terminal should increase
+   *  - Check working directory in open terminal, should point to the selected project
+   * </pre>
    */
   @Test
   public void openInTerminalTest() {
+    seleniumWebDriver.navigate().refresh();
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
@@ -88,17 +107,29 @@ public class OpenInTerminalTest {
   }
 
   /**
-   * First check: - Expend project tree - Select some folder - Open context menu on selected folder
-   * - Click on "Open in Terminal" action - Wait on opening new terminal, number of opened terminal
-   * should increase - Check working directory in open terminal, should point to the selected folder
    *
-   * <p>Second check: - Select some file in project tree - Open context menu on selected folder -
-   * Click on "Open in Terminal" action - Wait on opening new terminal, number of opened terminal
-   * should increase - Check working directory in open terminal, should point to the parent of
-   * selected file
+   *
+   * <pre>
+   * First check:
+   *  - Expend project tree
+   *  - Select some folder
+   *  - Open context menu on selected folder
+   *  - Click on "Open in Terminal" action
+   *  - Wait on opening new terminal, number of opened terminal should increase
+   *  - Check working directory in open terminal, should point to the selected folder
+   *
+   * Second check:
+   *  - Select some file in project tree
+   *  - Open context menu on selected folder
+   *  - Click on "Open in Terminal" action
+   *  - Wait on opening new terminal, number of opened terminal should increase
+   *  - Check working directory in open terminal, should point to the parent of selected file
+   * </pre>
    */
   @Test
   public void openFolderInTerminalTest() {
+    seleniumWebDriver.navigate().refresh();
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + PATH_TO_EXPAND);
@@ -115,6 +146,28 @@ public class OpenInTerminalTest {
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
     terminal.waitNumberTerminalTab(3);
     terminalWorkDir = terminal.getVisibleTextFromTerminal();
+    Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + "$"));
+  }
+
+  /**
+   *
+   *
+   * <pre>
+   *  - Select project in project explorer
+   *  - Open context menu on selected project
+   *  - Click on "Open in Terminal" action
+   *  - Wait on opening new terminal, number of opened terminal should increase
+   *  - Check working directory in open terminal, should point to the selected project
+   * </pre>
+   */
+  @Test
+  public void openInTerminalTestByHotKey() {
+    seleniumWebDriver.navigate().refresh();
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    seleniumWebDriverHelper.sendKeys(Keys.chord(ALT, SHIFT, F12));
+    terminal.waitNumberTerminalTab(2);
+    String terminalWorkDir = terminal.getVisibleTextFromTerminal();
     Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + "$"));
   }
 }
