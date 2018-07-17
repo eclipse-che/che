@@ -25,7 +25,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ALL_TABS_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ASSIST_CONTENT_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_CONTAINER;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_PROPOSAL_DOC_ID;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.CONTEXT_MENU;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_CONDITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_DISABLED;
@@ -35,6 +34,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGE
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEFINED_EDITOR_ACTIVE_LINE_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM_PATTERN;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HOVER_POPUP_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
@@ -347,12 +347,8 @@ public class CodenvyEditor {
   @FindBy(xpath = HOVER_POPUP_XPATH)
   private WebElement hoverPopup;
 
-  @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
-  private WebElement proposalDoc;
-
-  @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
-  private WebElement languageServerRenameField;
-
+    @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
+    private WebElement languageServerRenameField;
   /**
    * Waits until specified {@code editorTab} is presented, selected, focused and editor activated.
    *
@@ -2328,6 +2324,7 @@ public class CodenvyEditor {
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
   }
 
+<<<<<<< HEAD
   public void checkProposalDocumentation(String expectedText) {
     seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
   }
@@ -2352,6 +2349,8 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.pressEnter();
   }
 
+=======
+>>>>>>> Readd removed code to fix build
   /** Type the comment line in the file by keyboard */
   public void launchCommentCodeFeature() {
     actionsFactory
