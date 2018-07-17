@@ -148,7 +148,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       new Timer() {
         @Override
         public void run() {
-          connect(TerminalOptionsJso.createDefault());
+          connect();
         }
       }.schedule(TIME_BETWEEN_CONNECTIONS);
     }
