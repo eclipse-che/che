@@ -10,7 +10,7 @@
 FROM node:8-alpine
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION=0.4.0-next.b17727c1
+ARG THEIA_VERSION=0.3.12
 
 EXPOSE 3000 3030
 
@@ -32,7 +32,7 @@ RUN \
     ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
     # Add Theia extensions
     #==TODO== replace with master branch after Theia release
-    git clone --depth=1 -b latest-deps https://github.com/eclipse/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
+    git clone --depth=1 https://github.com/eclipse/che-theia-hosted-plugin-manager-extension /tmp/hosted-plugin-extension && \
     node ${HOME}/add-extensions.js \
         @eclipse-che/che-theia-hosted-plugin-manager-extension:file:///tmp/hosted-plugin-extension \
         #che-theia-ssh-extension:https://github.com/eclipse/che-theia-ssh-plugin.git \
