@@ -18,7 +18,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.io.IOException;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -31,7 +30,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-@Test(groups = TestGroup.OSIO)
 public class RenameWorkspaceTest {
 
   private static final int MIN_WORKSPACE_NAME_SIZE = 3;

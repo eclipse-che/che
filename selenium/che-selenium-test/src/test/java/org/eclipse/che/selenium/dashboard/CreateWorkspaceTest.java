@@ -20,7 +20,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -30,7 +29,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Serhii Skoryk */
-@Test(groups = TestGroup.OSIO)
 public class CreateWorkspaceTest {
 
   private final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
