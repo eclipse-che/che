@@ -12,6 +12,9 @@ package org.eclipse.che.ide.processes;
 
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
@@ -38,6 +41,12 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
 
   private CoreLocalizationConstant locale;
   private final ProcessesPanelPresenter processesPanelPresenter;
+
+  interface Command extends SafeHtmlTemplates {
+
+    @Template("cd {0} && clear")
+    SafeHtml openInTerminalCommand(String path);
+  }
 
   @Inject
   public OpenInTerminalAction(
@@ -67,7 +76,8 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
       resource = parent;
     }
     Path path = resource.getLocation().makeRelative();
-    String command = locale.openInTerminalCommand(path.toString());
+    Command cmdTmpl = GWT.create(Command.class);
+    String command = cmdTmpl.openInTerminalCommand(path.toString()).asString();
     processesPanelPresenter.newTerminal(
         TerminalOptionsJso.createDefault().withCommand(command).withFocusOnOpen(true));
   }

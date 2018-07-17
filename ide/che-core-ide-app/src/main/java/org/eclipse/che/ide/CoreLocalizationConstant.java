@@ -1233,9 +1233,6 @@ public interface CoreLocalizationConstant extends Messages {
   @DefaultMessage("Open in Terminal")
   String openInTerminalAction();
 
-  @Key("open.in.terminal.command")
-  String openInTerminalCommand(String path);
-
   @Key("machine.output.action.title")
   String machineOutputActionTitle();
 

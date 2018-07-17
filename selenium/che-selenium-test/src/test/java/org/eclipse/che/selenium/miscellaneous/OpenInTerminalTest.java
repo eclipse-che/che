@@ -28,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -94,7 +93,7 @@ public class OpenInTerminalTest {
    * </pre>
    */
   @Test
-  public void openInTerminalTest() {
+  public void openProjectInTerminalTest() {
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -102,8 +101,7 @@ public class OpenInTerminalTest {
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
     terminal.waitNumberTerminalTab(2);
-    String terminalWorkDir = terminal.getVisibleTextFromTerminal();
-    Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + "$"));
+    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + "$");
   }
 
   /**
@@ -137,16 +135,14 @@ public class OpenInTerminalTest {
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
     terminal.waitNumberTerminalTab(2);
-    String terminalWorkDir = terminal.getVisibleTextFromTerminal();
-    Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + PATH_TO_EXPAND + "$"));
+    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + PATH_TO_EXPAND + "$");
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME + FILE);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + FILE);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
     terminal.waitNumberTerminalTab(3);
-    terminalWorkDir = terminal.getVisibleTextFromTerminal();
-    Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + "$"));
+    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + "$");
   }
 
   /**
@@ -155,7 +151,7 @@ public class OpenInTerminalTest {
    * <pre>
    *  - Select project in project explorer
    *  - Open context menu on selected project
-   *  - Click on "Open in Terminal" action
+   *  - Call hot key Alt+Shift+F12
    *  - Wait on opening new terminal, number of opened terminal should increase
    *  - Check working directory in open terminal, should point to the selected project
    * </pre>
@@ -167,7 +163,6 @@ public class OpenInTerminalTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     seleniumWebDriverHelper.sendKeys(Keys.chord(ALT, SHIFT, F12));
     terminal.waitNumberTerminalTab(2);
-    String terminalWorkDir = terminal.getVisibleTextFromTerminal();
-    Assert.assertTrue(terminalWorkDir.trim().endsWith(PROJECT_NAME + "$"));
+    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + "$");
   }
 }

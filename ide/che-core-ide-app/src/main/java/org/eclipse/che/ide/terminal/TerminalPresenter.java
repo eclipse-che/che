@@ -45,6 +45,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
   // event which is performed when user input data into terminal
   private static final String DATA_EVENT_NAME = "data";
+  private static final String TYPE = "type";
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
   private final TerminalView view;
@@ -69,12 +70,10 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       NotificationManager notificationManager,
       CoreLocalizationConstant locale,
       @NotNull @Assisted MachineImpl machine,
-      @Assisted TerminalOptionsJso options,
       final TerminalInitializePromiseHolder terminalHolder,
       final ModuleHolder moduleHolder,
       AgentURLModifier agentURLModifier) {
     this.view = view;
-    TerminalOptionsJso options1 = options != null ? options : TerminalOptionsJso.createDefault();
     this.agentURLModifier = agentURLModifier;
     view.setDelegate(this);
     this.notificationManager = notificationManager;
@@ -85,6 +84,14 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     countRetry = 2;
     this.terminalHolder = terminalHolder;
     this.moduleHolder = moduleHolder;
+  }
+
+  /**
+   * Connects to Terminal Server by WebSocket. Which allows get information from terminal on server
+   * side. The terminal is initialized only when the method is called the first time.
+   */
+  public void connect() {
+    connect(TerminalOptionsJso.createDefault());
   }
 
   /**
@@ -154,7 +161,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
    */
   public void sendCommand(String command) {
     Jso jso = Jso.create();
-    jso.addField("type", DATA_EVENT_NAME);
+    jso.addField(TYPE, DATA_EVENT_NAME);
     jso.addField(DATA_EVENT_NAME, command);
     socket.send(jso.serialize());
   }
@@ -186,12 +193,13 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
               DATA_EVENT_NAME,
               data -> {
                 Jso jso = Jso.create();
-                jso.addField("type", DATA_EVENT_NAME);
+                jso.addField(TYPE, DATA_EVENT_NAME);
                 jso.addField(DATA_EVENT_NAME, data);
                 socket.send(jso.serialize());
               });
-          if (!Strings.isNullOrEmpty(options.getStringField("command"))) {
-            sendCommand(options.getStringField("command"));
+          String command = options.getStringField("command");
+          if (!Strings.isNullOrEmpty(command)) {
+            sendCommand(command);
             sendCommand("\r");
           }
         });
@@ -217,7 +225,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   public void stopTerminal() {
     if (connected) {
       Jso jso = Jso.create();
-      jso.addField("type", "close");
+      jso.addField(TYPE, "close");
       socket.send(jso.serialize());
     }
   }
@@ -255,8 +263,8 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     JsArrayInteger arr = Jso.createArray().cast();
     arr.set(0, x);
     arr.set(1, y);
-    jso.addField("type", "resize");
-    jso.addField("data", arr);
+    jso.addField(TYPE, "resize");
+    jso.addField(DATA_EVENT_NAME, arr);
     socket.send(jso.serialize());
   }
 
