@@ -11,7 +11,7 @@
 package org.eclipse.che.api.languageserver;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 import com.google.inject.Singleton;
 import java.util.List;
@@ -97,7 +97,7 @@ class LanguageServerService {
       languageServerConfigInitializer.initialize();
 
       ServerCapabilitiesDto serverCapabilitiesDto =
-          new ServerCapabilitiesDto(languageServerInitializer.initialize(wsPath).get(30, SECONDS));
+          new ServerCapabilitiesDto(languageServerInitializer.initialize(wsPath).get(1, MINUTES));
 
       LOG.debug("Responding: {}", serverCapabilitiesDto);
       return serverCapabilitiesDto;
