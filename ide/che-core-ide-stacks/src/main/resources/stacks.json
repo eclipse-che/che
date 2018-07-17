@@ -1433,7 +1433,7 @@
             "previewUrl": "${server.wildfly}",
             "goal": "Run"
           },
-          "commandLine": "cd ${current.project.path}\nscl enable rh-maven33 'java -jar target/*-swarm.jar -Djava.net.preferIPv4Stack=true'"
+          "commandLine": "cd ${current.project.path}\nscl enable rh-maven33 'java -jar target/*-thorntail.jar -Djava.net.preferIPv4Stack=true'"
         }
       ],
       "projects": [],
