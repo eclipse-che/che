@@ -29,6 +29,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGE
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_PREFIX_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM_PATTERN;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HOVER_POPUP_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
@@ -192,6 +193,9 @@ public class CodenvyEditor {
         "//div[@id='gwt-debug-content-assist-doc-popup']//div[@class='gwt-HTML']";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
+    String TEXT_TO_MOVE_CURSOR_XPATH =
+        ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
+    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip']";
   }
 
   public enum TabActionLocator {
@@ -317,6 +321,9 @@ public class CodenvyEditor {
   @FindBy(css = TOOLTIP_TITLE_CSS)
   private WebElement tooltipTitle;
 
+  @FindBy(xpath = HOVER_POPUP_XPATH)
+  private WebElement hoverPopup;
+
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
    *
@@ -410,6 +417,15 @@ public class CodenvyEditor {
    */
   public void waitTextInToolTipPopup(String expectedText) {
     seleniumWebDriverHelper.waitTextContains(tooltipTitle, expectedText);
+  }
+
+  /**
+   * wait text in hover pop-up (after hovering on text)
+   *
+   * @param expectedText the expected text into hover pop-up
+   */
+  public void waitTextInHoverPopup(String expectedText) {
+    seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
   }
 
   /**
@@ -2078,5 +2094,10 @@ public class CodenvyEditor {
     return seleniumWebDriverHelper.waitVisibilityOfAllElements(
         By.xpath(
             format("//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']", tabName)));
+  }
+
+  public void moveCursorToText(String text) {
+    seleniumWebDriverHelper.moveCursorTo(
+        By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
   }
 }
