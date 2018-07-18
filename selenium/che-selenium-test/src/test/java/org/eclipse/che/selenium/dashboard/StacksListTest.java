@@ -82,17 +82,17 @@ public class StacksListTest {
 
   @Test
   public void checkStacksSelectingByCheckbox() {
-    String newStackName = createDuplicatedStack(JAVA_MYSQL.getName());
+    String stackName = createDuplicatedStack(JAVA_MYSQL.getName());
 
     // select stacks by checkbox and check it is selected
-    stacks.selectStackByCheckbox(newStackName);
-    assertTrue(stacks.isStackChecked(newStackName));
-    stacks.selectStackByCheckbox(newStackName);
-    assertFalse(stacks.isStackChecked(newStackName));
+    stacks.selectStackByCheckbox(stackName);
+    assertTrue(stacks.isStackChecked(stackName));
+    stacks.selectStackByCheckbox(stackName);
+    assertFalse(stacks.isStackChecked(stackName));
 
     // click on the Bulk button and check that created stack is checked
     stacks.selectAllStacksByBulk();
-    assertTrue(stacks.isStackChecked(newStackName));
+    assertTrue(stacks.isStackChecked(stackName));
   }
 
   @Test
