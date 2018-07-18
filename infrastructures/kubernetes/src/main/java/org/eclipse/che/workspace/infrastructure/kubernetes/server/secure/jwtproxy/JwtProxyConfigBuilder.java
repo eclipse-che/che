@@ -70,8 +70,7 @@ public class JwtProxyConfigBuilder {
               workspaceId));
       if (!verifierProxy.excludes.isEmpty()) {
         configBuilder.append("      excludes:\n");
-        verifierProxy.excludes.forEach(
-            s -> configBuilder.append(format("      - %s\n", s)));
+        verifierProxy.excludes.forEach(s -> configBuilder.append(format("      - %s\n", s)));
       }
     }
 

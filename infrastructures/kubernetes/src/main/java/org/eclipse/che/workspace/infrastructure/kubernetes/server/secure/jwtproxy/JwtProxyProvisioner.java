@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.UNSECURED_PATHS_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
@@ -81,7 +82,6 @@ public class JwtProxyProvisioner {
 
   static final String JWT_PROXY_CONFIG_FOLDER = "/config";
   static final String JWT_PROXY_PUBLIC_KEY_FILE = "mykey.pub";
-  static final String UNSECURED_PATHS_ATTRIBUTE = "unsecuredPaths";
 
   private final SignatureKeyManager signatureKeyManager;
 
