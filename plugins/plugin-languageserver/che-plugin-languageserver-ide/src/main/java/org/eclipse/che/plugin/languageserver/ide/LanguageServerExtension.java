@@ -158,6 +158,12 @@ public class LanguageServerExtension {
     keyBindingManager
         .getGlobal()
         .addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), "LS.rename");
+
+    DefaultActionGroup editorContextMenuGroup =
+        (DefaultActionGroup) actionManager.getAction("editorContextMenu");
+    editorContextMenuGroup.addSeparator();
+    editorContextMenuGroup.add(findDefinitionAction);
+    editorContextMenuGroup.add(refactoringGroup);
   }
 
   @Inject
