@@ -13,9 +13,9 @@ package org.eclipse.che.selenium.editor;
 
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.CLOSE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FIND;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FIND_DEFINITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.NAVIGATE_FILE_STRUCTURE;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.OPEN_DECLARATION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.QUICK_DOC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.QUICK_FIX;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REDO;
@@ -25,14 +25,9 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocat
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.UNDO;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
-import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Random;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -56,20 +51,39 @@ public class ContextMenuEditorTest {
 
   private static final String PROJECT_NAME =
       NameGenerator.generate(ContextMenuEditorTest.class.getSimpleName(), 4);
-  private static final String PROJECT_NAME_2 = "2_ContextMenuEditor" + new Random().nextInt(999);
   private static final String FORMATTED_TEXT =
-      "public class AppController implements Controller {\n"
+      "/*\n"
+          + " * Copyright (c) 2012-2018 Red Hat, Inc.\n"
+          + " * All rights reserved. This program and the accompanying materials\n"
+          + " * are made available under the terms of the Eclipse Public License v1.0\n"
+          + " * which accompanies this distribution, and is available at\n"
+          + " * http://www.eclipse.org/legal/epl-v10.html\n"
+          + " *\n"
+          + " * Contributors:\n"
+          + " *   Red Hat, Inc. - initial API and implementation\n"
+          + " */\n"
+          + "package org.eclipse.qa.examples;\n"
+          + "\n"
+          + "import java.util.Random;\n"
+          + "\n"
+          + "import org.springframework.web.servlet.ModelAndView;\n"
+          + "import org.springframework.web.servlet.mvc.Controller;\n"
+          + "\n"
+          + "import javax.servlet.http.HttpServletRequest;\n"
+          + "import javax.servlet.http.HttpServletResponse;\n"
+          + "\n"
+          + "public class AppController implements Controller {\n"
           + "    private static final String secretNum = Integer.toString(new Random().nextInt(10));\n"
           + "\n"
           + "    @Override\n"
           + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {\n"
           + "        String numGuessByUser = request.getParameter(\"numGuess\");\n"
           + "        String result = \"\";\n"
-          + "\n"
+          + "        \n"
           + "        if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
           + "            result = \"Congrats! The number is \" + secretNum;\n"
-          + "        }\n"
-          + "\n"
+          + "        } \n"
+          + "        \n"
           + "        else if (numGuessByUser != null) {\n"
           + "            result = \"Sorry, you failed. Try again later!\";\n"
           + "        }\n"
@@ -84,14 +98,8 @@ public class ContextMenuEditorTest {
 
   private static final String QUICK_DOC_TEXT =
       "java.lang.Exception\n"
-          + "\n"
-          + "The class Exception and its subclasses are a form of Throwable that"
-          + " indicates conditions that a reasonable application might want to catch.\n"
-          + "The class Exception and any subclasses that are not also subclasses "
-          + "of RuntimeException are checked exceptions. Checked exceptions need "
-          + "to be declared in a method or constructor's throws clause if they can"
-          + " be thrown by the execution of the method or constructor and propagate"
-          + " outside the method or constructor boundary.\n"
+          + "The class Exception and its subclasses are a form of Throwable that indicates conditions that a reasonable application might want to catch.\n"
+          + "The class Exception and any subclasses that are not also subclasses of RuntimeException are checked exceptions. Checked exceptions need to be declared in a method or constructor's throws clause if they can be thrown by the execution of the method or constructor and propagate outside the method or constructor boundary.\n"
           + "Since:\n"
           + "JDK1.0\n"
           + "Author:\n"
@@ -100,8 +108,6 @@ public class ContextMenuEditorTest {
           + "java.lang.Error\n"
           + "@jls\n"
           + "11.2 Compile-Time Checking of Exceptions";
-
-  private String expectedTextBeforeDownloadSources = "";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -122,16 +128,6 @@ public class ContextMenuEditorTest {
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
-    testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME_2,
-        ProjectTemplates.MAVEN_SPRING);
-
-    resource = ContextMenuEditorTest.class.getResource("expected-test-before-download-sources");
-    List<String> expectedText =
-        Files.readAllLines(Paths.get(resource.toURI()), Charset.forName("UTF-8"));
-    expectedTextBeforeDownloadSources = Joiner.on('\n').join(expectedText);
 
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
@@ -212,9 +208,9 @@ public class ContextMenuEditorTest {
 
   @Test(priority = 3)
   public void checkQuickDocumentation() {
-    projectExplorer.waitItem(PROJECT_NAME_2);
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
-        PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActive();
     editor.goToCursorPositionVisible(26, 105);
     loader.waitOnClosed();
@@ -229,9 +225,9 @@ public class ContextMenuEditorTest {
 
   @Test(priority = 4)
   public void checkQuickFix() {
-    projectExplorer.waitItem(PROJECT_NAME_2);
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
-        PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActive();
     editor.setCursorToLine(29);
     editor.typeTextIntoEditor("String s = 5;");
@@ -250,16 +246,15 @@ public class ContextMenuEditorTest {
 
   @Test(priority = 5)
   public void checkOpenDeclaration() {
-    projectExplorer.waitItem(PROJECT_NAME_2);
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
-        PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.goToCursorPositionVisible(26, 13);
     editor.openContextMenuOnElementInEditor(" ModelAndView");
-    editor.clickOnItemInContextMenu(OPEN_DECLARATION);
+    editor.clickOnItemInContextMenu(FIND_DEFINITION);
     editor.waitContextMenuIsNotPresent();
-    editor.waitTabIsPresent("ModelAndView");
-    editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
-    editor.closeFileByNameWithSaving("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
+    editor.closeFileByNameWithSaving("ModelAndView.class");
   }
 
   @Test(priority = 6)
@@ -295,32 +290,32 @@ public class ContextMenuEditorTest {
 
   @Test(priority = 7)
   public void checkNaviFileStructure() {
-    projectExplorer.waitItem(PROJECT_NAME_2);
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
-        PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(NAVIGATE_FILE_STRUCTURE);
     editor.waitContextMenuIsNotPresent();
     fileStructure.waitFileStructureFormIsOpen("AppController");
     loader.waitOnClosed();
     fileStructure.waitExpectedTextInFileStructure(
-        "handleRequest(HttpServletRequest, HttpServletResponse) : ModelAndView");
+        "handleRequest(HttpServletRequest, HttpServletResponse):ModelAndView");
     loader.waitOnClosed();
     fileStructure.selectItemInFileStructure(
-        "handleRequest(HttpServletRequest, HttpServletResponse) : ModelAndView");
+        "handleRequest(HttpServletRequest, HttpServletResponse):ModelAndView");
     fileStructure.selectItemInFileStructureByDoubleClick(
-        "handleRequest(HttpServletRequest, HttpServletResponse) : ModelAndView");
+        "handleRequest(HttpServletRequest, HttpServletResponse):ModelAndView");
     fileStructure.waitFileStructureFormIsClosed();
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("handleRequest");
-    editor.waitSpecifiedValueForLineAndChar(26, 25);
+    editor.waitSpecifiedValueForLineAndChar(26, 24);
   }
 
   @Test(priority = 8)
   public void checkFind() {
-    projectExplorer.waitItem(PROJECT_NAME_2);
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
-        PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FIND);
     editor.waitContextMenuIsNotPresent();
@@ -328,7 +323,7 @@ public class ContextMenuEditorTest {
     findText.typeTextIntoFindField("class");
     findText.waitTextIntoFindField("class");
     loader.waitOnClosed();
-    findText.waitPathIntoRootField("/" + PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples");
+    findText.waitPathIntoRootField("/" + PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel("AppController.java");
