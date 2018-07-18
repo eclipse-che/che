@@ -418,7 +418,7 @@ public class TextDocumentService {
     String uri = prefixURI(wsPath);
     positionParams.getTextDocument().setUri(uri);
     positionParams.setUri(prefixURI(positionParams.getUri()));
-    HoverDto result = new HoverDto();
+    Hover result = new Hover();
     StringBuilder content = new StringBuilder();
 
     Set<ExtendedLanguageServer> servers = findServer.byPath(uri);
@@ -439,15 +439,27 @@ public class TextDocumentService {
           @Override
           public boolean handleResult(ExtendedLanguageServer element, Hover hover) {
             if (hover != null) {
-              HoverDto hoverDto = new HoverDto(hover);
               Either<List<Either<String, MarkedString>>, MarkupContent> contents =
-                  hoverDto.getContents();
+                  hover.getContents();
               if (contents.isLeft()) {
-
+                for (Either<String, MarkedString> part : contents.getLeft()) {
+                  if (content.length() > 0) {
+                    content.append("\n\n");
+                  }
+                  if (part.isLeft()) {
+                    content.append(part.getLeft());
+                  } else {
+                    // we don't handle the "language" in the IDE anyway.
+                    content.append(part.getRight().getValue());
+                  }
+                }
               } else {
                 MarkupContent markup = contents.getRight();
                 if (MarkupKind.MARKDOWN.equals(markup.getKind())
                     || MarkupKind.PLAINTEXT.equals(markup.getKind())) {
+                  if (content.length() > 0) {
+                    content.append("\n\n");
+                  }
                   content.append(markup.getValue());
                 } else {
                   LOG.warn("Unknown markup type: {}", markup.getKind());
@@ -462,7 +474,7 @@ public class TextDocumentService {
     markupContent.setKind(MarkupKind.MARKDOWN);
     markupContent.setValue(content.toString());
     result.setContents(markupContent);
-    return result;
+    return new HoverDto(result);
   }
 
   private SignatureHelpDto signatureHelp(TextDocumentPositionParams positionParams) {
