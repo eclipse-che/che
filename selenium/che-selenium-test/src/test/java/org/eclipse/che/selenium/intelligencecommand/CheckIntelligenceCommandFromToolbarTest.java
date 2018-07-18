@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -109,8 +108,8 @@ public class CheckIntelligenceCommandFromToolbarTest {
     consoles.clickOnPreviewUrl();
 
     waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
-    assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
-    assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#3"));
+    commandsToolbar.waitTimerValuePattern("\\d\\d:\\d\\d");
+    commandsToolbar.waitNumOfProcessCounter(3);
 
     checkTestAppByPreviewButtonAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
