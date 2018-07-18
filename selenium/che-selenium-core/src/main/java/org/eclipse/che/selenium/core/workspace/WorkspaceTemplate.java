@@ -25,6 +25,7 @@ public class WorkspaceTemplate {
   public static final String DEFAULT = "default.json";
   public static final String DEFAULT_WITH_GITHUB_PROJECTS = "default_with_github_projects.json";
   public static final String PYTHON = "ubuntu_python.json";
+  public static final String NODEJS_WITH_JSON_LS = "nodejs_with_json_ls.json";
   public static final String UBUNTU_CAMEL = "ubuntu_jdk8_with_camel_ls.json";
 
   private WorkspaceTemplate() {}
