@@ -40,10 +40,12 @@ import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspa
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.InsertTextFormat;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 /**
  * @author Anatolii Bazko
@@ -104,7 +106,10 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
   }
 
   private Widget createAdditionalInfoWidget() {
-    String documentation = completionItem.getItem().getDocumentation();
+    Either<String, MarkupContent> markup = completionItem.getItem().getDocumentation();
+    // markup type is plain text or markdown. Both are ok natively.
+    String documentation = markup.isLeft() ? markup.getLeft() : markup.getRight().getValue();
+
     if (documentation == null || documentation.trim().isEmpty()) {
       documentation = "No documentation found.";
     }
