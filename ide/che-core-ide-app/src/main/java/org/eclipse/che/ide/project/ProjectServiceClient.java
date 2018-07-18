@@ -15,7 +15,11 @@ import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
 import static com.google.gwt.http.client.URL.encodePathSegment;
 import static com.google.gwt.http.client.URL.encodeQueryString;
+import static org.eclipse.che.api.project.shared.Constants.Services.PROJECTS_BATCH;
+import static org.eclipse.che.api.project.shared.Constants.Services.PROJECT_IMPORT;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.jsonrpc.JsonRpcErrorUtils.getPromiseError;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 import static org.eclipse.che.ide.util.PathEncoder.encodePath;
@@ -25,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
@@ -33,8 +38,11 @@ import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
+import org.eclipse.che.api.project.shared.dto.service.CreateBatchProjectsRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.ImportRequestDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
@@ -67,7 +75,6 @@ public class ProjectServiceClient {
   private static final String FOLDER = "/folder";
   private static final String FILE = "/file";
   private static final String SEARCH = "/search";
-  private static final String IMPORT = "/import";
   private static final String RESOLVE = "/resolve";
   private static final String ESTIMATE = "/estimate";
 
@@ -75,6 +82,7 @@ public class ProjectServiceClient {
   private final AsyncRequestFactory reqFactory;
   private final DtoFactory dtoFactory;
   private final DtoUnmarshallerFactory unmarshaller;
+  private final RequestTransmitter requestTransmitter;
   private final AppContext appContext;
 
   @Inject
@@ -83,11 +91,13 @@ public class ProjectServiceClient {
       AsyncRequestFactory reqFactory,
       DtoFactory dtoFactory,
       DtoUnmarshallerFactory unmarshaller,
+      RequestTransmitter requestTransmitter,
       AppContext appContext) {
     this.loaderFactory = loaderFactory;
     this.reqFactory = reqFactory;
     this.dtoFactory = dtoFactory;
     this.unmarshaller = unmarshaller;
+    this.requestTransmitter = requestTransmitter;
     this.appContext = appContext;
   }
 
@@ -159,12 +169,20 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<Void> importProject(Path path, SourceStorageDto source) {
-    String url = getBaseUrl() + IMPORT + encodePath(path);
-
-    url += url.contains("?") ? "&" : "?";
-    url += "clientId=" + appContext.getApplicationId().orElse("");
-
-    return reqFactory.createPostRequest(url, source).header(CONTENT_TYPE, APPLICATION_JSON).send();
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(PROJECT_IMPORT)
+                .paramsAsDto(
+                    dtoFactory
+                        .createDto(ImportRequestDto.class)
+                        .withWsPath(path.toString())
+                        .withSourceStorage(source))
+                .sendAndReceiveResultAsDto(ImportRequestDto.class)
+                .onSuccess(() -> resolve.apply(null))
+                .onFailure(error -> reject.apply(getPromiseError(error))));
   }
 
   /**
@@ -264,18 +282,19 @@ public class ProjectServiceClient {
    */
   public Promise<List<ProjectConfigDto>> createBatchProjects(
       List<NewProjectConfigDto> configurations) {
-    String url = getBaseUrl() + BATCH_PROJECTS;
-
-    url += url.contains("?") ? "&" : "?";
-    url += "clientId=" + appContext.getApplicationId().orElse("");
-
-    final String loaderMessage =
-        configurations.size() > 1 ? "Creating the batch of projects..." : "Creating project...";
-    return reqFactory
-        .createPostRequest(url, configurations)
-        .header(ACCEPT, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader(loaderMessage))
-        .send(unmarshaller.newListUnmarshaller(ProjectConfigDto.class));
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(PROJECTS_BATCH)
+                .paramsAsDto(
+                    dtoFactory
+                        .createDto(CreateBatchProjectsRequestDto.class)
+                        .withNewProjectConfigs(configurations))
+                .sendAndReceiveResultAsListOfDto(ProjectConfigDto.class)
+                .onSuccess(resolve::apply)
+                .onFailure(error -> reject.apply(getPromiseError(error))));
   }
 
   /**

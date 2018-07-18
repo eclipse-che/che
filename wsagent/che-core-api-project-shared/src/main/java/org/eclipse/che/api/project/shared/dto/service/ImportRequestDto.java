@@ -19,7 +19,11 @@ public interface ImportRequestDto {
 
   void setWsPath(String wsPath);
 
+  ImportRequestDto withWsPath(String wsPath);
+
   SourceStorageDto getSourceStorage();
 
   void setSourceStorage(SourceStorageDto sourceStorage);
+
+  ImportRequestDto withSourceStorage(SourceStorageDto sourceStorage);
 }

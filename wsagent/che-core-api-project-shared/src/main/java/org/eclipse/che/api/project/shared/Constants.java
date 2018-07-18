@@ -45,6 +45,7 @@ public class Constants {
 
     public static final String PROJECT_GET = "project/get";
     public static final String PROJECT_CREATE = "project/create";
+    public static final String PROJECTS_BATCH = "projects/batch";
     public static final String PROJECT_UPDATE = "project/update";
     public static final String PROJECT_DELETE = "project/delete";
     public static final String PROJECT_RECOGNIZE = "project/recognize";

@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
-import static org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil.getPromiseError;
+import static org.eclipse.che.ide.jsonrpc.JsonRpcErrorUtils.getPromiseError;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
