@@ -67,7 +67,6 @@ public class RenameParametersTest {
     ide.open(workspace);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
-    // consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     events.clickEventLogBtn();
