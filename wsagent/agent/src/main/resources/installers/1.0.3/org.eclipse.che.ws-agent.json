@@ -12,7 +12,7 @@
       "path" : "/api",
       "attributes": {
         "secure": "true",
-        "unsecuredPaths" : "/api/liveness"
+        "unsecuredPaths": "/api/liveness"
       }
     },
     "wsagent/ws": {
@@ -21,7 +21,7 @@
       "path" : "/wsagent",
       "attributes": {
         "secure": "true",
-        "unsecuredPaths" : "/api/liveness"
+        "unsecuredPaths": "/api/liveness"
       }
     },
     "wsagent-debug": {

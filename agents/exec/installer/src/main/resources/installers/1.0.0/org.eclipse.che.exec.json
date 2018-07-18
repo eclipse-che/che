@@ -12,7 +12,7 @@
       "path" : "/process",
       "attributes": {
         "secure": "true",
-        "unsecuredPaths" : "/liveness"
+        "unsecuredPaths": "/liveness"
       }
     },
     "exec-agent/ws": {
@@ -21,7 +21,7 @@
       "path": "/connect",
       "attributes": {
         "secure": "true",
-        "unsecuredPaths" : "/liveness"
+        "unsecuredPaths": "/liveness"
       }
     }
   }

@@ -12,7 +12,7 @@
       "path" : "/pty",
       "attributes": {
         "secure": "true",
-        "unsecuredPaths" : "/liveness"
+        "unsecuredPaths": "/liveness"
       }
     }
   }
