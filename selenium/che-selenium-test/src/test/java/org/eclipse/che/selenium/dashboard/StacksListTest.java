@@ -147,15 +147,13 @@ public class StacksListTest {
     // create stack duplicate by Duplicate Stack button
     stackName = createDuplicatedStack(JAVA.getName());
     assertTrue(stacks.isDuplicatedStackExisted(stackName));
-    stackName = createDuplicatedStack(BLANK.getName());
-    assertTrue(stacks.isDuplicatedStackExisted(stackName));
 
     // delete stack by the Action delete stack button
-    stacks.clickOnDeleteActionButton(stackName);
-    stacks.clickOnDeleteDialogButton();
-    dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", stackName));
-    dashboard.waitNotificationIsClosed();
-    assertFalse(stacks.isStackItemExisted(stackName));
+    deleteStackByActionDeleteButton(stackName);
+
+    stackName = createDuplicatedStack(BLANK.getName());
+    assertTrue(stacks.isDuplicatedStackExisted(stackName));
+    deleteStackByActionDeleteButton(stackName);
   }
 
   private void deleteStack() {
@@ -166,20 +164,27 @@ public class StacksListTest {
   }
 
   private String createDuplicatedStack(String stack) {
-    ArrayList<String> stackNamesList;
     String createdStackName = "";
 
     dashboard.selectStacksItemOnDashboard();
     stacks.waitToolbarTitleName();
     stacks.clickOnDuplicateStackButton(stack);
-    stackNamesList = stacks.getStacksNamesList();
 
-    for (String name : stackNamesList) {
+    for (String name : stacks.getStacksNamesList()) {
       if (name.contains(stack + "-copy-")) {
         createdStackName = name;
       }
     }
 
     return createdStackName;
+  }
+
+  private void deleteStackByActionDeleteButton(String name) {
+    // delete stack by the Action delete stack button
+    stacks.clickOnDeleteActionButton(name);
+    stacks.clickOnDeleteDialogButton();
+    dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", name));
+    dashboard.waitNotificationIsClosed();
+    assertFalse(stacks.isStackItemExisted(name));
   }
 }
