@@ -90,7 +90,6 @@ public class UploadIntoProjectTest {
 
     // open upload file window
     openFormAndSelectUploadFile(localPathToFileToUpload);
-
     uploadFileDialogPage.clickOnUploadButton();
 
     // then
@@ -106,9 +105,7 @@ public class UploadIntoProjectTest {
 
     // when re-upload the file
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-
     openFormAndSelectUploadFile(localPathToFileToUpload);
-
     uploadFileDialogPage.clickOnUploadButton();
 
     // then there is changes remained after uploading
@@ -133,7 +130,6 @@ public class UploadIntoProjectTest {
 
     // open upload file window
     openFormAndSelectUploadFile(localPathToFileToUpload);
-
     uploadFileDialogPage.clickOnUploadButton();
 
     // then
@@ -149,7 +145,6 @@ public class UploadIntoProjectTest {
 
     // when re-upload the file
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-
     openFormAndSelectUploadFile(localPathToFileToUpload);
 
     // then
@@ -175,7 +170,6 @@ public class UploadIntoProjectTest {
 
     // open upload directory window
     openFormAndUploadFolder(localPathToFolderToUpload);
-
     uploadDirectoryDialogPage.clickOnUploadButton();
 
     // then
@@ -190,9 +184,7 @@ public class UploadIntoProjectTest {
 
     // when re-upload the directory
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-
     openFormAndUploadFolder(localPathToFolderToUpload);
-
     uploadDirectoryDialogPage.clickOnUploadButton();
 
     // then there is changes remained after uploading
@@ -218,7 +210,6 @@ public class UploadIntoProjectTest {
 
     // open upload directory window
     openFormAndUploadFolder(localPathToFolderToUpload);
-
     uploadDirectoryDialogPage.clickOnUploadButton();
 
     // then
@@ -238,7 +229,6 @@ public class UploadIntoProjectTest {
 
     // when re-upload the directory with overwriting
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-
     openFormAndUploadFolder(localPathToFolderToUpload);
 
     // then
