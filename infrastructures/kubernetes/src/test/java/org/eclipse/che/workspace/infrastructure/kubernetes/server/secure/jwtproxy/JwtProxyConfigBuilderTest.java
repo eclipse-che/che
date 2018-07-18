@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
-import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 
 import java.util.HashSet;
@@ -36,8 +35,9 @@ public class JwtProxyConfigBuilderTest {
   @Test
   public void shouldBuildJwtProxyConfigInYamlFormat() throws Exception {
     // given
-    Set<String> excludes = new HashSet<>(asList("/api/liveness"));
+    Set<String> excludes = new HashSet<>();
     jwtProxyConfigBuilder.addVerifierProxy(8080, "http://tomcat:8080", new HashSet<>(excludes));
+    excludes.add("/api/liveness");
     excludes.add("/other/exclude");
     jwtProxyConfigBuilder.addVerifierProxy(4101, "ws://terminal:4101", new HashSet<>(excludes));
 

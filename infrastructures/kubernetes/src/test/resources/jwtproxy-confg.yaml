@@ -18,8 +18,6 @@ jwtproxy:
           iss: wsmaster
       nonce_storage:
         type: void
-      excludes:
-      - /api/liveness
   - listen_addr: :4101
     verifier:
       upstream: ws://terminal:4101/
