@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -91,7 +92,7 @@ public class JwtProxyProvisionerTest {
   @Test
   public void shouldProvisionJwtProxyRelatedObjectsIntoKubernetesEnvironment() throws Exception {
     // when
-    jwtProxyProvisioner.expose(k8sEnv, "terminal", 4401, "TCP");
+    jwtProxyProvisioner.expose(k8sEnv, "terminal", 4401, "TCP", Collections.EMPTY_MAP);
 
     // then
     InternalMachineConfig jwtProxyMachine =

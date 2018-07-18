@@ -11,7 +11,8 @@
       "protocol": "http",
       "path" : "/api",
       "attributes": {
-        "secure": "true"
+        "secure": "true",
+        "unsecuredPaths" : "/api/liveness"
       }
     },
     "wsagent/ws": {
@@ -19,7 +20,8 @@
       "protocol": "ws",
       "path" : "/wsagent",
       "attributes": {
-        "secure": "true"
+        "secure": "true",
+        "unsecuredPaths" : "/api/liveness"
       }
     },
     "wsagent-debug": {
