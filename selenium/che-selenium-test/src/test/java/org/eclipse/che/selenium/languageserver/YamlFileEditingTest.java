@@ -94,7 +94,8 @@ public class YamlFileEditingTest {
 
     // launch autocomplete feature, select proposal and check expected text in the Editor
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("kind"); // TODO check proposal documentation
+    editor.waitTextIntoAutocompleteContainer("kind");
+    // TODO check proposal documentation
     editor.enterAutocompleteProposal("kind");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("PersistentVolume");
@@ -134,7 +135,7 @@ public class YamlFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkOpenshiftDelpoymentYamlFile() {
+  public void checkOpenshiftDeploymentYamlFile() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/deployment.yaml");
 
