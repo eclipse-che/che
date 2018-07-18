@@ -152,7 +152,17 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
   /** {@inheritDoc} */
   @Override
   public void go(AcceptsOneWidget container) {
-    container.setWidget(view);
+    if (widgets.isEmpty()) {
+      preferencesManager
+          .loadPreferences()
+          .then(
+              properties -> {
+                options.forEach(this::provideWidget);
+                container.setWidget(view);
+              });
+    } else {
+      container.setWidget(view);
+    }
   }
 
   @Override
