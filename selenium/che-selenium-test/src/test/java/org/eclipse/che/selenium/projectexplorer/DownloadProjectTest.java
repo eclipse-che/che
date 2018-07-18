@@ -17,12 +17,12 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -44,16 +45,15 @@ import org.testng.annotations.Test;
 public class DownloadProjectTest {
   private static final String TEST_PROJECT_1 = "TestProject1";
   private static final String TEST_PROJECT_2 = "TestProject2";
-  private static final ImmutableList<String> PROJECT_NAMES =
-      ImmutableList.of(TEST_PROJECT_1, TEST_PROJECT_2);
-
   private static final String TEST_FILE_NAME = "README.md";
   private static final String TEST_DIRECTORY_NAME = "src";
 
   private static final int MAX_ATTEMPTS = 5;
 
-  private static final URL PROJECT_SOURCES =
+  private static final URL PROJECT_1_SOURCES =
       DownloadProjectTest.class.getResource("/projects/ProjectWithDifferentTypeOfFiles");
+  private static final URL PROJECT_2_SOURCES =
+      DownloadProjectTest.class.getResource("/projects/ProjectWithDifferentTypeOfFiles2");
 
   private static final String DOWNLOADED_PROJECTS_PACKAGE_NAME = "download.zip";
   private static final String DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME = TEST_PROJECT_1 + ".zip";
@@ -68,23 +68,24 @@ public class DownloadProjectTest {
   @Inject private DownloadedFileUtil downloadedFileUtil;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private DefaultTestUser user;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
-    PROJECT_NAMES.forEach(
-        testProject -> {
-          try {
-            testProjectServiceClient.importProject(
-                workspace.getId(),
-                Paths.get(PROJECT_SOURCES.toURI()),
-                testProject,
-                ProjectTemplates.MAVEN_SPRING);
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        });
+    testProjectServiceClient.importProject(
+        workspace.getId(),
+        Paths.get(PROJECT_1_SOURCES.toURI()),
+        TEST_PROJECT_1,
+        ProjectTemplates.MAVEN_SPRING);
+    testProjectServiceClient.importProject(
+        workspace.getId(),
+        Paths.get(PROJECT_2_SOURCES.toURI()),
+        TEST_PROJECT_2,
+        ProjectTemplates.MAVEN_SPRING);
 
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(TEST_PROJECT_1);
+    consoles.waitJDTLSProjectResolveFinishedMessage(TEST_PROJECT_2);
     projectExplorer.waitProjectExplorer();
     loader.waitOnClosed();
   }
@@ -104,7 +105,11 @@ public class DownloadProjectTest {
     // given
     List<String> expectedPackageFileList =
         asList(
-            "TestProject1/.che/classpath",
+            "TestProject1/.classpath",
+            "TestProject1/.project",
+            "TestProject1/.settings/org.eclipse.jdt.apt.core.prefs",
+            "TestProject1/.settings/org.eclipse.jdt.core.prefs",
+            "TestProject1/.settings/org.eclipse.m2e.core.prefs",
             "TestProject1/README.md",
             "TestProject1/pom.xml",
             "TestProject1/src/main/java/org/eclipse/qa/examples/AppController.java",
@@ -112,11 +117,14 @@ public class DownloadProjectTest {
             "TestProject1/src/main/webapp/WEB-INF/spring-servlet.xml",
             "TestProject1/src/main/webapp/WEB-INF/web.xml",
             "TestProject1/src/main/webapp/index.jsp",
-            "TestProject2/.che/classpath",
-            "TestProject2/README.md",
+            "TestProject2/.classpath",
+            "TestProject2/.project",
+            "TestProject2/.settings/org.eclipse.jdt.apt.core.prefs",
+            "TestProject2/.settings/org.eclipse.jdt.core.prefs",
+            "TestProject2/.settings/org.eclipse.m2e.core.prefs",
             "TestProject2/pom.xml",
             "TestProject2/src/main/java/org/eclipse/qa/examples/AppController.java",
-            "TestProject2/src/main/webapp/WEB-INF/jsp/guess_num.jsp",
+            "TestProject2/src/main/webapp/WEB-INF/jsp/hello_view.jsp",
             "TestProject2/src/main/webapp/WEB-INF/spring-servlet.xml",
             "TestProject2/src/main/webapp/WEB-INF/web.xml",
             "TestProject2/src/main/webapp/index.jsp");
@@ -125,8 +133,7 @@ public class DownloadProjectTest {
     menu.runCommand(WORKSPACE, DOWNLOAD_AS_ZIP);
 
     // then
-    assertEquals(
-        getPackageFileList(DOWNLOADED_PROJECTS_PACKAGE_NAME), expectedPackageFileList.toString());
+    assertEquals(getPackageFileList(DOWNLOADED_PROJECTS_PACKAGE_NAME), expectedPackageFileList);
   }
 
   @Test
@@ -134,7 +141,11 @@ public class DownloadProjectTest {
     // given
     List<String> expectedPackageFileList =
         asList(
-            ".che/classpath",
+            ".classpath",
+            ".project",
+            ".settings/org.eclipse.jdt.apt.core.prefs",
+            ".settings/org.eclipse.jdt.core.prefs",
+            ".settings/org.eclipse.m2e.core.prefs",
             "README.md",
             "pom.xml",
             "src/main/java/org/eclipse/qa/examples/AppController.java",
@@ -151,8 +162,7 @@ public class DownloadProjectTest {
 
     // then
     assertEquals(
-        getPackageFileList(DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME),
-        expectedPackageFileList.toString());
+        getPackageFileList(DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME), expectedPackageFileList);
 
     // when
     downloadedFileUtil.removeDownloadedFiles(
@@ -164,8 +174,7 @@ public class DownloadProjectTest {
 
     // then
     assertEquals(
-        getPackageFileList(DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME),
-        expectedPackageFileList.toString());
+        getPackageFileList(DOWNLOADED_TEST_PROJECT_1_PACKAGE_NAME), expectedPackageFileList);
   }
 
   @Test
@@ -188,8 +197,8 @@ public class DownloadProjectTest {
     projectExplorer.clickOnItemInContextMenu(ContextMenuFirstLevelItems.DOWNLOAD);
 
     // then
-    String packageFileList = getPackageFileList(DOWNLOADED_TEST_DIRECTORY_PACKAGE_NAME);
-    assertEquals(packageFileList, expectedPackageFileList.toString());
+    assertEquals(
+        getPackageFileList(DOWNLOADED_TEST_DIRECTORY_PACKAGE_NAME), expectedPackageFileList);
   }
 
   @Test
@@ -224,13 +233,17 @@ public class DownloadProjectTest {
     throw lastException;
   }
 
-  private String getPackageFileList(String downloadedTestProject1PackageName) throws IOException {
+  private List<String> getPackageFileList(String downloadedTestProject1PackageName)
+      throws IOException {
     IOException lastException = null;
     for (int i = 0; i < MAX_ATTEMPTS; i++) {
       try {
         return downloadedFileUtil
             .getPackageFileList(seleniumWebDriver, downloadedTestProject1PackageName)
-            .toString();
+            .stream()
+            // target && .che directories appears asynchronously and leads to failed tests
+            .filter(s -> !s.contains("target/") && !s.startsWith(".che"))
+            .collect(Collectors.toList());
       } catch (IOException e) {
         lastException = e;
         sleepQuietly(TestTimeoutsConstants.MINIMUM_SEC);
