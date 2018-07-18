@@ -144,6 +144,7 @@ import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronized;
 import org.eclipse.che.ide.processes.NewTerminalAction;
+import org.eclipse.che.ide.processes.OpenInTerminalAction;
 import org.eclipse.che.ide.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.processes.actions.DisplayMachineOutputAction;
 import org.eclipse.che.ide.processes.actions.PreviewSSHAction;
@@ -201,6 +202,7 @@ public class StandardComponentInitializer {
   public static final String SHOW_REFERENCE = "showReference";
   public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
   public static final String NEW_TERMINAL = "newTerminal";
+  public static final String OPEN_IN_TERMINAL = "openInTerminal";
   public static final String PROJECT_EXPLORER_DISPLAYING_MODE = "projectExplorerDisplayingMode";
   public static final String COMMAND_EXPLORER_DISPLAYING_MODE = "commandExplorerDisplayingMode";
   public static final String FIND_RESULT_DISPLAYING_MODE = "findResultDisplayingMode";
@@ -402,6 +404,8 @@ public class StandardComponentInitializer {
   @Inject private RenameCommandAction renameCommandAction;
 
   @Inject private MoveCommandAction moveCommandAction;
+
+  @Inject private OpenInTerminalAction openInTerminalAction;
 
   @Inject
   @Named("XMLFileType")
@@ -744,6 +748,8 @@ public class StandardComponentInitializer {
     mainContextMenuGroup.add(newGroup, FIRST);
     mainContextMenuGroup.addSeparator();
     mainContextMenuGroup.add(resourceOperation);
+    mainContextMenuGroup.add(openInTerminalAction);
+    actionManager.registerAction(OPEN_IN_TERMINAL, openInTerminalAction);
 
     DefaultActionGroup partMenuGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_PART_MENU);
@@ -903,6 +909,9 @@ public class StandardComponentInitializer {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), NEW_TERMINAL);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().shift().charCode(KeyCodeMap.F12).build(), OPEN_IN_TERMINAL);
 
     keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('N').build(), NEW_FILE);
     keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('x').build(), CREATE_PROJECT);
