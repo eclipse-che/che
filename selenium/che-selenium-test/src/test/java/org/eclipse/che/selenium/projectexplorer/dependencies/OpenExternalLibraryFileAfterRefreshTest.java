@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
+import static org.testng.AssertJUnit.assertTrue;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
@@ -28,20 +31,6 @@ import org.testng.annotations.Test;
 public class OpenExternalLibraryFileAfterRefreshTest {
   private static final String PROJECT_NAME = NameGenerator.generate("ExternalFileTest", 4);
   private static final String CHECKING_FILE_NAME = "Filter";
-  private static final String EXPECTED_EDITOR_TEXT =
-      "\n"
-          + " // Failed to get sources. Instead, stub sources have been generated.\n"
-          + " // Implementation of methods is unavailable.\n"
-          + "package javax.servlet;\n"
-          + "public interface Filter {\n"
-          + "\n"
-          + "    public void init(javax.servlet.FilterConfig arg0) throws javax.servlet.ServletException;\n"
-          + "\n"
-          + "    public void doFilter(javax.servlet.ServletRequest arg0, javax.servlet.ServletResponse arg1, javax.servlet.FilterChain arg2) throws java.io.IOException, javax.servlet.ServletException;\n"
-          + "\n"
-          + "    public void destroy();\n"
-          + "\n"
-          + "}\n";
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspace testWorkspace;
@@ -49,6 +38,7 @@ public class OpenExternalLibraryFileAfterRefreshTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -59,6 +49,7 @@ public class OpenExternalLibraryFileAfterRefreshTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -87,6 +78,6 @@ public class OpenExternalLibraryFileAfterRefreshTest {
 
     editor.waitActive();
     editor.waitTabIsPresent(CHECKING_FILE_NAME);
-    editor.waitTextIntoEditor(EXPECTED_EDITOR_TEXT);
+    assertTrue(editor.getVisibleTextFromEditor().contains("package javax.servlet"));
   }
 }
