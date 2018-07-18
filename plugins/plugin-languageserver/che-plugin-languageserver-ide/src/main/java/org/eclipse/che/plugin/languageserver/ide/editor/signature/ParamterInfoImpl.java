@@ -13,7 +13,9 @@ package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
 import com.google.common.base.Optional;
 import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.ParameterInformation;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 /** @author Evgen Vidolob */
 class ParamterInfoImpl implements ParameterInfo {
@@ -31,6 +33,8 @@ class ParamterInfoImpl implements ParameterInfo {
 
   @Override
   public Optional<String> getDocumentation() {
-    return Optional.fromNullable(dto.getDocumentation());
+    Either<String, MarkupContent> doc = dto.getDocumentation();
+    // both markdown and plain text are ok.
+    return Optional.fromNullable(doc.isLeft() ? doc.getLeft() : doc.getRight().getValue());
   }
 }
