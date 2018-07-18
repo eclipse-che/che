@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.parameters;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
@@ -24,6 +25,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -31,12 +33,14 @@ import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 19.11.15 */
 public class RenameParametersTest {
   private static final String PROJECT_NAME = NameGenerator.generate("ParametersProject-", 4);
   private static final String pathToPackageInChePrefix = PROJECT_NAME + "/src/main/java";
+  private static final String APPLY_WORKSPACE_CHANGES = "Apply Workspace Changes\nDone";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -50,6 +54,7 @@ public class RenameParametersTest {
   @Inject private Refactor refactor;
   @Inject private AskDialog askDialog;
   @Inject private Consoles consoles;
+  @Inject private Events events;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -63,9 +68,14 @@ public class RenameParametersTest {
     ide.open(workspace);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
-    consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
+    events.clickEventLogBtn();
+  }
+
+  @BeforeMethod
+  public void setUp() throws Exception {
+    events.clearAllMessages();
   }
 
   @AfterMethod
@@ -90,6 +100,7 @@ public class RenameParametersTest {
     refactor.typeAndWaitNewName("j");
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameParametersFormIsClosed();
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -105,11 +116,13 @@ public class RenameParametersTest {
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.goToCursorPositionVisible(15, 23);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j1");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -124,6 +137,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -138,6 +152,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -152,6 +167,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -171,11 +187,13 @@ public class RenameParametersTest {
     askDialog.acceptDialogWithText("Duplicate parameter j");
     loader.waitOnClosed();
     refactor.waitRenameParametersFormIsClosed();
+    events.clearAllMessages();
     editor.waitActive();
     editor.goToCursorPositionVisible(15, 23);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("i");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitMarkerInvisibility(ERROR, 15);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
@@ -191,6 +209,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -205,6 +224,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -219,6 +239,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -236,6 +257,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -250,6 +272,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("kk");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -267,6 +290,7 @@ public class RenameParametersTest {
     refactor.typeAndWaitNewName("b");
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameParametersFormIsClosed();
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
