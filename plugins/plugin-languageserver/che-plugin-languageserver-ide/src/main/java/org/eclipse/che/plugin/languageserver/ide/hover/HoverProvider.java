@@ -39,6 +39,7 @@ import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.MarkedString;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
@@ -117,16 +118,26 @@ public class HoverProvider implements OrionHoverHandler {
   }
 
   private String renderContent(Hover hover) {
-    List<String> contents = new ArrayList<>();
-    for (Either<String, MarkedString> dto : hover.getContents()) {
+    Either<List<Either<String, MarkedString>>, MarkupContent> contents = hover.getContents();
+    if (contents.isLeft()) {
+
+      return renderContent(contents.getLeft());
+    } else {
+      return contents.getRight().getValue();
+    }
+  }
+
+  private String renderContent(List<Either<String, MarkedString>> contents) {
+    List<String> result = new ArrayList<>();
+    for (Either<String, MarkedString> dto : contents) {
       if (dto.isLeft()) {
         // plain markdown text
-        contents.add(dto.getLeft());
+        result.add(dto.getLeft());
       } else {
-        contents.add(dto.getRight().getValue());
+        result.add(dto.getRight().getValue());
       }
     }
-    return Joiner.on("\n\n").join(contents);
+    return Joiner.on("\n\n").join(result);
   }
 
   private void createHoverLinkListener(EditorPartPresenter activeEditor) {
