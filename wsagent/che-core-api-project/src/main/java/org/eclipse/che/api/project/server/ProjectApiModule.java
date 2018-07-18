@@ -69,6 +69,8 @@ public class ProjectApiModule extends AbstractModule {
 
     bind(ProjectConfigRegistry.class).to(InmemoryProjectRegistry.class);
 
+    bind(ProjectJsonRpcServiceConfigurator.class).asEagerSingleton();
+
     newSetBinder(binder(), ProjectImporter.class).addBinding().to(ZipProjectImporter.class);
 
     newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(BaseProjectType.class);

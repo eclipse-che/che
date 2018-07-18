@@ -23,9 +23,11 @@ import static org.eclipse.che.api.project.shared.Constants.Services.UNAUTHORIZED
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,25 +40,15 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
+import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
-import org.eclipse.che.api.project.shared.dto.service.CreateRequestDto;
-import org.eclipse.che.api.project.shared.dto.service.CreateResponseDto;
-import org.eclipse.che.api.project.shared.dto.service.DeleteRequestDto;
-import org.eclipse.che.api.project.shared.dto.service.DeleteResponseDto;
-import org.eclipse.che.api.project.shared.dto.service.GetRequestDto;
-import org.eclipse.che.api.project.shared.dto.service.GetResponseDto;
-import org.eclipse.che.api.project.shared.dto.service.ImportRequestDto;
-import org.eclipse.che.api.project.shared.dto.service.ImportResponseDto;
-import org.eclipse.che.api.project.shared.dto.service.RecognizeRequestDto;
-import org.eclipse.che.api.project.shared.dto.service.RecognizeResponseDto;
-import org.eclipse.che.api.project.shared.dto.service.UpdateRequestDto;
-import org.eclipse.che.api.project.shared.dto.service.UpdateResponseDto;
-import org.eclipse.che.api.project.shared.dto.service.VerifyRequestDto;
-import org.eclipse.che.api.project.shared.dto.service.VerifyResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.*;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 
@@ -65,12 +57,16 @@ public class ProjectJsonRpcServiceBackEnd {
 
   private final ProjectManager projectManager;
   private final RequestTransmitter requestTransmitter;
+  private final EventService eventService;
 
   @Inject
   public ProjectJsonRpcServiceBackEnd(
-      ProjectManager projectManager, RequestTransmitter requestTransmitter) {
+      ProjectManager projectManager,
+      RequestTransmitter requestTransmitter,
+      EventService eventService) {
     this.projectManager = projectManager;
     this.requestTransmitter = requestTransmitter;
+    this.eventService = eventService;
   }
 
   public GetResponseDto get(GetRequestDto getRequestDto) {
@@ -99,6 +95,11 @@ public class ProjectJsonRpcServiceBackEnd {
 
   public ImportResponseDto doImport(String endpointId, ImportRequestDto importRequestDto) {
     return perform(this::doImportInternally, endpointId, importRequestDto);
+  }
+
+  public List<ProjectConfigDto> createBatchProjects(
+      String endpointId, CreateBatchProjectsRequestDto createProjectsRequest) {
+    return perform(this::createBatchProjectsInternally, endpointId, createProjectsRequest);
   }
 
   private GetResponseDto getInternally(GetRequestDto request)
@@ -229,31 +230,59 @@ public class ProjectJsonRpcServiceBackEnd {
   }
 
   private ImportResponseDto doImportInternally(String endpointId, ImportRequestDto request)
-      throws ServerException, ConflictException, ForbiddenException, BadRequestException,
-          NotFoundException, UnauthorizedException {
+      throws ServerException, ConflictException, ForbiddenException, NotFoundException,
+          UnauthorizedException {
     String wsPath = request.getWsPath();
     SourceStorageDto sourceStorage = request.getSourceStorage();
 
-    BiConsumer<String, String> consumer =
-        (projectName, message) -> {
-          ImportProgressRecordDto progressRecord =
-              newDto(ImportProgressRecordDto.class).withProjectName(projectName).withLine(message);
-
-          requestTransmitter
-              .newRequest()
-              .endpointId(endpointId)
-              .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
-              .paramsAsDto(progressRecord)
-              .sendAndSkipResult();
-        };
-
     RegisteredProject registeredProject =
-        projectManager.doImport(wsPath, sourceStorage, false, consumer);
+        projectManager.doImport(wsPath, sourceStorage, false, getImportConsumer(endpointId));
+    eventService.publish(new ProjectCreatedEvent(wsPath));
     ProjectConfigDto projectConfigDto = asDto(registeredProject);
     ImportResponseDto response = newDto(ImportResponseDto.class);
     response.setConfig(projectConfigDto);
 
     return response;
+  }
+
+  private List<ProjectConfigDto> createBatchProjectsInternally(
+      String endpointId, CreateBatchProjectsRequestDto createProjectsRequest)
+      throws ForbiddenException, BadRequestException, ConflictException, NotFoundException,
+          ServerException, UnauthorizedException {
+
+    List<NewProjectConfigDto> newProjectConfigs = createProjectsRequest.getNewProjectConfigs();
+    projectManager.doImport(
+        new HashSet<>(newProjectConfigs),
+        createProjectsRequest.isRewrite(),
+        getImportConsumer(endpointId));
+
+    Set<RegisteredProject> registeredProjects = new HashSet<>(newProjectConfigs.size());
+
+    for (NewProjectConfigDto projectConfig : newProjectConfigs) {
+      registeredProjects.add(projectManager.update(projectConfig));
+    }
+
+    registeredProjects
+        .stream()
+        .map(RegisteredProject::getPath)
+        .map(ProjectCreatedEvent::new)
+        .forEach(eventService::publish);
+
+    return registeredProjects.stream().map(ProjectDtoConverter::asDto).collect(toList());
+  }
+
+  private BiConsumer<String, String> getImportConsumer(String endpointId) {
+    return (projectName, message) -> {
+      ImportProgressRecordDto progressRecord =
+          newDto(ImportProgressRecordDto.class).withProjectName(projectName).withLine(message);
+
+      requestTransmitter
+          .newRequest()
+          .endpointId(endpointId)
+          .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
+          .paramsAsDto(progressRecord)
+          .sendAndSkipResult();
+    };
   }
 
   // TODO temporary solution, further need to make a generalized exception mapper for all json rpc
