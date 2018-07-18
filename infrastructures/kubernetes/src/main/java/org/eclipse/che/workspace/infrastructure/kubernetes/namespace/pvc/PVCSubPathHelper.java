@@ -146,10 +146,9 @@ public class PVCSubPathHelper {
       PodStatus finishedStatus = finished.getStatus();
       if (POD_PHASE_FAILED.equals(finishedStatus.getPhase())) {
         LOG.error(
-            "Job command '{}' execution is failed. Reason '{}', message '{}'.",
+            "Job command '{}' execution is failed. Status '{}'.",
             Arrays.toString(command),
-            finishedStatus.getReason(),
-            finishedStatus.getMessage());
+            finishedStatus);
       }
     } catch (InfrastructureException ex) {
       LOG.error(
