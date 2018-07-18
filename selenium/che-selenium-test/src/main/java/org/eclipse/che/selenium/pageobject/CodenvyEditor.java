@@ -272,7 +272,7 @@ public class CodenvyEditor {
     FORMAT(By.id("contextMenu/Format")),
     QUICK_DOC(By.id("contextMenu/Quick Documentation")),
     QUICK_FIX(By.id("contextMenu/Quick Fix")),
-    OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
+    FIND_DEFINITION(By.id("contextMenu/Find Definition")),
     NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
     FIND(By.id("contextMenu/Find")),
     OPEN_ON_GITHUB(By.id("contextMenu/Open on GitHub")),
