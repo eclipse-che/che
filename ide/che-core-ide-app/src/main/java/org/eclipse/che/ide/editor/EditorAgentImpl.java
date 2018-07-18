@@ -651,6 +651,11 @@ public class EditorAgentImpl
                           callback.onSuccess(null);
                         }
                       }
+                    })
+                .catchError(
+                    error -> {
+                      removeFromOpeningFilesList(path, editorPartStack);
+                      callback.onSuccess(null);
                     });
           }
         });

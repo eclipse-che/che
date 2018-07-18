@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -26,8 +27,8 @@ import org.testng.annotations.Test;
 /** @author Andrey Chizhikov */
 public class CheckShowHideHiddenFilesTest {
   private static final String PROJECT_NAME = "RefreshProject";
-  private static final String PATH_TO_CODENVY_FOLDER = PROJECT_NAME + "/.che";
-  private static final String PATH_TO_CLASSPATH_FILE = PROJECT_NAME + "/.che/classpath";
+  private static final String PATH_TO_CLASSPATH_FILE = PROJECT_NAME + "/.classpath";
+  private static final String PATH_TO_PROJECT_FILE = PROJECT_NAME + "/.project";
   public static final String CLASSPATH_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
   @Inject private TestWorkspace testWorkspace;
@@ -37,6 +38,7 @@ public class CheckShowHideHiddenFilesTest {
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
   @Inject private Wizard projectWizard;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -46,6 +48,7 @@ public class CheckShowHideHiddenFilesTest {
   @Test
   public void checkShowHideHiddenFilesTest() {
     createProject(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
@@ -54,10 +57,8 @@ public class CheckShowHideHiddenFilesTest {
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
     loader.waitOnClosed();
-    projectExplorer.waitItem(PATH_TO_CODENVY_FOLDER);
-    projectExplorer.openItemByPath(PATH_TO_CODENVY_FOLDER);
-    loader.waitOnClosed();
     projectExplorer.waitItem(PATH_TO_CLASSPATH_FILE);
+    projectExplorer.waitItem(PATH_TO_PROJECT_FILE);
     projectExplorer.openItemByPath(PATH_TO_CLASSPATH_FILE);
     loader.waitOnClosed();
     editor.waitActive();
@@ -67,8 +68,9 @@ public class CheckShowHideHiddenFilesTest {
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
     loader.waitOnClosed();
-    editor.waitTabIsPresent("classpath");
-    projectExplorer.waitItemInvisibility(PATH_TO_CODENVY_FOLDER);
+    editor.waitTabIsPresent(".classpath");
+    projectExplorer.waitItemInvisibility(PATH_TO_CLASSPATH_FILE);
+    projectExplorer.waitItemInvisibility(PATH_TO_PROJECT_FILE);
   }
 
   private void createProject(String projectName) {
