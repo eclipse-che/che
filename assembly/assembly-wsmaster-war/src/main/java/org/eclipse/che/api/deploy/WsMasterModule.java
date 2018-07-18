@@ -91,9 +91,13 @@ import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.IdentityProviderConfigFactory;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
@@ -298,6 +302,8 @@ public class WsMasterModule extends AbstractModule {
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(new ReplicationModule(persistenceProperties));
+
+      configureJwtProxySecureProvisioner(infrastructure);
     } else {
       bind(RemoteSubscriptionStorage.class)
           .to(org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage.class);
@@ -366,5 +372,31 @@ public class WsMasterModule extends AbstractModule {
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
+  }
+
+  private void configureJwtProxySecureProvisioner(String infrastructure) {
+    if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
+      install(
+          new FactoryModuleBuilder()
+              .build(
+                  new TypeLiteral<JwtProxySecureServerExposerFactory<KubernetesEnvironment>>() {}));
+      MapBinder.newMapBinder(
+              binder(),
+              new TypeLiteral<String>() {},
+              new TypeLiteral<SecureServerExposerFactory<KubernetesEnvironment>>() {})
+          .addBinding("jwtproxy")
+          .to(new TypeLiteral<JwtProxySecureServerExposerFactory<KubernetesEnvironment>>() {});
+    } else {
+      install(
+          new FactoryModuleBuilder()
+              .build(
+                  new TypeLiteral<JwtProxySecureServerExposerFactory<OpenShiftEnvironment>>() {}));
+      MapBinder.newMapBinder(
+              binder(),
+              new TypeLiteral<String>() {},
+              new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {})
+          .addBinding("jwtproxy")
+          .to(new TypeLiteral<JwtProxySecureServerExposerFactory<OpenShiftEnvironment>>() {});
+    }
   }
 }

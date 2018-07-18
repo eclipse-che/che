@@ -54,7 +54,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Singl
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
 
 /** @author Sergii Leshchenko */
@@ -139,13 +138,5 @@ public class KubernetesInfraModule extends AbstractModule {
     secureServerExposerFactories
         .addBinding("default")
         .to(new TypeLiteral<DefaultSecureServersFactory<KubernetesEnvironment>>() {});
-
-    install(
-        new FactoryModuleBuilder()
-            .build(
-                new TypeLiteral<JwtProxySecureServerExposerFactory<KubernetesEnvironment>>() {}));
-    secureServerExposerFactories
-        .addBinding("jwtproxy")
-        .to(new TypeLiteral<JwtProxySecureServerExposerFactory<KubernetesEnvironment>>() {});
   }
 }

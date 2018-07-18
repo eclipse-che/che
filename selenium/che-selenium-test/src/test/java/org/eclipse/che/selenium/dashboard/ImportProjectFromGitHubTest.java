@@ -40,7 +40,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.GITHUB, TestGroup.OSIO})
+@Test(groups = {TestGroup.GITHUB})
 public class ImportProjectFromGitHubTest {
   private static final String WORKSPACE =
       generate(ImportProjectFromGitHubTest.class.getSimpleName(), 4);

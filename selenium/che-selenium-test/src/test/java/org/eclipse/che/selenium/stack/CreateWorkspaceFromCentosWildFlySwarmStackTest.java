@@ -72,7 +72,7 @@ public class CreateWorkspaceFromCentosWildFlySwarmStackTest {
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
     consoles.executeCommandFromProjectExplorer(
-        PROJECT_NAME, RUN_GOAL, RUN_COMMAND, "WildFly Swarm is Ready");
+        PROJECT_NAME, RUN_GOAL, RUN_COMMAND, "Thorntail is Ready");
     consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
   }
 }

@@ -80,6 +80,7 @@ public class Wizard {
     String WEB_JAVA_PETCLINIC = "web-java-petclinic";
     String CONSOLE_CPP_SIMPLE = "console-cpp-simple";
     String CONSOLE_PYTHON3_SIMPLE = "console-python3.5-simple";
+    String NODEJS_HELLO_WORLD = "nodejs-hello-world";
   }
 
   public interface TypeFolder {

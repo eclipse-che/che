@@ -24,20 +24,17 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.GitHub;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
@@ -100,8 +97,6 @@ public class ImportWizardFormTest {
   @Inject private GitHub gitHub;
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private Loader loader;
-  @Inject private Events events;
-  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private Dashboard dashboard;
   @Inject private KeycloakFederatedIdentitiesPage keycloakFederatedIdentitiesPage;
   @Inject private TestGitHubRepository testRepo;
@@ -222,7 +217,7 @@ public class ImportWizardFormTest {
   }
 
   @Test(priority = 1)
-  public void keepDirectoryImportBySshUrlTest() throws Exception {
+  public void keepDirectoryImportBySshUrlTest() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = keepDirectoryRepo.getName() + "Ssh";
 
@@ -240,8 +235,8 @@ public class ImportWizardFormTest {
     expandDirectoryMyLib(currentProjectName);
   }
 
-  @Test(priority = 2)
-  public void keepDirectoryImportByHttpsUrlTest() throws Exception {
+  @Test(priority = 1)
+  public void keepDirectoryImportByHttpsUrlTest() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = keepDirectoryRepo.getName() + "Https";
 
@@ -271,7 +266,7 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(currentProjectName + "/my-lib/src");
   }
 
-  @Test(priority = 3)
+  @Test(priority = 1)
   public void keepDirectoryImportFromGitHub() throws Exception {
     projectExplorer.waitProjectExplorer();
     currentProjectName = keepDirectoryRepo.getName();
@@ -330,8 +325,8 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(currentProjectName);
   }
 
-  @Test(priority = 4)
-  public void checkImportProjectInBranchBySshUrl() throws IOException, JsonParseException {
+  @Test(priority = 1)
+  public void checkImportProjectInBranchBySshUrl() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = importBranchRepo.getName() + "Ssh";
 
@@ -354,8 +349,8 @@ public class ImportWizardFormTest {
     editor.waitActive();
   }
 
-  @Test(priority = 5)
-  public void checkImportProjectInBranchByHttpsUrl() throws IOException, JsonParseException {
+  @Test(priority = 1)
+  public void checkImportProjectInBranchByHttpsUrl() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = importBranchRepo.getName() + "Https";
 
@@ -380,7 +375,7 @@ public class ImportWizardFormTest {
     editor.waitActive();
   }
 
-  @Test(priority = 6)
+  @Test(priority = 1)
   public void checkImportProjectInBranchFromGitHub() throws Exception {
     projectExplorer.waitProjectExplorer();
     currentProjectName = importBranchRepo.getName();
@@ -412,8 +407,8 @@ public class ImportWizardFormTest {
     editor.waitActive();
   }
 
-  @Test(priority = 7)
-  public void checkImportProjectSubmoduleByHttpsUrl() throws Exception {
+  @Test(priority = 1)
+  public void checkImportProjectSubmoduleByHttpsUrl() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = multimoduleRepo.getName() + "Https";
 
@@ -422,8 +417,8 @@ public class ImportWizardFormTest {
     openAndCheckRegularSubmodule(currentProjectName);
   }
 
-  @Test(priority = 8)
-  public void checkImportProjectSubmoduleBySshUrl() throws Exception {
+  @Test(priority = 1)
+  public void checkImportProjectSubmoduleBySshUrl() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = multimoduleRepo.getName() + "Ssh";
 
@@ -432,7 +427,7 @@ public class ImportWizardFormTest {
     openAndCheckRegularSubmodule(currentProjectName);
   }
 
-  @Test(priority = 9)
+  @Test(priority = 1)
   public void checkImportProjectSubmoduleFromGithub() throws Exception {
     projectExplorer.waitProjectExplorer();
     currentProjectName = multimoduleRepo.getName();
@@ -442,7 +437,7 @@ public class ImportWizardFormTest {
     openAndCheckRegularSubmodule(currentProjectName);
   }
 
-  private void importRecursivelyFromGitUrl(String url, String projectName) throws Exception {
+  private void importRecursivelyFromGitUrl(String url, String projectName) {
     loader.waitOnClosed();
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
@@ -476,8 +471,7 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(projectName);
   }
 
-  private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName)
-      throws Exception {
+  private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName) {
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
     importProject.waitMainForm();
@@ -500,8 +494,7 @@ public class ImportWizardFormTest {
     projectExplorer.waitProjectExplorer();
   }
 
-  private void performImportIntoBranch(String url, String projectName, String branchName)
-      throws IOException, JsonParseException {
+  private void performImportIntoBranch(String url, String projectName, String branchName) {
     projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
 
@@ -536,7 +529,7 @@ public class ImportWizardFormTest {
     projectExplorer.waitProjectExplorer();
   }
 
-  private void expandDirectoryMyLib(String projectName) throws Exception {
+  private void expandDirectoryMyLib(String projectName) {
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         projectName + "/my-lib/src/main/java/hello", "SayHello.java");
 
@@ -620,7 +613,7 @@ public class ImportWizardFormTest {
     projectExplorer.waitItem(projectName);
   }
 
-  private void openAndCheckSpringSubmodule(String projectName) throws Exception {
+  private void openAndCheckSpringSubmodule(String projectName) {
     projectExplorer.openItemByPath(projectName);
     projectExplorer.waitAndSelectItem(projectName + "/" + SPRING_SUBMODULE);
 
@@ -649,7 +642,7 @@ public class ImportWizardFormTest {
     editor.closeFileByNameWithSaving("GreetingController");
   }
 
-  private void openAndCheckRegularSubmodule(String projectName) throws Exception {
+  private void openAndCheckRegularSubmodule(String projectName) {
     projectExplorer.waitAndSelectItem(projectName + "/" + REGULAR_SUBMODULE);
 
     menu.runCommand(
