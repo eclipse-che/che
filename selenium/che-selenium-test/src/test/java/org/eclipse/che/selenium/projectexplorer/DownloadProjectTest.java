@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.inject.SeleniumTestHandler;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
@@ -36,6 +37,8 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -104,7 +107,6 @@ public class DownloadProjectTest {
     // given
     List<String> expectedPackageFileList =
         asList(
-            ".che/user_che/appState",
             "TestProject1/.classpath",
             "TestProject1/.project",
             "TestProject1/.settings/org.eclipse.jdt.apt.core.prefs",
@@ -123,7 +125,7 @@ public class DownloadProjectTest {
             "TestProject2/.settings/org.eclipse.jdt.core.prefs",
             "TestProject2/.settings/org.eclipse.m2e.core.prefs",
             "TestProject2/pom.xml",
-            "TestProject2/src/main/java.org.eclipse.qa.examples/AppController.java",
+            "TestProject2/src/main/java/org/eclipse/qa/examples/AppController.java",
             "TestProject2/src/main/webapp/WEB-INF/jsp/hello_view.jsp",
             "TestProject2/src/main/webapp/WEB-INF/spring-servlet.xml",
             "TestProject2/src/main/webapp/WEB-INF/web.xml",
@@ -241,8 +243,8 @@ public class DownloadProjectTest {
         return downloadedFileUtil
             .getPackageFileList(seleniumWebDriver, downloadedTestProject1PackageName)
             .stream()
-            // target directory appears asynchronously and leads to failed tests
-            .filter(s -> !s.contains("target"))
+            // target && .che directories appears asynchronously and leads to failed tests
+            .filter(s -> !s.contains("target/") && !s.startsWith(".che"))
             .collect(Collectors.toList());
       } catch (IOException e) {
         lastException = e;
