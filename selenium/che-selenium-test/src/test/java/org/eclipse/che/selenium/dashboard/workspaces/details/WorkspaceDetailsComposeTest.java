@@ -39,7 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-@Test(groups = {TestGroup.DOCKER, TestGroup.OSIO})
+@Test(groups = {TestGroup.DOCKER})
 public class WorkspaceDetailsComposeTest {
 
   private static final String WORKSPACE = generate("java-mysql", 4);

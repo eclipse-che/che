@@ -39,6 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 
 /**
  * Helps to modify {@link KubernetesEnvironment} to make servers that are configured by {@link
@@ -102,6 +103,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   public static final String SERVER_PREFIX = "server";
 
   private final ExternalServerExposerStrategy<T> externalServerExposer;
+  private final SecureServerExposer<T> secureServerExposer;
   private final String machineName;
   private final Container container;
   private final Pod pod;
@@ -109,11 +111,13 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
   public KubernetesServerExposer(
       ExternalServerExposerStrategy<T> externalServerExposer,
+      SecureServerExposer<T> secureServerExposer,
       String machineName,
       Pod pod,
       Container container,
       T k8sEnv) {
     this.externalServerExposer = externalServerExposer;
+    this.secureServerExposer = secureServerExposer;
     this.machineName = machineName;
     this.pod = pod;
     this.container = container;
@@ -133,13 +137,21 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   public void expose(Map<String, ? extends ServerConfig> servers) throws InfrastructureException {
     Map<String, ServerConfig> internalServers = new HashMap<>();
     Map<String, ServerConfig> externalServers = new HashMap<>();
+    Map<String, ServerConfig> secureServers = new HashMap<>();
 
     servers.forEach(
         (key, value) -> {
           if ("true".equals(value.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+            // Server is internal. It doesn't make sense to make an it secure since
+            // it is available only within workspace servers
             internalServers.put(key, value);
           } else {
-            externalServers.put(key, value);
+            // Server is external. Check if it should be secure or not
+            if ("true".equals(value.getAttributes().get(ServerConfig.SECURE_SERVER_ATTRIBUTE))) {
+              secureServers.put(key, value);
+            } else {
+              externalServers.put(key, value);
+            }
           }
         });
 
@@ -162,6 +174,13 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
       if (!matchedExternalServers.isEmpty()) {
         externalServerExposer.expose(
             k8sEnv, machineName, serviceName, servicePort, matchedExternalServers);
+      }
+
+      // expose service port related secure servers if exist
+      Map<String, ServerConfig> matchedSecureServers = match(secureServers, servicePort);
+      if (!matchedSecureServers.isEmpty()) {
+        secureServerExposer.expose(
+            k8sEnv, machineName, serviceName, servicePort, matchedSecureServers);
       }
     }
   }

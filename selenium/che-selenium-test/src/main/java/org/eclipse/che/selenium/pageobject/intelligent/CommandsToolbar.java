@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -30,6 +31,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
@@ -45,13 +47,16 @@ public class CommandsToolbar {
   private final SeleniumWebDriver seleniumWebDriver;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final ActionsFactory actionsFactory;
+  private final WebDriverWaitFactory webDriverWaitFactory;
 
   @Inject
   public CommandsToolbar(
       SeleniumWebDriver seleniumWebDriver,
       TestWebElementRenderChecker testWebElementRenderChecker,
-      ActionsFactory actionsFactory) {
+      ActionsFactory actionsFactory,
+      WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     appearanceWait = new WebDriverWait(seleniumWebDriver, MULTIPLE);
     loadPageWait =
@@ -179,8 +184,22 @@ public class CommandsToolbar {
     return wait.until(driver -> driver.findElement(By.id(Locators.TIMER_LOCATOR)).getText());
   }
 
+  public void waitTimerValuePattern(String regexp) {
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> getTimerValue().matches(regexp));
+  }
+
   public String getNumOfProcessCounter() {
     return redrawWait.until(visibilityOf(execProcessCounter)).getText();
+  }
+
+  public void waitNumOfProcessCounter(int expectedCount) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> getNumOfProcessCounter().equals("#" + expectedCount));
   }
 
   public void clickOnPreviewsUrlButton() {

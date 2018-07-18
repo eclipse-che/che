@@ -9,7 +9,10 @@
     "terminal": {
       "port": "4411/tcp",
       "protocol": "ws",
-      "path" : "/pty"
+      "path" : "/pty",
+      "attributes": {
+        "secure": "true"
+      }
     }
   }
 }

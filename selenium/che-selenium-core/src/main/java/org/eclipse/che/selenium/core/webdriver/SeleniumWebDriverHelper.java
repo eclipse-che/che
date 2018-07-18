@@ -708,7 +708,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibility(element).getText().contains(expectedText));
+                driver -> waitVisibility(element, timeout).getText().contains(expectedText));
   }
 
   /**
@@ -1309,16 +1309,9 @@ public class SeleniumWebDriverHelper {
    * @return name of file which is linked to upload, or the name of zip file which contains
    *     uploading directory
    * @throws IOException if there is a problem with preparing resource to upload
-   * @throws IllegalArgumentException if web element is not input of file type
    */
   public String selectResourceToUpload(WebElement webElement, Path localResource)
       throws IOException {
-    if (!"file".equalsIgnoreCase(waitVisibilityAndGetAttribute(webElement, "type"))
-        || !"input".equalsIgnoreCase(webElement.getTagName())) {
-      throw new IllegalArgumentException(
-          String.format("Web element '%s' is not input of file type.", webElement));
-    }
-
     Path readyToUploadFile = uploadUtil.prepareToUpload(seleniumWebDriver, localResource);
     webElement.sendKeys(readyToUploadFile.toString());
 

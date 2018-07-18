@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class CSharpLanguageServerConfig implements LanguageServerConfig {
   private static final Logger LOG = LoggerFactory.getLogger(CSharpLanguageServerConfig.class);
 
-  private static final String REGEX = ".*\\.(cs|csx)";
+  private static final String REGEX = ".*\\.(cs|csx)$";
 
   private final EventService eventService;
   private final PathTransformer pathTransformer;
