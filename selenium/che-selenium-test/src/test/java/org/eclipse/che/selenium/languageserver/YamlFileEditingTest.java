@@ -11,19 +11,20 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS_YAML;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.Preferences.DropDownLanguageServerSettings.YAML;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -40,7 +41,7 @@ import org.testng.annotations.Test;
 
 public class YamlFileEditingTest {
 
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final String PROJECT_NAME = generate("project", 4);
   private static final String YAML_FILE_NAME = "openshift.yaml";
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
@@ -60,7 +61,7 @@ public class YamlFileEditingTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/nodejs-with-yaml");
+    URL resource = YamlFileEditingTest.class.getResource("/projects/nodejs-with-yaml");
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, NODE_JS);
     ide.open(workspace);
@@ -81,7 +82,7 @@ public class YamlFileEditingTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/deployment.yaml");
     editor.waitTabIsPresent("deployment.yaml");
 
-    // check Apache Camel language server initialized
+    // check Yaml language server initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
@@ -135,16 +136,9 @@ public class YamlFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkOpenshiftDeploymentYamlFile() {
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME + "/deployment.yaml");
-
-    editor.waitAllMarkersInvisibility(ERROR);
-  }
-
-  @Test(priority = 1)
   public void checkHoverFeature() {
     editor.selectTabByName("deployment.yaml");
+    editor.waitAllMarkersInvisibility(ERROR);
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
@@ -160,11 +154,11 @@ public class YamlFileEditingTest {
   }
 
   private void addYamlSchema(String schemaName) {
-    menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
+    menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
 
-    preferences.waitMenuInCollapsedDropdown(Preferences.DropDownLanguageServerSettings.YAML);
-    preferences.selectDroppedMenuByName(Preferences.DropDownLanguageServerSettings.YAML);
+    preferences.waitMenuInCollapsedDropdown(YAML);
+    preferences.selectDroppedMenuByName(YAML);
 
     preferences.clickOnAddSchemaUrlButton();
     preferences.addSchemaUrl(schemaName);
