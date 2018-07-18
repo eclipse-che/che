@@ -71,9 +71,7 @@ public class JwtProxyConfigBuilder {
       if (!verifierProxy.excludes.isEmpty()) {
         configBuilder.append("      excludes:\n");
         verifierProxy.excludes.forEach(
-            s -> {
-              configBuilder.append(format("      - %s\n", s));
-            });
+            s -> configBuilder.append(format("      - %s\n", s)));
       }
     }
 
