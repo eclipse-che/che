@@ -340,11 +340,21 @@ export class StackSelectorController {
   }
 
   /**
-   * Handles the adding stack options.
+   * Show dialog for stack to create.
+   *
+   * @param $event {MouseEvent}
    */
-  onAddStack(): void {
-    this.confirmDialogService.showConfirmDialog('Create stack', 'Would you like to create a new stack?', 'Yes', 'No').then(() => {
-      this.$location.path('/stacks');
+  onAddStack($event: MouseEvent): void {
+    this.$mdDialog.show({
+      targetEvent: $event,
+      controller: 'BuildStackController',
+      controllerAs: 'buildStackController',
+      bindToController: true,
+      clickOutsideToClose: true,
+      locals: {
+        callbackController: this
+      },
+      templateUrl: 'app/stacks/list-stacks/build-stack/build-stack.html'
     });
   }
 

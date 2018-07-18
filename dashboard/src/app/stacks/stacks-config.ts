@@ -64,22 +64,6 @@ export class StacksConfig {
         controller: 'ListStacksController',
         controllerAs: 'listStacksController'
       })
-        .accessWhen('/stack/create', {
-          title: () => {
-            return 'create';
-          },
-          templateUrl: 'app/stacks/stack-details/stack.html',
-          controller: 'ImportStackController',
-          controllerAs: 'stackController',
-          resolve: {
-            initData: ['cheStack', (cheStack: CheStack) => {
-              return cheStack.fetchStacks().then(() => {
-                const stack = cheStack.getStackTemplate();
-                return {stack};
-              });
-            }]
-          }
-        })
         .accessWhen('/stack/import', {
           title: () => {
             return 'create';
