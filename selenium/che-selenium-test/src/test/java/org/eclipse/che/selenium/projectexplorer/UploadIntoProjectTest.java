@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -59,6 +60,7 @@ public class UploadIntoProjectTest {
   @Inject private UploadDirectoryDialogPage uploadDirectoryDialogPage;
   @Inject private NotificationsPopupPanel notificationPopup;
   @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -66,10 +68,11 @@ public class UploadIntoProjectTest {
         testWorkspace.getId(),
         get(PROJECT_SOURCES.toURI()),
         PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        ProjectTemplates.PLAIN_JAVA);
 
     ide.open(testWorkspace);
-    projectExplorer.waitProjectInitialization(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+    projectExplorer.waitVisibleItem(PROJECT_NAME);
   }
 
   @BeforeMethod
