@@ -521,7 +521,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     workspaceAgentProvider.get().setActivePart(this);
 
     newTerminal.setVisible(true);
-    newTerminal.connect();
+    newTerminal.connect(options);
     newTerminal.setListener(() -> onCloseTerminal(terminalNode));
   }
 

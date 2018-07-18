@@ -8,15 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.languageserver.ide.service;
+package org.eclipse.che.ide.jsonrpc;
 
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.promises.client.PromiseError;
 
-public class ServiceUtil {
-  private ServiceUtil() {}
+public class JsonRpcErrorUtils {
 
+  private JsonRpcErrorUtils() {}
+
+  /** Transform {@link JsonRpcError} to {@link PromiseError}. */
   public static PromiseError getPromiseError(JsonRpcError jsonRpcError) {
     return new PromiseError() {
       @Override
