@@ -32,6 +32,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -81,6 +82,7 @@ public class ProjectServiceClientTest {
   @Mock private AsyncRequestFactory requestFactory;
   @Mock private DtoFactory dtoFactory;
   @Mock private DtoUnmarshallerFactory unmarshaller;
+  @Mock private RequestTransmitter transmitter;
   @Mock private AppContext appContext;
   @Mock private AsyncRequest asyncRequest;
 
@@ -108,7 +110,7 @@ public class ProjectServiceClientTest {
   public void setUp() throws Exception {
     client =
         new ProjectServiceClient(
-            loaderFactory, requestFactory, dtoFactory, unmarshaller, appContext);
+            loaderFactory, requestFactory, dtoFactory, unmarshaller, transmitter, appContext);
 
     when(loaderFactory.newLoader(any(String.class))).thenReturn(messageLoader);
     when(asyncRequest.loader(messageLoader)).thenReturn(asyncRequest);

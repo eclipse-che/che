@@ -11,30 +11,23 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectOptions;
-import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -44,12 +37,11 @@ import org.testng.annotations.Test;
 /** @author Ihor Okhrimenko */
 public class AddOrImportProjectFormTest {
 
-  private static final String NAME_WITH_MAX_AVAILABLE_LENGTH = NameGenerator.generate("name", 124);
-  private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
+  private static final String NAME_WITH_MAX_AVAILABLE_LENGTH = generate("name", 124);
+  private static final String WORKSPACE_NAME = generate("test-workspace", 4);
   private static final String TEST_BLANK_WORKSPACE_NAME = "test-blank-workspace";
   private static final String TEST_JAVA_WORKSPACE_NAME = "test-java-workspace";
-  private static final String TEST_JAVA_WORKSPACE_NAME_EDIT =
-      NameGenerator.generate("test-java-workspace", 4);
+  private static final String TEST_JAVA_WORKSPACE_NAME_EDIT = generate("test-java-workspace", 4);
   private static final String NAME_WITH_SPECIAL_CHARACTERS = "@#$%^&*";
   private static final String SPRING_SAMPLE_NAME = "web-java-spring";
   private static final String EXPECTED_SPRING_REPOSITORY_URL =
@@ -98,22 +90,14 @@ public class AddOrImportProjectFormTest {
           + "   }\n"
           + "}\n";
 
-  private Workspace customWorkspace;
-
   @Inject private Dashboard dashboard;
-  @Inject private WorkspaceProjects workspaceProjects;
-  @Inject private WorkspaceConfig workspaceConfig;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private TestWorkspaceProvider testWorkspaceProvider;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private DocumentationPage documentationPage;
   @Inject private WorkspaceOverview workspaceOverview;
-  @Inject private Stacks stacks;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectOptions projectOptions;
@@ -410,7 +394,6 @@ public class AddOrImportProjectFormTest {
   public void checkCreatingProject() throws Exception {
     // check that name field saves it state after choosing another stack
     newWorkspace.waitPageLoad();
-    newWorkspace.waitStackSelected(Stack.BLANK);
     newWorkspace.typeWorkspaceName(TEST_BLANK_WORKSPACE_NAME);
     newWorkspace.selectStack(Stack.DOT_NET);
     newWorkspace.waitStackSelected(Stack.DOT_NET);
