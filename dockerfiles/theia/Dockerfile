@@ -10,7 +10,7 @@
 FROM node:8-alpine
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION=0.3.12
+ARG THEIA_VERSION=0.4.0-next.b17727c1
 
 EXPOSE 3000 3030
 
@@ -50,25 +50,22 @@ RUN \
     # Change version of Theia to specified in THEIA_VERSION
     ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
     # Apply resolution section to the Theia package.json to use strict versions for Theia dependencies
-    node ${HOME}/resolutions-provider.js ${HOME}/package.json 
+    node ${HOME}/resolutions-provider.js ${HOME}/package.json && \
     # generate node_modules, should be reused with default extensions
-    # yarn
-    # rm -rf ${HOME}/extensions && \
+    yarn && \
     # # Add default Theia extensions
-    # node ${HOME}/add-extensions.js && \
+    node ${HOME}/add-extensions.js && \
     # # launch `yarn` again to apply default extensions to the Theia node_modules
-    # yarn && \
-    # yarn theia clean && \
+    yarn && \
+    yarn theia clean && \
     # # Build Theia with all the extensions
-    # yarn theia build && \
+    yarn theia build && \
     # # Install Theia plugin generator
-    # npm install -g yo @theia/generator-plugin && \
+    npm install -g yo @theia/generator-plugin && \
     # # Change permissions to allow editing of files for openshift user
-    # find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; && \
+    find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; && \
     # # Grant permissions for modifying supervisor log file
-    # touch /var/log/supervisord.log && chmod g+rwX /var/log/supervisord.log && chgrp 0 /var/log/supervisord.log
-    #  && \
-    # yarn cache clean
+    touch /var/log/supervisord.log && chmod g+rwX /var/log/supervisord.log && chgrp 0 /var/log/supervisord.log && \
+    yarn cache clean
 
-# ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
-CMD tail -f /dev/null
+ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]

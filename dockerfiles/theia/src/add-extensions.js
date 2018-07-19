@@ -66,7 +66,7 @@ function addExtensionFromDir(extensionRootPath, extension) {
 }
 
 function addExtensionFromGit(extensionRootPath, extension) {
-    const checkoutTarget = extension["version"];
+    const checkoutTarget = extension["checkoutTo"];
     const extensionSource = extension["source"];
     cloneRepository(extensionRootPath, extensionSource);
 
@@ -86,14 +86,15 @@ function cloneRepository(path, url) {
 function checkoutRepo(path, checkoutTarget) {
     try {
          if (!checkoutTarget) {
-            checkoutTarget = 'master';
+            console.error(`Field 'checkoutTo' is required for git extensions. Path ${path}`);
+            process.exit(4);
         }
         console.log(`>>> Checkout repository to: ${checkoutTarget}`);
 
         spawnSync('git', ['checkout', checkoutTarget], {cwd: `${path}`, stdio:[0,1,2]});
     } catch (error) {
         console.error(`Failed to checkout repository to branch: ${checkoutTarget}`, error);
-        process.exit(4);
+        process.exit(5);
     }
 }
 
@@ -105,7 +106,7 @@ function buildExtension(path) {
         spawnSync(`yarn`, ['--modules-folder', nodeModulesPath, '--global-folder', nodeModulesPath, '--cache-folder', nodeModulesPath], {cwd: `${path}`, stdio:[0,1,2]});
     } catch (error) {
         console.error('Failed to build extension located in: ', path);
-        process.exit(5);
+        process.exit(6);
     }
 }
 
@@ -127,7 +128,7 @@ function getBinaryPath(extensionRoot, extensionName) {
         }
     }
     console.error('Failed to find folder with binaries for extension: ', extensionRoot);
-    process.exit(5);
+    process.exit(7);
 }
 
 function addExtensionsIntoDefaultPackageJson(extensions) {
