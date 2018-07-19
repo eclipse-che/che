@@ -10,7 +10,7 @@
  */
 'use strict';
 import {CheAgent} from '../../../../components/api/che-agent.factory';
-import { IEnvironmentManagerMachine } from '../../../../../target/dist/components/api/environment/environment-manager-machine';
+import { IEnvironmentManagerMachine } from '../../../../components/api/environment/environment-manager-machine';
 
 export interface IAgentItem extends che.IAgent {
   isEnabled: boolean;
