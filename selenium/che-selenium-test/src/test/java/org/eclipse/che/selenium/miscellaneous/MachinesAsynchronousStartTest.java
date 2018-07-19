@@ -10,9 +10,10 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.RUNNING;
+import static java.util.Arrays.asList;
 
 import com.google.inject.Inject;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -25,6 +26,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 public class MachinesAsynchronousStartTest {
+  private static final String GET_POD_NAME_COMMAND_COMMAND_TEMPLATE =
+      "get pod --no-headers=true -l che.workspace_id=%s | awk '{print $1}'";
+  private static final String GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE =
+      "get events --field-selector involvedObject.name=%s";
+
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
@@ -48,22 +54,41 @@ public class MachinesAsynchronousStartTest {
     String wsId = testWorkspace.getId();
     String wsName = testWorkspace.getName();
 
-    brokenWorkspace = createBrokenWorkspace();
+    /*brokenWorkspace = createBrokenWorkspace();
     testWorkspaceServiceClient.start(
-        brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser);
+        brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser); */
 
     // check that broken workspace is displayed with "Running" status
-    dashboard.waitDashboardToolbarTitle();
+
+    /*dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitPageLoading();
-    workspaces.waitWorkspaceStatus(brokenWorkspace.getName(), RUNNING);
+    workspaces.waitWorkspaceStatus(brokenWorkspace.getName(), RUNNING);*/
 
-    // check oc log output
+    // check openshift events log
 
+    String events = getPodRelatedEvents();
+    List<String> splitedEvents = splitEvents(events);
+
+    int i = 0;
   }
 
   private TestWorkspace createBrokenWorkspace() throws Exception {
     return testWorkspaceProvider.createWorkspace(
         defaultTestUser, 2, WorkspaceTemplate.BROKEN, true);
+  }
+
+  private String getPodName() throws Exception {
+    String command = String.format(GET_POD_NAME_COMMAND_COMMAND_TEMPLATE, testWorkspace.getId());
+    return openShiftCliCommandExecutor.execute(command);
+  }
+
+  private String getPodRelatedEvents() throws Exception {
+    String command = String.format(GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE, getPodName());
+    return openShiftCliCommandExecutor.execute(command);
+  }
+
+  private List<String> splitEvents(String events) {
+    return asList(events.split("\n"));
   }
 }
