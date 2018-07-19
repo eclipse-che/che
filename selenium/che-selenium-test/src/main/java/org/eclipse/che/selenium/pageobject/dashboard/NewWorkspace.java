@@ -779,9 +779,7 @@ public class NewWorkspace {
     WaitUtils.sleepQuietly(2);
 
     seleniumWebDriverHelper.waitVisibility(By.xpath(CREATE_STACK_DIALOG_FORM_XPATH));
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath("//div[text()='Would you like to create a new stack?']"));
-    seleniumWebDriverHelper.waitVisibility(By.xpath("//div[text()='Create stack']"));
+    seleniumWebDriverHelper.waitVisibility(By.xpath("//div[text()='Build stack from recipe']"));
   }
 
   public void waitCreateStackDialogClosing() {
@@ -789,11 +787,11 @@ public class NewWorkspace {
   }
 
   public void clickOnYesButtonInCreateStackDialog() {
-    seleniumWebDriverHelper.waitAndClick(By.id("ok-dialog-button"));
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//*[@che-button-title='Ok']"));
   }
 
   public void clickOnNoButtonInCreateStackDialog() {
-    seleniumWebDriverHelper.waitAndClick(By.id("cancel-dialog-button"));
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//*[@che-button-title='Cancel']"));
   }
 
   public void closeCreateStackDialogByCloseButton() {

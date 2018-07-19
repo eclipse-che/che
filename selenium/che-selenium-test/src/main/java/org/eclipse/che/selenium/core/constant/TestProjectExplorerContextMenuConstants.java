@@ -25,6 +25,7 @@ public final class TestProjectExplorerContextMenuConstants {
     SHOW_REFERENCES("gwt-debug-contextMenu/showReference"),
     GO_INTO("gwt-debug-contextMenu/goInto"),
     GO_BACK("gwt-debug-contextMenu/goInto"),
+    OPEN_IN_TERMINAL("gwt-debug-contextMenu/openInTerminal"),
     CUT("gwt-debug-contextMenu/cut"),
     COPY("gwt-debug-contextMenu/copy"),
     PASTE("gwt-debug-contextMenu/paste"),
