@@ -91,12 +91,16 @@ public class YamlFileEditingTest {
   public void checkAutocompleteFeature() {
     editor.selectTabByName(YAML_FILE_NAME);
 
-    editor.goToPosition(1, 1);
-
-    // launch autocomplete feature, select proposal and check expected text in the Editor
+    // launch autocomplete feature and check proposal documentation
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("kind");
-    // TODO check proposal documentation
+    editor.waitTextIntoAutocompleteContainer("diskName");
+    editor.selectAutocompleteProposal("diskName");
+    editor.checkProposalDocumentation("The Name of the data disk in the blob storage");
+    editor.waitTextIntoAutocompleteContainer("diskURI");
+    editor.selectAutocompleteProposal("diskURI");
+    editor.checkProposalDocumentation("The URI the data disk in the blob storage");
+
+    // select proposal and check expected text in the Editor
     editor.enterAutocompleteProposal("kind");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("PersistentVolume");
@@ -138,7 +142,6 @@ public class YamlFileEditingTest {
   @Test(priority = 1)
   public void checkHoverFeature() {
     editor.selectTabByName("deployment.yaml");
-    editor.waitAllMarkersInvisibility(ERROR);
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
@@ -148,6 +151,24 @@ public class YamlFileEditingTest {
     editor.waitTextInHoverPopup(
         "Kind is a string value representing the REST resource this object represents.");
 
+    editor.moveCursorToText("apiVersion:");
+    editor.waitTextInHoverPopup(
+        "APIVersion defines the versioned schema of this representation of an object.");
+  }
+
+  @Test(priority = 2)
+  public void checkCodeValidation() {
+    editor.selectTabByName("deployment.yaml");
+    editor.waitAllMarkersInvisibility(ERROR);
+
+    editor.goToPosition(12, 2);
+    editor.typeTextIntoEditor("a");
+    editor.moveCursorToText("aapiVersion");
+    editor.waitTextInHoverPopup("Unexpected property aapiVersion");
+
+    editor.goToPosition(12, 1);
+    editor.typeTextIntoEditor(DELETE.toString());
+    editor.waitAllMarkersInvisibility(ERROR);
     editor.moveCursorToText("apiVersion:");
     editor.waitTextInHoverPopup(
         "APIVersion defines the versioned schema of this representation of an object.");

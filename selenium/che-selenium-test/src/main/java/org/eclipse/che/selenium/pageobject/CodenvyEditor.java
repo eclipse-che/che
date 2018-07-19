@@ -206,6 +206,7 @@ public class CodenvyEditor {
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
     String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
+    String AUTOCOMPLETE_PROPOSAL_DOC_XPATH = "//div[text()='%s']";
   }
 
   public enum TabActionLocator {
@@ -2166,5 +2167,10 @@ public class CodenvyEditor {
   public void moveCursorToText(String text) {
     seleniumWebDriverHelper.moveCursorTo(
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
+  }
+
+  public void checkProposalDocumentation(String expectedText) {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(Locators.AUTOCOMPLETE_PROPOSAL_DOC_XPATH, expectedText)));
   }
 }
