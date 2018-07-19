@@ -62,8 +62,7 @@ RUN \
     yarn && \
     yarn theia build && \
     # Install Theia plugin generator
-    #==TODO== add after generator-theia-plugin release
-    #npm install -g yo @wiptheia/generator-theia-plugin && \
+    npm install -g yo @theia/generator-plugin && \
     # Change permissions to allow editing of files for openshift user
     find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; && \
     # Grant permissions for modifying supervisor log file
