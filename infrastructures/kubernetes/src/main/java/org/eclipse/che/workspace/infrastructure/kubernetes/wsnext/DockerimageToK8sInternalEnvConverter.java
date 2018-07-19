@@ -9,7 +9,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.D
 
 /**
  * Converts Dockerimage workspace environment to kubernetes environment.
- * Other internal environments returns without changing.
+ * Other internal environments are returned without changes.
  *
  * <p>Allows support of sidecar tooling flow on Dockerimage environments while it is directly
  * implemented in the kubernetes environment only.
