@@ -1,76 +1,76 @@
 1
 {
 2
-  "environments": {
+  "defaultEnv": "%1$s",
 3
-    "%s": {
+  "environments": {
 4
-      "machines": {
+    "%1$s": {
 5
-        "dev-machine": {
+      "machines": {
 6
-          "attributes": {
+        "dev-machine": {
 7
-            "memoryLimitBytes": "3221225472"
+          "attributes": {
 8
-          },
+            "memoryLimitBytes": "3221225472"
 9
-          "servers": {
-10
-            "tomcat8-debug": {
-11
-              "attributes": {},
-12
-              "port": "8000",
-13
-              "protocol": "http"
-14
-            },
-15
-            "codeserver": {
-16
-              "attributes": {},
-17
-              "port": "9876",
-18
-              "protocol": "http"
-19
-            },
-20
-            "tomcat8": {
-21
-              "attributes": {},
-22
-              "port": "8080",
-23
-              "protocol": "http"
-24
-            }
-25
           },
+10
+          "servers": {
+11
+            "tomcat8-debug": {
+12
+              "attributes": {},
+13
+              "port": "8000",
+14
+              "protocol": "http"
+15
+            },
+16
+            "codeserver": {
+17
+              "attributes": {},
+18
+              "port": "9876",
+19
+              "protocol": "http"
+20
+            },
+21
+            "tomcat8": {
+22
+              "attributes": {},
+23
+              "port": "8080",
+24
+              "protocol": "http"
+25
+            }
 26
-          "volumes": {},
+          },
 27
-          "installers": [
+          "volumes": {},
 28
-            "org.eclipse.che.terminal",
+          "installers": [
 29
-            "org.eclipse.che.ws-agent",
+            "org.eclipse.che.terminal",
 30
-            "org.eclipse.che.exec"
+            "org.eclipse.che.ws-agent",
 32
-          "env": {
+          ],
 33
-            "CHE_MACHINE_NAME": "dev-machine"
+          "env": {
 34
-          }
+            "CHE_MACHINE_NAME": "dev-machine"
 35
-        }
+          }
 36
-      },
+        }
 37
-      "recipe": {
+      },
 38
-        "type": "dockerimage",
+      "recipe": {
 39
-        "content": "eclipse/ubuntu_jdk8"
+        "type": "dockerimage",
