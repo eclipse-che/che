@@ -192,7 +192,12 @@ public class UploadIntoProjectTest {
     projectExplorer.quickRevealToItemWithJavaScript(
         get(pathToUploadingFileInsideTheProject).getParent().toString());
     projectExplorer.openItemByPath(pathToUploadingFileInsideTheProject);
-    editor.waitTextIntoEditor(TEXT_TO_INSERT);
+
+    try {
+      editor.waitTextNotPresentIntoEditor(TEXT_TO_INSERT);
+    } catch (WebDriverException ex) {
+      fail("Known issue https://github.com/eclipse/che/issues/10484", ex);
+    }
   }
 
   @Test
