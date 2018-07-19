@@ -121,6 +121,9 @@
             entry = paramEntries.find(_entry => {
                 return _entry.startsWith(name + '=');
             });
+            if (!entry) {
+                return;
+            }
             const [_, value] = entry.split('=');
             return decodeURIComponent(value);
         }
@@ -191,10 +194,12 @@
             const re = new RegExp(/(https?:\/\/[^\/]+?)(?:$|\/).*/),
                 //                  \    /     \     /
                 //                  scheme    host:port
-                url = redirectUrl.replace(re, "$1" + "/authenticate?token=" + encodeURIComponent(token));
+                url = redirectUrl.replace(re, "$1" + "/authenticate");
             return new Promise((resolve, reject) => {
                 const request = new XMLHttpRequest();
                 request.open('GET', url);
+                request.setRequestHeader('Authorization', token);
+                request.withCredentials = true;
                 request.send();
                 request.onreadystatechange = () => {
                     if (request.readyState !== 4) {
@@ -212,7 +217,7 @@
         (function () {
             const keycloackAuthenticationPromise = new KeycloakLoader().loadKeycloakSettings();
 
-            const workspaceId = getQueryParam('wsId'),
+            const workspaceId = getQueryParam('workspaceId'),
                 redirectUrl = getQueryParam('redirectUrl');
             const getWorkspacePromise = new Promise((resolve, reject) => {
                 if (!workspaceId) {
