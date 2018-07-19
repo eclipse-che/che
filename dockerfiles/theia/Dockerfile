@@ -50,22 +50,25 @@ RUN \
     # Change version of Theia to specified in THEIA_VERSION
     ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
     # Apply resolution section to the Theia package.json to use strict versions for Theia dependencies
-    node ${HOME}/resolutions-provider.js ${HOME}/package.json && \
+    node ${HOME}/resolutions-provider.js ${HOME}/package.json 
     # generate node_modules, should be reused with default extensions
-    yarn --global-folder ${HOME}/node_modules/ --cache-folder ${HOME}/node_modules/ && \
-    rm -rf ${HOME}/extensions && \
-    # Add default Theia extensions
-    node ${HOME}/add-extensions.js && \
-    # launch `yarn` again to apply default extensions to the Theia node_modules
-    yarn --global-folder ${HOME}/node_modules/ --cache-folder ${HOME}/node_modules/ && \
-    yarn theia clean && \
-    # Build Theia with all the extensions
-    yarn theia build && \
-    # Install Theia plugin generator
-    npm install -g yo @theia/generator-plugin && \
-    # Change permissions to allow editing of files for openshift user
-    find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; && \
-    # Grant permissions for modifying supervisor log file
-    touch /var/log/supervisord.log && chmod g+rwX /var/log/supervisord.log && chgrp 0 /var/log/supervisord.log
+    # yarn
+    # rm -rf ${HOME}/extensions && \
+    # # Add default Theia extensions
+    # node ${HOME}/add-extensions.js && \
+    # # launch `yarn` again to apply default extensions to the Theia node_modules
+    # yarn && \
+    # yarn theia clean && \
+    # # Build Theia with all the extensions
+    # yarn theia build && \
+    # # Install Theia plugin generator
+    # npm install -g yo @theia/generator-plugin && \
+    # # Change permissions to allow editing of files for openshift user
+    # find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; && \
+    # # Grant permissions for modifying supervisor log file
+    # touch /var/log/supervisord.log && chmod g+rwX /var/log/supervisord.log && chgrp 0 /var/log/supervisord.log
+    #  && \
+    # yarn cache clean
 
-ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
+# ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
+CMD tail -f /dev/null

@@ -18,68 +18,49 @@ console.log(`Generate resolutions for ${PACKAGE_JSON_PATH}`);
 const PACKAGE_JSON = require(PACKAGE_JSON_PATH);
 const THEIA_VERSION = process.env.THEIA_VERSION;
 const HOME = process.env.HOME;
-const THEIA_DEP_PREFIX = "@theia/";
 
-const theiaFullPackageJsonLink=`https://raw.githubusercontent.com/theia-ide/theia/v${THEIA_VERSION}/examples/browser/package.json`
-const fullPackageJsonPath=`${HOME}/full-package.json`;
+const NPM_API_URL = 'https://api.npms.io/v2';
+const keyWords = 'keywords:theia-extension';
+const resultSize = 200;
 
-spawnSync('wget', ['-O', `${fullPackageJsonPath}`, `${theiaFullPackageJsonLink}`]);
+const SEARCH_JSON_PATH = `${HOME}/search.json`;
 
-if (!fs.existsSync(`${fullPackageJsonPath}`)) {
-    console.log("Can't generate resolution, because we have not list all base Theia dependencies.");
-    return;
-}
-const FULL_PACKAGE_JSON = require(`${fullPackageJsonPath}`);
-const fullDependenciesList = Object.keys(FULL_PACKAGE_JSON['dependencies']);
-const dependencies = listToResolutions(fullDependenciesList);
-let ALL_RESOLUTIONS = {...dependencies};
-
-const devDependencies = PACKAGE_JSON['devDependencies'];
-const depsToGetResolutions = {...devDependencies, ...{"@theia/core": THEIA_VERSION}};
-for (let dep in depsToGetResolutions) {
-    const depResolsList = getResolutionsList(dep);
-    depResolsList.push(dep);
-    const depResolutions = listToResolutions(depResolsList);
-    ALL_RESOLUTIONS = {...ALL_RESOLUTIONS, ...depResolutions};
+try {
+    spawnSync('curl',[`${NPM_API_URL}/search?q=${keyWords}&size=${resultSize}`, '-o', SEARCH_JSON_PATH]);
+} catch(error) {
+    console.error("Failed to get Theia depedencies. Cause: ", error);
+    process.exit(2);
 }
 
-console.log(`Generated resolutions: `, ALL_RESOLUTIONS);
-PACKAGE_JSON["resolutions"] = ALL_RESOLUTIONS;
+const packageScopeRegexp = '^@theia/.*$';
+let theiaResolutionsList = [];
+try {
+    const filteredDepList = spawnSync('jq', ['-c', `.results | map(.package) | map(.name|select(test("${packageScopeRegexp}")))`, SEARCH_JSON_PATH]);
+    theiaResolutionsList = JSON.parse(filteredDepList.stdout);
+} catch(error) {
+    console.error("Failed to filter Theia resolutions. Cause: ", error);
+    process.exit(2);
+}
 
+const depResolutions = listToResolutions(theiaResolutionsList);
+console.log(depResolutions);
+
+PACKAGE_JSON["resolutions"] = depResolutions;
 console.log(`Write generated resolutions to the package.json ${PACKAGE_JSON_PATH}`);
 writeJsonToFile(PACKAGE_JSON_PATH, PACKAGE_JSON);
 
-/**
- * Get list resolutions for Theia dependency.
- *
- * @param theiaDep - theia dependency
- */
-function getResolutionsList(theiaDep) {
-    console.info(`Get resolutions for ${theiaDep} ...`);
-
-    const depToSearch = theiaDep + `@` + THEIA_VERSION;
-    const dependencies = spawnSync('npm', ['view', depToSearch, 'dependencies', '--json']);
-
-    const resolutionsJson = JSON.parse(String(dependencies.stdout));
-
-    return filterResolutionsList(Object.keys(resolutionsJson));
-}
-
-/**
- * Return only Theia resolutions list.
- * 
- * @param resolutions - resolutions to filter.
- */
-function filterResolutionsList(resolutions) {
-    const theiaResolutions = [];
-
-    for (const resolution of resolutions) {
-        if (resolution.startsWith(THEIA_DEP_PREFIX)) {
-            theiaResolutions.push(resolution);
+function resolutionExist(resolutionName) {
+    try {
+        console.log(`Check depedency ${resolutionName}`);
+        const info = spawnSync('npm', ['view', `${resolutionName}@${THEIA_VERSION}`, 'version']);
+        if (info.stdout.toString()) {
+            return true;
         }
+    } catch(error) {
+        console.log(`Unable to check resolution with name ${resolutionName}`);
+        process.exit(3);
     }
-
-    return theiaResolutions;
+    return false;
 }
 
 /**
@@ -91,7 +72,9 @@ function listToResolutions(resolutionsList) {
     const RESOLUTIONS = {};
 
     for (const resolution of resolutionsList) {
-        RESOLUTIONS[resolution] = THEIA_VERSION;
+        if (resolutionExist(resolution)) {
+            RESOLUTIONS[resolution] = THEIA_VERSION;
+        }
     }
 
     return RESOLUTIONS;
