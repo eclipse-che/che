@@ -17,7 +17,22 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.project.server.impl.ProjectJsonRpcServiceBackEnd;
-import org.eclipse.che.api.project.shared.dto.service.*;
+import org.eclipse.che.api.project.shared.dto.service.CreateBatchProjectsRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.CreateRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.CreateResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.DeleteRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.DeleteResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.GetRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.GetResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.ImportRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.ImportResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.RecognizeRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.RecognizeResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.UpdateRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.UpdateResponseDto;
+import org.eclipse.che.api.project.shared.dto.service.VerifyRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.VerifyResponseDto;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 @Singleton
 public class ProjectJsonRpcServiceConfigurator {
@@ -82,5 +97,12 @@ public class ProjectJsonRpcServiceConfigurator {
         .paramsAsDto(ImportRequestDto.class)
         .resultAsDto(ImportResponseDto.class)
         .withBiFunction(service::doImport);
+
+    handlers
+        .newConfiguration()
+        .methodName(PROJECTS_BATCH)
+        .paramsAsDto(CreateBatchProjectsRequestDto.class)
+        .resultAsListOfDto(ProjectConfigDto.class)
+        .withBiFunction(service::createBatchProjects);
   }
 }
