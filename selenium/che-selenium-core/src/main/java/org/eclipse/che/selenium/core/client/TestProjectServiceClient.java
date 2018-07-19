@@ -39,7 +39,7 @@ import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlPr
 @Singleton
 public class TestProjectServiceClient {
 
-  private final String BEARER_TOKEN_PREFIX = "Bearer ";
+  private static final String BEARER_TOKEN_PREFIX = "Bearer ";
   private final TestMachineServiceClient machineServiceClient;
   private final HttpJsonRequestFactory requestFactory;
   private final TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpointUrlProvider;
