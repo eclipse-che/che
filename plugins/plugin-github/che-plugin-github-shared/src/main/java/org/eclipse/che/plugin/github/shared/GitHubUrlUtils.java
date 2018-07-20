@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.plugin.github.shared;
+
+public class GitHubUrlUtils {
+
+  /**
+   * normalize git@ and https:git@ urls
+   *
+   * @param gitUrl
+   * @return
+   */
+  public static String toHttpsIfNeed(String gitUrl) {
+    String gitRepoUrl = gitUrl;
+    if (gitUrl.startsWith("git@")) {
+      // normalize git@ and https:git@ urls
+      gitRepoUrl = gitUrl.replaceFirst("git@", "https://");
+      gitRepoUrl = gitRepoUrl.replaceFirst(".com:", ".com/");
+    }
+    if (gitRepoUrl.endsWith(".git")) {
+      gitRepoUrl = gitRepoUrl.substring(0, gitRepoUrl.lastIndexOf(".git"));
+    }
+    return gitRepoUrl;
+  }
+
+  public static String getBlobUrl(String rootGitRepoUrl, String ref, String path) {
+    return getBlobUrl(rootGitRepoUrl, ref, path, 0, 0);
+  }
+
+  public static String getBlobUrl(
+      String rootGitRepoUrl, String ref, String path, int lineStart, int lineEnd) {
+    return rootGitRepoUrl
+        + "/blob/"
+        + ref
+        + "/"
+        + path
+        + (lineStart > 0 ? "#L" + lineStart : "")
+        + (lineEnd > 0 ? "-L" + lineEnd : "");
+  }
+
+  public static String getTreeUrl(String rootGitRepoUrl, String ref, String path) {
+    return rootGitRepoUrl + "/tree/" + ref + "/" + path;
+  }
+}
