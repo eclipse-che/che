@@ -32,6 +32,11 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
      * @param y amount of terminal rows
      */
     void setTerminalSize(int x, int y);
+
+    /**
+     * Returns rendered text for test purpose.
+     */
+    String[] getRenderedLines();
   }
 
   /**
@@ -54,4 +59,9 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
    * @param message message which will be shown
    */
   void showErrorMessage(@NotNull String message);
+
+  /**
+   * Returns rendered text for test purpose.
+   */
+  String[] getRenderedLines();
 }

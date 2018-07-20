@@ -82,4 +82,23 @@ class TerminalJso extends JavaScriptObject {
   public final native void applyAddon(JavaScriptObject addon) /*-{
       this.termJSO.applyAddon(addon);
   }-*/;
+
+   public final native String[] getRenderedLines() /*-{
+     var start = this.terminal.buffer.ydisp;
+     var rows = this.terminal.rows;
+
+     var lines = [];
+     for (var lineIndex = start; lineIndex < start + rows; lineIndex++) {
+         var lineText = this.terminal.buffer.translateBufferLineToString(lineIndex, true);
+
+         var bufferLine = this.terminal.buffer.lines.get(lineIndex);
+         if (bufferLine.isWrapped) {
+             lines[lines.length - 1] += lineText;
+         } else {
+             lines.push(lineText);
+         }
+     }
+
+     return lines;
+    }-*/;
 }

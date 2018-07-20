@@ -69,6 +69,14 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     terminalPanel.setVisible(false);
   }
 
+  @Override
+  public String[] getRenderedLines() {
+    if (terminal != null) {
+      return terminal.getRenderedLines();
+    }
+    return null;
+  }
+
   /**
    * Resize {@link TerminalJso} to current widget size. To improve performance we should resize only
    * visible terminals, because "resize terminal" is quite expensive operation. When you click on

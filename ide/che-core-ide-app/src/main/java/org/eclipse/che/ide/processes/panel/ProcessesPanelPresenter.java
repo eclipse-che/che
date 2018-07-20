@@ -240,6 +240,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     Scheduler.get().scheduleDeferred(() -> workspaceLoadingTrackerProvider.get().startTracking());
 
     Scheduler.get().scheduleDeferred(this::updateMachineList);
+
+    registerNative();
   }
 
   protected void displayMachineOutput(DisplayMachineOutputEvent event) {
@@ -1487,4 +1489,34 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     $doc.body.removeChild(element);
   }-*/;
+
+  /*
+   * Expose Terminal internal API to the world, to allow automated Selenium scripts get text from the terminal.
+   */
+  private native void registerNative() /*-{
+    var that = this;
+    var TerminalContentProvider = {};
+
+    TerminalContentProvider.getVisibleText = $entry(function(terminalName, machineName) {
+        return  that.@org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter::getRenderedTerminalLines(*)(terminalName, machineName);
+    });
+
+    $wnd.IDE.TerminalContentProvider = TerminalContentProvider;
+  }-*/;
+
+  private String[] getRenderedTerminalLines(String terminalName, String machineName) {
+    for (ProcessTreeNode machineNode: rootNode.getChildren()) {
+      if (machineNode.getName().equals(machineName)) {
+        for (ProcessTreeNode machineChildNode: machineNode.getChildren()) {
+          if (machineChildNode.getName().equals(terminalName)) {
+            TerminalPresenter terminalPresenter = terminals.get(machineChildNode.getId());
+             if (terminalPresenter != null) {
+               return terminalPresenter.getRenderedLines();
+             }
+          }
+        }
+      }
+    }
+    throw new RuntimeException("Unable to find terminal by machineName: " + machineName + " and terminal name: " + terminalName);
+  };
 }

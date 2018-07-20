@@ -304,6 +304,10 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     socket.send(jso.serialize());
   }
 
+  public String[] getRenderedLines() {
+    return this.view.getRenderedLines();
+  }
+
   /** Sets listener that will be called when a terminal state changed */
   public void setListener(TerminalStateListener listener) {
     this.terminalStateListener = listener;
