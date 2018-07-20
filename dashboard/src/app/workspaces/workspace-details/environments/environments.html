@@ -58,8 +58,8 @@
                        che-label-name="Machines"
                        class="che-label-container-last">
   </che-label-container>
-  <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines | orderBy:'name'"
-                            machine-name="machine.name"
+  <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines track by machine.name | orderBy:'name'"
+                            machine="machine"
                             machines-list="workspaceEnvironmentsController.machines"
                             environment-manager="workspaceEnvironmentsController.environmentManager"
                             machine-dev-on-change="workspaceEnvironmentsController.changeMachineDev(name)"

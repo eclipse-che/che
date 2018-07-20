@@ -58,6 +58,7 @@ export class CheAgent {
       this.agents.length = 0;
 
       agents.forEach((agent: che.IAgent) => {
+        this.agentsMap.set(agent.id, agent);
         this.agents.push(agent);
       });
       defer.resolve(this.agents);
