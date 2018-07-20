@@ -206,7 +206,7 @@ public class CodenvyEditor {
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
     String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
-    String AUTOCOMPLETE_PROPOSAL_DOC_XPATH = "//div[text()='%s']";
+    String AUTOCOMPLETE_PROPOSAL_DOC_XPATH = "//body/div/div[text()='%s']";
   }
 
   public enum TabActionLocator {
