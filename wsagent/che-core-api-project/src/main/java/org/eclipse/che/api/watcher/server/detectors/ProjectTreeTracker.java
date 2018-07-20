@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,6 +34,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
@@ -48,21 +54,31 @@ public class ProjectTreeTracker {
   private static final String OUTGOING_METHOD = "event/project-tree-state-changed";
   private static final String INCOMING_METHOD = "track/project-tree";
 
+  private final Set<String> registeredProjectPaths;
   private final Map<String, Integer> watchIdRegistry = new HashMap<>();
   private final List<String> timers = new CopyOnWriteArrayList<>();
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager fileWatcherManager;
+  private final ProjectManager projectManager;
+  private final EventService eventService;
   private final HiddenItemPathMatcher hiddenItemPathMatcher;
 
   @Inject
   public ProjectTreeTracker(
       RequestTransmitter transmitter,
       FileWatcherManager fileWatcherManager,
+      ProjectManager projectManager,
+      EventService eventService,
       HiddenItemPathMatcher hiddenItemPathMatcher) {
     this.transmitter = transmitter;
     this.fileWatcherManager = fileWatcherManager;
+    this.projectManager = projectManager;
+    this.eventService = eventService;
     this.hiddenItemPathMatcher = hiddenItemPathMatcher;
+
+    registeredProjectPaths =
+        projectManager.getAll().stream().map(RegisteredProject::getBaseFolder).collect(toSet());
   }
 
   @Inject
@@ -154,6 +170,34 @@ public class ProjectTreeTracker {
             .paramsAsDto(params)
             .sendAndSkipResult();
       }
+
+      // Two or more clients can be subscribed to this handler, so need to skip firing the event
+      // if it was already sent.
+      if (registeredProjectPaths.contains(it)) {
+        return;
+      }
+
+      // Need to check if the given folder is a project.
+      final Timer timer = new Timer();
+      timer.schedule(
+          new TimerTask() {
+
+            int attempt = 1;
+
+            @Override
+            public void run() {
+              if (projectManager.isRegistered(it)) {
+                eventService.publish(new ProjectCreatedEvent(it));
+                registeredProjectPaths.add(it);
+                timer.cancel();
+              } else if (attempt == 5) {
+                timer.cancel();
+              }
+              attempt++;
+            }
+          },
+          200,
+          200);
     };
   }
 
@@ -167,6 +211,10 @@ public class ProjectTreeTracker {
         return;
       }
 
+      if (registeredProjectPaths.contains(it)) {
+        eventService.publish(new ProjectDeletedEvent(it));
+        registeredProjectPaths.remove(it);
+      }
       timers.add(it);
       new Timer()
           .schedule(

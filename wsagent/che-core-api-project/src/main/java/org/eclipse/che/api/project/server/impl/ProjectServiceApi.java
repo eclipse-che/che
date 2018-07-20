@@ -14,7 +14,6 @@ import static java.io.File.separator;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
@@ -64,9 +63,9 @@ import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectService;
-import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -173,11 +172,8 @@ public class ProjectServiceApi {
 
     RegisteredProject project = projectManager.create(projectConfig, options);
     ProjectConfigDto asDto = asDto(project);
-    ProjectConfigDto injectedLinks = injectProjectLinks(asDto);
 
-    eventService.publish(new ProjectCreatedEvent(project.getPath()));
-
-    return injectedLinks;
+    return injectProjectLinks(asDto);
   }
 
   /** Create projects with specified configurations for a client with specified identifier */
@@ -195,20 +191,12 @@ public class ProjectServiceApi {
       registeredProjects.add(projectManager.update(projectConfig));
     }
 
-    Set<ProjectConfigDto> result =
-        registeredProjects
-            .stream()
-            .map(ProjectDtoConverter::asDto)
-            .map(this::injectProjectLinks)
-            .collect(toSet());
-
-    registeredProjects
+    return registeredProjects
         .stream()
-        .map(RegisteredProject::getPath)
-        .map(ProjectCreatedEvent::new)
-        .forEach(eventService::publish);
-
-    return new ArrayList<>(result);
+        .map(ProjectDtoConverter::asDto)
+        .map(this::injectProjectLinks)
+        .distinct()
+        .collect(Collectors.toList());
   }
 
   /** Update project specified by workspace path with new configuration */
@@ -218,11 +206,8 @@ public class ProjectServiceApi {
     if (wsPath != null) {
       projectConfigDto.setPath(absolutize(wsPath));
     }
-    boolean registeredEarly = projectManager.isRegistered(wsPath);
     RegisteredProject updated = projectManager.update(projectConfigDto);
-    if (!registeredEarly) { // if project config set firstly we will fire event project created
-      eventService.publish(new ProjectCreatedEvent(updated.getPath()));
-    }
+    eventService.publish(new ProjectUpdatedEvent(updated.getPath()));
 
     return asDto(updated);
   }
@@ -299,7 +284,6 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
-    eventService.publish(new ProjectCreatedEvent(wsPath));
   }
 
   /** Create file with specified path, name and content */
