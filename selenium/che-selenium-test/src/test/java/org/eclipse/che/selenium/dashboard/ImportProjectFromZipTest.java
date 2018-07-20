@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.ZIP;
 
 import com.google.inject.Inject;
@@ -18,10 +19,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -36,7 +35,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-@Test(groups = TestGroup.OSIO)
 public class ImportProjectFromZipTest {
 
   private final String WORKSPACE = generate("ImptPrjFromZip", 4);
@@ -81,7 +79,7 @@ public class ImportProjectFromZipTest {
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
+    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();

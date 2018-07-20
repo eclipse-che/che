@@ -23,6 +23,9 @@ public interface AboutView extends View<AboutView.ActionDelegate> {
 
     /** Performs any actions appropriate in response to the user having pressed the OK button */
     void onOkClicked();
+
+    /** Shows build details information window. */
+    void onShowBuildDetailsClicked();
   }
 
   /** Close view. */
@@ -37,18 +40,4 @@ public interface AboutView extends View<AboutView.ActionDelegate> {
    * @param version
    */
   void setVersion(String version);
-
-  /**
-   * Set application's revision value.
-   *
-   * @param revision
-   */
-  void setRevision(String revision);
-
-  /**
-   * Set application's build time value.
-   *
-   * @param time
-   */
-  void setTime(String time);
 }

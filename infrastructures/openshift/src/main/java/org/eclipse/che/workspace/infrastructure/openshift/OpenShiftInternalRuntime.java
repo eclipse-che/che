@@ -12,7 +12,9 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
@@ -92,6 +94,15 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   @Override
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
+
+    for (Secret secret : osEnv.getSecrets().values()) {
+      project.secrets().create(secret);
+    }
+
+    for (ConfigMap configMap : osEnv.getConfigMaps().values()) {
+      project.configMaps().create(configMap);
+    }
+
     List<Service> createdServices = new ArrayList<>();
     for (Service service : osEnv.getServices().values()) {
       createdServices.add(project.services().create(service));
@@ -104,10 +115,10 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     // TODO https://github.com/eclipse/che/issues/7653
     // project.pods().watch(new AbnormalStopHandler());
 
-    project.pods().watchContainers(new MachineLogsPublisher());
+    project.deployments().watchEvents(new MachineLogsPublisher());
     if (!unrecoverableEvents.isEmpty()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      project.pods().watchContainers(new UnrecoverableEventHandler(pods));
+      project.deployments().watchEvents(new UnrecoverablePodEventHandler(pods));
     }
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));

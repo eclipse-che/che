@@ -190,7 +190,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   private void exec(BiConsumer<String, String> outputConsumer, String... command)
       throws InfrastructureException {
     namespace
-        .pods()
+        .deployments()
         .exec(
             kubernetesMachine.getPodName(),
             kubernetesMachine.getContainerName(),
@@ -201,7 +201,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
 
   private void exec(String... command) throws InfrastructureException {
     namespace
-        .pods()
+        .deployments()
         .exec(
             kubernetesMachine.getPodName(),
             kubernetesMachine.getContainerName(),

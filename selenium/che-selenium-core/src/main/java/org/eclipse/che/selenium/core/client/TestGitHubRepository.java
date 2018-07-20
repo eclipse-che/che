@@ -84,7 +84,7 @@ public class TestGitHubRepository {
     SUBMODULE("160000"),
     BLOB_SYMLINK("120000");
 
-    private String mode;
+    private final String mode;
 
     TreeElementMode(String mode) {
       this.mode = mode;
@@ -100,7 +100,7 @@ public class TestGitHubRepository {
     TREE("tree"),
     COMMIT("commit");
 
-    private String nodeType;
+    private final String nodeType;
 
     GitNodeType(String nodeType) {
       this.nodeType = nodeType;
@@ -244,6 +244,10 @@ public class TestGitHubRepository {
 
   public String getHtmlUrl() {
     return ghRepo.getHtmlUrl().toString();
+  }
+
+  public String getHttpsTransportUrl() {
+    return ghRepo.gitHttpTransportUrl();
   }
 
   public String getSshUrl() {

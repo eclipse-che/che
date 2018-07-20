@@ -27,16 +27,20 @@ import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.Watcher.Action;
+import io.fabric8.kubernetes.client.dsl.ExtensionsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.dsl.ScalableResource;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -59,14 +63,29 @@ public class KubernetesNamespaceTest {
   public static final String NAMESPACE = "testNamespace";
   public static final String WORKSPACE_ID = "workspace123";
 
-  @Mock private KubernetesPods pods;
+  @Mock private KubernetesDeployments deployments;
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
+  @Mock private KubernetesSecrets secrets;
+  @Mock private KubernetesConfigsMaps configMaps;
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private NonNamespaceOperation namespaceOperation;
   @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
+
+  // Deployments Mocks
+  @Mock private ExtensionsAPIGroupDSL extensions;
+  @Mock private MixedOperation deploymentsMixedOperation;
+  @Mock private NonNamespaceOperation deploymentsNamespaceOperation;
+  @Mock private ScalableResource deploymentResource;
+
+  // Pod Mocks
+  @Mock private MixedOperation podsMixedOperation;
+  @Mock private NonNamespaceOperation podsNamespaceOperation;
+  @Mock private PodResource podResource;
+  @Mock private Pod pod;
+  @Mock private ObjectMeta podMetadata;
 
   private KubernetesNamespace k8sNamespace;
 
@@ -84,9 +103,31 @@ public class KubernetesNamespaceTest {
     when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
     when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
 
+    // Model DSL: client.pods().inNamespace(...).withName(...).get().getMetadata().getName();
+    doReturn(podsMixedOperation).when(kubernetesClient).pods();
+    doReturn(podsNamespaceOperation).when(podsMixedOperation).inNamespace(anyString());
+    doReturn(podResource).when(podsNamespaceOperation).withName(anyString());
+    doReturn(pod).when(podResource).get();
+    doReturn(podMetadata).when(pod).getMetadata();
+
+    doReturn(extensions).when(kubernetesClient).extensions();
+    doReturn(deploymentsMixedOperation).when(extensions).deployments();
+    doReturn(deploymentsNamespaceOperation)
+        .when(deploymentsMixedOperation)
+        .inNamespace(anyString());
+    doReturn(deploymentResource).when(deploymentsNamespaceOperation).withName(anyString());
+
     k8sNamespace =
         new KubernetesNamespace(
-            clientFactory, WORKSPACE_ID, NAMESPACE, pods, services, pvcs, ingresses);
+            clientFactory,
+            WORKSPACE_ID,
+            NAMESPACE,
+            deployments,
+            services,
+            pvcs,
+            ingresses,
+            secrets,
+            configMaps);
   }
 
   @Test
@@ -122,13 +163,15 @@ public class KubernetesNamespaceTest {
 
     verify(ingresses).delete();
     verify(services).delete();
-    verify(pods).delete();
+    verify(deployments).delete();
+    verify(secrets).delete();
+    verify(configMaps).delete();
   }
 
   @Test
   public void testKubernetesNamespaceCleaningUpIfExceptionsOccurs() throws Exception {
     doThrow(new InfrastructureException("err1.")).when(services).delete();
-    doThrow(new InfrastructureException("err2.")).when(pods).delete();
+    doThrow(new InfrastructureException("err2.")).when(deployments).delete();
 
     InfrastructureException error = null;
     // when
@@ -210,37 +253,29 @@ public class KubernetesNamespaceTest {
 
   @Test
   public void testDeleteNonExistingPodBeforeWatch() throws Exception {
-    final MixedOperation mixedOperation = mock(MixedOperation.class);
-    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
-    final PodResource podResource = mock(PodResource.class);
-    doReturn(mixedOperation).when(kubernetesClient).pods();
-    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
-    when(namespaceOperation.withName(anyString())).thenReturn(podResource);
+    final String POD_NAME = "nonExistingPod";
+    doReturn(POD_NAME).when(podMetadata).getName();
 
     doReturn(Boolean.FALSE).when(podResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
-    new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
+    new KubernetesDeployments("", "", clientFactory).doDelete(POD_NAME).get(5, TimeUnit.SECONDS);
 
     verify(watch).close();
   }
 
   @Test
   public void testDeletePodThrowingKubernetesClientExceptionShouldCloseWatch() throws Exception {
-    final MixedOperation mixedOperation = mock(MixedOperation.class);
-    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
-    final PodResource podResource = mock(PodResource.class);
-    doReturn(mixedOperation).when(kubernetesClient).pods();
-    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
-    when(namespaceOperation.withName(anyString())).thenReturn(podResource);
+    final String POD_NAME = "nonExistingPod";
+    doReturn(POD_NAME).when(podMetadata).getName();
 
     doThrow(KubernetesClientException.class).when(podResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
+      new KubernetesDeployments("", "", clientFactory).doDelete(POD_NAME).get(5, TimeUnit.SECONDS);
     } catch (KubernetesInfrastructureException e) {
       assertTrue(e.getCause() instanceof KubernetesClientException);
       verify(watch).close();
@@ -251,19 +286,15 @@ public class KubernetesNamespaceTest {
 
   @Test
   public void testDeletePodThrowingAnyExceptionShouldCloseWatch() throws Exception {
-    final MixedOperation mixedOperation = mock(MixedOperation.class);
-    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
-    final PodResource podResource = mock(PodResource.class);
-    doReturn(mixedOperation).when(kubernetesClient).pods();
-    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
-    when(namespaceOperation.withName(anyString())).thenReturn(podResource);
+    final String POD_NAME = "nonExistingPod";
+    doReturn(POD_NAME).when(podMetadata).getName();
 
     doThrow(RuntimeException.class).when(podResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesPods("", "", clientFactory).doDelete("nonExistingPod").get(5, TimeUnit.SECONDS);
+      new KubernetesDeployments("", "", clientFactory).doDelete(POD_NAME).get(5, TimeUnit.SECONDS);
     } catch (RuntimeException e) {
       verify(watch).close();
       return;

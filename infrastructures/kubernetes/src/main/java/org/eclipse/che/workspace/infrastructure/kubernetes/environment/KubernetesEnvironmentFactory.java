@@ -15,11 +15,13 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.io.ByteArrayInputStream;
@@ -61,6 +63,14 @@ public class KubernetesEnvironmentFactory
   static final int PVC_IGNORED_WARNING_CODE = 4101;
   static final String PVC_IGNORED_WARNING_MESSAGE =
       "Persistent volume claims specified in Kubernetes recipe are ignored.";
+
+  static final int SECRET_IGNORED_WARNING_CODE = 4102;
+  static final String SECRET_IGNORED_WARNING_MESSAGE =
+      "Secrets specified in Kubernetes recipe are ignored.";
+
+  static final int CONFIG_MAP_IGNORED_WARNING_CODE = 4103;
+  static final String CONFIG_MAP_IGNORED_WARNING_MESSAGE =
+      "Config maps specified in Kubernetes recipe are ignored.";
 
   private final KubernetesClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
@@ -115,6 +125,8 @@ public class KubernetesEnvironmentFactory
     Map<String, Service> services = new HashMap<>();
     boolean isAnyIngressPresent = false;
     boolean isAnyPVCPresent = false;
+    boolean isAnySecretPresent = false;
+    boolean isAnyConfigMapPresent = false;
     for (HasMetadata object : list.getItems()) {
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
@@ -126,6 +138,10 @@ public class KubernetesEnvironmentFactory
         isAnyIngressPresent = true;
       } else if (object instanceof PersistentVolumeClaim) {
         isAnyPVCPresent = true;
+      } else if (object instanceof Secret) {
+        isAnySecretPresent = true;
+      } else if (object instanceof ConfigMap) {
+        isAnyConfigMapPresent = true;
       } else {
         throw new ValidationException(
             format("Found unknown object type '%s'", object.getMetadata()));
@@ -141,6 +157,15 @@ public class KubernetesEnvironmentFactory
       warnings.add(new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
     }
 
+    if (isAnySecretPresent) {
+      warnings.add(new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
+    }
+
+    if (isAnyConfigMapPresent) {
+      warnings.add(
+          new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
+    }
+
     addRamLimitAttribute(machines, pods.values());
 
     KubernetesEnvironment k8sEnv =
@@ -152,6 +177,8 @@ public class KubernetesEnvironmentFactory
             .setServices(services)
             .setIngresses(new HashMap<>())
             .setPersistentVolumeClaims(new HashMap<>())
+            .setSecrets(new HashMap<>())
+            .setConfigMaps(new HashMap<>())
             .build();
 
     envValidator.validate(k8sEnv);

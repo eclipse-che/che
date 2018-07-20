@@ -26,6 +26,7 @@ public class TerminalOptionsJso extends Jso {
             cols: 80,
             rows: 24,
             screenKeys: true,
+            command: "",
             fontSize: 12,
             fontFamily: "DejaVu Sans Mono"
         }
@@ -37,5 +38,15 @@ public class TerminalOptionsJso extends Jso {
 
   public final native void setTheme(TerminalThemeJso theme) /*-{
         this.theme = theme;
+    }-*/;
+
+  /**
+   * @param command initial command what will be executed immediately after connection to the
+   *     terminal will established
+   * @return
+   */
+  public final native TerminalOptionsJso withCommand(String command) /*-{
+        this.command = command;
+        return this;
     }-*/;
 }

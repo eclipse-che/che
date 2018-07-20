@@ -11,14 +11,12 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static java.lang.String.format;
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.BLANK;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import java.util.Collections;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.StackDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -34,8 +31,6 @@ import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
 public class StacksListTest {
-
-  private static final String NEW_STACK_NAME = generate("", 8);
 
   @Inject private StackDetails stackDetails;
   @Inject private Dashboard dashboard;
@@ -82,22 +77,22 @@ public class StacksListTest {
     assertEquals(
         stacks.getStackDescription(JAVA.getName()),
         "Default Java Stack with JDK 8, Maven and Tomcat.");
-    assertEquals(stacks.getStackComponents(JAVA.getName()), "JDK, Maven, Tomcat");
+    assertEquals(stacks.getStackComponents(JAVA.getName()), "Ubuntu, JDK, Maven, Tomcat");
   }
 
   @Test
   public void checkStacksSelectingByCheckbox() {
-    createStack(NEW_STACK_NAME);
+    String stackName = createDuplicatedStack(JAVA_MYSQL.getName());
 
     // select stacks by checkbox and check it is selected
-    stacks.selectStackByCheckbox(NEW_STACK_NAME);
-    assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
-    stacks.selectStackByCheckbox(NEW_STACK_NAME);
-    assertFalse(stacks.isStackChecked(NEW_STACK_NAME));
+    stacks.selectStackByCheckbox(stackName);
+    assertTrue(stacks.isStackChecked(stackName));
+    stacks.selectStackByCheckbox(stackName);
+    assertFalse(stacks.isStackChecked(stackName));
 
     // click on the Bulk button and check that created stack is checked
     stacks.selectAllStacksByBulk();
-    assertTrue(stacks.isStackChecked(NEW_STACK_NAME));
+    assertTrue(stacks.isStackChecked(stackName));
   }
 
   @Test
@@ -147,21 +142,18 @@ public class StacksListTest {
 
   @Test
   public void checkStackActionButtons() {
-    String stackName = generate("", 8);
+    String stackName;
 
     // create stack duplicate by Duplicate Stack button
-    stacks.clickOnDuplicateStackButton(JAVA.getName());
-    assertTrue(stacks.isDuplicatedStackExisted(JAVA.getName() + "-copy-"));
-    stacks.clickOnDuplicateStackButton(BLANK.getName());
-    assertTrue(stacks.isDuplicatedStackExisted(BLANK.getName() + "-copy-"));
+    stackName = createDuplicatedStack(JAVA.getName());
+    assertTrue(stacks.isDuplicatedStackExisted(stackName));
 
     // delete stack by the Action delete stack button
-    createStack(stackName);
-    stacks.clickOnDeleteActionButton(stackName);
-    stacks.clickOnDeleteDialogButton();
-    dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", stackName));
-    dashboard.waitNotificationIsClosed();
-    assertFalse(stacks.isStackItemExisted(stackName));
+    deleteStackByActionDeleteButton(stackName);
+
+    stackName = createDuplicatedStack(BLANK.getName());
+    assertTrue(stacks.isDuplicatedStackExisted(stackName));
+    deleteStackByActionDeleteButton(stackName);
   }
 
   private void deleteStack() {
@@ -171,22 +163,28 @@ public class StacksListTest {
     dashboard.waitNotificationIsClosed();
   }
 
-  private void createStack(String stackName) {
+  private String createDuplicatedStack(String stack) {
+    String createdStackName = "";
+
     dashboard.selectStacksItemOnDashboard();
     stacks.waitToolbarTitleName();
+    stacks.clickOnDuplicateStackButton(stack);
 
-    stacks.clickOnAddStackButton();
-    stackDetails.setStackName(stackName);
-    stackDetails.clickOnSaveChangesButton();
-    stackDetails.waitToolbar(stackName);
-    stackDetails.clickOnAllStacksButton();
-    stacks.waitToolbarTitleName();
-
-    try {
-      stacks.waitStackItem(stackName);
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9523", ex);
+    for (String name : stacks.getStacksNamesList()) {
+      if (name.contains(stack + "-copy-")) {
+        createdStackName = name;
+      }
     }
+
+    return createdStackName;
+  }
+
+  private void deleteStackByActionDeleteButton(String name) {
+    // delete stack by the Action delete stack button
+    stacks.clickOnDeleteActionButton(name);
+    stacks.clickOnDeleteDialogButton();
+    dashboard.waitNotificationMessage(format("Stack %s has been successfully removed.", name));
+    dashboard.waitNotificationIsClosed();
+    assertFalse(stacks.isStackItemExisted(name));
   }
 }

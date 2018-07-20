@@ -18,7 +18,6 @@ import io.fabric8.kubernetes.api.model.LocalObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Base64;
@@ -30,9 +29,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.infrastructure.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
 import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /**
  * This class allows workspace-related pods the pull images from the private docker registries
@@ -40,10 +37,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
  * infrastructures. <br>
  * <br>
  * <strong>How it works</strong> <br>
- * When starting a workspace, this provisioner first creates or replaces, in the K8S namespace of
- * the workspace, an <a
+ * When starting a workspace, this provisioner adds an <a
  * href="https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod">{@code
- * imagePullSecret}</a> that reflects the user private registries settings.
+ * imagePullSecret}</a> into environment that reflects the user private registries settings.
  *
  * <p>Then a reference to the created {@code imagePullSecret} is added in each workspace POD
  * specification.
@@ -52,20 +48,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
  */
 public class ImagePullSecretProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
-  static final String SECRET_NAME = "workspace-private-registries";
+  static final String SECRET_NAME_SUFFIX = "-private-registries";
 
   private final UserSpecificDockerRegistryCredentialsProvider credentialsProvider;
-  private final KubernetesClientFactory clientFactory;
-  private final KubernetesNamespaceFactory namespaceFactory;
 
   @Inject
   public ImagePullSecretProvisioner(
-      UserSpecificDockerRegistryCredentialsProvider credentialsProvider,
-      KubernetesClientFactory clientFactory,
-      KubernetesNamespaceFactory namespaceFactory) {
+      UserSpecificDockerRegistryCredentialsProvider credentialsProvider) {
     this.credentialsProvider = credentialsProvider;
-    this.clientFactory = clientFactory;
-    this.namespaceFactory = namespaceFactory;
   }
 
   @Override
@@ -83,31 +73,21 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
       return;
     }
 
-    try {
-      String encodedConfig =
-          Base64.getEncoder().encodeToString(generateDockerCfg(authConfigs).getBytes());
+    String encodedConfig =
+        Base64.getEncoder().encodeToString(generateDockerCfg(authConfigs).getBytes());
 
-      Secret secret =
-          new SecretBuilder()
-              .addToData(".dockercfg", encodedConfig)
-              .withType("kubernetes.io/dockercfg")
-              .withNewMetadata()
-              .withName(SECRET_NAME)
-              .endMetadata()
-              .build();
+    Secret secret =
+        new SecretBuilder()
+            .addToData(".dockercfg", encodedConfig)
+            .withType("kubernetes.io/dockercfg")
+            .withNewMetadata()
+            .withName(identity.getWorkspaceId() + SECRET_NAME_SUFFIX)
+            .endMetadata()
+            .build();
 
-      clientFactory
-          .create(identity.getWorkspaceId())
-          .secrets()
-          .inNamespace(namespaceFactory.create(identity.getWorkspaceId()).getName())
-          .createOrReplace(secret);
-    } catch (KubernetesClientException e) {
-      throw new InfrastructureException(
-          "Unexpected exception occured while adding the 'ImagePullSecret' built from private docker registry user preferences",
-          e);
-    }
+    k8sEnv.getSecrets().put(secret.getMetadata().getName(), secret);
 
-    k8sEnv.getPods().values().forEach(this::provision);
+    k8sEnv.getPods().values().forEach(p -> addImagePullSecret(secret.getMetadata().getName(), p));
   }
 
   /**
@@ -155,17 +135,13 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
           jsonWriter.value(authConfig.getPassword());
           jsonWriter.name("email");
           jsonWriter.value("email@email");
-          String auth =
-              new StringBuilder(authConfig.getUsername())
-                  .append(':')
-                  .append(authConfig.getPassword())
-                  .toString();
+          String auth = authConfig.getUsername() + ':' + authConfig.getPassword();
           jsonWriter.name("auth");
           jsonWriter.value(encoder.encodeToString(auth.getBytes()));
           jsonWriter.endObject();
         } catch (IOException e) {
           throw new InfrastructureException(
-              "Unexpected exception occured while building the 'ImagePullSecret' from private docker registry user preferences",
+              "Unexpected exception occurred while building the 'ImagePullSecret' from private docker registry user preferences",
               e);
         }
       }
@@ -178,12 +154,12 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
     }
   }
 
-  private void provision(Pod pod) {
+  private void addImagePullSecret(String secretName, Pod pod) {
     List<LocalObjectReference> imagePullSecrets = pod.getSpec().getImagePullSecrets();
     pod.getSpec()
         .setImagePullSecrets(
             ImmutableList.<LocalObjectReference>builder()
-                .add(new LocalObjectReferenceBuilder().withName(SECRET_NAME).build())
+                .add(new LocalObjectReferenceBuilder().withName(secretName).build())
                 .addAll(imagePullSecrets)
                 .build());
   }

@@ -41,6 +41,7 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -50,6 +51,7 @@ import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
@@ -97,7 +99,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.UnrecoverableEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.UnrecoverablePodEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -108,15 +110,17 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.ContainerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -169,7 +173,9 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesNamespace namespace;
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
-  @Mock private KubernetesPods pods;
+  @Mock private KubernetesSecrets secrets;
+  @Mock private KubernetesConfigsMaps configMaps;
+  @Mock private KubernetesDeployments deployments;
   @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
@@ -186,6 +192,14 @@ public class KubernetesInternalRuntimeTest {
 
   private KubernetesInternalRuntime<KubernetesRuntimeContext<KubernetesEnvironment>>
       internalRuntimeWithoutUnrecoverableHandler;
+
+  private final ImmutableMap<String, Pod> podsMap =
+      ImmutableMap.of(
+          WORKSPACE_POD_NAME,
+          mockPod(
+              ImmutableList.of(
+                  mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
+                  mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -243,7 +257,9 @@ public class KubernetesInternalRuntimeTest {
     doNothing().when(namespace).cleanUp();
     when(namespace.services()).thenReturn(services);
     when(namespace.ingresses()).thenReturn(ingresses);
-    when(namespace.pods()).thenReturn(pods);
+    when(namespace.deployments()).thenReturn(deployments);
+    when(namespace.secrets()).thenReturn(secrets);
+    when(namespace.configMaps()).thenReturn(configMaps);
     when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
         .thenReturn(bootstrapper);
     doReturn(
@@ -263,32 +279,29 @@ public class KubernetesInternalRuntimeTest {
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(any(), anyInt(), any())).thenReturn(ingress);
-    when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
     when(k8sEnv.getPods()).thenReturn(allPods);
-    when(pods.waitAsync(any(), any())).thenReturn(CompletableFuture.completedFuture(null));
+    when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
     when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
+    when(k8sEnv.getPods()).thenReturn(podsMap);
   }
 
   @Test
   public void startsKubernetesEnvironment() throws Exception {
-    final ImmutableMap<String, Pod> podsMap =
-        ImmutableMap.of(
-            WORKSPACE_POD_NAME,
-            mockPod(
-                ImmutableList.of(
-                    mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
-                    mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
-    when(k8sEnv.getPods()).thenReturn(podsMap);
+    when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
+    when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
 
     internalRuntime.internalStart(emptyMap());
 
-    verify(pods).create(any());
+    verify(deployments).deploy(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    verify(namespace.pods(), times(2)).watchContainers(any());
+    verify(secrets).create(any());
+    verify(configMaps).create(any());
+    verify(namespace.deployments(), times(2)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -297,26 +310,17 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.pods(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch();
   }
 
   @Test
   public void startsKubernetesEnvironmentWithoutUnrecoverableHandler() throws Exception {
-    final ImmutableMap<String, Pod> podsMap =
-        ImmutableMap.of(
-            WORKSPACE_POD_NAME,
-            mockPod(
-                ImmutableList.of(
-                    mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
-                    mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
-    when(k8sEnv.getPods()).thenReturn(podsMap);
-
     internalRuntimeWithoutUnrecoverableHandler.internalStart(emptyMap());
 
-    verify(pods).create(any());
+    verify(deployments).deploy(any());
     verify(ingresses).create(any());
     verify(services).create(any());
-    verify(namespace.pods(), times(1)).watchContainers(any());
+    verify(namespace.deployments(), times(1)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -325,7 +329,7 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.pods(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch();
   }
 
   @Test(expectedExceptions = InternalInfrastructureException.class)
@@ -341,7 +345,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(2)).stopWatch();
     }
   }
 
@@ -357,7 +361,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.internalStart(emptyMap());
     } catch (Exception rethrow) {
-      verify(pods).create(any());
+      verify(deployments).deploy(any());
       verify(ingresses).create(any());
       verify(services).create(any());
       verify(bootstrapper, atLeastOnce()).bootstrapAsync();
@@ -383,7 +387,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.pods(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(2)).stopWatch();
     }
   }
 
@@ -395,14 +399,6 @@ public class KubernetesInternalRuntimeTest {
   )
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
-    final ImmutableMap<String, Pod> podsMap =
-        ImmutableMap.of(
-            WORKSPACE_POD_NAME,
-            mockPod(
-                ImmutableList.of(
-                    mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
-                    mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
-    when(k8sEnv.getPods()).thenReturn(podsMap);
     when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
 
     Executors.newSingleThreadScheduledExecutor()
@@ -430,14 +426,14 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
-    final ContainerEvent out1 =
+    final PodEvent out1 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulling",
             "pulling image",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    final ContainerEvent out2 =
+    final PodEvent out2 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulled",
@@ -459,9 +455,9 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testHandleUnrecoverableEventByReason() throws Exception {
     final String unrecoverableEventReason = "Failed Mount";
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent unrecoverableEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent unrecoverableEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             unrecoverableEventReason,
@@ -477,9 +473,9 @@ public class KubernetesInternalRuntimeTest {
   public void testHandleUnrecoverableEventByMessage() throws Exception {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent unrecoverableEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent unrecoverableEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulling",
@@ -495,9 +491,9 @@ public class KubernetesInternalRuntimeTest {
   public void testDoNotHandleUnrecoverableEventFromNonWorkspacePod() throws Exception {
     final String unrecoverableEventMessage =
         "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent unrecoverableEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent unrecoverableEvent =
         mockContainerEvent(
             "NonWorkspacePod",
             "Pulling",
@@ -512,9 +508,9 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void testHandleRegularEvent() throws Exception {
-    final UnrecoverableEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverableEventHandler(k8sEnv.getPods());
-    final ContainerEvent regularEvent =
+    final UnrecoverablePodEventHandler unrecoverableEventHandler =
+        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
+    final PodEvent regularEvent =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Pulling",
@@ -529,7 +525,7 @@ public class KubernetesInternalRuntimeTest {
   @Test
   public void testDoNotPublishForeignMachineOutput() throws ParseException {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
-    final ContainerEvent out1 =
+    final PodEvent out1 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
             "Created",
@@ -573,7 +569,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.internalStart(emptyMap());
 
-    verify(probesScheduler).schedule(eq(workspaceProbes), any());
+    verify(probesScheduler, times(2)).schedule(eq(workspaceProbes), any());
   }
 
   @Test
@@ -827,13 +823,13 @@ public class KubernetesInternalRuntimeTest {
     return metadata;
   }
 
-  private static ContainerEvent mockContainerEvent(
+  private static PodEvent mockContainerEvent(
       String podName,
       String reason,
       String message,
       String creationTimestamp,
       String lastTimestamp) {
-    final ContainerEvent event = mock(ContainerEvent.class);
+    final PodEvent event = mock(PodEvent.class);
     when(event.getPodName()).thenReturn(podName);
     when(event.getContainerName()).thenReturn(CONTAINER_NAME_1);
     when(event.getReason()).thenReturn(reason);
@@ -843,7 +839,7 @@ public class KubernetesInternalRuntimeTest {
     return event;
   }
 
-  private static MachineLogEvent asMachineLogEvent(ContainerEvent event) {
+  private static MachineLogEvent asMachineLogEvent(PodEvent event) {
     return newDto(MachineLogEvent.class)
         .withRuntimeId(DtoConverter.asDto(IDENTITY))
         .withText(event.getMessage())
@@ -853,7 +849,7 @@ public class KubernetesInternalRuntimeTest {
 
   private String getCurrentTimestampWithOneHourShiftAhead() throws ParseException {
     Date currentTimestampWithOneHourShiftAhead = new Date(new Date().getTime() + 3600 * 1000);
-    return ContainerEvents.convertDateToEventTimestamp(currentTimestampWithOneHourShiftAhead);
+    return PodEvents.convertDateToEventTimestamp(currentTimestampWithOneHourShiftAhead);
   }
 
   private static IntOrString intOrString(int port) {

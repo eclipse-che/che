@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-permission</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.7.0-SNAPSHOT</version>
+        <version>6.9.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-permission-system</artifactId>
     <name>Che Multiuser :: System Permissions</name>
@@ -24,10 +24,6 @@
         <findbugs.failonerror>false</findbugs.failonerror>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
@@ -55,6 +51,11 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,7 +95,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoreDependenvy>org.eclipse.che.multiuser:che-multiuser-api-permission</ignoreDependenvy>
+                                <ignoreDependency>org.eclipse.che.core:che-core-api-system</ignoreDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>

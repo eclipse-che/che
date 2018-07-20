@@ -56,6 +56,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.DeletedFilesController;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -135,6 +136,7 @@ public final class ResourceManager {
   private final Container workspaceRoot;
 
   private final AppContext appContext;
+  private final CoreLocalizationConstant locale;
   private final AgentURLModifier urlModifier;
   private final ClientServerEventService clientServerEventService;
   /** Internal store, which caches requested resources from the server. */
@@ -151,6 +153,7 @@ public final class ResourceManager {
       DtoFactory dtoFactory,
       ProjectTypeRegistry typeRegistry,
       ResourceStore store,
+      CoreLocalizationConstant locale,
       AgentURLModifier urlModifier,
       ClientServerEventService clientServerEventService,
       AppContext appContext) {
@@ -163,6 +166,7 @@ public final class ResourceManager {
     this.dtoFactory = dtoFactory;
     this.typeRegistry = typeRegistry;
     this.store = store;
+    this.locale = locale;
     this.urlModifier = urlModifier;
     this.clientServerEventService = clientServerEventService;
 
@@ -530,9 +534,18 @@ public final class ResourceManager {
     return findResource(destination)
         .thenPromise(
             resource -> {
-              checkState(
-                  !resource.isPresent() || force,
-                  "Cannot create '" + destination.toString() + "'. Resource already exists.");
+              if (source.getLocation().equals(destination)) {
+                return promises.reject(
+                    new IllegalStateException(
+                        locale.resourceCopyMoveSamePathErrorMessage(source.getName())));
+              }
+
+              if (resource.isPresent() && !force) {
+                return promises.reject(
+                    new IllegalStateException(
+                        locale.resourceCopyMoveAlreadyExistErrorMessage(
+                            source.getName(), destination.parent().toString())));
+              }
 
               if (isResourceOpened(source)) {
                 deletedFilesController.add(source.getLocation().toString());
@@ -567,12 +580,17 @@ public final class ResourceManager {
     return findResource(destination)
         .thenPromise(
             resource -> {
+              if (source.getLocation().equals(destination)) {
+                return promises.reject(
+                    new IllegalStateException(
+                        locale.resourceCopyMoveSamePathErrorMessage(source.getName())));
+              }
+
               if (resource.isPresent() && !force) {
                 return promises.reject(
                     new IllegalStateException(
-                        "Cannot create '"
-                            + destination.toString()
-                            + "'. Resource already exists."));
+                        locale.resourceCopyMoveAlreadyExistErrorMessage(
+                            source.getName(), destination.parent().toString())));
               }
 
               return ps.copy(

@@ -28,12 +28,15 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
+import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
+import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
@@ -52,13 +55,16 @@ import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFacto
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
-import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtilImpl;
-import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtilImpl;
+import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtil;
+import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadIntoGridUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadLocallyUtil;
+import org.eclipse.che.selenium.core.webdriver.UploadUtil;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
+import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProviderImpl;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 
@@ -71,8 +77,6 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 public class CheSeleniumSuiteModule extends AbstractModule {
 
   public static final String AUXILIARY = "auxiliary";
-  public static final String DOCKER_INFRASTRUCTURE = "docker";
-  public static final String OPENSHIFT_INFRASTRUCTURE = "openshift";
 
   private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
   private static final String CHE_INFRASTRUCTURE_VARIABLE = "CHE_INFRASTRUCTURE";
@@ -100,11 +104,17 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestWorkspaceAgentApiEndpointUrlProvider.class)
         .to(CheTestWorkspaceAgentApiEndpointUrlProvider.class);
 
-    bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
     bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
 
+    install(
+        new FactoryModuleBuilder()
+            .implement(TestWorkspaceServiceClient.class, CheTestWorkspaceServiceClient.class)
+            .build(TestWorkspaceServiceClientFactory.class));
+
+    bind(TestWorkspaceServiceClient.class).to(CheTestWorkspaceServiceClient.class);
+    bind(TestWorkspaceProvider.class).to(CheTestWorkspaceProvider.class).asEagerSingleton();
+
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
-    install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(TestUserServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(WebDriverLogsReaderFactory.class));
 
@@ -116,26 +126,38 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       install(new CheSeleniumSingleUserModule());
     }
 
-    String cheInfrastructure = System.getenv(CHE_INFRASTRUCTURE_VARIABLE);
-    if (cheInfrastructure == null || cheInfrastructure.isEmpty()) {
-      throw new RuntimeException(
-          format(
-              "Che infrastructure should be defined by environment variable '%s'.",
-              CHE_INFRASTRUCTURE_VARIABLE));
-    } else if (cheInfrastructure.equalsIgnoreCase(DOCKER_INFRASTRUCTURE)) {
-      install(new CheSeleniumDockerModule());
-    } else if (cheInfrastructure.equalsIgnoreCase(OPENSHIFT_INFRASTRUCTURE)) {
-      install(new CheSeleniumOpenshiftModule());
-    } else {
-      throw new RuntimeException(
-          format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
-    }
+    configureInfrastructureRelatedDependencies();
+    configureTestExecutionModeRelatedDependencies();
+  }
 
+  private void configureInfrastructureRelatedDependencies() {
+    final Infrastructure cheInfrastructure =
+        Infrastructure.valueOf(System.getenv(CHE_INFRASTRUCTURE_VARIABLE).toUpperCase());
+    switch (cheInfrastructure) {
+      case OPENSHIFT:
+      case K8S:
+      case OSIO:
+        install(new CheSeleniumOpenshiftModule());
+        break;
+
+      case DOCKER:
+        install(new CheSeleniumDockerModule());
+        break;
+
+      default:
+        throw new RuntimeException(
+            format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
+    }
+  }
+
+  private void configureTestExecutionModeRelatedDependencies() {
     boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
     if (gridMode) {
-      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtilImpl.class);
+      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtil.class);
+      bind(UploadUtil.class).to(UploadIntoGridUtil.class);
     } else {
-      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtilImpl.class);
+      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtil.class);
+      bind(UploadUtil.class).to(UploadLocallyUtil.class);
     }
   }
 

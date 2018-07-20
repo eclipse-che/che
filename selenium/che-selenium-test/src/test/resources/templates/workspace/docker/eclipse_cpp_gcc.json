@@ -3,20 +3,11 @@
     "replaced_name": {
       "machines": {
         "dev-machine": {
-          "servers": {
-            "tomcat8" : {
-              "port" : "8080",
-              "protocol" : "http"
-            },
-            "tomcat8-debug" : {
-              "port" : "8000",
-              "protocol" : "http"
-            }
-          },
+          "servers": {},
           "installers": [
-            "org.eclipse.che.exec",
             "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent",
+            "org.eclipse.che.exec",
             "org.eclipse.che.ls.clangd"
           ],
           "attributes": {
@@ -25,11 +16,21 @@
         }
       },
       "recipe": {
-        "type": "dockerimage",
-        "content": "eclipse/cpp_gcc"
+        "location": "eclipse/cpp_gcc",
+        "type": "dockerimage"
       }
     }
   },
   "defaultEnv": "replaced_name",
-  "name": "replaced_name"
+  "commands": [
+    {
+      "commandLine": "cd ${current.project.path} && make && gdbserver :8001 ./a.out",
+      "name": "make and debug",
+      "type": "custom",
+      "attributes": {}
+    }
+  ],
+  "projects": [],
+  "name": "replaced_name",
+  "links": []
 }

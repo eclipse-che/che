@@ -11,9 +11,8 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
 import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertTrue;
@@ -41,7 +40,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.GITHUB, TestGroup.OSIO})
+@Test(groups = {TestGroup.GITHUB})
 public class ImportProjectFromGitHubTest {
   private static final String WORKSPACE =
       generate(ImportProjectFromGitHubTest.class.getSimpleName(), 4);
@@ -97,7 +96,7 @@ public class ImportProjectFromGitHubTest {
     newWorkspace.waitToolbar();
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
@@ -112,7 +111,7 @@ public class ImportProjectFromGitHubTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability(ELEMENT_TIMEOUT_SEC);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(projectName);

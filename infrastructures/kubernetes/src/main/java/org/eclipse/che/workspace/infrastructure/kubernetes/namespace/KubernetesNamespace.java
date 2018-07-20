@@ -11,10 +11,12 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
@@ -57,28 +59,34 @@ public class KubernetesNamespace {
   private final String workspaceId;
   private final String name;
 
-  private final KubernetesPods pods;
+  private final KubernetesDeployments deployments;
   private final KubernetesServices services;
   private final KubernetesPersistentVolumeClaims pvcs;
   private final KubernetesIngresses ingresses;
   private final KubernetesClientFactory clientFactory;
+  private final KubernetesSecrets secrets;
+  private final KubernetesConfigsMaps configMaps;
 
   @VisibleForTesting
   protected KubernetesNamespace(
       KubernetesClientFactory clientFactory,
       String workspaceId,
       String name,
-      KubernetesPods pods,
+      KubernetesDeployments deployments,
       KubernetesServices services,
       KubernetesPersistentVolumeClaims pvcs,
-      KubernetesIngresses kubernetesIngresses) {
+      KubernetesIngresses kubernetesIngresses,
+      KubernetesSecrets secrets,
+      KubernetesConfigsMaps configMaps) {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
-    this.pods = pods;
+    this.deployments = deployments;
     this.services = services;
     this.pvcs = pvcs;
     this.ingresses = kubernetesIngresses;
+    this.secrets = secrets;
+    this.configMaps = configMaps;
   }
 
   public KubernetesNamespace(
@@ -86,10 +94,12 @@ public class KubernetesNamespace {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
-    this.pods = new KubernetesPods(name, workspaceId, clientFactory);
+    this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
+    this.secrets = new KubernetesSecrets(name, workspaceId, clientFactory);
+    this.configMaps = new KubernetesConfigsMaps(name, workspaceId, clientFactory);
   }
 
   /**
@@ -117,8 +127,8 @@ public class KubernetesNamespace {
   }
 
   /** Returns object for managing {@link Pod} instances inside namespace. */
-  public KubernetesPods pods() {
-    return pods;
+  public KubernetesDeployments deployments() {
+    return deployments;
   }
 
   /** Returns object for managing {@link Service} instances inside namespace. */
@@ -136,9 +146,24 @@ public class KubernetesNamespace {
     return ingresses;
   }
 
+  /** Returns object for managing {@link Secret} instances inside namespace. */
+  public KubernetesSecrets secrets() {
+    return secrets;
+  }
+
+  /** Returns object for managing {@link ConfigMap} instances inside namespace. */
+  public KubernetesConfigsMaps configMaps() {
+    return configMaps;
+  }
+
   /** Removes all object except persistent volume claims inside namespace. */
   public void cleanUp() throws InfrastructureException {
-    doRemove(ingresses::delete, services::delete, pods::delete);
+    doRemove(
+        ingresses::delete,
+        services::delete,
+        deployments::delete,
+        secrets::delete,
+        configMaps::delete);
   }
 
   /**

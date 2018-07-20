@@ -20,11 +20,13 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"os"
+	"strings"
 )
 
 const (
 	TokenKind      = "machine_token"
 	WorkspaceIdEnv = "CHE_WORKSPACE_ID"
+	BearerPrefix   = "bearer "
 )
 
 var (
@@ -111,6 +113,12 @@ func (handler handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	token := req.URL.Query().Get("token")
+	if token == "" {
+		header := req.Header.Get("Authorization")
+		if header != "" && strings.HasPrefix(strings.ToLower(header), BearerPrefix) {
+			token = header[len(BearerPrefix):]
+		}
+	}
 	if err := authenticate(token); err == nil {
 		handler.delegate.ServeHTTP(w, req)
 	} else {
@@ -125,6 +133,12 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 		return
 	}
 	token := req.URL.Query().Get("token")
+	if token == "" {
+		header := req.Header.Get("Authorization")
+		if header != "" && strings.HasPrefix(strings.ToLower(header), BearerPrefix) {
+			token = header[len(BearerPrefix):]
+		}
+	}
 	if handler.cache.Contains(token) {
 		handler.delegate.ServeHTTP(w, req)
 	} else if err := authenticate(token); err == nil {
@@ -137,7 +151,7 @@ func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 
 func authenticate(token string) error {
 	if token == "" {
-		return errors.New("Authentication failed because: missing 'token' query parameter")
+		return errors.New("Authentication failed because: missing authentication token in 'Authorization' header or 'token' query param")
 	}
 
 	claims := &JWTClaims{}

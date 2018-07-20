@@ -12,13 +12,16 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
@@ -67,9 +70,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -86,9 +89,6 @@ public class KubernetesInternalRuntime<
     extends InternalRuntime<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesInternalRuntime.class);
-
-  private static final String POD_RUNNING_STATUS = "Running";
-  private static final String POD_FAILED_STATUS = "Failed";
 
   private final int workspaceStartTimeout;
   private final int ingressStartTimeout;
@@ -198,7 +198,7 @@ public class KubernetesInternalRuntime<
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
       // stop watching before namespace cleaning up
-      namespace.pods().stopWatch();
+      namespace.deployments().stopWatch();
       try {
         namespace.cleanUp();
       } catch (InfrastructureException cleanUppingEx) {
@@ -214,7 +214,7 @@ public class KubernetesInternalRuntime<
       }
       wrapAndRethrow(startFailureCause);
     } finally {
-      namespace.pods().stopWatch();
+      namespace.deployments().stopWatch();
     }
   }
 
@@ -383,10 +383,8 @@ public class KubernetesInternalRuntime<
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
     CompletableFuture<Void> waitFuture =
-        namespace
-            .pods()
-            .waitAsync(
-                machine.getPodName(), p -> (POD_RUNNING_STATUS.equals(p.getStatus().getPhase())));
+        namespace.deployments().waitRunningAsync(machine.getPodName());
+
     toCancelFutures.add(waitFuture);
     return waitFuture;
   }
@@ -468,6 +466,15 @@ public class KubernetesInternalRuntime<
    */
   protected void startMachines() throws InfrastructureException {
     KubernetesEnvironment k8sEnv = getContext().getEnvironment();
+
+    for (Secret secret : k8sEnv.getSecrets().values()) {
+      namespace.secrets().create(secret);
+    }
+
+    for (ConfigMap configMap : k8sEnv.getConfigMaps().values()) {
+      namespace.configMaps().create(configMap);
+    }
+
     List<Service> createdServices = new ArrayList<>();
     for (Service service : k8sEnv.getServices().values()) {
       createdServices.add(namespace.services().create(service));
@@ -479,10 +486,10 @@ public class KubernetesInternalRuntime<
 
     // TODO https://github.com/eclipse/che/issues/7653
     // namespace.pods().watch(new AbnormalStopHandler());
-    namespace.pods().watchContainers(new MachineLogsPublisher());
+    namespace.deployments().watchEvents(new MachineLogsPublisher());
     if (!unrecoverableEvents.isEmpty()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      namespace.pods().watchContainers(new UnrecoverableEventHandler(pods));
+      namespace.deployments().watchEvents(new UnrecoverablePodEventHandler(pods));
     }
 
     final KubernetesServerResolver serverResolver =
@@ -502,7 +509,7 @@ public class KubernetesInternalRuntime<
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
     for (Pod toCreate : environment.getPods().values()) {
-      final Pod createdPod = namespace.pods().create(toCreate);
+      final Pod createdPod = namespace.deployments().deploy(toCreate);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
         String machineName = Names.machineName(toCreate, container);
@@ -706,11 +713,11 @@ public class KubernetesInternalRuntime<
     }
   }
 
-  /** Listens container's events and terminates workspace if unrecoverable event occurs. */
-  public class UnrecoverableEventHandler implements ContainerEventHandler {
+  /** Listens Pod events and terminates workspace if unrecoverable event occurs. */
+  public class UnrecoverablePodEventHandler implements PodEventHandler {
     private Map<String, Pod> workspacePods;
 
-    public UnrecoverableEventHandler(Map<String, Pod> workspacePods) {
+    public UnrecoverablePodEventHandler(Map<String, Pod> workspacePods) {
       this.workspacePods = workspacePods;
     }
 
@@ -719,7 +726,7 @@ public class KubernetesInternalRuntime<
      * and 'lastTimestamp' of the event is *after* the time of handler initialization
      */
     @Override
-    public void handle(ContainerEvent event) {
+    public void handle(PodEvent event) {
       if (isWorkspaceEvent(event) && isUnrecoverable(event)) {
         String reason = event.getReason();
         String message = event.getMessage();
@@ -740,7 +747,7 @@ public class KubernetesInternalRuntime<
     }
 
     /** Returns true if event belongs to one of the workspace pods, false otherwise */
-    private boolean isWorkspaceEvent(ContainerEvent event) {
+    private boolean isWorkspaceEvent(PodEvent event) {
       String podName = event.getPodName();
       return workspacePods.containsKey(podName);
     }
@@ -751,7 +758,7 @@ public class KubernetesInternalRuntime<
      *
      * @param event event to check
      */
-    private boolean isUnrecoverable(ContainerEvent event) {
+    private boolean isUnrecoverable(PodEvent event) {
       boolean isUnrecoverable = false;
       String reason = event.getReason();
       String message = event.getMessage();
@@ -772,19 +779,17 @@ public class KubernetesInternalRuntime<
     }
   }
 
-  /** Listens container's events and publish them as machine logs. */
-  public class MachineLogsPublisher implements ContainerEventHandler {
+  /** Listens pod events and publish them as machine logs. */
+  public class MachineLogsPublisher implements PodEventHandler {
 
     @Override
-    public void handle(ContainerEvent event) {
+    public void handle(PodEvent event) {
       final String podName = event.getPodName();
-      final String containerName = event.getContainerName();
       try {
         for (Entry<String, KubernetesMachineImpl> entry :
             machines.getMachines(getContext().getIdentity()).entrySet()) {
           final KubernetesMachineImpl machine = entry.getValue();
-          if (machine.getPodName().equals(podName)
-              && machine.getContainerName().equals(containerName)) {
+          if (machine.getPodName().equals(podName)) {
             eventPublisher.sendMachineLogEnvent(
                 entry.getKey(),
                 event.getMessage(),
@@ -806,7 +811,7 @@ public class KubernetesInternalRuntime<
     public void handle(Action action, Pod pod) {
       // Cancels workspace servers probes if any
       probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
-      if (pod.getStatus() != null && POD_FAILED_STATUS.equals(pod.getStatus().getPhase())) {
+      if (pod.getStatus() != null && POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
         try {
           internalStop(emptyMap());
         } catch (InfrastructureException ex) {

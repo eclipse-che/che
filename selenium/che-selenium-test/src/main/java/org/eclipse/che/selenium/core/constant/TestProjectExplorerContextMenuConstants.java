@@ -25,7 +25,9 @@ public final class TestProjectExplorerContextMenuConstants {
     SHOW_REFERENCES("gwt-debug-contextMenu/showReference"),
     GO_INTO("gwt-debug-contextMenu/goInto"),
     GO_BACK("gwt-debug-contextMenu/goInto"),
+    OPEN_IN_TERMINAL("gwt-debug-contextMenu/openInTerminal"),
     CUT("gwt-debug-contextMenu/cut"),
+    COPY("gwt-debug-contextMenu/copy"),
     PASTE("gwt-debug-contextMenu/paste"),
     RENAME("gwt-debug-contextMenu/renameResource"),
     DELETE("gwt-debug-contextMenu/deleteItem"),
@@ -37,8 +39,9 @@ public final class TestProjectExplorerContextMenuConstants {
     REFRESH("gwt-debug-contextMenu/refreshPathAction"),
     REIMPORT("gwt-debug-contextMenu/Maven/reimportMavenDependenciesAction"),
     TEST("gwt-debug-contextMenu/TestingContextGroup"),
-    ADD_TO_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Add to File Watcher excludes"),
-    REMOVE_FROM_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Remove from File Watcher excludes");
+    ADD_TO_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Add to File Watcher exclusion list"),
+    REMOVE_FROM_FILE_WATCHER_EXCLUDES(
+        "gwt-debug-contextMenu/Remove from File Watcher exclusion list");
 
     private final String itemId;
 
@@ -120,9 +123,10 @@ public final class TestProjectExplorerContextMenuConstants {
 
   /** Submenu for {@link ContextMenuFirstLevelItems#COMMANDS} */
   public enum ContextMenuCommandGoals implements ContextMenuItems {
-    COMMON("gwt-debug-contextMenu/Commands/goal_Common"),
-    BUILD("gwt-debug-contextMenu/Commands/goal_Build"),
-    RUN("gwt-debug-contextMenu/Commands/goal_Run");
+    COMMON_GOAL("gwt-debug-contextMenu/Commands/goal_Common"),
+    BUILD_GOAL("gwt-debug-contextMenu/Commands/goal_Build"),
+    RUN_GOAL("gwt-debug-contextMenu/Commands/goal_Run"),
+    DEBUG_GOAL("gwt-debug-contextMenu/Commands/goal_Debug");
 
     private final String itemId;
 

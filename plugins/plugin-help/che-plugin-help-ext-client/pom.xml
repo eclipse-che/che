@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-help-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.7.0-SNAPSHOT</version>
+        <version>6.9.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-help-ext-client</artifactId>
     <packaging>gwt-lib</packaging>
@@ -59,6 +59,11 @@
             <groupId>com.google.gwt.inject</groupId>
             <artifactId>gin</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

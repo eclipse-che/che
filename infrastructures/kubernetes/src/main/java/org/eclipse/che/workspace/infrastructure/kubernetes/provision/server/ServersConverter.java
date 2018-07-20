@@ -23,8 +23,10 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 
 /**
  * Converts {@link ServerConfig} to Kubernetes related objects to add a server into Kubernetes
@@ -39,15 +41,20 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 public class ServersConverter<T extends KubernetesEnvironment>
     implements ConfigurationProvisioner<T> {
 
+  private final SecureServerExposerFactory<T> secureServerExposerFactory;
   private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
 
   @Inject
-  public ServersConverter(ExternalServerExposerStrategy<T> externalServerExposerStrategy) {
+  public ServersConverter(
+      SecureServerExposerFactory<T> secureServerExposerFactory,
+      ExternalServerExposerStrategy<T> externalServerExposerStrategy) {
+    this.secureServerExposerFactory = secureServerExposerFactory;
     this.externalServerExposerStrategy = externalServerExposerStrategy;
   }
 
   @Override
   public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
+    SecureServerExposer<T> secureServerExposer = secureServerExposerFactory.create(identity);
 
     for (Pod podConfig : k8sEnv.getPods().values()) {
       final PodSpec podSpec = podConfig.getSpec();
@@ -57,7 +64,12 @@ public class ServersConverter<T extends KubernetesEnvironment>
         if (!machineConfig.getServers().isEmpty()) {
           KubernetesServerExposer kubernetesServerExposer =
               new KubernetesServerExposer<>(
-                  externalServerExposerStrategy, machineName, podConfig, containerConfig, k8sEnv);
+                  externalServerExposerStrategy,
+                  secureServerExposer,
+                  machineName,
+                  podConfig,
+                  containerConfig,
+                  k8sEnv);
           kubernetesServerExposer.expose(machineConfig.getServers());
         }
       }

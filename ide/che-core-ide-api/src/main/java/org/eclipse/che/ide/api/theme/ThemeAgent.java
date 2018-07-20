@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
  */
 public interface ThemeAgent {
 
+  String PREFERENCE_KEY = "ide.theme";
+
   /**
    * @param themeId the id of the theme
    * @return theme with theme id or default theme if theme not found
@@ -35,4 +37,10 @@ public interface ThemeAgent {
 
   /** @return current theme */
   String getCurrentThemeId();
+
+  /**
+   * Sets current theme by theme id. If there is no such theme by given id, then default theme is
+   * activated.
+   */
+  void setTheme(String themeId);
 }

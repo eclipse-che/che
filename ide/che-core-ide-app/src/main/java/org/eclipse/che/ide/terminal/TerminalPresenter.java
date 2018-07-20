@@ -18,6 +18,7 @@ import static org.eclipse.che.ide.terminal.TerminalInitializer.FIT_ADDON;
 import static org.eclipse.che.ide.terminal.TerminalInitializer.XTERM_JS_MODULE;
 import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_NORMAL;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.user.client.Timer;
@@ -51,11 +52,11 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
   // event which is performed when user input data into terminal
   private static final String DATA_EVENT_NAME = "data";
+  private static final String TYPE = "type";
   private static final String RESIZE_EVENT_NAME = "resize";
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
   private final TerminalView view;
-  private final TerminalOptionsJso options;
   private final NotificationManager notificationManager;
   private final CoreLocalizationConstant locale;
   private final MachineImpl machine;
@@ -83,7 +84,6 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       AgentURLModifier agentURLModifier,
       ThemeAgent themeAgent) {
     this.view = view;
-    this.options = options != null ? options : TerminalOptionsJso.create();
     this.focusOnOpen = focusOnOpen;
     this.agentURLModifier = agentURLModifier;
     view.setDelegate(this);
@@ -99,10 +99,27 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   }
 
   /**
-   * Connects to special WebSocket which allows get information from terminal on server side. The
-   * terminal is initialized only when the method is called the first time.
+   * Connects to Terminal Server by WebSocket. Which allows get information from terminal on server
+   * side. The terminal is initialized only when the method is called the first time.
    */
   public void connect() {
+    connect(TerminalOptionsJso.create());
+  }
+
+  /**
+   * <pre>
+   * Connects to Terminal Server by WebSocket. Which allows get information from terminal on server side. The
+   * terminal is initialized only when the method is called the first time.
+   *
+   * @param options with options param can be set some initial states for new terminal like:
+   *               - initial size (number of rows and cols);
+   *               - set focused on open;
+   *               - initial command (like change working dir 'cd directory' and etc)
+   *
+   * More details {@link TerminalOptionsJso}
+   * </pre>
+   */
+  public void connect(TerminalOptionsJso options) {
     if (countRetry == 0) {
       return;
     }
@@ -121,7 +138,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
                                     "Machine "
                                         + machine.getName()
                                         + " doesn't provide terminal server."));
-                connectToTerminal(agentURLModifier.modify(terminalServer.getUrl()));
+                connectToTerminal(agentURLModifier.modify(terminalServer.getUrl()), options);
               })
           .catchError(
               arg -> {
@@ -149,9 +166,21 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     }
   }
 
-  private void connectToTerminal(@NotNull String wsUrl) {
+  /**
+   * Give command will be executed
+   *
+   * @param command
+   */
+  public void sendCommand(String command) {
+    Jso jso = Jso.create();
+    jso.addField(TYPE, DATA_EVENT_NAME);
+    jso.addField(DATA_EVENT_NAME, command);
+    socket.send(jso.serialize());
+  }
+
+  private void connectToTerminal(@NotNull String wsUrl, TerminalOptionsJso options) {
     countRetry--;
-    TerminalJso terminal = createTerminal();
+    TerminalJso terminal = createTerminal(options);
     socket = WebSocket.create(wsUrl);
 
     socket.setOnMessageHandler(event -> terminal.write(event.getMessage()));
@@ -182,10 +211,15 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
               DATA_EVENT_NAME,
               data -> {
                 Jso jso = Jso.create();
-                jso.addField("type", "data");
-                jso.addField("data", data);
+                jso.addField(TYPE, DATA_EVENT_NAME);
+                jso.addField(DATA_EVENT_NAME, data);
                 socket.send(jso.serialize());
               });
+          String command = options.getStringField("command");
+          if (!Strings.isNullOrEmpty(command)) {
+            sendCommand(command);
+            sendCommand("\r");
+          }
         });
 
     socket.setOnErrorHandler(
@@ -205,8 +239,8 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
         });
   }
 
-  private TerminalJso createTerminal() {
-    setUpTerminalTheme();
+  private TerminalJso createTerminal(TerminalOptionsJso options) {
+    setUpTerminalTheme(options);
 
     JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
     TerminalJso terminal = TerminalJso.create(terminalJso, options);
@@ -219,7 +253,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     return terminal;
   }
 
-  private void setUpTerminalTheme() {
+  private void setUpTerminalTheme(TerminalOptionsJso options) {
     if (options.getTheme() == null) {
       Theme ideTheme = themeAgent.getTheme(themeAgent.getCurrentThemeId());
       TerminalThemeJso terminalTheme = TerminalThemeJso.create();
@@ -235,7 +269,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   public void stopTerminal() {
     if (connected) {
       Jso jso = Jso.create();
-      jso.addField("type", "close");
+      jso.addField(TYPE, "close");
       socket.send(jso.serialize());
     }
   }
@@ -265,8 +299,8 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     JsArrayInteger arr = Jso.createArray().cast();
     arr.set(0, x);
     arr.set(1, y);
-    jso.addField("type", "resize");
-    jso.addField("data", arr);
+    jso.addField(TYPE, "resize");
+    jso.addField(DATA_EVENT_NAME, arr);
     socket.send(jso.serialize());
   }
 

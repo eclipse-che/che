@@ -13,8 +13,10 @@ package org.eclipse.che.selenium.core.webdriver;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
+import org.eclipse.che.selenium.core.utils.DockerUtil;
 
 /** @author Dmytro Nochevnov */
 @Singleton
@@ -32,16 +34,12 @@ public class SeleniumWebDriverFactory {
   @Named("sys.grid.mode")
   private boolean gridMode;
 
-  @Inject
-  @Named("sys.driver.version")
-  private String webDriverVersion;
+  @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
 
-  @Inject
-  @Named("tests.download_dir")
-  private String downloadDirectory;
+  @Inject private DockerUtil dockerUtil;
 
   public SeleniumWebDriver create() {
     return new SeleniumWebDriver(
-        browser, webDriverPort, gridMode, webDriverVersion, downloadDirectory);
+        browser, webDriverPort, gridMode, httpJsonRequestFactory, dockerUtil);
   }
 }

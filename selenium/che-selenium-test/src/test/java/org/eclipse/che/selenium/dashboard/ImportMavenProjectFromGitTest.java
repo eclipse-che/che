@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
 
 import com.google.inject.Inject;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -36,7 +35,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-@Test(groups = TestGroup.OSIO)
 public class ImportMavenProjectFromGitTest {
 
   private final String WORKSPACE = generate("ImtMvnPrjGit", 4);
@@ -79,7 +77,7 @@ public class ImportMavenProjectFromGitTest {
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();

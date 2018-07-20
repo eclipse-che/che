@@ -30,10 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
@@ -44,7 +41,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
@@ -91,8 +91,7 @@ public class OpenShiftInfraModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(LogsRootEnvVariableProvider.class);
 
-    bind(KubernetesRuntimeStateCache.class).to(JpaKubernetesRuntimeStateCache.class);
-    bind(KubernetesMachineCache.class).to(JpaKubernetesMachineCache.class);
+    install(new JpaKubernetesRuntimeCacheModule());
 
     Multibinder.newSetBinder(binder(), ServiceTermination.class)
         .addBinding()
@@ -101,5 +100,19 @@ public class OpenShiftInfraModule extends AbstractModule {
     MapBinder<String, WorkspaceNextApplier> wsNext =
         MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
     wsNext.addBinding(OpenShiftEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
+
+    bind(new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {})
+        .toProvider(new TypeLiteral<SecureServerExposerFactoryProvider<OpenShiftEnvironment>>() {});
+
+    MapBinder<String, SecureServerExposerFactory<OpenShiftEnvironment>>
+        secureServerExposerFactories =
+            MapBinder.newMapBinder(
+                binder(),
+                new TypeLiteral<String>() {},
+                new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {});
+
+    secureServerExposerFactories
+        .addBinding("default")
+        .to(new TypeLiteral<DefaultSecureServersFactory<OpenShiftEnvironment>>() {});
   }
 }

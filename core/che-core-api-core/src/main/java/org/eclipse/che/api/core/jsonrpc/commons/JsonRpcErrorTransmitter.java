@@ -40,7 +40,8 @@ public class JsonRpcErrorTransmitter {
 
     LOGGER.debug("Transmitting a JSON RPC error: " + e.getMessage());
 
-    JsonRpcError error = new JsonRpcError(e.getCode(), e.getMessage());
+    JsonRpcError error =
+        new JsonRpcError(e.getCode(), e.getMessage() == null ? "Unexpected error" : e.getMessage());
     JsonRpcResponse response = new JsonRpcResponse(e.getId(), null, error);
     String message = marshaller.marshall(response);
     transmitter.transmit(endpointId, message);

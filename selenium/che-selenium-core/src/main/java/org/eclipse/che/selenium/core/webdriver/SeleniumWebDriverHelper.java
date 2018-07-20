@@ -29,36 +29,40 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** @author Ihor Okhrimenko */
 @Singleton
 public class SeleniumWebDriverHelper {
-  protected final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
-  protected final SeleniumWebDriver seleniumWebDriver;
-  protected final WebDriverWaitFactory webDriverWaitFactory;
-  protected final ActionsFactory actionsFactory;
-  protected final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriverHelper.class);
+  private final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
+
+  private final SeleniumWebDriver seleniumWebDriver;
+  private final WebDriverWaitFactory webDriverWaitFactory;
+  private final ActionsFactory actionsFactory;
+  private final UploadUtil uploadUtil;
 
   @Inject
   public SeleniumWebDriverHelper(
       SeleniumWebDriver seleniumWebDriver,
       WebDriverWaitFactory webDriverWaitFactory,
-      ActionsFactory actionsFactory) {
+      ActionsFactory actionsFactory,
+      UploadUtil uploadFileUtil) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.webDriverWaitFactory = webDriverWaitFactory;
     this.actionsFactory = actionsFactory;
+    this.uploadUtil = uploadFileUtil;
   }
 
   /**
@@ -428,7 +432,7 @@ public class SeleniumWebDriverHelper {
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
    * @param elementLocator locator of element from which text should be got
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(By elementLocator) {
     return waitVisibility(elementLocator).getAttribute("value");
@@ -438,7 +442,7 @@ public class SeleniumWebDriverHelper {
    * Waits visibility of provided {@code webElement} and gets text.
    *
    * @param webElement element, text from which should be got
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(WebElement webElement) {
     return waitVisibility(webElement).getAttribute("value");
@@ -446,11 +450,11 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text from
-   * its {@code attribute} attribute.
+   * its {@code attribute}.
    *
    * @param elementLocator locator of element from which attribute should be got
    * @param attribute name of element attribute
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetAttribute(By elementLocator, String attribute) {
     return waitVisibilityAndGetAttribute(elementLocator, attribute, DEFAULT_TIMEOUT);
@@ -458,14 +462,37 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility during {@code timeout} of {@link WebElement} with provided {@code
-   * elementLocator} and gets text from its {@code attribute} attribute.
+   * elementLocator} and gets text from its {@code attribute}.
    *
    * @param elementLocator locator of element from which attribute should be got
    * @param attribute name of element attribute
-   * @return element text by {@link WebElement#getAttribute(String)}
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetAttribute(By elementLocator, String attribute, int timeout) {
     return waitVisibility(elementLocator, timeout).getAttribute(attribute);
+  }
+
+  /**
+   * Waits visibility of specified {@code element} and gets text from its {@code attribute}.
+   *
+   * @param element element from which attribute should be got
+   * @param attribute name of element attribute
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetAttribute(WebElement element, String attribute) {
+    return waitVisibilityAndGetAttribute(element, attribute, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits visibility during {@code timeout} of specified {@code element} and gets text from its
+   * {@code attribute}.
+   *
+   * @param element element from which attribute should be got
+   * @param attribute name of element attribute
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetAttribute(WebElement element, String attribute, int timeout) {
+    return waitVisibility(element, timeout).getAttribute(attribute);
   }
 
   /**
@@ -681,7 +708,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibility(element).getText().contains(expectedText));
+                driver -> waitVisibility(element, timeout).getText().contains(expectedText));
   }
 
   /**
@@ -1099,6 +1126,26 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits during {@code timeout} until attribute with specified {@code attributeName} has {@code
+   * expectedValue}.
+   *
+   * @param element element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   * @param timeout waiting time in seconds
+   */
+  public void waitAttributeEqualsTo(
+      WebElement element, String attributeName, String expectedValue, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    waitVisibilityAndGetAttribute(element, attributeName, timeout)
+                        .equals(expectedValue));
+  }
+
+  /**
    * Waits until attribute with specified {@code attributeName} has {@code expectedValue}.
    *
    * @param elementLocator element which contains attribute
@@ -1107,6 +1154,50 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAttributeEqualsTo(By elementLocator, String attributeName, String expectedValue) {
     waitAttributeEqualsTo(elementLocator, attributeName, expectedValue, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until attribute with specified {@code attributeName} has {@code expectedValue}.
+   *
+   * @param element element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   */
+  public void waitAttributeEqualsTo(
+      WebElement element, String attributeName, String expectedValue) {
+    waitAttributeEqualsTo(element, attributeName, expectedValue, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until attribute with specified {@code attributeName} contains
+   * {@code expectedValue}.
+   *
+   * @param elementLocator element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   * @param timeout waiting time in seconds
+   */
+  public void waitAttributeContainsValue(
+      By elementLocator, String attributeName, String expectedValue, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    waitVisibilityAndGetAttribute(elementLocator, attributeName, timeout)
+                        .contains(expectedValue));
+  }
+
+  /**
+   * Waits until attribute with specified {@code attributeName} contains {@code expectedValue}.
+   *
+   * @param elementLocator element which contains attribute
+   * @param attributeName name of the attribute
+   * @param expectedValue expected attribute value
+   */
+  public void waitAttributeContainsValue(
+      By elementLocator, String attributeName, String expectedValue) {
+    waitAttributeContainsValue(elementLocator, attributeName, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -1177,5 +1268,53 @@ public class SeleniumWebDriverHelper {
         waitElementIsNotSelected(isCheckedWebElement);
       }
     }
+  }
+
+  /**
+   * Performs clicking and holding an {@code element} during specified {@code timeout}.
+   *
+   * @param element target element
+   * @param holdingTimeout time for element holding
+   */
+  public void clickAndHoldElementDuringTimeout(By element, int holdingTimeout) {
+    clickAndHoldElementDuringTimeout(waitVisibility(element), holdingTimeout);
+  }
+
+  /**
+   * Performs clicking and holding an {@code element} during specified {@code timeout}.
+   *
+   * @param element target element
+   * @param holdingTimeout time for element holding
+   */
+  public void clickAndHoldElementDuringTimeout(WebElement element, int holdingTimeout) {
+    Actions action = getAction();
+    action.clickAndHold(waitVisibility(element)).perform();
+    WaitUtils.sleepQuietly(holdingTimeout);
+    action.release(waitVisibility(element)).perform();
+  }
+
+  /**
+   * @see SeleniumWebDriverHelper#selectResourceToUpload(org.openqa.selenium.WebElement,
+   *     java.nio.file.Path)
+   */
+  public void selectResourceToUpload(By elementLocator, Path localResource) throws IOException {
+    selectResourceToUpload(seleniumWebDriver.findElement(elementLocator), localResource);
+  }
+
+  /**
+   * Links resource to upload to input element of file type.
+   *
+   * @param webElement web element which is being used to upload the file
+   * @param localResource path to the local file or directory
+   * @return name of file which is linked to upload, or the name of zip file which contains
+   *     uploading directory
+   * @throws IOException if there is a problem with preparing resource to upload
+   */
+  public String selectResourceToUpload(WebElement webElement, Path localResource)
+      throws IOException {
+    Path readyToUploadFile = uploadUtil.prepareToUpload(seleniumWebDriver, localResource);
+    webElement.sendKeys(readyToUploadFile.toString());
+
+    return readyToUploadFile.getFileName().toString();
   }
 }

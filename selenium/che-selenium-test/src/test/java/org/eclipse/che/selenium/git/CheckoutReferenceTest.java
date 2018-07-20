@@ -10,10 +10,7 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.BRANCHES;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.CHECKOUT_REFERENCE;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.SHOW_HISTORY;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.*;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 import static org.testng.Assert.assertTrue;
 
@@ -26,10 +23,7 @@ import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.git.GitHistory;
 import org.testng.annotations.BeforeClass;
@@ -114,6 +108,12 @@ public class CheckoutReferenceTest {
     editor.waitActive();
     editor.waitTextIntoEditor(UPDATE_FILE);
 
+    // check current reference
+    menu.runCommand(GIT, STATUS);
+    git.waitGitStatusBarWithMess("On branch " + DEFAULT_BRANCH);
+
+    projectExplorer.waitReferenceName(DEFAULT_BRANCH);
+
     // check the name of the default branch
     openBranchPanelAndWaitRefHeadName(DEFAULT_BRANCH);
 
@@ -133,6 +133,12 @@ public class CheckoutReferenceTest {
     editor.selectTabByName(JS_FILE);
     editor.waitTextIntoEditor(CHANGE_FILE);
     editor.waitTextNotPresentIntoEditor(UPDATE_FILE);
+
+    // check current reference
+    menu.runCommand(GIT, STATUS);
+    git.waitGitStatusBarWithMess("HEAD detached at " + hashCommit);
+
+    projectExplorer.waitReferenceName(sha1);
 
     // switch to default branch
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -174,6 +180,12 @@ public class CheckoutReferenceTest {
 
     editor.selectTabByName(JS_FILE);
     editor.waitTextIntoEditor(CHANGE_FILE_1);
+
+    // check current reference
+    menu.runCommand(GIT, STATUS);
+    git.waitGitStatusBarWithMess("HEAD detached at " + TAG_NAME_1);
+
+    projectExplorer.waitReferenceName(TAG_NAME_1);
 
     // check the git history
     openGitHistoryForm();

@@ -28,13 +28,13 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
-import org.eclipse.che.ide.theme.ThemeAgentImpl;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
@@ -62,6 +62,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   protected final Provider<WorkspacePresenter> workspacePresenterProvider;
   protected final EventBus eventBus;
   protected final DialogFactory dialogFactory;
+  protected final PreferencesManager preferencesManager;
 
   @Inject
   DefaultIdeInitializationStrategy(
@@ -74,7 +75,8 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
       Provider<StandardComponentInitializer> standardComponentsInitializerProvider,
       Provider<WorkspacePresenter> workspacePresenterProvider,
       EventBus eventBus,
-      DialogFactory dialogFactory) {
+      DialogFactory dialogFactory,
+      PreferencesManager preferencesManager) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
     this.browserAddress = browserAddress;
@@ -85,6 +87,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     this.workspacePresenterProvider = workspacePresenterProvider;
     this.eventBus = eventBus;
     this.dialogFactory = dialogFactory;
+    this.preferencesManager = preferencesManager;
   }
 
   @Override
@@ -120,7 +123,7 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
 
   private Operation<Void> initUI() {
     return aVoid -> {
-      ((ThemeAgentImpl) themeAgent).applyUserTheme();
+      themeAgent.setTheme(preferencesManager.getValue(ThemeAgent.PREFERENCE_KEY));
       styleInjector.inject();
     };
   }

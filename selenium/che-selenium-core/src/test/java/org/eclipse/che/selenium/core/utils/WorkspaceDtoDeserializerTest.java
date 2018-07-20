@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.utils;
 
 import java.lang.reflect.Field;
+import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -24,7 +25,7 @@ public class WorkspaceDtoDeserializerTest {
     deserializer = new WorkspaceDtoDeserializer();
     Field f1 = WorkspaceDtoDeserializer.class.getDeclaredField("infrastructure");
     f1.setAccessible(true);
-    f1.set(deserializer, "supershift");
+    f1.set(deserializer, Infrastructure.OPENSHIFT);
   }
 
   @Test
@@ -36,7 +37,7 @@ public class WorkspaceDtoDeserializerTest {
   @Test(
     expectedExceptions = RuntimeException.class,
     expectedExceptionsMessageRegExp =
-        "resource /templates/workspace/supershift/some.json relative to org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer not found."
+        "resource /templates/workspace/openshift/some.json relative to org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer not found."
   )
   public void shouldFailIfResourceIsNotFound() {
     deserializer.deserializeWorkspaceTemplate("some.json");

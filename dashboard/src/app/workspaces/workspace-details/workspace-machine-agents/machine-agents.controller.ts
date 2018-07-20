@@ -9,9 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
-import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {CheAgent} from '../../../../components/api/che-agent.factory';
+import { IEnvironmentManagerMachine } from '../../../../components/api/environment/environment-manager-machine';
 
 export interface IAgentItem extends che.IAgent {
   isEnabled: boolean;
@@ -29,46 +28,68 @@ const LATEST: string = 'latest';
  */
 export class MachineAgentsController {
 
-  static $inject = ['$scope', 'cheAgent', '$timeout'];
+  static $inject = ['$scope', 'cheAgent', '$timeout', '$q'];
 
   onChange: Function;
   agentOrderBy = 'name';
-  agentsList: Array<IAgentItem>;
+  agentItemsList: Array<IAgentItem>;
 
   private cheAgent: CheAgent;
   private $timeout: ng.ITimeoutService;
   private timeoutPromise: ng.IPromise<any>;
-  private selectedMachine: IEnvironmentManagerMachine;
-  private environmentManager: EnvironmentManager;
-  private agents: Array<string>;
+  private machine: IEnvironmentManagerMachine;
+  private machineAgentsList: Array<string>;
+  private availableAgents: Array<che.IAgent>;
+  private agentsToUpdate: Array<IAgentItem> = [];
 
   /**
    * Default constructor that is using resource
    */
-  constructor($scope: ng.IScope, cheAgent: CheAgent, $timeout: ng.ITimeoutService) {
+  constructor($scope: ng.IScope, cheAgent: CheAgent, $timeout: ng.ITimeoutService, $q: ng.IQService) {
     this.cheAgent = cheAgent;
     this.$timeout = $timeout;
 
-    cheAgent.fetchAgents().then(() => {
-      this.agents = this.selectedMachine ? this.environmentManager.getAgents(this.selectedMachine) : [];
+    this.availableAgents = cheAgent.getAgents();
+    const availableAgentsDefer = $q.defer();
+    if (this.availableAgents && this.availableAgents.length) {
+      availableAgentsDefer.resolve();
+    } else {
+      cheAgent.fetchAgents().then(() => {
+        this.availableAgents = cheAgent.getAgents();
+        availableAgentsDefer.resolve();
+      });
+    }
+
+    let resolved = false;
+    const machineAgentsDefer = $q.defer();
+    const deRegistrationFn = $scope.$watch(() => {
+      return this.machine && this.machine.installers;
+    }, (newAgentsList: string[]) => {
+      if (!resolved && newAgentsList && newAgentsList.length) {
+        machineAgentsDefer.resolve();
+        resolved = true;
+
+        this.machineAgentsList = angular.copy(newAgentsList);
+        return;
+      }
+
+      if (angular.equals(newAgentsList, this.machineAgentsList)) {
+        return;
+      }
+
+      this.machineAgentsList = angular.copy(newAgentsList);
       this.buildAgentsList();
     });
 
-    const deRegistrationFn = $scope.$watch(() => {
-      if (!this.environmentManager || !this.selectedMachine) {
-        return false;
-      }
-      return !angular.equals(this.agents, this.environmentManager.getAgents(this.selectedMachine));
-    }, (newVal: boolean) => {
-      if (!newVal) {
-        return;
-      }
-      this.agents = this.environmentManager.getAgents(this.selectedMachine);
+    $q.all([availableAgentsDefer.promise, machineAgentsDefer.promise]).then(() => {
       this.buildAgentsList();
-    }, true);
+    }) ;
 
     $scope.$on('$destroy', () => {
       deRegistrationFn();
+      if (this.timeoutPromise) {
+        this.$timeout.cancel(this.timeoutPromise);
+      }
     });
   }
 
@@ -76,8 +97,11 @@ export class MachineAgentsController {
    * Builds agents list.
    */
   buildAgentsList(): void {
-    const agents = this.cheAgent.getAgents();
-    this.agentsList = agents.map((agentItem: IAgentItem) => {
+    if (!this.machineAgentsList) {
+      return;
+    }
+
+    this.agentItemsList = this.availableAgents.map((agentItem: IAgentItem) => {
       this.checkAgentLatestVersion(agentItem);
       return agentItem;
     });
@@ -90,16 +114,23 @@ export class MachineAgentsController {
   updateAgent(agent: IAgentItem): void {
     this.$timeout.cancel(this.timeoutPromise);
 
+    this.agentsToUpdate.push(agent);
+
     this.timeoutPromise = this.$timeout(() => {
-      const index = this.agents.indexOf(agent.id);
-      if (agent.isEnabled) {
-        if (index === -1) {
-          this.agents.push(agent.id);
+      this.agentsToUpdate.forEach((agent: IAgentItem) => {
+        const index = this.machineAgentsList.indexOf(agent.id);
+        if (agent.isEnabled) {
+          if (index === -1) {
+            this.machineAgentsList.push(agent.id);
+          }
+        } else if (index >= 0) {
+          this.machineAgentsList.splice(index, 1);
         }
-      } else if (index >= 0) {
-        this.agents.splice(index, 1);
-      }
-      this.environmentManager.setAgents(this.selectedMachine, this.agents);
+      });
+      this.agentsToUpdate.length = 0;
+      this.machine.installers = angular.copy(this.machineAgentsList);
+
+      this.buildAgentsList();
       this.onChange();
     }, 500);
   }
@@ -119,8 +150,8 @@ export class MachineAgentsController {
    * @param agentItem {IAgentItem}
    */
   checkEnabled(agentItem: IAgentItem): void {
-    for (let i = 0; i < this.agents.length; i++) {
-      let agent = this.agents[i];
+    for (let i = 0; i < this.machineAgentsList.length; i++) {
+      let agent = this.machineAgentsList[i];
       // try to extract agent's version in format id:version:
       let groups = agent.match(/[^:]+(:(.+)){0,1}/);
       let id;

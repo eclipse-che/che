@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.api.core.jsonrpc.commons;
 
+import javax.validation.constraints.NotNull;
+
 /** Represents JSON RPC error object */
 public class JsonRpcError {
   private final int code;
   private final String message;
 
-  public JsonRpcError(int code, String message) {
+  public JsonRpcError(int code, @NotNull String message) {
     this.code = code;
     this.message = message;
   }

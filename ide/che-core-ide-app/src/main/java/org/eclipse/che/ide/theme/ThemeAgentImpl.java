@@ -19,11 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
-import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 
 /**
  * Implementation of ThemeAgent
@@ -33,17 +31,13 @@ import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 public class ThemeAgentImpl implements ThemeAgent {
 
   public static final String THEME_STORAGE = "codenvy-theme";
-  public static final String PREF_IDE_THEME = "ide.theme";
-
-  private final PreferencesManager preferencesManager;
   private final Theme defaultTheme;
 
   private Map<String, Theme> themes;
   private String currentThemeId;
 
   @Inject
-  public ThemeAgentImpl(DarkTheme darkTheme, PreferencesManagerImpl preferencesManager) {
-    this.preferencesManager = preferencesManager;
+  public ThemeAgentImpl(DarkTheme darkTheme) {
     defaultTheme = darkTheme;
 
     themes = new HashMap<>();
@@ -76,6 +70,15 @@ public class ThemeAgentImpl implements ThemeAgent {
   }
 
   @Override
+  public void setTheme(String themeId) {
+    themeId = themeId != null ? themeId : getCurrentThemeId();
+    Theme themeToSet = themeId != null ? getTheme(themeId) : getDefault();
+    setCurrentThemeId(themeToSet.getId());
+
+    Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
+  }
+
+  @Override
   public String getCurrentThemeId() {
     if (currentThemeId == null
         && Storage.isLocalStorageSupported()
@@ -102,13 +105,4 @@ public class ThemeAgentImpl implements ThemeAgent {
             $wnd["IDE"].theme = id;
         }
     }-*/;
-
-  public void applyUserTheme() {
-    String storedThemeId = preferencesManager.getValue(PREF_IDE_THEME);
-    storedThemeId = storedThemeId != null ? storedThemeId : getCurrentThemeId();
-    final Theme themeToSet = storedThemeId != null ? getTheme(storedThemeId) : getDefault();
-    setCurrentThemeId(themeToSet.getId());
-
-    Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
-  }
 }

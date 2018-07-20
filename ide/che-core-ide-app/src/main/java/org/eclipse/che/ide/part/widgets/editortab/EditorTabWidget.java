@@ -25,6 +25,7 @@ import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -140,7 +141,19 @@ public class EditorTabWidget extends Composite
   @Override
   public void onBrowserEvent(Event event) {
     if (event.getTypeInt() == Event.ONMOUSEDOWN && event.getButton() == NativeEvent.BUTTON_MIDDLE) {
-      editorAgent.closeEditor(relatedEditorPart);
+      if (editorAgent.getOpenedEditors().size() == 1) {
+        editorAgent.closeEditor(relatedEditorPart);
+      } else {
+        // In some OS paste action is assigned to middle mouse key by default. 'closeEditor'
+        // command restores cursor position in a new editor in the same time when the paste
+        // action fires. So adding 150 ms delay prevents pasting buffer content to the editor.
+        new Timer() {
+          @Override
+          public void run() {
+            editorAgent.closeEditor(relatedEditorPart);
+          }
+        }.schedule(150);
+      }
     }
 
     super.onBrowserEvent(event);

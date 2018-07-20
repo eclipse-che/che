@@ -83,6 +83,32 @@ public class LanguageServerFormatter implements ContentFormatter {
   }
 
   @Override
+  public boolean canFormat(Document document) {
+    TextRange selectedRange = document.getSelectedTextRange();
+
+    boolean requiresFullDocumentFormatting;
+    if (selectedRange == null) {
+      requiresFullDocumentFormatting = true;
+    } else {
+      requiresFullDocumentFormatting = selectedRange.getFrom().equals(selectedRange.getTo());
+    }
+
+    if (requiresFullDocumentFormatting) {
+      try {
+        return capabilities.getDocumentFormattingProvider();
+      } catch (NullPointerException e) {
+        return false;
+      }
+    } else {
+      try {
+        return capabilities.getDocumentRangeFormattingProvider();
+      } catch (NullPointerException e) {
+        return false;
+      }
+    }
+  }
+
+  @Override
   public void install(TextEditor editor) {
     this.editor = editor;
     if (capabilities.getDocumentOnTypeFormattingProvider() != null
@@ -134,6 +160,7 @@ public class LanguageServerFormatter implements ContentFormatter {
 
     params.setTextDocument(identifier);
     params.setOptions(getFormattingOptions());
+
     Promise<List<TextEdit>> promise = client.formatting(params);
     handleFormatting(promise, document);
   }
@@ -171,12 +198,22 @@ public class LanguageServerFormatter implements ContentFormatter {
       Collections.reverse(edits);
       for (TextEdit change : edits) {
         Range range = change.getRange();
-        document.replace(
-            range.getStart().getLine(),
-            range.getStart().getCharacter(),
-            range.getEnd().getLine(),
-            range.getEnd().getCharacter(),
-            change.getNewText());
+        int startLine = range.getStart().getLine();
+        int startCharacter = range.getStart().getCharacter();
+        int endLine = range.getEnd().getLine();
+        int endCharacter = range.getEnd().getCharacter();
+
+        if (startCharacter == 0
+            && startLine == 0
+            && endCharacter == 0
+            && endLine == document.getLineCount()) {
+          endLine = document.getLineCount() - 1;
+          endCharacter = document.getTextRangeForLine(endLine).getTo().getCharacter();
+        }
+
+        String newText = change.getNewText();
+
+        document.replace(startLine, startCharacter, endLine, endCharacter, newText);
       }
     } catch (final Exception e) {
       Log.error(getClass(), e);

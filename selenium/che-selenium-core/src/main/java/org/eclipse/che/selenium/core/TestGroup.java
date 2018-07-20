@@ -18,4 +18,5 @@ public interface TestGroup {
   String DOCKER = "docker";
   String GITHUB = "github";
   String OSIO = "osio";
+  String K8S = "k8s";
 }
