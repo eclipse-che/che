@@ -245,7 +245,7 @@ public interface Debugger {
   }
 
   /**
-   * Gets a location.
+   * Gets a location of the resources for the given frame.
    *
    * @throws DebuggerException if any error occur
    */

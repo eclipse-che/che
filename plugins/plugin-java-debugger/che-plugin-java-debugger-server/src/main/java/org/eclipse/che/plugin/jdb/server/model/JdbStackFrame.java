@@ -40,7 +40,6 @@ public class JdbStackFrame implements StackFrameDump {
   public JdbStackFrame(com.sun.jdi.StackFrame jdiStackFrame) {
     this.jdiStackFrame = jdiStackFrame;
 
-    // for performance reason it isn't needed to calculate actual location
     com.sun.jdi.Location jdiLocation = jdiStackFrame.location();
     this.location =
         new JdbLocation(
@@ -57,7 +56,6 @@ public class JdbStackFrame implements StackFrameDump {
     this.fields = new AtomicReference<>(fields);
     this.variables = new AtomicReference<>(variables);
 
-    // for performance reason it isn't needed to calculate actual location
     com.sun.jdi.Location jdiLocation = jdiStackFrame.location();
     this.location =
         new JdbLocation(
