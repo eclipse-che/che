@@ -316,12 +316,7 @@ public class WorkspacesListTest {
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceConfigureButton(expectedJavaItem.getWorkspaceName());
-
     workspaceConfig.waitConfigForm();
-
-    assertEquals(
-        workspaceConfig.createExpectedWorkspaceConfig(expectedJavaItem.getWorkspaceName()),
-        workspaceConfig.getWorkspaceConfig());
 
     seleniumWebDriver.navigate().back();
 
