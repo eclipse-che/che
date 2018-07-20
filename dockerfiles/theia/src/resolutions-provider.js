@@ -82,7 +82,7 @@ function listToResolutions(resolutionsList) {
 
 /**
  * Write json to the file by path.
- * 
+ *
  * @param filePath - file system location of the file.
  * @param json - json object to write.
  */
