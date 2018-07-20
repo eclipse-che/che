@@ -31,6 +31,7 @@ import org.eclipse.che.ide.api.editor.link.LinkedModel;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.editor.orion.client.jso.MarkedOverlay;
 import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
@@ -112,6 +113,8 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     if (documentation == null || documentation.trim().isEmpty()) {
       documentation = "No documentation found.";
     }
+
+    documentation = MarkedOverlay.getInstance().toHTML(documentation);
 
     HTML widget = new HTML(documentation);
     widget.setWordWrap(true);

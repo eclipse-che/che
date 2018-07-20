@@ -42,6 +42,7 @@ import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
+import org.eclipse.che.ide.editor.orion.client.jso.MarkedOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionPixelPositionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
@@ -185,6 +186,8 @@ public class SignatureWidget implements EventListener {
     if (documentation == null || documentation.trim().isEmpty()) {
       documentation = "No documentation found.";
     }
+
+    documentation = MarkedOverlay.getInstance().toHTML(documentation);
 
     HTML widget = new HTML(documentation);
     widget.getElement().getStyle().setWhiteSpace(WhiteSpace.PRE_LINE);
