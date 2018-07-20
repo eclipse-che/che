@@ -78,7 +78,6 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
     Path path = resource.getLocation().makeRelative();
     Command cmdTmpl = GWT.create(Command.class);
     String command = cmdTmpl.openInTerminalCommand(path.toString()).asString();
-    processesPanelPresenter.newTerminal(
-        TerminalOptionsJso.create().withCommand(command), true);
+    processesPanelPresenter.newTerminal(TerminalOptionsJso.create().withCommand(command), true);
   }
 }

@@ -83,7 +83,7 @@ class TerminalJso extends JavaScriptObject {
       this.termJSO.applyAddon(addon);
   }-*/;
 
-   public final native String[] getRenderedLines() /*-{
+  public final native String[] getRenderedLines() /*-{
      var start = this.terminal.buffer.ydisp;
      var rows = this.terminal.rows;
 

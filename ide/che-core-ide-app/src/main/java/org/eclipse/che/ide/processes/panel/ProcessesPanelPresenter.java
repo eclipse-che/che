@@ -1505,18 +1505,22 @@ public class ProcessesPanelPresenter extends BasePresenter
   }-*/;
 
   private String[] getRenderedTerminalLines(String terminalName, String machineName) {
-    for (ProcessTreeNode machineNode: rootNode.getChildren()) {
+    for (ProcessTreeNode machineNode : rootNode.getChildren()) {
       if (machineNode.getName().equals(machineName)) {
-        for (ProcessTreeNode machineChildNode: machineNode.getChildren()) {
+        for (ProcessTreeNode machineChildNode : machineNode.getChildren()) {
           if (machineChildNode.getName().equals(terminalName)) {
             TerminalPresenter terminalPresenter = terminals.get(machineChildNode.getId());
-             if (terminalPresenter != null) {
-               return terminalPresenter.getRenderedLines();
-             }
+            if (terminalPresenter != null) {
+              return terminalPresenter.getRenderedLines();
+            }
           }
         }
       }
     }
-    throw new RuntimeException("Unable to find terminal by machineName: " + machineName + " and terminal name: " + terminalName);
+    throw new RuntimeException(
+        "Unable to find terminal by machineName: "
+            + machineName
+            + " and terminal name: "
+            + terminalName);
   };
 }

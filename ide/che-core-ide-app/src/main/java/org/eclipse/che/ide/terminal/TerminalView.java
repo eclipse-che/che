@@ -33,9 +33,7 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
      */
     void setTerminalSize(int x, int y);
 
-    /**
-     * Returns rendered text for test purpose.
-     */
+    /** Returns rendered text for test purpose. */
     String[] getRenderedLines();
   }
 
@@ -60,8 +58,6 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
    */
   void showErrorMessage(@NotNull String message);
 
-  /**
-   * Returns rendered text for test purpose.
-   */
+  /** Returns rendered text for test purpose. */
   String[] getRenderedLines();
 }
