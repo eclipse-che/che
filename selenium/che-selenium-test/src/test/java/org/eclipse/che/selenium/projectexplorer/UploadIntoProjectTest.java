@@ -163,10 +163,11 @@ public class UploadIntoProjectTest {
   @Test
   public void shouldUploadDirectoryWithDefaultOptions() throws IOException {
     // given
-    final String uploadingFileName = "app.js";
+    final String uploadingFileName = "index.jsp";
     final String pathToUploadingFileInsideTheProject =
         format("%s/%s", PROJECT_NAME, uploadingFileName);
-    final Path localPathToFolderToUpload = get(FOLDER_SOURCES.getPath());
+    final Path localPathToFolderToUpload =
+        get(PROJECT_SOURCES.getPath()).resolve("src/main/webapp");
 
     // open upload directory window
     openFormAndUploadFolder(localPathToFolderToUpload);
@@ -194,7 +195,7 @@ public class UploadIntoProjectTest {
     projectExplorer.openItemByPath(pathToUploadingFileInsideTheProject);
 
     try {
-      editor.waitTextNotPresentIntoEditor(TEXT_TO_INSERT);
+      editor.waitTextIntoEditor(TEXT_TO_INSERT);
     } catch (WebDriverException ex) {
       fail("Known issue https://github.com/eclipse/che/issues/10484", ex);
     }
