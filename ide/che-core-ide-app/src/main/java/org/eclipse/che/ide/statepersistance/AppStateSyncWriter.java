@@ -52,7 +52,7 @@ public class AppStateSyncWriter {
                     var request = new XMLHttpRequest();
                     request.open("POST", url, false);
                     request.setRequestHeader("Content-Type", "application/json");
-                    request.setRequestHeader("Authorization", machineToken);
+                    request.setRequestHeader("Authorization", "Bearer " + machineToken);
                     request.send(json);
                 } catch (e) {
                     console.error(e);
