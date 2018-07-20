@@ -125,6 +125,8 @@ public interface Debugger extends DebuggerObservable {
    */
   void setValue(Variable variable, long threadId, int frameIndex);
 
+  Promise<? extends Location> getStackFrameLocation(long threadId, int frameIndex);
+
   /** Indicates if connection is established with the server. */
   boolean isConnected();
 

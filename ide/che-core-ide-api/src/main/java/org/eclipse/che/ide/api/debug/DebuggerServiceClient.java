@@ -181,4 +181,6 @@ public interface DebuggerServiceClient {
    * @param frameIndex the frame index inside the thread
    */
   Promise<String> evaluate(String id, String expression, long threadId, int frameIndex);
+
+  Promise<LocationDto> getStackFrameLocation(String id, long threadId, int frameIndex);
 }
