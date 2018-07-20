@@ -123,7 +123,7 @@ export class StackController {
     this.stackTags = tags ? tags : [];
     this.stackName = name ? name : '';
     this.stackDescription = description;
-    this.stack = stack;
+    this.stack = angular.copy(stack);
   }
 
   /**

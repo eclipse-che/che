@@ -66,8 +66,20 @@ export class WorkspaceMachineConfigController {
     this.lodash = lodash;
     this.confirmDialogService = confirmDialogService;
 
+    this.machineConfig = {};
     this.timeoutPromise = null;
+
+    const deRegistrationFn = $scope.$watch(() => {
+      return this.machine;
+    }, (newMachine: IEnvironmentManagerMachine, oldMachine: IEnvironmentManagerMachine) => {
+      if (angular.equals(newMachine, oldMachine)) {
+        return;
+      }
+      this.init();
+    }, true);
+
     $scope.$on('$destroy', () => {
+      deRegistrationFn();
       if (this.timeoutPromise) {
         $timeout.cancel(this.timeoutPromise);
       }
@@ -80,19 +92,15 @@ export class WorkspaceMachineConfigController {
    * Sets initial values
    */
   init(): void {
-    this.machine = this.lodash.find(this.machinesList, (machine: any) => {
-      return machine.name === this.machineName;
-    });
+    this.machineName = this.machine.name;
 
-    this.machineConfig = {
-      source: this.environmentManager.getSource(this.machine),
-      isDev: this.environmentManager.isDev(this.machine),
-      memoryLimitBytes: this.environmentManager.getMemoryLimit(this.machine),
-      servers: this.environmentManager.getServers(this.machine),
-      installers: this.environmentManager.getAgents(this.machine),
-      canEditEnvVariables: this.environmentManager.canEditEnvVariables(this.machine),
-      envVariables: this.environmentManager.getEnvVariables(this.machine)
-    };
+    this.machineConfig.source = this.environmentManager.getSource(this.machine);
+    this.machineConfig.isDev = this.environmentManager.isDev(this.machine);
+    this.machineConfig.memoryLimitBytes = this.environmentManager.getMemoryLimit(this.machine);
+    this.machineConfig.servers = this.environmentManager.getServers(this.machine);
+    this.machineConfig.installers = this.environmentManager.getAgents(this.machine);
+    this.machineConfig.canEditEnvVariables = this.environmentManager.canEditEnvVariables(this.machine);
+    this.machineConfig.envVariables = this.environmentManager.getEnvVariables(this.machine);
 
     this.newDev = this.machineConfig.isDev;
 

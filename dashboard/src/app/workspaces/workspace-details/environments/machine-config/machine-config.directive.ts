@@ -33,7 +33,7 @@ export class WorkspaceMachineConfig implements ng.IDirective {
   bindToController = true;
 
   scope = {
-    machineName: '=',
+    machine: '=',
     machinesList: '=',
     environmentManager: '=',
     machineDevOnChange: '&',

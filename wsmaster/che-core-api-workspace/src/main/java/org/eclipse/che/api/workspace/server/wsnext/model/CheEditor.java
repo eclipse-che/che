@@ -10,50 +10,32 @@
  */
 package org.eclipse.che.api.workspace.server.wsnext.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-/** Represents Che plugin in sidecar-powered workspace. */
-public class ChePlugin extends PluginBase {
-  private List<EditorCompatibility> editors = new ArrayList<>();
-
-  public ChePlugin editors(List<EditorCompatibility> editors) {
-    this.editors = editors;
-    return this;
-  }
-
-  public List<EditorCompatibility> getEditors() {
-    return editors;
-  }
-
-  public void setEditors(List<EditorCompatibility> editors) {
-    this.editors = editors;
-  }
-
+/**
+ * Represents an editor inside of Che workspace.
+ *
+ * <p>It may be classic GWT IDE, Eclipse Theia or something else.
+ */
+public class CheEditor extends PluginBase {
   @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof ChePlugin)) {
+    if (!(o instanceof CheEditor)) {
       return false;
     }
-    if (!super.equals(o)) {
-      return false;
-    }
-    ChePlugin plugin = (ChePlugin) o;
-    return Objects.equals(getEditors(), plugin.getEditors());
+    CheEditor cheEditor = (CheEditor) o;
+    return super.equals(cheEditor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), getEditors());
+    return super.hashCode();
   }
 
   @Override
   public String toString() {
-    return "ChePlugin{"
+    return "CheEditor{"
         + "name='"
         + getName()
         + '\''
@@ -67,8 +49,6 @@ public class ChePlugin extends PluginBase {
         + getContainers()
         + ", endpoints="
         + getEndpoints()
-        + ", editors="
-        + getEditors()
         + '}';
   }
 }
