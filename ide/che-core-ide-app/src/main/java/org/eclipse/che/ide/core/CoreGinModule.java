@@ -158,6 +158,8 @@ public class CoreGinModule extends AbstractGinModule {
 
     bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
     bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
+
+    bind(FreeDiskSpaceNotifier.class).asEagerSingleton();
   }
 
   @Provides

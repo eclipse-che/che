@@ -43,5 +43,7 @@ public class WsAgentModule extends AbstractModule {
     install(new org.eclipse.che.git.impl.jgit.JGitModule());
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
+    install(
+        new org.eclipse.che.api.fs.server.impl.FreeDiskSpaceChecker.FreeDiskSpaceCheckerModule());
   }
 }
