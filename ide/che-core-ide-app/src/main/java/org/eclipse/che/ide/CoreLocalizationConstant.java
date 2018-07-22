@@ -1346,4 +1346,10 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("resource.copy.move.already.exist.error.message")
   String resourceCopyMoveAlreadyExistErrorMessage(String sourceName, String path);
+
+  @Key("low.disk.space")
+  String lowDiskSpace();
+
+  @Key("low.disk.space.description")
+  String lowDiskSpaceDescription();
 }

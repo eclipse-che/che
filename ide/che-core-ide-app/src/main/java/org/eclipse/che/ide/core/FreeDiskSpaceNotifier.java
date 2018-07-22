@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WAR
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -30,11 +31,14 @@ public class FreeDiskSpaceNotifier {
   private static final String JSON_RPC_METHOD_NAME = "workspace/lowDiskSpace";
 
   private NotificationManager notificationManager;
+  private CoreLocalizationConstant constant;
   private boolean notified = false;
 
   @Inject
-  public FreeDiskSpaceNotifier(NotificationManager notificationManager) {
+  public FreeDiskSpaceNotifier(
+      NotificationManager notificationManager, CoreLocalizationConstant constant) {
     this.notificationManager = notificationManager;
+    this.constant = constant;
   }
 
   @Inject
@@ -54,10 +58,7 @@ public class FreeDiskSpaceNotifier {
     }
 
     notificationManager.notify(
-        "Low disk space",
-        "Optimize your disk space to prevent unexpected problems.",
-        WARNING,
-        EMERGE_MODE);
+        constant.lowDiskSpace(), constant.lowDiskSpaceDescription(), WARNING, EMERGE_MODE);
     notified = true;
   }
 }
