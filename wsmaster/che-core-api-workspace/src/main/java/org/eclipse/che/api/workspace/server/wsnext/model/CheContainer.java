@@ -10,19 +10,23 @@
  */
 package org.eclipse.che.api.workspace.server.wsnext.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/** Represents sidecar container in Che workspace. */
 public class CheContainer {
 
   private String image = null;
   private List<EnvVar> env = new ArrayList<>();
+
+  @JsonProperty("editor-commands")
   private List<Command> commands = new ArrayList<>();
+
   private List<Volume> volumes = new ArrayList<>();
   private List<CheContainerPort> ports = new ArrayList<>();
 
-  /** */
   public CheContainer image(String image) {
     this.image = image;
     return this;
