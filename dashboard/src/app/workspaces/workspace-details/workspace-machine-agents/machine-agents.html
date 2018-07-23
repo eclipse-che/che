@@ -2,7 +2,7 @@
   <div flex>
     <!-- Agents list header -->
     <div flex layout="column" md-theme="maincontent-theme">
-      <che-list-header che-hide-header="!machineAgentsController.agentsList.length">
+      <che-list-header che-hide-header="!machineAgentsController.agentItemsList.length">
         <div flex="100"
              layout="row"
              layout-align="start stretch"
@@ -24,9 +24,9 @@
       </che-list-header>
       <!-- Agents list  -->
       <che-list class="machine-agents-list" flex
-                ng-if="machineAgentsController.agentsList && machineAgentsController.agentsList.length > 0">
+                ng-if="machineAgentsController.agentItemsList && machineAgentsController.agentItemsList.length > 0">
         <div class="machine-agents-item" ng-if="agentItem.isLatest || agentItem.isEnabled"
-             ng-repeat="agentItem in machineAgentsController.agentsList | orderBy:[machineAgentsController.agentOrderBy, '-version' ]">
+             ng-repeat="agentItem in machineAgentsController.agentItemsList | orderBy:[machineAgentsController.agentOrderBy, '-version' ]">
           <che-list-item flex>
             <div flex="100"
                  layout="row"

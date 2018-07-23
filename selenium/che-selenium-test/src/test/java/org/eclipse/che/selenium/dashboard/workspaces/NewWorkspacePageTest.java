@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
@@ -43,21 +44,11 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.stacks.Stacks;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
@@ -75,7 +66,8 @@ public class NewWorkspacePageTest {
   private static final String JDK_SUGGESTION_TITLE = "JDK";
   private static final String JAVA_SUGGESTION_TITLE = "JAVA";
   private static final String JAVA_1_8_SUGGESTION_TITLE = "JAVA 1.8";
-  private static final String NAME_WITH_ONE_HUNDRED_SYMBOLS = NameGenerator.generate("wksp-", 95);
+  private static final String JAVA_TOMCAT_MYSQL_SUGGESTION_TITLE = "JAVA 1.8, TOMCAT 8, MYSQL 5.7";
+  private static final String NAME_WITH_ONE_HUNDRED_SYMBOLS = generate("wksp-", 95);
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
@@ -93,7 +85,8 @@ public class NewWorkspacePageTest {
           NODE,
           PHP,
           PYTHON,
-          RAILS);
+          RAILS,
+          JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
@@ -124,7 +117,8 @@ public class NewWorkspacePageTest {
           NODE.getId(),
           PHP.getId(),
           PYTHON.getId(),
-          RAILS.getId());
+          RAILS.getId(),
+          JAVA_THEIA_DOCKER.getId());
 
   private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_ORDER =
       asList(
@@ -136,11 +130,11 @@ public class NewWorkspacePageTest {
           CPP.getId(),
           ECLIPSE_CHE.getId(),
           GO.getId(),
-          JAVA_THEIA_DOCKER.getId(),
           NODE.getId(),
           PHP.getId(),
           PYTHON.getId(),
-          RAILS.getId());
+          RAILS.getId(),
+          JAVA_THEIA_DOCKER.getId());
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
@@ -163,7 +157,8 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          SPRING_BOOT);
+          SPRING_BOOT,
+          JAVA_THEIA_DOCKER);
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
@@ -186,19 +181,21 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          SPRING_BOOT);
+          SPRING_BOOT,
+          JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_DOCKER, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
 
   private static final List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
           BLANK.getId(),
           JAVA.getId(),
           DOT_NET.getId(),
+          JAVA_THEIA_DOCKER.getId(),
           RAILS.getId(),
           PYTHON.getId(),
           PHP.getId(),
@@ -214,11 +211,11 @@ public class NewWorkspacePageTest {
           BLANK.getId(),
           JAVA.getId(),
           JAVA_MYSQL.getId(),
+          JAVA_THEIA_DOCKER.getId(),
           RAILS.getId(),
           PYTHON.getId(),
           PHP.getId(),
           NODE.getId(),
-          JAVA_THEIA_DOCKER.getId(),
           GO.getId(),
           ECLIPSE_CHE.getId(),
           CPP.getId(),
@@ -229,28 +226,22 @@ public class NewWorkspacePageTest {
       asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_THEIA_OPENSHIFT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_JAVA_STACKS =
-      asList(JAVA_MYSQL, JAVA, JAVA_THEIA_DOCKER, ECLIPSE_CHE, ANDROID);
+      asList(JAVA_MYSQL, JAVA, ECLIPSE_CHE, ANDROID);
 
-  private static final List<String> EXPECTED_FILTERS_SUGGESTIONS =
+  private static final List<String> EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);
+
+  private static final List<String> EXPECTED_DOCKER_FILTERS_SUGGESTIONS =
+      asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_TOMCAT_MYSQL_SUGGESTION_TITLE);
 
   private static final List<String> VALID_NAMES =
       asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
 
   @Inject private Dashboard dashboard;
-  @Inject private WorkspaceProjects workspaceProjects;
-  @Inject private WorkspaceConfig workspaceConfig;
-  @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private TestWorkspaceProvider testWorkspaceProvider;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private DocumentationPage documentationPage;
-  @Inject private WorkspaceOverview workspaceOverview;
-  @Inject private Stacks stacks;
 
   @BeforeClass
   public void setup() {
@@ -329,12 +320,13 @@ public class NewWorkspacePageTest {
 
   @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
   public void checkOpenshiftFiltersButton() {
-    checkFiltersButton(EXPECTED_OPENSHIFT_QUICK_START_STACKS);
+    checkFiltersButton(
+        EXPECTED_OPENSHIFT_QUICK_START_STACKS, EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS);
   }
 
   @Test(groups = TestGroup.DOCKER)
   public void checkDockerFiltersButton() {
-    checkFiltersButton(EXPECTED_DOCKER_QUICK_START_STACKS);
+    checkFiltersButton(EXPECTED_DOCKER_QUICK_START_STACKS, EXPECTED_DOCKER_FILTERS_SUGGESTIONS);
   }
 
   @Test
@@ -359,19 +351,11 @@ public class NewWorkspacePageTest {
     newWorkspace.closeCreateStackDialogByCloseButton();
     newWorkspace.waitCreateStackDialogClosing();
 
-    // close form by "No" button
+    // close form by "Cancel" button
     newWorkspace.clickOnAddStackButton();
     newWorkspace.waitCreateStackDialog();
     newWorkspace.clickOnNoButtonInCreateStackDialog();
     newWorkspace.waitCreateStackDialogClosing();
-
-    // click on "Yes" button
-    newWorkspace.clickOnAddStackButton();
-    newWorkspace.waitCreateStackDialog();
-    newWorkspace.clickOnYesButtonInCreateStackDialog();
-    stacks.waitToolbarTitleName();
-    seleniumWebDriver.navigate().back();
-    newWorkspace.waitPageLoad();
   }
 
   @Test(groups = TestGroup.OPENSHIFT)
@@ -482,7 +466,8 @@ public class NewWorkspacePageTest {
     newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
   }
 
-  private void checkFiltersButton(List<NewWorkspace.Stack> expectedQuickStartStacks) {
+  private void checkFiltersButton(
+      List<NewWorkspace.Stack> expectedQuickStartStacks, List<String> expectedSuggestions) {
     newWorkspace.waitPageLoad();
 
     // close by "Escape" button
@@ -501,7 +486,7 @@ public class NewWorkspacePageTest {
     newWorkspace.clickOnFiltersButton();
     newWorkspace.waitFiltersFormOpened();
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
-    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
+    newWorkspace.waitFiltersSuggestionsNames(expectedSuggestions);
 
     assertEquals(
         newWorkspace.getSelectedFiltersSuggestionName(),
@@ -513,9 +498,6 @@ public class NewWorkspacePageTest {
 
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
     newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
-
-    seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
-    newWorkspace.waitSelectedFiltersSuggestion(JAVA_1_8_SUGGESTION_TITLE);
 
     // interaction with suggested tads by mouse clicking
     newWorkspace.clickOnFiltersSuggestions(JAVA_SUGGESTION_TITLE);
@@ -532,18 +514,16 @@ public class NewWorkspacePageTest {
 
     // delete tags from input
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
-    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
+    newWorkspace.waitFiltersSuggestionsNames(expectedSuggestions);
 
     newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
-    newWorkspace.doubleClickOnFiltersSuggestion(JAVA_1_8_SUGGESTION_TITLE);
-
-    newWorkspace.waitFiltersInputTags(asList(JAVA_1_8_SUGGESTION_TITLE));
-
-    newWorkspace.deleteTagByRemoveButton(JAVA_1_8_SUGGESTION_TITLE);
+    newWorkspace.doubleClickOnFiltersSuggestion(JAVA_SUGGESTION_TITLE);
+    newWorkspace.waitFiltersInputTags(asList(JAVA_SUGGESTION_TITLE));
+    newWorkspace.deleteTagByRemoveButton(JAVA_SUGGESTION_TITLE);
     newWorkspace.waitFiltersInputIsEmpty();
 
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
-    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
+    newWorkspace.waitFiltersSuggestionsNames(expectedSuggestions);
     newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
     newWorkspace.chooseFilterSuggestionByPlusButton(JDK_SUGGESTION_TITLE);
     newWorkspace.waitFiltersInputTags(asList(JDK_SUGGESTION_TITLE));
@@ -552,7 +532,7 @@ public class NewWorkspacePageTest {
     newWorkspace.waitFiltersInputIsEmpty();
 
     newWorkspace.typeToFiltersInput(LETTER_FOR_SEARCHING);
-    newWorkspace.waitFiltersSuggestionsNames(EXPECTED_FILTERS_SUGGESTIONS);
+    newWorkspace.waitFiltersSuggestionsNames(expectedSuggestions);
     newWorkspace.waitSelectedFiltersSuggestion(JAVA_SUGGESTION_TITLE);
     newWorkspace.chooseFilterSuggestionByPlusButton(JAVA_SUGGESTION_TITLE);
     newWorkspace.waitFiltersInputTags(asList(JAVA_SUGGESTION_TITLE));

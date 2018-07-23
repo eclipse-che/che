@@ -1,12 +1,11 @@
 [
   {
-    "id": "java-theia-docker",
+    "id": "simple-theia-docker",
     "creator": "ide",
-    "name": "Java Theia (docker)",
-    "description": "Che development + Theia in a sidecar container (docker)",
+    "name": "Theia IDE on docker",
+    "description": "Theia in a sidecar container (docker)",
     "scope": "general",
     "tags": [
-      "Java 1.8",
       "Theia",
       "Alpine",
       "CentOS"
@@ -16,49 +15,41 @@
         "default": {
           "machines": {
             "theia": {
-              "attributes": {},
               "servers": {
                 "theia": {
-                  "protocol": "http",
-                  "port": "3000",
                   "attributes": {
                     "type": "ide"
-                  }
+                  },
+                  "protocol": "http",
+                  "port": "3000"
                 },
                 "theia-dev": {
-                  "protocol": "http",
-                  "port": "3030",
                   "attributes": {
                     "type": "ide-dev"
-                  }
+                  },
+                  "protocol": "http",
+                  "port": "3030"
                 }
               },
+              "installers": [],
               "volumes": {
                 "projects": {
                   "path": "/projects"
                 }
               },
-              "installers": [],
               "env": {
+                "CHE_MACHINE_NAME": "theia",
                 "HOSTED_PLUGIN_HOSTNAME": "0.0.0.0"
-              }
-            },
-            "dev-machine": {
-              "attributes": {},
-              "servers": {},
-              "volumes": {
-                "projects": {
-                  "path": "/projects"
-                }
               },
-              "installers": [],
-              "env": {}
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
             }
           },
           "recipe": {
-            "type": "compose",
-            "content": "services:\n theia:\n  image: eclipse/che-theia:0.4.0-next.b17727c1-nightly\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/che-dev:nightly\n  mem_limit: 2147483648\n  depends_on:\n    - theia",
-            "contentType": "application/x-yaml"
+            "contentType": "",
+            "type": "dockerimage",
+            "content": "eclipse/che-theia:0.4.0-next.b17727c1-nightly"
           }
         }
       },
@@ -731,6 +722,24 @@
           "attributes": {
             "previewUrl": "${server.8080/tcp}",
             "goal": "Run"
+          }
+        },
+        {
+          "name": "test",
+          "type": "custom",
+          "commandLine": "cd ${current.project.path} && go get -d && go test",
+          "attributes": {
+            "previewUrl": "${server.8080/tcp}",
+            "goal": "Test"
+          }
+        },
+        {
+          "name": "build",
+          "type": "custom",
+          "commandLine": "cd ${current.project.path} && go get -d && go build",
+          "attributes": {
+            "previewUrl": "${server.8080/tcp}",
+            "goal": "Build"
           }
         }
       ]
@@ -1433,7 +1442,7 @@
             "previewUrl": "${server.wildfly}",
             "goal": "Run"
           },
-          "commandLine": "cd ${current.project.path}\nscl enable rh-maven33 'java -jar target/*-swarm.jar -Djava.net.preferIPv4Stack=true'"
+          "commandLine": "cd ${current.project.path}\nscl enable rh-maven33 'java -jar target/*-thorntail.jar -Djava.net.preferIPv4Stack=true'"
         }
       ],
       "projects": [],

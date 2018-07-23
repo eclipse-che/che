@@ -26,7 +26,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 public abstract class AbstractUploadDialogPage {
   private static final String CHOOSE_FILE_BUTTON_ID = "gwt-debug-file-uploadFile-ChooseFile";
 
-  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory webDriverWaitFactory;
 
   @FindBy(id = CHOOSE_FILE_BUTTON_ID)
@@ -69,7 +69,16 @@ public abstract class AbstractUploadDialogPage {
     uploadButton.click();
   }
 
+  public void selectOverwriteIfFileExistsCheckbox() {
+    seleniumWebDriverHelper.waitAndSetCheckbox(
+        getOverwriteIfExistsCheckbox(), getOverwriteIfExistsCheckboxLabel(), true);
+  }
+
   abstract WebElement getTitle();
 
   abstract WebElement getUploadButton();
+
+  abstract WebElement getOverwriteIfExistsCheckbox();
+
+  abstract WebElement getOverwriteIfExistsCheckboxLabel();
 }
