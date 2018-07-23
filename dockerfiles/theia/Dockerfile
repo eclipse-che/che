@@ -45,7 +45,7 @@ RUN \
       fi \
     fi && \
     # install remaining packages
-    apk add --no-cache make gcc g++ python git bash supervisor curl && \
+    apk add --no-cache make gcc g++ python git bash supervisor && \
     rm -rf /tmp/* /var/cache/apk/* && \
     # Change version of Theia to specified in THEIA_VERSION
     ${HOME}/versions.sh && rm ${HOME}/versions.sh && \
