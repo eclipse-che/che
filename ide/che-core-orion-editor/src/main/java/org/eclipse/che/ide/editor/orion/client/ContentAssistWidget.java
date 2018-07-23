@@ -19,6 +19,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -159,6 +160,10 @@ public class ContentAssistWidget implements EventListener {
           callCodeAssistTimer.cancel();
           callCodeAssistTimer.schedule(250);
         };
+
+    UIObject.ensureDebugId(
+        (com.google.gwt.dom.client.Element) popupElement, "content-assistant-proposals");
+    docPopup.ensureDebugId("content-assistant-doc-popup");
   }
 
   public void validateItem(boolean insert) {
