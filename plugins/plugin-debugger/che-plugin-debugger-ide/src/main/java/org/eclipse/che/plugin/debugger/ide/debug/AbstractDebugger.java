@@ -715,7 +715,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       return service.getStackFrameLocation(debugSessionDto.getId(), threadId, frameIndex);
     }
 
-    return Promises.reject(JsPromiseError.create("Debugger is not connected"));
+    return promiseProvider.reject(JsPromiseError.create("Debugger is not connected"));
   }
 
   @Override
