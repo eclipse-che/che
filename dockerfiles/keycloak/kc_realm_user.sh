@@ -18,7 +18,7 @@ if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
 fi
 
 cat /scripts/che-realm.json.erb | \
-                                sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}@" \
+                                sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://${CHE_HOST}@" \
                                 > /scripts/che-realm.json
 
 echo "Creating Admin user..."
