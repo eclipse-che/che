@@ -171,34 +171,38 @@ public class ProjectTreeTracker {
             .sendAndSkipResult();
       }
 
-      // Two or more clients can be subscribed to this handler, so need to skip firing the event
-      // if it was already sent.
-      if (registeredProjectPaths.contains(it)) {
-        return;
-      }
-
-      // Need to check if the given folder is a project.
-      final Timer timer = new Timer();
-      timer.schedule(
-          new TimerTask() {
-
-            int attempt = 1;
-
-            @Override
-            public void run() {
-              if (projectManager.isRegistered(it)) {
-                eventService.publish(new ProjectCreatedEvent(it));
-                registeredProjectPaths.add(it);
-                timer.cancel();
-              } else if (attempt == 5) {
-                timer.cancel();
-              }
-              attempt++;
-            }
-          },
-          200,
-          200);
+      fireCreatedEventIfIsProject(it);
     };
+  }
+
+  private void fireCreatedEventIfIsProject(String path) {
+    // Two or more clients can be subscribed to this handler, so need to skip firing the event
+    // if it was already sent.
+    if (registeredProjectPaths.contains(path)) {
+      return;
+    }
+
+    // Check if the given folder is a project.
+    final Timer timer = new Timer();
+    timer.schedule(
+        new TimerTask() {
+
+          int attempt = 1;
+
+          @Override
+          public void run() {
+            if (projectManager.isRegistered(path)) {
+              eventService.publish(new ProjectCreatedEvent(path));
+              registeredProjectPaths.add(path);
+              timer.cancel();
+            } else if (attempt == 5) {
+              timer.cancel();
+            }
+            attempt++;
+          }
+        },
+        200,
+        200);
   }
 
   private Consumer<String> getModifyConsumer(String endpointId) {
@@ -215,6 +219,7 @@ public class ProjectTreeTracker {
         eventService.publish(new ProjectDeletedEvent(it));
         registeredProjectPaths.remove(it);
       }
+
       timers.add(it);
       new Timer()
           .schedule(
