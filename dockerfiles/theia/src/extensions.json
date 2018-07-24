@@ -1,0 +1,16 @@
+{
+    "extensions": [
+        {
+            "name": "theia-machines-extension",
+            "source": "https://github.com/eclipse/che-theia-machines-plugin.git",
+            "checkoutTo": "master",
+            "type": "git"
+        },
+        {
+            "name": "@eclipse-che/che-theia-hosted-plugin-manager-extension",
+            "source": "https://github.com/eclipse/che-theia-hosted-plugin-manager-extension.git",
+            "checkoutTo": "latest-deps",
+            "type": "git"
+        }
+    ]
+}

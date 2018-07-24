@@ -153,9 +153,7 @@ export class MachineSelectorController {
     }
 
     let name = this.selectedMachine && names.indexOf(this.selectedMachine.name) >= 0 ? this.selectedMachine.name : this.machinesList[0].name;
-    this.$timeout(() => {
       this.updateData(name);
-    }, 500);
   }
 
   /**

@@ -22,12 +22,22 @@ import org.openqa.selenium.support.FindBy;
 public class UploadFileDialogPage extends AbstractUploadDialogPage {
   private static final String UPLOAD_BUTTON_ID = "file-uploadFile-upload";
   private static final String TITLE_XPATH = "//div[text()='Upload File']";
+  private static final String OVERWRITE_FILE_CHECKBOX_ID =
+      "gwt-debug-file-uploadFile-overwrite-input";
+  private static final String OVERWRITE_FILE_CHECKBOX_LABEL_ID =
+      "gwt-debug-file-uploadFile-overwrite-label";
 
   @FindBy(id = UPLOAD_BUTTON_ID)
   private WebElement uploadButton;
 
   @FindBy(xpath = TITLE_XPATH)
   private WebElement title;
+
+  @FindBy(id = OVERWRITE_FILE_CHECKBOX_ID)
+  private WebElement overwriteIfFileExistsCheckbox;
+
+  @FindBy(id = OVERWRITE_FILE_CHECKBOX_LABEL_ID)
+  private WebElement overwriteIfFileExistsCheckboxLabel;
 
   @Inject
   public UploadFileDialogPage(
@@ -38,12 +48,22 @@ public class UploadFileDialogPage extends AbstractUploadDialogPage {
   }
 
   @Override
-  public WebElement getTitle() {
+  WebElement getTitle() {
     return title;
   }
 
   @Override
-  public WebElement getUploadButton() {
+  WebElement getUploadButton() {
     return uploadButton;
+  }
+
+  @Override
+  WebElement getOverwriteIfExistsCheckbox() {
+    return overwriteIfFileExistsCheckbox;
+  }
+
+  @Override
+  WebElement getOverwriteIfExistsCheckboxLabel() {
+    return overwriteIfFileExistsCheckboxLabel;
   }
 }

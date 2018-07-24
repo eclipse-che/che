@@ -34,6 +34,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
@@ -195,6 +196,18 @@ public class DebuggerService {
       throws DebuggerException {
     List<ThreadState> threadStates = debuggerManager.getDebugger(sessionId).getThreadDump();
     return threadStates.stream().map(DtoConverter::asDto).collect(Collectors.toList());
+  }
+
+  @GET
+  @Path("{id}/location")
+  @Produces(MediaType.APPLICATION_JSON)
+  public LocationDto getStackFrameLocation(
+      @PathParam("id") String sessionId,
+      @QueryParam("thread") @DefaultValue("-1") long threadId,
+      @QueryParam("frame") @DefaultValue("-1") int frameIndex)
+      throws DebuggerException {
+    return DtoConverter.asDto(
+        debuggerManager.getDebugger(sessionId).getStackFrameLocation(threadId, frameIndex));
   }
 
   @GET

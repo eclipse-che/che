@@ -710,6 +710,15 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
+  public Promise<? extends Location> getStackFrameLocation(long threadId, int frameIndex) {
+    if (isConnected()) {
+      return service.getStackFrameLocation(debugSessionDto.getId(), threadId, frameIndex);
+    }
+
+    return promiseProvider.reject(JsPromiseError.create("Debugger is not connected"));
+  }
+
+  @Override
   public boolean isConnected() {
     return debugSessionDto != null;
   }

@@ -244,6 +244,19 @@ public interface Debugger {
     return Collections.emptyList();
   }
 
+  /**
+   * Gets a location of the resources for the given frame.
+   *
+   * @throws DebuggerException if any error occur
+   */
+  default Location getStackFrameLocation(long threadId, int frameIndex) throws DebuggerException {
+    if (threadId == -1) {
+      return dumpStackFrame().getLocation();
+    }
+
+    return getStackFrameDump(threadId, frameIndex).getLocation();
+  }
+
   /** Is used to send back any events to client. */
   interface DebuggerCallback {
     void onEvent(DebuggerEvent event);
