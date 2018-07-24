@@ -208,6 +208,15 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
         .send(new StringUnmarshaller());
   }
 
+  @Override
+  public Promise<LocationDto> getStackFrameLocation(String id, long threadId, int frameIndex) {
+    String requestUrl = getBaseUrl(id) + "/location?thread=" + threadId + "&frame=" + frameIndex;
+    return asyncRequestFactory
+        .createGetRequest(requestUrl)
+        .loader(loaderFactory.newLoader())
+        .send(dtoUnmarshallerFactory.newUnmarshaller(LocationDto.class));
+  }
+
   private String getBaseUrl(String id) {
     final String url = appContext.getWsAgentServerApiEndpoint() + "/debugger";
     if (id != null) {

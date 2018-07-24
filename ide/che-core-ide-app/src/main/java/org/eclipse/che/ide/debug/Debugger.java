@@ -125,6 +125,14 @@ public interface Debugger extends DebuggerObservable {
    */
   void setValue(Variable variable, long threadId, int frameIndex);
 
+  /**
+   * Gets a location of the resources for the given frame.
+   *
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
+   */
+  Promise<? extends Location> getStackFrameLocation(long threadId, int frameIndex);
+
   /** Indicates if connection is established with the server. */
   boolean isConnected();
 
