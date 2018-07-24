@@ -65,30 +65,41 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
     if (chePlugins.isEmpty()) {
       return;
     }
+
     KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) internalEnvironment;
+
     Map<String, Pod> pods = kubernetesEnvironment.getPods();
     if (pods.size() != 1) {
       throw new InfrastructureException(
           "Workspace.Next configuration can be applied to a workspace with one pod only");
     }
     Pod pod = pods.values().iterator().next();
+
     for (ChePlugin chePlugin : chePlugins) {
       for (CheContainer container : chePlugin.getContainers()) {
-        io.fabric8.kubernetes.api.model.Container k8sContainer =
-            addContainer(pod, container.getImage(), container.getEnv());
-
-        String machineName = Names.machineName(pod, k8sContainer);
-
-        InternalMachineConfig machineConfig =
-            addMachine(
-                kubernetesEnvironment,
-                machineName,
-                getContainerEndpoints(container.getPorts(), chePlugin.getEndpoints()),
-                container.getVolumes());
-
-        normalizeMemory(k8sContainer, machineConfig);
+        addMachine(pod, container, chePlugin, kubernetesEnvironment);
       }
     }
+  }
+
+  private void addMachine(
+      Pod pod,
+      CheContainer container,
+      ChePlugin chePlugin,
+      KubernetesEnvironment kubernetesEnvironment) {
+
+    List<ChePluginEndpoint> containerEndpoints =
+        getContainerEndpoints(container.getPorts(), chePlugin.getEndpoints());
+    io.fabric8.kubernetes.api.model.Container k8sContainer =
+        addContainer(pod, container.getImage(), container.getEnv());
+
+    String machineName = Names.machineName(pod, k8sContainer);
+
+    InternalMachineConfig machineConfig =
+        addMachineConfig(
+            kubernetesEnvironment, machineName, containerEndpoints, container.getVolumes());
+
+    normalizeMemory(k8sContainer, machineConfig);
   }
 
   private io.fabric8.kubernetes.api.model.Container addContainer(
@@ -103,7 +114,7 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
     return container;
   }
 
-  private InternalMachineConfig addMachine(
+  private InternalMachineConfig addMachineConfig(
       KubernetesEnvironment kubernetesEnvironment,
       String machineName,
       List<ChePluginEndpoint> endpoints,
