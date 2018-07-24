@@ -175,6 +175,7 @@
           <class name="org.eclipse.che.selenium.miscellaneous.FindTextFeatureTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ImplementationBaseOperationsTest"/>
+          <class name="org.eclipse.che.selenium.miscellaneous.MachinesAsynchronousStartTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.NavigateToFileTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.OpenInTerminalTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ResolveDependencyAfterRecreateProjectTest"/>

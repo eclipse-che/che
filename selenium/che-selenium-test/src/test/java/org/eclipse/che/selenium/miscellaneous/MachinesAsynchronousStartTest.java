@@ -11,17 +11,20 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.RUNNING;
 
 import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -29,7 +32,7 @@ public class MachinesAsynchronousStartTest {
   private static final String GET_POD_NAME_COMMAND_COMMAND_TEMPLATE =
       "get pod --no-headers=true -l che.workspace_id=%s | awk '{print $1}'";
   private static final String GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE =
-      "get events --field-selector involvedObject.name=%s";
+      "get events --no-headers=true --field-selector involvedObject.name=%s | awk '{print $7 \" \" $8}'";
 
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -38,6 +41,7 @@ public class MachinesAsynchronousStartTest {
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   @Inject private TestWorkspace testWorkspace;
+  @Inject private WebDriverWaitFactory webDriverWaitFactory;
 
   private TestWorkspace brokenWorkspace;
 
@@ -51,26 +55,20 @@ public class MachinesAsynchronousStartTest {
     // prepare
     dashboard.open();
 
-    String wsId = testWorkspace.getId();
-    String wsName = testWorkspace.getName();
-
-    /*brokenWorkspace = createBrokenWorkspace();
+    // create and start broken workspace
+    brokenWorkspace = createBrokenWorkspace();
     testWorkspaceServiceClient.start(
-        brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser); */
+        brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser);
 
     // check that broken workspace is displayed with "Running" status
-
-    /*dashboard.waitDashboardToolbarTitle();
+    dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitPageLoading();
-    workspaces.waitWorkspaceStatus(brokenWorkspace.getName(), RUNNING);*/
+    workspaces.waitWorkspaceStatus(brokenWorkspace.getName(), RUNNING);
 
     // check openshift events log
-
-    String events = getPodRelatedEvents();
-    List<String> splitedEvents = splitEvents(events);
-
-    int i = 0;
+    waitEvent("Failed");
+    waitEvent("BackOff");
   }
 
   private TestWorkspace createBrokenWorkspace() throws Exception {
@@ -83,12 +81,27 @@ public class MachinesAsynchronousStartTest {
     return openShiftCliCommandExecutor.execute(command);
   }
 
-  private String getPodRelatedEvents() throws Exception {
+  private List<String> getPodRelatedEvents() throws Exception {
     String command = String.format(GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE, getPodName());
-    return openShiftCliCommandExecutor.execute(command);
+    String events = openShiftCliCommandExecutor.execute(command);
+    return asList(events.split("[\\ \\n]"));
   }
 
-  private List<String> splitEvents(String events) {
-    return asList(events.split("\n"));
+  private boolean eventIsPresent(String event) {
+    try {
+      return getPodRelatedEvents().contains(event);
+    } catch (Exception e) {
+      throw new RuntimeException("Fail of events logs reading", e);
+    }
   }
+
+  private void waitEvent(String event) {
+    final int timeoutInSeconds = 12;
+    final int delayBetweenRequestsInSeconds = 2;
+
+    webDriverWaitFactory
+        .get(timeoutInSeconds, delayBetweenRequestsInSeconds)
+        .until((ExpectedCondition<Boolean>) driver -> eventIsPresent(event));
+  }
+
 }
