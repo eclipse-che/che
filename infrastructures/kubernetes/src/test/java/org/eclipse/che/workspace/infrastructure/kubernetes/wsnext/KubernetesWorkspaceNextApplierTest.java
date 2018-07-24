@@ -28,9 +28,12 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
@@ -59,12 +62,15 @@ public class KubernetesWorkspaceNextApplierTest {
   private static final String POD_NAME = "pod12";
   private static final String VOLUME_NAME = "test_volume_name";
   private static final String VOLUME_MOUNT_PATH = "/path/test";
+  private static final String USER_MACHINE_NAME = POD_NAME + "/userContainer";
   private static final int MEMORY_LIMIT_MB = 200;
 
   @Mock Pod pod;
   @Mock PodSpec podSpec;
   @Mock ObjectMeta meta;
   @Mock KubernetesEnvironment internalEnvironment;
+  @Mock Container userContainer;
+  @Mock InternalMachineConfig userMachineConfig;
 
   KubernetesWorkspaceNextApplier applier;
   List<Container> containers;
@@ -75,6 +81,9 @@ public class KubernetesWorkspaceNextApplierTest {
     applier = new KubernetesWorkspaceNextApplier(MEMORY_LIMIT_MB);
     machines = new HashMap<>();
     containers = new ArrayList<>();
+
+    containers.add(userContainer);
+    machines.put(USER_MACHINE_NAME, userMachineConfig);
 
     when(internalEnvironment.getPods()).thenReturn(of(POD_NAME, pod));
     when(pod.getSpec()).thenReturn(podSpec);
@@ -106,8 +115,8 @@ public class KubernetesWorkspaceNextApplierTest {
   public void addToolingContainerToAPod() throws Exception {
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
-    assertEquals(containers.size(), 1);
-    Container toolingContainer = containers.get(0);
+    verifyPodAndContainersNumber(2);
+    Container toolingContainer = getOneAndOnlyNonUserContainer(internalEnvironment);
     verifyContainer(toolingContainer);
   }
 
@@ -115,53 +124,94 @@ public class KubernetesWorkspaceNextApplierTest {
   public void canAddMultipleToolingContainersToAPodFromOnePlugin() throws Exception {
     applier.apply(internalEnvironment, singletonList(createChePluginWith2Containers()));
 
-    assertEquals(containers.size(), 2);
-    for (Container container : containers) {
-      verifyContainer(container);
-    }
+    verifyPodAndContainersNumber(3);
+    List<Container> nonUserContainers = getNonUserContainers(internalEnvironment);
+    verifyContainers(nonUserContainers);
   }
 
   @Test
   public void canAddMultipleToolingContainersToAPodFromSeveralPlugins() throws Exception {
     applier.apply(internalEnvironment, ImmutableList.of(createChePlugin(), createChePlugin()));
 
-    assertEquals(containers.size(), 2);
-    for (Container container : containers) {
-      verifyContainer(container);
-    }
+    verifyPodAndContainersNumber(3);
+    List<Container> nonUserContainers = getNonUserContainers(internalEnvironment);
+    verifyContainers(nonUserContainers);
   }
 
   @Test
-  public void addsMachineWithVolumeForEachContainer() throws Exception {
+  public void addsMachineWithVolumeToAToolingContainer() throws Exception {
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
-    InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
-    Map<String, org.eclipse.che.api.core.model.workspace.config.Volume> volumes =
-        machineConfig.getVolumes();
-    assertEquals(volumes.size(), 1);
-    assertEquals(
-        ImmutableMap.of(VOLUME_NAME, new VolumeImpl().withPath(VOLUME_MOUNT_PATH)), volumes);
+    InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
+    verifyOneAndOnlyVolume(machineConfig, VOLUME_NAME, VOLUME_MOUNT_PATH);
+  }
+
+  @Test
+  public void addsMachinesWithVolumesToAllToolingContainer() throws Exception {
+    // given
+    ChePlugin chePluginWithNonDefaultVolume = createChePlugin();
+    String anotherVolumeName = VOLUME_NAME + "1";
+    String anotherVolumeMountPath = VOLUME_MOUNT_PATH + "/something";
+    chePluginWithNonDefaultVolume
+        .getContainers()
+        .get(0)
+        .setVolumes(
+            singletonList(new Volume().name(anotherVolumeName).mountPath(anotherVolumeMountPath)));
+
+    // when
+    applier.apply(internalEnvironment, asList(createChePlugin(), chePluginWithNonDefaultVolume));
+
+    // then
+    Collection<InternalMachineConfig> machineConfigs = getNonUserMachines(internalEnvironment);
+    assertEquals(machineConfigs.size(), 2);
+    verifyNumberOfMachinesWithSpecificVolume(machineConfigs, 1, VOLUME_NAME, VOLUME_MOUNT_PATH);
+    verifyNumberOfMachinesWithSpecificVolume(
+        machineConfigs, 1, anotherVolumeName, anotherVolumeMountPath);
+  }
+
+  @Test
+  public void addsMachineWithVolumeFromChePlugin() throws Exception {
+    // given
+    ChePlugin chePluginWithNoVolume = createChePlugin();
+    chePluginWithNoVolume.getContainers().get(0).setVolumes(emptyList());
+
+    // when
+    applier.apply(internalEnvironment, asList(createChePlugin(), chePluginWithNoVolume));
+
+    // then
+    Collection<InternalMachineConfig> machineConfigs = getNonUserMachines(internalEnvironment);
+    assertEquals(machineConfigs.size(), 2);
+    verifyNumberOfMachinesWithSpecificNumberOfVolumes(machineConfigs, 1, 0);
+    verifyNumberOfMachinesWithSpecificNumberOfVolumes(machineConfigs, 1, 1);
   }
 
   @Test
   public void addsMachineWithServersForContainer() throws Exception {
+    // given
     ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port", emptyMap(), true);
+
+    // when
     applier.apply(internalEnvironment, singletonList(chePlugin));
 
-    InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
+    // then
+    InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     assertEquals(
         machineConfig.getServers(), expectedSingleServer(80, "test-port", emptyMap(), true));
   }
 
   @Test
   public void addsTwoServersForContainers() throws Exception {
+    // given
     ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port", emptyMap(), true);
     addPortToSingleContainerPlugin(chePlugin, 8090, "another-test-port", emptyMap(), false);
+
+    // when
     applier.apply(internalEnvironment, singletonList(chePlugin));
 
-    InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
+    // then
+    InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     assertEquals(
         machineConfig.getServers(),
         expectedTwoServers(
@@ -170,12 +220,16 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void addsMachineWithServersThatUseSamePortButDifferentNames() throws Exception {
+    // given
     ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port/http", emptyMap(), true);
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port/ws", emptyMap(), true);
+
+    // when
     applier.apply(internalEnvironment, singletonList(chePlugin));
 
-    InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
+    // then
+    InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     assertEquals(
         machineConfig.getServers(),
         expectedTwoServers(
@@ -184,6 +238,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @Test
   public void addsMachineWithServersThatSetProtocolAndPath() throws Exception {
+    // given
     ChePlugin chePlugin = createChePlugin();
     addPortToSingleContainerPlugin(
         chePlugin,
@@ -191,9 +246,12 @@ public class KubernetesWorkspaceNextApplierTest {
         "test-port",
         ImmutableMap.of("path", "/path/1", "protocol", "https", "attr1", "value1"),
         true);
+
+    // when
     applier.apply(internalEnvironment, singletonList(chePlugin));
 
-    InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
+    // then
+    InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     assertEquals(
         machineConfig.getServers(),
         expectedSingleServer(
@@ -204,7 +262,7 @@ public class KubernetesWorkspaceNextApplierTest {
   public void setsDefaultMemoryLimitForMachineAssociatedWithContainer() throws Exception {
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
-    InternalMachineConfig machineConfig = getOneAndOnlyMachine(internalEnvironment);
+    InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     String memoryLimitAttribute = machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE);
     assertEquals(memoryLimitAttribute, Integer.toString(MEMORY_LIMIT_MB * 1024 * 1024));
   }
@@ -236,6 +294,12 @@ public class KubernetesWorkspaceNextApplierTest {
     return cheContainer;
   }
 
+  private void verifyPodAndContainersNumber(int containersNumber) {
+    assertEquals(internalEnvironment.getPods().size(), 1);
+    Pod pod = internalEnvironment.getPods().values().iterator().next();
+    assertEquals(pod.getSpec().getContainers().size(), containersNumber);
+  }
+
   private void verifyContainer(Container toolingContainer) {
     assertEquals(toolingContainer.getImage(), TEST_IMAGE);
     assertEquals(
@@ -243,10 +307,84 @@ public class KubernetesWorkspaceNextApplierTest {
         singletonList(new io.fabric8.kubernetes.api.model.EnvVar(ENV_VAR, ENV_VAR_VALUE, null)));
   }
 
-  private InternalMachineConfig getOneAndOnlyMachine(InternalEnvironment internalEnvironment) {
+  private void verifyContainers(List<Container> containers) {
+    for (Container container : containers) {
+      verifyContainer(container);
+    }
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void verifyOneAndOnlyVolume(
+      InternalMachineConfig machineConfig, String volumeName, String volumeMountPath) {
+    Map<String, org.eclipse.che.api.core.model.workspace.config.Volume> volumes =
+        machineConfig.getVolumes();
+    assertEquals(volumes.size(), 1);
+    assertEquals(ImmutableMap.of(volumeName, new VolumeImpl().withPath(volumeMountPath)), volumes);
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void verifyNumberOfMachinesWithSpecificNumberOfVolumes(
+      Collection<InternalMachineConfig> machineConfigs, int numberOfMachines, int numberOfVolumes) {
+
+    long numberOfMatchingMachines =
+        machineConfigs
+            .stream()
+            .filter(machineConfig -> machineConfig.getVolumes().size() == numberOfVolumes)
+            .count();
+    assertEquals(numberOfMatchingMachines, numberOfMachines);
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void verifyNumberOfMachinesWithSpecificVolume(
+      Collection<InternalMachineConfig> machineConfigs,
+      int numberOfMachines,
+      String volumeName,
+      String volumeMountPath) {
+
+    long numberOfMatchingMachines =
+        machineConfigs
+            .stream()
+            .filter(machineConfig -> machineConfig.getVolumes().size() == 1)
+            .filter(machineConfig -> machineConfig.getVolumes().get(volumeName) != null)
+            .filter(
+                machineConfig ->
+                    volumeMountPath.equals(machineConfig.getVolumes().get(volumeName).getPath()))
+            .count();
+    assertEquals(numberOfMatchingMachines, numberOfMachines);
+  }
+
+  private Collection<InternalMachineConfig> getNonUserMachines(
+      InternalEnvironment internalEnvironment) {
     Map<String, InternalMachineConfig> machines = internalEnvironment.getMachines();
-    assertEquals(machines.size(), 1);
-    return machines.values().iterator().next();
+    Map<String, InternalMachineConfig> nonUserMachines =
+        machines
+            .entrySet()
+            .stream()
+            .filter(entry -> !USER_MACHINE_NAME.equals(entry.getKey()))
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    return nonUserMachines.values();
+  }
+
+  private InternalMachineConfig getOneAndOnlyNonUserMachine(
+      InternalEnvironment internalEnvironment) {
+    Collection<InternalMachineConfig> nonUserMachines = getNonUserMachines(internalEnvironment);
+    assertEquals(nonUserMachines.size(), 1);
+    return nonUserMachines.iterator().next();
+  }
+
+  private List<Container> getNonUserContainers(KubernetesEnvironment kubernetesEnvironment) {
+    Pod pod = kubernetesEnvironment.getPods().values().iterator().next();
+    return pod.getSpec()
+        .getContainers()
+        .stream()
+        .filter(container -> userContainer != container)
+        .collect(Collectors.toList());
+  }
+
+  private Container getOneAndOnlyNonUserContainer(KubernetesEnvironment kubernetesEnvironment) {
+    List<Container> nonUserContainers = getNonUserContainers(kubernetesEnvironment);
+    assertEquals(nonUserContainers.size(), 1);
+    return nonUserContainers.get(0);
   }
 
   private void addPortToSingleContainerPlugin(
