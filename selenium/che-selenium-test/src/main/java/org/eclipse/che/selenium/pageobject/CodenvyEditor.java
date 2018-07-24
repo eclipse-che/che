@@ -206,7 +206,7 @@ public class CodenvyEditor {
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
     String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
-    String AUTOCOMPLETE_PROPOSAL_DOC_XPATH = "//body/div/div[text()='%s']";
+    String AUTOCOMPLETE_PROPOSAL_DOC_XPATH = "//div[@class='gwt-HTML' and text()='%s']";
   }
 
   public enum TabActionLocator {
@@ -2172,5 +2172,10 @@ public class CodenvyEditor {
   public void checkProposalDocumentation(String expectedText) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(Locators.AUTOCOMPLETE_PROPOSAL_DOC_XPATH, expectedText)));
+  }
+
+  public void launchCommentCodeFeature() {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(CONTROL).sendKeys("/").keyUp(CONTROL).perform();
   }
 }

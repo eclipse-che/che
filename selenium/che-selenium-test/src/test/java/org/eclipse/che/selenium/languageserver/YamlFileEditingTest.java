@@ -68,7 +68,7 @@ public class YamlFileEditingTest {
 
     ide.waitOpenedWorkspaceIsReadyToUse();
 
-    addYamlSchema("kubernetes");
+    addYamlSchema();
   }
 
   @Test
@@ -156,7 +156,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void checkCodeValidation() {
     editor.selectTabByName("deployment.yaml");
     editor.waitAllMarkersInvisibility(ERROR);
@@ -174,7 +174,41 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  private void addYamlSchema(String schemaName) {
+  @Test(priority = 1)
+  public void checkCommentCodeFeature() {
+    editor.selectTabByName("deployment.yaml");
+
+    // comment lines by Ctrl+'/' buttons
+    editor.goToPosition(18, 1);
+    editor.launchCommentCodeFeature();
+    editor.waitTextIntoEditor("#  generation: 4");
+    editor.goToPosition(20, 1);
+    editor.launchCommentCodeFeature();
+    editor.goToPosition(22, 1);
+    editor.launchCommentCodeFeature();
+    editor.waitTextIntoEditor(
+        "#  generation: 4\n"
+            + "  labels:\n"
+            + "#    app: che\n"
+            + "    template: che\n"
+            + "#  name: che");
+
+    // uncomment all commented lines
+    editor.goToPosition(18, 1);
+    editor.launchCommentCodeFeature();
+    editor.goToPosition(20, 1);
+    editor.launchCommentCodeFeature();
+    editor.goToPosition(22, 1);
+    editor.launchCommentCodeFeature();
+    editor.waitTextIntoEditor(
+        "  generation: 4\n"
+            + "  labels:\n"
+            + "    app: che\n"
+            + "    template: che\n"
+            + "  name: che");
+  }
+
+  private void addYamlSchema() {
     menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
 
@@ -182,7 +216,7 @@ public class YamlFileEditingTest {
     preferences.selectDroppedMenuByName(YAML);
 
     preferences.clickOnAddSchemaUrlButton();
-    preferences.addSchemaUrl(schemaName);
+    preferences.addSchemaUrl("kubernetes");
     preferences.clickOnOkBtn();
 
     preferences.closeForm();
