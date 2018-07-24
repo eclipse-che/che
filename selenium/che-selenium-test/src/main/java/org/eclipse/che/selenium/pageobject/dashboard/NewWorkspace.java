@@ -149,7 +149,7 @@ public class NewWorkspace {
     ECLIPSE_VERTX("vert.x"),
     GO("go-default"),
     JAVA_CENTOS("java-centos"),
-    JAVA_THEIA_DOCKER("java-theia-docker"),
+    JAVA_THEIA_DOCKER("simple-theia-docker"),
     JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
     JAVA_MYSQL_CENTOS("java-centos-mysql"),
     JAVA_DEBIAN("java-debian"),
