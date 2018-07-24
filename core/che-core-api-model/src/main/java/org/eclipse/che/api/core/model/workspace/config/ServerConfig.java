@@ -37,6 +37,13 @@ public interface ServerConfig {
   String SECURE_SERVER_ATTRIBUTE = "secure";
 
   /**
+   * {@link ServerConfig} and {@link Server} attribute name which can contain an comma-separated
+   * list of URI-s which are considered as non-secure on the given server and can be accessible with
+   * unauthenticated requests.
+   */
+  String UNSECURED_PATHS_ATTRIBUTE = "unsecuredPaths";
+
+  /**
    * Port used by server.
    *
    * <p>It may contain protocol(tcp or udp) after '/' symbol. If protocol is missing tcp will be
