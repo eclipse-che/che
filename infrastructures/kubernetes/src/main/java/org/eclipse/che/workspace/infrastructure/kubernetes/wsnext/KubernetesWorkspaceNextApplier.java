@@ -10,12 +10,21 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsnext;
 
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.ContainerPort;
+import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -86,12 +95,13 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
       Pod pod,
       CheContainer container,
       ChePlugin chePlugin,
-      KubernetesEnvironment kubernetesEnvironment) {
+      KubernetesEnvironment kubernetesEnvironment)
+      throws InfrastructureException {
 
     List<ChePluginEndpoint> containerEndpoints =
         getContainerEndpoints(container.getPorts(), chePlugin.getEndpoints());
     io.fabric8.kubernetes.api.model.Container k8sContainer =
-        addContainer(pod, container.getImage(), container.getEnv());
+        addContainer(pod, container.getImage(), container.getEnv(), containerEndpoints);
 
     String machineName = Names.machineName(pod, k8sContainer);
 
@@ -99,17 +109,73 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
         addMachineConfig(
             kubernetesEnvironment, machineName, containerEndpoints, container.getVolumes());
 
+    addEndpointsServices(kubernetesEnvironment, containerEndpoints, pod.getMetadata().getName());
+
     normalizeMemory(k8sContainer, machineConfig);
   }
 
+  /**
+   * Add k8s Service objects to environment to provide service discovery in sidecar based
+   * workspaces.
+   */
+  private void addEndpointsServices(
+      KubernetesEnvironment kubernetesEnvironment,
+      List<ChePluginEndpoint> endpoints,
+      String podName)
+      throws InfrastructureException {
+
+    for (ChePluginEndpoint endpoint : endpoints) {
+      String serviceName = endpoint.getName();
+      Service service = createService(serviceName, podName, endpoint.getTargetPort());
+
+      Map<String, Service> services = kubernetesEnvironment.getServices();
+      if (!services.containsKey(serviceName)) {
+        services.put(serviceName, service);
+      } else {
+        throw new InfrastructureException(
+            "Applying of sidecar tooling failed. Kubernetes service with name '"
+                + serviceName
+                + "' already exists in the workspace environment.");
+      }
+    }
+  }
+
+  private Service createService(String name, String podName, int port) {
+    ServicePort servicePort =
+        new ServicePortBuilder().withPort(port).withProtocol("TCP").withNewTargetPort(port).build();
+    return new ServiceBuilder()
+        .withNewMetadata()
+        .withName(name)
+        .endMetadata()
+        .withNewSpec()
+        .withSelector(singletonMap(CHE_ORIGINAL_NAME_LABEL, podName))
+        .withPorts(singletonList(servicePort))
+        .endSpec()
+        .build();
+  }
+
   private io.fabric8.kubernetes.api.model.Container addContainer(
-      Pod toolingPod, String image, List<EnvVar> env) {
+      Pod toolingPod, String image, List<EnvVar> env, List<ChePluginEndpoint> containerEndpoints) {
+
+    List<ContainerPort> containerPorts =
+        containerEndpoints
+            .stream()
+            .map(
+                endpoint ->
+                    new ContainerPortBuilder()
+                        .withContainerPort(endpoint.getTargetPort())
+                        .withProtocol("TCP")
+                        .build())
+            .collect(Collectors.toList());
+
     io.fabric8.kubernetes.api.model.Container container =
         new ContainerBuilder()
             .withImage(image)
             .withName(Names.generateName("tooling"))
             .withEnv(toK8sEnv(env))
+            .withPorts(containerPorts)
             .build();
+
     toolingPod.getSpec().getContainers().add(container);
     return container;
   }
@@ -160,6 +226,7 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
 
   private Map<String, ? extends org.eclipse.che.api.core.model.workspace.config.Volume>
       toWorkspaceVolumes(List<Volume> volumes) {
+
     Map<String, VolumeImpl> result = new HashMap<>();
 
     for (Volume volume : volumes) {

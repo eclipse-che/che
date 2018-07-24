@@ -17,16 +17,23 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerPort;
+import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,6 +71,7 @@ public class KubernetesWorkspaceNextApplierTest {
   private static final String VOLUME_MOUNT_PATH = "/path/test";
   private static final String USER_MACHINE_NAME = POD_NAME + "/userContainer";
   private static final int MEMORY_LIMIT_MB = 200;
+  private static final String CHE_PLUGIN_ENDPOINT_NAME = "test-endpoint-1";
 
   @Mock Pod pod;
   @Mock PodSpec podSpec;
@@ -73,14 +81,14 @@ public class KubernetesWorkspaceNextApplierTest {
   @Mock InternalMachineConfig userMachineConfig;
 
   KubernetesWorkspaceNextApplier applier;
-  List<Container> containers;
-  Map<String, InternalMachineConfig> machines;
 
   @BeforeMethod
   public void setUp() {
     applier = new KubernetesWorkspaceNextApplier(MEMORY_LIMIT_MB);
-    machines = new HashMap<>();
-    containers = new ArrayList<>();
+
+    Map<String, InternalMachineConfig> machines = new HashMap<>();
+    List<Container> containers = new ArrayList<>();
+    Map<String, Service> services = new HashMap<>();
 
     containers.add(userContainer);
     machines.put(USER_MACHINE_NAME, userMachineConfig);
@@ -91,6 +99,7 @@ public class KubernetesWorkspaceNextApplierTest {
     when(pod.getMetadata()).thenReturn(meta);
     when(meta.getName()).thenReturn(POD_NAME);
     when(internalEnvironment.getMachines()).thenReturn(machines);
+    when(internalEnvironment.getServices()).thenReturn(services);
   }
 
   @Test
@@ -267,6 +276,89 @@ public class KubernetesWorkspaceNextApplierTest {
     assertEquals(memoryLimitAttribute, Integer.toString(MEMORY_LIMIT_MB * 1024 * 1024));
   }
 
+  @Test
+  public void shouldExposeChePluginEndpointsPortsInToolingContainer() throws Exception {
+    // given
+    ChePluginEndpoint endpoint1 =
+        new ChePluginEndpoint().name(CHE_PLUGIN_ENDPOINT_NAME).targetPort(101010).setPublic(true);
+    ChePluginEndpoint endpoint2 =
+        new ChePluginEndpoint().name("test-endpoint-2").targetPort(2020).setPublic(false);
+    CheContainerPort cheContainerPort1 = new CheContainerPort().exposedPort(101010);
+    CheContainerPort cheContainerPort2 = new CheContainerPort().exposedPort(2020);
+    ChePlugin chePlugin = createChePlugin();
+    chePlugin.setEndpoints(asList(endpoint1, endpoint2));
+    chePlugin.getContainers().get(0).setPorts(asList(cheContainerPort1, cheContainerPort2));
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    Container container = getOneAndOnlyNonUserContainer(internalEnvironment);
+    verifyPortsExposed(container, 101010, 2020);
+  }
+
+  @Test
+  public void shouldNotExposeChePluginPortIfThereIsNoEndpoint() throws Exception {
+    // given
+    ChePluginEndpoint endpoint1 =
+        new ChePluginEndpoint().name(CHE_PLUGIN_ENDPOINT_NAME).targetPort(101010).setPublic(true);
+    CheContainerPort cheContainerPort1 = new CheContainerPort().exposedPort(101010);
+    CheContainerPort cheContainerPort2 = new CheContainerPort().exposedPort(2020);
+    ChePlugin chePlugin = createChePlugin();
+    chePlugin.setEndpoints(singletonList(endpoint1));
+    chePlugin.getContainers().get(0).setPorts(asList(cheContainerPort1, cheContainerPort2));
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    Container container = getOneAndOnlyNonUserContainer(internalEnvironment);
+    verifyPortsExposed(container, 101010);
+  }
+
+  @Test
+  public void shouldAddK8sServicesForChePluginEndpoints() throws Exception {
+    // given
+    ChePluginEndpoint endpoint1 =
+        new ChePluginEndpoint().name(CHE_PLUGIN_ENDPOINT_NAME).targetPort(101010).setPublic(true);
+    ChePluginEndpoint endpoint2 =
+        new ChePluginEndpoint().name("test-endpoint-2").targetPort(2020).setPublic(false);
+    CheContainerPort cheContainerPort1 = new CheContainerPort().exposedPort(101010);
+    CheContainerPort cheContainerPort2 = new CheContainerPort().exposedPort(2020);
+    ChePlugin chePlugin = createChePlugin();
+    chePlugin.setEndpoints(asList(endpoint1, endpoint2));
+    chePlugin.getContainers().get(0).setPorts(asList(cheContainerPort1, cheContainerPort2));
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    verifyK8sServices(internalEnvironment, endpoint1, endpoint2);
+  }
+
+  @Test(
+    expectedExceptions = InfrastructureException.class,
+    expectedExceptionsMessageRegExp =
+        "Applying of sidecar tooling failed. Kubernetes service with name '"
+            + CHE_PLUGIN_ENDPOINT_NAME
+            + "' already exists in the workspace environment."
+  )
+  public void throwsExceptionOnAddingChePluginEndpointServiceIfServiceExists() throws Exception {
+    // given
+    ChePluginEndpoint endpoint1 =
+        new ChePluginEndpoint().name(CHE_PLUGIN_ENDPOINT_NAME).targetPort(101010).setPublic(true);
+    CheContainerPort cheContainerPort1 = new CheContainerPort().exposedPort(101010);
+    ChePlugin chePlugin = createChePlugin();
+    chePlugin.setEndpoints(singletonList(endpoint1));
+    chePlugin.getContainers().get(0).setPorts(singletonList(cheContainerPort1));
+
+    // make collision of service names
+    internalEnvironment.getServices().put(CHE_PLUGIN_ENDPOINT_NAME, new Service());
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+  }
+
   private ChePlugin createChePlugin() {
     ChePlugin plugin = new ChePlugin();
     plugin.setName("some-name");
@@ -292,6 +384,14 @@ public class KubernetesWorkspaceNextApplierTest {
     cheContainer.setVolumes(
         singletonList(new Volume().name(VOLUME_NAME).mountPath(VOLUME_MOUNT_PATH)));
     return cheContainer;
+  }
+
+  private ServicePort createServicePort(int port) {
+    return new ServicePortBuilder()
+        .withPort(port)
+        .withProtocol("TCP")
+        .withNewTargetPort(port)
+        .build();
   }
 
   private void verifyPodAndContainersNumber(int containersNumber) {
@@ -351,6 +451,31 @@ public class KubernetesWorkspaceNextApplierTest {
                     volumeMountPath.equals(machineConfig.getVolumes().get(volumeName).getPath()))
             .count();
     assertEquals(numberOfMatchingMachines, numberOfMachines);
+  }
+
+  private void verifyPortsExposed(Container container, int... ports) {
+    List<ContainerPort> actualPorts = container.getPorts();
+    List<ContainerPort> expectedPorts = new ArrayList<>();
+    for (int port : ports) {
+      expectedPorts.add(
+          new ContainerPortBuilder().withContainerPort(port).withProtocol("TCP").build());
+    }
+    assertEquals(actualPorts, expectedPorts);
+  }
+
+  private void verifyK8sServices(
+      KubernetesEnvironment internalEnvironment, ChePluginEndpoint... endpoints) {
+    Map<String, Service> services = internalEnvironment.getServices();
+    for (ChePluginEndpoint endpoint : endpoints) {
+      assertTrue(services.containsKey(endpoint.getName()));
+      Service service = services.get(endpoint.getName());
+      assertEquals(service.getMetadata().getName(), endpoint.getName());
+      assertEquals(
+          service.getSpec().getSelector(), singletonMap(CHE_ORIGINAL_NAME_LABEL, POD_NAME));
+
+      assertEquals(
+          service.getSpec().getPorts(), singletonList(createServicePort(endpoint.getTargetPort())));
+    }
   }
 
   private Collection<InternalMachineConfig> getNonUserMachines(
