@@ -459,11 +459,16 @@ public class CodenvyEditor {
    * @param timeout waiting time in seconds
    */
   public void waitTextIntoEditor(final String expectedText, final int timeout) {
+    String[] result = new String[1];
     webDriverWaitFactory
         .get(timeout)
+        .withMessage(() -> "Timeout waiting for txt, actual='" + result[0] + "'")
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> getVisibleTextFromEditor().contains(expectedText));
+                driver -> {
+                  result[0] = getVisibleTextFromEditor();
+                  return result[0].contains(expectedText);
+                });
   }
 
   /**
