@@ -116,6 +116,10 @@ public class PomReconciler {
     try {
       Model.readFrom(new ByteArrayInputStream(pomContent.getBytes(defaultCharset())));
 
+      if (isNullOrEmpty(projectPath)) {
+        return result;
+      }
+
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectPath);
       MavenProject mavenProject = mavenProjectManager.findMavenProject(project);
       if (mavenProject == null) {

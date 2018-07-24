@@ -20,6 +20,8 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -45,8 +47,13 @@ public class FileOpenCloseEventListener {
         new FileEvent.FileEventHandler() {
           @Override
           public void onFileOperation(FileEvent event) {
-            final Path path = event.getFile().getLocation();
-            final EditorAgent editorAgent = editorAgentProvider.get();
+            VirtualFile file = event.getFile();
+            if (!(file instanceof Resource)) {
+              return;
+            }
+
+            Path path = file.getLocation();
+            EditorAgent editorAgent = editorAgentProvider.get();
 
             switch (event.getOperationType()) {
               case OPEN:
