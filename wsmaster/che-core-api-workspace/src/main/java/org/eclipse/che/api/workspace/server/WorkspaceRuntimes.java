@@ -340,8 +340,10 @@ public class WorkspaceRuntimes {
     } catch (ValidationException e) {
       LOG.error(e.getLocalizedMessage(), e);
       throw new ConflictException(e.getLocalizedMessage());
-    } catch (InfrastructureException e) {
+    } catch (InternalInfrastructureException e) {
       LOG.error(e.getLocalizedMessage(), e);
+      throw new ServerException(e.getLocalizedMessage(), e);
+    } catch (InfrastructureException e) {
       throw new ServerException(e.getLocalizedMessage(), e);
     }
   }
