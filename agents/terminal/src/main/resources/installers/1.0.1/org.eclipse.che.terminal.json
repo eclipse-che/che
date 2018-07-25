@@ -11,7 +11,8 @@
       "protocol": "ws",
       "path" : "/pty",
       "attributes": {
-        "secure": "true"
+        "secure": "true",
+        "unsecuredPaths": "/liveness"
       }
     }
   }
