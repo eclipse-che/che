@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.RUNNING;
 
 import com.google.inject.Inject;
@@ -28,6 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
+@Test(groups = OPENSHIFT)
 public class MachinesAsynchronousStartTest {
   private static final String GET_POD_NAME_COMMAND_COMMAND_TEMPLATE =
       "get pod --no-headers=true -l che.workspace_id=%s | awk '{print $1}'";
@@ -77,12 +80,12 @@ public class MachinesAsynchronousStartTest {
   }
 
   private String getPodName() throws Exception {
-    String command = String.format(GET_POD_NAME_COMMAND_COMMAND_TEMPLATE, testWorkspace.getId());
+    String command = format(GET_POD_NAME_COMMAND_COMMAND_TEMPLATE, testWorkspace.getId());
     return openShiftCliCommandExecutor.execute(command);
   }
 
   private List<String> getPodRelatedEvents() throws Exception {
-    String command = String.format(GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE, getPodName());
+    String command = format(GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE, getPodName());
     String events = openShiftCliCommandExecutor.execute(command);
     return asList(events.split("[\\ \\n]"));
   }
@@ -103,5 +106,4 @@ public class MachinesAsynchronousStartTest {
         .get(timeoutInSeconds, delayBetweenRequestsInSeconds)
         .until((ExpectedCondition<Boolean>) driver -> eventIsPresent(event));
   }
-
 }
