@@ -24,9 +24,12 @@ public class LanguageServerInitializedEvent {
 
   private final LanguageServer languageServer;
 
-  LanguageServerInitializedEvent(String id, LanguageServer languageServer) {
+  private final String wsPath;
+
+  LanguageServerInitializedEvent(String id, LanguageServer languageServer, String wsPath) {
     this.id = id;
     this.languageServer = languageServer;
+    this.wsPath = wsPath;
   }
 
   /**
@@ -45,5 +48,14 @@ public class LanguageServerInitializedEvent {
    */
   public LanguageServer getLanguageServer() {
     return languageServer;
+  }
+
+  /**
+   * Get initialized language server workspace path
+   *
+   * @return language server workspace path
+   */
+  public String getWsPath() {
+    return wsPath;
   }
 }

@@ -119,7 +119,7 @@ class LanguageServerInitializer {
                   .filter(Objects::nonNull)
                   .map(this::createServerInstance)
                   .filter(Objects::nonNull)
-                  .map(this::initializeServerInstance)
+                  .map(id -> initializeServerInstance(id, wsPath))
                   .filter(Objects::nonNull)
                   .map(serverCapabilitiesRegistry::getOrNull)
                   .filter(Objects::nonNull)
@@ -195,7 +195,7 @@ class LanguageServerInitializer {
     return null;
   }
 
-  private String initializeServerInstance(String id) {
+  private String initializeServerInstance(String id, String wsPath) {
     try {
       LOG.debug("Initializing of a language server instance for server '{}': started", id);
       synchronized (idRegistry.get(id)) {
@@ -210,7 +210,7 @@ class LanguageServerInitializer {
             languageServer.initialize(initializeParams).get(30, SECONDS);
 
         LanguageServerInitializedEvent event =
-            new LanguageServerInitializedEvent(id, languageServer);
+            new LanguageServerInitializedEvent(id, languageServer, wsPath);
         eventService.publish(event);
         LOG.debug("Published a corresponding event: {}", event);
 
