@@ -73,7 +73,8 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
             k8sEnv,
             serviceName,
             servicePort.getTargetPort().getIntVal(),
-            servicePort.getProtocol());
+            servicePort.getProtocol(),
+            secureServers);
 
     exposerStrategy.expose(
         k8sEnv, machineName, proxyProvisioner.getServiceName(), exposedServicePort, secureServers);

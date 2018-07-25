@@ -10,11 +10,13 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
+import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_CONFIG_FOLDER;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_PUBLIC_KEY_FILE;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Helps to build JWTProxy config with several verifier proxies.
@@ -29,8 +31,8 @@ public class JwtProxyConfigBuilder {
     this.workspaceId = workspaceId;
   }
 
-  public void addVerifierProxy(Integer listenPort, String upstream) {
-    verifierProxies.add(new VerifierProxy(listenPort, upstream));
+  public void addVerifierProxy(Integer listenPort, String upstream, Set<String> excludes) {
+    verifierProxies.add(new VerifierProxy(listenPort, upstream, excludes));
   }
 
   public String build() {
@@ -39,18 +41,18 @@ public class JwtProxyConfigBuilder {
     configBuilder.append("jwtproxy:\n" + "  verifier_proxies:\n");
     for (VerifierProxy verifierProxy : verifierProxies) {
       configBuilder.append(
-          String.format(
+          format(
               "  - listen_addr: :%s\n" // :4471
                   + "    verifier:\n"
                   + "      upstream: %s/\n" // http://localhost:4401
-                  + "      audience: http://%s\n"
+                  + "      audience: %s\n"
                   + "      max_skew: 1m\n"
-                  + "      max_ttl: 3h\n"
+                  + "      max_ttl: 8800h\n"
                   + "      key_server:\n"
                   + "        type: preshared\n"
                   + "        options:\n"
                   + "          issuer: wsmaster\n"
-                  + "          key_id: mykey\n"
+                  + "          key_id: %s\n"
                   + "          public_key_path: "
                   + JWT_PROXY_CONFIG_FOLDER
                   + "/"
@@ -64,8 +66,14 @@ public class JwtProxyConfigBuilder {
                   + "        type: void\n",
               verifierProxy.listenPort,
               verifierProxy.upstream,
+              workspaceId,
               workspaceId));
+      if (!verifierProxy.excludes.isEmpty()) {
+        configBuilder.append("      excludes:\n");
+        verifierProxy.excludes.forEach(s -> configBuilder.append(format("      - %s\n", s)));
+      }
     }
+
     configBuilder.append("  signer_proxy:\n" + "    enabled: false\n");
     return configBuilder.toString();
   }
@@ -73,10 +81,12 @@ public class JwtProxyConfigBuilder {
   private class VerifierProxy {
     private Integer listenPort;
     private String upstream;
+    private Set<String> excludes;
 
-    VerifierProxy(Integer listenPort, String upstream) {
+    VerifierProxy(Integer listenPort, String upstream, Set<String> excludes) {
       this.listenPort = listenPort;
       this.upstream = upstream;
+      this.excludes = excludes;
     }
   }
 }
