@@ -13,8 +13,10 @@ package org.eclipse.che.selenium.stack;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
+import static org.openqa.selenium.Keys.BACK_SPACE;
 import static org.openqa.selenium.Keys.ESCAPE;
 
 import com.google.inject.Inject;
@@ -41,6 +43,10 @@ public class ImportAndValidateEclipseCheProjectTest {
   private static final String WORKSPACE_NAME = generate("EclipseCheWs", 4);
   private static final String PROJECT_NAME = "eclipse-che";
   private static final String ECLIPSE_CHE_PROJECT_URL = "https://github.com/eclipse/che.git";
+  private static final String PATH_TO_JAVA_FILE =
+      "selenium/che-selenium-test/src/main/java/org/eclipse/che/selenium/pageobject/CodenvyEditor.java";
+  private static final String PATH_TO_POM_FILE = "dashboard/pom.xml";
+  private static final String PATH_TO_TS_FILE = "dashboard/src/app/index.module.ts";
 
   @Inject private Ide ide;
   @Inject private Menu menu;
@@ -71,7 +77,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   }
 
   @Test
-  public void checkImportAndVAlidateEclipceCheProject() {
+  public void checkImportAndResolveDependenciesEclipceCheProject() {
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
@@ -86,20 +92,18 @@ public class ImportAndValidateEclipseCheProjectTest {
     // TODO it is the workaround, delete it after resolve the issue
     // TODO https://github.com/eclipse/che/issues/10515
     // close unexpected error information dialog and click on the 'Save' button;
+    int counterErrorDialog = 0;
 
-    if (informationDialog.waitFormIsOpened()) {
+    while (informationDialog.waitFormIsOpened()) {
       informationDialog.waitFormToOpen();
       informationDialog.clickOkBtn();
       projectWizard.clickSaveButton();
+      counterErrorDialog++;
       loader.waitOnClosed();
-
-      if (informationDialog.waitFormIsOpened()) {
-        informationDialog.waitFormToOpen();
-        informationDialog.clickOkBtn();
-        projectWizard.clickSaveButton();
-        loader.waitOnClosed();
-      }
     }
+
+    System.out.println(
+        "==== The error information dialog appeared " + counterErrorDialog + " times ====");
 
     projectWizard.waitCreateProjectWizardFormIsClosed();
     loader.waitOnClosed();
@@ -110,27 +114,22 @@ public class ImportAndValidateEclipseCheProjectTest {
     loader.waitOnClosed();
 
     // then open files
-    String pathToJavaFile =
-        "selenium/che-selenium-test/src/main/java/org/eclipse/che/selenium/pageobject/CodenvyEditor.java";
-    String pathToPomFile = "dashboard/pom.xml";
-    String pathToTsFile = "dashboard/src/app/index.module.ts";
-
     // open a java file
     projectExplorer.quickRevealToItemWithJavaScript(
-        String.format("%s/%s", PROJECT_NAME, pathToJavaFile));
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, pathToJavaFile));
+        String.format("%s/%s", PROJECT_NAME, PATH_TO_JAVA_FILE));
+    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_JAVA_FILE));
     editor.waitActive();
 
     // open a xml file
     projectExplorer.quickRevealToItemWithJavaScript(
-        String.format("%s/%s", PROJECT_NAME, pathToPomFile));
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, pathToPomFile));
+        String.format("%s/%s", PROJECT_NAME, PATH_TO_POM_FILE));
+    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_POM_FILE));
     editor.waitActive();
 
     // open a ts file
     projectExplorer.quickRevealToItemWithJavaScript(
-        String.format("%s/%s", PROJECT_NAME, pathToTsFile));
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, pathToTsFile));
+        String.format("%s/%s", PROJECT_NAME, PATH_TO_TS_FILE));
+    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_TS_FILE));
     editor.waitActive();
 
     // open the resolving dependencies form
@@ -146,8 +145,40 @@ public class ImportAndValidateEclipseCheProjectTest {
     mavenPluginStatusBar.clickOnInfoPanel();
     mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
 
-    // wait while are resolved dependencies
-    mavenPluginStatusBar.waitClosingInfoPanel(3600);
+    // wait while dependencies are resolved
+    mavenPluginStatusBar.waitClosingInfoPanel(4200);
     mavenPluginStatusBar.waitResolveDependenciesFormToClose();
+  }
+
+  @Test(priority = 1)
+  public void checkErrorMarkersInEditor() {
+    projectExplorer.waitItem(PROJECT_NAME);
+
+    // check the ts file
+    projectExplorer.openItemByPath(PATH_TO_TS_FILE);
+    editor.waitActive();
+    editor.typeTextIntoEditor("q");
+    editor.waitMarkerInPosition(ERROR, 1);
+    editor.typeTextIntoEditor(BACK_SPACE.toString());
+    editor.waitMarkerInvisibility(ERROR, 1);
+
+    // check the pom.xml file
+    projectExplorer.openItemByPath(PATH_TO_POM_FILE);
+    editor.waitActive();
+    editor.waitAllMarkersInvisibility(ERROR);
+    editor.typeTextIntoEditor("q");
+    editor.waitMarkerInPosition(ERROR, 1);
+    editor.typeTextIntoEditor(BACK_SPACE.toString());
+    editor.waitMarkerInvisibility(ERROR, 1);
+
+    // check the java file
+    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
+    editor.waitActive();
+    editor.waitAllMarkersInvisibility(ERROR);
+    editor.setCursorToLine(12);
+    editor.typeTextIntoEditor("q");
+    editor.waitMarkerInPosition(ERROR, 12);
+    editor.typeTextIntoEditor(BACK_SPACE.toString());
+    editor.waitMarkerInvisibility(ERROR, 12);
   }
 }
