@@ -47,6 +47,19 @@ public class YamlFileEditingTest {
   private static final String LS_INIT_MESSAGE =
       format("Finished language servers initialization, file path '/%s'", PATH_TO_YAML_FILE);
 
+  private static final String COMMENTED_CODE =
+      "#  generation: 4\n"
+          + "  labels:\n"
+          + "#    app: che\n"
+          + "    template: che\n"
+          + "#  name: che";
+  private static final String UNCOMMENTED_CODE =
+      "  generation: 4\n"
+          + "  labels:\n"
+          + "    app: che\n"
+          + "    template: che\n"
+          + "  name: che";
+
   @InjectTestWorkspace(template = ECLIPSE_NODEJS_YAML)
   private TestWorkspace workspace;
 
@@ -186,12 +199,7 @@ public class YamlFileEditingTest {
     editor.launchCommentCodeFeature();
     editor.goToPosition(22, 1);
     editor.launchCommentCodeFeature();
-    editor.waitTextIntoEditor(
-        "#  generation: 4\n"
-            + "  labels:\n"
-            + "#    app: che\n"
-            + "    template: che\n"
-            + "#  name: che");
+    editor.waitTextIntoEditor(COMMENTED_CODE);
 
     // uncomment all commented lines
     editor.goToPosition(18, 1);
@@ -200,12 +208,7 @@ public class YamlFileEditingTest {
     editor.launchCommentCodeFeature();
     editor.goToPosition(22, 1);
     editor.launchCommentCodeFeature();
-    editor.waitTextIntoEditor(
-        "  generation: 4\n"
-            + "  labels:\n"
-            + "    app: che\n"
-            + "    template: che\n"
-            + "  name: che");
+    editor.waitTextIntoEditor(UNCOMMENTED_CODE);
   }
 
   private void addYamlSchema() {

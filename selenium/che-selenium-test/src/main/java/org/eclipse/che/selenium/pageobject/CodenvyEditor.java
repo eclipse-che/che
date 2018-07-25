@@ -2178,7 +2178,11 @@ public class CodenvyEditor {
   }
 
   public void launchCommentCodeFeature() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).sendKeys("/").keyUp(CONTROL).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("/")
+        .keyUp(CONTROL)
+        .perform();
   }
 }

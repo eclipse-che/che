@@ -324,18 +324,13 @@ public class Preferences {
   }
 
   public void clickOnAddSchemaUrlButton() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOf(addSchemaUrlButton))
-        .click();
+    webDriverHelper.waitAndClick(addSchemaUrlButton);
   }
 
   public void addSchemaUrl(String schemaName) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOf(addSchemaUrlInput));
+    webDriverHelper.waitVisibility(addSchemaUrlInput);
     addSchemaUrlInput.sendKeys(schemaName);
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.id("askValue-dialog-ok")))
-        .click();
+    webDriverHelper.waitAndClick(By.id("askValue-dialog-ok"));
   }
 
   public void clickOnGenerateAndUploadToGitHub() {
