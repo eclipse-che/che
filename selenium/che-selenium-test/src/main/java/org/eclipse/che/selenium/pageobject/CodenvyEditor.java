@@ -23,6 +23,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ALL_TABS_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ASSIST_CONTENT_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_CONTAINER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_PROPOSAL_DOC_ID;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.CONTEXT_MENU;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_CONDITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_DISABLED;
@@ -206,7 +207,7 @@ public class CodenvyEditor {
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
     String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
-    String AUTOCOMPLETE_PROPOSAL_DOC_XPATH = "//div[@class='gwt-HTML' and text()='%s']";
+    String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
   }
 
   public enum TabActionLocator {
@@ -334,6 +335,9 @@ public class CodenvyEditor {
 
   @FindBy(xpath = HOVER_POPUP_XPATH)
   private WebElement hoverPopup;
+
+  @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
+  private WebElement proposalDoc;
 
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
@@ -2170,8 +2174,7 @@ public class CodenvyEditor {
   }
 
   public void checkProposalDocumentation(String expectedText) {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.AUTOCOMPLETE_PROPOSAL_DOC_XPATH, expectedText)));
+    seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
   }
 
   public void launchCommentCodeFeature() {
