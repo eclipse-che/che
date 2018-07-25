@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.RUNNING;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -67,11 +69,20 @@ public class MachinesAsynchronousStartTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitPageLoading();
-    workspaces.waitWorkspaceStatus(brokenWorkspace.getName(), RUNNING);
+    waitWorkspaceRunningStatusOnDashboard();
 
     // check openshift events log
     waitEvent("Failed");
     waitEvent("BackOff");
+  }
+
+  private void waitWorkspaceRunningStatusOnDashboard() throws Exception {
+    try {
+      workspaces.waitWorkspaceStatus(brokenWorkspace.getName(), RUNNING);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10295", ex);
+    }
   }
 
   private TestWorkspace createBrokenWorkspace() throws Exception {
