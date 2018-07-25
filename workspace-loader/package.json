@@ -25,7 +25,9 @@
     "webpack-dev-server": "^2.11.1",
     "webpack-merge": "^4.1.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "reconnecting-websocket": "3.2.2"
+  },
   "jest": {
     "moduleFileExtensions": [
       "ts",
