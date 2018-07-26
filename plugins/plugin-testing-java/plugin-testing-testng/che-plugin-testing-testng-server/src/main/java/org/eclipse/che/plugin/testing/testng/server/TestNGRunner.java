@@ -41,6 +41,8 @@ import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -193,11 +195,14 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   }
 
   @Override
-  protected boolean isTestSuite(String filePath, IJavaProject project) {
-    int projectPathLength = project.getPath().toString().length();
-    String path = filePath.substring(projectPathLength, filePath.length());
-    IFile file = project.getProject().getFile(path);
+  protected boolean isTestSuite(String fileLocation, IJavaProject project) {
+    IPath projectPath = project.getPath();
+    IPath filePath = new Path(fileLocation);
+    if (!projectPath.isPrefixOf(filePath)) {
+      return false;
+    }
 
+    IFile file = project.getProject().getFile(filePath.makeRelativeTo(projectPath));
     if (!file.exists()) {
       return false;
     }
@@ -208,9 +213,9 @@ public class TestNGRunner extends AbstractJavaTestRunner {
       SAXParser parser = factory.newSAXParser();
       parser.parse(file.getContents(), suiteParser);
     } catch (ParserConfigurationException | SAXException | IOException e) {
-      LOG.error("It is not possible to parse file " + path, e);
+      LOG.error("It is not possible to parse file " + fileLocation, e);
     } catch (CoreException e) {
-      LOG.error("It is not possible to read file " + path, e);
+      LOG.error("It is not possible to read file " + fileLocation, e);
     }
 
     return suiteParser.isSuite();
