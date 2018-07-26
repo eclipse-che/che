@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
@@ -25,13 +24,9 @@ import org.eclipse.ltk.core.refactoring.participants.CreateArguments;
 import org.eclipse.ltk.core.refactoring.participants.CreateParticipant;
 import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
 import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 /**
@@ -182,26 +177,6 @@ public class ResourceModifications {
   }
 
   /**
-   * Adds the given resource to the list of resources to be moved.
-   *
-   * @param move the resource to be moved
-   * @param arguments the move arguments
-   */
-  public void addMove(IResource move, MoveArguments arguments) {
-    if (fMove == null) {
-      fMove = new ArrayList(2);
-      fMoveArguments = new ArrayList(2);
-    }
-    fMove.add(move);
-    fMoveArguments.add(arguments);
-    if (fIgnoreCount == 0) {
-      IPath destination =
-          ((IResource) arguments.getDestination()).getFullPath().append(move.getName());
-      internalAdd(new MoveDescription(move, destination));
-    }
-  }
-
-  /**
    * Adds the given resource to the list of resources to be copied.
    *
    * @param copy the resource to be copied
@@ -215,27 +190,6 @@ public class ResourceModifications {
     fCopy.add(copy);
     fCopyArguments.add(arguments);
     addCopyDelta(copy, arguments);
-  }
-
-  /**
-   * Adds the given resource to the list of renamed resources.
-   *
-   * @param rename the resource to be renamed
-   * @param arguments the arguments of the rename
-   */
-  public void addRename(IResource rename, RenameArguments arguments) {
-    Assert.isNotNull(rename);
-    Assert.isNotNull(arguments);
-    if (fRename == null) {
-      fRename = new ArrayList(2);
-      fRenameArguments = new ArrayList(2);
-    }
-    fRename.add(rename);
-    fRenameArguments.add(arguments);
-    if (fIgnoreCount == 0) {
-      IPath newPath = rename.getFullPath().removeLastSegments(1).append(arguments.getNewName());
-      internalAdd(new MoveDescription(rename, newPath));
-    }
   }
 
   public RefactoringParticipant[] getParticipants(
@@ -262,16 +216,6 @@ public class ResourceModifications {
         result.addAll(Arrays.asList(creates));
       }
     }
-    if (fMove != null) {
-      for (int i = 0; i < fMove.size(); i++) {
-        Object element = fMove.get(i);
-        MoveArguments arguments = (MoveArguments) fMoveArguments.get(i);
-        MoveParticipant[] moves =
-            ParticipantManager.loadMoveParticipants(
-                status, processor, element, arguments, natures, shared);
-        result.addAll(Arrays.asList(moves));
-      }
-    }
     if (fCopy != null) {
       for (int i = 0; i < fCopy.size(); i++) {
         Object element = fCopy.get(i);
@@ -280,16 +224,6 @@ public class ResourceModifications {
             ParticipantManager.loadCopyParticipants(
                 status, processor, element, arguments, natures, shared);
         result.addAll(Arrays.asList(copies));
-      }
-    }
-    if (fRename != null) {
-      for (int i = 0; i < fRename.size(); i++) {
-        Object resource = fRename.get(i);
-        RenameArguments arguments = (RenameArguments) fRenameArguments.get(i);
-        RenameParticipant[] renames =
-            ParticipantManager.loadRenameParticipants(
-                status, processor, resource, arguments, natures, shared);
-        result.addAll(Arrays.asList(renames));
       }
     }
     return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
@@ -337,19 +271,6 @@ public class ResourceModifications {
     for (Iterator iter = fDeltaDescriptions.iterator(); iter.hasNext(); ) {
       ((DeltaDescription) iter.next()).buildDelta(builder);
     }
-  }
-
-  public static void buildMoveDelta(
-      IResourceChangeDescriptionFactory builder, IResource resource, RenameArguments args) {
-    IPath newPath = resource.getFullPath().removeLastSegments(1).append(args.getNewName());
-    builder.move(resource, newPath);
-  }
-
-  public static void buildMoveDelta(
-      IResourceChangeDescriptionFactory builder, IResource resource, MoveArguments args) {
-    IPath destination =
-        ((IResource) args.getDestination()).getFullPath().append(resource.getName());
-    builder.move(resource, destination);
   }
 
   public static void buildCopyDelta(
