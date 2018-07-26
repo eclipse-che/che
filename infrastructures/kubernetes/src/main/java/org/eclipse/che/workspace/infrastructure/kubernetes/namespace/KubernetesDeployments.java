@@ -434,7 +434,7 @@ public class KubernetesDeployments {
                   if (happenedAfterWatcherInitialization(podEvent)) {
                     containerEventsHandlers.forEach(h -> h.handle(podEvent));
                   }
-                } catch (ParseException e) {
+                } catch (ParseException | IllegalArgumentException e) {
                   LOG.error("Failed to parse last timestamp of the event: {}", podEvent);
                 }
               }
