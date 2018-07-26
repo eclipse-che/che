@@ -379,6 +379,8 @@ public class ApplyWorkspaceEditAction extends BaseAction {
                         (ResolveFunction<Void> resolve, RejectFunction reject) -> {
                           try {
                             undoRedo.undo();
+                            // TODO it is temporary needs, to investigate failures in tests
+                            Log.info(getClass(), "Undo operation was applied for " + uri);
                             resolve.apply(null);
                           } catch (Exception e) {
                             reject.apply(
@@ -425,6 +427,12 @@ public class ApplyWorkspaceEditAction extends BaseAction {
       Position end = r.getEnd();
       document.replace(
           start.getLine(), start.getCharacter(), end.getLine(), end.getCharacter(), e.getNewText());
+      // TODO it is temporary, needs to investigate failures in tests
+      Log.info(
+          ApplyWorkspaceEditAction.class,
+          "Text edit was applied for " + document.getFile().getName());
     }
+    // TODO it is temporary, needs to investigate failures in tests
+    Log.info(ApplyWorkspaceEditAction.class, "New contents is " + document.getContents());
   }
 }
