@@ -2,6 +2,7 @@
     "private": true,
     "dependencies": {
         "@theia/typescript": "latest",
+        "@theia/editor": "latest",
         "@theia/navigator": "latest",
         "@theia/terminal": "latest",
         "@theia/outline-view": "latest",
@@ -10,8 +11,7 @@
         "@theia/file-search": "latest",
         "@theia/markers": "latest",
         "@theia/extension-manager": "latest",
-        "@theia/messages": "latest",
-        "@eclipse-che/theia-factory-extension": "0.0.1-1530189818"
+        "@theia/messages": "latest"
     },
     "devDependencies": {
         "@theia/cli": "latest"

@@ -36,7 +36,7 @@ function addExtensions(extensions) {
     const extensionsToAdd = {};
     for (let extension of extensions) {
         const extensionName = extension["name"];
-        const extensionRootPath = EXTENSIONS_DIR + '/' + extensionName.replace(/\//g, '_');
+        let extensionRootPath = EXTENSIONS_DIR + '/' + extensionName.replace(/\//g, '_');
 
         const extensionType = extension["type"];
         switch(extensionType) {
@@ -49,8 +49,14 @@ function addExtensions(extensions) {
             default:
                 throw new Error(`Invalid extension type ${extensionType}.`);
         }
-        buildExtension(extensionRootPath);
-        extensionsToAdd[extensionName] = getBinaryPath(extensionRootPath, extensionName);
+        const buildFolder = extension["folder"];
+        const originalExtensionPath = extensionRootPath;
+        if (buildFolder) {
+            console.log('There is a build folder defined', buildFolder);
+            extensionRootPath = extensionRootPath + '/' + buildFolder;
+        }
+        buildExtension(extensionRootPath, originalExtensionPath);
+        extensionsToAdd[extensionName] = 'file://' + extensionRootPath;
     }
     console.log("Extension to add: ", extensionsToAdd);
     addExtensionsIntoDefaultPackageJson(extensionsToAdd);
@@ -98,38 +104,28 @@ function checkoutRepo(path, checkoutTarget) {
     }
 }
 
-function buildExtension(path) {
+function buildExtension(path,rootPath) {
     try {
+        console.log('Generate versions for extension: ', path);
+        spawnSync(`${DEFAULT_THEIA_ROOT}/versions.sh`, [], {cwd: `${path}`});
+        if (path !== rootPath) {
+            console.log("Removing parent files");
+            // cleanup files in root path
+            fs.unlinkSync(rootPath + '/package.json');
+            fs.unlinkSync(rootPath + '/lerna.json');
+        }
+        //spawnSync(`node`, [`${DEFAULT_THEIA_ROOT}/resolutions-provider.js`, `${rootPath}/package.json`], {cwd: `${rootPath}`});
         console.log('Building extension: ', path);
         const nodeModulesPath = `${DEFAULT_THEIA_ROOT}/node_modules`;
         // build extension, but use Theia node_modules to reuse dependencies and prevent growing docker image.
-        spawnSync(`yarn`, ['--modules-folder', nodeModulesPath, '--global-folder', nodeModulesPath, '--cache-folder', nodeModulesPath], {cwd: `${path}`, stdio:[0,1,2]});
+        spawnSync(`yarn`, ['--modules-folder', nodeModulesPath, '--global-folder', nodeModulesPath], {cwd: `${path}`, stdio:[0,1,2]});
     } catch (error) {
+        console.log(error);
         console.error('Failed to build extension located in: ', path);
         process.exit(6);
     }
 }
 
-function getBinaryPath(extensionRoot, extensionName) {
-    const rootPackageJson = require(`${extensionRoot}/package.json`);
-    if ('theiaExtensions' in rootPackageJson) {
-        return extensionRoot;
-    }
-
-    const dirs = fs.readdirSync(extensionRoot).filter(item => !item.startsWith('.') && fs.lstatSync(extensionRoot + '/' + item).isDirectory());
-    for (let dirName of dirs) {
-        const extensionTargetDir = extensionRoot + '/' + dirName;
-        const packageJsonPath = extensionTargetDir + '/package.json';
-        if (fs.existsSync(packageJsonPath)) {
-            let packageJson = require(packageJsonPath);
-            if (packageJson['name'] === extensionName) {
-                return extensionRoot + '/' + dirName;
-            }
-        }
-    }
-    console.error('Failed to find folder with binaries for extension: ', extensionRoot);
-    process.exit(7);
-}
 
 function addExtensionsIntoDefaultPackageJson(extensions) {
     let theiaPackageJson = require(`${DEFAULT_THEIA_ROOT}/package.json`);
