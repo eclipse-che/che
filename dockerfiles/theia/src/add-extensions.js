@@ -104,7 +104,7 @@ function checkoutRepo(path, checkoutTarget) {
     }
 }
 
-function buildExtension(path,rootPath) {
+function buildExtension(path, rootPath) {
     try {
         console.log('Generate versions for extension: ', path);
         spawnSync(`${DEFAULT_THEIA_ROOT}/versions.sh`, [], {cwd: `${path}`});
@@ -114,13 +114,12 @@ function buildExtension(path,rootPath) {
             fs.unlinkSync(rootPath + '/package.json');
             fs.unlinkSync(rootPath + '/lerna.json');
         }
-        //spawnSync(`node`, [`${DEFAULT_THEIA_ROOT}/resolutions-provider.js`, `${rootPath}/package.json`], {cwd: `${rootPath}`});
         console.log('Building extension: ', path);
         const nodeModulesPath = `${DEFAULT_THEIA_ROOT}/node_modules`;
         // build extension, but use Theia node_modules to reuse dependencies and prevent growing docker image.
         spawnSync(`yarn`, ['--modules-folder', nodeModulesPath, '--global-folder', nodeModulesPath], {cwd: `${path}`, stdio:[0,1,2]});
     } catch (error) {
-        console.log(error);
+        console.error(error);
         console.error('Failed to build extension located in: ', path);
         process.exit(6);
     }
