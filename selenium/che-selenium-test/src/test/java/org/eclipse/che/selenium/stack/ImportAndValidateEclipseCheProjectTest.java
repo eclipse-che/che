@@ -16,7 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
-import static org.openqa.selenium.Keys.BACK_SPACE;
+import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ESCAPE;
 
 import com.google.inject.Inject;
@@ -146,39 +146,43 @@ public class ImportAndValidateEclipseCheProjectTest {
     mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
 
     // wait while dependencies are resolved
-    mavenPluginStatusBar.waitClosingInfoPanel(4200);
+    mavenPluginStatusBar.waitClosingInfoPanel(2900);
     mavenPluginStatusBar.waitResolveDependenciesFormToClose();
+
+    // wait the project and the files
+    projectExplorer.waitItem(PROJECT_NAME);
+    editor.waitTabIsPresent("CodenvyEditor");
+    editor.waitTabIsPresent("che-dashboard-war");
+    editor.waitTabIsPresent("index.module.ts");
   }
 
   @Test(priority = 1)
   public void checkErrorMarkersInEditor() {
-    projectExplorer.waitItem(PROJECT_NAME);
-
-    // check the ts file
-    projectExplorer.openItemByPath(PATH_TO_TS_FILE);
-    editor.waitActive();
-    editor.typeTextIntoEditor("q");
-    editor.waitMarkerInPosition(ERROR, 1);
-    editor.typeTextIntoEditor(BACK_SPACE.toString());
-    editor.waitMarkerInvisibility(ERROR, 1);
-
-    // check the pom.xml file
-    projectExplorer.openItemByPath(PATH_TO_POM_FILE);
+    // check an error marker in the pom.xml file
+    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_POM_FILE));
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
     editor.typeTextIntoEditor("q");
+    editor.goToPosition(1, 1);
     editor.waitMarkerInPosition(ERROR, 1);
-    editor.typeTextIntoEditor(BACK_SPACE.toString());
+    editor.typeTextIntoEditor(DELETE.toString());
     editor.waitMarkerInvisibility(ERROR, 1);
 
-    // check the java file
-    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
+    // check error marker in the java file
+    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_JAVA_FILE));
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
     editor.setCursorToLine(12);
     editor.typeTextIntoEditor("q");
+    editor.goToPosition(12, 1);
     editor.waitMarkerInPosition(ERROR, 12);
-    editor.typeTextIntoEditor(BACK_SPACE.toString());
+    editor.typeTextIntoEditor(DELETE.toString());
     editor.waitMarkerInvisibility(ERROR, 12);
+
+    // check error marker in the ts file
+    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_TS_FILE));
+    editor.waitActive();
+    editor.typeTextIntoEditor("q");
+    editor.waitMarkerInPosition(ERROR, 1);
   }
 }
