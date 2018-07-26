@@ -25,30 +25,38 @@ public class CheRefactoringContributions {
   private static final Map<String, String> refactoringContributions = new HashMap<>();
 
   static {
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.compilationunit",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringContribution");
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.enum.constant",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameEnumConstRefactoringContribution");
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.field",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringContribution");
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.local.variable",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameLocalVariableRefactoringContribution");
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.method",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameMethodRefactoringContribution");
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.package",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenamePackageRefactoringContribution");
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.type.parameter",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeParameterRefactoringContribution");
-    refactoringContributions.put(
-        "org.eclipse.jdt.ui.rename.type",
-        "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.compilationunit",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.enum.constant",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameEnumConstRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.field",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.local.variable",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameLocalVariableRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.method",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameMethodRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.package",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenamePackageRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.type.parameter",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeParameterRefactoringContribution");
+    //    refactoringContributions.put(
+    //        "org.eclipse.jdt.ui.rename.type",
+    //
+    // "org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringContribution");
     // TODO :
     /*
       <contribution
