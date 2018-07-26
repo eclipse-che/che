@@ -39,7 +39,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -193,10 +192,9 @@ public class ApplyWorkspaceEditAction extends BaseAction {
               promiseHelper
                   .forEach(undos.iterator(), Supplier::get, (Void v) -> {})
                   .then(
-                      (Void v) -> {
-                        notification.setContent(
-                            localization.applyWorkspaceActionNotificationUndone());
-                      })
+                      (Void v) ->
+                          notification.setContent(
+                              localization.applyWorkspaceActionNotificationUndone()))
                   .catchError(
                       e -> {
                         Log.info(getClass(), "Error undoing changes", e);
@@ -216,20 +214,9 @@ public class ApplyWorkspaceEditAction extends BaseAction {
             Scheduler.get()
                 .scheduleDeferred(
                     () -> {
-                      editorAgent
-                          .getOpenedEditors()
-                          .forEach(
-                              editor -> {
-                                updateFileContent(editor.getEditorInput().getFile());
-                                editor.doSave();
-                              });
+                      editorAgent.getOpenedEditors().forEach(EditorPartPresenter::doSave);
                       callback.onSuccess(null);
                     }));
-  }
-
-  private void updateFileContent(VirtualFile virtualFile) {
-    String path = virtualFile.getLocation().toString();
-    eventBus.fireEvent(new FileContentUpdateEvent(path));
   }
 
   private Promise<?> appResourceChanges(
