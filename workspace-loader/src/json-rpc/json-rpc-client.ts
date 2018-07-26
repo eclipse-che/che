@@ -22,16 +22,16 @@ export const CODE_REQUEST_TIMEOUT = 4000;
 export interface ICommunicationClient {
   /**
    * Adds listener callbacks for specified client event.
-   * @param {CommunicationClientEvent} event an event type
+   * @param {CommunicationClientEvent} eventType an event type
    * @param {Function} handler a callback function
    */
-  addListener(event: CommunicationClientEvent, handler: Function): void;
+  addListener(eventType: CommunicationClientEvent, handler: Function): void;
   /**
    * Removes listener.
-   * @param {CommunicationClientEvent} event an event type
+   * @param {CommunicationClientEvent} eventType an event type
    * @param {Function} handler a callback function
    */
-  removeListener(event: CommunicationClientEvent, handler: Function): void;
+  removeListener(eventType: CommunicationClientEvent, handler: Function): void;
   /**
    * Performs connections.
    *

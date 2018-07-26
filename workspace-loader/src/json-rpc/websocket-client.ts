@@ -30,24 +30,24 @@ export class WebsocketClient implements ICommunicationClient {
     connect(entrypoint: string): Promise<void> {
         return new Promise((resolve, reject) => {
             this.websocketStream = new RWS(entrypoint, [], {});
-            this.websocketStream.addEventListener("open", data => {
-                const event: CommunicationClientEvent = "open";
-                this.callHandlers(event, data);
+            this.websocketStream.addEventListener("open", (event: Event) => {
+                const eventType: CommunicationClientEvent = "open";
+                this.callHandlers(eventType, event);
                 resolve();
             });
-            this.websocketStream.addEventListener("error", error => {
-                const event: CommunicationClientEvent = "error";
-                this.callHandlers(event, error);
+            this.websocketStream.addEventListener("error", (event: Event) => {
+                const eventType: CommunicationClientEvent = "error";
+                this.callHandlers(eventType, event);
                 reject();
             });
-            this.websocketStream.addEventListener("message", (message) => {
+            this.websocketStream.addEventListener("message", (message: any) => {
                 const data = JSON.parse(message.data);
-                const event: CommunicationClientEvent = "message";
-                this.callHandlers(event, data);
+                const eventType: CommunicationClientEvent = "message";
+                this.callHandlers(eventType, data);
             });
-            this.websocketStream.addEventListener("close", error => {
-                const event: CommunicationClientEvent = "close";
-                this.callHandlers(event, error);
+            this.websocketStream.addEventListener("close", (event: Event) => {
+                const eventType: CommunicationClientEvent = "close";
+                this.callHandlers(eventType, event);
             });
         });
     }
@@ -68,18 +68,18 @@ export class WebsocketClient implements ICommunicationClient {
     /**
      * Removes a listener.
      *
-     * @param {communicationClientEvent} event
+     * @param {communicationClientEvent} eventType
      * @param {Function} handler
      */
-    removeListener(event: CommunicationClientEvent, handler: Function): void {
-        if (!this.handlers[event] || !handler) {
+    removeListener(eventType: CommunicationClientEvent, handler: Function): void {
+        if (!this.handlers[eventType] || !handler) {
             return;
         }
-        const index = this.handlers[event].indexOf(handler);
+        const index = this.handlers[eventType].indexOf(handler);
         if (index === -1) {
             return;
         }
-        this.handlers[event].splice(index, 1);
+        this.handlers[eventType].splice(index, 1);
     }
 
     /**
@@ -103,7 +103,7 @@ export class WebsocketClient implements ICommunicationClient {
 
     private callHandlers(event: CommunicationClientEvent, data?: any): void {
         if (this.handlers[event] && this.handlers[event].length > 0) {
-            this.handlers[event].forEach(handler => handler(data));
+            this.handlers[event].forEach((handler: Function) => handler(data));
         }
     }
 }

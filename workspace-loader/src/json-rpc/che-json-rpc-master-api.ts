@@ -42,8 +42,8 @@ export class CheJsonRpcMasterApi {
     this.client = client;
 
     client.addListener('open', () => this.onConnectionOpen());
-    client.addListener('close', e => {
-      switch (e.code) {
+    client.addListener('close', (event: any) => {
+      switch (event.code) {
         case 1000: // normal close
           break;
         default:

@@ -121,7 +121,7 @@ export class WorkspaceLoader {
     startAfterStopping = false;
 
     constructor(private readonly loader: Loader,
-                private readonly keycloak: any) {
+                private readonly keycloak?: any) {
         /** Ask dashboard to show the IDE. */
         window.parent.postMessage("show-ide", "*");
     }
