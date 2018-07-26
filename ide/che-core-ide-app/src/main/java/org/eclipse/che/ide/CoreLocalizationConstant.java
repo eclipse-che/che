@@ -1352,4 +1352,7 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("low.disk.space.description")
   String lowDiskSpaceDescription();
+
+  @Key("low.disk.space.status.bar.message")
+  String lowDiskSpaceStatusBarMessage();
 }

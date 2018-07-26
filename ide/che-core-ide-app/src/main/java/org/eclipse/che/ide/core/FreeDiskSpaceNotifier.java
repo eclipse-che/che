@@ -61,4 +61,8 @@ public class FreeDiskSpaceNotifier {
         constant.lowDiskSpace(), constant.lowDiskSpaceDescription(), WARNING, EMERGE_MODE);
     notified = true;
   }
+
+  public boolean isNotified() {
+    return notified;
+  }
 }
