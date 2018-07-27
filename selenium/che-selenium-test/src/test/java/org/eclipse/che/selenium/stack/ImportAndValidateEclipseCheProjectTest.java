@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ESCAPE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -33,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -108,18 +108,15 @@ public class ImportAndValidateEclipseCheProjectTest {
 
     // then open files
     // open a java file
-    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_FILE);
-    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
+    quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_JAVA_FILE);
     editor.waitActive();
 
     // open a xml file
-    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_POM_FILE);
-    projectExplorer.openItemByPath(PATH_TO_POM_FILE);
+    quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_POM_FILE);
     editor.waitActive();
 
     // open a ts file
-    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_TS_FILE);
-    projectExplorer.openItemByPath(PATH_TO_TS_FILE);
+    quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_TS_FILE);
     editor.waitActive();
 
     // open the resolving dependencies form
@@ -185,10 +182,10 @@ public class ImportAndValidateEclipseCheProjectTest {
 
       if (counterErrorDialog > 5) {
 
-        Assert.assertEquals(
-            counterErrorDialog,
-            5,
-            "The unexpected error information dialog is appeared more 5 times");
+        fail(
+            "The unexpected error information dialog is appeared more than "
+                + counterErrorDialog
+                + " times");
       }
 
       informationDialog.waitFormToOpen();
@@ -196,5 +193,10 @@ public class ImportAndValidateEclipseCheProjectTest {
       projectWizard.clickSaveButton();
       loader.waitOnClosed();
     }
+  }
+
+  private void quickRevealToItemWithJavaScriptAndOpenFile(String pathToItem) {
+    projectExplorer.quickRevealToItemWithJavaScript(pathToItem);
+    projectExplorer.openItemByPath(pathToItem);
   }
 }
