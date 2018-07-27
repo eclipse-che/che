@@ -31,12 +31,6 @@ public class JdbLocation implements Location {
     this(languageServer, stackFrame, new JdbMethod(stackFrame));
   }
 
-  public JdbLocation(Location internal, Method method) {
-    this.method = method;
-    this.internal = internal;
-    this.jdiStackFrame = null;
-  }
-
   /**
    * Intends to create location when thread is not suspended. Information concerning thread and
    * frame are not available.
