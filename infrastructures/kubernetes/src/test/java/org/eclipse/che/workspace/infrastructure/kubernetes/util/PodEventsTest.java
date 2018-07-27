@@ -35,6 +35,24 @@ public class PodEventsTest {
     PodEvents.convertEventTimestampToDate(eventTime);
   }
 
+  @Test(expectedExceptions = ParseException.class)
+  public void throwsIllegalArgumentExceptionWhenDateIs12DotSring() throws ParseException {
+    String eventTime = "12.";
+    PodEvents.convertEventTimestampToDate(eventTime);
+  }
+
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void throwsIllegalArgumentExceptionWhenDateIsNull() throws ParseException {
+    String eventTime = null;
+    PodEvents.convertEventTimestampToDate(eventTime);
+  }
+
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void throwsIllegalArgumentExceptionWhenDateIsEmptyString() throws ParseException {
+    String eventTime = "";
+    PodEvents.convertEventTimestampToDate(eventTime);
+  }
+
   @Test
   public void getEventTimestampFromDate() throws ParseException {
     String timestamp = "2018-05-15T16:17:54Z";
