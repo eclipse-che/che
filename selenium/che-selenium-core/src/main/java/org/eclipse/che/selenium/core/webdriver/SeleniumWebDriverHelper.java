@@ -1324,7 +1324,7 @@ public class SeleniumWebDriverHelper {
    * @param expression the condition which should be waits until it has a "true" state
    * @param timeout waiting time in seconds
    */
-  public void waitSuccess(ExpectedCondition<Boolean> expression, int timeout) {
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until((ExpectedCondition<Boolean>) driver -> expression.apply(this.seleniumWebDriver));
@@ -1335,7 +1335,7 @@ public class SeleniumWebDriverHelper {
    *
    * @param expression the condition which should be waits until it has a "true" state
    */
-  public void waitSuccess(ExpectedCondition<Boolean> expression) {
-    waitSuccess(expression, DEFAULT_TIMEOUT);
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression) {
+    waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
 }
