@@ -92,7 +92,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    editor.checkProposalDocumentation(
         ".*<p><b>Deprecated.</b> <i> As of version 1.0, use "
             + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs.*org.apache.commons.lang.StringUtils%E2%98%82join%E2%98%82Object\\+%5B%5D%E2%98%82char'>org.apache.commons.lang.StringUtils.join\\(Object \\[\\], char\\)</a></code>"
             + "</i><p>Returns concatination of two strings into one divided by special symbol."
@@ -114,7 +114,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("App()");
 
     // then
-    editor.waitContextMenuJavaDocText(".*No documentation found.*");
+    editor.checkProposalDocumentation(".*No documentation found.*");
   }
 
   @Test
@@ -127,7 +127,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("isEquals(Object o) : boolean ");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    editor.checkProposalDocumentation(
         ".*Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code>"
             + "<dl><dt>Parameters:</dt>"
             + "<dd><b>o</b> an object.</dd>"
@@ -155,7 +155,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("BookImpl");
 
     // then
-    editor.waitContextMenuJavaDocText(".*UPDATE. Implementation of Book interface..*");
+    editor.checkProposalDocumentation(".*UPDATE. Implementation of Book interface..*");
   }
 
   @Test
@@ -168,7 +168,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("hashCode() : int");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    editor.checkProposalDocumentation(
         ".*Returns a hash code value for the object. "
             + "This method is supported for the benefit of hash tables such as those provided by "
             + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs.*%3Cjava.lang%28Object.class%E2%98%83Object%7EhashCode%E2%98%82java.util.HashMap'>java.util.HashMap</a></code>.*");
@@ -184,7 +184,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("info(String arg0) : void");
 
     // then
-    editor.waitContextMenuJavaDocText(".*No documentation found.*");
+    editor.checkProposalDocumentation(".*No documentation found.*");
 
     // when
     editor.closeAutocomplete();
@@ -202,7 +202,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("info(String msg) : void");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    editor.checkProposalDocumentation(
         ".*Log a message at the .* level."
             + "<dl><dt>Parameters:</dt>"
             + "<dd><b>msg</b>"
