@@ -22,6 +22,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ALL_TABS_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ASSIST_CONTENT_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_CONTAINER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_PROPOSAL_DOC_ID;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.CONTEXT_MENU;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_CONDITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_DISABLED;
@@ -35,6 +36,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
@@ -80,10 +82,8 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -334,8 +334,13 @@ public class CodenvyEditor {
   @FindBy(xpath = HOVER_POPUP_XPATH)
   private WebElement hoverPopup;
 
+  @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
+  private WebElement proposalDoc;
+
     @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
     private WebElement languageServerRenameField;
+
+
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
    *
@@ -2107,47 +2112,6 @@ public class CodenvyEditor {
     loader.waitOnClosed();
   }
 
-  /**
-   * Get html code of java doc of autocomplete proposal.
-   *
-   * @return html code of JavaDoc of already opened autocomplete proposal by making request on 'src'
-   *     attribute of iframe of JavaDoc popup.
-   */
-  public String getAutocompleteProposalJavaDocHtml() throws IOException {
-    return getJavaDocPopupText();
-  }
-
-  /**
-   * Waits until specified {@code expectedText} is present in javadoc.
-   *
-   * @param expectedText text which should be present in javadoc
-   */
-  public void waitContextMenuJavaDocText(String expectedText) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  String javaDocPopupHtmlText = "";
-                  try {
-                    javaDocPopupHtmlText = getJavaDocPopupText();
-                  } catch (StaleElementReferenceException e) {
-                    LOG.warn(
-                        "Can not get java doc HTML text from autocomplete context menu in editor");
-                  }
-                  return javaDocPopupHtmlText.length() > 0
-                      && verifyJavaDoc(javaDocPopupHtmlText, expectedText);
-                });
-  }
-
-  private String getJavaDocPopupText() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetText(autocompleteProposalJavaDocPopup);
-  }
-
-  private boolean verifyJavaDoc(String javaDocHtml, String regex) {
-    return Pattern.compile(regex, Pattern.DOTALL).matcher(javaDocHtml).matches();
-  }
-
   private List<WebElement> getAllTabsWithProvidedName(String tabName) {
     return seleniumWebDriverHelper.waitVisibilityOfAllElements(
         By.xpath(
@@ -2157,6 +2121,19 @@ public class CodenvyEditor {
   public void moveCursorToText(String text) {
     seleniumWebDriverHelper.moveCursorTo(
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
+  }
+
+  public void checkProposalDocumentation(String expectedText) {
+    seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
+  }
+
+  public void launchCommentCodeFeature() {
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("/")
+        .keyUp(CONTROL)
+        .perform();
   }
 
     /**
