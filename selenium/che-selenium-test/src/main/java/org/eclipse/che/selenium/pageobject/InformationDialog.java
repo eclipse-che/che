@@ -60,7 +60,7 @@ public class InformationDialog {
     seleniumWebDriverHelper.waitVisibility(dialogForm);
   }
 
-  public boolean waitFormIsOpened() {
+  public boolean isFormOpened() {
     return seleniumWebDriverHelper.isVisible(dialogForm);
   }
 

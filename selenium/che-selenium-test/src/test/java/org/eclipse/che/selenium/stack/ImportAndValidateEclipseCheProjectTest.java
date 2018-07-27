@@ -33,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,9 +45,10 @@ public class ImportAndValidateEclipseCheProjectTest {
   private static final String PROJECT_NAME = "eclipse-che";
   private static final String ECLIPSE_CHE_PROJECT_URL = "https://github.com/eclipse/che.git";
   private static final String PATH_TO_JAVA_FILE =
-      "selenium/che-selenium-test/src/main/java/org/eclipse/che/selenium/pageobject/CodenvyEditor.java";
-  private static final String PATH_TO_POM_FILE = "dashboard/pom.xml";
-  private static final String PATH_TO_TS_FILE = "dashboard/src/app/index.module.ts";
+      PROJECT_NAME
+          + "/selenium/che-selenium-test/src/main/java/org/eclipse/che/selenium/pageobject/CodenvyEditor.java";
+  private static final String PATH_TO_POM_FILE = PROJECT_NAME + "/dashboard/pom.xml";
+  private static final String PATH_TO_TS_FILE = PROJECT_NAME + "/dashboard/src/app/index.module.ts";
 
   @Inject private Ide ide;
   @Inject private Menu menu;
@@ -78,6 +80,9 @@ public class ImportAndValidateEclipseCheProjectTest {
 
   @Test
   public void checkImportAndResolveDependenciesEclipceCheProject() {
+    int timeoutToOpenInfoPanel = 120;
+    int timeoutToClosingInfoPanel = 2900;
+
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
@@ -91,19 +96,7 @@ public class ImportAndValidateEclipseCheProjectTest {
 
     // TODO it is the workaround, delete it after resolve the issue
     // TODO https://github.com/eclipse/che/issues/10515
-    // close unexpected error information dialog and click on the 'Save' button;
-    int counterErrorDialog = 0;
-
-    while (informationDialog.waitFormIsOpened()) {
-      informationDialog.waitFormToOpen();
-      informationDialog.clickOkBtn();
-      projectWizard.clickSaveButton();
-      counterErrorDialog++;
-      loader.waitOnClosed();
-    }
-
-    System.out.println(
-        "==== The error information dialog appeared " + counterErrorDialog + " times ====");
+    closeErrorDialog();
 
     projectWizard.waitCreateProjectWizardFormIsClosed();
     loader.waitOnClosed();
@@ -115,26 +108,23 @@ public class ImportAndValidateEclipseCheProjectTest {
 
     // then open files
     // open a java file
-    projectExplorer.quickRevealToItemWithJavaScript(
-        String.format("%s/%s", PROJECT_NAME, PATH_TO_JAVA_FILE));
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_JAVA_FILE));
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_FILE);
+    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     editor.waitActive();
 
     // open a xml file
-    projectExplorer.quickRevealToItemWithJavaScript(
-        String.format("%s/%s", PROJECT_NAME, PATH_TO_POM_FILE));
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_POM_FILE));
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_POM_FILE);
+    projectExplorer.openItemByPath(PATH_TO_POM_FILE);
     editor.waitActive();
 
     // open a ts file
-    projectExplorer.quickRevealToItemWithJavaScript(
-        String.format("%s/%s", PROJECT_NAME, PATH_TO_TS_FILE));
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_TS_FILE));
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_TS_FILE);
+    projectExplorer.openItemByPath(PATH_TO_TS_FILE);
     editor.waitActive();
 
     // open the resolving dependencies form
     loader.waitOnClosed();
-    mavenPluginStatusBar.waitExpectedTextInInfoPanel("Resolving project:", 120);
+    mavenPluginStatusBar.waitExpectedTextInInfoPanel("Resolving project:", timeoutToOpenInfoPanel);
     mavenPluginStatusBar.clickOnInfoPanel();
 
     // should close the resolve dependencies form by Esc
@@ -146,7 +136,7 @@ public class ImportAndValidateEclipseCheProjectTest {
     mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
 
     // wait while dependencies are resolved
-    mavenPluginStatusBar.waitClosingInfoPanel(2900);
+    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanel);
     mavenPluginStatusBar.waitResolveDependenciesFormToClose();
 
     // wait the project and the files
@@ -159,7 +149,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   @Test(priority = 1)
   public void checkErrorMarkersInEditor() {
     // check an error marker in the pom.xml file
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_POM_FILE));
+    projectExplorer.openItemByPath(PATH_TO_POM_FILE);
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
     editor.typeTextIntoEditor("q");
@@ -169,7 +159,7 @@ public class ImportAndValidateEclipseCheProjectTest {
     editor.waitMarkerInvisibility(ERROR, 1);
 
     // check error marker in the java file
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_JAVA_FILE));
+    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
     editor.setCursorToLine(12);
@@ -180,9 +170,31 @@ public class ImportAndValidateEclipseCheProjectTest {
     editor.waitMarkerInvisibility(ERROR, 12);
 
     // check error marker in the ts file
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, PATH_TO_TS_FILE));
+    projectExplorer.openItemByPath(PATH_TO_TS_FILE);
     editor.waitActive();
     editor.typeTextIntoEditor("q");
     editor.waitMarkerInPosition(ERROR, 1);
+  }
+
+  private void closeErrorDialog() {
+    // if the error dialog is appeared more 5 times, the test will be failed
+    int counterErrorDialog = 0;
+
+    while (informationDialog.isFormOpened()) {
+      counterErrorDialog++;
+
+      if (counterErrorDialog > 5) {
+
+        Assert.assertEquals(
+            counterErrorDialog,
+            5,
+            "The unexpected error information dialog is appeared more 5 times");
+      }
+
+      informationDialog.waitFormToOpen();
+      informationDialog.clickOkBtn();
+      projectWizard.clickSaveButton();
+      loader.waitOnClosed();
+    }
   }
 }
