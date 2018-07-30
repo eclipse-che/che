@@ -24,7 +24,8 @@ else
 fi
 
 # install remaining packages
-apk add --no-cache make gcc g++ python git bash supervisor
+# Include opendjk for Java support
+apk add --no-cache make gcc g++ python git bash supervisor openjdk8
 # Cleanup APK cache
 rm -rf /tmp/* /var/cache/apk/*
 
@@ -95,25 +96,20 @@ cd ${HOME} && ${HOME}/versions.sh
 # Apply resolution section to the Theia package.json to use strict versions for Theia dependencies
 node ${HOME}/resolutions-provider.js ${HOME}/package.json
 
-cd ${HOME}
-
 # avoid issue with checksum of electron
-npm install electron-packager -g
-
-cd ${HOME}
+cd ${HOME} && npm install electron-packager -g
 
 # Add default Theia extensions
-node ${HOME}/add-extensions.js
-
-cd ${HOME}
+cd ${HOME} && node ${HOME}/add-extensions.js
 
 # Build Theia with all the extensions
-yarn
-yarn theia build
+cd ${HOME} && yarn && yarn theia build
 
+# Reset config registry
 npm config set registry https://registry.npmjs.org
 yarn config set registry https://registry.npmjs.org
 
+# install the latest theia generator of plug-in
 npm install -g yo @theia/generator-plugin
 mkdir -p ${HOME}/.config/insight-nodejs/
 chmod -R 777 ${HOME}/.config/

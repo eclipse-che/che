@@ -1,6 +1,7 @@
 {
     "private": true,
     "dependencies": {
+        "@theia/java": "latest",
         "@theia/typescript": "latest",
         "@theia/editor": "latest",
         "@theia/navigator": "latest",
@@ -10,6 +11,8 @@
         "@theia/git": "latest",
         "@theia/file-search": "latest",
         "@theia/markers": "latest",
+        "@theia/plugin-ext": "latest",
+        "@theia/plugin-ext-vscode": "latest",
         "@theia/extension-manager": "latest",
         "@theia/messages": "latest"
     },
