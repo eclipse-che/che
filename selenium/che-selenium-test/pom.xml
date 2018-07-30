@@ -264,6 +264,7 @@
                                 </property>
                             </systemProperties>
                             <systemPropertyVariables>
+                                <includedGroups>${includedGroups}</includedGroups>
                                 <excludedGroups>${excludedGroups}</excludedGroups>
                             </systemPropertyVariables>
                         </configuration>

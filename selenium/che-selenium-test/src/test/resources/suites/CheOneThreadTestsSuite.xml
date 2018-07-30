@@ -16,20 +16,27 @@
        verbose="10"
        parallel="classes"
        thread-count="1">
-
     <test name="all">
         <method-selectors>
             <method-selector>
                 <script language="beanshell">
                     <![CDATA[
     boolean isTestGroupsAgreedWithRequestedGroups() {
-      excludedGroupsVal = System.getProperty("excludedGroups");
-      if (excludedGroupsVal == null || excludedGroupsVal.isEmpty() || groups.isEmpty()) {
+      if (groups.isEmpty()) {
         return true;
       }
 
+      excludedGroupsVal = System.getProperty("excludedGroups");
       excludedGroups = excludedGroupsVal.split(",");
+
+      includedGroupsVal = System.getProperty("includedGroups");
+      includedGroups = includedGroupsVal.split(",");
+
       for (String group: groups.keySet()) {
+        if (Arrays.asList(includedGroups).contains(group)) {
+          return true;
+        }
+
         if (Arrays.asList(excludedGroups).contains(group)) {
           return false;
         }
