@@ -58,7 +58,6 @@ public class WaitUtils {
    *
    * @param condition expression which should be performed
    * @param timeout waiting time in seconds
-   * @throws InterruptedException
    */
   public static void waitSuccessCondition(BooleanCondition condition, int timeout) {
     final int delayBetweenTriesInSeconds = 1;
@@ -80,7 +79,6 @@ public class WaitUtils {
    * Waits until {@code condition} has a "true" state.
    *
    * @param condition expression which should be performed
-   * @throws InterruptedException
    */
   public static void waitSuccessCondition(BooleanCondition condition) {
     final int defaultTimeout = LOAD_PAGE_TIMEOUT_SEC;
