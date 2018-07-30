@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_CONFIG_FILE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_CONFIG_FOLDER;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_PUBLIC_KEY_FILE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,7 +74,7 @@ public class JwtProxyConfigBuilder {
       Map<String,String> keyServerOptions = new HashMap<>();
       keyServerOptions.put("issuer", "wsmaster");
       keyServerOptions.put("key_id", workspaceId);
-      keyServerOptions.put("public_key_path", JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_CONFIG_FILE);
+      keyServerOptions.put("public_key_path", JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_PUBLIC_KEY_FILE);
       verifierConfig.setKeyServer(new RegistrableComponentConfig().withType("preshared").withOptions(keyServerOptions));
 
       verifierConfig.setClaimsVerifier(new RegistrableComponentConfig().withType("static").withOptions(Collections
