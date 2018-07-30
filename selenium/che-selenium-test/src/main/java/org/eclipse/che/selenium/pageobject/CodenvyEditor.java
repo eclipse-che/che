@@ -23,6 +23,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ALL_TABS_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ASSIST_CONTENT_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_CONTAINER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_PROPOSAL_DOC_ID;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.CONTEXT_MENU;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_CONDITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_DISABLED;
@@ -205,7 +206,8 @@ public class CodenvyEditor {
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
-    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip']";
+    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
+    String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
   }
 
   public enum TabActionLocator {
@@ -333,6 +335,9 @@ public class CodenvyEditor {
 
   @FindBy(xpath = HOVER_POPUP_XPATH)
   private WebElement hoverPopup;
+
+  @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
+  private WebElement proposalDoc;
 
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
@@ -2166,5 +2171,18 @@ public class CodenvyEditor {
   public void moveCursorToText(String text) {
     seleniumWebDriverHelper.moveCursorTo(
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
+  }
+
+  public void checkProposalDocumentation(String expectedText) {
+    seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
+  }
+
+  public void launchCommentCodeFeature() {
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("/")
+        .keyUp(CONTROL)
+        .perform();
   }
 }

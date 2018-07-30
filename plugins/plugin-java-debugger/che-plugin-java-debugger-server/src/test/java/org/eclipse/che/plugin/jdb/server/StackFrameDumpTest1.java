@@ -88,7 +88,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 25);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
+    assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "do2");
@@ -134,7 +134,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 21);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
+    assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "do1");
@@ -188,7 +188,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 16);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
+    assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "main");

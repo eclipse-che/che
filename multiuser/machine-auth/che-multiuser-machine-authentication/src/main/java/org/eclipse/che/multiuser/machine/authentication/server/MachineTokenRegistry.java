@@ -10,8 +10,9 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
-import static io.jsonwebtoken.SignatureAlgorithm.RS512;
+import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 import static java.lang.String.format;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
 
 import com.google.common.collect.HashBasedTable;
@@ -19,6 +20,7 @@ import com.google.common.collect.Table;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.security.PrivateKey;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -92,14 +94,21 @@ public class MachineTokenRegistry {
     final User user = userManager.getById(userId);
     final Map<String, Object> header = new HashMap<>(2);
     header.put("kind", MACHINE_TOKEN_KIND);
-    final Map<String, Object> claims = new HashMap<>(4);
+    header.put("kid", workspaceId);
+    final Map<String, Object> claims = new HashMap<>();
     // to ensure that each token is unique
     claims.put(Claims.ID, UUID.randomUUID().toString());
     claims.put(Constants.USER_ID_CLAIM, userId);
     claims.put(Constants.USER_NAME_CLAIM, user.getName());
     claims.put(Constants.WORKSPACE_ID_CLAIM, workspaceId);
+    // jwtproxy required claims
+    claims.put(Claims.ISSUER, "wsmaster");
+    claims.put(Claims.AUDIENCE, workspaceId);
+    claims.put(Claims.EXPIRATION, Instant.now().plus(365, DAYS).getEpochSecond());
+    claims.put(Claims.NOT_BEFORE, -1); // always
+    claims.put(Claims.ISSUED_AT, Instant.now().getEpochSecond());
     final String token =
-        Jwts.builder().setClaims(claims).setHeader(header).signWith(RS512, privateKey).compact();
+        Jwts.builder().setClaims(claims).setHeader(header).signWith(RS256, privateKey).compact();
     tokens.put(workspaceId, userId, token);
     return token;
   }

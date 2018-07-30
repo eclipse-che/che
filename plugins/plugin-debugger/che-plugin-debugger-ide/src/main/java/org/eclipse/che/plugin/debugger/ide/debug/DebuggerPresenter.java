@@ -214,7 +214,18 @@ public class DebuggerPresenter extends BasePresenter
     if (threadState != null) {
       List<? extends StackFrameDump> frames = threadState.getFrames();
       if (frames.size() > frameIndex) {
-        open(frames.get(frameIndex).getLocation());
+
+        Debugger debugger = debuggerManager.getActiveDebugger();
+        if (debugger != null && debugger.isSuspended()) {
+          debugger
+              .getStackFrameLocation(threadId, frameIndex)
+              .then(
+                  location -> {
+                    if (isSameSelection(threadId, frameIndex)) {
+                      open(location);
+                    }
+                  });
+        }
       }
     }
   }

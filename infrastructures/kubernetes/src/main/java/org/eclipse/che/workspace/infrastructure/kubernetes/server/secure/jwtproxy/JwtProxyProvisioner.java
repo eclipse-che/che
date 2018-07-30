@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.UNSECURED_PATHS_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
@@ -30,9 +31,13 @@ import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import java.security.KeyPair;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -105,6 +110,7 @@ public class JwtProxyProvisioner {
    * @param backendServiceName service name that will be exposed
    * @param backendServicePort service port that will be exposed
    * @param protocol protocol that will be used for exposed port
+   * @param secureServers secure servers to expose
    * @return JWTProxy service port that expose the specified one
    * @throws InfrastructureException if any exception occurs during port exposing
    */
@@ -112,14 +118,23 @@ public class JwtProxyProvisioner {
       KubernetesEnvironment k8sEnv,
       String backendServiceName,
       int backendServicePort,
-      String protocol)
+      String protocol,
+      Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
     ensureJwtProxyInjected(k8sEnv);
 
     int listenPort = availablePort++;
 
+    Set<String> excludes = new HashSet<>();
+    for (ServerConfig config : secureServers.values()) {
+      if (config.getAttributes().containsKey(UNSECURED_PATHS_ATTRIBUTE)) {
+        Collections.addAll(
+            excludes, config.getAttributes().get(UNSECURED_PATHS_ATTRIBUTE).split(","));
+      }
+    }
+
     proxyConfigBuilder.addVerifierProxy(
-        listenPort, "http://" + backendServiceName + ":" + backendServicePort);
+        listenPort, "http://" + backendServiceName + ":" + backendServicePort, excludes);
     k8sEnv
         .getConfigMaps()
         .get(getConfigMapName())

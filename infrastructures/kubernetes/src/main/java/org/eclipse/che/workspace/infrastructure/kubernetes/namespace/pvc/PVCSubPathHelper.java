@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -142,8 +143,12 @@ public class PVCSubPathHelper {
       deployments = factory.create(workspaceId).deployments();
       deployments.create(pod);
       final Pod finished = deployments.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
-      if (POD_PHASE_FAILED.equals(finished.getStatus().getPhase())) {
-        LOG.error("Job command '{}' execution is failed.", Arrays.toString(command));
+      PodStatus finishedStatus = finished.getStatus();
+      if (POD_PHASE_FAILED.equals(finishedStatus.getPhase())) {
+        LOG.error(
+            "Job command '{}' execution is failed. Status '{}'.",
+            Arrays.toString(command),
+            finishedStatus);
       }
     } catch (InfrastructureException ex) {
       LOG.error(

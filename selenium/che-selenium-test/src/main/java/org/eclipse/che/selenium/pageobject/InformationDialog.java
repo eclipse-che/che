@@ -10,18 +10,14 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Operations with information dialogs.
@@ -31,12 +27,15 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 @Singleton
 public class InformationDialog {
-  private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
 
   @Inject
-  public InformationDialog(SeleniumWebDriver seleniumWebDriver, Loader loader) {
-    this.seleniumWebDriver = seleniumWebDriver;
+  public InformationDialog(
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader) {
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -58,22 +57,30 @@ public class InformationDialog {
 
   /** Wait for information dialog is opened. */
   public void waitFormToOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(dialogForm));
+    seleniumWebDriverHelper.waitVisibility(dialogForm);
+  }
+
+  public boolean isFormOpened() {
+    return seleniumWebDriverHelper.isVisible(dialogForm);
+  }
+
+  /**
+   * Wait for information dialog is opened.
+   *
+   * @param expectedTimeout timeout defined by user
+   */
+  public void waitFormToOpen(int expectedTimeout) {
+    seleniumWebDriverHelper.waitVisibility(dialogForm, expectedTimeout);
   }
 
   /** Wait for information dialog is closed */
   public void waitFormToClose() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath(Locators.INFORMATION_DIALOG_FORM)));
-    loader.waitOnClosed();
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.INFORMATION_DIALOG_FORM));
   }
 
   /** Click Ok button at information dialog. */
   public void clickOkBtn() {
-    okButton.click();
+    seleniumWebDriverHelper.waitAndClick(okButton);
     waitFormToClose();
   }
 
@@ -83,22 +90,7 @@ public class InformationDialog {
    * @param expectedText expected text in widget
    */
   public void containsText(final String expectedText) {
-    new WebDriverWait(seleniumWebDriver, 3).until(ExpectedConditions.visibilityOf(textContainer));
-    new WebDriverWait(seleniumWebDriver, 7)
-        .until(
-            (ExpectedCondition<Boolean>) webDriver -> getTextFromWidget().contains(expectedText));
-  }
-
-  /**
-   * Get the text from the information dialog
-   *
-   * @return {@link String} text
-   */
-  public String getTextFromWidget() {
-    waitFormToOpen();
-    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(textContainer))
-        .getText();
+    seleniumWebDriverHelper.waitTextContains(textContainer, expectedText);
   }
 
   /**

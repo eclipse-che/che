@@ -10,6 +10,13 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestGitConstants.GIT_INITIALIZED_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.COMMIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.SHOW_HISTORY;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.net.URL;
@@ -19,7 +26,6 @@ import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -84,17 +90,16 @@ public class AmendCommitTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
+    menu.runCommand(GIT, INITIALIZE_REPOSITORY);
     askDialog.confirmAndWaitClosed();
-    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
+    git.waitGitStatusBarWithMess(GIT_INITIALIZED_SUCCESS);
     events.clickEventLogBtn();
-    events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
+    events.waitExpectedMessage(GIT_INITIALIZED_SUCCESS);
     loader.waitOnClosed();
 
     // perform init commit
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+    menu.runCommand(GIT, COMMIT);
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 
@@ -106,24 +111,27 @@ public class AmendCommitTest {
     editor.setCursorToLine(12);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+    menu.runCommand(GIT, COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
+
+    // need to repeat selection of the project (https://github.com/eclipse/che/issues/10520)
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess(NOTHING_TO_COMMIT);
 
     // view git history
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
+    menu.runCommand(GIT, SHOW_HISTORY);
     loader.waitOnClosed();
     git.waitTextInHistoryForm(COMMIT_MESSAGE);
     git.closeGitHistoryForm();
 
     // only amend commit message
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+    menu.runCommand(GIT, COMMIT);
     git.waitAndRunAmendCommitMessage(AMEND_COMMIT_MESS);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
+    menu.runCommand(GIT, SHOW_HISTORY);
     git.waitHistoryFormToOpen();
     git.waitCommitInHistoryFormNotPresent(COMMIT_MESSAGE);
     git.waitCommitInHistoryForm(AMEND_COMMIT_MESS);
@@ -136,15 +144,18 @@ public class AmendCommitTest {
     editor.selectLineAndDelete();
     editor.typeTextIntoEditor("//" + AMEND_CONTENT);
     editor.waitTextIntoEditor("//" + AMEND_CONTENT);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+    menu.runCommand(GIT, COMMIT);
     git.waitAndRunAmendPreviousCommit(AMEND_COMMIT);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
+
+    // need to repeat selection of the project (https://github.com/eclipse/che/issues/10520)
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess(NOTHING_TO_COMMIT);
 
     // view git history
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
+    menu.runCommand(GIT, SHOW_HISTORY);
     loader.waitOnClosed();
     git.waitTextInHistoryForm(AMEND_COMMIT);
     git.waitCommitInHistoryFormNotPresent(AMEND_COMMIT_MESS);

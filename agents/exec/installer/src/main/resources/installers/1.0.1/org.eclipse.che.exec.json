@@ -11,7 +11,8 @@
       "protocol": "http",
       "path" : "/process",
       "attributes": {
-        "secure": "true"
+        "secure": "true",
+        "unsecuredPaths": "/liveness"
       }
     },
     "exec-agent/ws": {
@@ -19,7 +20,8 @@
       "protocol": "ws",
       "path": "/connect",
       "attributes": {
-        "secure": "true"
+        "secure": "true",
+        "unsecuredPaths": "/liveness"
       }
     }
   }
