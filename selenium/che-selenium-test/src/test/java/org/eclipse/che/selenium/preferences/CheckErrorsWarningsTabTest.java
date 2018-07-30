@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.preferences;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
@@ -99,15 +100,16 @@ public class CheckErrorsWarningsTabTest {
     consoles.closeProcessesArea();
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
-    Assert.assertEquals(editor.getMarkersQuantity(WARNING_OVERVIEW), 12);
+    editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
+    Assert.assertEquals(editor.getMarkersQuantity(WARNING_OVERVIEW), 13);
     Assert.assertEquals(editor.getMarkersQuantity(WARNING), 22);
 
-    editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.ERROR);
-    Assert.assertEquals(editor.getMarkersQuantity(ERROR_OVERVIEW), 12);
-    Assert.assertEquals(editor.getMarkersQuantity(ERROR), 22);
     editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
+    Assert.assertEquals(editor.getMarkersQuantity(ERROR_OVERVIEW), 13);
+    Assert.assertEquals(editor.getMarkersQuantity(ERROR), 22);
+
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.IGNORE);
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
@@ -133,7 +135,7 @@ public class CheckErrorsWarningsTabTest {
     editor.typeTextIntoEditorWithoutDelayForSaving(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    WaitUtils.sleepQuietly(3);
+    WaitUtils.sleepQuietly(DEFAULT_TIMEOUT);
   }
 
   private String getTextInStringFromFile(String path) throws Exception {
