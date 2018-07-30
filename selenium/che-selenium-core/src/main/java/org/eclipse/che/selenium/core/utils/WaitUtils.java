@@ -14,6 +14,7 @@ import static java.lang.Thread.sleep;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import org.openqa.selenium.TimeoutException;
 
 /**
@@ -59,11 +60,11 @@ public class WaitUtils {
    * @param condition expression which should be performed
    * @param timeout waiting time in seconds
    */
-  public static void waitSuccessCondition(BooleanCondition condition, int timeout) {
+  public static void waitSuccessCondition(BooleanSupplier condition, int timeout) {
     final int delayBetweenTriesInSeconds = 1;
 
     for (int i = 1; i <= timeout; i++) {
-      if (condition.execution()) {
+      if (condition.getAsBoolean()) {
         break;
       }
 
@@ -80,13 +81,8 @@ public class WaitUtils {
    *
    * @param condition expression which should be performed
    */
-  public static void waitSuccessCondition(BooleanCondition condition) {
+  public static void waitSuccessCondition(BooleanSupplier condition) {
     final int defaultTimeout = LOAD_PAGE_TIMEOUT_SEC;
     waitSuccessCondition(condition, defaultTimeout);
-  }
-
-  @FunctionalInterface
-  public interface BooleanCondition {
-    boolean execution();
   }
 }
