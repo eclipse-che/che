@@ -39,6 +39,7 @@
     },
     "testMatch": [
       "**/test/*.(ts)"
-    ]
+    ],
+    "testURL": "http://localhost"
   }
 }
