@@ -1317,4 +1317,25 @@ public class SeleniumWebDriverHelper {
 
     return readyToUploadFile.getFileName().toString();
   }
+
+  /**
+   * Waits during {@code timeout} until specified {@code expression} returns "true".
+   *
+   * @param expression the condition which should be waits until it has a "true" state
+   * @param timeout waiting time in seconds
+   */
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until((ExpectedCondition<Boolean>) driver -> expression.apply(this.seleniumWebDriver));
+  }
+
+  /**
+   * Waits until specified {@code expression} returns "true".
+   *
+   * @param expression the condition which should be waits until it has a "true" state
+   */
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression) {
+    waitSuccessCondition(expression, DEFAULT_TIMEOUT);
+  }
 }
