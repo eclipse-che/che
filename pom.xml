@@ -1906,11 +1906,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.jdt.ui</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.jface</artifactId>
                 <version>${che.version}</version>
             </dependency>
