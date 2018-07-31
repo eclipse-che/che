@@ -61,8 +61,7 @@ public class MachinesAsynchronousStartTest {
 
     // create and start broken workspace
     brokenWorkspace = createBrokenWorkspace();
-    testWorkspaceServiceClient.start(
-        brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser);
+    startBrokenWorkspaceAndWaitRunningStatus();
 
     // check that broken workspace is displayed with "Running" status
     dashboard.waitDashboardToolbarTitle();
@@ -73,6 +72,16 @@ public class MachinesAsynchronousStartTest {
     // check openshift events log
     waitEvent("Failed");
     waitEvent("BackOff");
+  }
+
+  private void startBrokenWorkspaceAndWaitRunningStatus() throws Exception {
+    try {
+      testWorkspaceServiceClient.start(
+          brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser);
+    } catch (Exception ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10295", ex);
+    }
   }
 
   private void waitWorkspaceRunningStatusOnDashboard() throws Exception {
