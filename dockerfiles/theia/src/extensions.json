@@ -35,13 +35,6 @@
             "type": "git"
         },
         {
-            "name": "@eclipse-che/theia-task-extension",
-            "source": "https://github.com/eclipse/che-theia-task-plugin",
-            "folder": "che-theia-task-extension",
-            "checkoutTo": "master",
-            "type": "git"
-        },
-        {
             "name": "@eclipse-che/theia-java-extension",
             "source": "https://github.com/eclipse/che-theia-java-plugin",
             "folder": "che-theia-java-extension",
