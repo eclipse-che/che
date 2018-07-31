@@ -15,7 +15,6 @@ import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.nio.file.PathMatcher;
@@ -24,15 +23,10 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeJsonRpcMessenger;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServerConfig;
 import org.eclipse.che.plugin.maven.lsp.MavenTextDocumentService;
-import org.eclipse.che.plugin.maven.server.core.MavenJsonRpcCommunication;
-import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
-import org.eclipse.che.plugin.maven.server.core.MavenServerNotifier;
-import org.eclipse.che.plugin.maven.server.core.MavenTerminalImpl;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenTargetExcludeMatcher;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProviderFactory;
@@ -76,10 +70,6 @@ public class MavenModule extends AbstractModule {
             binder(), PathMatcher.class, Names.named("che.user.workspaces.storage.excludes"));
     fileWatcherExcludes.addBinding().to(MavenTargetExcludeMatcher.class);
 
-    bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
-    bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);
-
-    bind(MavenJsonRpcCommunication.class);
     bind(MavenArchetypeJsonRpcMessenger.class);
 
     bind(MavenLanguageServer.class);

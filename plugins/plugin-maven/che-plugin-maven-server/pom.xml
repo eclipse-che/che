@@ -92,16 +92,6 @@
             <artifactId>che-core-commons-xml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>org-eclipse-jdt-core-repack</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.eclipse.jdt.core</artifactId>
-                    <groupId>org.eclipse.tycho</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.ls.jdt</groupId>
             <artifactId>jdt.ls.extension.api</artifactId>
             <version>${che.ls.jdt.version}</version>
@@ -135,10 +125,6 @@
             <artifactId>org.eclipse.core.resources</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.jdt.ui</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
@@ -169,164 +155,13 @@
             <artifactId>che-core-api-workspace-shared</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.core.filebuffers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-testng</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-maven-test-lib</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.plugin</groupId>
-                                    <artifactId>maven-server-impl</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
-                                    <destFileName>maven-server-impl.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.plugin</groupId>
-                                    <artifactId>maven-server-api</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
-                                    <destFileName>maven-server-api.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>log4j</groupId>
-                                    <artifactId>log4j</artifactId>
-                                    <version>${log4j.version}</version>
-                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
-                                    <destFileName>log4j.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.jdom</groupId>
-                                    <artifactId>jdom</artifactId>
-                                    <version>${org.jdom.version}</version>
-                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
-                                    <destFileName>jdom.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.core</groupId>
-                                    <artifactId>che-core-commons-lang</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
-                                    <destFileName>che-core-commons-lang.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.maven.shared</groupId>
-                                    <artifactId>maven-dependency-tree</artifactId>
-                                    <version>${org.apache.maven.shared.version}</version>
-                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
-                                    <destFileName>maven-dependency-tree.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/test-pom.xml</exclude>
-                        <exclude>**/multimoduleProject/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/maven/server/**</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>integration</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <includes>
-                                <include>**/maven/server/*.java</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/MavenServerManagerTest.java</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
