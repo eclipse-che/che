@@ -10,7 +10,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import { ICommunicationClient } from './json-rpc-client';
+import { ICommunicationClient, CommunicationClientEvent } from './json-rpc-client';
+import * as ReconnectingWebsocket from 'reconnecting-websocket';
+const RWS = require('reconnecting-websocket');
 
 /**
  * The implementation for JSON RPC protocol communication through websocket.
@@ -18,12 +20,8 @@ import { ICommunicationClient } from './json-rpc-client';
  * @author Ann Shumilova
  */
 export class WebsocketClient implements ICommunicationClient {
-    onResponse: Function;
-    private websocketStream: WebSocket;
-
-    constructor() {
-
-    }
+    private websocketStream: ReconnectingWebsocket;
+    private handlers: {[event: string]: Function[]} =  {};
 
     /**
      * Performs connection to the pointed entrypoint.
@@ -32,28 +30,66 @@ export class WebsocketClient implements ICommunicationClient {
      */
     connect(entrypoint: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.websocketStream = new WebSocket(entrypoint);
-            this.websocketStream.addEventListener("open", () => {
+            this.websocketStream = new RWS(entrypoint, [], {});
+            this.websocketStream.addEventListener("open", (event: Event) => {
+                const eventType: CommunicationClientEvent = "open";
+                this.callHandlers(eventType, event);
                 resolve();
             });
-
-            this.websocketStream.addEventListener("error", () => {
+            this.websocketStream.addEventListener("error", (event: Event) => {
+                const eventType: CommunicationClientEvent = "error";
+                this.callHandlers(eventType, event);
                 reject();
             });
-            this.websocketStream.addEventListener("message", (message) => {
-                let data = JSON.parse(message.data);
-                this.onResponse(data);
+            this.websocketStream.addEventListener("message", (message: any) => {
+                const data = JSON.parse(message.data);
+                const eventType: CommunicationClientEvent = "message";
+                this.callHandlers(eventType, data);
+            });
+            this.websocketStream.addEventListener("close", (event: Event) => {
+                const eventType: CommunicationClientEvent = "close";
+                this.callHandlers(eventType, event);
             });
         });
+    }
 
+    /**
+     * Adds a listener on an event.
+     *
+     * @param {communicationClientEvent} event
+     * @param {Function} handler
+     */
+    addListener(event: CommunicationClientEvent, handler: Function): void {
+        if (!this.handlers[event]) {
+            this.handlers[event] = [];
+        }
+        this.handlers[event].push(handler);
+    }
+
+    /**
+     * Removes a listener.
+     *
+     * @param {communicationClientEvent} eventType
+     * @param {Function} handler
+     */
+    removeListener(eventType: CommunicationClientEvent, handler: Function): void {
+        if (!this.handlers[eventType] || !handler) {
+            return;
+        }
+        const index = this.handlers[eventType].indexOf(handler);
+        if (index === -1) {
+            return;
+        }
+        this.handlers[eventType].splice(index, 1);
     }
 
     /**
      * Performs closing the connection.
+     * @param {number} code close code
      */
-    disconnect(): void {
+    disconnect(code?: number): void {
         if (this.websocketStream) {
-            this.websocketStream.close();
+            this.websocketStream.close(code ? code : undefined);
         }
     }
 
@@ -64,5 +100,11 @@ export class WebsocketClient implements ICommunicationClient {
      */
     send(data: any): void {
         this.websocketStream.send(JSON.stringify(data));
+    }
+
+    private callHandlers(event: CommunicationClientEvent, data?: any): void {
+        if (this.handlers[event] && this.handlers[event].length > 0) {
+            this.handlers[event].forEach((handler: Function) => handler(data));
+        }
     }
 }

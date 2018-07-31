@@ -122,7 +122,7 @@ export class WorkspaceLoader {
     startAfterStopping = false;
 
     constructor(private readonly loader: Loader,
-                private readonly keycloak: any) {
+                private readonly keycloak?: any) {
         /** Ask dashboard to show the IDE. */
         window.parent.postMessage("show-ide", "*");
     }
@@ -279,9 +279,15 @@ export class WorkspaceLoader {
      * Subscribes to the workspace events.
      */
     subscribeWorkspaceEvents() : Promise<void> {
-        let master = new CheJsonRpcMasterApi(new WebsocketClient());
+        const websocketClient = new WebsocketClient();
+        websocketClient.addListener('open', () => {
+            this.getWorkspace(this.workspace.id).then((workspace) => {
+                this.onWorkspaceStatusChanged(workspace.status ? workspace.status : '');
+            });
+        });
+        const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
+        const master = new CheJsonRpcMasterApi(websocketClient, entryPoint);
         return new Promise((resolve) => {
-            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
             master.connect(entryPoint).then(() => {
                 master.subscribeEnvironmentOutput(this.workspace.id, 
                     (message: any) => this.onEnvironmentOutput(message.text));
@@ -289,7 +295,7 @@ export class WorkspaceLoader {
                 master.subscribeWorkspaceStatus(this.workspace.id, 
                     (message: any) => {
                     if (message.error) {
-                       this.loader.error(message.error);
+                        this.loader.error(message.error);
                     } else {
                         this.onWorkspaceStatusChanged(message.status);
                     }

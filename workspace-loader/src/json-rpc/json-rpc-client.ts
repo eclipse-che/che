@@ -13,15 +13,26 @@
 import { IDeffered, Deffered } from './util';
 const JSON_RPC_VERSION: string = '2.0';
 
+export type CommunicationClientEvent = 'close' | 'error' | 'open' | 'message';
+export const CODE_REQUEST_TIMEOUT = 4000;
+
 /**
  * Interface for communication between two entrypoints.
  * The implementation can be through websocket or http protocol.
  */
 export interface ICommunicationClient {
   /**
-   * Process responses.
+   * Adds listener callbacks for specified client event.
+   * @param {CommunicationClientEvent} eventType an event type
+   * @param {Function} handler a callback function
    */
-  onResponse: Function;
+  addListener(eventType: CommunicationClientEvent, handler: Function): void;
+  /**
+   * Removes listener.
+   * @param {CommunicationClientEvent} eventType an event type
+   * @param {Function} handler a callback function
+   */
+  removeListener(eventType: CommunicationClientEvent, handler: Function): void;
   /**
    * Performs connections.
    *
@@ -30,8 +41,9 @@ export interface ICommunicationClient {
   connect(entrypoint: string): Promise<any>;
   /**
    * Close the connection.
+   * @param {number} code close code
    */
-  disconnect(): void;
+  disconnect(code?: number): void;
   /**
    * Send pointed data.
    *
@@ -78,9 +90,9 @@ export class JsonRpcClient {
     this.pendingRequests = new Map<string, IDeffered<any>>();
     this.notificationHandlers = new Map<string, Array<Function>>();
 
-    this.client.onResponse = (message: any): void => {
+    this.client.addListener("message", (message: any) => {
       this.processResponse(message);
-    };
+    });
   }
 
   /**
