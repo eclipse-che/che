@@ -1,10 +1,9 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
- *
- * SPDX-License-Identifier: EPL-2.0
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -46,7 +45,6 @@ public class MachinesAsynchronousStartTest {
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
-  @Inject private TestWorkspace testWorkspace;
   @Inject private WebDriverWaitFactory webDriverWaitFactory;
 
   private TestWorkspace brokenWorkspace;
@@ -63,8 +61,7 @@ public class MachinesAsynchronousStartTest {
 
     // create and start broken workspace
     brokenWorkspace = createBrokenWorkspace();
-    testWorkspaceServiceClient.start(
-        brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser);
+    startBrokenWorkspaceAndWaitRunningStatus();
 
     // check that broken workspace is displayed with "Running" status
     dashboard.waitDashboardToolbarTitle();
@@ -75,6 +72,16 @@ public class MachinesAsynchronousStartTest {
     // check openshift events log
     waitEvent("Failed");
     waitEvent("BackOff");
+  }
+
+  private void startBrokenWorkspaceAndWaitRunningStatus() throws Exception {
+    try {
+      testWorkspaceServiceClient.start(
+          brokenWorkspace.getName(), brokenWorkspace.getId(), defaultTestUser);
+    } catch (Exception ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10295", ex);
+    }
   }
 
   private void waitWorkspaceRunningStatusOnDashboard() throws Exception {
@@ -92,7 +99,7 @@ public class MachinesAsynchronousStartTest {
   }
 
   private String getPodName() throws Exception {
-    String command = format(GET_POD_NAME_COMMAND_COMMAND_TEMPLATE, testWorkspace.getId());
+    String command = format(GET_POD_NAME_COMMAND_COMMAND_TEMPLATE, brokenWorkspace.getId());
     return openShiftCliCommandExecutor.execute(command);
   }
 
