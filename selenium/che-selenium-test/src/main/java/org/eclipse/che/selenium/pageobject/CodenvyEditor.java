@@ -434,6 +434,11 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitTextContains(tooltipTitle, expectedText);
   }
 
+  /** Get text from hover popup */
+  public String getTextFromHoverPopup() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(hoverPopup);
+  }
+
   /**
    * wait text in hover pop-up (after hovering on text)
    *
