@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Optional;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
@@ -37,7 +36,6 @@ public class WsAgentJsonRpcInitializer {
 
   private final AppContext appContext;
   private final JsonRpcInitializer initializer;
-  private final RequestTransmitter requestTransmitter;
   private final AgentURLModifier agentURLModifier;
   private final WsAgentServerUtil wsAgentServerUtil;
 
@@ -46,12 +44,10 @@ public class WsAgentJsonRpcInitializer {
       JsonRpcInitializer initializer,
       AppContext appContext,
       EventBus eventBus,
-      RequestTransmitter requestTransmitter,
       AgentURLModifier agentURLModifier,
       WsAgentServerUtil wsAgentServerUtil) {
     this.appContext = appContext;
     this.initializer = initializer;
-    this.requestTransmitter = requestTransmitter;
     this.agentURLModifier = agentURLModifier;
     this.wsAgentServerUtil = wsAgentServerUtil;
 
@@ -104,24 +100,11 @@ public class WsAgentJsonRpcInitializer {
               Optional<String> applicationWebSocketId = appContext.getApplicationId();
               String queryParams =
                   applicationWebSocketId.map(id -> separator + "clientId=" + id).orElse("");
-              //              Set<Runnable> initActions =
-              //                  applicationWebSocketId.isPresent() ? emptySet() :
-              // singleton(this::processWsId);
 
               initializer.initialize(
                   WS_AGENT_JSON_RPC_ENDPOINT_ID,
                   singletonMap("url", wsAgentWebSocketUrl + queryParams),
                   emptySet());
             });
-  }
-
-  private void processWsId() {
-    //    requestTransmitter
-    //        .newRequest()
-    //        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-    //        .methodName("websocketIdService/getId")
-    //        .noParams()
-    //        .sendAndReceiveResultAsString()
-    //        .onSuccess(appContext::setApplicationWebsocketId);
   }
 }
