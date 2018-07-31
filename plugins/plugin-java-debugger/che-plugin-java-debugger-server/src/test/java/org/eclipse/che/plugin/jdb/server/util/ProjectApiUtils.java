@@ -40,8 +40,6 @@ import org.eclipse.che.api.search.server.SearchApiModule;
 import org.eclipse.che.api.watcher.server.FileWatcherApiModule;
 import org.eclipse.che.plugin.java.server.inject.JavaModule;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,11 +151,5 @@ public class ProjectApiUtils {
             () -> pathTransformer,
             () -> fsManager);
     resourcesPlugin.start();
-
-    JavaPlugin javaPlugin =
-        new JavaPlugin(root.getAbsolutePath() + "/.settings", resourcesPlugin, projectManager);
-    javaPlugin.start();
-
-    JavaModelManager.getDeltaState().initializeRoots(true);
   }
 }
