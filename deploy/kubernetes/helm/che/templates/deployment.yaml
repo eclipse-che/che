@@ -258,6 +258,21 @@ spec:
             configMapKeyRef:
               key: CHE_LOGS_APPENDERS_IMPL
               name: che
+        - name: CHE_WORKSPACE_HTTP__PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_HTTP__PROXY
+              name: che
+        - name: CHE_WORKSPACE_HTTPS__PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_HTTPS__PROXY
+              name: che
+        - name: CHE_WORKSPACE_NO__PROXY
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_NO__PROXY
+              name: che
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         livenessProbe:

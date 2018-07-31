@@ -15,7 +15,7 @@ if [ -z "${THEIA_VERSION}" ]; then
 fi
 
 LATEST_VERSION="latest"
-PACKAGE_JSON_PATH="/home/theia/package.json"
+PACKAGE_JSON_PATH="./package.json"
 
 # modify  package json files according to provided THEIA_VERSION. Check if included packages are available before running sed
 PACKAGES_FULL=$(cat ${PACKAGE_JSON_PATH} | jq -r '.dependencies | keys | .[]')
@@ -25,7 +25,7 @@ for i in ${PACKAGES_FULL[@]}; do
       echo "${i} package with version ${THEIA_VERSION} not found. Using latest"
     else
       echo "Found ${i} package with version ${THEIA_VERSION}"
-      sed -i "s#\"${i}\": \"latest\"#\"${i}\": \"${THEIA_VERSION}\"#g" ${PACKAGE_JSON_PATH}
+      sed -i "s#\"${i}\": \".*\"#\"${i}\": \"${THEIA_VERSION}\"#g" ${PACKAGE_JSON_PATH}
     fi
 done
 
