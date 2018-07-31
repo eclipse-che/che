@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -41,6 +42,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -343,6 +345,7 @@ public class WorkspaceManager {
             });
   }
 
+  /** Returns a set of supported recipe types */
   public Set<String> getSupportedRecipes() {
     return runtimes.getSupportedRecipes();
   }
@@ -357,9 +360,16 @@ public class WorkspaceManager {
               workspace.getNamespace(), workspace.getConfig().getName(), envName));
     }
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-    workspaceDao.update(workspace);
     final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
 
+    // validate environment in advance
+    try {
+      runtimes.validate(workspace.getConfig().getEnvironments().get(env));
+    } catch (InfrastructureException | ValidationException e) {
+      throw new ServerException(e);
+    }
+
+    workspaceDao.update(workspace);
     runtimes
         .startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
         .thenAccept(aVoid -> handleStartupSuccess(workspace))

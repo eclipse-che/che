@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -27,6 +28,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -91,7 +93,7 @@ public class JwtProxyProvisionerTest {
   @Test
   public void shouldProvisionJwtProxyRelatedObjectsIntoKubernetesEnvironment() throws Exception {
     // when
-    jwtProxyProvisioner.expose(k8sEnv, "terminal", 4401, "TCP");
+    jwtProxyProvisioner.expose(k8sEnv, "terminal", 4401, "TCP", Collections.EMPTY_MAP);
 
     // then
     InternalMachineConfig jwtProxyMachine =

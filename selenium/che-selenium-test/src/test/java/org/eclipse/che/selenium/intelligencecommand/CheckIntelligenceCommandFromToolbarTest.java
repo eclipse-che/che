@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -15,7 +16,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -92,7 +92,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   @Test(
     priority = 1,
-    groups = {TestGroup.OPENSHIFT}
+    groups = {TestGroup.OPENSHIFT, TestGroup.K8S}
   )
   public void checkButtonsOnToolbarOnOpenshift() {
     checkButtonsOnToolbar("Application is not available");
@@ -109,8 +109,8 @@ public class CheckIntelligenceCommandFromToolbarTest {
     consoles.clickOnPreviewUrl();
 
     waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
-    assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
-    assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#3"));
+    commandsToolbar.waitTimerValuePattern("\\d\\d:\\d\\d");
+    commandsToolbar.waitNumOfProcessCounter(3);
 
     checkTestAppByPreviewButtonAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();

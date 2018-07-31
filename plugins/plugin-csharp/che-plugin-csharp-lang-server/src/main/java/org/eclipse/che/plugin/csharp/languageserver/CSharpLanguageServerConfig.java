@@ -1,16 +1,15 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.csharp.languageserver;
-
-import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -21,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.notification.EventService;
@@ -30,6 +30,8 @@ import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.LanguageServerException;
 import org.eclipse.che.api.languageserver.LanguageServerInitializedEvent;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.csharp.inject.CSharpModule;
 import org.slf4j.Logger;
@@ -40,17 +42,20 @@ import org.slf4j.LoggerFactory;
 public class CSharpLanguageServerConfig implements LanguageServerConfig {
   private static final Logger LOG = LoggerFactory.getLogger(CSharpLanguageServerConfig.class);
 
-  private static final String REGEX = ".*\\.(cs|csx)";
+  private static final String REGEX = ".*\\.(cs|csx)$";
 
   private final EventService eventService;
   private final PathTransformer pathTransformer;
+  private final ProjectManager projectManager;
 
   private final Path launchScript;
 
   @Inject
-  public CSharpLanguageServerConfig(EventService eventService, PathTransformer pathTransformer) {
+  public CSharpLanguageServerConfig(
+      EventService eventService, PathTransformer pathTransformer, ProjectManager projectManager) {
     this.eventService = eventService;
     this.pathTransformer = pathTransformer;
+    this.projectManager = projectManager;
 
     this.launchScript = Paths.get(System.getenv("HOME"), "che/ls-csharp/launch.sh");
   }
@@ -63,7 +68,10 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
   private void onLSProxyInitialized(LanguageServerInitializedEvent event) {
     try {
       if ("org.eclipse.che.plugin.csharp.languageserver".equals(event.getId())) {
-        restoreDependencies(pathTransformer.transform(ROOT));
+        Optional<RegisteredProject> project = projectManager.getClosest(event.getWsPath());
+        if (project.isPresent()) {
+          restoreDependencies(pathTransformer.transform(project.get().getPath()));
+        }
       }
     } catch (LanguageServerException e) {
       LOG.error(e.getMessage(), e);
@@ -71,33 +79,22 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
   }
 
   private void restoreDependencies(Path workspaceRootFsPath) throws LanguageServerException {
-    File[] files = workspaceRootFsPath.toFile().listFiles();
-    if (files == null) {
-      LOG.error("Something went wrong while listing workspace projects");
-      return;
-    }
+    File workspaceRootFile = workspaceRootFsPath.toFile();
+    if (workspaceRootFile.isDirectory()) {
+      ProcessBuilder processBuilder = new ProcessBuilder("dotnet", "restore");
+      processBuilder.directory(workspaceRootFile);
 
-    for (File file : files) {
-      if (file.isDirectory()) {
-        if (!file.toPath().resolve("dotnet").toFile().exists()) {
-          LOG.warn("An executable 'dotnet' is not present at '{}'", file.toPath().toString());
-          return;
+      try {
+        Process process = processBuilder.start();
+        int resultCode = process.waitFor();
+        if (resultCode != 0) {
+          String err = IoUtil.readStream(process.getErrorStream());
+          String in = IoUtil.readStream(process.getInputStream());
+          throw new LanguageServerException(
+              "Can't restore dependencies. Error: " + err + ". Output: " + in);
         }
-
-        ProcessBuilder processBuilder = new ProcessBuilder("dotnet", "restore");
-        processBuilder.directory(file);
-        try {
-          Process process = processBuilder.start();
-          int resultCode = process.waitFor();
-          if (resultCode != 0) {
-            String err = IoUtil.readStream(process.getErrorStream());
-            String in = IoUtil.readStream(process.getInputStream());
-            throw new LanguageServerException(
-                "Can't restore dependencies. Error: " + err + ". Output: " + in);
-          }
-        } catch (IOException | InterruptedException e) {
-          throw new LanguageServerException("Can't start CSharp language server", e);
-        }
+      } catch (IOException | InterruptedException e) {
+        throw new LanguageServerException("Can't start CSharp language server", e);
       }
     }
   }

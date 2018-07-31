@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -32,6 +33,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -81,6 +83,7 @@ public class ProjectServiceClientTest {
   @Mock private AsyncRequestFactory requestFactory;
   @Mock private DtoFactory dtoFactory;
   @Mock private DtoUnmarshallerFactory unmarshaller;
+  @Mock private RequestTransmitter transmitter;
   @Mock private AppContext appContext;
   @Mock private AsyncRequest asyncRequest;
 
@@ -108,7 +111,7 @@ public class ProjectServiceClientTest {
   public void setUp() throws Exception {
     client =
         new ProjectServiceClient(
-            loaderFactory, requestFactory, dtoFactory, unmarshaller, appContext);
+            loaderFactory, requestFactory, dtoFactory, unmarshaller, transmitter, appContext);
 
     when(loaderFactory.newLoader(any(String.class))).thenReturn(messageLoader);
     when(asyncRequest.loader(messageLoader)).thenReturn(asyncRequest);

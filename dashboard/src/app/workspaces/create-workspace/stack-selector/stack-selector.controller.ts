@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -340,11 +341,21 @@ export class StackSelectorController {
   }
 
   /**
-   * Handles the adding stack options.
+   * Show dialog for stack to create.
+   *
+   * @param $event {MouseEvent}
    */
-  onAddStack(): void {
-    this.confirmDialogService.showConfirmDialog('Create stack', 'Would you like to create a new stack?', 'Yes', 'No').then(() => {
-      this.$location.path('/stacks');
+  onAddStack($event: MouseEvent): void {
+    this.$mdDialog.show({
+      targetEvent: $event,
+      controller: 'BuildStackController',
+      controllerAs: 'buildStackController',
+      bindToController: true,
+      clickOutsideToClose: true,
+      locals: {
+        callbackController: this
+      },
+      templateUrl: 'app/stacks/list-stacks/build-stack/build-stack.html'
     });
   }
 

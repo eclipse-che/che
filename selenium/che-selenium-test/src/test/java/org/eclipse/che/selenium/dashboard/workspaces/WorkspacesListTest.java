@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -13,7 +14,9 @@ package org.eclipse.che.selenium.dashboard.workspaces;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -21,7 +24,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -45,7 +47,6 @@ import org.testng.annotations.Test;
  * @author Sergey Skorik
  * @author Ihor Okhrimenko
  */
-@Test(groups = TestGroup.OSIO)
 public class WorkspacesListTest {
   private static final int BLANK_WS_MB = 2048;
   private static final int JAVA_WS_MB = 3072;
@@ -271,7 +272,7 @@ public class WorkspacesListTest {
     checkExpectedJavaWorkspaceDisplaying();
   }
 
-  @Test(priority = 1)
+  @Test()
   public void checkWorkspaceActions() throws Exception {
     workspaces.waitPageLoading();
     String mainWindow = seleniumWebDriver.getWindowHandle();
@@ -316,12 +317,7 @@ public class WorkspacesListTest {
 
     workspaces.moveCursorToWorkspaceRamSection(expectedJavaItem.getWorkspaceName());
     workspaces.clickOnWorkspaceConfigureButton(expectedJavaItem.getWorkspaceName());
-
     workspaceConfig.waitConfigForm();
-
-    assertEquals(
-        workspaceConfig.createExpectedWorkspaceConfig(expectedJavaItem.getWorkspaceName()),
-        workspaceConfig.getWorkspaceConfig());
 
     seleniumWebDriver.navigate().back();
 
@@ -339,6 +335,7 @@ public class WorkspacesListTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
+    newWorkspace.selectStack(BLANK);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
     dashboard.waitWorkspacesCountInWorkspacesItem(getWorkspacesCount());
@@ -352,9 +349,13 @@ public class WorkspacesListTest {
         workspaces.getWorkspacesListItemByWorkspaceName(
             workspaces.getVisibleWorkspaces(), NEWEST_CREATED_WORKSPACE_NAME);
 
-    assertEquals(newestCreatedWorkspaceItem, expectedNewestWorkspaceItem);
+    assertTrue(newestCreatedWorkspaceItem.equals(expectedNewestWorkspaceItem));
+  }
 
-    // delete workspaces by checkboxes
+  @Test(priority = 1)
+  public void deleteWorkspacesByCheckboxes() {
+    workspaces.waitPageLoading();
+
     workspaces.selectWorkspaceByCheckbox(expectedNewestWorkspaceItem.getWorkspaceName());
     workspaces.clickOnDeleteWorkspacesBtn();
     workspaces.clickOnDeleteButtonInDialogWindow();

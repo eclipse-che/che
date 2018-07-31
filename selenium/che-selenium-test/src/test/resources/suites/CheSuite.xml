@@ -1,10 +1,11 @@
 <!--
 
     Copyright (c) 2012-2018 Red Hat, Inc.
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
+    This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v2.0
+    which is available at http://www.eclipse.org/legal/epl-2.0.html
+
+    SPDX-License-Identifier: EPL-2.0
 
     Contributors:
       Red Hat, Inc. - initial API and implementation
@@ -53,6 +54,8 @@
           <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.JsonFileEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.YamlFileEditingTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
@@ -174,7 +177,9 @@
           <class name="org.eclipse.che.selenium.miscellaneous.FindTextFeatureTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ImplementationBaseOperationsTest"/>
+          <class name="org.eclipse.che.selenium.miscellaneous.MachinesAsynchronousStartTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.NavigateToFileTest"/>
+          <class name="org.eclipse.che.selenium.miscellaneous.OpenInTerminalTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ResolveDependencyAfterRecreateProjectTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ServerRuntimeInfoTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.TerminalTypingTest"/>

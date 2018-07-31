@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -1229,6 +1230,10 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("control.terminal.create.description")
   String newTerminalDescription();
 
+  @Key("control.open.in.terminal")
+  @DefaultMessage("Open in Terminal")
+  String openInTerminalAction();
+
   @Key("machine.output.action.title")
   String machineOutputActionTitle();
 
@@ -1342,4 +1347,13 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("resource.copy.move.already.exist.error.message")
   String resourceCopyMoveAlreadyExistErrorMessage(String sourceName, String path);
+
+  @Key("low.disk.space")
+  String lowDiskSpace();
+
+  @Key("low.disk.space.description")
+  String lowDiskSpaceDescription();
+
+  @Key("low.disk.space.status.bar.message")
+  String lowDiskSpaceStatusBarMessage();
 }

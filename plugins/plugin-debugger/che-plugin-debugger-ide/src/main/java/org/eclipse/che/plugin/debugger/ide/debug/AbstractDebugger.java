@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -707,6 +708,15 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 Log.error(AbstractDebugger.class, error.getMessage());
               });
     }
+  }
+
+  @Override
+  public Promise<? extends Location> getStackFrameLocation(long threadId, int frameIndex) {
+    if (isConnected()) {
+      return service.getStackFrameLocation(debugSessionDto.getId(), threadId, frameIndex);
+    }
+
+    return promiseProvider.reject(JsPromiseError.create("Debugger is not connected"));
   }
 
   @Override

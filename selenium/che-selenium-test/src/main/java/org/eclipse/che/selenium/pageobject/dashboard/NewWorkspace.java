@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -149,7 +150,7 @@ public class NewWorkspace {
     ECLIPSE_VERTX("vert.x"),
     GO("go-default"),
     JAVA_CENTOS("java-centos"),
-    JAVA_THEIA_DOCKER("java-theia-docker"),
+    JAVA_THEIA_DOCKER("simple-theia-docker"),
     JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
     JAVA_MYSQL_CENTOS("java-centos-mysql"),
     JAVA_DEBIAN("java-debian"),
@@ -779,9 +780,7 @@ public class NewWorkspace {
     WaitUtils.sleepQuietly(2);
 
     seleniumWebDriverHelper.waitVisibility(By.xpath(CREATE_STACK_DIALOG_FORM_XPATH));
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath("//div[text()='Would you like to create a new stack?']"));
-    seleniumWebDriverHelper.waitVisibility(By.xpath("//div[text()='Create stack']"));
+    seleniumWebDriverHelper.waitVisibility(By.xpath("//div[text()='Build stack from recipe']"));
   }
 
   public void waitCreateStackDialogClosing() {
@@ -789,11 +788,11 @@ public class NewWorkspace {
   }
 
   public void clickOnYesButtonInCreateStackDialog() {
-    seleniumWebDriverHelper.waitAndClick(By.id("ok-dialog-button"));
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//*[@che-button-title='Ok']"));
   }
 
   public void clickOnNoButtonInCreateStackDialog() {
-    seleniumWebDriverHelper.waitAndClick(By.id("cancel-dialog-button"));
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//*[@che-button-title='Cancel']"));
   }
 
   public void closeCreateStackDialogByCloseButton() {

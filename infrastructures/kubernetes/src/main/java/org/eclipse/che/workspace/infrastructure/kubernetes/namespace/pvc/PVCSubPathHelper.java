@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -22,6 +23,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -142,8 +144,12 @@ public class PVCSubPathHelper {
       deployments = factory.create(workspaceId).deployments();
       deployments.create(pod);
       final Pod finished = deployments.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
-      if (POD_PHASE_FAILED.equals(finished.getStatus().getPhase())) {
-        LOG.error("Job command '{}' execution is failed.", Arrays.toString(command));
+      PodStatus finishedStatus = finished.getStatus();
+      if (POD_PHASE_FAILED.equals(finishedStatus.getPhase())) {
+        LOG.error(
+            "Job command '{}' execution is failed. Status '{}'.",
+            Arrays.toString(command),
+            finishedStatus);
       }
     } catch (InfrastructureException ex) {
       LOG.error(

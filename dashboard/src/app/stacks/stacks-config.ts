@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -64,22 +65,6 @@ export class StacksConfig {
         controller: 'ListStacksController',
         controllerAs: 'listStacksController'
       })
-        .accessWhen('/stack/create', {
-          title: () => {
-            return 'create';
-          },
-          templateUrl: 'app/stacks/stack-details/stack.html',
-          controller: 'ImportStackController',
-          controllerAs: 'stackController',
-          resolve: {
-            initData: ['cheStack', (cheStack: CheStack) => {
-              return cheStack.fetchStacks().then(() => {
-                const stack = cheStack.getStackTemplate();
-                return {stack};
-              });
-            }]
-          }
-        })
         .accessWhen('/stack/import', {
           title: () => {
             return 'create';

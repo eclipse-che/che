@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2018-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -121,7 +122,7 @@ export class WorkspaceLoader {
     startAfterStopping = false;
 
     constructor(private readonly loader: Loader,
-                private readonly keycloak: any) {
+                private readonly keycloak?: any) {
         /** Ask dashboard to show the IDE. */
         window.parent.postMessage("show-ide", "*");
     }
@@ -278,9 +279,15 @@ export class WorkspaceLoader {
      * Subscribes to the workspace events.
      */
     subscribeWorkspaceEvents() : Promise<void> {
-        let master = new CheJsonRpcMasterApi(new WebsocketClient());
+        const websocketClient = new WebsocketClient();
+        websocketClient.addListener('open', () => {
+            this.getWorkspace(this.workspace.id).then((workspace) => {
+                this.onWorkspaceStatusChanged(workspace.status ? workspace.status : '');
+            });
+        });
+        const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
+        const master = new CheJsonRpcMasterApi(websocketClient, entryPoint);
         return new Promise((resolve) => {
-            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
             master.connect(entryPoint).then(() => {
                 master.subscribeEnvironmentOutput(this.workspace.id, 
                     (message: any) => this.onEnvironmentOutput(message.text));
@@ -288,7 +295,7 @@ export class WorkspaceLoader {
                 master.subscribeWorkspaceStatus(this.workspace.id, 
                     (message: any) => {
                     if (message.error) {
-                       this.loader.error(message.error);
+                        this.loader.error(message.error);
                     } else {
                         this.onWorkspaceStatusChanged(message.status);
                     }

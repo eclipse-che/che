@@ -78,7 +78,7 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
 
-    SUPPORTED_INFRASTRUCTURES=(docker openshift)
+    SUPPORTED_INFRASTRUCTURES=(docker openshift k8s osio)
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -741,6 +741,26 @@ getExcludedGroups() {
             fi
         done
     done
+
+    #if product based on "openshift" remove "k8s" from excluded groups
+    #added as workaround for issue #10430, after fix reason should be deleted
+    if [[ "${productConfigArray[@]}" =~ "openshift" ]]; then
+    for i in ${!uncomplyingGroups[@]}; do
+            if [[ "k8s" == "${uncomplyingGroups[i]}" ]]; then
+                unset uncomplyingGroups[i]
+            fi
+        done
+    fi
+
+    #if product based on "k8s" remove "openshift" from excluded groups
+    #added as workaround for issue #10430, after fix reason should be deleted
+    if [[ "${productConfigArray[@]}" =~ "k8s" ]]; then
+    for i in ${!uncomplyingGroups[@]}; do
+            if [[ "openshift" == "${uncomplyingGroups[i]}" ]]; then
+                unset uncomplyingGroups[i]
+            fi
+        done
+    fi
 
     local excludedGroups=("${uncomplyingGroups[@]}" "${excludeParamArray[@]}")
     echo $(IFS=$','; echo "${excludedGroups[*]}")

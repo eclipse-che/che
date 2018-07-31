@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -11,18 +12,16 @@
 package org.eclipse.che.plugin.languageserver.ide.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.jsonrpc.JsonRpcErrorUtils.getPromiseError;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
@@ -262,19 +261,5 @@ public class TextDocumentServiceClient {
         .methodName(name)
         .paramsAsDto(jsonSerializable)
         .sendAndSkipResult();
-  }
-
-  private PromiseError getPromiseError(JsonRpcError jsonRpcError) {
-    return new PromiseError() {
-      @Override
-      public String getMessage() {
-        return jsonRpcError.getMessage();
-      }
-
-      @Override
-      public Throwable getCause() {
-        return new JsonRpcException(jsonRpcError.getCode(), jsonRpcError.getMessage());
-      }
-    };
   }
 }

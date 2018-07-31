@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -35,6 +36,13 @@ public interface ServerConfig {
    * makes the server non-secure.
    */
   String SECURE_SERVER_ATTRIBUTE = "secure";
+
+  /**
+   * {@link ServerConfig} and {@link Server} attribute name which can contain an comma-separated
+   * list of URI-s which are considered as non-secure on the given server and can be accessible with
+   * unauthenticated requests.
+   */
+  String UNSECURED_PATHS_ATTRIBUTE = "unsecuredPaths";
 
   /**
    * Port used by server.

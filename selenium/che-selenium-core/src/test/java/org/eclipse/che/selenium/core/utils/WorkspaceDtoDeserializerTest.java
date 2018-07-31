@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -11,6 +12,7 @@
 package org.eclipse.che.selenium.core.utils;
 
 import java.lang.reflect.Field;
+import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -24,7 +26,7 @@ public class WorkspaceDtoDeserializerTest {
     deserializer = new WorkspaceDtoDeserializer();
     Field f1 = WorkspaceDtoDeserializer.class.getDeclaredField("infrastructure");
     f1.setAccessible(true);
-    f1.set(deserializer, "supershift");
+    f1.set(deserializer, Infrastructure.OPENSHIFT);
   }
 
   @Test
@@ -36,7 +38,7 @@ public class WorkspaceDtoDeserializerTest {
   @Test(
     expectedExceptions = RuntimeException.class,
     expectedExceptionsMessageRegExp =
-        "resource /templates/workspace/supershift/some.json relative to org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer not found."
+        "resource /templates/workspace/openshift/some.json relative to org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer not found."
   )
   public void shouldFailIfResourceIsNotFound() {
     deserializer.deserializeWorkspaceTemplate("some.json");

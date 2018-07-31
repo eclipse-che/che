@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -36,6 +37,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
+import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
@@ -76,8 +78,6 @@ import org.eclipse.che.selenium.pageobject.PageObjectsInjectorImpl;
 public class CheSeleniumSuiteModule extends AbstractModule {
 
   public static final String AUXILIARY = "auxiliary";
-  public static final String DOCKER_INFRASTRUCTURE = "docker";
-  public static final String OPENSHIFT_INFRASTRUCTURE = "openshift";
 
   private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
   private static final String CHE_INFRASTRUCTURE_VARIABLE = "CHE_INFRASTRUCTURE";
@@ -132,19 +132,22 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   }
 
   private void configureInfrastructureRelatedDependencies() {
-    String cheInfrastructure = System.getenv(CHE_INFRASTRUCTURE_VARIABLE);
-    if (cheInfrastructure == null || cheInfrastructure.isEmpty()) {
-      throw new RuntimeException(
-          format(
-              "Che infrastructure should be defined by environment variable '%s'.",
-              CHE_INFRASTRUCTURE_VARIABLE));
-    } else if (cheInfrastructure.equalsIgnoreCase(DOCKER_INFRASTRUCTURE)) {
-      install(new CheSeleniumDockerModule());
-    } else if (cheInfrastructure.equalsIgnoreCase(OPENSHIFT_INFRASTRUCTURE)) {
-      install(new CheSeleniumOpenshiftModule());
-    } else {
-      throw new RuntimeException(
-          format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
+    final Infrastructure cheInfrastructure =
+        Infrastructure.valueOf(System.getenv(CHE_INFRASTRUCTURE_VARIABLE).toUpperCase());
+    switch (cheInfrastructure) {
+      case OPENSHIFT:
+      case K8S:
+      case OSIO:
+        install(new CheSeleniumOpenshiftModule());
+        break;
+
+      case DOCKER:
+        install(new CheSeleniumDockerModule());
+        break;
+
+      default:
+        throw new RuntimeException(
+            format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
     }
   }
 

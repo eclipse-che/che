@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -76,7 +77,6 @@ import org.eclipse.che.plugin.jdb.server.expression.Evaluator;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionException;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionParser;
 import org.eclipse.che.plugin.jdb.server.model.JdbLocation;
-import org.eclipse.che.plugin.jdb.server.model.JdbMethod;
 import org.eclipse.che.plugin.jdb.server.model.JdbStackFrame;
 import org.eclipse.che.plugin.jdb.server.utils.JavaDebuggerUtils;
 import org.slf4j.Logger;
@@ -405,8 +405,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
       List<JdbStackFrame> frames = new LinkedList<>();
       try {
         for (StackFrame f : t.frames()) {
-          frames.add(
-              new JdbStackFrame(f, emptyList(), emptyList(), new JdbLocation(f, new JdbMethod(f))));
+          frames.add(new JdbStackFrame(f, emptyList(), emptyList()));
         }
       } catch (IncompatibleThreadStateException ignored) {
         // Thread isn't suspended. Information isn't available.
@@ -424,6 +423,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     return threadStates;
   }
+
   /**
    * Get value of variable with specified path. Each item in path is name of variable.
    *
@@ -720,6 +720,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
     com.sun.jdi.Value result =
         evaluate(ExpressionParser.newInstance(expression), threadId, frameIndex);
     return result == null ? "null" : result.toString();
+  }
+
+  @Override
+  public Location getStackFrameLocation(long threadId, int frameIndex) throws DebuggerException {
+    StackFrame jdiStackFrame = getJdiStackFrame(threadId, frameIndex);
+    return new JdbLocation(jdiStackFrame);
   }
 
   private com.sun.jdi.Value evaluate(ExpressionParser parser, long threadId, int frameIndex)
