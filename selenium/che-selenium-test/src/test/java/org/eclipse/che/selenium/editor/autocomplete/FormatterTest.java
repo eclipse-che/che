@@ -75,7 +75,7 @@ public class FormatterTest {
           + "        view.addObject(\"num\", result);\n"
           + "        return view;\n"
           + "    }\n"
-          + "}\n";
+          + "}";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
