@@ -18,7 +18,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING_OVERVIEW;
 
-import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -48,8 +47,6 @@ import org.testng.annotations.Test;
 public class CheckErrorsWarningsTabTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CheckErrorsWarningsTabTest.class.getSimpleName(), 4);
-  private static final String PATH_TO_CLASS_IN_SPRING_PACKAGE =
-      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java";
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -63,7 +60,7 @@ public class CheckErrorsWarningsTabTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = getClass().getResource("/projects/default-spring-project");
+    URL resource = getClass().getResource("/projects/prefs-spring-project");
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
@@ -76,7 +73,6 @@ public class CheckErrorsWarningsTabTest {
   @Test
   public void errorsWarningTest() throws Exception {
     List<String> expectedErrorsWarningsList = getTextInListFromFile("errors-warnings");
-    String embedCode = getTextInStringFromFile("embed-code");
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
@@ -84,10 +80,6 @@ public class CheckErrorsWarningsTabTest {
     editor.waitActive();
     loader.waitOnClosed();
     editor.waitActive();
-    editor.deleteAllContent();
-    editor.typeTextIntoEditorWithoutDelayForSaving(embedCode);
-    loader.waitOnClosed();
-    editor.removeLineAndAllAfterIt(105);
 
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
@@ -125,9 +117,6 @@ public class CheckErrorsWarningsTabTest {
     preferences.clickOnOkBtn();
     preferences.close();
     loader.waitOnClosed();
-    projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);
-    projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
-    loader.waitOnClosed();
     editor.setCursorToLine(85);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -136,13 +125,6 @@ public class CheckErrorsWarningsTabTest {
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     WaitUtils.sleepQuietly(DEFAULT_TIMEOUT);
-  }
-
-  private String getTextInStringFromFile(String path) throws Exception {
-    URL pathInUrl = CheckErrorsWarningsTabTest.class.getResource(path);
-    List<String> textFromFile =
-        Files.readAllLines(Paths.get(pathInUrl.toURI()), Charset.forName("UTF-8"));
-    return Joiner.on('\n').join(textFromFile);
   }
 
   private List<String> getTextInListFromFile(String path) throws Exception {
