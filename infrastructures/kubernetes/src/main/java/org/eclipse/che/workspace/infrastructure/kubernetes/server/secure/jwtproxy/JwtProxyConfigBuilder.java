@@ -19,6 +19,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,52 +52,47 @@ public class JwtProxyConfigBuilder {
   }
 
   public String build() {
-    Config config = new Config();
-    JWTProxy jwtProxy = new JWTProxy();
-    config.setJwtProxy(jwtProxy);
-
-    jwtProxy.setSignerProxy(new SignerProxy());
-    jwtProxy.getSignerProxy().setEnabled(false);
-
     List<VerifierProxyConfig> proxyConfigs = new ArrayList<>();
-    jwtProxy.setVerifiedProxyConfigs(proxyConfigs);
+    Config config = new Config()
+        .withJWTProxy(new JWTProxy()
+            .withSignerProxy(new SignerProxy().withEnabled(false))
+            .withVerifiedProxyConfigs(proxyConfigs));
+
     for (VerifierProxy verifierProxy : verifierProxies) {
-      VerifierProxyConfig proxyConfig = new VerifierProxyConfig();
-
-      proxyConfig.setListenAddr(verifierProxy.listenPort);
-
       VerifierConfig verifierConfig = new VerifierConfig()
           .withAudience(workspaceId)
           .withUpstream(verifierProxy.upstream)
           .withMaxSkew("1m")
-          .withMaxTtl("8800h");
-
-      Map<String,String> keyServerOptions = new HashMap<>();
-      keyServerOptions.put("issuer", "wsmaster");
-      keyServerOptions.put("key_id", workspaceId);
-      keyServerOptions.put("public_key_path", JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_PUBLIC_KEY_FILE);
-      verifierConfig.setKeyServer(new RegistrableComponentConfig()
-          .withType("preshared")
-          .withOptions(keyServerOptions));
-
-      verifierConfig.setClaimsVerifier(new RegistrableComponentConfig().withType("static").withOptions(Collections
-          .singletonMap("iss", "wsmaster")));
-
-      verifierConfig.setNonceStorage(new RegistrableComponentConfig().withType("void"));
+          .withMaxTtl("8800h")
+          .withKeyServer(new RegistrableComponentConfig()
+              .withType("preshared")
+              .withOptions(ImmutableMap.of(
+                  "issuer", "wsmaster",
+                  "key_id", workspaceId,
+                  "public_key_path", JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_PUBLIC_KEY_FILE)))
+          .withClaimsVerifier(new RegistrableComponentConfig()
+              .withType("static")
+              .withOptions(ImmutableMap.of("iss", "wsmaster")))
+          .withNonceStorage(new RegistrableComponentConfig()
+              .withType("void"));
 
       if (!verifierProxy.excludes.isEmpty()) {
         verifierConfig.setExcludes(verifierProxy.excludes);
       }
-      proxyConfig.setVerifierConfig(verifierConfig);
+
+      VerifierProxyConfig proxyConfig = new VerifierProxyConfig()
+          .withListenAddr(verifierProxy.listenPort)
+          .withVerifierConfig(verifierConfig);
 
       proxyConfigs.add(proxyConfig);
     }
-      try {
+
+    try {
         return YAML_PARSER.writeValueAsString(config);
-      } catch (JsonProcessingException e) {
-        throw new RuntimeException("Error during creation of JWTProxy config YAML: ", e);
-      }
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Error during creation of JWTProxy config YAML: ", e);
     }
+  }
 
   private class VerifierProxy {
     private Integer listenPort;

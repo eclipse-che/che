@@ -10,10 +10,18 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Set;
 
+@JsonInclude(Include.NON_NULL)
+/**
+ * Verifier configuration
+ *
+ * @author Mykhailo Kuznietsov
+ */
 public class VerifierConfig {
   private String upstream;
 
@@ -91,6 +99,11 @@ public class VerifierConfig {
     this.nonceStorage = nonceStorage;
   }
 
+  public VerifierConfig withNonceStorage(RegistrableComponentConfig nonceStorage) {
+    this.nonceStorage = nonceStorage;
+    return this;
+  }
+
   public RegistrableComponentConfig getKeyServer() {
     return keyServer;
   }
@@ -98,6 +111,11 @@ public class VerifierConfig {
   public void setKeyServer(
       RegistrableComponentConfig keyServer) {
     this.keyServer = keyServer;
+  }
+
+  public VerifierConfig withKeyServer(RegistrableComponentConfig keyServer) {
+    this.keyServer = keyServer;
+    return this;
   }
 
   public RegistrableComponentConfig getClaimsVerifier() {
@@ -109,11 +127,21 @@ public class VerifierConfig {
     this.claimsVerifier = claimsVerifier;
   }
 
+  public VerifierConfig withClaimsVerifier(RegistrableComponentConfig claimsVerifier) {
+    this.claimsVerifier = claimsVerifier;
+    return this;
+  }
+
   public Set<String> getExcludes() {
     return excludes;
   }
 
   public void setExcludes(Set<String> excludes) {
     this.excludes = excludes;
+  }
+
+  public VerifierConfig withExcludes(Set<String> excludes) {
+    this.excludes = excludes;
+    return this;
   }
 }

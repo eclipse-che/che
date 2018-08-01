@@ -25,4 +25,9 @@ public class Config {
         JWTProxy jwtProxy) {
         this.jwtProxy = jwtProxy;
     }
+
+    public Config withJWTProxy(JWTProxy jwtProxy) {
+        this.jwtProxy = jwtProxy;
+        return this;
+    }
 }

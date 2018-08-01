@@ -22,5 +22,8 @@ public class SignerProxy {
     this.enabled = enabled;
   }
 
-
+  public SignerProxy withEnabled(boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
 }

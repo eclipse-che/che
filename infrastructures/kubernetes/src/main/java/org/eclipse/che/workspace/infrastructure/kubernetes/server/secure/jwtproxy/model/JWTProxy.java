@@ -28,11 +28,21 @@ public class JWTProxy {
     this.verifiedProxyConfigs = verifiedProxyConfigs;
   }
 
+  public JWTProxy withVerifiedProxyConfigs(List<VerifierProxyConfig> verifiedProxyConfigs) {
+    this.verifiedProxyConfigs = verifiedProxyConfigs;
+    return this;
+  }
+
   public SignerProxy getSignerProxy() {
     return signerProxy;
   }
 
   public void setSignerProxy(SignerProxy signerProxy) {
     this.signerProxy = signerProxy;
+  }
+
+  public JWTProxy withSignerProxy(SignerProxy signerProxy) {
+    this.signerProxy = signerProxy;
+    return this;
   }
 }
