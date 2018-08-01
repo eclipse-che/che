@@ -57,7 +57,7 @@ public class ThreadDumpTest1 {
     debugger = new JavaDebugger("localhost", parseInt(getProperty("debug.port")), events::add);
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/ThreadDumpTest1.java", 26, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/ThreadDumpTest1.java", 27, false, -1, "/test", null, -1);
     BreakpointImpl breakpoint = new BreakpointImpl(location);
 
     debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
@@ -100,7 +100,7 @@ public class ThreadDumpTest1 {
     assertTrue(stackFrameDump.getFields().isEmpty());
 
     Location location = stackFrameDump.getLocation();
-    assertEquals(location.getLineNumber(), 26);
+    assertEquals(location.getLineNumber(), 27);
     assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest1");
     assertEquals(location.getExternalResourceId(), 0);
     assertNull(location.getResourceProjectPath());

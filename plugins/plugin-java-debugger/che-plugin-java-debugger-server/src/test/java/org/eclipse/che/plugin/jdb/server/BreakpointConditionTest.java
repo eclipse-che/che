@@ -45,7 +45,7 @@ public class BreakpointConditionTest {
     ProjectApiUtils.ensure();
 
     Location location =
-        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 17, "/test");
+        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 18, "/test");
 
     events = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
@@ -64,7 +64,7 @@ public class BreakpointConditionTest {
   public void shouldStopByHitCount() throws Exception {
     debugger.addBreakpoint(
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 19, "/test"),
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 20, "/test"),
             true,
             new BreakpointConfigurationImpl(3)));
 
@@ -84,7 +84,7 @@ public class BreakpointConditionTest {
   public void shouldStopByCondition() throws Exception {
     Breakpoint breakpoint =
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 24, "/test"),
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 25, "/test"),
             true,
             new BreakpointConfigurationImpl("i==5"));
 
