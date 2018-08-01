@@ -25,16 +25,21 @@ public class ChainedTokenExtractor implements RequestTokenExtractor {
 
   private final QueryRequestTokenExtractor queryRequestTokenExtractor;
 
+  private final CookieRequestTokenExtractor cookieRequestTokenExtractor;
+
   public ChainedTokenExtractor() {
     headerRequestTokenExtractor = new HeaderRequestTokenExtractor();
     queryRequestTokenExtractor = new QueryRequestTokenExtractor();
+    cookieRequestTokenExtractor = new CookieRequestTokenExtractor();
   }
 
   @Override
   public String getToken(HttpServletRequest req) {
     String token;
     if ((token = queryRequestTokenExtractor.getToken(req)) == null) {
-      token = headerRequestTokenExtractor.getToken(req);
+      if ((token = headerRequestTokenExtractor.getToken(req)) == null) {
+        token = cookieRequestTokenExtractor.getToken(req);
+      }
     }
     return token;
   }
