@@ -49,7 +49,7 @@ public class SuspendPolicyTest {
     ProjectApiUtils.ensure();
 
     Location location =
-        new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 15, "/test");
+        new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 16, "/test");
 
     events = new ArrayBlockingQueue<>(10);
     debugger =
@@ -76,7 +76,7 @@ public class SuspendPolicyTest {
   public void shouldReturnStackFrameDumpOnlyForSuspendedThread() throws Exception {
     debugger.addBreakpoint(
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 16, "/test"),
+            new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 17, "/test"),
             true,
             new BreakpointConfigurationImpl(SuspendPolicy.THREAD)));
 

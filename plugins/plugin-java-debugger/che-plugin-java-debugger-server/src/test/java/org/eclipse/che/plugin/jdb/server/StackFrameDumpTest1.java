@@ -57,7 +57,7 @@ public class StackFrameDumpTest1 {
 
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/StackFrameDumpTest1.java", 25, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/StackFrameDumpTest1.java", 26, false, -1, "/test", null, -1);
     debugger = startJavaDebugger(new BreakpointImpl(location), callback);
 
     ensureSuspendAtDesiredLocation(location, callback);
@@ -88,7 +88,7 @@ public class StackFrameDumpTest1 {
     StackFrameDumpDto stackFrame = asDto(debugger.getStackFrameDump(threadId, 0));
 
     LocationDto location = stackFrame.getLocation();
-    assertEquals(location.getLineNumber(), 25);
+    assertEquals(location.getLineNumber(), 26);
     assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
@@ -134,7 +134,7 @@ public class StackFrameDumpTest1 {
     StackFrameDumpDto stackFrame = asDto(debugger.getStackFrameDump(threadId, 1));
 
     LocationDto location = stackFrame.getLocation();
-    assertEquals(location.getLineNumber(), 21);
+    assertEquals(location.getLineNumber(), 22);
     assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
@@ -188,7 +188,7 @@ public class StackFrameDumpTest1 {
     StackFrameDumpDto stackFrame = asDto(debugger.getStackFrameDump(threadId, 2));
 
     LocationDto location = stackFrame.getLocation();
-    assertEquals(location.getLineNumber(), 16);
+    assertEquals(location.getLineNumber(), 17);
     assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
