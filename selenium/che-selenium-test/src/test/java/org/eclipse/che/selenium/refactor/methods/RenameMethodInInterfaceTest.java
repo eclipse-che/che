@@ -19,8 +19,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Random;
-
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -44,7 +42,8 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class RenameMethodInInterfaceTest {
   private static final Logger LOG = LoggerFactory.getLogger(RenameMethodInInterfaceTest.class);
-  private static final String nameOfProject = NameGenerator.generate(RenameMethodInInterfaceTest.class.getSimpleName(),3);
+  private static final String nameOfProject =
+      NameGenerator.generate(RenameMethodInInterfaceTest.class.getSimpleName(), 3);
   private static final String pathToPackageInChePrefix =
       nameOfProject + "/src" + "/main" + "/java" + "/renameMethodsInInterface";
   private static final String expectedWarnMessForFail5 =
