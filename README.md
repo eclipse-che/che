@@ -49,7 +49,7 @@ The next generation of Eclipse Che is going to be built from multiple components
 * **Weekly Meetings:** Join us in our [Che community meeting](https://github.com/eclipse/che/wiki/Che-Dev-Meetings) every second monday.
 
 ### License
-Che is open sourced under the Eclipse Public License 1.0.
+Che is open sourced under the Eclipse Public License 2.0.
 
 ### Roadmap and Community Meetings
 We publish the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in the open and welcome anyone to join our [community meetings](https://github.com/eclipse/che/wiki/Che-Dev-Meetings). We love to hear from users and developers!
