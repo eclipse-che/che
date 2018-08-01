@@ -75,7 +75,7 @@ public class FileStructureCodeEditorTest {
     fileStructure.waitFileStructureFormIsClosed();
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("getInstance");
-    editor.waitSpecifiedValueForLineAndChar(40, 27);
+    editor.waitSpecifiedValueForLineAndChar(41, 27);
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
@@ -83,7 +83,7 @@ public class FileStructureCodeEditorTest {
     fileStructure.waitFileStructureFormIsClosed();
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("INSTANCE");
-    editor.waitSpecifiedValueForLineAndChar(24, 38);
+    editor.waitSpecifiedValueForLineAndChar(25, 38);
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
@@ -91,10 +91,10 @@ public class FileStructureCodeEditorTest {
     fileStructure.waitFileStructureFormIsClosed();
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("getId");
-    editor.waitSpecifiedValueForLineAndChar(36, 23);
+    editor.waitSpecifiedValueForLineAndChar(37, 23);
 
     // check new elements in the 'file structure' form
-    editor.setCursorToLine(19);
+    editor.setCursorToLine(20);
     editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(NEW_CONTENT);

@@ -83,7 +83,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 17);
+    editor.goToCursorPositionVisible(15, 17);
     editor.launchRefactorForm();
     refactor.waitRenameParametersFormIsOpen();
     refactor.typeAndWaitNewName("j");
@@ -99,12 +99,12 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 15);
+    editor.goToCursorPositionVisible(15, 15);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
-    editor.goToCursorPositionVisible(14, 23);
+    editor.goToCursorPositionVisible(15, 23);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j1");
     loader.waitOnClosed();
@@ -119,7 +119,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 17);
+    editor.goToCursorPositionVisible(15, 17);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -133,7 +133,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 17);
+    editor.goToCursorPositionVisible(15, 17);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -147,7 +147,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 23);
+    editor.goToCursorPositionVisible(15, 23);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -161,7 +161,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 15);
+    editor.goToCursorPositionVisible(15, 15);
     editor.launchRefactorForm();
     refactor.waitRenameParametersFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
@@ -171,11 +171,11 @@ public class RenameParametersTest {
     loader.waitOnClosed();
     refactor.waitRenameParametersFormIsClosed();
     editor.waitActive();
-    editor.goToCursorPositionVisible(14, 23);
+    editor.goToCursorPositionVisible(15, 23);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("i");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitMarkerInvisibility(ERROR, 14);
+    editor.waitMarkerInvisibility(ERROR, 15);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
@@ -186,7 +186,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 20);
+    editor.goToCursorPositionVisible(15, 20);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -200,7 +200,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 17);
+    editor.goToCursorPositionVisible(15, 17);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -214,7 +214,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(15, 16);
+    editor.goToCursorPositionVisible(16, 16);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -228,7 +228,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 18);
+    editor.goToCursorPositionVisible(15, 18);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
@@ -245,7 +245,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(14, 30);
+    editor.goToCursorPositionVisible(15, 30);
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("kk");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -259,7 +259,7 @@ public class RenameParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.goToCursorPositionVisible(15, 12);
+    editor.goToCursorPositionVisible(16, 12);
     editor.launchRefactorForm();
     refactor.waitRenameParametersFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(false);

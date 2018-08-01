@@ -110,23 +110,23 @@ public class RenameStaticMethodsTest {
 
   @Test
   public void test0() {
-    doRefactoringWithKeys(13, 14, "k");
+    doRefactoringWithKeys(14, 14, "k");
   }
 
   @Test
   public void test2() {
-    doRefactoringWithKeys(13, 17, "k");
+    doRefactoringWithKeys(14, 17, "k");
   }
 
   @Test
   public void test8() {
-    doRefactorByWizard(13, 17, "k");
+    doRefactorByWizard(14, 17, "k");
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
   @Test
   public void testFail5() {
-    doRefactorByWizardWithExpectedWarningMessage(14, 24, "k", testsFail5ErrorMess);
+    doRefactorByWizardWithExpectedWarningMessage(15, 24, "k", testsFail5ErrorMess);
   }
 
   @Test
@@ -134,7 +134,7 @@ public class RenameStaticMethodsTest {
     contentFromOutB = getTextFromFile(resourcesOutB);
 
     String contentFromOutA = getTextFromFile(resourceOutA);
-    doRefactorByWizard(15, 23, "fred");
+    doRefactorByWizard(16, 23, "fred");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/B.java");
     editor.waitTextIntoEditor(contentFromOutB);

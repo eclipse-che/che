@@ -99,9 +99,9 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
 
   private void checkOpenDeclaration() {
     editor.waitActive();
-    editor.goToCursorPositionVisible(35, 21);
+    editor.goToCursorPositionVisible(36, 21);
     editor.waitActive();
-    editor.waitSpecifiedValueForLineAndChar(35, 21);
+    editor.waitSpecifiedValueForLineAndChar(36, 21);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Test");
     String expectedContent =
@@ -122,9 +122,9 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   }
 
   private void checkAutocompletion() {
-    editor.goToCursorPositionVisible(29, 25);
+    editor.goToCursorPositionVisible(30, 25);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitSpecifiedValueForLineAndChar(30, 9);
+    editor.waitSpecifiedValueForLineAndChar(31, 9);
     editor.typeTextIntoEditor("Test");
     editor.launchAutocomplete();
     String[] autocompleteItems = {
@@ -143,7 +143,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   }
 
   private void checkJavadoc() {
-    editor.goToCursorPositionVisible(28, 21);
+    editor.goToCursorPositionVisible(29, 21);
     editor.openJavaDocPopUp();
     String expectedTextInJavaDoc =
         "The String class represents character strings. "

@@ -48,24 +48,24 @@ public class FindUsagesBaseOperationTest {
           + "- src/main/java\n"
           + "AppController\n"
           + "handleRequest(HttpServletRequest, HttpServletResponse)\n"
-          + "29:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
-          + "29:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
-          + "33:    else if (numGuessByUser != null) {";
+          + "30:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
+          + "30:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
+          + "34:    else if (numGuessByUser != null) {";
 
   private static final String EXPECTED_TEXT_1 =
       "org.eclipse.qa.examples\n"
           + "- src/main/java\n"
           + "AppController\n"
           + "handleRequest(HttpServletRequest, HttpServletResponse)\n"
-          + "29:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
-          + "29:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
-          + "33:    else if (numGuessByUser != null) {";
+          + "30:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
+          + "30:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
+          + "34:    else if (numGuessByUser != null) {";
 
   private static final String EXPECTED_TEXT_2 =
       "handleRequest(HttpServletRequest, HttpServletResponse)\n"
-          + "29:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
-          + "29:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
-          + "33:    else if (numGuessByUser != null) {";
+          + "30:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
+          + "30:    if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
+          + "34:    else if (numGuessByUser != null) {";
 
   @Inject private FindUsages findUsages;
   @Inject private TestWorkspace workspace;
@@ -94,7 +94,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
-    editor.goToCursorPositionVisible(26, 17);
+    editor.goToCursorPositionVisible(27, 17);
     menu.runCommand(ASSISTANT, FIND_USAGES);
     loader.waitOnClosed();
     findUsages.waitFindUsagesPanelIsOpen();
@@ -107,7 +107,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
-    editor.goToCursorPositionVisible(26, 17);
+    editor.goToCursorPositionVisible(27, 17);
     menu.runCommand(ASSISTANT, FIND_USAGES);
     loader.waitOnClosed();
     findUsages.waitFindUsagesPanelIsOpen();
@@ -181,9 +181,9 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
 
     // Check the found items in the editor
-    findUsages.selectHighlightedItemInFindUsagesByDoubleClick(29);
+    findUsages.selectHighlightedItemInFindUsagesByDoubleClick(30);
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
-    editor.expectedNumberOfActiveLine(29);
+    editor.expectedNumberOfActiveLine(30);
     editor.waitTextElementsActiveLine("numGuessByUser");
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
@@ -192,7 +192,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
-    editor.expectedNumberOfActiveLine(33);
+    editor.expectedNumberOfActiveLine(34);
     editor.waitTextElementsActiveLine("numGuessByUser");
   }
 }

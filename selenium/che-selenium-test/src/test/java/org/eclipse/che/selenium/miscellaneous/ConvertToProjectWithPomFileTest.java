@@ -132,7 +132,7 @@ public class ConvertToProjectWithPomFileTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
     editor.waitTabIsPresent("qa-spring-sample");
-    editor.goToCursorPositionVisible(18, 17);
+    editor.goToCursorPositionVisible(19, 17);
     editor.typeTextIntoEditor("new-");
 
     // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed

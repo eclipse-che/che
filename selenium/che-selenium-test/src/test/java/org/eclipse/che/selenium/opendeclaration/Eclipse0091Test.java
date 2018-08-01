@@ -55,9 +55,9 @@ public class Eclipse0091Test {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test/Test.java");
     editor.waitActive();
-    editor.goToCursorPositionVisible(13, 5);
+    editor.goToCursorPositionVisible(14, 5);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("MyAnnot");
-    editor.waitSpecifiedValueForLineAndChar(13, 19);
+    editor.waitSpecifiedValueForLineAndChar(14, 19);
   }
 }

@@ -11,5 +11,6 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
 echo sayHello("man");
 ?>

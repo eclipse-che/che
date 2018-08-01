@@ -56,10 +56,10 @@ public class Eclipse0093Test {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples", "Test.java");
-    editor.waitMarkerInPosition(WARNING, 12);
-    editor.goToCursorPositionVisible(17, 26);
+    editor.waitMarkerInPosition(WARNING, 13);
+    editor.goToCursorPositionVisible(18, 26);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("MyEnum");
-    editor.waitSpecifiedValueForLineAndChar(14, 3);
+    editor.waitSpecifiedValueForLineAndChar(15, 3);
   }
 }

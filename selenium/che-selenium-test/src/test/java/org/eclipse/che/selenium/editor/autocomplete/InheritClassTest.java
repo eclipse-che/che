@@ -118,7 +118,7 @@ public class InheritClassTest {
 
     editor.selectTabByName("AppController");
     editor.waitActive();
-    editor.setCursorToLine(32);
+    editor.setCursorToLine(33);
     editor.typeTextIntoEditor("Code");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");

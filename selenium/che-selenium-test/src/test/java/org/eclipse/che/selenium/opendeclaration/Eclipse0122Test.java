@@ -56,8 +56,8 @@ public class Eclipse0122Test {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
     editor.waitActive();
-    editor.goToCursorPositionVisible(15, 24);
+    editor.goToCursorPositionVisible(16, 24);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitSpecifiedValueForLineAndChar(14, 16);
+    editor.waitSpecifiedValueForLineAndChar(15, 16);
   }
 }

@@ -85,12 +85,12 @@ public class ShowHintsCommandTest {
     // check the 'show hints' to all parameters on the overloaded method
     editor.selectTabByName("AppController");
     editor.waitActive();
-    editor.setCursorToLine(32);
+    editor.setCursorToLine(33);
     editor.typeTextIntoEditor(Keys.TAB.toString());
     editor.typeTextIntoEditor("runCommand();");
     editor.waitTextIntoEditor("runCommand();");
-    editor.waitMarkerInPosition(MarkerLocator.ERROR, 33);
-    editor.goToCursorPositionVisible(32, 5);
+    editor.waitMarkerInPosition(MarkerLocator.ERROR, 34);
+    editor.goToCursorPositionVisible(33, 5);
     editor.callShowHintsPopUp();
     editor.waitShowHintsPopUpOpened();
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_1);
@@ -99,12 +99,12 @@ public class ShowHintsCommandTest {
 
     // check the 'show hints' to all parameters on the overloaded constructor
     editor.waitActive();
-    editor.setCursorToLine(27);
+    editor.setCursorToLine(28);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.TAB.toString());
     editor.typeTextIntoEditor(CONSTRUCTOR);
     editor.waitTextIntoEditor(CONSTRUCTOR);
-    editor.goToCursorPositionVisible(28, 41);
+    editor.goToCursorPositionVisible(29, 41);
     editor.callShowHintsPopUp();
     editor.waitShowHintsPopUpOpened();
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_2);

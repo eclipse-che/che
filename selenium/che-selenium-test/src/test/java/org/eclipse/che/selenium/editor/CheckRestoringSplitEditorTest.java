@@ -50,9 +50,9 @@ public class CheckRestoringSplitEditorTest {
   private final String PROJECT_NAME = NameGenerator.generate("project", 4);;
   private final String PATH_TO_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + javaClassName;
-  private Pair<Integer, Integer> cursorPositionForJavaFile = new Pair<>(12, 1);
+  private Pair<Integer, Integer> cursorPositionForJavaFile = new Pair<>(13, 1);
   private Pair<Integer, Integer> cursorPositionForReadMeFile = new Pair<>(1, 10);
-  private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(31, 1);
+  private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(32, 1);
   private List<String> expectedTextFromEditor;
 
   @Inject private TestWorkspace workspace;

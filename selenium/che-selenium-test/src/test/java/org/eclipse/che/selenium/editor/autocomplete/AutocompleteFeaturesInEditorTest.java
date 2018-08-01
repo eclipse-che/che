@@ -154,7 +154,7 @@ public class AutocompleteFeaturesInEditorTest {
     editor.waitActive();
     loader.waitOnClosed();
     reparseEditorCode();
-    editor.setCursorToLine(37);
+    editor.setCursorToLine(38);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.launchAutocompleteAndWaitContainer();
@@ -184,12 +184,12 @@ public class AutocompleteFeaturesInEditorTest {
 
   // need for check ready - state the ide editor
   private void reparseEditorCode() {
-    editor.setCursorToLine(36);
+    editor.setCursorToLine(37);
     editor.typeTextIntoEditor("a;");
-    editor.waitMarkerInPosition(ERROR, 36);
+    editor.waitMarkerInPosition(ERROR, 37);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-    editor.waitMarkerInvisibility(ERROR, 36);
+    editor.waitMarkerInvisibility(ERROR, 37);
   }
 }

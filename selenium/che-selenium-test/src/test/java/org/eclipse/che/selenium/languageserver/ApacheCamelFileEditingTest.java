@@ -70,7 +70,7 @@ public class ApacheCamelFileEditingTest {
   public void checkAutocompleteFeature() {
     editor.selectTabByName(CAMEL_FILE_NAME);
 
-    editor.goToPosition(49, 21);
+    editor.goToPosition(50, 21);
 
     editor.launchAutocomplete();
     editor.waitTextIntoEditor("timer:timerName");

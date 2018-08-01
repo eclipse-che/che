@@ -82,10 +82,10 @@ public class ClangFileEditingTest {
     editor.selectTabByName(CPP_FILE_NAME);
 
     // check error marker message
-    editor.goToCursorPositionVisible(13, 1);
-    editor.waitMarkerInvisibility(ERROR, 13);
+    editor.goToCursorPositionVisible(14, 1);
+    editor.waitMarkerInvisibility(ERROR, 14);
     editor.typeTextIntoEditor("c");
-    editor.waitMarkerInPosition(ERROR, 13);
+    editor.waitMarkerInPosition(ERROR, 14);
 
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
@@ -95,7 +95,7 @@ public class ClangFileEditingTest {
     editor.selectTabByName(CPP_FILE_NAME);
 
     // check contents of autocomplete container
-    editor.goToPosition(15, 1);
+    editor.goToPosition(16, 1);
     editor.deleteCurrentLineAndInsertNew();
     editor.typeTextIntoEditor("std::cou");
     editor.launchAutocompleteAndWaitContainer();
@@ -109,13 +109,13 @@ public class ClangFileEditingTest {
     editor.waitActive();
 
     // check Find Definition feature from Assistant menu
-    editor.goToPosition(20, 20);
+    editor.goToPosition(21, 20);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitTabIsPresent(H_FILE_NAME);
     editor.clickOnCloseFileIcon(H_FILE_NAME);
 
     // check Find Definition feature by pressing F4
-    editor.goToPosition(20, 20);
+    editor.goToPosition(21, 20);
     editor.typeTextIntoEditor(F4.toString());
     editor.waitTabIsPresent(H_FILE_NAME);
   }

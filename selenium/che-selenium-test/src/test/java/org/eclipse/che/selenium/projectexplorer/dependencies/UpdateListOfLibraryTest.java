@@ -146,7 +146,7 @@ public class UpdateListOfLibraryTest {
   private void addNewDependency() {
     editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToLine(43);
+    editor.setCursorToLine(44);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
@@ -157,7 +157,7 @@ public class UpdateListOfLibraryTest {
 
   private void deleteDependency() {
     editor.waitActive();
-    editor.setCursorToLine(27);
+    editor.setCursorToLine(28);
     seleniumWebDriverHelper
         .getAction()
         .keyDown(SHIFT)

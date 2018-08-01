@@ -72,18 +72,18 @@ public class ImplementationBaseOperationsTest {
     expandTReeProjectAndOpenClass(JAVA_FILE_NAME);
 
     // check that the 'Implementation' container is not present
-    editor.setCursorToLine(12);
+    editor.setCursorToLine(13);
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitImplementationFormIsClosed(JAVA_FILE_NAME);
 
     // check the 'implementation' for simple java class
-    editor.setCursorToLine(20);
+    editor.setCursorToLine(21);
     editor.clickOnSelectedElementInEditor(JAVA_FILE_NAME);
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitImplementationFormIsOpen(JAVA_FILE_NAME);
     editor.cancelFormInEditorByEscape();
     editor.waitImplementationFormIsClosed(JAVA_FILE_NAME);
-    editor.setCursorToLine(20);
+    editor.setCursorToLine(21);
     editor.clickOnSelectedElementInEditor(JAVA_FILE_NAME);
     editor.launchImplementationFormByKeyboard();
     editor.waitImplementationFormIsOpen(JAVA_FILE_NAME);
@@ -91,42 +91,42 @@ public class ImplementationBaseOperationsTest {
 
     // check the 'implementation' for abstract class
     projectExplorer.openItemByVisibleNameInExplorer(ABSTRACT_CLASS_NAME + ".java");
-    editor.goToCursorPositionVisible(15, 25);
+    editor.goToCursorPositionVisible(16, 25);
     editor.waitActive();
     editor.waitTextElementsActiveLine("Empl");
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeFixedSalary");
-    editor.expectedNumberOfActiveLine(13);
+    editor.expectedNumberOfActiveLine(14);
     editor.waitTextElementsActiveLine("EmployeeFixedSalary extends Empl");
     editor.clickOnCloseFileIcon("EmployeeFixedSalary");
     editor.waitActiveTabFileName(ABSTRACT_CLASS_NAME);
     editor.selectTabByName(ABSTRACT_CLASS_NAME);
-    editor.setCursorToLine(22);
+    editor.setCursorToLine(23);
     editor.clickOnSelectedElementInEditor("toString");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitActiveTabFileName("EmployeeFixedSalary");
-    editor.expectedNumberOfActiveLine(38);
+    editor.expectedNumberOfActiveLine(39);
     editor.waitTextElementsActiveLine("toString");
 
     // check the 'implementations' for interface
     projectExplorer.openItemByVisibleNameInExplorer(INTERFACE_NAME + ".java");
-    editor.goToCursorPositionVisible(15, 20);
+    editor.goToCursorPositionVisible(16, 20);
     editor.waitTextElementsActiveLine("Employee");
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeHourlyWages");
-    editor.expectedNumberOfActiveLine(14);
+    editor.expectedNumberOfActiveLine(15);
     editor.waitTextElementsActiveLine("EmployeeHourlyWages implements Employee");
     editor.clickOnCloseFileIcon("EmployeeHourlyWages");
     editor.waitActiveTabFileName(INTERFACE_NAME);
     editor.selectTabByName(INTERFACE_NAME);
-    editor.setCursorToLine(18);
+    editor.setCursorToLine(19);
     editor.clickOnSelectedElementInEditor("toString");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitActiveTabFileName("EmployeeHourlyWages");
-    editor.expectedNumberOfActiveLine(58);
+    editor.expectedNumberOfActiveLine(59);
     editor.waitTextElementsActiveLine("toString");
     editor.selectTabByName(INTERFACE_NAME);
-    editor.setCursorToLine(15);
+    editor.setCursorToLine(16);
     editor.waitTextElementsActiveLine("interface Employee extends Serializable");
     editor.clickOnSelectedElementInEditor("Serializable");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
@@ -135,7 +135,7 @@ public class ImplementationBaseOperationsTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitImplementationFormIsClosed("Serializable");
     editor.waitActiveTabFileName(ABSTRACT_CLASS_NAME);
-    editor.setCursorToLine(15);
+    editor.setCursorToLine(16);
     editor.waitTextElementsActiveLine("class Empl implements Serializable");
     editor.selectTabByName(INTERFACE_NAME);
     editor.launchImplementationFormByKeyboard();

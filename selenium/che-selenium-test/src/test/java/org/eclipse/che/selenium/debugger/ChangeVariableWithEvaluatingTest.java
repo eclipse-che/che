@@ -117,8 +117,8 @@ public class ChangeVariableWithEvaluatingTest {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG_COMMAND_NAME);
     consoles.waitExpectedTextIntoConsole(" Server startup in");
-    editor.setCursorToLine(34);
-    editor.setInactiveBreakpoint(34);
+    editor.setCursorToLine(35);
+    editor.setInactiveBreakpoint(35);
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
@@ -134,7 +134,7 @@ public class ChangeVariableWithEvaluatingTest {
                 .replace("tcp", "http")
             + "/spring/guess";
     String requestMess = "numGuess=11&submit=Ok";
-    editor.waitActiveBreakpoint(34);
+    editor.waitActiveBreakpoint(35);
     CompletableFuture<String> requestToApplication =
         debuggerUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
