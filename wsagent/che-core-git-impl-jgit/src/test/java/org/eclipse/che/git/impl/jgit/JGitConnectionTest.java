@@ -48,7 +48,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.SshTransport;
-import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.TransportHttp;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.mockito.ArgumentCaptor;
@@ -192,7 +191,8 @@ public class JGitConnectionTest {
      * with  help real children {@link TransportHttp}, which returns real not null
      * value. And then we can create mock {@link TransportHttp}.
      */
-    mock(Transport.class);
+    org.eclipse.jgit.transport.Transport transport =
+        mock(org.eclipse.jgit.transport.Transport.class);
     TransportHttp transportHttp = mock(TransportHttp.class);
     when(sshKeyProvider.getPrivateKey(anyString())).thenReturn(new byte[0]);
     doAnswer(
