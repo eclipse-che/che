@@ -88,8 +88,8 @@ public class ConditionalBreakpointsTest {
   @Test
   public void shouldNavigateToBreakpoint() throws Exception {
     projectExplorer.openItemByPath(PROJECT + "/src/HelloWorld.java");
-    editor.setBreakpoint(14);
-    editor.waitInactiveBreakpoint(14);
+    editor.setBreakpoint(15);
+    editor.waitInactiveBreakpoint(15);
 
     projectExplorer.openItemByVisibleNameInExplorer("External Libraries");
     projectExplorer.openItemByVisibleNameInExplorer("rt.jar");
@@ -97,15 +97,15 @@ public class ConditionalBreakpointsTest {
     projectExplorer.openItemByVisibleNameInExplorer("oracle");
     projectExplorer.openItemByVisibleNameInExplorer("net");
     projectExplorer.openItemByVisibleNameInExplorer("Sdp");
-    editor.setBreakpoint(6);
-    editor.waitInactiveBreakpoint(6);
+    editor.setBreakpoint(7);
+    editor.waitInactiveBreakpoint(7);
 
     editor.closeAllTabs();
 
-    debugPanel.navigateToBreakpoint("com.oracle.net.Sdp", 6);
+    debugPanel.navigateToBreakpoint("com.oracle.net.Sdp", 7);
     editor.waitActiveTabFileName("Sdp");
 
-    debugPanel.navigateToBreakpoint("HelloWorld.java", 14);
+    debugPanel.navigateToBreakpoint("HelloWorld.java", 15);
     editor.waitActiveTabFileName("HelloWorld");
 
     editor.closeAllTabs();
@@ -114,52 +114,52 @@ public class ConditionalBreakpointsTest {
   @Test(priority = 1)
   public void shouldAddConditionalBreakpoint() throws Exception {
     projectExplorer.openItemByPath(PROJECT + "/src/HelloWorld.java");
-    editor.setBreakpoint(15);
-    editor.waitInactiveBreakpoint(15);
+    editor.setBreakpoint(16);
+    editor.waitInactiveBreakpoint(16);
 
     debugPanel.configureBreakpoint(
-        "HelloWorld.java", 15, new BreakpointConfigurationImpl("i == 3"));
-    editor.waitConditionalBreakpoint(15, false);
+        "HelloWorld.java", 16, new BreakpointConfigurationImpl("i == 3"));
+    editor.waitConditionalBreakpoint(16, false);
 
     projectExplorer.waitAndSelectItem(PROJECT);
 
     startDebug();
 
-    editor.waitConditionalBreakpoint(15, true);
+    editor.waitConditionalBreakpoint(16, true);
 
     String filePath = "/" + PROJECT + "/src/HelloWorld.java";
-    debugPanel.waitBreakpointState(filePath, 15, DebugPanel.BreakpointState.ACTIVE, true);
+    debugPanel.waitBreakpointState(filePath, 16, DebugPanel.BreakpointState.ACTIVE, true);
     debugPanel.clickOnButton(RESUME_BTN_ID);
     debugPanel.waitTextInVariablesPanel("i=3");
   }
 
   @Test(priority = 2)
   public void shouldDisableBreakpoint() throws Exception {
-    editor.setBreakpoint(18);
-    editor.waitActiveBreakpoint(18);
-    debugPanel.disableBreakpoint("HelloWorld.java", 18);
-    editor.waitDisabledBreakpoint(18);
-
     editor.setBreakpoint(19);
     editor.waitActiveBreakpoint(19);
+    debugPanel.disableBreakpoint("HelloWorld.java", 19);
+    editor.waitDisabledBreakpoint(19);
+
+    editor.setBreakpoint(20);
+    editor.waitActiveBreakpoint(20);
 
     debugPanel.clickOnButton(RESUME_BTN_ID);
     debugPanel.waitDebugHighlightedText("System.out.println(j);");
 
     String filePath = "/" + PROJECT + "/src/HelloWorld.java";
-    debugPanel.waitBreakpointState(filePath, 14, DebugPanel.BreakpointState.ACTIVE, false);
-    debugPanel.waitBreakpointState(filePath, 15, DebugPanel.BreakpointState.ACTIVE, true);
-    debugPanel.waitBreakpointState(filePath, 18, DebugPanel.BreakpointState.DISABLED, false);
-    debugPanel.waitBreakpointState(filePath, 19, DebugPanel.BreakpointState.ACTIVE, false);
+    debugPanel.waitBreakpointState(filePath, 15, DebugPanel.BreakpointState.ACTIVE, false);
+    debugPanel.waitBreakpointState(filePath, 16, DebugPanel.BreakpointState.ACTIVE, true);
+    debugPanel.waitBreakpointState(filePath, 19, DebugPanel.BreakpointState.DISABLED, false);
+    debugPanel.waitBreakpointState(filePath, 20, DebugPanel.BreakpointState.ACTIVE, false);
     debugPanel.waitBreakpointState(
-        "com.oracle.net.Sdp", 6, DebugPanel.BreakpointState.INACTIVE, false);
+        "com.oracle.net.Sdp", 7, DebugPanel.BreakpointState.INACTIVE, false);
   }
 
   @Test(priority = 3)
   public void shouldDeleteBreakpoint() throws Exception {
     List<String> breakpoints = debugPanel.getAllBreakpoints();
 
-    debugPanel.deleteBreakpoint("HelloWorld.java", 19);
+    debugPanel.deleteBreakpoint("HelloWorld.java", 20);
 
     assertEquals(debugPanel.getAllBreakpoints().size(), breakpoints.size() - 1);
   }
@@ -168,14 +168,14 @@ public class ConditionalBreakpointsTest {
   public void shouldCheckBreakpointWhenDebuggerDisconnected() throws Exception {
     debugPanel.clickOnButton(BTN_DISCONNECT);
 
-    editor.waitInactiveBreakpoint(14);
-    editor.waitConditionalBreakpoint(15, false);
-    editor.waitDisabledBreakpoint(18);
+    editor.waitInactiveBreakpoint(15);
+    editor.waitConditionalBreakpoint(16, false);
+    editor.waitDisabledBreakpoint(19);
 
     String filePath = "/" + PROJECT + "/src/HelloWorld.java";
-    debugPanel.waitBreakpointState(filePath, 14, DebugPanel.BreakpointState.INACTIVE, false);
-    debugPanel.waitBreakpointState(filePath, 15, DebugPanel.BreakpointState.INACTIVE, true);
-    debugPanel.waitBreakpointState(filePath, 18, DebugPanel.BreakpointState.DISABLED, false);
+    debugPanel.waitBreakpointState(filePath, 15, DebugPanel.BreakpointState.INACTIVE, false);
+    debugPanel.waitBreakpointState(filePath, 16, DebugPanel.BreakpointState.INACTIVE, true);
+    debugPanel.waitBreakpointState(filePath, 19, DebugPanel.BreakpointState.DISABLED, false);
   }
 
   private void startDebug() {
