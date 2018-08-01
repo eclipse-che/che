@@ -9,11 +9,11 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
- /// <reference path="../src/custom.d.ts" />
+/// <reference path="../src/custom.d.ts" />
 
 'use strict';
 
-import {WorkspaceLoader} from '../src/index';
+import { WorkspaceLoader } from '../src/index';
 import { Loader } from '../src/loader/loader';
 
 describe('Workspace Loader', () => {
@@ -28,6 +28,7 @@ describe('Workspace Loader', () => {
                     <div id="workspace-loader-progress-bar"></div>
                 </div>
             </div>
+            <div id="workspace-loader-reload">Press F5 or click <a href="#">here</a> to try again.</div>
             </div>
                 <div id="workspace-console">
                 <div id="workspace-console-container"></div>
@@ -64,27 +65,27 @@ describe('Workspace Loader', () => {
         } as che.IWorkspace;
     });
 
-    it('must have "workspace-loader" in DOM', () => {
-        const loader = document.getElementById('workspace-loader');
-        expect(loader).toBeTruthy();
+    it('should have "workspace-loader" in DOM', () => {
+        const loaderElement = document.getElementById('workspace-loader');
+        expect(loaderElement).toBeTruthy();
     });
 
-    it('test when workspace key is not specified', () => {
-        let loader = new Loader();
-        let workspaceLoader = new WorkspaceLoader(loader);
+    it('should not get a workspace if workspace key is not specified', () => {
+        const loader = new Loader();
+        const workspaceLoader = new WorkspaceLoader(loader);
 
         spyOn(workspaceLoader, 'getWorkspaceKey');
         spyOn(workspaceLoader, 'getWorkspace');
-        
+
         workspaceLoader.load();
 
         expect(workspaceLoader.getWorkspaceKey).toHaveBeenCalled();
         expect(workspaceLoader.getWorkspace).not.toHaveBeenCalled();
     });
 
-    it('test getWorkspace with test value', () => {
-        let loader = new Loader();
-        let workspaceLoader = new WorkspaceLoader(loader);
+    it('should get a workspace by its workspace key', () => {
+        const loader = new Loader();
+        const workspaceLoader = new WorkspaceLoader(loader);
 
         spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
 
@@ -100,64 +101,12 @@ describe('Workspace Loader', () => {
         expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith("foo/bar");
     });
 
-    describe('must open IDE directly when workspace does not have IDE server', () => {
-        let workspaceLoader;
-
-        beforeEach((done) => {
-            let loader = new Loader();
-            workspaceLoader = new WorkspaceLoader(loader);
-
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-            spyOn(workspaceLoader, 'getQueryString').and.returnValue("");
-
-            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                return new Promise((resolve) => {
-                    fakeWorkspaceConfig.status = 'STOPPED';
-                    fakeWorkspaceConfig.config.environments["default"].machines = {};
-                    fakeWorkspaceConfig.runtime = {};
-                    resolve(fakeWorkspaceConfig);
-                });
-            });
-
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callFake(() => {
-                return new Promise((resolve) => {
-                    resolve();
-                });
-            });
-
-            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
-                done();
-            });
-
-            spyOn(workspaceLoader, "openIDE");
-
-            workspaceLoader.load();
-        });
-
-        it('openIDE must not be called if status is STOPPED', () => {
-            expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
-        });
-
-        it('must subscribe to events', () => {
-            expect(workspaceLoader.subscribeWorkspaceEvents).toHaveBeenCalled();
-        });
-
-        it('must start the workspace', () => {
-            expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
-        });
-
-        it('must open IDE when workspace become RUNNING', () => {
-            workspaceLoader.onWorkspaceStatusChanged("RUNNING");
-            expect(workspaceLoader.openIDE).toHaveBeenCalled();
-        });
-    });
-
-    describe('must open preconfigured IDE with query parameters', () => {
+    describe('if workspace has a preconfigured IDE with query parameters', () => {
         let ideURL = "ide URL"
         let workspaceLoader;
 
         beforeEach((done) => {
-            let loader = new Loader();
+            const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
 
             spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
@@ -166,63 +115,59 @@ describe('Workspace Loader', () => {
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
                     fakeWorkspaceConfig.status = 'RUNNING';
-                    fakeWorkspaceConfig.runtime = {machines: {ide: {servers: {server1: {attributes: {type: "ide"}, url: ideURL}}}}};
+                    fakeWorkspaceConfig.runtime = { machines: { ide: { servers: { server1: { attributes: { type: "ide" }, url: ideURL } } } } } as any;
                     resolve(fakeWorkspaceConfig);
-                    done();
                 });
             });
 
             spyOn(workspaceLoader, "openIDE").and.callThrough();
             spyOn(workspaceLoader, "openURL");
-            workspaceLoader.load();
+            workspaceLoader.load().then(done());
         });
 
-        it('must be called', () => {
+        it('should call openURL method with correct parameter', () => {
             expect(workspaceLoader.openURL).toHaveBeenCalledWith(ideURL + "?param=value");
         });
     });
 
-    describe('must handle workspace when it has IDE server', () => {
+    describe('if workspace does not have an IDE server', () => {
         let workspaceLoader;
 
         beforeEach((done) => {
-            let loader = new Loader();
+            const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
-    
+
             spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-    
+            spyOn(workspaceLoader, 'getQueryString').and.returnValue("");
+
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
+                    fakeWorkspaceConfig.status = 'RUNNING';
+                    fakeWorkspaceConfig.config.environments["default"].machines = {};
+                    fakeWorkspaceConfig.runtime = {} as che.IWorkspaceRuntime;
                     resolve(fakeWorkspaceConfig);
                 });
             });
-    
-            spyOn(workspaceLoader, "handleWorkspace").and.callFake(() => {
-                done();
-            });
 
-            workspaceLoader.load();
+            spyOn(workspaceLoader, "openIDE").and.callThrough();
+            spyOn(workspaceLoader, "openURL");
+            workspaceLoader.load().then(done());
         });
 
-        it('basic workspace function must be called', () => {
-            expect(workspaceLoader.getWorkspaceKey).toHaveBeenCalled();
-            expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith("foo/bar");
-        });
-
-        it('must be called', () => {
-            expect(workspaceLoader.handleWorkspace).toHaveBeenCalled();
+        it('should open IDE directly', () => {
+            expect(workspaceLoader.openURL).toHaveBeenCalledWith(fakeWorkspaceConfig.links.ide);
         });
     });
 
-    describe('must open IDE for RUNNING workspace', () => {
-        let workspaceLoader;
+    describe('if workspace is RUNNING', () => {
+        let workspaceLoader: WorkspaceLoader;
 
         beforeEach((done) => {
-            let loader = new Loader();
+            const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
-    
+
             spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-    
+
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
                     fakeWorkspaceConfig.status = 'RUNNING';
@@ -230,33 +175,38 @@ describe('Workspace Loader', () => {
                 });
             });
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents");
-    
-            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
-                done();
-            });
+            spyOn(workspaceLoader, "connectMasterApi");
 
-            workspaceLoader.load();
+            spyOn(workspaceLoader, "subscribeWorkspaceEvents");
+
+            spyOn(workspaceLoader, "openIDE");
+
+            workspaceLoader.load().then(() => done());
         });
 
-        it('must not subscribe to events', () => {
+        it('should not connect to workspace master API', () => {
+            expect(workspaceLoader.connectMasterApi).not.toHaveBeenCalled();
+        });
+
+        it('should not subscribe to workspace events', () => {
             expect(workspaceLoader.subscribeWorkspaceEvents).not.toHaveBeenCalled();
         });
-        
-        it('must open IDE immediately', () => {
+
+        it('should open IDE immediately', () => {
             expect(workspaceLoader.openIDE).toHaveBeenCalled();
         });
     });
-    
-    describe('> must start STOPPED workspace', () => {
-        let workspaceLoader;
+
+    describe('if workspace is STOPPED and then starts successfully', () => {
+        let workspaceLoader: WorkspaceLoader;
+        let statusChangeCallback: Function;
 
         beforeEach((done) => {
-            let loader = new Loader();
+            const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
-    
+
             spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-    
+
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
                     fakeWorkspaceConfig.status = 'STOPPED';
@@ -264,48 +214,159 @@ describe('Workspace Loader', () => {
                 });
             });
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callFake(() => {
-                return new Promise((resolve) => {
-                    resolve();
-                });
-            });
-    
+            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough();
+
             spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
-                done();
+                return Promise.resolve();
             });
 
-            spyOn(workspaceLoader, "openIDE");
+            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
+                done();
+                return Promise.resolve({
+                    addListener: () => { },
+                    subscribeEnvironmentOutput: () => { },
+                    subscribeWorkspaceStatus: (workspaceId, callback) => {
+                        statusChangeCallback = callback;
+                    }
+                });
+            });
+
+            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
+                return Promise.resolve();
+            });
 
             workspaceLoader.load();
         });
-        
-        it('openIDE must not be called if status is STOPPED', () => {
+
+        it('should not open an IDE', () => {
             expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
         });
-        
-        it('must subscribe to events', () => {
+
+        it('should subscribe to workspace events', () => {
             expect(workspaceLoader.subscribeWorkspaceEvents).toHaveBeenCalled();
         });
-        
-        it('must start the workspace', () => {
+
+        it('should start the workspace', () => {
             expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
         });
 
-        it('openIDE must be called when workspace become RUNNING', () => {
-            workspaceLoader.onWorkspaceStatusChanged("RUNNING");
-            expect(workspaceLoader.openIDE).toHaveBeenCalled();
+        describe('then becomes STARTING', () => {
+
+            beforeEach(() => {
+                statusChangeCallback({ status: 'STARTING' });
+            })
+
+            it('should not open an IDE', () => {
+                expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+            });
+
+            describe('then becomes RUNNING', () => {
+
+                beforeEach(() => {
+                    statusChangeCallback({ status: 'RUNNING' });
+                });
+
+                it('should open an IDE', () => {
+                    expect(workspaceLoader.openIDE).toHaveBeenCalled();
+                });
+
+            });
+
         });
+
     });
 
-    describe('must restart STOPPING workspace', () => {
-        let workspaceLoader;
+    describe('if workspace is STOPPED and then fails to start', () => {
+        let workspaceLoader: WorkspaceLoader;
+        let startPromiseReject: Function;
+        let workspaceLoadPromise: Promise<void>;
 
         beforeEach((done) => {
-            let loader = new Loader();
+            const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
-    
+
             spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-    
+
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
+                return new Promise((resolve) => {
+                    fakeWorkspaceConfig.status = 'STOPPED';
+                    resolve(fakeWorkspaceConfig);
+                });
+            });
+
+            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
+                return Promise.resolve({
+                    addListener: () => { },
+                    subscribeEnvironmentOutput: () => {},
+                    subscribeWorkspaceStatus: () => {}
+                });
+            });
+
+            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough();
+
+            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
+                done();
+                return Promise.reject();
+            });
+
+            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
+                return Promise.resolve();
+            });
+
+            workspaceLoadPromise = workspaceLoader.load();
+        });
+
+        it('should not open an IDE immediately', () => {
+            expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+        });
+
+        it('should start the workspace', () => {
+            expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
+        });
+
+        it('should not subscribe to workspace events', () => {
+            expect(workspaceLoader.subscribeWorkspaceEvents).not.toHaveBeenCalled();
+        });
+
+        it('should not open an IDE', () => {
+            expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+        });
+
+        describe('then the request for starting the workspace fails', () => {
+
+            beforeEach((done) => {
+                workspaceLoadPromise.then(() => done());
+            });
+
+            it('should hide loader and progress bar', () => {
+                const workspaceLoaderLabel = document.getElementById('workspace-loader-label'),
+                    workspaceLoaderProgress = document.getElementById('workspace-loader-progress');
+
+                expect(workspaceLoaderLabel.style.display).toEqual('none');
+                expect(workspaceLoaderProgress.style.display).toEqual('none');
+            });
+
+            it('should show message with "try again" prompt', () => {
+                const workspaceLoaderReload = document.getElementById('workspace-loader-reload');
+
+                expect(workspaceLoaderReload).toBeTruthy();
+                expect(workspaceLoaderReload.style.display).not.toEqual('none');
+            })
+
+        });
+
+    });
+
+    describe('if workspace is STOPPING', () => {
+        let workspaceLoader: WorkspaceLoader;
+        let statusChangeCallback: Function;
+
+        beforeEach((done) => {
+            const loader = new Loader();
+            workspaceLoader = new WorkspaceLoader(loader);
+
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
                     fakeWorkspaceConfig.status = 'STOPPING';
@@ -313,35 +374,70 @@ describe('Workspace Loader', () => {
                 });
             });
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callFake(() => {
-                return new Promise((resolve) => {
-                    resolve();
+            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough()
+
+            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
+                return Promise.resolve();
+            });
+
+            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
+                done();
+                return Promise.resolve({
+                    addListener: () => { },
+                    subscribeEnvironmentOutput: () => { },
+                    subscribeWorkspaceStatus: (workspaceId, callback) => {
+                        statusChangeCallback = callback;
+                    }
                 });
             });
-    
-            spyOn(workspaceLoader, "startWorkspace");
-            spyOn(workspaceLoader, "openIDE");
 
-            workspaceLoader.load().then(() => {
-                done();
+            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
+                return Promise.resolve();
             });
+
+            workspaceLoader.load();
         });
 
-        it('must start the workspace after stopping', () => {
-            expect(workspaceLoader.startAfterStopping).toEqual(true);
-        });
-        
-
-        it('must start workspace when workspace status become STOPPED', () => {
-            workspaceLoader.onWorkspaceStatusChanged("STOPPED");
-            expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
+        it('should not open an IDE immediately', () => {
             expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
         });
 
-        it('must open IDE when workspace become RUNNING', () => {
-            workspaceLoader.onWorkspaceStatusChanged("RUNNING");
-            expect(workspaceLoader.openIDE).toHaveBeenCalled();
+        it('should set flag to restart a workspace', () => {
+            expect(workspaceLoader.startAfterStopping).toEqual(true);
         });
+
+        it('should not start a workspace immediately', () => {
+            expect(workspaceLoader.startWorkspace).not.toHaveBeenCalled();
+        });
+
+        describe('then becomes STOPPED', () => {
+
+            beforeEach(() => {
+                statusChangeCallback({ status: 'STOPPED' });
+            });
+
+            it('should start a workspace', () => {
+                expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
+            });
+
+            it('should not open an IDE', () => {
+                expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+            });
+
+            describe('then becomes RUNNING', () => {
+
+                beforeEach(() => {
+                    statusChangeCallback({ status: 'RUNNING' });
+                });
+
+                it('should open an IDE', () => {
+                    expect(workspaceLoader.openIDE).toHaveBeenCalled();
+                });
+
+            });
+
+        });
+
     });
 
 });
