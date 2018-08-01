@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -90,7 +91,7 @@ public class GolangFileEditingTest {
     editor.selectTabByName(GO_FILE_NAME);
 
     // launch autocomplete feature and check proposals list
-    editor.goToPosition(20, 58);
+    editor.goToPosition(21, 58);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("fmt.");
     editor.launchAutocompleteAndWaitContainer();
@@ -109,10 +110,10 @@ public class GolangFileEditingTest {
     editor.selectTabByName(GO_FILE_NAME);
 
     editor.waitAllMarkersInvisibility(ERROR);
-    editor.goToCursorPositionVisible(12, 1);
+    editor.goToCursorPositionVisible(13, 1);
     editor.typeTextIntoEditor("p");
-    editor.waitMarkerInPosition(ERROR, 12);
-    editor.goToCursorPositionVisible(12, 1);
+    editor.waitMarkerInPosition(ERROR, 13);
+    editor.goToCursorPositionVisible(13, 1);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
   }
@@ -138,18 +139,18 @@ public class GolangFileEditingTest {
     editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
 
     // check Find Definition feature from Assistant menu
-    editor.goToPosition(23, 8);
+    editor.goToPosition(24, 8);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitTabIsPresent("print.go");
-    editor.waitCursorPosition(23, 6);
+    editor.waitCursorPosition(24, 6);
     editor.clickOnCloseFileIcon("print.go");
 
     // check Find Definition feature by pressing F4
     editor.selectTabByName("towers.go");
-    editor.goToPosition(23, 8);
+    editor.goToPosition(24, 8);
     editor.typeTextIntoEditor(F4.toString());
     editor.waitTabIsPresent("print.go");
-    editor.waitCursorPosition(23, 6);
+    editor.waitCursorPosition(24, 6);
     editor.clickOnCloseFileIcon("print.go");
   }
 }
