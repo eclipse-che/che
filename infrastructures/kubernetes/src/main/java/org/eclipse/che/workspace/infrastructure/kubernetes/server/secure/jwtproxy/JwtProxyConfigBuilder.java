@@ -65,18 +65,19 @@ public class JwtProxyConfigBuilder {
 
       proxyConfig.setListenAddr(verifierProxy.listenPort);
 
-      VerifierConfig verifierConfig = new VerifierConfig();
-
-      verifierConfig.setUpstream(verifierProxy.upstream);
-      verifierConfig.setAudience(workspaceId);
-      verifierConfig.setMaxSkew("1m");
-      verifierConfig.setMaxTtl("8800h");
+      VerifierConfig verifierConfig = new VerifierConfig()
+          .withAudience(workspaceId)
+          .withUpstream(verifierProxy.upstream)
+          .withMaxSkew("1m")
+          .withMaxTtl("8800h");
 
       Map<String,String> keyServerOptions = new HashMap<>();
       keyServerOptions.put("issuer", "wsmaster");
       keyServerOptions.put("key_id", workspaceId);
       keyServerOptions.put("public_key_path", JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_PUBLIC_KEY_FILE);
-      verifierConfig.setKeyServer(new RegistrableComponentConfig().withType("preshared").withOptions(keyServerOptions));
+      verifierConfig.setKeyServer(new RegistrableComponentConfig()
+          .withType("preshared")
+          .withOptions(keyServerOptions));
 
       verifierConfig.setClaimsVerifier(new RegistrableComponentConfig().withType("static").withOptions(Collections
           .singletonMap("iss", "wsmaster")));

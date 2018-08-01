@@ -39,12 +39,22 @@ public class VerifierConfig {
     this.audience = audience;
   }
 
+  public VerifierConfig withAudience(String audience) {
+    this.audience = audience;
+    return this;
+  }
+
   public String getMaxSkew() {
     return maxSkew;
   }
 
   public void setMaxSkew(String maxSkew) {
     this.maxSkew = maxSkew;
+  }
+
+  public VerifierConfig withMaxSkew(String maxSkew) {
+    this.maxSkew = maxSkew;
+    return this;
   }
 
   public String getMaxTtl() {
@@ -55,12 +65,22 @@ public class VerifierConfig {
     this.maxTtl = maxTtl;
   }
 
+  public VerifierConfig withMaxTtl(String maxTtl) {
+    this.maxTtl = maxTtl;
+    return this;
+  }
+
   public String getUpstream() {
     return upstream;
   }
 
   public void setUpstream(String upstream) {
     this.upstream = upstream;
+  }
+
+  public VerifierConfig withUpstream(String upstream) {
+    this.upstream = upstream;
+    return this;
   }
 
   public RegistrableComponentConfig getNonceStorage() {

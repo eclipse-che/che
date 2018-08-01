@@ -26,12 +26,21 @@ public class VerifierProxyConfig {
     this.listenAddr = listenAddr;
   }
 
+  public VerifierProxyConfig withListenAddr(Integer listenAddr) {
+    this.listenAddr = listenAddr;
+    return this;
+  }
+
   public VerifierConfig getVerifierConfig() {
     return verifierConfig;
   }
 
-  public void setVerifierConfig(
-      VerifierConfig verifierConfig) {
+  public void setVerifierConfig(VerifierConfig verifierConfig) {
     this.verifierConfig = verifierConfig;
+  }
+
+  public VerifierProxyConfig withVerifierConfig(VerifierConfig verifierConfig) {
+    this.verifierConfig = verifierConfig;
+    return this;
   }
 }
