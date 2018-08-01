@@ -144,7 +144,7 @@ public class MultimoduleProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("author=\"oracle\"");
   }
 
-   @Test
+  @Test
   public void shouldStopInsideConstructor() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
@@ -196,7 +196,7 @@ public class MultimoduleProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("title=\"go\"");
   }
 
-   @Test
+  @Test
   public void shouldDebugDefaultMethod() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_INTERFACE);
