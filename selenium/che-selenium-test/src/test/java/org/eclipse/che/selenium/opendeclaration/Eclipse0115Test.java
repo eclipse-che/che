@@ -56,9 +56,9 @@ public class Eclipse0115Test {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples", "X.java");
-    editor.waitMarkerInPosition(WARNING, 14);
-    editor.goToCursorPositionVisible(32, 14);
+    editor.waitMarkerInPosition(WARNING, 15);
+    editor.goToCursorPositionVisible(33, 14);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitSpecifiedValueForLineAndChar(35, 24);
+    editor.waitSpecifiedValueForLineAndChar(36, 24);
   }
 }

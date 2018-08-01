@@ -56,9 +56,9 @@ public class Eclipse0121Test {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(PATH_FOR_EXPAND, "Test.java");
     editor.waitActive();
-    editor.goToCursorPositionVisible(15, 43);
+    editor.goToCursorPositionVisible(16, 43);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Collections");
-    editor.waitSpecifiedValueForLineAndChar(14, 35);
+    editor.waitSpecifiedValueForLineAndChar(15, 35);
   }
 }
