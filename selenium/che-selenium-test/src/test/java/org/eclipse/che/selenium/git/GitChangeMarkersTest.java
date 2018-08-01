@@ -97,28 +97,28 @@ public class GitChangeMarkersTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/Main.java");
     editor.waitActive();
     editor.waitNoGitChangeMarkers();
-    editor.typeTextIntoEditor("//", 11);
+    editor.typeTextIntoEditor("//", 12);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
-    editor.waitGitModificationMarkerInPosition(11, 13);
+    editor.waitGitModificationMarkerInPosition(12, 13);
   }
 
   @Test(priority = 1)
   public void testInsertionMarker() {
-    editor.setCursorToLine(16);
+    editor.setCursorToLine(17);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitGitInsertionMarkerInPosition(17, 18);
+    editor.waitGitInsertionMarkerInPosition(18, 18);
   }
 
   @Test(priority = 2)
   public void testDeletionMarker() {
-    editor.setCursorToLine(20);
+    editor.setCursorToLine(21);
     editor.deleteCurrentLine();
 
-    editor.waitGitDeletionMarkerInPosition(19);
+    editor.waitGitDeletionMarkerInPosition(20);
   }
 
   @Test(priority = 3)
@@ -136,8 +136,8 @@ public class GitChangeMarkersTest {
   public void testChangeMarkersAfterCommitFromTerminal() {
     // Make a change
     editor.selectTabByName("Main");
-    editor.typeTextIntoEditor("//", 12);
-    editor.waitGitModificationMarkerInPosition(12, 12);
+    editor.typeTextIntoEditor("//", 13);
+    editor.waitGitModificationMarkerInPosition(13, 12);
 
     terminal.selectTerminalTab();
     terminal.typeIntoTerminal("cd " + PROJECT_NAME + Keys.ENTER);
@@ -153,8 +153,8 @@ public class GitChangeMarkersTest {
   public void testChangeMarkersOnUntrackedFile() {
     // Make a change
     editor.selectTabByName("Main");
-    editor.typeTextIntoEditor("//", 13);
-    editor.waitGitModificationMarkerInPosition(13, 13);
+    editor.typeTextIntoEditor("//", 14);
+    editor.waitGitModificationMarkerInPosition(14, 13);
 
     // Remove file from index
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/com/company/Main.java");
@@ -171,7 +171,7 @@ public class GitChangeMarkersTest {
     // Add file to index
     terminal.selectTerminalTab();
     terminal.typeIntoTerminal("git add src/com/company/Main.java" + Keys.ENTER);
-    editor.waitGitModificationMarkerInPosition(13, 13);
+    editor.waitGitModificationMarkerInPosition(14, 13);
 
     // Remove file from index
     terminal.typeIntoTerminal("git rm --cached src/com/company/Main.java" + Keys.ENTER);

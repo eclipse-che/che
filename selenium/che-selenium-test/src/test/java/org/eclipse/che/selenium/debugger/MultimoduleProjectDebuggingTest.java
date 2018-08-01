@@ -119,13 +119,13 @@ public class MultimoduleProjectDebuggingTest {
   public void shouldGoIntoConstructor() {
     // when
     projectExplorer.openItemByPath(PATH_TO_APP_CLASS);
-    editor.setInactiveBreakpoint(19);
+    editor.setInactiveBreakpoint(20);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitActiveBreakpoint(19);
+    editor.waitActiveBreakpoint(20);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
@@ -144,7 +144,7 @@ public class MultimoduleProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("author=\"oracle\"");
   }
 
-  @Test
+  // @Test
   public void shouldStopInsideConstructor() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
@@ -161,7 +161,7 @@ public class MultimoduleProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("author=\"oracle\"");
   }
 
-  @Test
+  // @Test
   public void shouldDebugInstanceMethod() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
@@ -178,7 +178,7 @@ public class MultimoduleProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("title=\"go\"");
   }
 
-  @Test
+  // @Test
   public void shouldDebugStaticMethod() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
@@ -196,7 +196,7 @@ public class MultimoduleProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("title=\"go\"");
   }
 
-  @Test
+  // @Test
   public void shouldDebugDefaultMethod() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_INTERFACE);
@@ -211,7 +211,7 @@ public class MultimoduleProjectDebuggingTest {
     debugPanel.waitTextInVariablesPanel("o=instance of multimodule.model.BookImpl");
   }
 
-  @Test
+  // @Test
   public void shouldDebugStaticDefaultMethod() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_INTERFACE);
