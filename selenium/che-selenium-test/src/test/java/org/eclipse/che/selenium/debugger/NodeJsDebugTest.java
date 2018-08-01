@@ -124,7 +124,7 @@ public class NodeJsDebugTest {
     debugPanel.waitDebugHighlightedText("return \"HELLO\";");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
     debugPanel.waitDebugHighlightedText("var c=\"some add value\" + b;");
-    assertEquals(debugPanel.getExecutionPoint(), "app.js:13");
+    assertEquals(debugPanel.getExecutionPoint(), "app.js:14");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
   }
 

@@ -56,7 +56,7 @@ public class JavaTestPluginJunit4Test {
           + " at org.junit.Assert.assertTrue(Assert.java:41)\n"
           + " at org.junit.Assert.assertFalse(Assert.java:64)\n"
           + " at org.junit.Assert.assertFalse(Assert.java:74)\n"
-          + " at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:33)";
+          + " at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:34)";
 
   public static final String APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE =
       "java.lang.AssertionError\n"
@@ -64,7 +64,7 @@ public class JavaTestPluginJunit4Test {
           + " at org.junit.Assert.assertTrue(Assert.java:41)\n"
           + " at org.junit.Assert.assertFalse(Assert.java:64)\n"
           + " at org.junit.Assert.assertFalse(Assert.java:74)\n"
-          + " at org.eclipse.che.examples.AppAnotherTest.shouldFailOfAppAnother(AppAnotherTest.java:34)";
+          + " at org.eclipse.che.examples.AppAnotherTest.shouldFailOfAppAnother(AppAnotherTest.java:35)";
 
   @Inject private JavaTestRunnerPluginConsole pluginConsole;
   @Inject private ProjectExplorer projectExplorer;
@@ -145,7 +145,7 @@ public class JavaTestPluginJunit4Test {
     projectExplorer.openItemByPath(PATH_TO_JUNIT4_ANOTHER_TEST);
     editor.waitActive();
 
-    editor.goToCursorPositionVisible(27, 5);
+    editor.goToCursorPositionVisible(28, 5);
 
     // when
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
@@ -157,7 +157,7 @@ public class JavaTestPluginJunit4Test {
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     // then
 
-    editor.goToCursorPositionVisible(32, 5);
+    editor.goToCursorPositionVisible(33, 5);
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
@@ -167,7 +167,7 @@ public class JavaTestPluginJunit4Test {
         testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
 
-    editor.goToCursorPositionVisible(38, 5);
+    editor.goToCursorPositionVisible(39, 5);
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppAnother");

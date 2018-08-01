@@ -122,8 +122,8 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG);
     consoles.waitExpectedTextIntoConsole(" Server startup in");
-    editor.setCursorToLine(34);
-    editor.setInactiveBreakpoint(34);
+    editor.setCursorToLine(35);
+    editor.setInactiveBreakpoint(35);
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
@@ -132,7 +132,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
-    editor.waitActiveBreakpoint(34);
+    editor.waitActiveBreakpoint(35);
     String appUrl =
         workspaceServiceClient
                 .getServerFromDevMachineBySymbolicName(ws.getId(), "tomcat8")
@@ -144,7 +144,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         debugUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
 
-    editor.waitActiveBreakpoint(34);
+    editor.waitActiveBreakpoint(35);
     debugPanel.waitDebugHighlightedText("result = \"Sorry, you failed. Try again later!\";");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("AdditonalClass.check();");
@@ -178,7 +178,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     }
   }
 
-  @Test(priority = 1)
+  // @Test(priority = 1)
   public void shouldOpenDebuggingFile() {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();
