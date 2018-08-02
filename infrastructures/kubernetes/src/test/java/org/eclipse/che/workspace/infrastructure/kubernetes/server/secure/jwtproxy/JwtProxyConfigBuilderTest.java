@@ -44,7 +44,6 @@ public class JwtProxyConfigBuilderTest {
 
     // when
     String jwtProxyConfigYaml = jwtProxyConfigBuilder.build();
-    System.out.println(jwtProxyConfigYaml);
     // then
     assertEquals(
         jwtProxyConfigYaml,
