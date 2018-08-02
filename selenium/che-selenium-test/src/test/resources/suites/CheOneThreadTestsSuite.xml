@@ -26,18 +26,16 @@
         return true;
       }
 
-      excludedGroupsVal = System.getProperty("excludedGroups");
-      excludedGroups = excludedGroupsVal.split(",");
-
       includedGroupsVal = System.getProperty("includedGroups");
-      includedGroups = includedGroupsVal.split(",");
-
-      for (String group: groups.keySet()) {
-        if (Arrays.asList(includedGroups).contains(group)) {
+      for (String includedGroup: includedGroupsVal.split(",")) {
+        if (groups.contains(includedGroup)) {
           return true;
         }
+      }
 
-        if (Arrays.asList(excludedGroups).contains(group)) {
+      excludedGroupsVal = System.getProperty("excludedGroups");
+      for (String excludedGroup: excludedGroupsVal.split(",")) {
+        if (groups.contains(excludedGroup)) {
           return false;
         }
       }
