@@ -704,11 +704,19 @@ public class SeleniumWebDriverHelper {
    * @param timeout waiting time in seconds
    */
   public void waitTextContains(WebElement element, String expectedText, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
         .get(timeout)
+        .withMessage(
+            () -> {
+              return "expected \n'" + expectedText + "'\nbut was \n'" + actual[0] + "'\n";
+            })
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibility(element, timeout).getText().contains(expectedText));
+                driver -> {
+                  actual[0] = waitVisibility(element, timeout).getText();
+                  return actual[0].contains(expectedText);
+                });
   }
 
   /**
