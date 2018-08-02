@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -13,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
 import java.util.Set;
 
 @JsonInclude(Include.NON_NULL)
@@ -26,16 +26,21 @@ public class VerifierConfig {
   private String upstream;
 
   private String audience;
+
   @JsonProperty("max_skew")
   private String maxSkew;
+
   @JsonProperty("max_ttl")
   private String maxTtl;
+
   @JsonProperty("nonce_storage")
   private RegistrableComponentConfig nonceStorage;
+
   @JsonProperty("key_server")
   private RegistrableComponentConfig keyServer;
-  @JsonProperty("claims_verifier")
-  private RegistrableComponentConfig claimsVerifier;
+
+  @JsonProperty("claims_verifiers")
+  private Set<RegistrableComponentConfig> claimsVerifiers;
 
   private Set<String> excludes;
 
@@ -108,8 +113,7 @@ public class VerifierConfig {
     return keyServer;
   }
 
-  public void setKeyServer(
-      RegistrableComponentConfig keyServer) {
+  public void setKeyServer(RegistrableComponentConfig keyServer) {
     this.keyServer = keyServer;
   }
 
@@ -118,17 +122,16 @@ public class VerifierConfig {
     return this;
   }
 
-  public RegistrableComponentConfig getClaimsVerifier() {
-    return claimsVerifier;
+  public Set<RegistrableComponentConfig> getClaimsVerifiers() {
+    return claimsVerifiers;
   }
 
-  public void setClaimsVerifier(
-      RegistrableComponentConfig claimsVerifier) {
-    this.claimsVerifier = claimsVerifier;
+  public void setClaimsVerifiers(Set<RegistrableComponentConfig> claimsVerifiers) {
+    this.claimsVerifiers = claimsVerifiers;
   }
 
-  public VerifierConfig withClaimsVerifier(RegistrableComponentConfig claimsVerifier) {
-    this.claimsVerifier = claimsVerifier;
+  public VerifierConfig withClaimsVerifier(Set<RegistrableComponentConfig> claimsVerifiers) {
+    this.claimsVerifiers = claimsVerifiers;
     return this;
   }
 
