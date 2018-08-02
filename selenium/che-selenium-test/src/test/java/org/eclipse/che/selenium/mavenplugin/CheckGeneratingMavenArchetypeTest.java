@@ -14,7 +14,6 @@ package org.eclipse.che.selenium.mavenplugin;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -74,7 +73,6 @@ public class CheckGeneratingMavenArchetypeTest {
     projectWizard.clickCreateButton();
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
-    console.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.quickExpandWithJavaScript();
     expectedItems.forEach(projectExplorer::waitItem);
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
