@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -49,9 +49,9 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest {
   private static final String EXPECTED_EDITOR_TEXT =
       "/*\n"
           + " * Copyright (c) 2012-2018 Red Hat, Inc.\n"
-          + " * This program and the accompanying materials\n"
-          + " * are made available under the terms of the Eclipse Public License v2.0\n"
-          + " * which is available at http://www.eclipse.org/legal/epl-2.0.html\n"
+          + " * This program and the accompanying materials are made\n"
+          + " * available under the terms of the Eclipse Public License 2.0\n"
+          + " * which is available at https://www.eclipse.org/legal/epl-2.0/\n"
           + " *\n"
           + " * SPDX-License-Identifier: EPL-2.0\n"
           + " *\n"
