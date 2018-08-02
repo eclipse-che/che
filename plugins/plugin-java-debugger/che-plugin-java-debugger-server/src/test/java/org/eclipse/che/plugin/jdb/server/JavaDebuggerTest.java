@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -76,7 +76,7 @@ public class JavaDebuggerTest {
   @Test(priority = 20)
   public void testStartDebugger() throws Exception {
     BreakpointImpl breakpoint =
-        new BreakpointImpl(new LocationImpl("com.HelloWorld", 17), false, null);
+        new BreakpointImpl(new LocationImpl("com.HelloWorld", 18), false, null);
     debugger.start(new StartActionImpl(singletonList(breakpoint)));
 
     DebuggerEvent debuggerEvent = events.take();
@@ -86,7 +86,7 @@ public class JavaDebuggerTest {
     assertTrue(debuggerEvent instanceof SuspendEvent);
 
     Location location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getLineNumber(), 17);
+    assertEquals(location.getLineNumber(), 18);
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
   }
 
@@ -94,7 +94,7 @@ public class JavaDebuggerTest {
   public void testSteps() throws Exception {
     debugger.deleteAllBreakpoints();
 
-    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 20), false, null));
+    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 21), false, null));
 
     assertTrue(events.take() instanceof BreakpointActivatedEvent);
 
@@ -104,7 +104,7 @@ public class JavaDebuggerTest {
     assertTrue(debuggerEvent instanceof SuspendEvent);
     Location location = ((SuspendEvent) debuggerEvent).getLocation();
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
-    assertEquals(location.getLineNumber(), 20);
+    assertEquals(location.getLineNumber(), 21);
     assertEquals(location.getExternalResourceId(), -1);
     assertEquals(location.getResourceProjectPath(), "/test");
 
@@ -114,17 +114,9 @@ public class JavaDebuggerTest {
     assertTrue(debuggerEvent instanceof SuspendEvent);
     location = ((SuspendEvent) debuggerEvent).getLocation();
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
-    assertEquals(location.getLineNumber(), 28);
+    assertEquals(location.getLineNumber(), 29);
 
     debugger.stepOut(new StepOutActionImpl(SuspendPolicy.ALL));
-
-    debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof SuspendEvent);
-    location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
-    assertEquals(location.getLineNumber(), 20);
-
-    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
@@ -138,7 +130,7 @@ public class JavaDebuggerTest {
     assertTrue(debuggerEvent instanceof SuspendEvent);
     location = ((SuspendEvent) debuggerEvent).getLocation();
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
-    assertEquals(location.getLineNumber(), 23);
+    assertEquals(location.getLineNumber(), 22);
 
     debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
@@ -147,6 +139,14 @@ public class JavaDebuggerTest {
     location = ((SuspendEvent) debuggerEvent).getLocation();
     assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 24);
+
+    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
+
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+    location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
+    assertEquals(location.getLineNumber(), 25);
   }
 
   @Test(priority = 120)

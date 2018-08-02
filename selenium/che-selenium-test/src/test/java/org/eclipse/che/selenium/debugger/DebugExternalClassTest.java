@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -125,14 +125,14 @@ public class DebugExternalClassTest {
   @Test
   public void shouldDebugMavenArtifactClassWithSources() {
     // when
-    editor.setInactiveBreakpoint(23);
+    editor.setInactiveBreakpoint(24);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitActiveBreakpoint(23);
+    editor.waitActiveBreakpoint(24);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then
@@ -165,14 +165,14 @@ public class DebugExternalClassTest {
   @Test(priority = 1)
   public void shouldHandleDebugOfMavenArtifactWithoutSources() {
     // when
-    editor.setInactiveBreakpoint(27);
+    editor.setInactiveBreakpoint(28);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitActiveBreakpoint(27);
+    editor.waitActiveBreakpoint(28);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
     // then

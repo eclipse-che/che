@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -56,9 +56,9 @@ public class Eclipse0115Test {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples", "X.java");
-    editor.waitMarkerInPosition(WARNING, 14);
-    editor.goToCursorPositionVisible(32, 14);
+    editor.waitMarkerInPosition(WARNING, 15);
+    editor.goToCursorPositionVisible(33, 14);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitSpecifiedValueForLineAndChar(35, 24);
+    editor.waitSpecifiedValueForLineAndChar(36, 24);
   }
 }

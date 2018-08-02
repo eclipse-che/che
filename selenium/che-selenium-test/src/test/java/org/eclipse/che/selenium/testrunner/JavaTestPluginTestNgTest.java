@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -61,7 +61,7 @@ public class JavaTestPluginTestNgTest {
           + " at org.testng.Assert.failNotEquals(Assert.java:494)\n"
           + " at org.testng.Assert.assertFalse(Assert.java:63)\n"
           + " at org.testng.Assert.assertFalse(Assert.java:73)\n"
-          + " at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:31)";
+          + " at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:32)";
 
   public static final String APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE =
       "[TestNG] Running:  /home/user/che/ws-agent/temp/che-testng-suite.xmlexpected [false] but found [true]\n"
@@ -136,12 +136,12 @@ public class JavaTestPluginTestNgTest {
 
     // then
     editor.waitActive();
-    editor.goToCursorPositionVisible(25, 17);
+    editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    editor.goToCursorPositionVisible(30, 17);
+    editor.goToCursorPositionVisible(31, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     try {
       pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
@@ -165,7 +165,7 @@ public class JavaTestPluginTestNgTest {
 
     // then
     editor.waitActive();
-    editor.goToCursorPositionVisible(25, 17);
+    editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     try {
@@ -175,7 +175,7 @@ public class JavaTestPluginTestNgTest {
       fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
     }
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    editor.goToCursorPositionVisible(30, 17);
+    editor.goToCursorPositionVisible(31, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);

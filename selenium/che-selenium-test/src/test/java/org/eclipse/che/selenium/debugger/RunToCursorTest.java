@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -73,7 +73,7 @@ public class RunToCursorTest {
     commandsPalette.startCommandByDoubleClick("build");
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT + "/src/App.java");
-    editor.setBreakpoint(14);
+    editor.setBreakpoint(15);
     debugPanel.openDebugPanel();
 
     startDebug();
@@ -82,7 +82,7 @@ public class RunToCursorTest {
   @Test
   public void shouldRunToLocationInsideMainClass() {
     // when
-    editor.setCursorToLine(21);
+    editor.setCursorToLine(22);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RUN_TO_CURSOR);
 
     // then
@@ -92,7 +92,7 @@ public class RunToCursorTest {
   @Test(priority = 1)
   public void shouldRunToLocationInsideMethod() {
     // when
-    editor.setCursorToLine(27);
+    editor.setCursorToLine(28);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RUN_TO_CURSOR);
 
     // then
@@ -102,7 +102,7 @@ public class RunToCursorTest {
   @Test(priority = 2)
   public void shouldNotRunToNonExistedLocation() {
     // when
-    editor.setCursorToLine(28);
+    editor.setCursorToLine(29);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RUN_TO_CURSOR);
 
     // then
@@ -112,7 +112,7 @@ public class RunToCursorTest {
   @Test(priority = 3)
   public void shouldRunToLocationInsideInnerClass() {
     // when
-    editor.setCursorToLine(31);
+    editor.setCursorToLine(32);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RUN_TO_CURSOR);
 
     // then

@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -56,9 +56,9 @@ public class Eclipse0097Test {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
     editor.waitActive();
-    editor.goToCursorPositionVisible(13, 31);
+    editor.goToCursorPositionVisible(14, 31);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Key");
-    editor.waitSpecifiedValueForLineAndChar(13, 14);
+    editor.waitSpecifiedValueForLineAndChar(14, 14);
   }
 }

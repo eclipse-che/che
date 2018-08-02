@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -49,7 +49,7 @@ public class SuspendPolicyTest {
     ProjectApiUtils.ensure();
 
     Location location =
-        new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 15, "/test");
+        new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 16, "/test");
 
     events = new ArrayBlockingQueue<>(10);
     debugger =
@@ -76,7 +76,7 @@ public class SuspendPolicyTest {
   public void shouldReturnStackFrameDumpOnlyForSuspendedThread() throws Exception {
     debugger.addBreakpoint(
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 16, "/test"),
+            new LocationImpl("/test/src/org/eclipse/SuspendPolicyTest.java", 17, "/test"),
             true,
             new BreakpointConfigurationImpl(SuspendPolicy.THREAD)));
 

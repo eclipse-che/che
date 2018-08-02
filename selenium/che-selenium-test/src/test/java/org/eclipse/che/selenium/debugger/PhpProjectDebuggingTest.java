@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -124,7 +124,7 @@ public class PhpProjectDebuggingTest {
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-    editor.setBreakpoint(13);
+    editor.setBreakpoint(14);
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
@@ -142,7 +142,7 @@ public class PhpProjectDebuggingTest {
 
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
-    editor.waitActiveBreakpoint(13);
+    editor.waitActiveBreakpoint(14);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
@@ -174,7 +174,7 @@ public class PhpProjectDebuggingTest {
             NON_DEFAULT_DEBUG_PORT));
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-    editor.setBreakpoint(13);
+    editor.setBreakpoint(14);
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
@@ -187,7 +187,7 @@ public class PhpProjectDebuggingTest {
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
 
-    editor.waitActiveBreakpoint(13);
+    editor.waitActiveBreakpoint(14);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 

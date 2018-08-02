@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -239,12 +239,12 @@ public class FindTextFeatureTest {
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
     findTextPage.selectItemInFindInfoPanel(
         pathToQuessNumFile,
-        "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
+        "26:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActive();
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionVisible(), 25);
+    assertEquals(editor.getPositionVisible(), 26);
 
     // Check that the Find Info panel state restored
     consoles.closeProcessesArea();
@@ -255,7 +255,7 @@ public class FindTextFeatureTest {
     // Open 'SayHello.java' file and check cursor position
     findTextPage.selectItemInFindInfoPanel(
         pathToQuessNumFile,
-        "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
+        "26:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
@@ -264,11 +264,11 @@ public class FindTextFeatureTest {
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_RIGHT.toString());
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findTextPage.selectItemInFindInfoPanelByDoubleClick(
-        pathToSayHelloFile, "20:    public String sayHello(String name)");
+        pathToSayHelloFile, "21:    public String sayHello(String name)");
     editor.waitActive();
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionVisible(), 20);
+    assertEquals(editor.getPositionVisible(), 21);
 
     editor.closeAllTabsByContextMenu();
   }

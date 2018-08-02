@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -75,7 +75,7 @@ public class CheckMavenPluginTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActive();
-    editor.setCursorToLine(14);
+    editor.setCursorToLine(15);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass = new TestClass();");
     editor.waitAllMarkersInvisibility(ERROR);
@@ -85,9 +85,9 @@ public class CheckMavenPluginTest {
   public void shouldExcludeModules() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
-    editor.goToCursorPositionVisible(25, 8);
+    editor.goToCursorPositionVisible(26, 8);
     editor.typeTextIntoEditor("!--");
-    editor.goToCursorPositionVisible(26, 32);
+    editor.goToCursorPositionVisible(27, 32);
     editor.typeTextIntoEditor("--");
     try {
       projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
@@ -106,17 +106,17 @@ public class CheckMavenPluginTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActive();
-    editor.goToCursorPositionVisible(17, 1);
+    editor.goToCursorPositionVisible(18, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void includeModulesInTheParentPom() {
-    editor.goToCursorPositionVisible(26, 32);
+    editor.goToCursorPositionVisible(27, 32);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.goToCursorPositionVisible(25, 8);
+    editor.goToCursorPositionVisible(26, 8);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());

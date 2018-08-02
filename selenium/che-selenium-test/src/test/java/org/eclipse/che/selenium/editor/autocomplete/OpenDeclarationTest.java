@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -87,11 +87,11 @@ public class OpenDeclarationTest {
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
     editor.selectTabByName("AppController");
-    editor.setCursorToLine(20);
+    editor.setCursorToLine(21);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("import sun.net.spi.nameservice.dns.DNSNameServiceDescriptor;");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.setCursorToLine(25);
+    editor.setCursorToLine(26);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(
         "DNSNameServiceDescriptor descriptor = new DNSNameServiceDescriptor();");
@@ -100,7 +100,7 @@ public class OpenDeclarationTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
 
-    editor.goToCursorPositionVisible(26, 10);
+    editor.goToCursorPositionVisible(27, 10);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("DNSNameServiceDescriptor");
     editor.waitActive();
@@ -109,7 +109,7 @@ public class OpenDeclarationTest {
     editor.closeFileByNameWithSaving("DNSNameServiceDescriptor");
     editor.waitTabIsNotPresent("DNSNameServiceDescriptor");
     editor.selectTabByName("AppController");
-    editor.goToCursorPositionVisible(27, 39);
+    editor.goToCursorPositionVisible(28, 39);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("DNSNameServiceDescriptor");
     editor.setCursorToLine(11);
@@ -118,7 +118,7 @@ public class OpenDeclarationTest {
 
     // check an ability to download source
     editor.selectTabByName("AppController");
-    editor.goToCursorPositionVisible(30, 12);
+    editor.goToCursorPositionVisible(31, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
     // editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
@@ -130,7 +130,7 @@ public class OpenDeclarationTest {
 
     // check go to class
     editor.selectTabByName("AppController");
-    editor.goToCursorPositionVisible(30, 12);
+    editor.goToCursorPositionVisible(31, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
     editor.waitTextElementsActiveLine("ModelAndView");
@@ -139,7 +139,7 @@ public class OpenDeclarationTest {
 
     // Check go to method
     editor.selectTabByName("AppController");
-    editor.goToCursorPositionVisible(43, 16);
+    editor.goToCursorPositionVisible(44, 16);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
     editor.waitTextElementsActiveLine("addObject");
