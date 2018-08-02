@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -132,7 +132,7 @@ public class ConvertToProjectWithPomFileTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
     editor.waitTabIsPresent("qa-spring-sample");
-    editor.goToCursorPositionVisible(18, 17);
+    editor.goToCursorPositionVisible(19, 17);
     editor.typeTextIntoEditor("new-");
 
     // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed

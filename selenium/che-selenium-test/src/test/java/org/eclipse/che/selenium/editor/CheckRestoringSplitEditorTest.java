@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -50,9 +50,9 @@ public class CheckRestoringSplitEditorTest {
   private final String PROJECT_NAME = NameGenerator.generate("project", 4);;
   private final String PATH_TO_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + javaClassName;
-  private Pair<Integer, Integer> cursorPositionForJavaFile = new Pair<>(12, 1);
+  private Pair<Integer, Integer> cursorPositionForJavaFile = new Pair<>(13, 1);
   private Pair<Integer, Integer> cursorPositionForReadMeFile = new Pair<>(1, 10);
-  private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(31, 1);
+  private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(32, 1);
   private List<String> expectedTextFromEditor;
 
   @Inject private TestWorkspace workspace;

@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -91,10 +91,10 @@ public class OrganizeImportsTest {
     projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     loader.waitOnClosed();
     editor.waitActive();
-    editor.setCursorToLine(15);
+    editor.setCursorToLine(16);
     editor.deleteCurrentLine();
-    editor.waitMarkerInPosition(ERROR, 24);
-    editor.waitMarkerInPosition(ERROR, 36);
+    editor.waitMarkerInPosition(ERROR, 25);
+    editor.waitMarkerInPosition(ERROR, 37);
     loader.waitOnClosed();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
@@ -105,11 +105,11 @@ public class OrganizeImportsTest {
         editor.checkWhatTextLinePresentOnce(
             "import org.springframework.web.servlet.ModelAndView;"));
 
-    editor.setCursorToLine(20);
+    editor.setCursorToLine(21);
     editor.typeTextIntoEditorWithoutDelayForSaving(
         "import org.springframework.web.servlet.ModelAndView;");
     loader.waitOnClosed();
-    editor.goToCursorPositionVisible(20, 8);
+    editor.goToCursorPositionVisible(21, 8);
     editor.launchPropositionAssistPanel();
     editor.enterTextIntoFixErrorPropByEnter("Organize imports");
     loader.waitOnClosed();
@@ -124,17 +124,17 @@ public class OrganizeImportsTest {
           editor.checkWhatTextLinePresentOnce(
               "import org.springframework.web.servlet.ModelAndView;"));
     }
-    editor.goToCursorPositionVisible(29, 23);
+    editor.goToCursorPositionVisible(30, 23);
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.QUICK_FIX);
     editor.waitPropositionAssistContainer();
     loader.waitOnClosed();
     createNewStructure();
-    editor.setCursorToLine(35);
+    editor.setCursorToLine(36);
     editor.typeTextIntoEditor(CALL_TEST_TEXT);
-    editor.waitMarkerInPosition(ERROR, 36);
     editor.waitMarkerInPosition(ERROR, 37);
+    editor.waitMarkerInPosition(ERROR, 38);
 
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,

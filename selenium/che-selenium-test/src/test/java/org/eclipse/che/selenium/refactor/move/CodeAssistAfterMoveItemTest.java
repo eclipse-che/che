@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -63,13 +63,13 @@ public class CodeAssistAfterMoveItemTest {
         pathToPackageInChePrefix + "/org/eclipse/qa/examples/AppController.java");
     loader.waitOnClosed();
     editor.waitActive();
-    editor.setCursorToLine(31);
+    editor.setCursorToLine(32);
     editor.typeTextIntoEditor(Keys.TAB.toString());
     loader.waitOnClosed();
     editor.typeTextIntoEditor("A5 a = new A5();");
     loader.waitOnClosed();
     editor.waitTextIntoEditor("A5 a = new A5();");
-    editor.waitMarkerInPosition(ERROR, 31);
+    editor.waitMarkerInPosition(ERROR, 32);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.launchPropositionAssistPanel();
     loader.waitOnClosed();
@@ -77,7 +77,7 @@ public class CodeAssistAfterMoveItemTest {
     editor.enterTextIntoFixErrorPropByDoubleClick("Import 'A5' (r)");
     loader.waitOnClosed();
     editor.waitTextIntoEditor("import r.A5;");
-    editor.waitMarkerInvisibility(ERROR, 33);
+    editor.waitMarkerInvisibility(ERROR, 34);
 
     // move item 'A5' into package 'p1'
     projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");
@@ -92,11 +92,11 @@ public class CodeAssistAfterMoveItemTest {
     projectExplorer.waitItem(pathToPackageInChePrefix + "/p1/A5.java");
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A5.java");
     editor.waitTextIntoEditor("import p1.A5;");
-    editor.setCursorToLine(16);
+    editor.setCursorToLine(17);
     editor.deleteCurrentLine();
     loader.waitOnClosed();
-    editor.waitMarkerInPosition(ERROR, 32);
-    editor.goToCursorPositionVisible(32, 5);
+    editor.waitMarkerInPosition(ERROR, 33);
+    editor.goToCursorPositionVisible(33, 5);
     editor.launchPropositionAssistPanel();
     loader.waitOnClosed();
     editor.waitTextIntoFixErrorProposition("Import 'A5' (p1)");

@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -94,15 +94,15 @@ public class PhpFileEditingTest {
   private void checkGoToDefinition() {
     editor.deleteCurrentLine();
 
-    editor.goToPosition(14, 9);
+    editor.goToPosition(15, 9);
 
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitActiveTabFileName("lib.php");
-    editor.waitCursorPosition(14, 2);
+    editor.waitCursorPosition(15, 2);
   }
 
   private void checkCodeAssistant() {
-    editor.goToCursorPositionVisible(15, 7);
+    editor.goToCursorPositionVisible(16, 7);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("e");
     editor.launchAutocomplete();
@@ -115,12 +115,12 @@ public class PhpFileEditingTest {
   }
 
   private void checkAutocompletion() {
-    editor.goToCursorPositionVisible(13, 1);
+    editor.goToCursorPositionVisible(14, 1);
     editor.typeTextIntoEditor("$color = \"blue\";");
 
-    editor.goToCursorPositionVisible(14, 22);
+    editor.goToCursorPositionVisible(15, 22);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitCursorPosition(15, 1);
+    editor.waitCursorPosition(16, 1);
 
     editor.typeTextIntoEditor("$");
     editor.launchAutocomplete();
@@ -129,12 +129,12 @@ public class PhpFileEditingTest {
   }
 
   private void checkCodeValidation() {
-    editor.goToPosition(14, 2);
+    editor.goToPosition(15, 2);
     editor.typeTextIntoEditor(" ");
-    editor.clickOnMarker(ERROR_OVERVIEW, 14);
+    editor.clickOnMarker(ERROR_OVERVIEW, 15);
     editor.waitTextInToolTipPopup("';' expected.");
 
-    editor.goToPosition(14, 3);
+    editor.goToPosition(15, 3);
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.waitAllMarkersInvisibility(ERROR_OVERVIEW);
   }

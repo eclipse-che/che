@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -146,7 +146,7 @@ public class UpdateListOfLibraryTest {
   private void addNewDependency() {
     editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToLine(43);
+    editor.setCursorToLine(44);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
@@ -157,7 +157,7 @@ public class UpdateListOfLibraryTest {
 
   private void deleteDependency() {
     editor.waitActive();
-    editor.setCursorToLine(27);
+    editor.setCursorToLine(28);
     seleniumWebDriverHelper
         .getAction()
         .keyDown(SHIFT)

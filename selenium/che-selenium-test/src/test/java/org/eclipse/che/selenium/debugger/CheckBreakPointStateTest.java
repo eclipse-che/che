@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -73,7 +73,7 @@ public class CheckBreakPointStateTest {
         "AdditonalClass.java:7\n" + "AdditonalClass.java:9";
 
     String expectedBreakpointsForGreetingClass =
-        "AppController.java:29\n" + "AppController.java:30\n" + "AppController.java:31";
+        "AppController.java:30\n" + "AppController.java:31\n" + "AppController.java:32";
 
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     editor.waitActive();
@@ -89,9 +89,9 @@ public class CheckBreakPointStateTest {
         PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     debugPanel.waitBreakPointsPanelIsEmpty();
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AppController.java");
-    editor.setInactiveBreakpoint(29);
     editor.setInactiveBreakpoint(30);
     editor.setInactiveBreakpoint(31);
+    editor.setInactiveBreakpoint(32);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
     projectExplorer.waitAndSelectItem(PROJECT_NAME_2 + "/src/main/java");
@@ -107,12 +107,12 @@ public class CheckBreakPointStateTest {
   @Test(priority = 1)
   public void checkStateAfterDeletionProject() {
     String expectedBreakpointsForGreetingClass =
-        "AppController.java:29\n" + "AppController.java:31\n" + "AppController.java:34";
+        "AppController.java:30\n" + "AppController.java:32\n" + "AppController.java:35";
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_ONE_CLASS + "AppController.java");
     editor.setCursorToLine(35);
-    editor.setInactiveBreakpoint(29);
-    editor.setInactiveBreakpoint(31);
-    editor.setInactiveBreakpoint(34);
+    editor.setInactiveBreakpoint(30);
+    editor.setInactiveBreakpoint(32);
+    editor.setInactiveBreakpoint(35);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);

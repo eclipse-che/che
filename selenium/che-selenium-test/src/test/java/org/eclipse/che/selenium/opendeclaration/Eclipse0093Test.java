@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -56,10 +56,10 @@ public class Eclipse0093Test {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples", "Test.java");
-    editor.waitMarkerInPosition(WARNING, 12);
-    editor.goToCursorPositionVisible(17, 26);
+    editor.waitMarkerInPosition(WARNING, 13);
+    editor.goToCursorPositionVisible(18, 26);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("MyEnum");
-    editor.waitSpecifiedValueForLineAndChar(14, 3);
+    editor.waitSpecifiedValueForLineAndChar(15, 3);
   }
 }

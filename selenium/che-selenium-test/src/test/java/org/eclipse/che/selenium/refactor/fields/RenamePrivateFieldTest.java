@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -89,7 +89,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -110,7 +110,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -131,7 +131,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(14);
+    editor.setCursorToLine(15);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -152,7 +152,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -176,7 +176,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(18);
+    editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -200,7 +200,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -223,7 +223,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -246,7 +246,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -269,7 +269,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -290,7 +290,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(13);
+    editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -311,7 +311,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(19);
+    editor.setCursorToLine(20);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -336,7 +336,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(21);
+    editor.setCursorToLine(22);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();
@@ -360,7 +360,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToLine(14);
+    editor.setCursorToLine(15);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.launchRefactorForm();

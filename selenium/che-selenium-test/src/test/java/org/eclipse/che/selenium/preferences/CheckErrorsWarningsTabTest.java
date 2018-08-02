@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -85,7 +85,7 @@ public class CheckErrorsWarningsTabTest {
     editor.deleteAllContent();
     editor.typeTextIntoEditorWithoutDelayForSaving(embedCode);
     loader.waitOnClosed();
-    editor.removeLineAndAllAfterIt(104);
+    editor.removeLineAndAllAfterIt(105);
 
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
@@ -125,7 +125,7 @@ public class CheckErrorsWarningsTabTest {
     projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     loader.waitOnClosed();
-    editor.setCursorToLine(84);
+    editor.setCursorToLine(85);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditorWithoutDelayForSaving(Keys.ARROW_LEFT.toString());

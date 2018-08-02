@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which is available at http://www.eclipse.org/legal/epl-2.0.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -57,37 +57,37 @@ public class BreakpointReorderingTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
 
-    editor.setCursorToLine(26);
-    editor.setInactiveBreakpoint(26);
-    editor.setInactiveBreakpoint(29);
-    editor.setInactiveBreakpoint(31);
-    editor.setCursorToLine(38);
-    editor.setInactiveBreakpoint(38);
+    editor.setCursorToLine(27);
+    editor.setInactiveBreakpoint(27);
+    editor.setInactiveBreakpoint(30);
+    editor.setInactiveBreakpoint(32);
+    editor.setCursorToLine(39);
+    editor.setInactiveBreakpoint(39);
   }
 
   @Test
   public void shouldNotRemoveBreakpointWhenFirstCharacterRemoved() throws Exception {
-    editor.goToCursorPositionVisible(26, 1);
+    editor.goToCursorPositionVisible(27, 1);
     actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.DELETE).build().perform();
 
-    editor.waitInactiveBreakpoint(26);
+    editor.waitInactiveBreakpoint(27);
   }
 
   @Test(priority = 1)
   public void shouldNotRemoveBreakpointWhenLastCharacterRemoved() throws Exception {
-    editor.goToCursorPositionVisible(26, 65);
+    editor.goToCursorPositionVisible(27, 65);
     actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.BACK_SPACE).build().perform();
 
-    editor.waitInactiveBreakpoint(26);
+    editor.waitInactiveBreakpoint(27);
   }
 
   @Test(priority = 2)
   public void shouldReorderBreakpointsWhenLineRemoved() throws Exception {
     editor.deleteCurrentLine();
 
-    editor.waitInactiveBreakpoint(28);
-    editor.waitInactiveBreakpoint(30);
-    editor.waitInactiveBreakpoint(37);
+    editor.waitInactiveBreakpoint(29);
+    editor.waitInactiveBreakpoint(31);
+    editor.waitInactiveBreakpoint(38);
 
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -95,20 +95,20 @@ public class BreakpointReorderingTest {
         .sendKeys("z")
         .keyUp(Keys.CONTROL)
         .perform();
-
-    editor.waitInactiveBreakpoint(29);
-    editor.waitInactiveBreakpoint(31);
-    editor.waitInactiveBreakpoint(38);
-  }
-
-  @Test(priority = 3)
-  public void shouldReorderBreakpointsWhenLineAdded() throws Exception {
-    editor.goToCursorPositionVisible(26, 1);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER).build().perform();
 
     editor.waitInactiveBreakpoint(30);
     editor.waitInactiveBreakpoint(32);
     editor.waitInactiveBreakpoint(39);
+  }
+
+  @Test(priority = 3)
+  public void shouldReorderBreakpointsWhenLineAdded() throws Exception {
+    editor.goToCursorPositionVisible(27, 1);
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER).build().perform();
+
+    editor.waitInactiveBreakpoint(31);
+    editor.waitInactiveBreakpoint(33);
+    editor.waitInactiveBreakpoint(40);
 
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -117,8 +117,8 @@ public class BreakpointReorderingTest {
         .keyUp(Keys.CONTROL)
         .perform();
 
-    editor.waitInactiveBreakpoint(29);
-    editor.waitInactiveBreakpoint(31);
-    editor.waitInactiveBreakpoint(38);
+    editor.waitInactiveBreakpoint(30);
+    editor.waitInactiveBreakpoint(32);
+    editor.waitInactiveBreakpoint(39);
   }
 }
