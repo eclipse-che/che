@@ -660,7 +660,7 @@ public class JavaLanguageServerExtensionService {
 
   private void reComputeDiagnostics(String pomPath) {
     String pomUri = prefixURI(pomPath);
-    executeCommand(RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri));
+    executeCommand(Commands.RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri));
   }
 
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
