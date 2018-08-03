@@ -18,7 +18,7 @@ import java.util.Set;
 
 @JsonInclude(Include.NON_NULL)
 /**
- * Verifier configuration
+ * Desribes JWT verifier configuration
  *
  * @author Mykhailo Kuznietsov
  */

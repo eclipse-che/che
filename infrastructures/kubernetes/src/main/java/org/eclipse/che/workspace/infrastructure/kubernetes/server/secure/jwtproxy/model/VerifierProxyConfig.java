@@ -13,6 +13,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Describes configuration of the verifier proxy.
+ */
 public class VerifierProxyConfig {
   @JsonProperty("listen_addr")
   private String listenAddr;

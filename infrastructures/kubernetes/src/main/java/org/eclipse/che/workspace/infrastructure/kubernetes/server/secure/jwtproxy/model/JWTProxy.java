@@ -14,6 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
+/**
+ * Describes single signer and multiple verifier proxy configs.
+ */
 public class JWTProxy {
   @JsonProperty("verifier_proxies")
   private List<VerifierProxyConfig> verifiedProxyConfigs;
