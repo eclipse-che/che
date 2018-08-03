@@ -25,6 +25,13 @@
     <properties>
         <che.version>6.9.0-SNAPSHOT</che.version>
     </properties>
+    <repositories>
+        <repository>
+            <id>ossrh</id>
+            <name>central public snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
     <build>
         <plugins>
             <plugin>
