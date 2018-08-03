@@ -295,8 +295,6 @@ public class ProjectExplorer {
    * @param timeout waiting timeout in seconds
    */
   public void waitItem(String path, int timeout) {
-    loader.waitOnClosed();
-
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
   }
@@ -307,8 +305,6 @@ public class ProjectExplorer {
    * @param reference git reference e.g. branch, tag or commit
    */
   public void waitReferenceName(String reference) {
-    loader.waitOnClosed();
-
     seleniumWebDriverHelper.waitTextEqualsTo(projectReference, "(" + reference + ")");
   }
 
@@ -448,8 +444,6 @@ public class ProjectExplorer {
    * @return found {@link WebElement}
    */
   public WebElement waitVisibilityByName(String name, int timeOut) {
-    loader.waitOnClosed();
-
     return seleniumWebDriverHelper.waitVisibility(
         By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", name)), timeOut);
   }
@@ -636,7 +630,6 @@ public class ProjectExplorer {
    * @param folderType folder's type, defined in {@link FolderTypes}
    */
   public void waitDefinedTypeOfFolder(String path, FolderTypes folderType) {
-    loader.waitOnClosed();
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(
             format(

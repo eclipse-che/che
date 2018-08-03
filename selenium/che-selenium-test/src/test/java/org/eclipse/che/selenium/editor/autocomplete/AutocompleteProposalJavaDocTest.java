@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
@@ -25,8 +28,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -39,8 +40,6 @@ public class AutocompleteProposalJavaDocTest {
   private static final String PATH_FOR_EXPAND_APP_CLASS =
       PROJECT + "/app/src/main/java/multimodule";
   private static final String BOOK_IMPL_CLASS_NAME = "BookImpl";
-  private static final Logger LOG = LoggerFactory.getLogger(AutocompleteProposalJavaDocTest.class);
-  private static final String PATH_FOR_EXPAND_IMPL_CLASS = "model/src/main/java/multimodule.model";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -50,6 +49,10 @@ public class AutocompleteProposalJavaDocTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
+
+  // no links are present in completion item javadoc due to
+  // https://github.com/eclipse/eclipse.jdt.ls/issues/731
+  // also, links would be displayed, but not handled currently.
 
   @BeforeClass
   public void setup() throws Exception {
@@ -89,19 +92,36 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(31, 30);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String");
+    editor.selectAutocompleteProposal(
+        "concat(String part1, String part2, char divider) : String App");
 
     // then
-    editor.checkProposalDocumentation(
-        ".*<p><b>Deprecated.</b> <i> As of version 1.0, use "
-            + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs.*org.apache.commons.lang.StringUtils%E2%98%82join%E2%98%82Object\\+%5B%5D%E2%98%82char'>org.apache.commons.lang.StringUtils.join\\(Object \\[\\], char\\)</a></code>"
-            + "</i><p>Returns concatination of two strings into one divided by special symbol."
-            + "<dl><dt>Parameters:</dt>"
-            + "<dd><b>part1</b> part 1 to concat.</dd>"
-            + "<dd><b>part2</b> part 2 to concat.</dd>"
-            + "<dd><b>divider</b> divider of part1 and part2.</dd>"
-            + "<dt>Returns:</dt><dd> concatination of two strings into one.</dd><dt>Throws:</dt>"
-            + "<dd><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs%5C%2Fapp%2Fsrc%5C%2Fmain%5C%2Fjava%3Cmultimodule%7BApp.java%E2%98%83App%7Econcat%7EQString%3B%7EQString%3B%7EC%E2%98%82NullPointerException'>NullPointerException</a>.*if one of the part has null value.</dd></dl>.*");
+    assertEquals(
+        editor.getProposalDocumentationHTML(),
+        "<p><strong>Deprecated</strong>  <em>As of version 1.0, use <a href=\"jdt://contents/commons-lang-2.6.jar/org.apache.commons.lang/StringUtils.class?=app/%5C/home%5C/user%5C/.m2%5C/repository%5C/commons-lang%5C/commons-lang%5C/2.6%5C/commons-lang-2.6.jar%3Corg.apache.commons.lang%28StringUtils.class#3169\">org.apache.commons.lang.StringUtils.join(Object [], char)</a></em></p>\n"
+            + "<p>Returns concatination of two strings into one divided by special symbol.</p>\n"
+            + "<ul>\n"
+            + "<li><p><strong>Parameters:</strong></p>\n"
+            + "<ul>\n"
+            + "<li><p><strong>part1</strong> part 1 to concat.</p>\n"
+            + "</li>\n"
+            + "<li><p><strong>part2</strong> part 2 to concat.</p>\n"
+            + "</li>\n"
+            + "<li><p><strong>divider</strong> divider of part1 and part2.</p>\n"
+            + "</li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "<li><p><strong>Returns:</strong></p>\n"
+            + "<ul>\n"
+            + "<li>concatination of two strings into one.</li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "<li><p><strong>Throws:</strong></p>\n"
+            + "<ul>\n"
+            + "<li><a href=\"jdt://contents/rt.jar/java.lang/NullPointerException.class?=app/%5C/usr%5C/lib%5C/jvm%5C/java-8-openjdk-amd64%5C/jre%5C/lib%5C/rt.jar%3Cjava.lang%28NullPointerException.class#53\">NullPointerException</a> - if one of the part has null value.</li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "</ul>\n");
   }
 
   @Test
@@ -109,12 +129,12 @@ public class AutocompleteProposalJavaDocTest {
     // when
     editor.waitActive();
     loader.waitOnClosed();
-    editor.goToCursorPositionVisible(20, 1);
+    editor.goToCursorPositionVisible(32, 14);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("App()");
+    editor.selectAutocompleteProposal("App() multimodule.App");
 
     // then
-    editor.checkProposalDocumentation(".*No documentation found.*");
+    assertEquals(editor.getProposalDocumentationHTML(), "<p>No documentation found.</p>\n");
   }
 
   @Test
@@ -124,19 +144,34 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(25, 20);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("isEquals(Object o) : boolean ");
+    editor.selectAutocompleteProposal("isEquals(Object o) : boolean Book");
 
     // then
-    editor.checkProposalDocumentation(
-        ".*Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code>"
-            + "<dl><dt>Parameters:</dt>"
-            + "<dd><b>o</b> an object.</dd>"
-            + "<dt>Returns:</dt>"
-            + "<dd> Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code></dd>"
-            + "<dt>Since:</dt>"
-            + "<dd> 1.0</dd>"
-            + "<dt>See Also:</dt>.*"
-            + "<dd><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/model&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs%5C%2Fmodel%2Fsrc%5C%2Fmain%5C%2Fjava%3Cmultimodule.model%7BBook.java%E2%98%83Book%7EisEquals%7EQObject%3B%E2%98%82java.lang.Object%E2%98%82equals%E2%98%82Object'>java.lang.Object.equals\\(Object\\)</a></dd></dl>.*");
+    assertEquals(
+        editor.getProposalDocumentationHTML(),
+        "<p>Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code></p>\n"
+            + "<ul>\n"
+            + "<li><p><strong>Parameters:</strong></p>\n"
+            + "<ul>\n"
+            + "<li><strong>o</strong> an object.</li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "<li><p><strong>Returns:</strong></p>\n"
+            + "<ul>\n"
+            + "<li>Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code></li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "<li><p><strong>Since:</strong></p>\n"
+            + "<ul>\n"
+            + "<li>1.0</li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "<li><p><strong>See Also:</strong></p>\n"
+            + "<ul>\n"
+            + "<li><a href=\"jdt://contents/rt.jar/java.lang/Object.class?=app/%5C/usr%5C/lib%5C/jvm%5C/java-8-openjdk-amd64%5C/jre%5C/lib%5C/rt.jar%3Cjava.lang%28Object.class#148\">java.lang.Object.equals(Object)</a></li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "</ul>\n");
   }
 
   @Test
@@ -152,10 +187,13 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitActive();
     editor.goToCursorPositionVisible(22, 12);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("BookImpl");
+    editor.selectAutocompleteProposal("BookImpl - multimodule.model");
 
     // then
-    editor.checkProposalDocumentation(".*UPDATE. Implementation of Book interface..*");
+    assertTrue(
+        editor
+            .getProposalDocumentationHTML()
+            .contains("UPDATE. Implementation of Book interface."));
   }
 
   @Test
@@ -165,26 +203,31 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(25, 20);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("hashCode() : int");
+    editor.selectAutocompleteProposal("hashCode() : int Object");
 
     // then
-    editor.checkProposalDocumentation(
-        ".*Returns a hash code value for the object. "
-            + "This method is supported for the benefit of hash tables such as those provided by "
-            + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs.*%3Cjava.lang%28Object.class%E2%98%83Object%7EhashCode%E2%98%82java.util.HashMap'>java.util.HashMap</a></code>.*");
+    assertTrue(
+        editor
+            .getProposalDocumentationHTML()
+            .contains(
+                "Returns a hash code value for the object. "
+                    + "This method is supported for the benefit of hash tables such as those provided by"));
   }
 
   @Test
   public void shouldWorkAroundAbsentSourcesOfExternalLib() throws IOException {
+
+    // This test fails because jdt.ls does download source for the class being used here. Need to
+    // find or construct an artifact that has no source.
     // when
     editor.waitActive();
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(31, 23);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("info(String arg0) : void");
+    editor.selectAutocompleteProposal("info(String msg) : void Logger");
 
     // then
-    editor.checkProposalDocumentation(".*No documentation found.*");
+    assertEquals(editor.getProposalDocumentationHTML(), ".*No documentation found.*");
 
     // when
     editor.closeAutocomplete();
@@ -202,7 +245,8 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("info(String msg) : void");
 
     // then
-    editor.checkProposalDocumentation(
+    assertEquals(
+        editor.getProposalDocumentationHTML(),
         ".*Log a message at the .* level."
             + "<dl><dt>Parameters:</dt>"
             + "<dd><b>msg</b>"
