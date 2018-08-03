@@ -41,7 +41,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
@@ -100,9 +99,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -351,9 +348,8 @@ public class CodenvyEditor {
   @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
   private WebElement proposalDoc;
 
-    @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
-    private WebElement languageServerRenameField;
-
+  @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
+  private WebElement languageServerRenameField;
 
   /**
    * Waits until specified {@code editorTab} is presented, selected, focused and editor activated.
@@ -685,9 +681,7 @@ public class CodenvyEditor {
    * @param text text which should be typed
    */
   public void typeTextIntoEditor(String text) {
-    loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(text);
-    loader.waitOnClosed();
   }
 
   /**
@@ -802,7 +796,6 @@ public class CodenvyEditor {
 
   /** Launches code assistant by "ctrl" + "space" keys pressing. */
   public void launchAutocomplete() {
-    loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
     typeTextIntoEditor(SPACE.toString());
@@ -1057,7 +1050,7 @@ public class CodenvyEditor {
    */
   public void selectAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item)));
+        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[.='%s']", item)));
   }
 
   /**
@@ -2316,6 +2309,13 @@ public class CodenvyEditor {
   /** press the key 'Enter' */
   public void pressEnter() {
     seleniumWebDriverHelper.pressEnter();
+  }
+
+  public String getProposalDocumentationHTML() {
+    return seleniumWebDriverHelper
+        .waitVisibility(proposalDoc)
+        .findElement(By.tagName("div"))
+        .getAttribute("innerHTML");
   }
 
   /** Type the comment line in the file by keyboard */

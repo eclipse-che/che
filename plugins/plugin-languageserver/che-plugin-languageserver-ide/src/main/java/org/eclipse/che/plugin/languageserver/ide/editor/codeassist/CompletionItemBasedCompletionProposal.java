@@ -32,8 +32,10 @@ import org.eclipse.che.ide.api.editor.link.LinkedModel;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.editor.orion.client.jso.MarkedOverlay;
 import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.ide.util.Pair;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.editor.codeassist.snippet.SnippetResolver;
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
@@ -88,30 +90,43 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
   @Override
   public void getAdditionalProposalInfo(final AsyncCallback<Widget> callback) {
-    if (completionItem.getItem().getDocumentation() == null && canResolve()) {
-      resolve()
-          .then(
-              item -> {
-                completionItem = item;
-                resolved = true;
-                callback.onSuccess(createAdditionalInfoWidget());
-              })
-          .catchError(
-              e -> {
-                callback.onFailure(e.getCause());
-              });
-    } else {
-      callback.onSuccess(createAdditionalInfoWidget());
-    }
+    MarkedOverlay.getMarkedPromise()
+        .then(
+            (marked) -> {
+              if (completionItem.getItem().getDocumentation() == null && canResolve()) {
+                resolve()
+                    .then(
+                        item -> {
+                          completionItem = item;
+                          resolved = true;
+                          callback.onSuccess(createAdditionalInfoWidget(marked));
+                        })
+                    .catchError(
+                        e -> {
+                          callback.onFailure(e.getCause());
+                        });
+              } else {
+                callback.onSuccess(createAdditionalInfoWidget(marked));
+              }
+            });
   }
 
-  private Widget createAdditionalInfoWidget() {
+  private Widget createAdditionalInfoWidget(MarkedOverlay marked) {
     Either<String, MarkupContent> markup = completionItem.getItem().getDocumentation();
     // markup type is plain text or markdown. Both are ok natively.
-    String documentation = markup.isLeft() ? markup.getLeft() : markup.getRight().getValue();
+    String documentation = null;
+    if (markup != null) {
+      documentation = markup.isLeft() ? markup.getLeft() : markup.getRight().getValue();
+    }
 
     if (documentation == null || documentation.trim().isEmpty()) {
       documentation = "No documentation found.";
+    }
+
+    try {
+      documentation = marked.toHTML(documentation);
+    } catch (Exception e) {
+      Log.error(getClass(), e);
     }
 
     HTML widget = new HTML(documentation);
