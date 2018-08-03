@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -119,7 +120,7 @@ class LanguageServerInitializer {
                   .filter(Objects::nonNull)
                   .map(this::createServerInstance)
                   .filter(Objects::nonNull)
-                  .map(this::initializeServerInstance)
+                  .map(id -> initializeServerInstance(id, wsPath))
                   .filter(Objects::nonNull)
                   .map(serverCapabilitiesRegistry::getOrNull)
                   .filter(Objects::nonNull)
@@ -195,7 +196,7 @@ class LanguageServerInitializer {
     return null;
   }
 
-  private String initializeServerInstance(String id) {
+  private String initializeServerInstance(String id, String wsPath) {
     try {
       LOG.debug("Initializing of a language server instance for server '{}': started", id);
       synchronized (idRegistry.get(id)) {
@@ -210,7 +211,7 @@ class LanguageServerInitializer {
             languageServer.initialize(initializeParams).get(30, SECONDS);
 
         LanguageServerInitializedEvent event =
-            new LanguageServerInitializedEvent(id, languageServer);
+            new LanguageServerInitializedEvent(id, languageServer, wsPath);
         eventService.publish(event);
         LOG.debug("Published a corresponding event: {}", event);
 

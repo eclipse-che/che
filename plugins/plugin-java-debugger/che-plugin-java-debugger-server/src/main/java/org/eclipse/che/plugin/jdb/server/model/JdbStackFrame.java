@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -20,6 +21,7 @@ import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
 /**
@@ -38,20 +40,28 @@ public class JdbStackFrame implements StackFrameDump {
 
   public JdbStackFrame(com.sun.jdi.StackFrame jdiStackFrame) {
     this.jdiStackFrame = jdiStackFrame;
-    this.location = new JdbLocation(jdiStackFrame);
+
+    com.sun.jdi.Location jdiLocation = jdiStackFrame.location();
+    this.location =
+        new JdbLocation(
+            new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber()),
+            new JdbMethod(jdiStackFrame));
+
     this.variables = new AtomicReference<>();
     this.fields = new AtomicReference<>();
   }
 
   public JdbStackFrame(
-      com.sun.jdi.StackFrame jdiStackFrame,
-      List<Field> fields,
-      List<Variable> variables,
-      Location location) {
+      com.sun.jdi.StackFrame jdiStackFrame, List<Field> fields, List<Variable> variables) {
     this.jdiStackFrame = jdiStackFrame;
     this.fields = new AtomicReference<>(fields);
     this.variables = new AtomicReference<>(variables);
-    this.location = location;
+
+    com.sun.jdi.Location jdiLocation = jdiStackFrame.location();
+    this.location =
+        new JdbLocation(
+            new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber()),
+            new JdbMethod(jdiStackFrame));
   }
 
   @Override

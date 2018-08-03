@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -104,38 +105,38 @@ public class RenameVirtualMethodsTest {
 
   @Test
   public void test1() {
-    doRefactoringWithKeys(13, 19, "k");
+    doRefactoringWithKeys(14, 19, "k");
   }
 
   @Test
   public void test11() {
-    doRefactoringWithKeys(14, 10, "k");
+    doRefactoringWithKeys(15, 10, "k");
   }
 
   @Test
   public void test25() {
-    doRefactorByWizard(13, 10, "k");
+    doRefactorByWizard(14, 10, "k");
   }
 
   @Test
   public void testEnum2() {
-    doRefactoringWithKeys(29, 20, "get2ndPower");
+    doRefactoringWithKeys(30, 20, "get2ndPower");
   }
 
   @Test
   public void testFail35() {
-    doRefactorByWizardWithClosingWarnMess(13, 10, "k");
+    doRefactorByWizardWithClosingWarnMess(14, 10, "k");
   }
 
   @Test
   public void testGeneric2() {
-    doRefactorByWizard(19, 20, "addIfPositive");
+    doRefactorByWizard(20, 20, "addIfPositive");
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
   @Test
   public void testVarArgs1() {
-    doRefactorByWizard(25, 74, "runThes");
+    doRefactorByWizard(26, 74, "runThes");
     editor.waitTextIntoEditor(contentFromOutA);
   }
 

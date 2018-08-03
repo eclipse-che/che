@@ -71,8 +71,12 @@ objects:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: CHE_MULTIUSER
-            value: "${CHE_MULTIUSER}"
+          - name: CHE_WORKSPACE_HTTP__PROXY
+            value: "${CHE_WORKSPACE_HTTP__PROXY}"
+          - name: CHE_WORKSPACE_HTTPS__PROXY
+            value: "${CHE_WORKSPACE_HTTPS__PROXY}"
+          - name: CHE_WORKSPACE_NO__PROXY
+            value: "${CHE_WORKSPACE_NO__PROXY}"
           - name: CHE_HOST
             value: "che-${NAMESPACE}.${ROUTING_SUFFIX}"
           - name: CHE_PORT
@@ -187,6 +191,18 @@ objects:
     - type: ConfigChange
 
 parameters:
+- name: CHE_WORKSPACE_HTTP__PROXY
+  displayName: http_proxy for workspace containers
+  description:
+  value: ''
+- name: CHE_WORKSPACE_HTTPS__PROXY
+  displayName: https_proxy for workspace containers
+  description:
+  value: ''
+- name: CHE_WORKSPACE_NO__PROXY
+  displayName: no_proxy for workspace containers
+  description:
+  value: ''
 - name: ROUTING_SUFFIX
   displayName: Routing suffix of your OpenShift cluster
   description: This is the suffix appended to routes in your OpenShift cluster <route>-<project>.<routing_suffix>

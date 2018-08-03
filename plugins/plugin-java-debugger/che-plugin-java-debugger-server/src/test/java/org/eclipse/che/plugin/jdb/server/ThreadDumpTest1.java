@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -56,7 +57,7 @@ public class ThreadDumpTest1 {
     debugger = new JavaDebugger("localhost", parseInt(getProperty("debug.port")), events::add);
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/ThreadDumpTest1.java", 26, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/ThreadDumpTest1.java", 27, false, -1, "/test", null, -1);
     BreakpointImpl breakpoint = new BreakpointImpl(location);
 
     debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
@@ -99,10 +100,10 @@ public class ThreadDumpTest1 {
     assertTrue(stackFrameDump.getFields().isEmpty());
 
     Location location = stackFrameDump.getLocation();
-    assertEquals(location.getLineNumber(), 26);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/ThreadDumpTest1.java");
-    assertEquals(location.getExternalResourceId(), -1);
-    assertEquals(location.getResourceProjectPath(), "/test");
+    assertEquals(location.getLineNumber(), 27);
+    assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest1");
+    assertEquals(location.getExternalResourceId(), 0);
+    assertNull(location.getResourceProjectPath());
 
     Method method = location.getMethod();
     assertEquals(method.getName(), "main");

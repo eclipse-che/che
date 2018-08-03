@@ -54,3 +54,6 @@ wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabas
 
 # deploy
 deploy/** @riuvshin @l0rd @garagatyi @eivantsov @sleshchenko
+
+# selenium tests
+selenium/** @musienko-maxim @dmytro-ndp @Ohrimenko1988

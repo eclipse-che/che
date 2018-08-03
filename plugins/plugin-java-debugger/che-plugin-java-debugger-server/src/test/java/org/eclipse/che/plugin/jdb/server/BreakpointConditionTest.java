@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -44,7 +45,7 @@ public class BreakpointConditionTest {
     ProjectApiUtils.ensure();
 
     Location location =
-        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 17, "/test");
+        new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 18, "/test");
 
     events = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
@@ -63,7 +64,7 @@ public class BreakpointConditionTest {
   public void shouldStopByHitCount() throws Exception {
     debugger.addBreakpoint(
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 19, "/test"),
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 20, "/test"),
             true,
             new BreakpointConfigurationImpl(3)));
 
@@ -83,7 +84,7 @@ public class BreakpointConditionTest {
   public void shouldStopByCondition() throws Exception {
     Breakpoint breakpoint =
         new BreakpointImpl(
-            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 24, "/test"),
+            new LocationImpl("/test/src/org/eclipse/BreakpointsByConditionTest.java", 25, "/test"),
             true,
             new BreakpointConfigurationImpl("i==5"));
 

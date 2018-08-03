@@ -21,7 +21,8 @@
                     "type": "ide"
                   },
                   "protocol": "http",
-                  "port": "3000"
+                  "port": "3000",
+                  "path": "/"
                 },
                 "theia-dev": {
                   "attributes": {
@@ -49,7 +50,7 @@
           "recipe": {
             "contentType": "",
             "type": "dockerimage",
-            "content": "eclipse/che-theia:0.4.0-next.b17727c1-nightly"
+            "content": "eclipse/che-theia:0.3.13-nightly"
           }
         }
       },
@@ -85,6 +86,7 @@
                 "theia": {
                   "protocol": "http",
                   "port": "3000",
+                  "path": "/",
                   "attributes": {
                     "type": "ide"
                   }
@@ -121,7 +123,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.4.0-next.b17727c1-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.3.13-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
             "contentType": "application/x-yaml"
           }
         }

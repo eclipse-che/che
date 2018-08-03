@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -38,6 +39,8 @@ import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlPr
  */
 @Singleton
 public class TestProjectServiceClient {
+
+  private static final String BEARER_TOKEN_PREFIX = "Bearer ";
   private final TestMachineServiceClient machineServiceClient;
   private final HttpJsonRequestFactory requestFactory;
   private final TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpointUrlProvider;
@@ -64,7 +67,8 @@ public class TestProjectServiceClient {
     requestFactory
         .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
         .usePutMethod()
-        .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
+        .setAuthorizationHeader(
+            BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId))
         .setBody(project)
         .request();
   }
@@ -73,7 +77,8 @@ public class TestProjectServiceClient {
   public void deleteResource(String workspaceId, String path) throws Exception {
     requestFactory
         .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + path)
-        .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
+        .setAuthorizationHeader(
+            BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId))
         .useDeleteMethod()
         .request();
   }
@@ -82,7 +87,8 @@ public class TestProjectServiceClient {
     String url = workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/folder/" + folder;
     requestFactory
         .fromUrl(url)
-        .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
+        .setAuthorizationHeader(
+            BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId))
         .usePostMethod()
         .request();
   }
@@ -100,7 +106,8 @@ public class TestProjectServiceClient {
       httpConnection.setRequestMethod("POST");
       httpConnection.setRequestProperty("Content-Type", "application/zip");
       httpConnection.addRequestProperty(
-          "Authorization", machineServiceClient.getMachineApiToken(workspaceId));
+          "Authorization",
+          BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId));
       httpConnection.setDoOutput(true);
 
       try (OutputStream outputStream = httpConnection.getOutputStream()) {
@@ -156,7 +163,8 @@ public class TestProjectServiceClient {
       httpConnection.setRequestMethod("POST");
       httpConnection.setRequestProperty("Content-Type", "text/plain");
       httpConnection.addRequestProperty(
-          "Authorization", machineServiceClient.getMachineApiToken(workspaceId));
+          "Authorization",
+          BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId));
       httpConnection.setDoOutput(true);
       try (OutputStream output = httpConnection.getOutputStream()) {
         output.write(content.getBytes("UTF-8"));
@@ -178,7 +186,8 @@ public class TestProjectServiceClient {
     String apiUrl = workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project";
     return requestFactory
         .fromUrl(apiUrl)
-        .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
+        .setAuthorizationHeader(
+            BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId))
         .request()
         .asList(ProjectConfigDto.class)
         .get(0);
@@ -195,7 +204,8 @@ public class TestProjectServiceClient {
       httpConnection.setRequestMethod("PUT");
       httpConnection.setRequestProperty("Content-Type", "text/plain");
       httpConnection.addRequestProperty(
-          "Authorization", machineServiceClient.getMachineApiToken(workspaceId));
+          "Authorization",
+          BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId));
       httpConnection.setDoOutput(true);
 
       try (OutputStream output = httpConnection.getOutputStream()) {
