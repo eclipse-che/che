@@ -25,7 +25,10 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-/** @author Musienko Maxim */
+/**
+ * @author Musienko Maxim
+ * @author Ihor Okhrimenko
+ */
 @Singleton
 public class WorkspaceProjects {
 
