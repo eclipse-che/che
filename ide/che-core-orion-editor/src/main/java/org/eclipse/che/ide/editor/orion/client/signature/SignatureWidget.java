@@ -42,6 +42,7 @@ import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
+import org.eclipse.che.ide.editor.orion.client.jso.MarkedOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionPixelPositionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
@@ -160,31 +161,38 @@ public class SignatureWidget implements EventListener {
         event -> {
           Optional<String> docOptional = signature.getDocumentation();
           String documentation = docOptional.isPresent() ? docOptional.get() : "";
-          Widget info = createAdditionalInfoWidget(documentation);
-          if (info != null) {
-            docPopup.clear();
-            docPopup.add(info);
-            docPopup.getElement().getStyle().setOpacity(1);
+          MarkedOverlay.getMarkedPromise()
+              .then(
+                  marked -> {
+                    Widget info = createAdditionalInfoWidget(marked, documentation);
+                    if (info != null) {
+                      docPopup.clear();
+                      docPopup.add(info);
+                      docPopup.getElement().getStyle().setOpacity(1);
 
-            if (!docPopup.isAttached()) {
-              final int x = popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3;
-              final int y = popupElement.getOffsetTop();
-              RootPanel.get().add(docPopup);
-              updateMenuPosition(docPopup, x, y);
-            }
-          } else {
-            docPopup.getElement().getStyle().setOpacity(0);
-          }
+                      if (!docPopup.isAttached()) {
+                        final int x =
+                            popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3;
+                        final int y = popupElement.getOffsetTop();
+                        RootPanel.get().add(docPopup);
+                        updateMenuPosition(docPopup, x, y);
+                      }
+                    } else {
+                      docPopup.getElement().getStyle().setOpacity(0);
+                    }
+                  });
         },
         false);
 
     return element;
   }
 
-  private Widget createAdditionalInfoWidget(String documentation) {
+  private Widget createAdditionalInfoWidget(MarkedOverlay marked, String documentation) {
     if (documentation == null || documentation.trim().isEmpty()) {
       documentation = "No documentation found.";
     }
+
+    documentation = marked.toHTML(documentation);
 
     HTML widget = new HTML(documentation);
     widget.getElement().getStyle().setWhiteSpace(WhiteSpace.PRE_LINE);
