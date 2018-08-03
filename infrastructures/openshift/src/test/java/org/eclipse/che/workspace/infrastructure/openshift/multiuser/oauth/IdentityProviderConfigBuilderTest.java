@@ -225,7 +225,8 @@ public class IdentityProviderConfigBuilderTest {
 
   @Test(expectedExceptions = {InfrastructureException.class})
   public void testRethrowOnAnyException() throws Exception {
-    when(keycloakServiceClient.getIdentityProviderToken(anyString())).thenThrow(Exception.class);
+    when(keycloakServiceClient.getIdentityProviderToken(anyString()))
+        .thenThrow(org.eclipse.che.api.core.NotFoundException.class);
     configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID);
   }
 }
