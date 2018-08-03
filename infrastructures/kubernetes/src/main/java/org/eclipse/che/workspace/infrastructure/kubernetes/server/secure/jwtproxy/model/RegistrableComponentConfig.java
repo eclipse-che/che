@@ -15,10 +15,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
 
-/**
- * Describes jwtproxy standard registrable component
- * (type + options map).
- */
+/** Describes jwtproxy standard registrable component (type + options map). */
 @JsonInclude(Include.NON_NULL)
 public class RegistrableComponentConfig {
   private String type;
