@@ -1,16 +1,17 @@
 /*
  * Copyright (c) 2018-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
-import {ICommunicationClient} from './json-rpc-client';
+import { ICommunicationClient, CODE_REQUEST_TIMEOUT } from './json-rpc-client';
 
 enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'machine/log',
@@ -30,19 +31,90 @@ export class CheJsonRpcMasterApi {
   private cheJsonRpcApi: CheJsonRpcApiClient;
   private clientId: string;
 
-  constructor (client: ICommunicationClient) {
+  private checkingInterval: number;
+  private checkingDelay = 10000;
+  private fetchingClientIdTimeout = 5000;
+
+  private client: ICommunicationClient;
+
+  constructor(client: ICommunicationClient,
+              entryPoint: string) {
     this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
+    this.client = client;
+
+    client.addListener('open', () => this.onConnectionOpen());
+    client.addListener('close', (event: any) => {
+      switch (event.code) {
+        case 1000: // normal close
+          break;
+        default:
+          this.connect(entryPoint);
+      }
+    });
+  }
+
+  onConnectionOpen(): void {
+    if (this.checkingInterval) {
+      clearInterval(this.checkingInterval);
+      this.checkingInterval = undefined;
+    }
+
+    this.checkingInterval = setInterval(() => {
+      let isAlive = false;
+      const fetchClientPromise = new Promise((resolve) => {
+        this.fetchClientId().then(() => {
+          isAlive = true;
+          resolve(isAlive);
+        }, () => {
+          isAlive = false;
+          resolve(isAlive);
+        });
+      });
+
+      // this is timeout of fetchClientId request
+      const fetchClientTimeoutPromise = new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(isAlive);
+        }, this.fetchingClientIdTimeout);
+      });
+
+      Promise.race([fetchClientPromise, fetchClientTimeoutPromise]).then((isAlive: boolean) => {
+        if (isAlive) {
+          return;
+        }
+
+        clearInterval(this.checkingInterval);
+        this.checkingInterval = undefined;
+
+        this.client.disconnect(CODE_REQUEST_TIMEOUT);
+      });
+
+    }, this.checkingDelay);
   }
 
   /**
-   * Opens connection to pointed entrypoint.
+   * Opens connection to pointed entryPoint.
    *
-   * @param entrypoint
+   * @param {string} entryPoint
    * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
    */
-  connect(entrypoint: string): Promise<any> {
-    return this.cheJsonRpcApi.connect(entrypoint).then(() => {
+  connect(entryPoint: string): Promise<any> {
+    if (this.clientId) {
+      let clientId = `clientId=${this.clientId}`;
+      // in case of reconnection
+      // we need to test entrypoint on existing query parameters
+      // to add already gotten clientId
+      if (/\?/.test(entryPoint) === false) {
+        clientId = '?' + clientId;
+      } else {
+        clientId = '&' + clientId;
+      }
+      entryPoint += clientId;
+    }
+    return this.cheJsonRpcApi.connect(entryPoint).then(() => {
       return this.fetchClientId();
+    }).catch((error: any) => {
+      console.error(`Failed to connect to ${entryPoint}:`, error);
     });
   }
 
@@ -134,7 +206,7 @@ export class CheJsonRpcMasterApi {
   }
 
   /**
-   * Fetch client's id and strores it.
+   * Fetch client's id and stores it.
    *
    * @returns {IPromise<TResult>}
    */

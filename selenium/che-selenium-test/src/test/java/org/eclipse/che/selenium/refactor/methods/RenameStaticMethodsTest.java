@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -109,23 +110,23 @@ public class RenameStaticMethodsTest {
 
   @Test
   public void test0() {
-    doRefactoringWithKeys(13, 14, "k");
+    doRefactoringWithKeys(14, 14, "k");
   }
 
   @Test
   public void test2() {
-    doRefactoringWithKeys(13, 17, "k");
+    doRefactoringWithKeys(14, 17, "k");
   }
 
   @Test
   public void test8() {
-    doRefactorByWizard(13, 17, "k");
+    doRefactorByWizard(14, 17, "k");
     editor.waitTextIntoEditor(contentFromOutB);
   }
 
   @Test
   public void testFail5() {
-    doRefactorByWizardWithExpectedWarningMessage(14, 24, "k", testsFail5ErrorMess);
+    doRefactorByWizardWithExpectedWarningMessage(15, 24, "k", testsFail5ErrorMess);
   }
 
   @Test
@@ -133,7 +134,7 @@ public class RenameStaticMethodsTest {
     contentFromOutB = getTextFromFile(resourcesOutB);
 
     String contentFromOutA = getTextFromFile(resourceOutA);
-    doRefactorByWizard(15, 23, "fred");
+    doRefactorByWizard(16, 23, "fred");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/B.java");
     editor.waitTextIntoEditor(contentFromOutB);

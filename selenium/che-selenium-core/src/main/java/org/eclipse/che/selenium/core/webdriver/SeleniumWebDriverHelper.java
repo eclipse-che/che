@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -32,7 +33,6 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -394,7 +394,7 @@ public class SeleniumWebDriverHelper {
    * @param text text for sending
    */
   public void waitAndSendKeysTo(By elementLocator, String text) {
-    waitVisibility(elementLocator).sendKeys(text);
+    waitAndSendKeysTo(elementLocator, text, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -435,7 +435,19 @@ public class SeleniumWebDriverHelper {
    * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(By elementLocator) {
-    return waitVisibility(elementLocator).getAttribute("value");
+    return waitVisibilityAndGetValue(elementLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} visibility of {@link WebElement} with specified {@code
+   * elementLocator} and gets text.
+   *
+   * @param elementLocator locator of element from which text should be got
+   * @param timeout waiting time in seconds
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetValue(By elementLocator, int timeout) {
+    return waitVisibilityAndGetAttribute(elementLocator, "value", timeout);
   }
 
   /**
@@ -445,7 +457,18 @@ public class SeleniumWebDriverHelper {
    * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(WebElement webElement) {
-    return waitVisibility(webElement).getAttribute("value");
+    return waitVisibilityAndGetValue(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} visibility of provided {@code webElement} and gets text.
+   *
+   * @param webElement element, text from which should be got
+   * @param timeout waiting time in seconds
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetValue(WebElement webElement, int timeout) {
+    return waitVisibilityAndGetAttribute(webElement, "value", timeout);
   }
 
   /**
@@ -502,7 +525,7 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(By elementLocator) {
-    return waitVisibility(elementLocator).getText();
+    return waitVisibilityAndGetText(elementLocator, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -524,7 +547,18 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(WebElement webElement) {
-    return waitVisibility(webElement).getText();
+    return waitVisibilityAndGetText(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} visibility of provided {@code webElement} and gets text.
+   *
+   * @param webElement element from which text should be got
+   * @param timeout waiting time in seconds
+   * @return element text by {@link WebElement#getText()}
+   */
+  public String waitVisibilityAndGetText(WebElement webElement, int timeout) {
+    return waitVisibility(webElement, timeout).getText();
   }
 
   /**
@@ -541,7 +575,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetValue(elementLocator).equals(expectedValue));
+                driver -> waitVisibilityAndGetValue(elementLocator, timeout).equals(expectedValue));
   }
 
   /**
@@ -568,7 +602,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetValue(webElement).equals(expectedValue));
+                driver -> waitVisibilityAndGetValue(webElement, timeout).equals(expectedValue));
   }
 
   /**
@@ -597,7 +631,8 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibility(element).getAttribute("value").contains(expectedText));
+                driver ->
+                    waitVisibility(element, timeout).getAttribute("value").contains(expectedText));
   }
 
   /**
@@ -652,7 +687,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetText(elementLocator).equals(expectedText));
+                driver -> waitVisibilityAndGetText(elementLocator, timeout).equals(expectedText));
   }
 
   /**
@@ -679,7 +714,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetText(webElement).equals(expectedText));
+                driver -> waitVisibilityAndGetText(webElement, timeout).equals(expectedText));
   }
 
   /**
@@ -765,7 +800,7 @@ public class SeleniumWebDriverHelper {
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> !(waitVisibilityAndGetText(element).contains(expectedText)));
+                driver -> !(waitVisibilityAndGetText(element, timeout).contains(expectedText)));
   }
 
   /**
@@ -1082,11 +1117,31 @@ public class SeleniumWebDriverHelper {
     webDriverWaitFactory
         .get(WIDGET_TIMEOUT_SEC)
         .until(
+            (ExpectedCondition<Boolean>) driver -> seleniumWebDriver.getWindowHandles().size() > 1);
+  }
+
+  /**
+   * Waits during {@code timeout} until count of opened browser tabs are equals to {@code
+   * expectedCount}.
+   *
+   * @param expectedCount count of the opened browsers tabs
+   * @param timeout waiting time in seconds
+   */
+  public void waitWindowsCount(int expectedCount, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
             (ExpectedCondition<Boolean>)
-                input -> {
-                  Set<String> driverWindows = seleniumWebDriver.getWindowHandles();
-                  return (driverWindows.size() > 1);
-                });
+                driver -> seleniumWebDriver.getWindowHandles().size() == expectedCount);
+  }
+
+  /**
+   * Waits until count of opened browser tabs are equals to {@code expectedCount}.
+   *
+   * @param expectedCount count of the opened browsers tabs
+   */
+  public void waitWindowsCount(int expectedCount) {
+    waitWindowsCount(expectedCount, WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -1316,5 +1371,26 @@ public class SeleniumWebDriverHelper {
     webElement.sendKeys(readyToUploadFile.toString());
 
     return readyToUploadFile.getFileName().toString();
+  }
+
+  /**
+   * Waits during {@code timeout} until specified {@code expression} returns "true".
+   *
+   * @param expression the condition which should be waits until it has a "true" state
+   * @param timeout waiting time in seconds
+   */
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until((ExpectedCondition<Boolean>) driver -> expression.apply(this.seleniumWebDriver));
+  }
+
+  /**
+   * Waits until specified {@code expression} returns "true".
+   *
+   * @param expression the condition which should be waits until it has a "true" state
+   */
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression) {
+    waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
 }

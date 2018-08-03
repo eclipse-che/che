@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -174,12 +175,12 @@ public class YamlFileEditingTest {
     editor.selectTabByName("deployment.yaml");
     editor.waitAllMarkersInvisibility(ERROR);
 
-    editor.goToPosition(12, 2);
+    editor.goToPosition(13, 2);
     editor.typeTextIntoEditor("a");
     editor.moveCursorToText("aapiVersion");
     editor.waitTextInHoverPopup("Unexpected property aapiVersion");
 
-    editor.goToPosition(12, 1);
+    editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
     editor.moveCursorToText("apiVersion:");
@@ -192,21 +193,21 @@ public class YamlFileEditingTest {
     editor.selectTabByName("deployment.yaml");
 
     // comment lines by Ctrl+'/' buttons
-    editor.goToPosition(18, 1);
+    editor.goToPosition(19, 1);
     editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor("#  generation: 4");
-    editor.goToPosition(20, 1);
+    editor.goToPosition(21, 1);
     editor.launchCommentCodeFeature();
-    editor.goToPosition(22, 1);
+    editor.goToPosition(23, 1);
     editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor(COMMENTED_CODE);
 
     // uncomment all commented lines
-    editor.goToPosition(18, 1);
+    editor.goToPosition(19, 1);
     editor.launchCommentCodeFeature();
-    editor.goToPosition(20, 1);
+    editor.goToPosition(21, 1);
     editor.launchCommentCodeFeature();
-    editor.goToPosition(22, 1);
+    editor.goToPosition(23, 1);
     editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor(UNCOMMENTED_CODE);
   }

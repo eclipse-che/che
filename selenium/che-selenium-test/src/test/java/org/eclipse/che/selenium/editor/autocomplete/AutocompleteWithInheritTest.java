@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -79,18 +80,18 @@ public class AutocompleteWithInheritTest {
         PROJECT_NAME + "/src/main/java/example", BASE_CLASS + ".java");
     editor.waitAllMarkersInvisibility(ERROR);
     projectExplorer.openItemByVisibleNameInExplorer(EXTENDED_CLASS + ".java");
-    editor.waitMarkerInPosition(MarkerLocator.ERROR, 13);
-    editor.setCursorToLine(13);
+    editor.waitMarkerInPosition(MarkerLocator.ERROR, 14);
+    editor.setCursorToLine(14);
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Add constructor 'InheritClass(int,String)'");
     editor.selectFirstItemIntoFixErrorPropByEnter();
     editor.waitTextIntoEditor(contentAfterFix);
-    editor.waitMarkerInvisibility(ERROR, 13);
-    editor.waitMarkerInPosition(TASK_OVERVIEW, 18);
+    editor.waitMarkerInvisibility(ERROR, 14);
+    editor.waitMarkerInPosition(TASK_OVERVIEW, 19);
     editor.waitTabFileWithSavedStatus(EXTENDED_CLASS);
     editor.selectTabByName(BASE_CLASS);
     loader.waitOnClosed();
-    editor.selectLineAndDelete(24);
+    editor.selectLineAndDelete(25);
     editor.typeTextIntoEditor("int testString;");
     editor.typeTextIntoEditor(Keys.ARROW_DOWN.toString());
     editor.typeTextIntoEditor(Keys.ARROW_DOWN.toString());
@@ -100,7 +101,7 @@ public class AutocompleteWithInheritTest {
     editor.waitTabFileWithSavedStatus(BASE_CLASS);
     editor.selectTabByName(EXTENDED_CLASS);
     loader.waitOnClosed();
-    editor.setCursorToLine(16);
+    editor.setCursorToLine(17);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.HOME.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());

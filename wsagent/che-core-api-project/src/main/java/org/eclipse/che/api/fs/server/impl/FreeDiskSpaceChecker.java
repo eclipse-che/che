@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -65,7 +66,7 @@ public class FreeDiskSpaceChecker {
   private void onStart() {
     execs.scheduleAtFixedRate(
         this::checkFreeDiskSpace, CHECK_PERIOD_SEC, CHECK_PERIOD_SEC, TimeUnit.SECONDS);
-    LOG.info("Free disk space checker initialized");
+    LOG.debug("Free disk space checker initialized");
   }
 
   @PreDestroy
@@ -77,11 +78,11 @@ public class FreeDiskSpaceChecker {
       LOG.warn("Failed to terminate free disk space checker");
     }
 
-    LOG.info("Free disk space checker is stopped");
+    LOG.debug("Free disk space checker is stopped");
   }
 
   private void checkFreeDiskSpace() {
-    LOG.info("Checking free disk space");
+    LOG.debug("Checking free disk space");
     Path root = Paths.get(rootDirPathProvider.get());
 
     try {
@@ -92,7 +93,7 @@ public class FreeDiskSpaceChecker {
         checkerCommunication.broadcastLowDiskSpaceMessage();
       }
 
-      LOG.info(
+      LOG.debug(
           "Checking free disk space finished. Usable space: {}, boundary cutoff: {}.",
           usableSpace,
           BOUNDARY_CUTOFF_BYTES);

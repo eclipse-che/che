@@ -1,43 +1,44 @@
+---
 jwtproxy:
-  verifier_proxies:
-  - listen_addr: :8080
-    verifier:
-      upstream: http://tomcat:8080/
-      audience: workspace123
-      max_skew: 1m
-      max_ttl: 8800h
-      key_server:
-        type: preshared
-        options:
-          issuer: wsmaster
-          key_id: workspace123
-          public_key_path: /config/mykey.pub
-      claims_verifiers:
-      - type: static
-        options:
-          iss: wsmaster
-      nonce_storage:
-        type: void
-  - listen_addr: :4101
-    verifier:
-      upstream: ws://terminal:4101/
-      audience: workspace123
-      max_skew: 1m
-      max_ttl: 8800h
-      key_server:
-        type: preshared
-        options:
-          issuer: wsmaster
-          key_id: workspace123
-          public_key_path: /config/mykey.pub
-      claims_verifiers:
-      - type: static
-        options:
-          iss: wsmaster
-      nonce_storage:
-        type: void
-      excludes:
-      - /api/liveness
-      - /other/exclude
   signer_proxy:
     enabled: false
+  verifier_proxies:
+  - listen_addr: ":8080"
+    verifier:
+      audience: "workspace123"
+      claims_verifiers:
+      - options:
+          iss: "wsmaster"
+        type: "static"
+      key_server:
+        options:
+          issuer: "wsmaster"
+          key_id: "workspace123"
+          public_key_path: "/config/mykey.pub"
+        type: "preshared"
+      max_skew: "1m"
+      max_ttl: "8800h"
+      nonce_storage:
+        type: "void"
+      upstream: "http://tomcat:8080"
+  - listen_addr: ":4101"
+    verifier:
+      audience: "workspace123"
+      claims_verifiers:
+      - options:
+          iss: "wsmaster"
+        type: "static"
+      excludes:
+      - "/api/liveness"
+      - "/other/exclude"
+      key_server:
+        options:
+          issuer: "wsmaster"
+          key_id: "workspace123"
+          public_key_path: "/config/mykey.pub"
+        type: "preshared"
+      max_skew: "1m"
+      max_ttl: "8800h"
+      nonce_storage:
+        type: "void"
+      upstream: "ws://terminal:4101"
