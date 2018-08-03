@@ -10,17 +10,16 @@
  */
 package org.eclipse.che.ide.editor.orion.client.jso;
 
-/**
- * This class gives access to the marked.js module from orion editor.
- *
- * @author Thomas Mäder
- */
-
 import com.google.gwt.core.client.JavaScriptObject;
 import java.util.function.Consumer;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 
+/**
+ * This class gives access to the marked.js module from orion editor.
+ *
+ * @author Thomas Mäder
+ */
 public class MarkedOverlay extends JavaScriptObject {
 
   private static Promise<MarkedOverlay> markedPromise = create();
