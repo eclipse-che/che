@@ -11,7 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model;
 
-/** Describes signer proxy configuration, */
+/**
+ * Describes signer proxy configuration
+ *
+ * @author Mykhailo Kuznietsov
+ */
 public class SignerProxy {
 
   private boolean enabled;

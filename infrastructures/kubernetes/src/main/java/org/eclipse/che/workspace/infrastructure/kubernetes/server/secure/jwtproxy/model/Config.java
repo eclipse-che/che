@@ -13,7 +13,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/** Describes parent node of jwtproxy config. */
+/**
+ * Describes parent node of jwtproxy config.
+ *
+ * @author Mykhailo Kuznietsov
+ */
 public class Config {
   @JsonProperty("jwtproxy")
   private JWTProxy jwtProxy;
