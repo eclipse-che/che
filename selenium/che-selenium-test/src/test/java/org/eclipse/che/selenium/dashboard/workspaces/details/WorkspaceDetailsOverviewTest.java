@@ -196,7 +196,7 @@ public class WorkspaceDetailsOverviewTest {
 
   private void setupValidName(String name) {
     workspaceOverview.enterNameWorkspace(name);
-    workspaceOverview.waitUntillNoErrorsDisplayed();
+    workspaceOverview.waitUntilNoErrorsDisplayed();
     workspaceOverview.waitEnabledSaveButton();
   }
 

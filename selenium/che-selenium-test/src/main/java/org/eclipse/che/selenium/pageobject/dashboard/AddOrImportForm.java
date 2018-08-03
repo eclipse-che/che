@@ -129,8 +129,7 @@ public class AddOrImportForm {
   public void addSampleToWorkspace(String sampleName) {
     waitAddOrImportFormOpened();
 
-    if (!isSampleCheckboxEnabled(sampleName)) ;
-    {
+    if (!isSampleCheckboxEnabled(sampleName)) {
       clickOnSampleCheckbox(sampleName);
     }
 
@@ -314,9 +313,9 @@ public class AddOrImportForm {
 
   public boolean isSampleCheckboxEnabled(String sampleName) {
     String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
-    String locator = format("//div[@id='%s']/md-checkbox", checkboxId);
+    String checkboxLocator = format("//div[@id='%s']/md-checkbox", checkboxId);
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetAttribute(By.xpath(locator), "aria-checked")
+        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), "aria-checked")
         .equals("true");
   }
 
