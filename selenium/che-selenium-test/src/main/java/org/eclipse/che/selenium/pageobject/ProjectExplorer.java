@@ -64,7 +64,6 @@ import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuCons
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -1060,8 +1059,7 @@ public class ProjectExplorer {
   /** Invokes special javascript function for 'quick' expand project(s) tree */
   public void quickExpandWithJavaScript() {
     String jsScript = "IDE.ProjectExplorer.expandAll();";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 
@@ -1070,8 +1068,7 @@ public class ProjectExplorer {
    */
   public void quickCollapseJavaScript() {
     String jsScript = "IDE.ProjectExplorer.collapseAll()";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 
@@ -1083,8 +1080,7 @@ public class ProjectExplorer {
    */
   public void quickRevealToItemWithJavaScript(String absPathToResource) {
     String jsScript = "IDE.ProjectExplorer.reveal(\"" + absPathToResource.replace(".", "/") + "\")";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 

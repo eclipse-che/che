@@ -22,6 +22,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
@@ -136,11 +137,16 @@ public class CheTerminal {
     new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermContainer));
   }
 
-  /** gets visible text from terminal container */
+  /** gets visible text from terminal container where lines divided by "/n" delimiter */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public String getVisibleTextFromTerminal() {
-    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(defaultTermContainer))
-        .getText();
+    String jsCommandToReadVisibleTextFromTerminal = "return IDE.TerminalContentProvider.getVisibleText('Terminal', 'dev-machine')";
+    List<String> lines =
+        (List<String>)
+            seleniumWebDriver.executeScript(
+                    jsCommandToReadVisibleTextFromTerminal);
+    
+    return String.join("/n", lines);
   }
 
   /**
