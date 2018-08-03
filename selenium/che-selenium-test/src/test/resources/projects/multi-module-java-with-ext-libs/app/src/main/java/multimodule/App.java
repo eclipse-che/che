@@ -29,6 +29,7 @@ public class App {
         // external lib ch.qos.logback with sources which are accessible by maven; need to download sources from maven repo.
         org.slf4j.Logger logbackLogger = org.slf4j.LoggerFactory.getLogger(App.class);
         logbackLogger.info(concat("Info from ", "logbackLogger", ' '));
+        new App();
     }
 
     /**
