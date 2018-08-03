@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +28,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -152,7 +150,12 @@ public class TestProjectServiceClient {
 
   /** Import project from file system into a user workspace */
   public void importProject(
-          String workspaceId, String projectName, String location, String  type, Map<String,String> parameters) throws Exception {
+      String workspaceId,
+      String projectName,
+      String location,
+      String type,
+      Map<String, String> parameters)
+      throws Exception {
     SourceStorageDto source = getInstance().createDto(SourceStorageDto.class);
     source.setLocation(location);
     source.setType(type);
@@ -162,15 +165,16 @@ public class TestProjectServiceClient {
   }
 
   /** Import project from file system into a user workspace */
-  public void importProject(
-          String workspaceId, String projectName, SourceStorageDto source) throws Exception {
+  public void importProject(String workspaceId, String projectName, SourceStorageDto source)
+      throws Exception {
 
     requestFactory
-            .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
-            .usePutMethod()
-            .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
-            .setBody(source)
-            .request();
+        .fromUrl(
+            workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/import/" + projectName)
+        .usePostMethod()
+        .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
+        .setBody(source)
+        .request();
   }
 
   /** Creates file in the project. */

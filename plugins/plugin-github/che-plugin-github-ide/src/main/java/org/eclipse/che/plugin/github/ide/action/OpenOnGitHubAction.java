@@ -61,10 +61,13 @@ public class OpenOnGitHubAction extends BaseAction implements ActivePartChangedH
   /** {@inheritDoc} */
   @Override
   public void update(ActionEvent event) {
-    final Resource[] resources = appContext.getResources();
-
-    event.getPresentation().setVisible(true);
-    event.getPresentation().setEnabled(resources != null && resources.length == 1);
+    final Resource resources = appContext.getResource();
+    String gitRepoUrl = resources.getProject().getAttribute("git.repository.remotes");
+    if (GitHubUrlUtils.isGitHubUrl(gitRepoUrl)) {
+      event.getPresentation().setEnabledAndVisible(true);
+    } else {
+      event.getPresentation().setEnabledAndVisible(false);
+    }
   }
 
   /** {@inheritDoc} */

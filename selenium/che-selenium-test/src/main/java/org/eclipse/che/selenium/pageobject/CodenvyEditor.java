@@ -265,6 +265,7 @@ public class CodenvyEditor {
     OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
     NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
     FIND(By.id("contextMenu/Find")),
+    OPEN_ON_GITHUB(By.id("contextMenu/Open on GitHub")),
     CLOSE(By.id("contextMenu/Close"));
 
     @SuppressWarnings("ImmutableEnumChecker")
@@ -639,6 +640,22 @@ public class CodenvyEditor {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
     waitActive();
     waitCursorPosition(positionLine, positionChar);
+  }
+
+  /**
+   * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
+   *
+   * @param positionLine line's number where cursor should be placed
+   * @param positionChar char's number where cursor should be placed
+   */
+  public void selectLines(int fromLine, int numberOfLine) {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    setCursorToLine(fromLine);
+    action.keyDown(SHIFT).perform();
+    for (int i = 0; i < numberOfLine; i++) {
+      typeTextIntoEditor(Keys.ARROW_DOWN.toString());
+    }
+    action.keyUp(SHIFT).perform();
   }
 
   /**

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.github.shared;
 
+import com.google.common.base.Strings;
+
 public class GitHubUrlUtils {
 
   /**
@@ -19,7 +21,11 @@ public class GitHubUrlUtils {
    * @return
    */
   public static String toHttpsIfNeed(String gitUrl) {
+    if (Strings.isNullOrEmpty(gitUrl)) {
+      return gitUrl;
+    }
     String gitRepoUrl = gitUrl;
+
     if (gitUrl.startsWith("git@")) {
       // normalize git@ and https:git@ urls
       gitRepoUrl = gitUrl.replaceFirst("git@", "https://");
@@ -48,5 +54,12 @@ public class GitHubUrlUtils {
 
   public static String getTreeUrl(String rootGitRepoUrl, String ref, String path) {
     return rootGitRepoUrl + "/tree/" + ref + "/" + path;
+  }
+
+  public static boolean isGitHubUrl(String rootGitRepoUrl) {
+    if (Strings.isNullOrEmpty(rootGitRepoUrl)) {
+      return false;
+    }
+    return rootGitRepoUrl.startsWith("git@") || rootGitRepoUrl.startsWith("https://github.com");
   }
 }
