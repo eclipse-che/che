@@ -123,7 +123,7 @@ describe('Workspace Loader', () => {
 
             spyOn(workspaceLoader, "openIDE").and.callThrough();
             spyOn(workspaceLoader, "openURL");
-            workspaceLoader.load().then(done());
+            workspaceLoader.load().then(() => done());
         });
 
         it('should call openURL method with correct parameter', () => {
@@ -152,7 +152,7 @@ describe('Workspace Loader', () => {
 
             spyOn(workspaceLoader, "openIDE").and.callThrough();
             spyOn(workspaceLoader, "openURL");
-            workspaceLoader.load().then(done());
+            workspaceLoader.load().then(() => done());
         });
 
         it('should open IDE directly', () => {
