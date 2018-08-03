@@ -1996,6 +1996,11 @@
     </dependencyManagement>
     <repositories>
         <repository>
+            <id>ossrh</id>
+            <name>central public snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
             <id>codenvy-public-repo</id>
             <name>codenvy public</name>
             <url>https://maven.codenvycorp.com/content/groups/public/</url>
