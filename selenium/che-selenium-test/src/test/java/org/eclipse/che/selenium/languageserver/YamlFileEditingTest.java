@@ -26,6 +26,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.Preferences.DropDownLanguageServerSettings.YAML;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -125,10 +126,12 @@ public class YamlFileEditingTest {
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("diskName");
     editor.selectAutocompleteProposal("diskName");
-    editor.checkProposalDocumentation("The Name of the data disk in the blob storage");
+    assertEquals(
+        editor.getProposalDocumentationHTML(), "The Name of the data disk in the blob storage");
     editor.waitProposalIntoAutocompleteContainer("diskURI");
     editor.selectAutocompleteProposal("diskURI");
-    editor.checkProposalDocumentation("The URI the data disk in the blob storage");
+    assertEquals(
+        editor.getProposalDocumentationHTML(), "The URI the data disk in the blob storage");
 
     // select proposal and check expected text in the Editor
     editor.enterAutocompleteProposal("kind");
