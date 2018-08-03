@@ -117,8 +117,12 @@ objects:
             value: "/data/logs"
           - name: CHE_LOG_LEVEL
             value: "INFO"
+          - name: CHE_KEYCLOAK_REALM
+            value: "${CHE_KEYCLOAK_REALM}"
           - name: CHE_KEYCLOAK_AUTH__SERVER__URL
             value: "${CHE_KEYCLOAK_AUTH__SERVER__URL}"
+          - name: CHE_KEYCLOAK_CLIENT__ID
+            value: "${CHE_KEYCLOAK_CLIENT__ID}"
           - name: CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER
             value: "${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER}"
           - name: CHE_OAUTH_GITHUB_CLIENTID
@@ -255,6 +259,14 @@ parameters:
   displayName: Admin password update
   description: Force an admin to update password after 1st login. True by default
   value: 'true'
+- name: CHE_KEYCLOAK_REALM
+  displayName: Identity provider Realm
+  description: Identity provider Realm. Defaults to che
+  value: 'che'
+- name: CHE_KEYCLOAK_CLIENT__ID
+  displayName: Identity provider Client ID
+  description: Identity provider Client ID. Defaults to che-public
+  value: 'che-public'
 - name: CHE_KEYCLOAK_AUTH__SERVER__URL
   displayName: Identity provider URL
   description: URL of a remote identity provider. Defaults to Keycloak bundled with Che multi user
