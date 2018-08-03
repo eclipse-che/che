@@ -11,5 +11,4 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
-public class WorkspaceDetailsProjectsTest {
-}
+public class WorkspaceDetailsProjectsTest {}
