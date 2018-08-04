@@ -140,12 +140,11 @@ public class CheTerminal {
   /** gets visible text from terminal container where lines divided by "/n" delimiter */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public String getVisibleTextFromTerminal() {
-    String jsCommandToReadVisibleTextFromTerminal = "return IDE.TerminalContentProvider.getVisibleText('Terminal', 'dev-machine')";
+    String jsCommandToReadVisibleTextFromTerminal =
+        "return IDE.TerminalContentProvider.getVisibleText('Terminal', 'dev-machine')";
     List<String> lines =
-        (List<String>)
-            seleniumWebDriver.executeScript(
-                    jsCommandToReadVisibleTextFromTerminal);
-    
+        (List<String>) seleniumWebDriver.executeScript(jsCommandToReadVisibleTextFromTerminal);
+
     return String.join("/n", lines);
   }
 
