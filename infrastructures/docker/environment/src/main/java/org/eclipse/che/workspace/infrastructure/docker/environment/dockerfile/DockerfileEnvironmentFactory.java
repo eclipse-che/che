@@ -15,6 +15,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import java.util.List;
 import java.util.Map;
@@ -36,17 +37,21 @@ import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 public class DockerfileEnvironmentFactory
     extends InternalEnvironmentFactory<DockerfileEnvironment> {
 
-  private final String defaultMachineMemorySizeAttribute;
+  private final String defaultMachineMaxMemorySizeAttribute;
+  private final String defaultMachineRequestMemorySizeAttribute;
 
   @Inject
   public DockerfileEnvironmentFactory(
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
-      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+      @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeMB,
+      @Named("che.workspace.default_memory_request_mb") long defaultMachineRequestMemorySizeMB) {
     super(installerRegistry, recipeRetriever, machinesValidator);
-    this.defaultMachineMemorySizeAttribute =
-        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
+    this.defaultMachineMaxMemorySizeAttribute =
+        String.valueOf(defaultMachineMaxMemorySizeMB * 1024 * 1024);
+    this.defaultMachineRequestMemorySizeAttribute =
+        String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -62,19 +67,24 @@ public class DockerfileEnvironmentFactory
 
     checkArgument(dockerfile != null, "Dockerfile content should not be null.");
 
-    addRamLimitAttribute(machines);
+    addRamAttributes(machines);
 
     return new DockerfileEnvironment(dockerfile, recipe, machines, warnings);
   }
 
-  void addRamLimitAttribute(Map<String, InternalMachineConfig> machines) {
-    // sets default ram limit attribute if not present
+  void addRamAttributes(Map<String, InternalMachineConfig> machines) {
+    // sets default ram limit and request attributes if not present
     for (InternalMachineConfig machineConfig : machines.values()) {
-      if (isNullOrEmpty(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE))) {
-        machineConfig
-            .getAttributes()
-            .put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
-      }
+      initIfEmpty(machineConfig, MEMORY_LIMIT_ATTRIBUTE, defaultMachineMaxMemorySizeAttribute);
+      initIfEmpty(
+          machineConfig, MEMORY_REQUEST_ATTRIBUTE, defaultMachineRequestMemorySizeAttribute);
+    }
+  }
+
+  private void initIfEmpty(
+      InternalMachineConfig machineConfig, String attribute, String defaultValue) {
+    if (isNullOrEmpty(machineConfig.getAttributes().get(attribute))) {
+      machineConfig.getAttributes().put(attribute, defaultValue);
     }
   }
 }

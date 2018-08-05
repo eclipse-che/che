@@ -55,4 +55,35 @@ public class Containers {
     container.setResources(
         resourceBuilder.addToLimits("memory", new Quantity(String.valueOf(ramLimit))).build());
   }
+
+  /**
+   * Returns the RAM request in bytes, if it is present in given container otherwise 0 will be
+   * returned.
+   */
+  public static long getRamRequest(Container container) {
+    final ResourceRequirements resources = container.getResources();
+    final Quantity quantity;
+    if (resources != null
+        && resources.getLimits() != null
+        && (quantity = resources.getRequests().get("memory")) != null
+        && quantity.getAmount() != null) {
+      return KubernetesSize.toBytes(quantity.getAmount());
+    }
+    return 0;
+  }
+
+  /**
+   * Sets given RAM request in bytes to specified container. Note if the container already contains
+   * a RAM limit, it will be overridden, other resources won't be affected.
+   */
+  public static void addRamRequest(Container container, long ramRequest) {
+    final ResourceRequirementsBuilder resourceBuilder;
+    if (container.getResources() != null) {
+      resourceBuilder = new ResourceRequirementsBuilder(container.getResources());
+    } else {
+      resourceBuilder = new ResourceRequirementsBuilder();
+    }
+    container.setResources(
+        resourceBuilder.addToRequests("memory", new Quantity(String.valueOf(ramRequest))).build());
+  }
 }

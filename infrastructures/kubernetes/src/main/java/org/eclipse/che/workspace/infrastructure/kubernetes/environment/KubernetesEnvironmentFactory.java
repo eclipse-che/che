@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -31,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
@@ -75,7 +77,8 @@ public class KubernetesEnvironmentFactory
 
   private final KubernetesClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
-  private final String defaultMachineMemorySizeAttribute;
+  private final String defaultMaxMachineMemorySizeAttribute;
+  private final String defaultRequestMachineMemorySizeAttribute;
 
   @Inject
   public KubernetesEnvironmentFactory(
@@ -84,12 +87,15 @@ public class KubernetesEnvironmentFactory
       MachineConfigsValidator machinesValidator,
       KubernetesClientFactory clientFactory,
       KubernetesEnvironmentValidator envValidator,
-      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+      @Named("che.workspace.default_memory_limit_mb") long defaultMaxMachineMemorySizeMB,
+      @Named("che.workspace.default_memory_request_mb") long defaultRequestMachineMemorySizeMB) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
-    this.defaultMachineMemorySizeAttribute =
-        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
+    this.defaultMaxMachineMemorySizeAttribute =
+        String.valueOf(defaultMaxMachineMemorySizeMB * 1024 * 1024);
+    this.defaultRequestMachineMemorySizeAttribute =
+        String.valueOf(defaultRequestMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -167,7 +173,7 @@ public class KubernetesEnvironmentFactory
           new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
     }
 
-    addRamLimitAttribute(machines, pods.values());
+    addRamAttributes(machines, pods.values());
 
     KubernetesEnvironment k8sEnv =
         KubernetesEnvironment.builder()
@@ -188,7 +194,7 @@ public class KubernetesEnvironmentFactory
   }
 
   @VisibleForTesting
-  void addRamLimitAttribute(Map<String, InternalMachineConfig> machines, Collection<Pod> pods) {
+  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<Pod> pods) {
     for (Pod pod : pods) {
       for (Container container : pod.getSpec().getContainers()) {
         final String machineName = Names.machineName(pod, container);
@@ -197,15 +203,32 @@ public class KubernetesEnvironmentFactory
           machineConfig = new InternalMachineConfig();
           machines.put(machineName, machineConfig);
         }
-        final Map<String, String> attributes = machineConfig.getAttributes();
-        if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
-          final long ramLimit = Containers.getRamLimit(container);
-          if (ramLimit > 0) {
-            attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
-          } else {
-            attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
-          }
-        }
+        initIfEmpty(
+            machineConfig,
+            MEMORY_LIMIT_ATTRIBUTE,
+            defaultMaxMachineMemorySizeAttribute,
+            () -> Containers.getRamLimit(container));
+        initIfEmpty(
+            machineConfig,
+            MEMORY_REQUEST_ATTRIBUTE,
+            defaultRequestMachineMemorySizeAttribute,
+            () -> Containers.getRamRequest(container));
+      }
+    }
+  }
+
+  private void initIfEmpty(
+      InternalMachineConfig machineConfig,
+      String attribute,
+      String defaultValue,
+      Supplier<Long> containerValueProvider) {
+    final Map<String, String> attributes = machineConfig.getAttributes();
+    if (isNullOrEmpty(attributes.get(attribute))) {
+      final long containerValue = containerValueProvider.get();
+      if (containerValue > 0) {
+        attributes.put(attribute, String.valueOf(containerValue));
+      } else {
+        attributes.put(attribute, defaultValue);
       }
     }
   }

@@ -61,7 +61,8 @@ public class CommandDeserializerTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            2048);
+            2048,
+            1024);
   }
 
   private static final String RECIPE_WITHOUT_COMMAND_VALUE =

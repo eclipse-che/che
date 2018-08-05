@@ -26,7 +26,7 @@ import org.eclipse.che.commons.lang.Size;
  *
  * @author Mykhailo Kuznietsov
  */
-public class MemLimitDeserializer extends JsonDeserializer<Long> {
+public class MemAttributeDeserializer extends JsonDeserializer<Long> {
   private static final String UNSUPPORTED_VALUE_MESSAGE = "Unsupported value '%s'.";
 
   @Override

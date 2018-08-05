@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -51,7 +53,8 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
 
   private final ComposeServicesStartStrategy startStrategy;
   private final ComposeEnvironmentValidator composeValidator;
-  private final String defaultMachineMemorySizeAttribute;
+  private final String defaultMachineMaxMemorySizeAttribute;
+  private final String defaultMachineRequestMemorySizeAttribute;
 
   @Inject
   public ComposeEnvironmentFactory(
@@ -60,12 +63,15 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
       MachineConfigsValidator machinesValidator,
       ComposeEnvironmentValidator composeValidator,
       ComposeServicesStartStrategy startStrategy,
-      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+      @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeMB,
+      @Named("che.workspace.default_memory_request_mb") long defaultMachineRequestMemorySizeMB) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.startStrategy = startStrategy;
     this.composeValidator = composeValidator;
-    this.defaultMachineMemorySizeAttribute =
-        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
+    this.defaultMachineMaxMemorySizeAttribute =
+        String.valueOf(defaultMachineMaxMemorySizeMB * 1024 * 1024);
+    this.defaultMachineRequestMemorySizeAttribute =
+        String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -91,7 +97,7 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
     }
     ComposeRecipe composeRecipe = doParse(recipeContent);
 
-    addRamLimitAttribute(machines, composeRecipe.getServices());
+    addRamAttributes(machines, composeRecipe.getServices());
 
     ComposeEnvironment composeEnvironment =
         new ComposeEnvironment(
@@ -107,7 +113,7 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
   }
 
   @VisibleForTesting
-  void addRamLimitAttribute(
+  void addRamAttributes(
       Map<String, InternalMachineConfig> machines, Map<String, ComposeService> services)
       throws InfrastructureException {
     for (Entry<String, ComposeService> entry : services.entrySet()) {
@@ -116,14 +122,32 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
         machineConfig = new InternalMachineConfig();
         machines.put(entry.getKey(), machineConfig);
       }
-      final Map<String, String> attributes = machineConfig.getAttributes();
-      if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
-        final Long ramLimit = entry.getValue().getMemLimit();
-        if (ramLimit != null && ramLimit > 0) {
-          attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
-        } else {
-          attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
-        }
+
+      initIfEmpty(
+          () -> entry.getValue().getMemLimit(),
+          machineConfig,
+          MEMORY_LIMIT_ATTRIBUTE,
+          defaultMachineMaxMemorySizeAttribute);
+      initIfEmpty(
+          () -> entry.getValue().getMemRequest(),
+          machineConfig,
+          MEMORY_REQUEST_ATTRIBUTE,
+          defaultMachineRequestMemorySizeAttribute);
+    }
+  }
+
+  private void initIfEmpty(
+      Supplier<Long> attributeValueSupplier,
+      InternalMachineConfig machineConfig,
+      String attribute,
+      String defaultValue) {
+    final Map<String, String> attributes = machineConfig.getAttributes();
+    if (isNullOrEmpty(attributes.get(attribute))) {
+      final Long attribValue = attributeValueSupplier.get();
+      if (attribValue != null && attribValue > 0) {
+        attributes.put(attribute, String.valueOf(attribValue));
+      } else {
+        attributes.put(attribute, defaultValue);
       }
     }
   }

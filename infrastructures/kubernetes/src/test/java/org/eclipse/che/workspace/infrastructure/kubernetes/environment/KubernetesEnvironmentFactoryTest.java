@@ -18,6 +18,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.CONFIG_MAP_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.CONFIG_MAP_IGNORED_WARNING_MESSAGE;
@@ -80,6 +81,7 @@ public class KubernetesEnvironmentFactoryTest {
 
   private static final String YAML_RECIPE = "application/x-yaml";
   private static final long DEFAULT_RAM_LIMIT_MB = 2048;
+  private static final long DEFAULT_RAM_REQUEST_MB = 1024;
   public static final String MACHINE_NAME_1 = "machine1";
   public static final String MACHINE_NAME_2 = "machine2";
 
@@ -105,7 +107,13 @@ public class KubernetesEnvironmentFactoryTest {
   public void setup() throws Exception {
     k8sEnvironmentFactory =
         new KubernetesEnvironmentFactory(
-            null, null, null, clientFactory, k8sEnvValidator, DEFAULT_RAM_LIMIT_MB);
+            null,
+            null,
+            null,
+            clientFactory,
+            k8sEnvValidator,
+            DEFAULT_RAM_LIMIT_MB,
+            DEFAULT_RAM_REQUEST_MB);
     when(clientFactory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
@@ -177,69 +185,90 @@ public class KubernetesEnvironmentFactoryTest {
   }
 
   @Test
-  public void testSetsRamLimitAttributeFromKubernetesResource() throws Exception {
+  public void testSetsRamAttributesFromKubernetesResource() throws Exception {
     final long firstMachineRamLimit = 3072;
+    final long firstMachineRamRequest = 1536;
     final long secondMachineRamLimit = 1024;
+    final long secondMachineRamRequest = 512;
     when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
     when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
     final Set<Pod> pods =
         ImmutableSet.of(
-            mockPod(MACHINE_NAME_1, firstMachineRamLimit),
-            mockPod(MACHINE_NAME_2, secondMachineRamLimit));
+            mockPod(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
+            mockPod(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
 
-    k8sEnvironmentFactory.addRamLimitAttribute(machines, pods);
+    k8sEnvironmentFactory.addRamAttributes(machines, pods);
 
-    final long[] actual = machinesRam(machines.values());
-    final long[] expected = new long[] {firstMachineRamLimit, secondMachineRamLimit};
-    assertTrue(Arrays.equals(actual, expected));
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    final long[] expectedLimits = new long[] {firstMachineRamLimit, secondMachineRamLimit};
+    final long[] expectedRequests = new long[] {firstMachineRamRequest, secondMachineRamRequest};
+    assertTrue(Arrays.equals(actualLimits, expectedLimits));
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
 
   @Test
-  public void testDoNotOverrideRamLimitAttributeWhenItAlreadyPresent() throws Exception {
+  public void testDoNotOverrideRamAttributeWhenItAlreadyPresent() throws Exception {
     final long customRamLimit = 3072;
+    final long customRamRequest = 3072;
     final Map<String, String> attributes =
-        ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(customRamLimit));
+        ImmutableMap.of(
+            MEMORY_LIMIT_ATTRIBUTE,
+            String.valueOf(customRamLimit),
+            MEMORY_REQUEST_ATTRIBUTE,
+            String.valueOf(customRamRequest));
     when(machineConfig1.getAttributes()).thenReturn(attributes);
     when(machineConfig2.getAttributes()).thenReturn(attributes);
-    final Pod pod1 = mockPod(MACHINE_NAME_1, 0);
-    final Pod pod2 = mockPod(MACHINE_NAME_2, 0);
+    final Pod pod1 = mockPod(MACHINE_NAME_1, 0, 0);
+    final Pod pod2 = mockPod(MACHINE_NAME_2, 0, 0);
     final Set<Pod> pods = ImmutableSet.of(pod1, pod2);
 
-    k8sEnvironmentFactory.addRamLimitAttribute(machines, pods);
+    k8sEnvironmentFactory.addRamAttributes(machines, pods);
 
-    final long[] actual = machinesRam(machines.values());
-    final long[] expected = new long[actual.length];
-    fill(expected, customRamLimit);
-    assertTrue(Arrays.equals(actual, expected));
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    final long[] expectedLimits = new long[actualLimits.length];
+    fill(expectedLimits, customRamLimit);
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    final long[] expectedRequests = new long[actualRequests.length];
+    fill(expectedRequests, customRamRequest);
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
 
   @Test
-  public void testAddsMachineConfIntoEnvAndSetsRamLimAttributeWhenMachinePresentOnlyInRecipe()
+  public void testAddsMachineConfIntoEnvAndSetsRamAttributesWhenMachinePresentOnlyInRecipe()
       throws Exception {
     final long customRamLimit = 2048;
+    final long customRamRequest = 1024;
     final Map<String, InternalMachineConfig> machines = new HashMap<>();
-    final Set<Pod> pods = ImmutableSet.of(mockPod(MACHINE_NAME_2, customRamLimit));
+    final Set<Pod> pods =
+        ImmutableSet.of(mockPod(MACHINE_NAME_2, customRamLimit, customRamRequest));
 
-    k8sEnvironmentFactory.addRamLimitAttribute(machines, pods);
+    k8sEnvironmentFactory.addRamAttributes(machines, pods);
 
-    final long[] actual = machinesRam(machines.values());
-    final long[] expected = new long[actual.length];
-    fill(expected, customRamLimit);
-    assertTrue(Arrays.equals(actual, expected));
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    final long[] expectedLimits = new long[actualLimits.length];
+    fill(expectedLimits, customRamLimit);
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    final long[] expectedRequests = new long[actualRequests.length];
+    fill(expectedRequests, customRamRequest);
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
 
-  private static Pod mockPod(String machineName, long ramLimit) {
+  private static Pod mockPod(String machineName, long ramLimit, long ramRequest) {
     final String containerName = "container_" + machineName;
     final Container containerMock = mock(Container.class);
     final ResourceRequirements resourcesMock = mock(ResourceRequirements.class);
-    final Quantity quantityMock = mock(Quantity.class);
+    final Quantity limitQuantityMock = mock(Quantity.class);
+    final Quantity requestQuantityMock = mock(Quantity.class);
     final Pod podMock = mock(Pod.class);
     final PodSpec specMock = mock(PodSpec.class);
     final ObjectMeta metadataMock = mock(ObjectMeta.class);
     when(podMock.getSpec()).thenReturn(specMock);
     when(podMock.getMetadata()).thenReturn(metadataMock);
-    when(quantityMock.getAmount()).thenReturn(String.valueOf(ramLimit));
-    when(resourcesMock.getLimits()).thenReturn(ImmutableMap.of("memory", quantityMock));
+    when(limitQuantityMock.getAmount()).thenReturn(String.valueOf(ramLimit));
+    when(requestQuantityMock.getAmount()).thenReturn(String.valueOf(ramRequest));
+    when(resourcesMock.getLimits()).thenReturn(ImmutableMap.of("memory", limitQuantityMock));
+    when(resourcesMock.getRequests()).thenReturn(ImmutableMap.of("memory", requestQuantityMock));
     when(containerMock.getName()).thenReturn(containerName);
     when(containerMock.getResources()).thenReturn(resourcesMock);
     when(metadataMock.getAnnotations())
@@ -249,10 +278,10 @@ public class KubernetesEnvironmentFactoryTest {
     return podMock;
   }
 
-  private static long[] machinesRam(Collection<InternalMachineConfig> configs) {
+  private static long[] machinesRam(Collection<InternalMachineConfig> configs, String attribute) {
     return configs
         .stream()
-        .mapToLong(m -> Long.parseLong(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
+        .mapToLong(m -> Long.parseLong(m.getAttributes().get(attribute)))
         .toArray();
   }
 }

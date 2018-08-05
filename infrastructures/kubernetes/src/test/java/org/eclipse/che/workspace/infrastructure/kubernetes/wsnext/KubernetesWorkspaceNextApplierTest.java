@@ -18,6 +18,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -72,6 +73,7 @@ public class KubernetesWorkspaceNextApplierTest {
   private static final String VOLUME_MOUNT_PATH = "/path/test";
   private static final String USER_MACHINE_NAME = POD_NAME + "/userContainer";
   private static final int MEMORY_LIMIT_MB = 200;
+  private static final int MEMORY_REQUEST_MB = 100;
   private static final String CHE_PLUGIN_ENDPOINT_NAME = "test-endpoint-1";
 
   @Mock Pod pod;
@@ -85,7 +87,7 @@ public class KubernetesWorkspaceNextApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    applier = new KubernetesWorkspaceNextApplier(MEMORY_LIMIT_MB);
+    applier = new KubernetesWorkspaceNextApplier(MEMORY_LIMIT_MB, MEMORY_REQUEST_MB);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Container> containers = new ArrayList<>();
@@ -269,12 +271,14 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test
-  public void setsDefaultMemoryLimitForMachineAssociatedWithContainer() throws Exception {
+  public void setsDefaultMemoryAttributesForMachineAssociatedWithContainer() throws Exception {
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
     InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     String memoryLimitAttribute = machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE);
+    String memoryRequestAttribute = machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE);
     assertEquals(memoryLimitAttribute, Integer.toString(MEMORY_LIMIT_MB * 1024 * 1024));
+    assertEquals(memoryRequestAttribute, Integer.toString(MEMORY_REQUEST_MB * 1024 * 1024));
   }
 
   @Test

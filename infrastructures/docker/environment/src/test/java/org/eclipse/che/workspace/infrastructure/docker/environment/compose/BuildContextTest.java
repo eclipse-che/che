@@ -52,7 +52,8 @@ public class BuildContextTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            2048);
+            2048,
+            1024);
   }
 
   @Test

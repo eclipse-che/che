@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
 
 import static java.util.Arrays.fill;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertTrue;
@@ -38,6 +39,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class DockerImageEnvironmentFactoryTest {
   private static final long DEFAULT_RAM_LIMIT_MB = 2048;
+  private static final long DEFAULT_RAM_REQUEST_MB = 1024;
   private static final long BYTES_IN_MB = 1024 * 1024;
   private static final String MACHINE_NAME = "machine";
 
@@ -52,23 +54,31 @@ public class DockerImageEnvironmentFactoryTest {
   public void setUp() throws Exception {
     factory =
         new DockerImageEnvironmentFactory(
-            installerRegistry, recipeRetriever, machinesValidator, DEFAULT_RAM_LIMIT_MB);
+            installerRegistry,
+            recipeRetriever,
+            machinesValidator,
+            DEFAULT_RAM_LIMIT_MB,
+            DEFAULT_RAM_REQUEST_MB);
 
     when(recipe.getType()).thenReturn(DockerImageEnvironment.TYPE);
     when(recipe.getContent()).thenReturn("");
   }
 
   @Test
-  public void testSetRamLimitAttributeWhenRamLimitIsMissingInConfig() throws Exception {
+  public void testSetRamAttributesWhenTheyAreMissingInConfig() throws Exception {
     final Map<String, InternalMachineConfig> machines =
         ImmutableMap.of(MACHINE_NAME, mockInternalMachineConfig(new HashMap<>()));
 
     factory.doCreate(recipe, machines, Collections.emptyList());
 
-    final long[] actual = machinesRam(machines.values());
-    final long[] expected = new long[actual.length];
-    fill(expected, DEFAULT_RAM_LIMIT_MB * BYTES_IN_MB);
-    assertTrue(Arrays.equals(actual, expected));
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    final long[] expectedLimits = new long[actualLimits.length];
+    fill(expectedLimits, DEFAULT_RAM_LIMIT_MB * BYTES_IN_MB);
+    assertTrue(Arrays.equals(actualLimits, expectedLimits));
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    final long[] expectedRequests = new long[actualRequests.length];
+    fill(expectedRequests, DEFAULT_RAM_REQUEST_MB * BYTES_IN_MB);
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
 
   private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
@@ -77,10 +87,10 @@ public class DockerImageEnvironmentFactoryTest {
     return machineConfigMock;
   }
 
-  private static long[] machinesRam(Collection<InternalMachineConfig> configs) {
+  private static long[] machinesRam(Collection<InternalMachineConfig> configs, String attribute) {
     return configs
         .stream()
-        .mapToLong(m -> Long.parseLong(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
+        .mapToLong(m -> Long.parseLong(m.getAttributes().get(attribute)))
         .toArray();
   }
 }

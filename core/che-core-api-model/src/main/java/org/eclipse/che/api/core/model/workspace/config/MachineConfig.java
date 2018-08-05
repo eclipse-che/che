@@ -29,6 +29,13 @@ public interface MachineConfig {
   String MEMORY_LIMIT_ATTRIBUTE = "memoryLimitBytes";
 
   /**
+   * Name of the attribute from {@link #getAttributes()} which if present defines memory limit of
+   * the machine in bytes. If memory limit is set in environment specific recipe this attribute used
+   * in {@code MachineConfig} should override value from recipe.
+   */
+  String MEMORY_REQUEST_ATTRIBUTE = "memoryRequestBytes";
+
+  /**
    * Returns configured installers.
    *
    * <p>Values can be installer id with version separated with ':' symbol or just id then latest

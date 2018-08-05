@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.MemLimitDeserializer;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.MemAttributeDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
@@ -25,11 +25,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * Test of {@link MemLimitDeserializer} functionality.
+ * Test of {@link MemAttributeDeserializer} functionality.
  *
  * @author Mykhailo Kuznietsov
  */
-public class MemLimitDeserializerTest {
+public class MemAttributeDeserializerTest {
   @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
@@ -54,7 +54,8 @@ public class MemLimitDeserializerTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            2048);
+            2048,
+            1024);
   }
 
   @Test(dataProvider = "validValues")
