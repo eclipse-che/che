@@ -78,18 +78,18 @@ public class ApacheCamelFileEditingTest {
     // launch autocomplete feature, select proposal and check expected text in the Editor
     editor.typeTextIntoEditor("?");
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("fixedRate ");
+    editor.waitProposalIntoAutocompleteContainer("fixedRate ");
     editor.enterAutocompleteProposal("fixedRate ");
     editor.waitTextIntoEditor("timer:timerName?fixedRate=false");
 
     editor.typeTextIntoEditor("&amp;");
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("exchangePattern ");
+    editor.waitProposalIntoAutocompleteContainer("exchangePattern ");
     editor.enterAutocompleteProposal("exchangePattern ");
     editor.waitTextIntoEditor("timer:timerName?fixedRate=false&amp;exchangePattern=");
 
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("InOnly");
+    editor.waitProposalIntoAutocompleteContainer("InOnly");
     editor.enterAutocompleteProposal("InOnly");
     editor.waitTextIntoEditor("timer:timerName?fixedRate=false&amp;exchangePattern=InOnly");
   }

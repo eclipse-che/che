@@ -99,8 +99,8 @@ public class ClangFileEditingTest {
     editor.deleteCurrentLineAndInsertNew();
     editor.typeTextIntoEditor("std::cou");
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("cout ostream");
-    editor.waitTextIntoAutocompleteContainer("wcout wostream");
+    editor.waitProposalIntoAutocompleteContainer("cout ostream");
+    editor.waitProposalIntoAutocompleteContainer("wcout wostream");
     editor.closeAutocomplete();
   }
 

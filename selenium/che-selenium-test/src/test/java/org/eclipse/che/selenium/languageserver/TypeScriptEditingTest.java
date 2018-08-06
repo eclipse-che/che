@@ -121,7 +121,7 @@ public class TypeScriptEditingTest {
     // check autocomplete form content after the ";"
     editor.goToPosition(29, 36);
     editor.launchAutocomplete();
-    editor.waitTextIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
+    editor.waitProposalIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
 
     editor.closeAutocomplete();
 
@@ -130,7 +130,7 @@ public class TypeScriptEditingTest {
     editor.typeTextIntoEditor(nameOfGreeterClassRef);
 
     editor.launchAutocomplete();
-    editor.waitTextIntoAutocompleteContainer(textFromGreeterObject);
+    editor.waitProposalIntoAutocompleteContainer(textFromGreeterObject);
     editor.selectItemIntoAutocompleteAndPerformDoubleClick(methodToComplete);
     editor.waitAllMarkersInvisibility(ERROR);
   }

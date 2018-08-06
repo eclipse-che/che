@@ -109,7 +109,7 @@ public class InheritClassTest {
     editor.typeTextIntoEditor(" Code");
     loader.waitOnClosed();
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
     editor.enterAutocompleteProposal("CodenvyTest");
     editor.waitAutocompleteContainerIsClosed();
     editor.waitTextIntoEditor("CodenvyTestInherite extends CodenvyTest");
@@ -121,8 +121,8 @@ public class InheritClassTest {
     editor.setCursorToLine(33);
     editor.typeTextIntoEditor("Code");
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
-    editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
     editor.enterAutocompleteProposal("CodenvyTest");
     editor.waitAutocompleteContainerIsClosed();
 
@@ -130,14 +130,14 @@ public class InheritClassTest {
     editor.typeTextIntoEditor(" codenvyTest = n");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitAutocompleteContainer();
-    editor.waitTextIntoAutocompleteContainer("new");
+    editor.waitProposalIntoAutocompleteContainer("new");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
     editor.typeTextIntoEditor(" Code");
     editor.waitCodeAssistMarkers(ERROR);
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
-    editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
     editor.enterAutocompleteProposal("CodenvyTestInherite");
     editor.waitAutocompleteContainerIsClosed();
     editor.typeTextIntoEditor(";");

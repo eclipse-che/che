@@ -18,9 +18,11 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocat
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.openqa.selenium.Keys.F4;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -39,7 +41,6 @@ public class GolangFileEditingTest {
 
   private static final String PROJECT_NAME = "desktop-go-simple";
   private static final String GO_FILE_NAME = "main.go";
-  private static final String PATH_TO_GO_FILE = PROJECT_NAME + "/" + GO_FILE_NAME;
   private static final String LS_INIT_MESSAGE = "Finished running tool: /usr/local/go/bin/go build";
   private static final String FORMATTED_CODE =
       "package main\n"
@@ -52,6 +53,7 @@ public class GolangFileEditingTest {
           + "func print() {\n"
           + " fmt.Printf(\"Hello, world. Sqrt(2) = %v\\n\", math.Sqrt(2))\n"
           + "}";
+  private List<String> expectedProposals = ImmutableList.of("Print", "Println", "Printf");
 
   @InjectTestWorkspace(template = UBUNTU_GO)
   private TestWorkspace workspace;
@@ -74,9 +76,7 @@ public class GolangFileEditingTest {
 
   @Test
   public void checkLanguageServerInitialized() {
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.openItemByPath(PATH_TO_GO_FILE);
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(PROJECT_NAME, GO_FILE_NAME);
     editor.waitTabIsPresent(GO_FILE_NAME);
 
     // check Golang language sever initialized
@@ -95,9 +95,7 @@ public class GolangFileEditingTest {
     editor.launchAutocompleteAndWaitContainer();
 
     editor.checkProposalDocumentation("No documentation found.");
-    editor.waitTextIntoAutocompleteContainer("Print");
-    editor.waitTextIntoAutocompleteContainer("Println");
-    editor.waitTextIntoAutocompleteContainer("Printf");
+    editor.waitProposalsIntoAutocompleteContainer(expectedProposals);
 
     editor.deleteCurrentLine();
     editor.waitAllMarkersInvisibility(ERROR);
