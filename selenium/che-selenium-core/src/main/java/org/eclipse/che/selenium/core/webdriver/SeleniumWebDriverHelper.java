@@ -1393,4 +1393,9 @@ public class SeleniumWebDriverHelper {
   public void waitSuccessCondition(ExpectedCondition<Boolean> expression) {
     waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
+
+  public void closeCurrentWinAndReturnToMainTab(String mainTabHandle) {
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(mainTabHandle);
+  }
 }

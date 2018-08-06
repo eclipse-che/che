@@ -25,7 +25,9 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -36,7 +38,7 @@ import org.testng.annotations.Test;
  */
 public class OpenOnGitHubTest {
   private static final String PROJECT_NAME = generate("project", 4);
-  private static final String PATH_TO_EXPAND = "/src/main/webapp/WEB-INF";
+  private static final String PATH_TO_EXPAND = "/src/main/java/commenttest";
   private static final String FILE = "/README.md";
 
   @SuppressWarnings("unused")
@@ -69,36 +71,40 @@ public class OpenOnGitHubTest {
 
   @Inject private CodenvyEditor editor;
 
-  private final String repoUrl = "https://github.com/iedexmain1/testRepo-1";
+  private static final String REPO_URL = "https://github.com/iedexmain1/testRepo-1";
+
+  private String mainBrowserTabHandle;
 
   @BeforeClass
   public void setUp() throws Exception {
     testProjectServiceClient.importProject(
-        workspace.getId(), PROJECT_NAME, repoUrl, "github", Collections.emptyMap());
+        workspace.getId(), PROJECT_NAME, REPO_URL, "github", Collections.emptyMap());
     ide.open(workspace);
+    mainBrowserTabHandle = seleniumWebDriver.getWindowHandle();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
+
+  }
+
+  @AfterMethod
+  public void returnToMainWindow() {
+    seleniumWebDriverHelper.closeCurrentWinAndReturnToMainTab(mainBrowserTabHandle);
   }
 
   /** */
   @Test
   public void openProjectOnGitHubTest() {
-    seleniumWebDriver.navigate().refresh();
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    Assert.assertTrue(seleniumWebDriver.getCurrentUrl().startsWith(repoUrl));
+    Assert.assertTrue(seleniumWebDriver.getCurrentUrl().startsWith(REPO_URL));
   }
 
   /** */
   @Test
   public void openFolderOnGitHubTest() {
-    seleniumWebDriver.navigate().refresh();
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.waitContextMenu();
@@ -106,26 +112,20 @@ public class OpenOnGitHubTest {
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
     Assert.assertEquals(
-        seleniumWebDriver.getCurrentUrl(), repoUrl + "/tree/master" + PATH_TO_EXPAND);
+        seleniumWebDriver.getCurrentUrl(), REPO_URL + "/tree/master" + PATH_TO_EXPAND);
   }
 
   /** */
-  @Test
+   @Test
   public void openFileOnGitHubTest() {
-    seleniumWebDriver.navigate().refresh();
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/src/main/java/commenttest");
-
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/commenttest/JavaCommentsTest.java");
-
     editor.selectLines(10, 10);
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(CodenvyEditor.ContextMenuLocator.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
     Assert.assertEquals(
         seleniumWebDriver.getCurrentUrl(),
-        repoUrl + "/blob/master" + PATH_TO_EXPAND + "/JavaCommentsTest.java" + "#L10-L20");
+        REPO_URL + "/blob/master" + PATH_TO_EXPAND + "/JavaCommentsTest.java#L10-L20");
   }
 }
