@@ -30,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -61,7 +60,6 @@ public class GolangFileEditingTest {
   @Inject private Menu menu;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
-  @Inject private Wizard wizard;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
@@ -113,6 +111,9 @@ public class GolangFileEditingTest {
     editor.goToCursorPositionVisible(13, 1);
     editor.typeTextIntoEditor("p");
     editor.waitMarkerInPosition(ERROR, 13);
+    editor.moveToMarkerAndWaitAssistContent(ERROR);
+    editor.waitTextIntoAnnotationAssist("expected 'package', found 'IDENT' ppackage");
+
     editor.goToCursorPositionVisible(13, 1);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
@@ -122,7 +123,6 @@ public class GolangFileEditingTest {
   public void checkFormatCodeFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/format.go");
     editor.waitTabIsPresent("format.go");
-    editor.selectTabByName("format.go");
 
     // format code by Format feature from context menu
     editor.openContextMenuInEditor();
