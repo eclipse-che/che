@@ -36,6 +36,6 @@ public class KeycloakServletModule extends ServletModule {
     // but not remove user (DELETE /user/{USER_ID}
     filterRegex("^/user(/password/?|/)?$").through(UnavailableResourceInMultiUserFilter.class);
 
-    filterRegex("/profile/.*/attributes").through(UnavailableResourceInMultiUserFilter.class);
+    filterRegex("^/profile/(.*/)?attributes$").through(UnavailableResourceInMultiUserFilter.class);
   }
 }
