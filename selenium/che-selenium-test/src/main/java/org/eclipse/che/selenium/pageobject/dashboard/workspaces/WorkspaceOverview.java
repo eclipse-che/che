@@ -20,8 +20,8 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview.Locators.AS_FILE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview.Locators.AS_FILE_CONFIG_BODY_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview.Locators.EXPORT_WS_FORM_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview.Locators.PRIVATE_CLOUD_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview.Locators.SAVE_BUTTON_XPATH;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview.Locators.To_PRIVATE_CLOUD_BUTTON_XPATH;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
@@ -71,7 +71,7 @@ public class WorkspaceOverview {
 
     String SAVE_BUTTON_XPATH = "//button[@name='save-button' ]";
     String AS_FILE_BUTTON_XPATH = "//md-tab-item/span[text()='As a File']";
-    String To_PRIVATE_CLOUD_BUTTON_XPATH = "//md-tab-item/span[text()='To Private Cloud']";
+    String PRIVATE_CLOUD_BUTTON_XPATH = "//md-tab-item/span[text()='To Private Cloud']";
   }
 
   @FindBy(xpath = Locators.NAME_WORKSPACE_INPUT)
@@ -117,7 +117,7 @@ public class WorkspaceOverview {
                 .equals(workspaceName));
   }
 
-  public void waitUntillNoErrorsDisplayed() {
+  public void waitUntilNoErrorsDisplayed() {
     seleniumWebDriverHelper.waitAttributeEqualsTo(nameWorkspaceInput, "aria-invalid", "false");
   }
 
@@ -165,9 +165,9 @@ public class WorkspaceOverview {
   }
 
   public boolean isAsFileTabOpened() {
+    final String asFileButtonParentContainer = AS_FILE_BUTTON_XPATH + "/parent::md-tab-item";
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetAttribute(
-            By.xpath(AS_FILE_BUTTON_XPATH + "/parent::md-tab-item"), "aria-selected")
+        .waitVisibilityAndGetAttribute(By.xpath(asFileButtonParentContainer), "aria-selected")
         .equals("true");
   }
 
@@ -180,13 +180,14 @@ public class WorkspaceOverview {
   }
 
   public void clickOnToPrivateCloudButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(To_PRIVATE_CLOUD_BUTTON_XPATH));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(PRIVATE_CLOUD_BUTTON_XPATH));
   }
 
   public boolean isToPrivateCloudTabOpened() {
+    final String privateCloudButtonParentContainer =
+        PRIVATE_CLOUD_BUTTON_XPATH + "/parent::md-tab-item";
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetAttribute(
-            By.xpath(To_PRIVATE_CLOUD_BUTTON_XPATH + "/parent::md-tab-item"), "aria-selected")
+        .waitVisibilityAndGetAttribute(By.xpath(privateCloudButtonParentContainer), "aria-selected")
         .equals("true");
   }
 
@@ -208,16 +209,17 @@ public class WorkspaceOverview {
     seleniumWebDriverHelper.waitAndClick(By.xpath(clipboardButtonXpath));
   }
 
-  public void clickOnCloseExportWorkspaceButton() {
+  public void clickOnCloseExportWorkspaceFormButton() {
     final String closeButtonXpath = "//che-button-notice [@che-button-title='Close']";
     seleniumWebDriverHelper.waitAndClick(By.xpath(closeButtonXpath));
   }
 
-  public void clickOnCloseExportWorkspaceIcon() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(EXPORT_WS_FORM_XPATH + "//i"));
+  public void clickOnCloseExportWorkspaceFormIcon() {
+    final String closeFormIcon = EXPORT_WS_FORM_XPATH + "//i";
+    seleniumWebDriverHelper.waitAndClick(By.xpath(closeFormIcon));
   }
 
-  public void waitExpectedNameErrorMessage(String expectedMessage) {
+  public void waitNameErrorMessage(String expectedMessage) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> isWorkspaceNameErrorMessageEquals(expectedMessage));
   }

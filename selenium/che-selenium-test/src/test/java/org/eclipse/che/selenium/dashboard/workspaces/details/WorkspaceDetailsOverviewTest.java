@@ -48,11 +48,9 @@ public class WorkspaceDetailsOverviewTest {
       asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
-  private static final String EXPECTED_CONFIG =
-      "{\n"
-          + "  \"defaultEnv\": \"default\",\n"
-          + "  \"environments\": {\n"
-          + "    \"default\": {\n"
+
+  private static final String EXPECTED_ATTRIBUTES_CONFIG =
+      "  \"default\": {\n"
           + "      \"machines\": {\n"
           + "        \"dev-machine\": {\n"
           + "          \"attributes\": {\n"
@@ -80,21 +78,16 @@ public class WorkspaceDetailsOverviewTest {
           + "            \"org.eclipse.che.exec\",\n"
           + "            \"org.eclipse.che.terminal\",\n"
           + "            \"org.eclipse.che.ws-agent\"\n"
-          + "          ],\n"
-          + "          \"env\": {\n"
-          + "            \"CHE_MACHINE_NAME\": \"dev-machine\"\n"
-          + "          }\n"
-          + "        }\n"
-          + "      },\n"
-          + "      \"recipe\": {\n"
+          + "          ],\n";
+
+  private static final String EXPECTED_IMAGE_CONFIG =
+      "      \"recipe\": {\n"
           + "        \"type\": \"dockerimage\",\n"
           + "        \"content\": \"eclipse/ubuntu_jdk8\"\n"
-          + "      }\n"
-          + "    }\n"
-          + "  },\n"
-          + "  \"projects\": [],\n"
-          + "  \"name\": \"wksp-mdt7\",\n"
-          + "  \"commands\": [\n"
+          + "      }\n";
+
+  private static final String EXPECTED_COMMAND_LINE_CONFIG =
+      "  \"commands\": [\n"
           + "    {\n"
           + "      \"commandLine\": \"mvn clean install -f ${current.project.path}\",\n"
           + "      \"name\": \"build\",\n"
@@ -102,10 +95,7 @@ public class WorkspaceDetailsOverviewTest {
           + "        \"goal\": \"Build\",\n"
           + "        \"previewUrl\": \"\"\n"
           + "      },\n"
-          + "      \"type\": \"mvn\"\n"
-          + "    }\n"
-          + "  ]\n"
-          + "}";
+          + "      \"type\": \"mvn\"\n";
 
   @Inject private Dashboard dashboard;
   @Inject private NewWorkspace newWorkspace;
@@ -147,17 +137,17 @@ public class WorkspaceDetailsOverviewTest {
     workspaceOverview.waitDisabledSaveButton();
 
     // check too short name
-    setupValidName(CHANGED_WORKSPACE_NAME);
-    setupInvalidNameAndCheckErrorMessage(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
+    nameShouldBeValid(CHANGED_WORKSPACE_NAME);
+    nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
 
     // check too long name
-    setupValidName(MIN_SHORT_NAME);
-    setupInvalidNameAndCheckErrorMessage(TOO_LONG_NAME, LONG_NAME_ERROR_MESSAGE);
+    nameShouldBeValid(MIN_SHORT_NAME);
+    nameShouldBeInvalid(TOO_LONG_NAME, LONG_NAME_ERROR_MESSAGE);
 
-    setupValidName(MAX_LONG_NAME);
-    checkValidNames();
+    nameShouldBeValid(MAX_LONG_NAME);
+    namesShouldBeValid();
 
-    checkInvalidNames();
+    namesShouldBeInvalid();
   }
 
   @Test(priority = 1)
@@ -171,17 +161,18 @@ public class WorkspaceDetailsOverviewTest {
 
     // close by "x" icon
     openExportWorkspaceForm();
-    workspaceOverview.clickOnCloseExportWorkspaceIcon();
+    workspaceOverview.clickOnCloseExportWorkspaceFormIcon();
     workspaceOverview.waitExportWorkspaceFormClosed();
 
     // close by "Close" button
     openExportWorkspaceForm();
-    workspaceOverview.clickOnCloseExportWorkspaceButton();
+    workspaceOverview.clickOnCloseExportWorkspaceFormButton();
     workspaceOverview.waitExportWorkspaceFormClosed();
 
     // check config
     openExportWorkspaceForm();
-    workspaceOverview.waitConfiguration(EXPECTED_CONFIG);
+    workspaceOverview.waitConfiguration(
+        EXPECTED_ATTRIBUTES_CONFIG, EXPECTED_COMMAND_LINE_CONFIG, EXPECTED_IMAGE_CONFIG);
     workspaceOverview.clickOnToPrivateCloudButton();
     workspaceOverview.waitToPrivateCloudTabOpened();
     seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
@@ -194,13 +185,13 @@ public class WorkspaceDetailsOverviewTest {
     newWorkspace.waitWorkspaceNameFieldValue(WORKSPACE_NAME);
   }
 
-  private void setupValidName(String name) {
+  private void nameShouldBeValid(String name) {
     workspaceOverview.enterNameWorkspace(name);
-    workspaceOverview.waitUntillNoErrorsDisplayed();
+    workspaceOverview.waitUntilNoErrorsDisplayed();
     workspaceOverview.waitEnabledSaveButton();
   }
 
-  private void setupInvalidNameAndCheckErrorMessage(String name, String expectedErrorMessage) {
+  private void nameShouldBeInvalid(String name, String expectedErrorMessage) {
     workspaceOverview.enterNameWorkspace(name);
 
     try {
@@ -210,23 +201,23 @@ public class WorkspaceDetailsOverviewTest {
       fail("Known issue https://github.com/eclipse/che/issues/10659", ex);
     }
 
-    workspaceOverview.waitExpectedNameErrorMessage(expectedErrorMessage);
+    workspaceOverview.waitNameErrorMessage(expectedErrorMessage);
     workspaceOverview.waitDisabledSaveButton();
   }
 
-  private void checkValidNames() {
+  private void namesShouldBeValid() {
     VALID_NAMES.forEach(
         name -> {
-          setupInvalidNameAndCheckErrorMessage(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
-          setupValidName(name);
+          nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
+          nameShouldBeValid(name);
         });
   }
 
-  private void checkInvalidNames() {
+  private void namesShouldBeInvalid() {
     NOT_VALID_NAMES.forEach(
         name -> {
-          setupValidName(CHANGED_WORKSPACE_NAME);
-          setupInvalidNameAndCheckErrorMessage(name, SPECIAL_CHARACTERS_ERROR_MESSAGE);
+          nameShouldBeValid(CHANGED_WORKSPACE_NAME);
+          nameShouldBeInvalid(name, SPECIAL_CHARACTERS_ERROR_MESSAGE);
         });
   }
 
