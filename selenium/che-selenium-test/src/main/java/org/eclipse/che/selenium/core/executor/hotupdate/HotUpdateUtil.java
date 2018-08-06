@@ -32,10 +32,10 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 public class HotUpdateUtil {
   private static final int TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS = 600;
   private static final int DELAY_BETWEEN_ATTEMPTS_IN_SECONDS = 5;
-  private static final String UPDATE_COMMAND = "rollout latest che";
   private static final String PODS_LIST_COMMAND = "get pods | awk 'NR > 1 {print $1}'";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
+  private static final String UPDATE_COMMAND = "rollout latest $(oc get dc | grep che | awk '{print $1}')";
 
   private final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   private final WebDriverWaitFactory webDriverWaitFactory;
