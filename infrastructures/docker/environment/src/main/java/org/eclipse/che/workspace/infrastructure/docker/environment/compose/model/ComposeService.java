@@ -60,6 +60,7 @@ public class ComposeService {
   @JsonDeserialize(using = MemAttributeDeserializer.class)
   @JsonProperty("mem_limit")
   private Long memLimit;
+
   @JsonDeserialize(using = MemAttributeDeserializer.class)
   @JsonProperty("mem_request")
   private Long memRequest;
@@ -399,6 +400,7 @@ public class ComposeService {
   public Long getMemLimit() {
     return memLimit;
   }
+
   public Long getMemRequest() {
     return memRequest;
   }
@@ -406,6 +408,7 @@ public class ComposeService {
   public void setMemLimit(Long memLimit) {
     this.memLimit = memLimit;
   }
+
   public void setMemRequest(Long memRequest) {
     this.memRequest = memRequest;
   }
