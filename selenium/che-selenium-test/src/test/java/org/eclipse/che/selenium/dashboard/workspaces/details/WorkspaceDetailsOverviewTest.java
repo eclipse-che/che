@@ -48,11 +48,9 @@ public class WorkspaceDetailsOverviewTest {
       asList("Wk-sp", "Wk-sp1", "9wk-sp", "5wk-sp0", "Wk19sp", "Wksp-01");
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
-  private static final String EXPECTED_CONFIG =
-      "{\n"
-          + "  \"defaultEnv\": \"default\",\n"
-          + "  \"environments\": {\n"
-          + "    \"default\": {\n"
+
+  private static final String EXPECTED_ATTRIBUTES_CONFIG =
+      "  \"default\": {\n"
           + "      \"machines\": {\n"
           + "        \"dev-machine\": {\n"
           + "          \"attributes\": {\n"
@@ -80,21 +78,16 @@ public class WorkspaceDetailsOverviewTest {
           + "            \"org.eclipse.che.exec\",\n"
           + "            \"org.eclipse.che.terminal\",\n"
           + "            \"org.eclipse.che.ws-agent\"\n"
-          + "          ],\n"
-          + "          \"env\": {\n"
-          + "            \"CHE_MACHINE_NAME\": \"dev-machine\"\n"
-          + "          }\n"
-          + "        }\n"
-          + "      },\n"
-          + "      \"recipe\": {\n"
+          + "          ],\n";
+
+  private static final String EXPECTED_IMAGE_CONFIG =
+      "      \"recipe\": {\n"
           + "        \"type\": \"dockerimage\",\n"
           + "        \"content\": \"eclipse/ubuntu_jdk8\"\n"
-          + "      }\n"
-          + "    }\n"
-          + "  },\n"
-          + "  \"projects\": [],\n"
-          + "  \"name\": \"wksp-mdt7\",\n"
-          + "  \"commands\": [\n"
+          + "      }\n";
+
+  private static final String EXPECTED_COMMAND_LINE_CONFIG =
+      "  \"commands\": [\n"
           + "    {\n"
           + "      \"commandLine\": \"mvn clean install -f ${current.project.path}\",\n"
           + "      \"name\": \"build\",\n"
@@ -102,10 +95,7 @@ public class WorkspaceDetailsOverviewTest {
           + "        \"goal\": \"Build\",\n"
           + "        \"previewUrl\": \"\"\n"
           + "      },\n"
-          + "      \"type\": \"mvn\"\n"
-          + "    }\n"
-          + "  ]\n"
-          + "}";
+          + "      \"type\": \"mvn\"\n";
 
   @Inject private Dashboard dashboard;
   @Inject private NewWorkspace newWorkspace;
@@ -181,7 +171,8 @@ public class WorkspaceDetailsOverviewTest {
 
     // check config
     openExportWorkspaceForm();
-    workspaceOverview.waitConfiguration(EXPECTED_CONFIG);
+    workspaceOverview.waitConfiguration(
+        EXPECTED_ATTRIBUTES_CONFIG, EXPECTED_COMMAND_LINE_CONFIG, EXPECTED_IMAGE_CONFIG);
     workspaceOverview.clickOnToPrivateCloudButton();
     workspaceOverview.waitToPrivateCloudTabOpened();
     seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
