@@ -16,7 +16,7 @@ import { StackController } from './stack.controller';
 
 /**
  * Test for Stack Details directive.
- * 
+ *
  * @author Oleksii Kurinny
  */
 describe(`StackDetailsDirective >`, () => {
