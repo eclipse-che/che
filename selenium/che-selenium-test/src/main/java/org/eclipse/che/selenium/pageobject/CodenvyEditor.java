@@ -435,6 +435,11 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitTextContains(tooltipTitle, expectedText);
   }
 
+  /** Get text from hover popup */
+  public String getTextFromHoverPopup() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(hoverPopup);
+  }
+
   /**
    * wait text in hover pop-up (after hovering on text)
    *
@@ -695,16 +700,28 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits specified {@code expectedText} in autocomplete container.
+   * Waits specified {@code expectedProposal} in autocomplete container.
    *
-   * @param expectedText text which should be present in the container
+   * @param expectedProposal text which should be present in the container
    */
-  public void waitTextIntoAutocompleteContainer(final String expectedText) {
+  public void waitProposalIntoAutocompleteContainer(final String expectedProposal) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromAutocomplete().contains(expectedText));
+                webDriver -> getAllVisibleTextFromAutocomplete().contains(expectedProposal));
+  }
+
+  /**
+   * Waits specified {@code proposals} in autocomplete container.
+   *
+   * @param expectedProposals text which should be present in the container
+   */
+  public void waitProposalsIntoAutocompleteContainer(List<String> expectedProposals) {
+    expectedProposals.forEach(
+        proposal -> {
+          waitProposalIntoAutocompleteContainer(proposal);
+        });
   }
 
   /**
