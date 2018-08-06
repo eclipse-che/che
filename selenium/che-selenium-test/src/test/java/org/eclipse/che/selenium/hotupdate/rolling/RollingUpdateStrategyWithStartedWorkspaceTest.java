@@ -42,7 +42,7 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
         dashboard.waitDashboardToolbarTitle();
         dashboard.selectWorkspacesItemOnDashboard();
 
-        // check existing of expected workspaces and their statuses
+        // check existing of expected workspace and its status
         workspaces.waitPageLoading();
         workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
         workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
@@ -54,10 +54,7 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
         hotUpdateUtil.waitMasterPodRevision(currentRevision + 1);
         hotUpdateUtil.waitFullMasterPodUpdate(currentRevision);
 
-        // execute stop-start commands for existing workspaces
         assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
-
-
         workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
         workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
 
