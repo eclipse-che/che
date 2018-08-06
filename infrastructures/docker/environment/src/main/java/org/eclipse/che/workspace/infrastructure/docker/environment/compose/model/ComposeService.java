@@ -107,7 +107,7 @@ public class ComposeService {
       volumes = new ArrayList<>(service.getVolumes());
     }
     memLimit = service.getMemLimit();
-    memLimit = service.getMemLimit();
+    memRequest = service.getMemRequest();
     if (service.getNetworks() != null) {
       networks = new ArrayList<>(service.getNetworks());
     }
