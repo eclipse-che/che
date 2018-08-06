@@ -209,17 +209,17 @@ public class WorkspaceOverview {
     seleniumWebDriverHelper.waitAndClick(By.xpath(clipboardButtonXpath));
   }
 
-  public void clickOnCloseExportWorkspaceButton() {
+  public void clickOnCloseExportWorkspaceFormButton() {
     final String closeButtonXpath = "//che-button-notice [@che-button-title='Close']";
     seleniumWebDriverHelper.waitAndClick(By.xpath(closeButtonXpath));
   }
 
-  public void clickOnCloseExportWorkspaceIcon() {
+  public void clickOnCloseExportWorkspaceFormIcon() {
     final String closeFormIcon = EXPORT_WS_FORM_XPATH + "//i";
     seleniumWebDriverHelper.waitAndClick(By.xpath(closeFormIcon));
   }
 
-  public void waitExpectedNameErrorMessage(String expectedMessage) {
+  public void waitNameErrorMessage(String expectedMessage) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> isWorkspaceNameErrorMessageEquals(expectedMessage));
   }

@@ -147,17 +147,17 @@ public class WorkspaceDetailsOverviewTest {
     workspaceOverview.waitDisabledSaveButton();
 
     // check too short name
-    setupValidName(CHANGED_WORKSPACE_NAME);
-    setupInvalidNameAndCheckErrorMessage(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
+    nameShouldBeValid(CHANGED_WORKSPACE_NAME);
+    nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
 
     // check too long name
-    setupValidName(MIN_SHORT_NAME);
-    setupInvalidNameAndCheckErrorMessage(TOO_LONG_NAME, LONG_NAME_ERROR_MESSAGE);
+    nameShouldBeValid(MIN_SHORT_NAME);
+    nameShouldBeInvalid(TOO_LONG_NAME, LONG_NAME_ERROR_MESSAGE);
 
-    setupValidName(MAX_LONG_NAME);
-    checkValidNames();
+    nameShouldBeValid(MAX_LONG_NAME);
+    namesShouldBeValid();
 
-    checkInvalidNames();
+    namesShouldBeInvalid();
   }
 
   @Test(priority = 1)
@@ -171,12 +171,12 @@ public class WorkspaceDetailsOverviewTest {
 
     // close by "x" icon
     openExportWorkspaceForm();
-    workspaceOverview.clickOnCloseExportWorkspaceIcon();
+    workspaceOverview.clickOnCloseExportWorkspaceFormIcon();
     workspaceOverview.waitExportWorkspaceFormClosed();
 
     // close by "Close" button
     openExportWorkspaceForm();
-    workspaceOverview.clickOnCloseExportWorkspaceButton();
+    workspaceOverview.clickOnCloseExportWorkspaceFormButton();
     workspaceOverview.waitExportWorkspaceFormClosed();
 
     // check config
@@ -194,13 +194,13 @@ public class WorkspaceDetailsOverviewTest {
     newWorkspace.waitWorkspaceNameFieldValue(WORKSPACE_NAME);
   }
 
-  private void setupValidName(String name) {
+  private void nameShouldBeValid(String name) {
     workspaceOverview.enterNameWorkspace(name);
     workspaceOverview.waitUntilNoErrorsDisplayed();
     workspaceOverview.waitEnabledSaveButton();
   }
 
-  private void setupInvalidNameAndCheckErrorMessage(String name, String expectedErrorMessage) {
+  private void nameShouldBeInvalid(String name, String expectedErrorMessage) {
     workspaceOverview.enterNameWorkspace(name);
 
     try {
@@ -210,23 +210,23 @@ public class WorkspaceDetailsOverviewTest {
       fail("Known issue https://github.com/eclipse/che/issues/10659", ex);
     }
 
-    workspaceOverview.waitExpectedNameErrorMessage(expectedErrorMessage);
+    workspaceOverview.waitNameErrorMessage(expectedErrorMessage);
     workspaceOverview.waitDisabledSaveButton();
   }
 
-  private void checkValidNames() {
+  private void namesShouldBeValid() {
     VALID_NAMES.forEach(
         name -> {
-          setupInvalidNameAndCheckErrorMessage(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
-          setupValidName(name);
+          nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
+          nameShouldBeValid(name);
         });
   }
 
-  private void checkInvalidNames() {
+  private void namesShouldBeInvalid() {
     NOT_VALID_NAMES.forEach(
         name -> {
-          setupValidName(CHANGED_WORKSPACE_NAME);
-          setupInvalidNameAndCheckErrorMessage(name, SPECIAL_CHARACTERS_ERROR_MESSAGE);
+          nameShouldBeValid(CHANGED_WORKSPACE_NAME);
+          nameShouldBeInvalid(name, SPECIAL_CHARACTERS_ERROR_MESSAGE);
         });
   }
 
