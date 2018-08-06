@@ -77,7 +77,7 @@ public class WorkingWithSplitPanelTest {
   public void checkMultiSplitPane() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
     loader.waitOnClosed();
 
     // open menu of the split pane
@@ -129,12 +129,12 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
     terminal.waitTerminalIsNotEmpty();
     loader.waitOnClosed();
-    terminal.typeIntoTerminal("mc");
-    terminal.typeIntoTerminal(Keys.ENTER.toString());
+    terminal.typeIntoActiveTerminal("mc");
+    terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
     terminal.waitTerminalIsNotEmpty();
     loader.waitOnClosed();
     for (String partOfContent : checkMcTerminal) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
+      terminal.waitTextInFirstTerminal(partOfContent);
     }
     multiSplitPanel.waitTabProcessIsNotPresent(2, BUILD_COMM);
   }
