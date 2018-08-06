@@ -9,6 +9,8 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
+
 public class A7 {
     A7 a;
 }

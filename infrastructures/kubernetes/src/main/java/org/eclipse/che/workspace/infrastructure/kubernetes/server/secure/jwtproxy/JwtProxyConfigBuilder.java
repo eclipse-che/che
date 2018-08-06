@@ -11,13 +11,24 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
-import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_CONFIG_FOLDER;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_PUBLIC_KEY_FILE;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model.Config;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model.JWTProxy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model.RegistrableComponentConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model.SignerProxy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model.VerifierConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model.VerifierProxyConfig;
 
 /**
  * Helps to build JWTProxy config with several verifier proxies.
@@ -27,6 +38,9 @@ import java.util.Set;
 public class JwtProxyConfigBuilder {
   private final List<VerifierProxy> verifierProxies = new ArrayList<>();
   private final String workspaceId;
+  private static final ObjectMapper YAML_PARSER =
+      new ObjectMapper(new YAMLFactory())
+          .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
 
   public JwtProxyConfigBuilder(String workspaceId) {
     this.workspaceId = workspaceId;
@@ -37,46 +51,56 @@ public class JwtProxyConfigBuilder {
   }
 
   public String build() {
-    StringBuilder configBuilder = new StringBuilder();
+    List<VerifierProxyConfig> proxyConfigs = new ArrayList<>();
+    Config config =
+        new Config()
+            .withJWTProxy(
+                new JWTProxy()
+                    .withSignerProxy(new SignerProxy().withEnabled(false))
+                    .withVerifiedProxyConfigs(proxyConfigs));
 
-    configBuilder.append("jwtproxy:\n" + "  verifier_proxies:\n");
     for (VerifierProxy verifierProxy : verifierProxies) {
-      configBuilder.append(
-          format(
-              "  - listen_addr: :%s\n" // :4471
-                  + "    verifier:\n"
-                  + "      upstream: %s/\n" // http://localhost:4401
-                  + "      audience: %s\n"
-                  + "      max_skew: 1m\n"
-                  + "      max_ttl: 8800h\n"
-                  + "      key_server:\n"
-                  + "        type: preshared\n"
-                  + "        options:\n"
-                  + "          issuer: wsmaster\n"
-                  + "          key_id: %s\n"
-                  + "          public_key_path: "
-                  + JWT_PROXY_CONFIG_FOLDER
-                  + "/"
-                  + JWT_PROXY_PUBLIC_KEY_FILE
-                  + "\n"
-                  + "      claims_verifiers:\n"
-                  + "      - type: static\n"
-                  + "        options:\n"
-                  + "          iss: wsmaster\n"
-                  + "      nonce_storage:\n"
-                  + "        type: void\n",
-              verifierProxy.listenPort,
-              verifierProxy.upstream,
-              workspaceId,
-              workspaceId));
+      VerifierConfig verifierConfig =
+          new VerifierConfig()
+              .withAudience(workspaceId)
+              .withUpstream(verifierProxy.upstream)
+              .withMaxSkew("1m")
+              .withMaxTtl("8800h")
+              .withKeyServer(
+                  new RegistrableComponentConfig()
+                      .withType("preshared")
+                      .withOptions(
+                          ImmutableMap.of(
+                              "issuer",
+                              "wsmaster",
+                              "key_id",
+                              workspaceId,
+                              "public_key_path",
+                              JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_PUBLIC_KEY_FILE)))
+              .withClaimsVerifier(
+                  Collections.singleton(
+                      new RegistrableComponentConfig()
+                          .withType("static")
+                          .withOptions(ImmutableMap.of("iss", "wsmaster"))))
+              .withNonceStorage(new RegistrableComponentConfig().withType("void"));
+
       if (!verifierProxy.excludes.isEmpty()) {
-        configBuilder.append("      excludes:\n");
-        verifierProxy.excludes.forEach(s -> configBuilder.append(format("      - %s\n", s)));
+        verifierConfig.setExcludes(verifierProxy.excludes);
       }
+
+      VerifierProxyConfig proxyConfig =
+          new VerifierProxyConfig()
+              .withListenAddr(":" + verifierProxy.listenPort)
+              .withVerifierConfig(verifierConfig);
+
+      proxyConfigs.add(proxyConfig);
     }
 
-    configBuilder.append("  signer_proxy:\n" + "    enabled: false\n");
-    return configBuilder.toString();
+    try {
+      return YAML_PARSER.writeValueAsString(config);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Error during creation of JWTProxy config YAML: ", e);
+    }
   }
 
   private class VerifierProxy {
