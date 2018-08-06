@@ -104,9 +104,10 @@ public class GolangFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkCodeValidation() {
+  public void checkCodeValidationFeature() {
     editor.selectTabByName(GO_FILE_NAME);
 
+    // make error in code and check error marker with message
     editor.waitAllMarkersInvisibility(ERROR);
     editor.goToCursorPositionVisible(13, 1);
     editor.typeTextIntoEditor("p");
@@ -114,6 +115,7 @@ public class GolangFileEditingTest {
     editor.moveToMarkerAndWaitAssistContent(ERROR);
     editor.waitTextIntoAnnotationAssist("expected 'package', found 'IDENT' ppackage");
 
+    // restore content and check error marker invisibility
     editor.goToCursorPositionVisible(13, 1);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
