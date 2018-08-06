@@ -32,7 +32,10 @@ public class KeycloakServletModule extends ServletModule {
     filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
         .through(IdentityIdLoggerFilter.class);
 
-    filterRegex("/user/?.*").through(UnavailableResourceInMultiUserFilter.class);
+    // Ban change password (POST /user/password) and create a user (POST /user/) methods
+    // but not remove user (DELETE /user/{USER_ID}
+    filterRegex("^/user(/password/?|/)?$").through(UnavailableResourceInMultiUserFilter.class);
+
     filterRegex("/profile/.*/attributes").through(UnavailableResourceInMultiUserFilter.class);
   }
 }
