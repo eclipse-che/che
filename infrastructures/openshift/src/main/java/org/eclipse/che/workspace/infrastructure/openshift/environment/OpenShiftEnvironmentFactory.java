@@ -89,7 +89,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       OpenShiftClientFactory clientFactory,
       KubernetesEnvironmentValidator envValidator,
       @Named("che.workspace.default_memory_limit_mb") long defaultMaxMachineMemorySizeMB,
-      @Named("che.workspace.default_memory_limit_mb") long defaultRequestMachineMemorySizeMB) {
+      @Named("che.workspace.default_memory_request_mb") long defaultRequestMachineMemorySizeMB) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
