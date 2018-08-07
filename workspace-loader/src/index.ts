@@ -186,30 +186,13 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        let response;
-                        try {
-                            response = JSON.parse(xhr.responseText);
-                        } catch (e) {}
-
-                        if (response) {
-                            reject(response);
-                        } else if (xhr.statusText) {
-                            reject(xhr.statusText);
-                        } else {
-                            reject("Unknown error");
-                        }
+                        const errorMessage = 'Failed to get the workspace' + this.getRequestErrorMessage(xhr);
+                        reject(errorMessage);
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
                 };
             });
-        }).catch((error: any) => {
-            let errorMessage = '';
-            if (error) {
-                errorMessage = error.message ? error.message.toString() : error.toString();
-            }
-            errorMessage = `Failed to get the workspace` + (errorMessage ? `: "${errorMessage}"` : '.');
-            return Promise.reject(errorMessage);
         });
     }
 
@@ -225,31 +208,32 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        let response;
-                        try {
-                            response = JSON.parse(xhr.responseText);
-                        } catch (e) {}
-
-                        if (response) {
-                            reject(response);
-                        } else if (xhr.statusText) {
-                            reject(xhr.statusText);
-                        } else {
-                            reject("Unknown error");
-                        }
+                        const errorMessage = 'Failed to start the workspace'  + this.getRequestErrorMessage(xhr);
+                        reject(errorMessage);
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
                 };
             });
-        }).catch((error: any) => {
-            let errorMessage = '';
-            if (error) {
-                errorMessage = error.message ? error.message.toString() : error.toString();
-            }
-            errorMessage = `Failed to start the workspace` + (errorMessage ? `: "${errorMessage}"` : '.');
-            return Promise.reject(errorMessage);
         });
+    }
+
+    getRequestErrorMessage(xhr: XMLHttpRequest): string {
+        let errorMessage;
+        try {
+            const response = JSON.parse(xhr.responseText);
+            errorMessage = response.message;
+        } catch (e) { }
+
+        if (errorMessage) {
+            return errorMessage;
+        }
+
+        if (xhr.statusText) {
+            return xhr.statusText;
+        }
+
+        return "Unknown error";
     }
 
     /**
