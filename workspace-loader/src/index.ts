@@ -322,7 +322,7 @@ export class WorkspaceLoader {
             masterApi.subscribeWorkspaceStatus(this.workspace.id,
                 (message: any) => {
                     if (message.error) {
-                        this.loader.error(message.error);
+                        reject(`Failed to run the workspace: "${message.error}"`);
                     } else if (message.status === 'RUNNING') {
                         resolve();
                     } else if (message.status === 'STOPPED') {

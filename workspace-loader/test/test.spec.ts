@@ -123,7 +123,7 @@ describe('Workspace Loader', () => {
 
             spyOn(workspaceLoader, "openIDE").and.callThrough();
             spyOn(workspaceLoader, "openURL");
-            workspaceLoader.load().then(() => done());
+            workspaceLoader.load().then(done);
         });
 
         it('should call openURL method with correct parameter', () => {
@@ -152,7 +152,7 @@ describe('Workspace Loader', () => {
 
             spyOn(workspaceLoader, "openIDE").and.callThrough();
             spyOn(workspaceLoader, "openURL");
-            workspaceLoader.load().then(() => done());
+            workspaceLoader.load().then(done);
         });
 
         it('should open IDE directly', () => {
@@ -182,7 +182,7 @@ describe('Workspace Loader', () => {
 
             spyOn(workspaceLoader, "openIDE");
 
-            workspaceLoader.load().then(() => done());
+            workspaceLoader.load().then(done);
         });
 
         it('should not connect to workspace master API', () => {
@@ -201,6 +201,7 @@ describe('Workspace Loader', () => {
     describe('if workspace is STOPPED and then starts successfully', () => {
         let workspaceLoader: WorkspaceLoader;
         let statusChangeCallback: Function;
+        let workspaceLoadPromise: Promise<any>;
 
         beforeEach((done) => {
             const loader = new Loader();
@@ -236,7 +237,7 @@ describe('Workspace Loader', () => {
                 return Promise.resolve();
             });
 
-            workspaceLoader.load();
+            workspaceLoadPromise = workspaceLoader.load();
         });
 
         it('should not open an IDE', () => {
@@ -270,6 +271,35 @@ describe('Workspace Loader', () => {
                 it('should open an IDE', () => {
                     expect(workspaceLoader.openIDE).toHaveBeenCalled();
                 });
+
+            });
+
+            describe('then receives an error on websocket', () => {
+
+                beforeEach((done) => {
+                    statusChangeCallback({ error: 'Something bad happened.' });
+
+                    workspaceLoadPromise.then(done);
+                });
+
+                it('should not open an IDE', () => {
+                    expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+                });
+
+                it('should hide loader and progress bar', () => {
+                    const workspaceLoaderLabel = document.getElementById('workspace-loader-label'),
+                        workspaceLoaderProgress = document.getElementById('workspace-loader-progress');
+
+                    expect(workspaceLoaderLabel.style.display).toEqual('none');
+                    expect(workspaceLoaderProgress.style.display).toEqual('none');
+                });
+
+                it('should show message with "try again" prompt', () => {
+                    const workspaceLoaderReload = document.getElementById('workspace-loader-reload');
+
+                    expect(workspaceLoaderReload).toBeTruthy();
+                    expect(workspaceLoaderReload.style.display).not.toEqual('none');
+                })
 
             });
 
@@ -336,7 +366,7 @@ describe('Workspace Loader', () => {
         describe('then the request for starting the workspace fails', () => {
 
             beforeEach((done) => {
-                workspaceLoadPromise.then(() => done());
+                workspaceLoadPromise.then(done);
             });
 
             it('should hide loader and progress bar', () => {
