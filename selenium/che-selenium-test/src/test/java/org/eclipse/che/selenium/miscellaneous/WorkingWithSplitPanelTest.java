@@ -127,11 +127,11 @@ public class WorkingWithSplitPanelTest {
     consoles.clickOnTerminalItemInContextMenu();
     consoles.startTerminalFromProcessesArea("dev-machine");
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
     loader.waitOnClosed();
     terminal.typeIntoActiveTerminal("mc");
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
     loader.waitOnClosed();
     for (String partOfContent : checkMcTerminal) {
       terminal.waitTextInFirstTerminal(partOfContent);

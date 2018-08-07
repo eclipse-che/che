@@ -141,7 +141,8 @@ public class GitChangeMarkersTest {
 
     terminal.selectFirstTerminalTab();
     terminal.typeIntoActiveTerminal("cd " + PROJECT_NAME + Keys.ENTER);
-    terminal.typeIntoActiveTerminal("git config --global user.email \"git@email.com\"" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal(
+        "git config --global user.email \"git@email.com\"" + Keys.ENTER);
     terminal.typeIntoActiveTerminal("git config --global user.name \"name\"" + Keys.ENTER);
     terminal.typeIntoActiveTerminal("git commit -a -m 'Terminal commit'" + Keys.ENTER);
     terminal.waitTextInFirstTerminal("1 file changed, 1 insertion(+), 1 deletion(-)");

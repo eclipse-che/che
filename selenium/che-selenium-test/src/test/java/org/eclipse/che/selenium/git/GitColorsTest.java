@@ -226,7 +226,8 @@ public class GitColorsTest {
     loader.waitOnClosed();
     terminal.selectFirstTerminalTab();
     terminal.typeIntoActiveTerminal("cd " + PROJECT_NAME + Keys.ENTER);
-    terminal.typeIntoActiveTerminal("git config --global user.email \"git@email.com\"" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal(
+        "git config --global user.email \"git@email.com\"" + Keys.ENTER);
     terminal.typeIntoActiveTerminal("git config --global user.name \"name\"" + Keys.ENTER);
     terminal.typeIntoActiveTerminal("git commit -a -m 'Terminal commit'" + Keys.ENTER);
     terminal.waitTextInFirstTerminal("2 files changed, 1 insertion(+), 1 deletion(-)");

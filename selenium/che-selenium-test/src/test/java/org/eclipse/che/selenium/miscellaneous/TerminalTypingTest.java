@@ -94,8 +94,8 @@ public class TerminalTypingTest {
   public void checkTerminalTypingCharsWithoutShift() {
     loader.waitOnClosed();
     terminal.selectFirstTerminalTab();
-    terminal.waitFirstTerminalConsole();
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitTerminalConsole();
+    terminal.waitFirstTerminalIsNotEmpty();
 
     for (Pair<String, String> pair : keyPairs) {
       terminal.typeIntoActiveTerminal(pair.first());
@@ -108,8 +108,8 @@ public class TerminalTypingTest {
   public void checkTerminalTypingWithShift() {
     loader.waitOnClosed();
     terminal.selectFirstTerminalTab();
-    terminal.waitFirstTerminalConsole();
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitTerminalConsole();
+    terminal.waitFirstTerminalIsNotEmpty();
 
     for (Pair<String, String> pair : keyPairs) {
       terminal.typeIntoActiveTerminal(Keys.SHIFT + pair.first());

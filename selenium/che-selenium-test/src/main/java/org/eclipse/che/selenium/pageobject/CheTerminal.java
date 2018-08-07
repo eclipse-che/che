@@ -84,18 +84,19 @@ public class CheTerminal {
             + "/preceding::div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[contains(text(),'%s')]";
     String TERMINAL_FOCUS_XPATH =
         "//div[contains(@id,'gwt-debug-Terminal') and @active]"
-            + "//div[contains(@class, 'terminal xterm xterm-theme-default focus')]";
+            + "//div[contains(@class, 'terminal xterm enable-mouse-events focus')]";
   }
 
   @FindBy(xpath = Locators.TERMINAL_DEFAULT_TAB_XPATH)
-  WebElement defaultTermTab;
+  WebElement defaultTerminalTab;
 
   @FindBy(xpath = Locators.TERMINAL_CONSOLE_CONTAINER_XPATH)
-  WebElement defaultTermContainer;
+  WebElement defaultTerminalContainer;
 
   /** waits default terminal tab */
   public void waitFirstTerminalTab() {
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC).until(visibilityOf(defaultTermTab));
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+        .until(visibilityOf(defaultTerminalTab));
   }
 
   /**
@@ -104,7 +105,7 @@ public class CheTerminal {
    * @param timeWait time of waiting terminal container in seconds
    */
   public void waitFirstTerminalTab(int timeWait) {
-    new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermTab));
+    new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTerminalTab));
   }
 
   /**
@@ -118,9 +119,9 @@ public class CheTerminal {
   }
 
   /** waits appearance the main terminal container */
-  public void waitFirstTerminalConsole() {
+  public void waitTerminalConsole() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(defaultTermContainer));
+        .until(visibilityOf(defaultTerminalContainer));
   }
 
   public boolean terminalIsPresent() {
@@ -137,8 +138,8 @@ public class CheTerminal {
    *
    * @param timeWait time of waiting terminal container in seconds
    */
-  public void waitFirstTerminalConsole(int timeWait) {
-    new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermContainer));
+  public void waitTerminalConsole(int timeWait) {
+    new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTerminalContainer));
   }
 
   /**
@@ -215,16 +216,16 @@ public class CheTerminal {
         .until((WebDriver input) -> getVisibleTextFromFirstTerminal().contains(expectedText));
   }
 
-  public void waitTerminalIsNotEmpty() {
+  public void waitFirstTerminalIsNotEmpty() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until((WebDriver input) -> getVisibleTextFromFirstTerminal().length() > 0);
   }
 
   public void selectFocusToActiveTerminal() {
-    waitFirstTerminalConsole();
+    waitTerminalConsole();
 
     if (seleniumWebDriver.findElements(By.xpath(Locators.TERMINAL_FOCUS_XPATH)).size() == 0) {
-      defaultTermContainer.click();
+      defaultTerminalContainer.click();
     }
   }
 
@@ -235,7 +236,7 @@ public class CheTerminal {
    */
   public void typeIntoActiveTerminal(String command) {
     selectFocusToActiveTerminal();
-    defaultTermContainer.findElement(By.tagName("textarea")).sendKeys(command);
+    defaultTerminalContainer.findElement(By.tagName("textarea")).sendKeys(command);
     loader.waitOnClosed();
   }
 
@@ -246,7 +247,7 @@ public class CheTerminal {
    */
   public void sendCommandIntoTerminal(String command) {
     selectFocusToActiveTerminal();
-    defaultTermContainer
+    defaultTerminalContainer
         .findElement(By.tagName("textarea"))
         .sendKeys(command + Keys.ENTER.toString());
     loader.waitOnClosed();
@@ -256,7 +257,7 @@ public class CheTerminal {
   public void selectFirstTerminalTab() {
     waitFirstTerminalTab();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(elementToBeClickable(defaultTermTab))
+        .until(elementToBeClickable(defaultTerminalTab))
         .click();
   }
 
@@ -318,26 +319,6 @@ public class CheTerminal {
   public void movePageUpListTerminal(String item) {
     loader.waitOnClosed();
     typeIntoActiveTerminal(Keys.PAGE_UP.toString());
-    WaitUtils.sleepQuietly(2);
-    WebElement element =
-        seleniumWebDriver.findElement(
-            By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(element));
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (WebDriver input) ->
-                element.getCssValue("background-color").equals(LINE_HIGHLIGHTED_GREEN));
-  }
-
-  /**
-   * scroll terminal by pressing key 'Home'
-   *
-   * @param item is the name of the highlighted item
-   */
-  public void moveUpListTerminal(String item) {
-    loader.waitOnClosed();
-    typeIntoActiveTerminal(Keys.HOME.toString());
     WaitUtils.sleepQuietly(2);
     WebElement element =
         seleniumWebDriver.findElement(

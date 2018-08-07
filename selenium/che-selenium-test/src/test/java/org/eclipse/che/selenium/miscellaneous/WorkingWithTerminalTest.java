@@ -13,8 +13,6 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
 import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM_ID;
-import static org.openqa.selenium.Keys.PAGE_DOWN;
-import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -60,7 +58,7 @@ public class WorkingWithTerminalTest {
   private static final String WAR_NAME = "qa-spring-sample-1.0-SNAPSHOT.war";
 
   private static final String BASH_SCRIPT =
-      "for i in `seq 1 10`; do sleep 3; echo \"test=$i\"; done";
+      "for i in `seq 1 10`; do sleep 1; echo \"test=$i\"; done";
 
   private static final String MC_HELP_DIALOG =
       "This is the main help screen for GNU Midnight Commander.";
@@ -104,8 +102,8 @@ public class WorkingWithTerminalTest {
       consoles.clickOnTerminalItemInContextMenu();
 
       terminal.selectFirstTerminalTab();
-      terminal.waitFirstTerminalConsole();
-      terminal.waitTerminalIsNotEmpty();
+      terminal.waitTerminalConsole();
+      terminal.waitFirstTerminalIsNotEmpty();
     } catch (Exception e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
@@ -117,7 +115,7 @@ public class WorkingWithTerminalTest {
     projectExplorer.waitProjectExplorer();
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME);
-    terminal.waitFirstTerminalConsole(1);
+    terminal.waitTerminalConsole(1);
     terminal.typeIntoActiveTerminal("cd /projects/" + PROJECT_NAME + Keys.ENTER);
     terminal.waitTextInFirstTerminal("/projects/" + PROJECT_NAME);
     terminal.typeIntoActiveTerminal("mvn clean install" + Keys.ENTER);
@@ -132,19 +130,21 @@ public class WorkingWithTerminalTest {
   }
 
   @Test
-  public void shouldAppearMCDialogs() {
+  public void shouldScrollAndAppearMCDialogs() {
     terminal.typeIntoActiveTerminal("cd ~ && touch -f testfile.txt" + Keys.ENTER);
 
     openMC("~");
-    // check F5
+    // check END + F5
     terminal.typeIntoActiveTerminal("" + Keys.END + Keys.F5);
-
     terminal.waitTextInFirstTerminal("Copy file \"testfile.txt\" with source mask");
     terminal.typeIntoActiveTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
 
-    // check F6
-    terminal.typeIntoActiveTerminal(Keys.F6.toString());
-    terminal.waitTextInFirstTerminal("Move file \"testfile.txt\" with source mask");
+    // check HOME + F6
+    // we need to press END, HOME or PAGE_DOWN.. keys before functional key because click in MC
+    // moves
+    // selection to another file in panel
+    terminal.typeIntoActiveTerminal("" + Keys.HOME + Keys.F6.toString());
+    terminal.waitTextInFirstTerminal("Cannot operate on \"..\"!");
     terminal.typeIntoActiveTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
 
     // check F7
@@ -152,8 +152,14 @@ public class WorkingWithTerminalTest {
     terminal.waitTextInFirstTerminal("Enter directory name:");
     terminal.typeIntoActiveTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
 
-    // check F8
-    terminal.typeIntoActiveTerminal(Keys.F8.toString());
+    // check PAGE_DOWN + F8
+    terminal.typeIntoActiveTerminal(
+        ""
+            + Keys.PAGE_DOWN
+            + Keys.PAGE_DOWN
+            + Keys.PAGE_DOWN
+            + Keys.PAGE_DOWN
+            + Keys.F8.toString());
     terminal.waitTextInFirstTerminal("Delete file");
     terminal.waitTextInFirstTerminal("\"testfile.txt\"?");
     terminal.typeIntoActiveTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
@@ -162,34 +168,6 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal("" + Keys.F9 + Keys.ENTER);
     terminal.waitTextInFirstTerminal("File listing");
     terminal.typeIntoActiveTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
-  }
-
-  @Test
-  public void shouldScrollIntoTerminal() throws InterruptedException {
-    openMC("/");
-
-    try {
-      // check scrolling of the terminal
-      terminal.movePageDownListTerminal("opt");
-
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
-    }
-
-    // check scrolling by the END and HOME buttons
-    terminal.moveDownListTerminal(".dockerenv");
-    terminal.waitTextInFirstTerminal(".dockerenv");
-    terminal.moveUpListTerminal("bin");
-    terminal.waitTextInFirstTerminal("bin");
-
-    // check scrolling by the Page Up and the Page Down buttons
-    terminal.typeIntoActiveTerminal(PAGE_DOWN.toString());
-    terminal.typeIntoActiveTerminal(PAGE_DOWN.toString());
-    terminal.waitTextInFirstTerminal(".dockerenv");
-    terminal.typeIntoActiveTerminal(PAGE_UP.toString());
-    terminal.typeIntoActiveTerminal(PAGE_UP.toString());
-    terminal.waitTextInFirstTerminal("bin");
   }
 
   @Test
@@ -260,14 +238,13 @@ public class WorkingWithTerminalTest {
   public void shouldCreateFileTest() {
     terminal.typeIntoActiveTerminal("cd ~" + Keys.ENTER);
     terminal.typeIntoActiveTerminal("ls" + Keys.ENTER);
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
     terminal.waitTextInFirstTerminal("che");
-    terminal.typeIntoActiveTerminal("touch testfile0.txt" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("touch a.txt" + Keys.ENTER);
 
     terminal.typeIntoActiveTerminal("ls" + Keys.ENTER);
     terminal.waitTextInFirstTerminal("che");
-    terminal.waitTextInFirstTerminal("che");
-    terminal.waitTextInFirstTerminal("testfile0.txt");
+    terminal.waitTextInFirstTerminal("a.txt");
     terminal.waitTextInFirstTerminal("tomcat8");
   }
 
@@ -283,7 +260,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal(Keys.CONTROL + "c");
 
     // wait 3 sec. If process was really stopped we should not get text "test=2"
-    WaitUtils.sleepQuietly(3);
+    WaitUtils.sleepQuietly(1);
 
     try {
       terminal.waitNoTextInFirstTerminal("test=2");
@@ -301,7 +278,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal("clear" + Keys.ENTER);
     terminal.waitNoTextInFirstTerminal("clear");
 
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
     terminal.waitTextInFirstTerminal("user@");
   }
 
@@ -313,7 +290,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal("reset" + Keys.ENTER.toString());
     terminal.waitNoTextInFirstTerminal("reset");
 
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
     terminal.waitTextInFirstTerminal("user@");
   }
 
@@ -341,7 +318,7 @@ public class WorkingWithTerminalTest {
 
     // check "F1"
     terminal.typeIntoActiveTerminal(Keys.F1.toString());
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
     terminal.waitTextInFirstTerminal(MC_HELP_DIALOG);
     terminal.typeIntoActiveTerminal(Keys.F10.toString());
     terminal.waitNoTextInFirstTerminal(MC_HELP_DIALOG);
@@ -372,7 +349,7 @@ public class WorkingWithTerminalTest {
 
   @Test
   public void closeTerminalByExitCommand() {
-    terminal.waitFirstTerminalConsole();
+    terminal.waitTerminalConsole();
     terminal.typeIntoActiveTerminal("exit" + Keys.ENTER);
     terminal.waitTerminalIsNotPresent(1);
   }
@@ -382,7 +359,8 @@ public class WorkingWithTerminalTest {
     openMC("/projects/" + PROJECT_NAME);
 
     // check End, Home, F4, Delete keys
-    terminal.typeIntoActiveTerminal("" + Keys.END + Keys.ENTER + Keys.END + Keys.ARROW_UP + Keys.F4);
+    terminal.typeIntoActiveTerminal(
+        "" + Keys.END + Keys.ENTER + Keys.END + Keys.ARROW_UP + Keys.F4);
     // select editor
     terminal.typeIntoActiveTerminal(valueOf(1) + Keys.ENTER);
 
@@ -408,6 +386,6 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
     terminal.typeIntoActiveTerminal("mc");
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitTextInFirstTerminal("Left     File     Command     Options     Right");
   }
 }
