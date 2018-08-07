@@ -22,6 +22,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.F4;
 import static org.testng.Assert.fail;
+import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -131,7 +132,7 @@ public class GolangFileEditingTest {
     editor.typeTextIntoEditor("fmt.");
     editor.launchAutocompleteAndWaitContainer();
 
-    editor.checkProposalDocumentation("No documentation found.");
+    assertEquals(editor.getProposalDocumentationHTML(), "No documentation found.");
     editor.waitProposalsIntoAutocompleteContainer(expectedProposals);
 
     editor.deleteCurrentLine();
