@@ -72,10 +72,9 @@ public class OrganizationalAccountPermissionsCheckerTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp =
-        "User is not authorized to create workspaces in specified namespace."
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp =
+          "User is not authorized to create workspaces in specified namespace.")
   public void shouldThrowForbiddenWhenUserDoesNotHavePermissionToCreateWorkspaces()
       throws Exception {
     when(subject.hasPermission(
@@ -94,9 +93,8 @@ public class OrganizationalAccountPermissionsCheckerTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "User is not authorized to use specified namespace."
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp = "User is not authorized to use specified namespace.")
   public void shouldThrowForbiddenWhenUserDoesNotHavePermissionToManagerWorkspaces()
       throws Exception {
     when(subject.hasPermission(
@@ -119,10 +117,9 @@ public class OrganizationalAccountPermissionsCheckerTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp =
-        "User is not authorized to see resources information of requested organization."
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp =
+          "User is not authorized to see resources information of requested organization.")
   public void shouldThrowForbiddenWhenUserDoesNotHavePermissionToSeeResourcesInformation()
       throws Exception {
     when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);

@@ -52,25 +52,22 @@ public class StackValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null stack"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null stack")
   public void shouldNotValidateIfStackIsNull() throws Exception {
     validator.check(null);
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name")
   public void shouldNotValidateIfStackNameIsNull() throws Exception {
     validator.check(createStack().withName(null));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name")
   public void shouldNotValidateIfStackNameIsEmpty() throws Exception {
     validator.check(createStack().withName(""));
   }
@@ -86,25 +83,22 @@ public class StackValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'")
   public void shouldNotValidateIfStackScopeIsNull() throws Exception {
     validator.check(createStack().withScope(null));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'")
   public void shouldNotValidateIfStackScopeIsNotGeneralOrAdvanced() throws Exception {
     validator.check(createStack().withScope("not-valid"));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Workspace config required"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Workspace config required")
   public void shouldValidateIfSourceIsStackSourceAndWorkspaceConfigIsNull() throws Exception {
     validator.check(createStack().withWorkspaceConfig(null));
   }

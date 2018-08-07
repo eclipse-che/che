@@ -44,9 +44,8 @@ public class TagDeleteTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDeleteTag(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given

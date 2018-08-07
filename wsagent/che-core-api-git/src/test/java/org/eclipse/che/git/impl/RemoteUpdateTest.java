@@ -51,9 +51,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testUpdateBranches(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -71,9 +70,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testAddUrl(GitConnectionFactory connectionFactory) throws GitException, IOException {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -86,9 +84,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testAddPushUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -102,9 +99,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testDeleteUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -121,9 +117,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testDeletePushUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given

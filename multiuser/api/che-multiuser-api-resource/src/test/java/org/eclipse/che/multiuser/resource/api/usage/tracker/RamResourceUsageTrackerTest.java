@@ -84,9 +84,8 @@ public class RamResourceUsageTrackerTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Account was not found"
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Account was not found")
   public void shouldThrowNotFoundExceptionWhenAccountDoesNotExistOnGettingUsedRam()
       throws Exception {
     when(accountManager.getById(any())).thenThrow(new NotFoundException("Account was not found"));

@@ -53,9 +53,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testEmptyStatus(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -72,9 +71,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testUntracked(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -93,9 +91,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testUntrackedFolder(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -112,9 +109,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testAdded(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -136,9 +132,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testModified(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -161,9 +156,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testChanged(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -192,9 +186,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testConflicting(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -229,9 +222,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testMissing(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -253,9 +245,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testRemovedFromFilesSystem(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -280,9 +271,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testRemovedFromIndex(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -307,9 +297,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testStatusWithFilter(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -331,9 +320,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void shouldReturnCurrentBranch(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -349,9 +337,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void shouldReturnTagName(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -367,9 +354,8 @@ public class StatusTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void shouldReturnCommitId(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);

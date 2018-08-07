@@ -36,19 +36,17 @@ public class WorkspaceDtoDeserializerTest {
   }
 
   @Test(
-    expectedExceptions = RuntimeException.class,
-    expectedExceptionsMessageRegExp =
-        "resource /templates/workspace/openshift/some.json relative to org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer not found."
-  )
+      expectedExceptions = RuntimeException.class,
+      expectedExceptionsMessageRegExp =
+          "resource /templates/workspace/openshift/some.json relative to org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer not found.")
   public void shouldFailIfResourceIsNotFound() {
     deserializer.deserializeWorkspaceTemplate("some.json");
   }
 
   @Test(
-    expectedExceptions = RuntimeException.class,
-    expectedExceptionsMessageRegExp =
-        "com.google.gson.stream.MalformedJsonException: Expected ':' at line 3 column 8 path \\$\\.werwerw"
-  )
+      expectedExceptions = RuntimeException.class,
+      expectedExceptionsMessageRegExp =
+          "com.google.gson.stream.MalformedJsonException: Expected ':' at line 3 column 8 path \\$\\.werwerw")
   public void shouldFailIfNotAJson() {
     deserializer.deserializeWorkspaceTemplate("notAJson.json");
   }

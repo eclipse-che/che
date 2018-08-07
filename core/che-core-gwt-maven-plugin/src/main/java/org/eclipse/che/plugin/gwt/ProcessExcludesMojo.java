@@ -56,10 +56,9 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  * module to avoid inheriting modules of the excluded plugins.
  */
 @Mojo(
-  name = "process-excludes",
-  defaultPhase = LifecyclePhase.PROCESS_RESOURCES,
-  requiresDependencyResolution = ResolutionScope.COMPILE
-)
+    name = "process-excludes",
+    defaultPhase = LifecyclePhase.PROCESS_RESOURCES,
+    requiresDependencyResolution = ResolutionScope.COMPILE)
 public class ProcessExcludesMojo extends AbstractMojo {
 
   public static final String FULL_IDE_ARTIFACT_ID = "che-ide-full";
@@ -73,10 +72,9 @@ public class ProcessExcludesMojo extends AbstractMojo {
 
   /** The remote repositories to use for the artifacts resolution. */
   @Parameter(
-    defaultValue = "${project.remoteArtifactRepositories}",
-    required = true,
-    readonly = true
-  )
+      defaultValue = "${project.remoteArtifactRepositories}",
+      required = true,
+      readonly = true)
   private List<ArtifactRepository> remoteRepositories;
 
   @Parameter(defaultValue = "${project.build.outputDirectory}", required = true)

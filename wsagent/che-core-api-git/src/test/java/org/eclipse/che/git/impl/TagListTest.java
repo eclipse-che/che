@@ -45,9 +45,8 @@ public class TagListTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testTagList(GitConnectionFactory connectionFactory) throws GitException, IOException {
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
 
@@ -59,9 +58,8 @@ public class TagListTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testTagListPattern(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);

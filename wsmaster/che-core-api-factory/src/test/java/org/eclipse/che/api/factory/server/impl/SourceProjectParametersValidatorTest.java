@@ -58,10 +58,9 @@ public class SourceProjectParametersValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp =
-        "You have provided an invalid parameter .* for this version of Factory parameters.*"
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "You have provided an invalid parameter .* for this version of Factory parameters.*")
   public void shouldThrowExceptionIfUnknownParameterIsUsed() throws Exception {
     sourceStorage.getParameters().put("other", "value");
 
@@ -69,10 +68,9 @@ public class SourceProjectParametersValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp =
-        "The parameter .* has a value submitted .* with a value that is unexpected.*"
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "The parameter .* has a value submitted .* with a value that is unexpected.*")
   public void shouldThrowExceptionIfKeepVcsIsNotTrueOrFalse() throws Exception {
     sourceStorage.getParameters().put("keepVcs", "qwerty");
 

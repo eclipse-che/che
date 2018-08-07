@@ -1702,10 +1702,9 @@ public class XMLTreeTest {
   }
 
   @Test(
-    expectedExceptions = XMLTreeException.class,
-    expectedExceptionsMessageRegExp =
-        "Operation not permitted for element which has been removed from XMLTree"
-  )
+      expectedExceptions = XMLTreeException.class,
+      expectedExceptionsMessageRegExp =
+          "Operation not permitted for element which has been removed from XMLTree")
   public void shouldNotBeAbleToUseElementWhenParentWasRemovedFromTree() {
     final XMLTree tree = XMLTree.from(XML_CONTENT);
 

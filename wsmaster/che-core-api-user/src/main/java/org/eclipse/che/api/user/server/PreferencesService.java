@@ -51,11 +51,10 @@ public class PreferencesService extends Service {
   @Produces(APPLICATION_JSON)
   @GenerateLink(rel = LINK_REL_PREFERENCES)
   @ApiOperation(
-    value = "Gets preferences of logged in user",
-    notes =
-        "If not all the preferences needed then 'filter' may be used, "
-            + "basically it is regex for filtering preferences by names"
-  )
+      value = "Gets preferences of logged in user",
+      notes =
+          "If not all the preferences needed then 'filter' may be used, "
+              + "basically it is regex for filtering preferences by names")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Preferences successfully fetched"),
     @ApiResponse(code = 500, message = "Internal Server Error")
@@ -77,9 +76,8 @@ public class PreferencesService extends Service {
   @Consumes(APPLICATION_JSON)
   @GenerateLink(rel = LINK_REL_PREFERENCES)
   @ApiOperation(
-    value = "Saves preferences of logged in user",
-    notes = "All the existing user's preferences will be override by this method"
-  )
+      value = "Saves preferences of logged in user",
+      notes = "All the existing user's preferences will be override by this method")
   @ApiResponses({
     @ApiResponse(code = 204, message = "Preferences successfully saved"),
     @ApiResponse(code = 400, message = "Request doesn't contain new preferences"),
@@ -97,17 +95,16 @@ public class PreferencesService extends Service {
   @Produces(APPLICATION_JSON)
   @GenerateLink(rel = LINK_REL_PREFERENCES)
   @ApiOperation(
-    value = "Updates preferences of logged in user",
-    notes =
-        "The merge strategy is used for update, which means that "
-            + "existing preferences with keys equal to update preference keys will "
-            + "be replaces with new values, and new preferences will be added"
-  )
+      value = "Updates preferences of logged in user",
+      notes =
+          "The merge strategy is used for update, which means that "
+              + "existing preferences with keys equal to update preference keys will "
+              + "be replaces with new values, and new preferences will be added")
   @ApiResponses({
     @ApiResponse(
-      code = 200,
-      message = "Preferences successfully updated, response contains " + "all the user preferences"
-    ),
+        code = 200,
+        message =
+            "Preferences successfully updated, response contains " + "all the user preferences"),
     @ApiResponse(code = 400, message = "Request doesn't contain preferences update"),
     @ApiResponse(code = 500, message = "Couldn't update preferences due to internal server error")
   })
@@ -123,11 +120,10 @@ public class PreferencesService extends Service {
   @Consumes(APPLICATION_JSON)
   @GenerateLink(rel = LINK_REL_PREFERENCES)
   @ApiOperation(
-    value = "Remove preferences of logged in user.",
-    notes =
-        "If names are not specified, then all the user's preferences will be removed, "
-            + "otherwise only the preferences which names are listed"
-  )
+      value = "Remove preferences of logged in user.",
+      notes =
+          "If names are not specified, then all the user's preferences will be removed, "
+              + "otherwise only the preferences which names are listed")
   @ApiResponses({
     @ApiResponse(code = 204, message = "Preferences successfully removed"),
     @ApiResponse(code = 500, message = "Couldn't remove preferences due to internal server error")

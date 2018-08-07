@@ -165,9 +165,9 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "The user does not have permission to perform this operation"
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp =
+          "The user does not have permission to perform this operation")
   public void shouldThrowForbiddenExceptionWhenRequestedUnknownMethod() throws Exception {
     final GenericResourceMethod mock = mock(GenericResourceMethod.class);
     Method unknownMethod = FreeResourcesLimitService.class.getMethod("getServiceDescriptor");

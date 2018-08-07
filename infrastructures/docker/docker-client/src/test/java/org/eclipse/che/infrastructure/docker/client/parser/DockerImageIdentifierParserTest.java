@@ -31,27 +31,24 @@ public class DockerImageIdentifierParserTest {
   }
 
   @Test(
-    expectedExceptions = DockerFileException.class,
-    expectedExceptionsMessageRegExp = "Null and empty argument value is forbidden"
-  )
+      expectedExceptions = DockerFileException.class,
+      expectedExceptionsMessageRegExp = "Null and empty argument value is forbidden")
   public void shouldThrowIllegalArgumentExceptionIfArgumentIsNull() throws Exception {
     DockerImageIdentifierParser.parse(null);
   }
 
   @Test(
-    expectedExceptions = DockerFileException.class,
-    expectedExceptionsMessageRegExp = "Null and empty argument value is forbidden"
-  )
+      expectedExceptions = DockerFileException.class,
+      expectedExceptionsMessageRegExp = "Null and empty argument value is forbidden")
   public void shouldThrowIllegalArgumentExceptionIfArgumentIsEmpty() throws Exception {
     DockerImageIdentifierParser.parse("");
   }
 
   @Test(
-    dataProvider = "invalidImages",
-    expectedExceptions = DockerFileException.class,
-    expectedExceptionsMessageRegExp = "Provided image reference is invalid",
-    timeOut = 500
-  )
+      dataProvider = "invalidImages",
+      expectedExceptions = DockerFileException.class,
+      expectedExceptionsMessageRegExp = "Provided image reference is invalid",
+      timeOut = 500)
   public void shouldThrowDockerFileExceptionIfArgumentDoesNotMatchRegexp(String image)
       throws Exception {
     DockerImageIdentifierParser.parse(image);
