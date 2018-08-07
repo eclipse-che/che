@@ -18,6 +18,7 @@ import com.google.gwt.json.client.JSONString;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.List;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
 import org.eclipse.lsp4j.ExecuteCommandParams;
@@ -47,23 +48,25 @@ public class ExecuteClientCommandProcessor {
         }
         break;
       case CLIENT_UPDATE_PROJECT:
-        updateProject(stringValue(params.getArguments()));
+        updateProject(params.getArguments());
         break;
       default:
         break;
     }
   }
 
-  private void updateProject(String project) {
-    appContext
-        .getWorkspaceRoot()
-        .getContainer(project)
-        .then(
-            container -> {
-              if (container.isPresent()) {
-                container.get().synchronize();
-              }
-            });
+  private void updateProject(List<Object> projects) {
+    for (Object project : projects) {
+      appContext
+          .getWorkspaceRoot()
+          .getContainer(stringValue(project))
+          .then(
+              container -> {
+                if (container.isPresent()) {
+                  container.get().synchronize();
+                }
+              });
+    }
   }
 
   private String stringValue(Object value) {
