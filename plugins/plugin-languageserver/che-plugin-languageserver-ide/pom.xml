@@ -230,8 +230,8 @@
                         <classe>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</classe>
                     </classes>
                     <excludes>
-                    	<exclude> org.eclipse.lsp4j.WatchKind</exclude>
-                    	<exclude> org.eclipse.lsp4j.MarkupKind</exclude>
+                        <exclude>org.eclipse.lsp4j.WatchKind</exclude>
+                        <exclude>org.eclipse.lsp4j.MarkupKind</exclude>
                     </excludes>
                     <dtoPackages>
                         <package>org.eclipse.lsp4j</package>
