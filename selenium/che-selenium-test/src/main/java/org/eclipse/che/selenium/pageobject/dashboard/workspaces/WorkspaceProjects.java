@@ -11,11 +11,16 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.ADD_NEW_PROJECT_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.DELETE_BUTTON_MESSAGE_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.DELETE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.NOTIFICATION_CONTAINER_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.SEARCH_FIELD_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.SELECT_ALL_CHECKBOX_XPATH;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.testng.Assert.fail;
@@ -57,6 +62,10 @@ public class WorkspaceProjects {
     String PROJECT_CHECKBOX = "//md-checkbox[contains(@aria-label, 'Project %s')]";
     String SEARCH_FIELD_XPATH = "//workspace-details-projects//input[@placeholder='Search']";
     String NOTIFICATION_CONTAINER_ID = "che-notification-container";
+    String DELETE_BUTTON_XPATH = "//che-button-primary[@che-button-title='Delete']";
+    String DELETE_BUTTON_MESSAGE_XPATH = "//che-list-header-delete-button/span";
+    String SELECT_ALL_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Project list']/div";
+    String CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE = "//md-checkbox[@aria-label='Project %s']";
   }
 
   public enum BottomButton {
@@ -75,6 +84,43 @@ public class WorkspaceProjects {
     }
   }
 
+  public void clickOnSelectAllCheckbox() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(SELECT_ALL_CHECKBOX_XPATH));
+  }
+
+  public WebElement waitDeleteButton() {
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(DELETE_BUTTON_XPATH));
+  }
+
+  public void waitDeleteButtonDisappearance() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(DELETE_BUTTON_XPATH));
+  }
+
+  public void clickOnDeleteButton() {
+    waitDeleteButton().click();
+  }
+
+  public void waitDeleteButtonMessage(String expectedMessage) {
+    seleniumWebDriverHelper.waitTextContains(
+        By.xpath(DELETE_BUTTON_MESSAGE_XPATH), expectedMessage);
+  }
+
+  public void waitDeleteButtonMessageDisappearance() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(DELETE_BUTTON_MESSAGE_XPATH));
+  }
+
+  public void waitDeleteButtonDisabling() {
+    waitButtonState(By.xpath(DELETE_BUTTON_XPATH), false);
+  }
+
+  public void waitDeleteButtonEnabling() {
+    waitButtonState(By.xpath(DELETE_BUTTON_XPATH), true);
+  }
+
+  public void typeToSearchField(String text) {
+    seleniumWebDriverHelper.setValue(waitSearchField(), text);
+  }
+
   public void waitNotification(String expectedText) {
     seleniumWebDriverHelper.waitTextContains(By.id(NOTIFICATION_CONTAINER_ID), expectedText);
   }
@@ -83,13 +129,22 @@ public class WorkspaceProjects {
     return seleniumWebDriverHelper.waitVisibility(By.name(button.get()));
   }
 
+  public void waitBottomButtonInvisibility(BottomButton... bottomButtons) {
+    asList(bottomButtons)
+        .forEach(button -> seleniumWebDriverHelper.waitInvisibility(By.name(button.get())));
+  }
+
   public void clickOnBottomButton(BottomButton button) {
     waitBottomButton(button).click();
   }
 
   private void waitBottomButtonState(BottomButton button, boolean state) {
+    waitButtonState(By.name(button.get()), state);
+  }
+
+  private void waitButtonState(By locator, boolean state) {
     seleniumWebDriverHelper.waitAttributeEqualsTo(
-        By.name(button.get()), "aria-disabled", Boolean.toString(!state));
+        locator, "aria-disabled", Boolean.toString(!state));
   }
 
   public void waitBottomButtonDisabled(BottomButton... buttons) {
@@ -188,5 +243,35 @@ public class WorkspaceProjects {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/8931");
     }
+  }
+
+  public boolean isCheckboxEnabled(String projectName) {
+    String checkboxLocator = format(CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE, projectName);
+    return seleniumWebDriverHelper
+        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), "aria-checked")
+        .equals("true");
+  }
+
+  public void waitCheckboxEnabled(String... projectName) {
+    asList(projectName)
+        .forEach(
+            name ->
+                seleniumWebDriverHelper.waitSuccessCondition(driver -> isCheckboxEnabled(name)));
+  }
+
+  public void waitCheckboxDisabled(String... projectName) {
+    asList(projectName)
+        .forEach(
+            name ->
+                seleniumWebDriverHelper.waitSuccessCondition(driver -> !isCheckboxEnabled(name)));
+  }
+
+  public void clickOnCheckbox(String... projectName) {
+    asList(projectName)
+        .forEach(
+            name -> {
+              String checkboxLocator = format(CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE, projectName);
+              seleniumWebDriverHelper.waitAndClick(By.xpath(checkboxLocator));
+            });
   }
 }
