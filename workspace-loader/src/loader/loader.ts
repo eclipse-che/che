@@ -26,7 +26,18 @@ export class Loader {
         }, 1);
 
         /** Add click handler to maximize output */
-        document.getElementById('workspace-console').onclick = () => this.onclick();
+        document.getElementById('workspace-console').onclick = () => this.onclickConsole();
+
+        document.getElementById('workspace-loader-reload').onclick = () => this.onclickReload();
+    }
+
+    hideLoader(): void {
+        document.getElementById('workspace-loader-label').style.display = 'none';
+        document.getElementById('workspace-loader-progress').style.display = 'none';
+    }
+
+    showReload(): void {
+        document.getElementById('workspace-loader-reload').style.display = 'block';
     }
 
     /**
@@ -59,7 +70,7 @@ export class Loader {
         element.className = "error";
     }
 
-    onclick(): void {
+    onclickConsole(): void {
         if (document.getElementById('workspace-loader').hasAttribute("max")) {
             document.getElementById('workspace-loader').removeAttribute("max");
             document.getElementById('workspace-console').removeAttribute("max");
@@ -67,6 +78,11 @@ export class Loader {
             document.getElementById('workspace-loader').setAttribute("max", "");
             document.getElementById('workspace-console').setAttribute("max", "");
         }
+    }
+
+    onclickReload(): boolean {
+        window.location.reload();
+        return false;
     }
 
 }
