@@ -264,8 +264,18 @@ describe('Workspace Loader', () => {
 
             describe('then becomes RUNNING', () => {
 
-                beforeEach(() => {
+                beforeEach((done) => {
+                    workspaceLoader.getWorkspace.and.callFake(() => {
+                        return new Promise((resolve) => {
+                            fakeWorkspaceConfig.status = 'RUNNING';
+                            fakeWorkspaceConfig.runtime = {} as che.IWorkspaceRuntime;
+                            resolve(fakeWorkspaceConfig);
+                        });
+                    });
+
                     statusChangeCallback({ status: 'RUNNING' });
+
+                    workspaceLoadPromise.then(done);
                 });
 
                 it('should open an IDE', () => {
@@ -391,6 +401,7 @@ describe('Workspace Loader', () => {
     describe('if workspace is STOPPING', () => {
         let workspaceLoader: WorkspaceLoader;
         let statusChangeCallback: Function;
+        let workspaceLoadPromise: Promise<any>;
 
         beforeEach((done) => {
             const loader = new Loader();
@@ -426,7 +437,7 @@ describe('Workspace Loader', () => {
                 return Promise.resolve();
             });
 
-            workspaceLoader.load();
+            workspaceLoadPromise = workspaceLoader.load();
         });
 
         it('should not open an IDE immediately', () => {
@@ -457,8 +468,18 @@ describe('Workspace Loader', () => {
 
             describe('then becomes RUNNING', () => {
 
-                beforeEach(() => {
+                beforeEach((done) => {
+                    workspaceLoader.getWorkspace.and.callFake(() => {
+                        return new Promise((resolve) => {
+                            fakeWorkspaceConfig.status = 'RUNNING';
+                            fakeWorkspaceConfig.runtime = {} as che.IWorkspaceRuntime;
+                            resolve(fakeWorkspaceConfig);
+                        });
+                    });
+
                     statusChangeCallback({ status: 'RUNNING' });
+
+                    workspaceLoadPromise.then(done);
                 });
 
                 it('should open an IDE', () => {

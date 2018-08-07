@@ -187,7 +187,7 @@ export class WorkspaceLoader {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
                         const errorMessage = 'Failed to get the workspace' + this.getRequestErrorMessage(xhr);
-                        reject(errorMessage);
+                        reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
@@ -209,7 +209,7 @@ export class WorkspaceLoader {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
                         const errorMessage = 'Failed to start the workspace'  + this.getRequestErrorMessage(xhr);
-                        reject(errorMessage);
+                        reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
@@ -258,13 +258,9 @@ export class WorkspaceLoader {
 
         const runningOnConnectionPromise = masterApiConnectionPromise
             .then((masterApi: CheJsonRpcMasterApi) => {
-                return new Promise((resolve) => {
+                return new Promise((resolve, reject) => {
                     masterApi.addListener('open', () => {
-                        this.getWorkspace(this.workspace.id).then((workspace) => {
-                            if (workspace.status === 'RUNNING') {
-                                resolve();
-                            }
-                        });
+                        this.checkWorkspaceRuntime().then(resolve, reject);
                     });
                 });
             });
@@ -306,13 +302,27 @@ export class WorkspaceLoader {
             masterApi.subscribeWorkspaceStatus(this.workspace.id,
                 (message: any) => {
                     if (message.error) {
-                        reject(`Failed to run the workspace: "${message.error}"`);
+                        reject(new Error(`Failed to run the workspace: "${message.error}"`));
                     } else if (message.status === 'RUNNING') {
-                        resolve();
+                        this.checkWorkspaceRuntime().then(resolve, reject);
                     } else if (message.status === 'STOPPED') {
                         this.startWorkspace().catch((error: any) => reject(error));
                     }
                 });
+        });
+    }
+
+    checkWorkspaceRuntime(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getWorkspace(this.workspace.id).then((workspace) => {
+                if (workspace.status === 'RUNNING') {
+                    if (workspace.runtime) {
+                        resolve();
+                    } else {
+                        reject(new Error('You do not have permissions to access workspace runtime, in this case IDE cannot be loaded.'));
+                    }
+                }
+            });
         });
     }
 
