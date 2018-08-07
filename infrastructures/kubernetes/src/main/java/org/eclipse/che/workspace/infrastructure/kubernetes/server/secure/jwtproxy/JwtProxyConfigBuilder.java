@@ -44,21 +44,23 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  * @author Sergii Leshchenko
  */
 public class JwtProxyConfigBuilder {
+
+  private static final ObjectMapper YAML_PARSER =
+      new ObjectMapper(new YAMLFactory())
+          .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+
   private final String workspaceId;
   private final URI authPageUrl;
   private final String issuer;
   private final String ttl;
   private final List<VerifierProxy> verifierProxies = new ArrayList<>();
-  private static final ObjectMapper YAML_PARSER =
-      new ObjectMapper(new YAMLFactory())
-          .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
 
   @Inject
   public JwtProxyConfigBuilder(
       @Named("che.api") URI apiEndpoint,
-      @Named("jwtproxy.token.issuer") String issuer,
-      @Named("jwtproxy.token.ttl") String ttl,
-      @Nullable @Named("jwtproxy.auth.loader.path") String loaderPath,
+      @Named("che.server.secure_exposer.jwtproxy.token.issuer") String issuer,
+      @Named("che.server.secure_exposer.jwtproxy.token.ttl") String ttl,
+      @Nullable @Named("che.server.secure_exposer.jwtproxy.auth.loader.path") String loaderPath,
       @Assisted String workspaceId) {
     this.workspaceId = workspaceId;
     this.authPageUrl =
