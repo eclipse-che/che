@@ -104,9 +104,9 @@ public class PythonFileEditingTest {
     editor.typeTextIntoEditor("\n\nobject = MyClass()\nprint(object.");
 
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("function");
-    editor.waitTextIntoAutocompleteContainer("var");
-    editor.waitTextIntoAutocompleteContainer("variable");
+    editor.waitProposalIntoAutocompleteContainer("function");
+    editor.waitProposalIntoAutocompleteContainer("var");
+    editor.waitProposalIntoAutocompleteContainer("variable");
 
     editor.enterAutocompleteProposal("function() ");
     editor.waitTextIntoEditor("print(object.function");
