@@ -377,12 +377,12 @@ public class WsMasterModule extends AbstractModule {
   }
 
   private void configureJwtProxySecureProvisioner(String infrastructure) {
+    install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
     if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(
           new FactoryModuleBuilder()
               .build(
                   new TypeLiteral<JwtProxySecureServerExposerFactory<KubernetesEnvironment>>() {}));
-      install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
       MapBinder.newMapBinder(
               binder(),
               new TypeLiteral<String>() {},
