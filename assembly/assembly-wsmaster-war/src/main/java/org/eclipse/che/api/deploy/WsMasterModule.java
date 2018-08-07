@@ -94,6 +94,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyConfigBuilderFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
@@ -381,6 +382,7 @@ public class WsMasterModule extends AbstractModule {
           new FactoryModuleBuilder()
               .build(
                   new TypeLiteral<JwtProxySecureServerExposerFactory<KubernetesEnvironment>>() {}));
+      install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
       MapBinder.newMapBinder(
               binder(),
               new TypeLiteral<String>() {},

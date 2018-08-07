@@ -25,6 +25,7 @@ import static org.testng.Assert.assertTrue;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import java.net.URI;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -68,7 +69,12 @@ public class JwtProxyProvisionerTest {
     when(signatureKeyManager.getKeyPair()).thenReturn(keyPair);
     when(publicKey.getEncoded()).thenReturn("publickey".getBytes());
 
-    jwtProxyProvisioner = new JwtProxyProvisioner(runtimeId, signatureKeyManager);
+    jwtProxyProvisioner =
+        new JwtProxyProvisioner(
+            runtimeId,
+            signatureKeyManager,
+            new JwtProxyConfigBuilder(
+                URI.create("http://che.api"), "iss", "1h", "", runtimeId.getWorkspaceId()));
     k8sEnv = KubernetesEnvironment.builder().build();
   }
 
