@@ -57,7 +57,7 @@ public class ComposerValueProviderFactory implements ValueProviderFactory {
         if (!composerDotJsonFsPath.toFile().exists()) {
           return Collections.emptyList();
         }
-        JsonObject model = readModel(projectFsPath);
+        JsonObject model = readModel(composerDotJsonFsPath);
         String value = "";
 
         if (attributeName.equals(PACKAGE) && model.has("name")) {

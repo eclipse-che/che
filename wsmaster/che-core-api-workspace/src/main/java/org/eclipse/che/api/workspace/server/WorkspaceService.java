@@ -59,6 +59,7 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.token.MachineAccessForbidden;
 import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.shared.Constants;
@@ -818,6 +819,9 @@ public class WorkspaceService extends Service {
     if (runtimeDto != null) {
       try {
         runtimeDto.setMachineToken(machineTokenProvider.getToken(workspace.getId()));
+      } catch (MachineAccessForbidden e) {
+        // set runtime to null since user doesn't have the required permissions
+        workspaceDto.setRuntime(null);
       } catch (MachineTokenException e) {
         throw new ServerException(e.getMessage(), e);
       }
