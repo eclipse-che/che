@@ -38,17 +38,14 @@ import org.eclipse.che.multiuser.resource.model.Resource;
 @Entity(name = "FreeResourcesLimit")
 @NamedQueries({
   @NamedQuery(
-    name = "FreeResourcesLimit.get",
-    query = "SELECT limit FROM FreeResourcesLimit limit WHERE limit.accountId= :accountId"
-  ),
+      name = "FreeResourcesLimit.get",
+      query = "SELECT limit FROM FreeResourcesLimit limit WHERE limit.accountId= :accountId"),
   @NamedQuery(
-    name = "FreeResourcesLimit.getAll",
-    query = "SELECT limit FROM FreeResourcesLimit limit"
-  ),
+      name = "FreeResourcesLimit.getAll",
+      query = "SELECT limit FROM FreeResourcesLimit limit"),
   @NamedQuery(
-    name = "FreeResourcesLimit.getTotalCount",
-    query = "SELECT COUNT(limit) FROM FreeResourcesLimit limit"
-  )
+      name = "FreeResourcesLimit.getTotalCount",
+      query = "SELECT COUNT(limit) FROM FreeResourcesLimit limit")
 })
 @Table(name = "che_free_resources_limit")
 public class FreeResourcesLimitImpl implements FreeResourcesLimit {
@@ -60,10 +57,9 @@ public class FreeResourcesLimitImpl implements FreeResourcesLimit {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
-    name = "che_free_resources_limit_resource",
-    joinColumns = @JoinColumn(name = "free_resources_limit_account_id"),
-    inverseJoinColumns = @JoinColumn(name = "resources_id")
-  )
+      name = "che_free_resources_limit_resource",
+      joinColumns = @JoinColumn(name = "free_resources_limit_account_id"),
+      inverseJoinColumns = @JoinColumn(name = "resources_id"))
   private List<ResourceImpl> resources;
 
   public FreeResourcesLimitImpl() {}

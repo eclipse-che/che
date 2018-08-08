@@ -131,7 +131,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
       "Test", "TestSuite", "TestCollector", "TestListener", "TestFailure"
     };
     for (String autocompleteItem : autocompleteItems) {
-      editor.waitTextIntoAutocompleteContainer(autocompleteItem);
+      editor.waitProposalIntoAutocompleteContainer(autocompleteItem);
     }
     editor.enterAutocompleteProposal("TestCase");
     editor.waitTextIntoEditor(

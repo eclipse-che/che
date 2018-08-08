@@ -129,10 +129,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    dataProvider = "incorrectFeatures",
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Features format is illegal. Problematic feature entry:.*"
-  )
+      dataProvider = "incorrectFeatures",
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Features format is illegal. Problematic feature entry:.*")
   public void throwsExceptionWhenFeatureEntryIsIncorrect(String featuresAttributeValue)
       throws Exception {
     retriever.get(singletonMap(WORKSPACE_NEXT_FEATURES, featuresAttributeValue));
@@ -158,18 +157,17 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Invalid Workspace.Next configuration: feature .* is duplicated"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Invalid Workspace.Next configuration: feature .* is duplicated")
   public void throwsExceptionWhenFeatureIsDuplicated() throws Exception {
     retriever.get(singletonMap(WORKSPACE_NEXT_FEATURES, "feature1/version1,feature1/version1"));
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Error occurred on retrieval of feature .*. Error: test error"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Error occurred on retrieval of feature .*. Error: test error")
   public void throwsExceptionWhenFeatureRetrievalFails() throws Exception {
     doThrow(new IOException("test error"))
         .when(retriever)
@@ -179,10 +177,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Error occurred on retrieval of ChePlugin .*. Error: test error"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Error occurred on retrieval of ChePlugin .*. Error: test error")
   public void throwsExceptionWhenPluginRetrievalFails() throws Exception {
     CheFeature cheFeature = testFeature();
     doReturn(cheFeature).when(retriever).getBody(any(URI.class), eq(CheFeature.class));
@@ -194,10 +191,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "ChePlugin '.*/.*' configuration is invalid. Version is missing."
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "ChePlugin '.*/.*' configuration is invalid. Version is missing.")
   public void throwExceptionIfPluginVersionIsNull() throws Exception {
     CheFeature cheFeature = testFeature();
     ChePlugin plugin = testPlugin();
@@ -209,10 +205,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "ChePlugin '.*/.*' configuration is invalid. Version is missing."
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "ChePlugin '.*/.*' configuration is invalid. Version is missing.")
   public void throwExceptionIfPluginVersionIsEmpty() throws Exception {
     CheFeature cheFeature = testFeature();
     ChePlugin plugin = testPlugin();
@@ -224,9 +219,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "ChePlugin '.*/.*' configuration is invalid. Name is missing."
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "ChePlugin '.*/.*' configuration is invalid. Name is missing.")
   public void throwExceptionIfPluginNameIsNull() throws Exception {
     CheFeature cheFeature = testFeature();
     ChePlugin plugin = testPlugin();
@@ -238,9 +233,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "ChePlugin '.*/.*' configuration is invalid. Name is missing."
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "ChePlugin '.*/.*' configuration is invalid. Name is missing.")
   public void throwExceptionIfPluginNameIsEmpty() throws Exception {
     CheFeature cheFeature = testFeature();
     ChePlugin plugin = testPlugin();
@@ -252,10 +247,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Parameters not supported by che plugins found: .*" + TEST_PLUGIN_PARAM_NAME + ".*"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Parameters not supported by che plugins found: .*" + TEST_PLUGIN_PARAM_NAME + ".*")
   public void throwExceptionIfValueForPluginParameterNotFound() throws Exception {
     CheFeature cheFeature =
         testFeature(
@@ -268,9 +262,8 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Containers contain duplicated exposed ports."
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Containers contain duplicated exposed ports.")
   public void throwExceptionIfContainerHasDuplicatedPorts() throws Exception {
     ChePlugin plugin = testPlugin();
     List<CheContainerPort> containerPorts = plugin.getContainers().get(0).getPorts();
@@ -285,10 +278,9 @@ public class WorkspaceNextObjectsRetrieverTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Ports in containers and endpoints don't match. Difference: .*"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Ports in containers and endpoints don't match. Difference: .*")
   public void throwExceptionIfContainersAndEndpointsPortsDoNotMatch() throws Exception {
     ChePlugin plugin = testPlugin();
     List<CheContainerPort> containerPorts = plugin.getContainers().get(0).getPorts();

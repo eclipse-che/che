@@ -94,10 +94,9 @@ public class SinglePortUrlRewriterTest {
   }
 
   @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Rewriting of host 'server.machine1.ws123.172.12.0.2.nip.io' in URL ':' failed. Error: .*"
-  )
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Rewriting of host 'server.machine1.ws123.172.12.0.2.nip.io' in URL ':' failed. Error: .*")
   public void shouldThrowExceptionWhenRewritingFails() throws Exception {
     Provider<SinglePortHostnameBuilder> provider =
         () -> new SinglePortHostnameBuilder("172.12.0.2", "127.0.0.1", null);

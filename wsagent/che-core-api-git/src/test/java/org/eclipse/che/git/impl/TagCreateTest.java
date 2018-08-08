@@ -41,9 +41,8 @@ public class TagCreateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCreateTag(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given

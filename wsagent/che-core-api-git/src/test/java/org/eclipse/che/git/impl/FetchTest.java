@@ -56,9 +56,8 @@ public class FetchTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testSimpleFetch(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
 
@@ -91,9 +90,8 @@ public class FetchTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testFetchBranch(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
 
@@ -134,13 +132,12 @@ public class FetchTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "No remote repository specified.  "
-            + "Please, specify either a URL or a remote name from which new revisions should be fetched in request."
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "No remote repository specified.  "
+              + "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
   public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory)
       throws Exception {
     // given

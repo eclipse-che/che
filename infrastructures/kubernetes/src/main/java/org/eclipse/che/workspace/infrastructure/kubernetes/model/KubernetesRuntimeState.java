@@ -28,9 +28,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 @NamedQueries({
   @NamedQuery(name = "KubernetesRuntime.getAll", query = "SELECT r FROM KubernetesRuntime r"),
   @NamedQuery(
-    name = "KubernetesRuntime.getByWorkspaceId",
-    query = "SELECT r FROM KubernetesRuntime r WHERE r.runtimeId.workspaceId = :workspaceId"
-  )
+      name = "KubernetesRuntime.getByWorkspaceId",
+      query = "SELECT r FROM KubernetesRuntime r WHERE r.runtimeId.workspaceId = :workspaceId")
 })
 public class KubernetesRuntimeState {
   @EmbeddedId private RuntimeId runtimeId;

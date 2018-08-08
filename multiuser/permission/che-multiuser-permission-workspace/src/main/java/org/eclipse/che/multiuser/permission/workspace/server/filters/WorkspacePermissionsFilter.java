@@ -18,7 +18,6 @@ import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDom
 import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.READ;
 import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.RUN;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.USE;
 
 import java.util.Map;
 import java.util.Set;
@@ -145,23 +144,6 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
       case "updateCommand":
         key = ((String) arguments[0]);
         action = CONFIGURE;
-        break;
-
-        // MachineService methods
-      case "startMachine":
-      case "stopMachine":
-        key = ((String) arguments[0]);
-        action = RUN;
-        break;
-
-      case "getMachineById":
-      case "getMachines":
-      case "executeCommandInMachine":
-      case "getProcesses":
-      case "stopProcess":
-      case "getProcessLogs":
-        key = ((String) arguments[0]);
-        action = USE;
         break;
 
       default:

@@ -18,7 +18,6 @@ package org.eclipse.che.jdt.internal.compiler.parser;
  * remote field constant inlining. | Given the intended purpose of the conversion is to resolve
  * references, this is not | a problem.
  */
-
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IImportDeclaration;

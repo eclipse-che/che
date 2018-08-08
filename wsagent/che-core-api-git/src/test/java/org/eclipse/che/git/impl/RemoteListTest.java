@@ -50,9 +50,8 @@ public class RemoteListTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testRemoteList(GitConnectionFactory connectionFactory)
       throws ServerException, URISyntaxException, UnauthorizedException, IOException {
     // given

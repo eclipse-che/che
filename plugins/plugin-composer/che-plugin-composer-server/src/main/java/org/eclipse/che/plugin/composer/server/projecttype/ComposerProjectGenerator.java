@@ -14,8 +14,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
@@ -39,7 +37,7 @@ public class ComposerProjectGenerator implements CreateProjectHandler {
   @Override
   public void onCreateProject(
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-      throws ForbiddenException, ConflictException, ServerException {
+      throws ServerException {
     AttributeValue packageName = attributes.get(Constants.PACKAGE);
     if (packageName == null) {
       throw new ServerException("Missed some required options (package)");
@@ -48,7 +46,7 @@ public class ComposerProjectGenerator implements CreateProjectHandler {
     Path path = pathTransformer.transform(projectWsPath);
     String projectAbsolutePath = path.toString();
     String[] commandLine = {
-      "composer", "create-project", packageName.getString(), projectAbsolutePath, "--no-install"
+      "composer", "create-project", packageName.getString(), projectAbsolutePath
     };
     try {
       commandExecutor.execute(commandLine, null);

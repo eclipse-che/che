@@ -57,9 +57,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimplePush(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -85,9 +84,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testPushRemote(GitConnectionFactory connectionFactory)
       throws GitException, IOException, URISyntaxException, UnauthorizedException {
     // given
@@ -110,13 +108,12 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "No remote repository specified.  "
-            + "Please, specify either a URL or a remote name from which new revisions should be fetched in request."
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "No remote repository specified.  "
+              + "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
   public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory)
       throws Exception {
     // given
@@ -127,9 +124,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testPushWhenLocalRepositoryIsNotSynchronisedWithRemote(
       GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
@@ -156,9 +152,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testPushWhenLocalRepositoryIsUpToDate(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
