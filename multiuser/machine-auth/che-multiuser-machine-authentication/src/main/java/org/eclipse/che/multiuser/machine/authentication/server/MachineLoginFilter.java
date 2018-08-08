@@ -16,15 +16,20 @@ import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
+import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
 import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
+import java.security.Key;
 import java.security.Principal;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -75,7 +80,7 @@ public class MachineLoginFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {}
+  public void init(FilterConfig filterConfig) {}
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -91,7 +96,7 @@ public class MachineLoginFilter implements Filter {
     // check token signature and verify is this token machine or not
     try {
       final Jws<Claims> jwt =
-          Jwts.parser().setSigningKey(keyManager.getKeyPair().getPublic()).parseClaimsJws(token);
+          Jwts.parser().setSigningKeyResolver(workspaceSigningKeyResolver).parseClaimsJws(token);
       final Claims claims = jwt.getBody();
 
       if (!isMachineToken(jwt)) {
@@ -158,4 +163,13 @@ public class MachineLoginFilter implements Filter {
 
   @Override
   public void destroy() {}
+
+  private SigningKeyResolver workspaceSigningKeyResolver =
+      new SigningKeyResolverAdapter() {
+        @Override
+        public Key resolveSigningKey(JwsHeader header, Claims claims) {
+          String wsId = claims.get(WORKSPACE_ID_CLAIM, String.class);
+          return keyManager.getKeyPair(wsId).getPublic();
+        }
+      };
 }

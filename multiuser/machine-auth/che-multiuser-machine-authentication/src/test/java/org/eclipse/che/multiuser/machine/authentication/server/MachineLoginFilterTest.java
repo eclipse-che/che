@@ -103,7 +103,7 @@ public class MachineLoginFilterTest {
             tokenExtractorMock, userManagerMock, keyManagerMock, permissionCheckerMock);
 
     when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(keyManagerMock.getKeyPair()).thenReturn(keyPair);
+    when(keyManagerMock.getKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
 
     when(userMock.getName()).thenReturn(SUBJECT.getUserName());
     when(userManagerMock.getById(SUBJECT.getUserId())).thenReturn(userMock);
@@ -113,7 +113,7 @@ public class MachineLoginFilterTest {
   public void testProcessRequestWithValidToken() throws Exception {
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair();
+    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verifyZeroInteractions(responseMock);
   }
@@ -128,8 +128,8 @@ public class MachineLoginFilterTest {
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
     verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
-    verify(keyManagerMock).getKeyPair();
     verify(chainMock).doFilter(requestMock, responseMock);
+    verifyZeroInteractions(keyManagerMock);
     verifyZeroInteractions(userManagerMock);
     verifyZeroInteractions(responseMock);
   }
@@ -154,7 +154,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair();
+    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(
@@ -168,7 +168,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair();
+    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(

@@ -37,6 +37,12 @@ public class SignaturePublicKeyEnvProvider implements EnvVarProvider {
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
     return Pair.of(
         SIGNATURE_PUBLIC_KEY_ENV,
-        new String(Base64.getEncoder().encode(keyManager.getKeyPair().getPublic().getEncoded())));
+        new String(
+            Base64.getEncoder()
+                .encode(
+                    keyManager
+                        .getKeyPair(runtimeIdentity.getWorkspaceId())
+                        .getPublic()
+                        .getEncoded())));
   }
 }

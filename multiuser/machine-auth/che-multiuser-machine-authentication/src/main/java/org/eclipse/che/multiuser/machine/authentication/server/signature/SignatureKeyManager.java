@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
-
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.security.KeyFactory;
@@ -25,12 +23,14 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.core.db.DBInitializer;
@@ -62,7 +62,7 @@ public class SignatureKeyManager {
   @SuppressWarnings("unused")
   private DBInitializer dbInitializer;
 
-  private KeyPair cachedPair;
+  private Map<String, KeyPair> cachedPair = new HashMap<>();
 
   @Inject
   public SignatureKeyManager(
@@ -76,37 +76,36 @@ public class SignatureKeyManager {
 
   /** Returns cached instance of {@link KeyPair} or null when failed to load key pair. */
   @Nullable
-  public KeyPair getKeyPair() {
-    if (cachedPair == null) {
-      loadKeyPair();
+  public KeyPair getKeyPair(String workspaceId) {
+    if (cachedPair.get(workspaceId) == null) {
+      loadKeyPair(workspaceId);
     }
-    return cachedPair;
+    return cachedPair.get(workspaceId);
   }
 
   /** Loads signature key pair if no existing keys found then stores a newly generated key pair. */
   @PostConstruct
   @VisibleForTesting
-  void loadKeyPair() {
+  void loadKeyPair(String workspaceId) {
     try {
-      final Iterator<SignatureKeyPairImpl> it = signatureKeyDao.getAll(1, 0).getItems().iterator();
-      if (it.hasNext()) {
-        cachedPair = toJavaKeyPair(it.next());
-        return;
+      final SignatureKeyPairImpl kp = signatureKeyDao.get(workspaceId);
+      cachedPair.put(workspaceId, toJavaKeyPair(kp));
+      return;
+    } catch (NotFoundException nfe) {
+      try {
+        cachedPair.put(
+            workspaceId, toJavaKeyPair(signatureKeyDao.create(generateKeyPair(workspaceId))));
+      } catch (ConflictException | ServerException ex) {
+        LOG.error("Failed to store signature keys. Cause: {}", ex.getMessage());
       }
     } catch (ServerException ex) {
       LOG.error("Failed to load signature keys. Cause: {}", ex.getMessage());
       return;
     }
-
-    try {
-      cachedPair = toJavaKeyPair(signatureKeyDao.create(generateKeyPair()));
-    } catch (ConflictException | ServerException ex) {
-      LOG.error("Failed to store signature keys. Cause: {}", ex.getMessage());
-    }
   }
 
   @VisibleForTesting
-  SignatureKeyPairImpl generateKeyPair() throws ServerException {
+  SignatureKeyPairImpl generateKeyPair(String workspaceId) throws ServerException {
     final KeyPairGenerator kpg;
     try {
       kpg = KeyPairGenerator.getInstance(algorithm);
@@ -116,8 +115,11 @@ public class SignatureKeyManager {
     kpg.initialize(keySize);
     final KeyPair pair = kpg.generateKeyPair();
     final SignatureKeyPairImpl kp =
-        new SignatureKeyPairImpl(generate("signatureKey", 16), pair.getPublic(), pair.getPrivate());
-    LOG.info("Generated signature key pair with id {} and algorithm {}.", kp.getId(), algorithm);
+        new SignatureKeyPairImpl(workspaceId, pair.getPublic(), pair.getPrivate());
+    LOG.info(
+        "Generated signature key pair with ws id {} and algorithm {}.",
+        kp.getWorkspaceId(),
+        algorithm);
     return kp;
   }
 

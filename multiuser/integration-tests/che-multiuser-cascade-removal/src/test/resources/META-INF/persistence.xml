@@ -59,6 +59,9 @@
         <class>org.eclipse.che.multiuser.organization.spi.impl.MemberImpl</class>
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
 
+        <class>org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyImpl</class>
+        <class>org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl</class>
+
         <class>org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl</class>
         <class>org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
