@@ -79,8 +79,8 @@ public class WorkspaceProjects {
       this.buttonNameAttribute = buttonNameAttribute;
     }
 
-    public String get() {
-      return this.buttonNameAttribute;
+    public By getLocator() {
+      return By.name(this.buttonNameAttribute);
     }
   }
 
@@ -110,11 +110,11 @@ public class WorkspaceProjects {
   }
 
   public void waitDeleteButtonDisabling() {
-    waitButtonState(By.xpath(DELETE_BUTTON_XPATH), false);
+    waitState(By.xpath(DELETE_BUTTON_XPATH), false);
   }
 
   public void waitDeleteButtonEnabling() {
-    waitButtonState(By.xpath(DELETE_BUTTON_XPATH), true);
+    waitState(By.xpath(DELETE_BUTTON_XPATH), true);
   }
 
   public void typeToSearchField(String text) {
@@ -125,34 +125,35 @@ public class WorkspaceProjects {
     seleniumWebDriverHelper.waitTextContains(By.id(NOTIFICATION_CONTAINER_ID), expectedText);
   }
 
-  public WebElement waitBottomButton(BottomButton button) {
-    return seleniumWebDriverHelper.waitVisibility(By.name(button.get()));
+  public WebElement wait(BottomButton button) {
+    return seleniumWebDriverHelper.waitVisibility(button.getLocator());
   }
 
-  public void waitBottomButtonInvisibility(BottomButton... bottomButtons) {
+  public void waitInvisibility(BottomButton... bottomButtons) {
     asList(bottomButtons)
-        .forEach(button -> seleniumWebDriverHelper.waitInvisibility(By.name(button.get())));
+        .forEach(button -> seleniumWebDriverHelper.waitInvisibility(button.getLocator()));
   }
 
-  public void clickOnBottomButton(BottomButton button) {
-    waitBottomButton(button).click();
+  public void waitAndClickOn(BottomButton button) {
+    wait(button).click();
   }
 
-  private void waitBottomButtonState(BottomButton button, boolean state) {
-    waitButtonState(By.name(button.get()), state);
+  private void waitState(BottomButton button, boolean enabled) {
+    waitState(button.getLocator(), enabled);
   }
 
-  private void waitButtonState(By locator, boolean state) {
+  private void waitState(By locator, boolean enabled) {
+    final String buttonStateAttribute = "aria-disabled";
     seleniumWebDriverHelper.waitAttributeEqualsTo(
-        locator, "aria-disabled", Boolean.toString(!state));
+        locator, buttonStateAttribute, Boolean.toString(!enabled));
   }
 
-  public void waitBottomButtonDisabled(BottomButton... buttons) {
-    asList(buttons).forEach(button -> waitBottomButtonState(button, false));
+  public void waitDisabled(BottomButton... buttons) {
+    asList(buttons).forEach(button -> waitState(button, false));
   }
 
-  public void waitBottomButtonEnabled(BottomButton... buttons) {
-    asList(buttons).forEach(button -> waitBottomButtonState(button, true));
+  public void waitEnabled(BottomButton... buttons) {
+    asList(buttons).forEach(button -> waitState(button, true));
   }
 
   /**
@@ -246,30 +247,33 @@ public class WorkspaceProjects {
   }
 
   public boolean isCheckboxEnabled(String projectName) {
-    String checkboxLocator = format(CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE, projectName);
+    final String checkboxLocator = format(CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE, projectName);
+    final String checkboxStateAttribute = "aria-checked";
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), "aria-checked")
+        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), checkboxStateAttribute)
         .equals("true");
   }
 
-  public void waitCheckboxEnabled(String... projectName) {
-    asList(projectName)
+  public void waitCheckboxEnabled(String... projectNames) {
+    asList(projectNames)
         .forEach(
-            name ->
-                seleniumWebDriverHelper.waitSuccessCondition(driver -> isCheckboxEnabled(name)));
+            projectName ->
+                seleniumWebDriverHelper.waitSuccessCondition(
+                    driver -> isCheckboxEnabled(projectName)));
   }
 
-  public void waitCheckboxDisabled(String... projectName) {
-    asList(projectName)
+  public void waitCheckboxDisabled(String... projectNames) {
+    asList(projectNames)
         .forEach(
-            name ->
-                seleniumWebDriverHelper.waitSuccessCondition(driver -> !isCheckboxEnabled(name)));
+            projectName ->
+                seleniumWebDriverHelper.waitSuccessCondition(
+                    driver -> !isCheckboxEnabled(projectName)));
   }
 
-  public void clickOnCheckbox(String... projectName) {
-    asList(projectName)
+  public void clickOnCheckbox(String... projectNames) {
+    asList(projectNames)
         .forEach(
-            name -> {
+            projectName -> {
               String checkboxLocator = format(CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE, projectName);
               seleniumWebDriverHelper.waitAndClick(By.xpath(checkboxLocator));
             });

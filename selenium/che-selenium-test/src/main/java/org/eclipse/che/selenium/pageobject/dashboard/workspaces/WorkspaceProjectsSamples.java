@@ -13,16 +13,16 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.BottomButton.ADD_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.BottomButton.CANCEL_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.ActionButton.ADD_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.ActionButton.CANCEL_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.Locators.SAMPLE_ITEM_TEMPLATE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.Locators.TAB_STATE_TEMPLATE_XPATH;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.UpperButton.BLANK_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.UpperButton.GITHUB_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.UpperButton.GIT_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.UpperButton.SAMPLES_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.UpperButton.ZIP_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.BLANK_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.GITHUB_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.GIT_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.SAMPLES_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.ZIP_BUTTON;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,7 +52,7 @@ public class WorkspaceProjectsSamples {
     String get();
   }
 
-  public enum UpperButton implements Button {
+  public enum TabButton implements Button {
     SAMPLES_BUTTON("samples-button"),
     BLANK_BUTTON("blank-button"),
     GIT_BUTTON("git-button"),
@@ -61,7 +61,7 @@ public class WorkspaceProjectsSamples {
 
     private final String buttonId;
 
-    UpperButton(String buttonId) {
+    TabButton(String buttonId) {
       this.buttonId = buttonId;
     }
 
@@ -70,13 +70,13 @@ public class WorkspaceProjectsSamples {
     }
   }
 
-  public enum BottomButton implements Button {
+  public enum ActionButton implements Button {
     CANCEL_BUTTON("cancel-button"),
     ADD_BUTTON("add-project-button");
 
     private final String buttonId;
 
-    BottomButton(String buttonId) {
+    ActionButton(String buttonId) {
       this.buttonId = buttonId;
     }
 
@@ -105,14 +105,14 @@ public class WorkspaceProjectsSamples {
     waitButton(button).click();
   }
 
-  public void waitTabSelected(UpperButton upperButton) {
-    String tabXpath = format(TAB_STATE_TEMPLATE_XPATH, upperButton.get());
+  public void waitTabSelected(TabButton tabButton) {
+    String tabXpath = format(TAB_STATE_TEMPLATE_XPATH, tabButton.get());
     seleniumWebDriverHelper.waitAttributeContainsValue(
         By.xpath(tabXpath), "class", "che-toggle-button-enabled");
   }
 
-  public void waitTabNotSelected(UpperButton upperButton) {
-    String tabXpath = format(TAB_STATE_TEMPLATE_XPATH, upperButton.get());
+  public void waitTabNotSelected(TabButton tabButton) {
+    String tabXpath = format(TAB_STATE_TEMPLATE_XPATH, tabButton.get());
     seleniumWebDriverHelper.waitAttributeContainsValue(
         By.xpath(tabXpath), "class", "che-toggle-button-disabled");
   }
@@ -124,35 +124,36 @@ public class WorkspaceProjectsSamples {
   public void waitSampleByName(String... sampleNames) {
     asList(sampleNames)
         .forEach(
-            name -> {
-              String sampleXpath = format(SAMPLE_ITEM_TEMPLATE_XPATH, sampleNames);
+            sampleName -> {
+              String sampleXpath = format(SAMPLE_ITEM_TEMPLATE_XPATH, sampleName);
               seleniumWebDriverHelper.waitVisibility(By.xpath(sampleXpath));
             });
   }
 
   public boolean isCheckboxEnabled(String sampleName) {
-    String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
-    String checkboxLocator = format("//div[@id='%s']/md-checkbox", checkboxId);
+    final String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
+    final String checkboxLocator = format("//div[@id='%s']/md-checkbox", checkboxId);
+    final String checkboxStateAttribute = "aria-checked";
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), "aria-checked")
+        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), checkboxStateAttribute)
         .equals("true");
   }
 
-  public void waitCheckboxEnabled(String... sampleNames) {
+  public void waitAllCheckboxesEnabled(String... sampleNames) {
     asList(sampleNames)
         .forEach(
             name ->
                 seleniumWebDriverHelper.waitSuccessCondition(driver -> isCheckboxEnabled(name)));
   }
 
-  public void waitCheckboxDisabled(String... sampleNames) {
+  public void waitAllCheckboxesDisabled(String... sampleNames) {
     asList(sampleNames)
         .forEach(
             name ->
                 seleniumWebDriverHelper.waitSuccessCondition(driver -> !isCheckboxEnabled(name)));
   }
 
-  public void clickOnCheckbox(String... sampleNames) {
+  public void clickOnAllCheckboxes(String... sampleNames) {
     asList(sampleNames)
         .forEach(
             name -> {
@@ -162,17 +163,17 @@ public class WorkspaceProjectsSamples {
             });
   }
 
-  private void waitButtonState(BottomButton bottomButton, boolean state) {
-    final String buttonXpath = format("//*[@id='%s']/button", bottomButton.get());
+  private void waitButtonState(ActionButton actionButton, boolean state) {
+    final String buttonXpath = format("//*[@id='%s']/button", actionButton.get());
     seleniumWebDriverHelper.waitAttributeEqualsTo(
         By.xpath(buttonXpath), "aria-disabled", Boolean.toString(!state));
   }
 
-  public void waitButtonDisabled(BottomButton... bottomButtons) {
-    asList(bottomButtons).forEach(button -> waitButtonState(button, false));
+  public void waitButtonDisabled(ActionButton... actionButtons) {
+    asList(actionButtons).forEach(button -> waitButtonState(button, false));
   }
 
-  public void waitButtonEnabled(BottomButton... bottomButtons) {
-    asList(bottomButtons).forEach(button -> waitButtonState(button, true));
+  public void waitButtonEnabled(ActionButton... actionButtons) {
+    asList(actionButtons).forEach(button -> waitButtonState(button, true));
   }
 }
