@@ -48,11 +48,10 @@ import org.apache.maven.project.MavenProject;
  * @author Florent Benoit
  */
 @Mojo(
-  name = "build",
-  defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-  requiresProject = true,
-  requiresDependencyCollection = ResolutionScope.RUNTIME
-)
+    name = "build",
+    defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+    requiresProject = true,
+    requiresDependencyCollection = ResolutionScope.RUNTIME)
 public class DynaModuleListGeneratorMojo extends AbstractMojo {
 
   /** Project providing artifact id, version and dependencies. */
@@ -96,10 +95,9 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
 
   /** The remote repositories used to get artifacts. */
   @Parameter(
-    defaultValue = "${project.remoteArtifactRepositories}",
-    required = true,
-    readonly = true
-  )
+      defaultValue = "${project.remoteArtifactRepositories}",
+      required = true,
+      readonly = true)
   private List<ArtifactRepository> artifactRepositories;
 
   @Override

@@ -514,9 +514,9 @@ public class WorkspacePermissionsFilterTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "The user does not have permission to perform this operation"
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp =
+          "The user does not have permission to perform this operation")
   public void shouldThrowForbiddenExceptionWhenRequestedUnknownMethod() throws Exception {
     final GenericResourceMethod mock = mock(GenericResourceMethod.class);
     Method injectLinks = WorkspaceService.class.getMethod("getServiceDescriptor");

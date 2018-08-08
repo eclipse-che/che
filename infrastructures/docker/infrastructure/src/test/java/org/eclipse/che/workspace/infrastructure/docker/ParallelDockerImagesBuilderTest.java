@@ -57,10 +57,9 @@ public class ParallelDockerImagesBuilderTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Che container '.*' doesn't have neither build nor image fields"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Che container '.*' doesn't have neither build nor image fields")
   void shouldThrowExceptionWhenNoBuildDataPresent() throws Throwable {
     DockerContainerConfig config = new DockerContainerConfig();
     config.setBuild(new DockerBuildContext());
@@ -69,10 +68,9 @@ public class ParallelDockerImagesBuilderTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Try to build a docker machine source with an invalid location/content. It is not in the expected format"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Try to build a docker machine source with an invalid location/content. It is not in the expected format")
   void shouldThrowExceptionWhenImageFormatWrong() throws Throwable {
     DockerContainerConfig config = new DockerContainerConfig();
     config.setImage("**/%%");

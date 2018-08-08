@@ -117,10 +117,9 @@ public class BindMountProjectsVolumeProvisionerTest {
   }
 
   @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Error occurred on resolving path to files of workspace " + WORKSPACE_ID
-  )
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Error occurred on resolving path to files of workspace " + WORKSPACE_ID)
   public void shouldThrowExceptionWhenWsFolderPathProviderThrowsException() throws Exception {
     // given
     when(workspaceFolderPathProvider.getPath(anyString())).thenThrow(new IOException("test"));

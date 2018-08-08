@@ -41,13 +41,12 @@ public class KubernetesServerImpl implements Server {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "che_k8s_server_attributes",
-    joinColumns = {
-      @JoinColumn(name = "workspace_id", referencedColumnName = "workspace_id"),
-      @JoinColumn(name = "machine_name", referencedColumnName = "machine_name"),
-      @JoinColumn(name = "server_name", referencedColumnName = "server_name")
-    }
-  )
+      name = "che_k8s_server_attributes",
+      joinColumns = {
+        @JoinColumn(name = "workspace_id", referencedColumnName = "workspace_id"),
+        @JoinColumn(name = "machine_name", referencedColumnName = "machine_name"),
+        @JoinColumn(name = "server_name", referencedColumnName = "server_name")
+      })
   @MapKeyColumn(name = "attribute_key")
   @Column(name = "attribute")
   private Map<String, String> attributes;

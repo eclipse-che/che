@@ -168,14 +168,13 @@ public class DataObjectsTest {
   }
 
   @Test(
-    dependsOnMethods = {
-      "testReflexiveness",
-      "testSymmetry",
-      "testTransitivity",
-      "testConsistency",
-      "testNotEqualityToNull"
-    }
-  )
+      dependsOnMethods = {
+        "testReflexiveness",
+        "testSymmetry",
+        "testTransitivity",
+        "testConsistency",
+        "testNotEqualityToNull"
+      })
   public void testHashCodeContract() throws Exception {
     final UserImpl user1 =
         new UserImpl("user123", "user@company.com", "user_name", "password", null);

@@ -58,10 +58,9 @@ public class DockerImageEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment of type '.*' doesn't support multiple machines, but contains machines: .*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
   public void shouldFailIfSeveralMachineConfigsArePresent() throws Exception {
     // given
     when(environment.getMachines())
@@ -90,9 +89,8 @@ public class DockerImageEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "The specified environment is not docker image environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "The specified environment is not docker image environment")
   public void shouldThrowExceptionInCaseEnvironmentHasWrongType() throws Exception {
     // when
     converter.convert(mock(InternalEnvironment.class));

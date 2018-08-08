@@ -44,9 +44,8 @@ public class ActionImpl implements Action {
 
   @ElementCollection
   @CollectionTable(
-    name = "che_factory_action_properties",
-    joinColumns = @JoinColumn(name = "action_entity_id")
-  )
+      name = "che_factory_action_properties",
+      joinColumns = @JoinColumn(name = "action_entity_id"))
   @MapKeyColumn(name = "property_key")
   @Column(name = "property_value")
   private Map<String, String> properties;

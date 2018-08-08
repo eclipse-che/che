@@ -51,9 +51,8 @@ public class PersonalAccountPermissionsCheckerTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "User is not authorized to use specified account"
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp = "User is not authorized to use specified account")
   public void shouldThrowForbiddenExceptionWhenUserIdFromSubjectDoesNotEqualToSpecifiedAccountId()
       throws Exception {
     permissionsChecker.checkPermissions("anotherUserId", null);

@@ -282,10 +282,9 @@ public class InstallerServersPortProvisionerTest {
   }
 
   @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "There is no available port in configured ports range \\[10000, 20000\\]."
-  )
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "There is no available port in configured ports range \\[10000, 20000\\].")
   public void shouldThrowExceptionIfThereIsNotFreePort() throws Exception {
     // given
     ServersPorts ports = portProvisioner.new ServersPorts(20_001, emptySet());

@@ -160,9 +160,8 @@ public class ProfileDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingProfileById"
-  )
+      expectedExceptions = NotFoundException.class,
+      dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingProfileById")
   public void shouldRemoveProfile() throws Exception {
     final ProfileImpl profile = profiles[0];
 

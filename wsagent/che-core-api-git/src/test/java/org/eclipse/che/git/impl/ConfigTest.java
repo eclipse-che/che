@@ -45,9 +45,8 @@ public class ConfigTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testAddProperty(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -66,12 +65,11 @@ public class ConfigTest {
   }
 
   @Test(
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "error: key does not contain a section: " + INVALID_PROPERTY_NAME + "\n",
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "error: key does not contain a section: " + INVALID_PROPERTY_NAME + "\n",
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testShouldWarnOnInvalidPropertySetting(GitConnectionFactory connectionFactory)
       throws Exception {
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -80,12 +78,11 @@ public class ConfigTest {
   }
 
   @Test(
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "Can not find property '" + PROPERTY_NAME + "' in Git configuration settings.",
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "Can not find property '" + PROPERTY_NAME + "' in Git configuration settings.",
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testShouldReturnEmptyValueForParameter(GitConnectionFactory connectionFactory)
       throws Exception {
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);

@@ -70,11 +70,10 @@ public class OrganizationService extends Service {
     @ApiResponse(code = 201, message = "The organization successfully created"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Conflict error occurred during the organization creation"
-              + "(e.g. The organization with such name already exists)"
-    ),
+        code = 409,
+        message =
+            "Conflict error occurred during the organization creation"
+                + "(e.g. The organization with such name already exists)"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response create(
@@ -98,11 +97,10 @@ public class OrganizationService extends Service {
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 404, message = "The organization with given id was not found"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Conflict error occurred during the organization creation"
-              + "(e.g. The organization with such name already exists)"
-    ),
+        code = 409,
+        message =
+            "Conflict error occurred during the organization creation"
+                + "(e.g. The organization with such name already exists)"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public OrganizationDto update(
@@ -165,10 +163,9 @@ public class OrganizationService extends Service {
   @Produces(APPLICATION_JSON)
   @Path("/{parent}/organizations")
   @ApiOperation(
-    value = "Get child organizations",
-    response = OrganizationDto.class,
-    responseContainer = "list"
-  )
+      value = "Get child organizations",
+      response = OrganizationDto.class,
+      responseContainer = "list")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The child organizations successfully fetched"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
@@ -195,11 +192,10 @@ public class OrganizationService extends Service {
   @GET
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get user's organizations",
-    notes = "When user parameter is missed then will be fetched current user's organizations",
-    response = OrganizationDto.class,
-    responseContainer = "list"
-  )
+      value = "Get user's organizations",
+      notes = "When user parameter is missed then will be fetched current user's organizations",
+      response = OrganizationDto.class,
+      responseContainer = "list")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The organizations successfully fetched"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),

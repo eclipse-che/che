@@ -108,10 +108,9 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Launch order of services '.*, .*' can't be evaluated. Circular dependency."
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Launch order of services '.*, .*' can't be evaluated. Circular dependency.")
   public void shouldFailIfCircularDependencyFound() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -124,9 +123,8 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "A service can not link to itself: .*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "A service can not link to itself: .*")
   public void shouldFailIfMachineLinksByItSelf() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -137,9 +135,8 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "A service can not depend on itself: .*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "A service can not depend on itself: .*")
   public void shouldFailIfMachineDependsOnByItSelf() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -150,9 +147,8 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "A service can not contain 'volumes_from' to itself:.*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "A service can not contain 'volumes_from' to itself:.*")
   public void shouldFailIfMachineContainsVolumesFromByItSelf() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -290,10 +286,9 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Dependency 'fifth' in service 'second' points to unknown service."
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Dependency 'fifth' in service 'second' points to unknown service.")
   public void shouldFailIfDependsOnFieldContainsNonExistingService() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -306,10 +301,9 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Dependency 'fifth' in service 'third' points to unknown service."
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Dependency 'fifth' in service 'third' points to unknown service.")
   public void shouldFailIfVolumesFromFieldContainsNonExistingService() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -322,9 +316,8 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Service volumes_from '.*' is invalid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Service volumes_from '.*' is invalid")
   public void shouldFailIfVolumesFromFieldHasIllegalFormat() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -338,10 +331,9 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Dependency 'fifth' in service 'second' points to unknown service."
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Dependency 'fifth' in service 'second' points to unknown service.")
   public void shouldFailIfLinksFieldContainsNonExistingService() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();
@@ -354,9 +346,8 @@ public class ComposeServicesStartStrategyTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Service link '.*' is invalid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Service link '.*' is invalid")
   public void shouldFailIfLinksFieldHasIllegalFormat() throws Exception {
     // given
     Map<String, ComposeService> services = new HashMap<>();

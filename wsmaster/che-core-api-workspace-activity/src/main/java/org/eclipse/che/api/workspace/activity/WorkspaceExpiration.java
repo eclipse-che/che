@@ -29,9 +29,8 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 @Entity(name = "WorkspaceExpiration")
 @NamedQueries({
   @NamedQuery(
-    name = "WorkspaceExpiration.getExpired",
-    query = "SELECT e FROM WorkspaceExpiration e WHERE e.expiration < :expiration"
-  )
+      name = "WorkspaceExpiration.getExpired",
+      query = "SELECT e FROM WorkspaceExpiration e WHERE e.expiration < :expiration")
 })
 @Table(name = "che_workspace_expiration")
 public class WorkspaceExpiration {

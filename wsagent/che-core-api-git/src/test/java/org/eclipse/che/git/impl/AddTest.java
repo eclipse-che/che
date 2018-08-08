@@ -57,9 +57,8 @@ public class AddTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleAdd(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -77,9 +76,8 @@ public class AddTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testAddUpdate(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -106,9 +104,8 @@ public class AddTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testAddDeletedFile(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -132,9 +129,8 @@ public class AddTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void shouldAddToIndexOnlySpecifiedFile(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
