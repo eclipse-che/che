@@ -72,3 +72,5 @@ data:
   CHE_WORKSPACE_HTTP__PROXY: {{ .Values.cheWorkspaceHttpProxy }}
   CHE_WORKSPACE_HTTPS__PROXY: {{ .Values.cheWorkspaceHttpsProxy }}
   CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy }}
+  CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: {{ .Values.global.wsAgentInactiveStopTimeout }}
+  
