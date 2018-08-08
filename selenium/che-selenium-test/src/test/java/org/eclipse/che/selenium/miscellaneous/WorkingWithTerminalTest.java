@@ -259,7 +259,7 @@ public class WorkingWithTerminalTest {
     // cancel script
     terminal.typeIntoActiveTerminal(Keys.CONTROL + "c");
 
-    // wait 3 sec. If process was really stopped we should not get text "test=2"
+    // wait 1 sec. If process was really stopped we should not get text "test=2"
     WaitUtils.sleepQuietly(1);
 
     try {

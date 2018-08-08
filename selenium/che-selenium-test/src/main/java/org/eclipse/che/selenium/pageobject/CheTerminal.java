@@ -221,6 +221,11 @@ public class CheTerminal {
         .until((WebDriver input) -> getVisibleTextFromFirstTerminal().length() > 0);
   }
 
+  public void waitTerminalIsNotEmpty(int terminalNumber) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver input) -> getVisibleTextFromTerminal(terminalNumber).length() > 0);
+  }
+
   public void selectFocusToActiveTerminal() {
     waitTerminalConsole();
 
