@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import static org.testng.Assert.assertEquals;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import org.testng.annotations.BeforeMethod;
@@ -30,7 +31,13 @@ public class JwtProxyConfigBuilderTest {
 
   @BeforeMethod
   public void setUp() {
-    jwtProxyConfigBuilder = new JwtProxyConfigBuilder("workspace123");
+    jwtProxyConfigBuilder =
+        new JwtProxyConfigBuilder(
+            URI.create("http://che-host.com"),
+            "wsmaster",
+            "1m",
+            "/app/loader.html",
+            "workspace123");
   }
 
   @Test
