@@ -1,14 +1,15 @@
 #!/bin/sh
+set -e
+set -u
 
 # Install basic software used for checking github API rate limit
-apk update && apk add --no-cache curl jq ca-certificates openssl expect
-
-# update certificates
-update-ca-certificates
+yum install -y epel-release
+yum -y install curl jq expect
 
 # define in env variable GITHUB_TOKEN only if it is defined
 # else check if github rate limit is enough, else will abort requiring to set GITHUB_TOKEN value
-if [ "$GITHUB_TOKEN" != "" ]; then
+
+if [ ! -z "${GITHUB_TOKEN-}" ]; then
     export GITHUB_TOKEN=$GITHUB_TOKEN;
     echo "Setting GITHUB_TOKEN value as provided";
 else
@@ -23,17 +24,19 @@ else
     fi
 fi
 
-# install remaining packages
+# Add yarn repo
+curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
+# Install nodejs/npm/yarn
+curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
+yum install -y nodejs yarn
+
+echo "npm version:"
+npm --version
+echo "nodejs version:"
+node --version
+
 # Include opendjk for Java support
-apk add --no-cache make gcc g++ python git bash supervisor openjdk8
-# Cleanup APK cache
-rm -rf /tmp/* /var/cache/apk/*
-
-# Install Yarn 1.7.0 (detect EPL 2.0 as a valid SPDX identifier)
-npm install -g yarn@1.7.0
-chmod u+x /usr/local/bin/yarn
-yarn --version
-
+yum install -y gcc-c++ make python git supervisor java-1.8.0-openjdk-devel bzip2
 
 # Clone specific tag of a Theia version
 git clone --branch v${THEIA_VERSION} https://github.com/theia-ide/theia ${HOME}/theia-source-code
@@ -123,7 +126,8 @@ cd ${HOME}
 yarn cache clean
 
 # cleanup stuff installed temporary
-apk del curl jq expect
+yum erase -y jq expect
+yum clean all
 npm uninstall -g verdaccio
 rm -rf ${HOME}/.config/verdaccio/
 
