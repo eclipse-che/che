@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.SHARE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -28,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.BeforeClass;
@@ -75,7 +75,7 @@ public class ShareWorkspaceTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
-    workspaceDetails.selectTabInWorkspaceMenu(TabNames.SHARE);
+    workspaceDetails.selectTabInWorkspaceMenu(SHARE);
   }
 
   @Test
