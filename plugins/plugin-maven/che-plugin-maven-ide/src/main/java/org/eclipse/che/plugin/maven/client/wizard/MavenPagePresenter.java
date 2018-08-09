@@ -216,7 +216,8 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
     updateView();
     validateCoordinates();
 
-    view.setArchetypeSectionVisibility(CREATE == wizardMode);
+    view.setArchetypeSectionVisibility(
+        CREATE == wizardMode && dataObject.getPath().equals("/" + projectName));
     view.enableArchetypes(view.isGenerateFromArchetypeSelected());
   }
 
