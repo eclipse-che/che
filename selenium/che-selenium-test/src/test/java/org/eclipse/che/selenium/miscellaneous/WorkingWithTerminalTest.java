@@ -386,6 +386,6 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
     terminal.typeIntoActiveTerminal("mc");
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
-    terminal.waitTextInFirstTerminal("Left     File     Command     Options     Right");
+    terminal.waitTextInFirstTerminal("Modify time");
   }
 }
