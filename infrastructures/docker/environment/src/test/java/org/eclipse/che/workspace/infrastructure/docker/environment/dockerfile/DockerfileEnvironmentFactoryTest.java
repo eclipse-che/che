@@ -85,14 +85,10 @@ public class DockerfileEnvironmentFactoryTest {
   @Test
   public void testDefaultLimitLessThenRequestIsIgnored() throws Exception {
     factory =
-            new DockerfileEnvironmentFactory(
-                    installerRegistry,
-                    recipeRetriever,
-                    machinesValidator,
-                    1024,
-                    2048);
+        new DockerfileEnvironmentFactory(
+            installerRegistry, recipeRetriever, machinesValidator, 1024, 2048);
     final Map<String, InternalMachineConfig> machines =
-            ImmutableMap.of(MACHINE_NAME, mockInternalMachineConfig(new HashMap<>()));
+        ImmutableMap.of(MACHINE_NAME, mockInternalMachineConfig(new HashMap<>()));
 
     factory.doCreate(recipe, machines, Collections.emptyList());
 

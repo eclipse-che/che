@@ -168,18 +168,18 @@ public class ComposeEnvironmentFactoryTest {
   @Test
   public void testSetRamAttributesIgnoresLimitDefaultLessThanRequest() throws Exception {
     composeEnvironmentFactory =
-            new ComposeEnvironmentFactory(
-                    installerRegistry,
-                    recipeRetriever,
-                    machinesValidator,
-                    composeValidator,
-                    startStrategy,
-                    1024,
-                    2048);
+        new ComposeEnvironmentFactory(
+            installerRegistry,
+            recipeRetriever,
+            machinesValidator,
+            composeValidator,
+            startStrategy,
+            1024,
+            2048);
     final Map<String, InternalMachineConfig> machines =
-            ImmutableMap.of(MACHINE_NAME_1, mockInternalMachineConfig(new HashMap<>()));
+        ImmutableMap.of(MACHINE_NAME_1, mockInternalMachineConfig(new HashMap<>()));
     final Map<String, ComposeService> services =
-            ImmutableMap.of(MACHINE_NAME_1, mockComposeService(0, 0));
+        ImmutableMap.of(MACHINE_NAME_1, mockComposeService(0, 0));
 
     composeEnvironmentFactory.addRamAttributes(machines, services);
 

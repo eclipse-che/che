@@ -79,7 +79,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
   private final OpenShiftClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
 
-
   @Inject
   public OpenShiftEnvironmentFactory(
       InstallerRegistry installerRegistry,
@@ -89,7 +88,12 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       KubernetesEnvironmentValidator envValidator,
       @Named("che.workspace.default_memory_limit_mb") long defaultMaxMachineMemorySizeMB,
       @Named("che.workspace.default_memory_request_mb") long defaultRequestMachineMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator, defaultMaxMachineMemorySizeMB, defaultRequestMachineMemorySizeMB);
+    super(
+        installerRegistry,
+        recipeRetriever,
+        machinesValidator,
+        defaultMaxMachineMemorySizeMB,
+        defaultRequestMachineMemorySizeMB);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
   }

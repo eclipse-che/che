@@ -188,9 +188,11 @@ class ComposeEnvironmentValidator {
         "Networks configuration is forbidden but found in service '%s' of environment",
         serviceName);
     checkArgument(
-            service.getMemRequest() == null || service.getMemLimit() == null || service.getMemLimit() >= service.getMemRequest() ,
-            "Memory limit less than memory request found in service '%s' of environment",
-            serviceName);
+        service.getMemRequest() == null
+            || service.getMemLimit() == null
+            || service.getMemLimit() >= service.getMemRequest(),
+        "Memory limit less than memory request found in service '%s' of environment",
+        serviceName);
   }
 
   private static void checkArgument(boolean expression, String error) throws ValidationException {

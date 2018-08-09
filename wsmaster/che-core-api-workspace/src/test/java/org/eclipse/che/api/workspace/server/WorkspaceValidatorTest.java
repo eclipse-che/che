@@ -196,11 +196,10 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Value '.*' of attribute '" + MEMORY_REQUEST_ATTRIBUTE + "' in machine '.*' is illegal",
-    dataProvider = "illegalMemoryAttributeValueProvider"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Value '.*' of attribute '" + MEMORY_REQUEST_ATTRIBUTE + "' in machine '.*' is illegal",
+      dataProvider = "illegalMemoryAttributeValueProvider")
   public void shouldFailValidationIfMemoryRequestMachineAttributeHasIllegalValue(
       String attributeValue) throws Exception {
     final WorkspaceConfigDto config = createConfig();

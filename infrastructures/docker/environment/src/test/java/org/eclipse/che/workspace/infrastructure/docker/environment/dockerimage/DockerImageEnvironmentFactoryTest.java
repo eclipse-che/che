@@ -84,14 +84,10 @@ public class DockerImageEnvironmentFactoryTest {
   @Test
   public void testRamDefaultMemoryLimitIsIgnoredIfLessThanDefaultRamRequest() throws Exception {
     factory =
-            new DockerImageEnvironmentFactory(
-                    installerRegistry,
-                    recipeRetriever,
-                    machinesValidator,
-                    1024,
-                    2048);
+        new DockerImageEnvironmentFactory(
+            installerRegistry, recipeRetriever, machinesValidator, 1024, 2048);
     final Map<String, InternalMachineConfig> machines =
-            ImmutableMap.of(MACHINE_NAME, mockInternalMachineConfig(new HashMap<>()));
+        ImmutableMap.of(MACHINE_NAME, mockInternalMachineConfig(new HashMap<>()));
 
     factory.doCreate(recipe, machines, Collections.emptyList());
 
@@ -104,7 +100,6 @@ public class DockerImageEnvironmentFactoryTest {
     fill(expectedRequests, 2048 * BYTES_IN_MB);
     assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
-
 
   private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
     final InternalMachineConfig machineConfigMock = mock(InternalMachineConfig.class);

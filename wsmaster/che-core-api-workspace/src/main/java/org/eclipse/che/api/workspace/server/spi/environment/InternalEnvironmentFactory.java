@@ -11,7 +11,16 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import static java.lang.Long.max;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_ENV_VAR;
+
 import com.google.common.annotations.VisibleForTesting;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -24,16 +33,6 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import static java.lang.Long.max;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_ENV_VAR;
 
 /**
  * Creates a valid instance of InternalEnvironment.
@@ -49,8 +48,9 @@ import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_EN
  * defaultMachineMaxMemorySizeAttribute defines default machine memory limit
  * defaultMachineRequestMemorySizeAttribute defines default requested machine memory allocation
  *
- * if default requested memory allocation is greater then default memory limit, memory limit
- * is set to be equal to requested memory allocation.
+ * <p>if default requested memory allocation is greater then default memory limit, memory limit is
+ * set to be equal to requested memory allocation.
+ *
  * @author gazarenkov
  * @author Sergii Leshchenko
  */
@@ -75,14 +75,14 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
     this.machinesValidator = machinesValidator;
     // if the passed default limit is less than the default request, limit is ignored
     long defaultMemLimit = max(defaultMachineMaxMemorySizeMB, defaultMachineRequestMemorySizeMB);
-    if(defaultMemLimit != defaultMachineMaxMemorySizeMB) {
-      LOG.error("Requested default container memory limit is less than default memory request. Memory limit parameter is ignored.");
+    if (defaultMemLimit != defaultMachineMaxMemorySizeMB) {
+      LOG.error(
+          "Requested default container memory limit is less than default memory request. Memory limit parameter is ignored.");
     }
 
-    this.defaultMachineMaxMemorySizeAttribute =
-            String.valueOf(defaultMemLimit * 1024 * 1024);
+    this.defaultMachineMaxMemorySizeAttribute = String.valueOf(defaultMemLimit * 1024 * 1024);
     this.defaultMachineRequestMemorySizeAttribute =
-            String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
+        String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
   }
 
   /**

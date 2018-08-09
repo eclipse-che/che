@@ -11,6 +11,17 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
+
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -19,23 +30,10 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
-
 /** @author Sergii Leshchenko */
 @Singleton
 public class DockerImageEnvironmentFactory
     extends InternalEnvironmentFactory<DockerImageEnvironment> {
-
 
   @Inject
   public DockerImageEnvironmentFactory(
@@ -44,7 +42,12 @@ public class DockerImageEnvironmentFactory
       MachineConfigsValidator machinesValidator,
       @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeMB,
       @Named("che.workspace.default_memory_request_mb") long defaultMachineRequestMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMaxMemorySizeMB, defaultMachineRequestMemorySizeMB);
+    super(
+        installerRegistry,
+        recipeRetriever,
+        machinesValidator,
+        defaultMachineMaxMemorySizeMB,
+        defaultMachineRequestMemorySizeMB);
   }
 
   @Override
@@ -95,5 +98,4 @@ public class DockerImageEnvironmentFactory
       machineConfig.getAttributes().put(attribute, defaultValue);
     }
   }
-
 }
