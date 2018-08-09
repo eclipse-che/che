@@ -56,9 +56,8 @@ public class GenerateEffectivePomTest {
   }
 
   @Test(
-    description =
-        "add additional try/catch block for workaround problem in https://github.com/eclipse/che/issues/2877"
-  )
+      description =
+          "add additional try/catch block for workaround problem in https://github.com/eclipse/che/issues/2877")
   public void generateEffectivePomTest() throws Exception {
     ide.open(workspace);
     URL mainEffectivePomPath = GenerateEffectivePomTest.class.getResource("main");

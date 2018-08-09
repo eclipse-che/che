@@ -161,9 +161,8 @@ public class ResourceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Account with specified id was not found"
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Account with specified id was not found")
   public void testThrowsNotFoundExceptionWhenAccountWithGivenIdWasNotFound() throws Exception {
     when(resourcesProvider.getResources(eq(ACCOUNT_ID)))
         .thenThrow(new NotFoundException("Account with specified id was not found"));

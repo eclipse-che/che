@@ -34,32 +34,26 @@ import org.eclipse.che.multiuser.organization.shared.model.Member;
 @Entity(name = "Member")
 @NamedQueries({
   @NamedQuery(
-    name = "Member.getMember",
-    query =
-        "SELECT m "
-            + "FROM Member m "
-            + "WHERE m.userId = :userId AND m.organizationId = :organizationId"
-  ),
+      name = "Member.getMember",
+      query =
+          "SELECT m "
+              + "FROM Member m "
+              + "WHERE m.userId = :userId AND m.organizationId = :organizationId"),
   @NamedQuery(
-    name = "Member.getByOrganization",
-    query = "SELECT m " + "FROM Member m " + "WHERE m.organizationId = :organizationId"
-  ),
+      name = "Member.getByOrganization",
+      query = "SELECT m " + "FROM Member m " + "WHERE m.organizationId = :organizationId"),
   @NamedQuery(
-    name = "Member.getCountByOrganizationId",
-    query = "SELECT COUNT(m) " + "FROM Member m " + "WHERE m.organizationId = :organizationId"
-  ),
+      name = "Member.getCountByOrganizationId",
+      query = "SELECT COUNT(m) " + "FROM Member m " + "WHERE m.organizationId = :organizationId"),
   @NamedQuery(
-    name = "Member.getByUser",
-    query = "SELECT m " + "FROM Member m " + "WHERE m.userId = :userId"
-  ),
+      name = "Member.getByUser",
+      query = "SELECT m " + "FROM Member m " + "WHERE m.userId = :userId"),
   @NamedQuery(
-    name = "Member.getOrganizations",
-    query = "SELECT org " + "FROM Member m, m.organization org " + "WHERE m.userId = :userId"
-  ),
+      name = "Member.getOrganizations",
+      query = "SELECT org " + "FROM Member m, m.organization org " + "WHERE m.userId = :userId"),
   @NamedQuery(
-    name = "Member.getOrganizationsCount",
-    query = "SELECT COUNT(m) " + "FROM Member m " + "WHERE m.userId = :userId "
-  )
+      name = "Member.getOrganizationsCount",
+      query = "SELECT COUNT(m) " + "FROM Member m " + "WHERE m.userId = :userId ")
 })
 @Table(name = "che_member")
 public class MemberImpl extends AbstractPermissions implements Member {
@@ -73,11 +67,10 @@ public class MemberImpl extends AbstractPermissions implements Member {
 
   @ManyToOne
   @JoinColumn(
-    name = "organization_id",
-    referencedColumnName = "id",
-    insertable = false,
-    updatable = false
-  )
+      name = "organization_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
   private OrganizationImpl organization;
 
   public MemberImpl() {}

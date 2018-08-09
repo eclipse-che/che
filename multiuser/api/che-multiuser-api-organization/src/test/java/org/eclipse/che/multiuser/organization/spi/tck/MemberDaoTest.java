@@ -137,9 +137,8 @@ public class MemberDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingMember"
-  )
+      expectedExceptions = NotFoundException.class,
+      dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingMember")
   public void shouldRemoveMember() throws Exception {
     final MemberImpl member = members[0];
 

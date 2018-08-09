@@ -134,10 +134,9 @@ public class KubernetesRuntimeStateCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Runtime state for workspace with id 'non-existent-ws' was not found"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Runtime state for workspace with id 'non-existent-ws' was not found")
   public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusRetrieving()
       throws Exception {
     // when
@@ -197,10 +196,9 @@ public class KubernetesRuntimeStateCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Runtime state for workspace with id 'non-existent-ws' was not found"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Runtime state for workspace with id 'non-existent-ws' was not found")
   public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusUpdatingWithoutPredicate()
       throws Exception {
     // when
@@ -209,10 +207,9 @@ public class KubernetesRuntimeStateCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Runtime state for workspace with id 'non-existent-ws' was not found"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Runtime state for workspace with id 'non-existent-ws' was not found")
   public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusUpdatingWithPredicate()
       throws Exception {
     // when

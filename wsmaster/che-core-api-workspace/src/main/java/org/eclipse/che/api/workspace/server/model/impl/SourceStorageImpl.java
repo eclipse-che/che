@@ -48,9 +48,8 @@ public class SourceStorageImpl implements SourceStorage {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "sourcestorage_parameters",
-    joinColumns = @JoinColumn(name = "sourcestorage_id")
-  )
+      name = "sourcestorage_parameters",
+      joinColumns = @JoinColumn(name = "sourcestorage_id"))
   @MapKeyColumn(name = "parameters_key")
   @Column(name = "parameters")
   private Map<String, String> parameters;

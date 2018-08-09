@@ -54,10 +54,9 @@ public class ResourceService extends Service {
   @Path("/{accountId}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get list of resources which are available for given account",
-    response = ResourceDto.class,
-    responseContainer = "List"
-  )
+      value = "Get list of resources which are available for given account",
+      response = ResourceDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The total resources are successfully fetched"),
     @ApiResponse(code = 404, message = "Account with specified id was not found"),
@@ -77,10 +76,9 @@ public class ResourceService extends Service {
   @Path("/{accountId}/available")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get list of resources which are available for usage by given account",
-    response = ResourceDto.class,
-    responseContainer = "List"
-  )
+      value = "Get list of resources which are available for usage by given account",
+      response = ResourceDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The available resources are successfully fetched"),
     @ApiResponse(code = 404, message = "Account with specified id was not found"),
@@ -99,10 +97,9 @@ public class ResourceService extends Service {
   @Path("/{accountId}/used")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get list of resources which are used by given account",
-    response = ResourceDto.class,
-    responseContainer = "List"
-  )
+      value = "Get list of resources which are used by given account",
+      response = ResourceDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The used resources are successfully fetched"),
     @ApiResponse(code = 404, message = "Account with specified id was not found"),
@@ -121,9 +118,8 @@ public class ResourceService extends Service {
   @Path("{accountId}/details")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get detailed information about resources for given account",
-    response = ResourcesDetailsDto.class
-  )
+      value = "Get detailed information about resources for given account",
+      response = ResourcesDetailsDto.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = "The resources details successfully fetched"),
     @ApiResponse(code = 404, message = "Account with specified id was not found"),

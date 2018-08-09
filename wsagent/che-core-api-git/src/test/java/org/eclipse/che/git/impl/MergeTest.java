@@ -52,9 +52,8 @@ public class MergeTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testMergeNoChanges(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -66,9 +65,8 @@ public class MergeTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testMerge(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -90,9 +88,8 @@ public class MergeTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testMergeConflict(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);

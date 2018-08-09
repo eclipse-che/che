@@ -33,11 +33,10 @@ import org.apache.maven.project.MavenProjectHelper;
  * @author Florent Benoit
  */
 @Mojo(
-  name = "build",
-  defaultPhase = LifecyclePhase.PACKAGE,
-  requiresProject = true,
-  requiresDependencyCollection = ResolutionScope.RUNTIME
-)
+    name = "build",
+    defaultPhase = LifecyclePhase.PACKAGE,
+    requiresProject = true,
+    requiresDependencyCollection = ResolutionScope.RUNTIME)
 public class TypeScriptDTOGeneratorMojo extends AbstractMojo {
 
   /** Project providing artifact id, version and dependencies. */

@@ -378,9 +378,8 @@ public class UserDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingUserById"
-  )
+      expectedExceptions = NotFoundException.class,
+      dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingUserById")
   public void shouldRemoveUser() throws Exception {
     final UserImpl user = users[0];
 

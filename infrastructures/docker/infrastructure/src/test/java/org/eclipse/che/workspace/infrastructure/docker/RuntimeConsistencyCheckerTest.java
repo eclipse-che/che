@@ -34,9 +34,8 @@ public class RuntimeConsistencyCheckerTest {
   }
 
   @Test(
-    dataProvider = "inconsistentRuntimesProvider",
-    expectedExceptions = ValidationException.class
-  )
+      dataProvider = "inconsistentRuntimesProvider",
+      expectedExceptions = ValidationException.class)
   public void inconsistentRuntimes(InternalEnvironment environment, DockerInternalRuntime runtime)
       throws Exception {
     new RuntimeConsistencyChecker().check(environment, runtime);

@@ -95,11 +95,10 @@ public class FactoryBuilderTest {
   }
 
   @Test(
-    expectedExceptions = ApiException.class,
-    dataProvider = "setByServerParamsProvider",
-    expectedExceptionsMessageRegExp =
-        "You have provided an invalid parameter .* for this version of Factory parameters.*"
-  )
+      expectedExceptions = ApiException.class,
+      dataProvider = "setByServerParamsProvider",
+      expectedExceptionsMessageRegExp =
+          "You have provided an invalid parameter .* for this version of Factory parameters.*")
   public void shouldNotAllowUsingParamsThatCanBeSetOnlyByServer(FactoryDto factory)
       throws Exception {
     factoryBuilder.checkValid(factory);

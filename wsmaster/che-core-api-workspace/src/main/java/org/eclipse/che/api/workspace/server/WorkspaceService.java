@@ -108,37 +108,34 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Create a new workspace based on the configuration",
-    notes =
-        "This operation can be performed only by authorized user,"
-            + "this user will be the owner of the created workspace",
-    response = WorkspaceConfigDto.class
-  )
+      value = "Create a new workspace based on the configuration",
+      notes =
+          "This operation can be performed only by authorized user,"
+              + "this user will be the owner of the created workspace",
+      response = WorkspaceConfigDto.class)
   @ApiResponses({
     @ApiResponse(code = 201, message = "The workspace successfully created"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Conflict error occurred during the workspace creation"
-              + "(e.g. The workspace with such name already exists)"
-    ),
+        code = 409,
+        message =
+            "Conflict error occurred during the workspace creation"
+                + "(e.g. The workspace with such name already exists)"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response create(
       @ApiParam(value = "The configuration to create the new workspace", required = true)
           WorkspaceConfigDto config,
       @ApiParam(
-            value =
-                "Workspace attribute defined in 'attrName:attrValue' format. "
-                    + "The first ':' is considered as attribute name and value separator",
-            examples =
-                @Example({
-                  @ExampleProperty("stackId:stack123"),
-                  @ExampleProperty("attrName:value-with:colon")
-                })
-          )
+              value =
+                  "Workspace attribute defined in 'attrName:attrValue' format. "
+                      + "The first ':' is considered as attribute name and value separator",
+              examples =
+                  @Example({
+                    @ExampleProperty("stackId:stack123"),
+                    @ExampleProperty("attrName:value-with:colon")
+                  }))
           @QueryParam("attribute")
           List<String> attrsList,
       @ApiParam(
@@ -175,12 +172,11 @@ public class WorkspaceService extends Service {
   @Path("/{key:.*}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get the workspace by the composite key",
-    notes =
-        "Composite key can be just workspace ID or in the "
-            + "namespace:workspace_name form, where namespace is optional (e.g :workspace_name is valid key too."
-            + "namespace/workspace_name form, where namespace can contain '/' character."
-  )
+      value = "Get the workspace by the composite key",
+      notes =
+          "Composite key can be just workspace ID or in the "
+              + "namespace:workspace_name form, where namespace is optional (e.g :workspace_name is valid key too."
+              + "namespace/workspace_name form, where namespace can contain '/' character.")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The response contains requested workspace entity"),
     @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
@@ -189,14 +185,13 @@ public class WorkspaceService extends Service {
   })
   public WorkspaceDto getByKey(
       @ApiParam(
-            value = "Composite key",
-            examples =
-                @Example({
-                  @ExampleProperty("workspace12345678"),
-                  @ExampleProperty("namespace/workspace_name"),
-                  @ExampleProperty("namespace_part_1/namespace_part_2/workspace_name")
-                })
-          )
+              value = "Composite key",
+              examples =
+                  @Example({
+                    @ExampleProperty("workspace12345678"),
+                    @ExampleProperty("namespace/workspace_name"),
+                    @ExampleProperty("namespace_part_1/namespace_part_2/workspace_name")
+                  }))
           @PathParam("key")
           String key,
       @ApiParam("Whether to include internal servers into runtime or not")
@@ -214,11 +209,10 @@ public class WorkspaceService extends Service {
   @GET
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get workspaces which user can read",
-    notes = "This operation can be performed only by authorized user",
-    response = WorkspaceDto.class,
-    responseContainer = "List"
-  )
+      value = "Get workspaces which user can read",
+      notes = "This operation can be performed only by authorized user",
+      response = WorkspaceDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspaces successfully fetched"),
     @ApiResponse(code = 500, message = "Internal server error occurred during workspaces fetching")
@@ -250,11 +244,10 @@ public class WorkspaceService extends Service {
   @Path("/namespace/{namespace:.*}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get workspaces by given namespace",
-    notes = "This operation can be performed only by authorized user",
-    response = WorkspaceDto.class,
-    responseContainer = "List"
-  )
+      value = "Get workspaces by given namespace",
+      notes = "This operation can be performed only by authorized user",
+      response = WorkspaceDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspaces successfully fetched"),
     @ApiResponse(code = 500, message = "Internal server error occurred during workspaces fetching")
@@ -277,19 +270,17 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Update the workspace by replacing all the existing data with update",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Update the workspace by replacing all the existing data with update",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspace successfully updated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 403, message = "The user does not have access to update the workspace"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Conflict error occurred during workspace update"
-              + "(e.g. Workspace with such name already exists)"
-    ),
+        code = 409,
+        message =
+            "Conflict error occurred during workspace update"
+                + "(e.g. Workspace with such name already exists)"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public WorkspaceDto update(
@@ -305,9 +296,8 @@ public class WorkspaceService extends Service {
   @DELETE
   @Path("/{id}")
   @ApiOperation(
-    value = "Removes the workspace",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Removes the workspace",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 204, message = "The workspace successfully removed"),
     @ApiResponse(code = 403, message = "The user does not have access to remove the workspace"),
@@ -325,18 +315,16 @@ public class WorkspaceService extends Service {
   @Path("/{id}/runtime")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Start the workspace by the id",
-    notes =
-        "This operation can be performed only by the workspace owner."
-            + "The workspace starts asynchronously"
-  )
+      value = "Start the workspace by the id",
+      notes =
+          "This operation can be performed only by the workspace owner."
+              + "The workspace starts asynchronously")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspace is starting"),
     @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist"),
     @ApiResponse(
-      code = 403,
-      message = "The user is not workspace owner." + "The operation is not allowed for the user"
-    ),
+        code = 403,
+        message = "The user is not workspace owner." + "The operation is not allowed for the user"),
     @ApiResponse(code = 409, message = "Any conflict occurs during the workspace start"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
@@ -357,25 +345,22 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Start the temporary workspace from the given configuration",
-    notes =
-        "This operation can be performed only by the authorized user or temp user."
-            + "The workspace starts synchronously"
-  )
+      value = "Start the temporary workspace from the given configuration",
+      notes =
+          "This operation can be performed only by the authorized user or temp user."
+              + "The workspace starts synchronously")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspace is starting"),
     @ApiResponse(code = 400, message = "The update config is not valid"),
     @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist"),
     @ApiResponse(
-      code = 403,
-      message = "The user is not workspace owner" + "The operation is not allowed for the user"
-    ),
+        code = 403,
+        message = "The user is not workspace owner" + "The operation is not allowed for the user"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Any conflict occurs during the workspace start"
-              + "(e.g. workspace with such name already exists"
-    ),
+        code = 409,
+        message =
+            "Any conflict occurs during the workspace start"
+                + "(e.g. workspace with such name already exists"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public WorkspaceDto startFromConfig(
@@ -407,11 +392,10 @@ public class WorkspaceService extends Service {
   @DELETE
   @Path("/{id}/runtime")
   @ApiOperation(
-    value = "Stop the workspace",
-    notes =
-        "This operation can be performed only by the workspace owner."
-            + "The workspace stops asynchronously"
-  )
+      value = "Stop the workspace",
+      notes =
+          "This operation can be performed only by the workspace owner."
+              + "The workspace stops asynchronously")
   @ApiResponses({
     @ApiResponse(code = 204, message = "The workspace is stopping"),
     @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist"),
@@ -428,9 +412,8 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Update the workspace by adding a new command to it",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Update the workspace by adding a new command to it",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspace successfully updated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -455,9 +438,8 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Update the workspace command by replacing the command with a new one",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Update the workspace command by replacing the command with a new one",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The command successfully updated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -486,9 +468,8 @@ public class WorkspaceService extends Service {
   @DELETE
   @Path("/{id}/command/{name}")
   @ApiOperation(
-    value = "Remove the command from the workspace",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Remove the command from the workspace",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 204, message = "The command successfully removed"),
     @ApiResponse(code = 403, message = "The user does not have access delete the command"),
@@ -514,9 +495,8 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Add a new environment to the workspace",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Add a new environment to the workspace",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspace successfully updated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -545,9 +525,8 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Update the workspace environment by replacing it with a new one",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Update the workspace environment by replacing it with a new one",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The environment successfully updated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -576,9 +555,8 @@ public class WorkspaceService extends Service {
   @DELETE
   @Path("/{id}/environment/{name}")
   @ApiOperation(
-    value = "Remove the environment from the workspace",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Remove the environment from the workspace",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 204, message = "The environment successfully removed"),
     @ApiResponse(code = 403, message = "The user does not have access remove the environment"),
@@ -601,9 +579,8 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Adds a new project to the workspace",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Adds a new project to the workspace",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The project successfully added to the workspace"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -628,9 +605,8 @@ public class WorkspaceService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Update the workspace project by replacing it with a new one",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Update the workspace project by replacing it with a new one",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The project successfully updated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -659,9 +635,8 @@ public class WorkspaceService extends Service {
   @DELETE
   @Path("/{id}/project/{path:.*}")
   @ApiOperation(
-    value = "Remove the project from the workspace",
-    notes = "This operation can be performed only by the workspace owner"
-  )
+      value = "Remove the project from the workspace",
+      notes = "This operation can be performed only by the workspace owner")
   @ApiResponses({
     @ApiResponse(code = 204, message = "The project successfully removed"),
     @ApiResponse(code = 403, message = "The user does not have access remove the project"),

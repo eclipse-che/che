@@ -149,9 +149,8 @@ public class FactoryService extends Service {
   @Path("/{id}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get factory by its identifier",
-    notes = "If validate parameter is not specified, retrieved factory wont be validated"
-  )
+      value = "Get factory by its identifier",
+      notes = "If validate parameter is not specified, retrieved factory wont be validated")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Response contains requested factory entry"),
     @ApiResponse(code = 400, message = "Missed required parameters, failed to validate factory"),
@@ -161,10 +160,10 @@ public class FactoryService extends Service {
   public FactoryDto getFactory(
       @ApiParam(value = "Factory identifier") @PathParam("id") String factoryId,
       @ApiParam(
-            value = "Whether or not to validate values like it is done when accepting the factory",
-            allowableValues = "true, false",
-            defaultValue = "false"
-          )
+              value =
+                  "Whether or not to validate values like it is done when accepting the factory",
+              allowableValues = "true, false",
+              defaultValue = "false")
           @DefaultValue("false")
           @QueryParam("validate")
           Boolean validate)
@@ -180,22 +179,20 @@ public class FactoryService extends Service {
   @Path("/find")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value =
-        "Get factory by attribute, "
-            + "the attribute must match one of the Factory model fields with type 'String', "
-            + "e.g. (factory.name, factory.creator.name)"
-            + " This method is going to be deprecated or limited in scope in 6.0 GA "
-            + "since it's not optimized on backend performance. "
-            + "Expected parameters creator.userId=? or name=?.",
-    notes =
-        "If specify more than one value for a single query parameter then will be taken the first one"
-  )
+      value =
+          "Get factory by attribute, "
+              + "the attribute must match one of the Factory model fields with type 'String', "
+              + "e.g. (factory.name, factory.creator.name)"
+              + " This method is going to be deprecated or limited in scope in 6.0 GA "
+              + "since it's not optimized on backend performance. "
+              + "Expected parameters creator.userId=? or name=?.",
+      notes =
+          "If specify more than one value for a single query parameter then will be taken the first one")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Response contains list requested factories"),
     @ApiResponse(
-      code = 400,
-      message = "When query does not contain at least one attribute to search for"
-    ),
+        code = 400,
+        message = "When query does not contain at least one attribute to search for"),
     @ApiResponse(code = 500, message = "Internal server error")
   })
   @Deprecated
@@ -237,22 +234,20 @@ public class FactoryService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Update factory information by configuration and specified identifier",
-    notes =
-        "Update factory based on the factory id which is passed in a path parameter. "
-            + "For perform this operation user needs respective rights"
-  )
+      value = "Update factory information by configuration and specified identifier",
+      notes =
+          "Update factory based on the factory id which is passed in a path parameter. "
+              + "For perform this operation user needs respective rights")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Factory successfully updated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 403, message = "User does not have rights to update factory"),
     @ApiResponse(code = 404, message = "Factory to update not found"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Conflict error occurred during factory update"
-              + "(e.g. Factory with such name and creator already exists)"
-    ),
+        code = 409,
+        message =
+            "Conflict error occurred during factory update"
+                + "(e.g. Factory with such name and creator already exists)"),
     @ApiResponse(code = 500, message = "Internal server error")
   })
   public FactoryDto updateFactory(
@@ -273,11 +268,10 @@ public class FactoryService extends Service {
   @DELETE
   @Path("/{id}")
   @ApiOperation(
-    value = "Removes factory by its identifier",
-    notes =
-        "Removes factory based on the factory id which is passed in a path parameter. "
-            + "For perform this operation user needs respective rights"
-  )
+      value = "Removes factory by its identifier",
+      notes =
+          "Removes factory based on the factory id which is passed in a path parameter. "
+              + "For perform this operation user needs respective rights")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Factory successfully removed"),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -293,9 +287,8 @@ public class FactoryService extends Service {
   @Path("/workspace/{ws-id}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Construct factory from workspace",
-    notes = "This call returns a Factory.json that is used to create a factory"
-  )
+      value = "Construct factory from workspace",
+      notes = "This call returns a Factory.json that is used to create a factory")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Response contains requested factory JSON"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -323,9 +316,8 @@ public class FactoryService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Create factory by providing map of parameters",
-    notes = "Get JSON with factory information"
-  )
+      value = "Create factory by providing map of parameters",
+      notes = "Get JSON with factory information")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Factory successfully built from parameters"),
     @ApiResponse(code = 400, message = "Missed required parameters, failed to validate factory"),
@@ -334,10 +326,9 @@ public class FactoryService extends Service {
   public FactoryDto resolveFactory(
       @ApiParam(value = "Parameters provided to create factories") Map<String, String> parameters,
       @ApiParam(
-            value = "Whether or not to validate values like it is done when accepting a Factory",
-            allowableValues = "true,false",
-            defaultValue = "false"
-          )
+              value = "Whether or not to validate values like it is done when accepting a Factory",
+              allowableValues = "true,false",
+              defaultValue = "false")
           @DefaultValue("false")
           @QueryParam(VALIDATE_QUERY_PARAMETER)
           Boolean validate)

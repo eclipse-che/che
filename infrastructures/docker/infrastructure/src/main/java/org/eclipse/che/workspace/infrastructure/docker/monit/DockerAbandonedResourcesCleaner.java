@@ -73,10 +73,9 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
   }
 
   @ScheduleRate(
-    periodParameterName = "che.docker.cleanup_period_min",
-    initialDelay = 0L,
-    unit = TimeUnit.MINUTES
-  )
+      periodParameterName = "che.docker.cleanup_period_min",
+      initialDelay = 0L,
+      unit = TimeUnit.MINUTES)
   @Override
   public void run() {
     cleanContainers();

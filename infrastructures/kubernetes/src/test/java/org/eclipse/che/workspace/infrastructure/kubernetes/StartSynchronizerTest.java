@@ -132,9 +132,8 @@ public class StartSynchronizerTest {
   }
 
   @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Runtime is already started"
-  )
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Runtime is already started")
   public void shouldNotSetStartThreadIfItIsAlreadySet() throws Exception {
     // given
     startSynchronizer.setStartThread();

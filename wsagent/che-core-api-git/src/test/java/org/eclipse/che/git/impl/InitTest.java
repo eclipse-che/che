@@ -42,9 +42,8 @@ public class InitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testInit(GitConnectionFactory connectionFactory)
       throws GitException, URISyntaxException, IOException {
     GitConnection connection = getTestUserConnection(connectionFactory, repository);

@@ -45,26 +45,23 @@ public class MachineConfigImpl implements MachineConfig {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "externalmachine_installers",
-    joinColumns = @JoinColumn(name = "externalmachine_id")
-  )
+      name = "externalmachine_installers",
+      joinColumns = @JoinColumn(name = "externalmachine_id"))
   @Column(name = "installers")
   private List<String> installers;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "externalmachine_attributes",
-    joinColumns = @JoinColumn(name = "externalmachine_id")
-  )
+      name = "externalmachine_attributes",
+      joinColumns = @JoinColumn(name = "externalmachine_id"))
   @MapKeyColumn(name = "attributes_key")
   @Column(name = "attributes")
   private Map<String, String> attributes;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "externalmachine_env",
-    joinColumns = @JoinColumn(name = "externalmachine_id")
-  )
+      name = "externalmachine_env",
+      joinColumns = @JoinColumn(name = "externalmachine_id"))
   @MapKeyColumn(name = "env_key")
   @Column(name = "env_value")
   private Map<String, String> env;
