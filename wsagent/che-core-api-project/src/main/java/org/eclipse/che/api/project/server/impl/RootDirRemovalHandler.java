@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
@@ -59,6 +60,8 @@ public class RootDirRemovalHandler {
   private void consumeDelete(String wsPath) {
     try {
       if (projectConfigRegistry.isRegistered(wsPath)) {
+        eventService.publish(new PreProjectDeletedEvent(wsPath));
+
         projectConfigRegistry
             .getAll(wsPath)
             .stream()
