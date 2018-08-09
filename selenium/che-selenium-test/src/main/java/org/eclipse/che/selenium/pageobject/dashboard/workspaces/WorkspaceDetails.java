@@ -124,10 +124,12 @@ public class WorkspaceDetails {
     }
   }
 
-
-
   @Inject
-  public WorkspaceDetails(SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper, Loader loader, Dashboard dashboard) {
+  public WorkspaceDetails(
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      Loader loader,
+      Dashboard dashboard) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
@@ -170,7 +172,8 @@ public class WorkspaceDetails {
 
   public void waitInvisibility(ActionButton... actionButtons) {
     asList(actionButtons)
-        .forEach(actionButton -> seleniumWebDriverHelper.waitInvisibility(actionButton.getLocator()));
+        .forEach(
+            actionButton -> seleniumWebDriverHelper.waitInvisibility(actionButton.getLocator()));
   }
 
   public void waitAndClickOn(ActionButton actionButton) {

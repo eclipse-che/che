@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.CHECKBOX_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.DECREMENT_RAM_BUTTON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.DELETE_BUTTON_XPATH_TEMPLATE;
@@ -115,11 +114,12 @@ public class WorkspaceDetailsMachines {
     return By.xpath(ramAmountTextFieldXpath);
   }
 
-  public void waitMachinesListItem(String machineName){
+  public void waitMachinesListItem(String machineName) {
     seleniumWebDriverHelper.waitVisibility(getMachineListItemLocator(machineName));
   }
 
-  public void waitMachinesListItemWithAllAttributes(String machineName, String imageName, String expectedRamValue){
+  public void waitMachinesListItemWithAllAttributes(
+      String machineName, String imageName, String expectedRamValue) {
     waitMachinesListItem(machineName);
     waitEditButton(machineName);
     waitSettindsButton(machineName);
@@ -154,16 +154,19 @@ public class WorkspaceDetailsMachines {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(SETTINGS_POPOVER_CONTAINER_XPATH));
   }
 
-  public boolean isRamValueValid(String machineName){
+  public boolean isRamValueValid(String machineName) {
     final String ramValidationAttribute = "aria-invalid";
-    return seleniumWebDriverHelper.waitVisibilityAndGetAttribute(getRamAmountTextFieldLocator(machineName), ramValidationAttribute).equals("false");
+    return seleniumWebDriverHelper
+        .waitVisibilityAndGetAttribute(
+            getRamAmountTextFieldLocator(machineName), ramValidationAttribute)
+        .equals("false");
   }
 
-  public void waitRamValidHighlighting(String machineName){
+  public void waitRamValidHighlighting(String machineName) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isRamValueValid(machineName));
   }
 
-  public void waitRamInvalidHighlighting(String machineName){
+  public void waitRamInvalidHighlighting(String machineName) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isRamValueValid(machineName));
   }
 
@@ -178,7 +181,7 @@ public class WorkspaceDetailsMachines {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> getRamAmount(machineName) == ramAmount);
   }
 
-  public void typeRamAmount(String machineName, String ramAmount){
+  public void typeRamAmount(String machineName, String ramAmount) {
     seleniumWebDriverHelper.setValue(getRamAmountTextFieldLocator(machineName), ramAmount);
   }
 
@@ -236,5 +239,4 @@ public class WorkspaceDetailsMachines {
   public void clickOnDeleteButton(String machineName) {
     waitDeleteButton(machineName).click();
   }
-
 }
