@@ -16,6 +16,7 @@ import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePref
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT_CONFIG;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -137,6 +138,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
         params.setArguments(fixedPathList);
         break;
       case CLIENT_UPDATE_PROJECT:
+      case CLIENT_UPDATE_PROJECT_CONFIG:
         Object projectUri = params.getArguments().get(0);
         params.setArguments(
             singletonList(removePrefixUri(convertToJson(projectUri).getAsString())));
