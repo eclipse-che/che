@@ -153,22 +153,6 @@ public class SignatureKeyManagerTest {
     verify(signatureKeyDao, times(1)).remove(eq(wsId));
   }
 
-  @Test
-  public void shouldCreateKeyPairOnWorkspaceStart() throws Exception {
-    final String wsId = "ws123";
-    signatureKeyManager.subscribe();
-    verify(eventService).subscribe(captor.capture());
-    final SignatureKeyPairImpl kp = newKeyPair(wsId);
-    when(signatureKeyDao.get(eq(wsId))).thenReturn(kp);
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
-    subscriber.onEvent(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.STARTING)
-            .withWorkspaceId(wsId));
-
-    verify(signatureKeyDao, times(1)).get(wsId);
-  }
-
   private SignatureKeyPairImpl newKeyPair(String id) {
     final KeyPair pair = kpg.generateKeyPair();
     return new SignatureKeyPairImpl(id, pair.getPublic(), pair.getPrivate());

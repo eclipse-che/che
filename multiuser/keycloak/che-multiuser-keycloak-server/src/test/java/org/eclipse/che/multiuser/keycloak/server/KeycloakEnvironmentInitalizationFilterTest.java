@@ -79,9 +79,8 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     filter =
         new KeycloakEnvironmentInitalizationFilter(
             userManager, tokenExtractor, permissionChecker, keycloakSettings);
-    filter.signatureKeyManager = keyManager;
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
-    when(keyManager.getKeyPair()).thenReturn(kp);
+    when(keyManager.getKeyPair(anyString())).thenReturn(kp);
   }
 
   @Test
@@ -89,7 +88,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
     kpg.initialize(1024);
     final KeyPair keyPair = kpg.generateKeyPair();
-    when(keyManager.getKeyPair()).thenReturn(keyPair);
+    when(keyManager.getKeyPair(anyString())).thenReturn(keyPair);
     final Map<String, Object> header = new HashMap<>();
     header.put("kind", Constants.MACHINE_TOKEN_KIND);
     final String token =

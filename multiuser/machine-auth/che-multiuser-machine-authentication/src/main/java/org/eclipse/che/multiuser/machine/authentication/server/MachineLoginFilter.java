@@ -19,15 +19,12 @@ import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
-import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import java.security.Key;
 import java.security.Principal;
@@ -98,12 +95,6 @@ public class MachineLoginFilter implements Filter {
       final Jws<Claims> jwt =
           Jwts.parser().setSigningKeyResolver(workspaceSigningKeyResolver).parseClaimsJws(token);
       final Claims claims = jwt.getBody();
-
-      if (!isMachineToken(jwt)) {
-        chain.doFilter(request, response);
-        return;
-      }
-
       try {
         final String userId = claims.get(USER_ID_CLAIM, String.class);
         // check if user with such id exists
@@ -126,18 +117,10 @@ public class MachineLoginFilter implements Filter {
       } finally {
         EnvironmentContext.reset();
       }
-    } catch (UnsupportedJwtException
-        | MalformedJwtException
-        | SignatureException
-        | ExpiredJwtException ex) {
+    } catch (JwtException ex) {
       // signature check failed
       chain.doFilter(request, response);
     }
-  }
-
-  /** Checks whether given token from a machine. */
-  private boolean isMachineToken(Jws<Claims> jwt) {
-    return MACHINE_TOKEN_KIND.equals(jwt.getHeader().get("kind"));
   }
 
   /** Sets given error code with err message into give response. */
@@ -168,6 +151,9 @@ public class MachineLoginFilter implements Filter {
       new SigningKeyResolverAdapter() {
         @Override
         public Key resolveSigningKey(JwsHeader header, Claims claims) {
+          if (!MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
+            throw new JwtException("Not a machine token");
+          }
           String wsId = claims.get(WORKSPACE_ID_CLAIM, String.class);
           return keyManager.getKeyPair(wsId).getPublic();
         }

@@ -174,7 +174,7 @@ public class JwtProxyProvisioner {
       k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
       k8sEnv.getPods().put(JWT_PROXY_POD_NAME, createJwtProxyPod(identity));
 
-      KeyPair keyPair = signatureKeyManager.getKeyPair();
+      KeyPair keyPair = signatureKeyManager.getKeyPair(identity.getWorkspaceId());
       if (keyPair == null) {
         throw new InternalInfrastructureException(
             "Key pair for machine authentication does not exist");

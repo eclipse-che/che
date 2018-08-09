@@ -97,6 +97,9 @@ import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
+import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
+import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
+import org.eclipse.che.multiuser.api.permission.server.PermissionsManager;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
@@ -243,6 +246,8 @@ public class JpaEntitiesCascadeRemovalTest {
                 bind(WorkspaceStatusCache.class).to(DefaultWorkspaceStatusCache.class);
                 bind(RuntimeInfrastructure.class).toInstance(mock(RuntimeInfrastructure.class));
                 MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
+                bind(PermissionsManager.class);
+                bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
                 bind(AccountManager.class);
                 bind(Boolean.class)
                     .annotatedWith(Names.named("che.workspace.auto_snapshot"))

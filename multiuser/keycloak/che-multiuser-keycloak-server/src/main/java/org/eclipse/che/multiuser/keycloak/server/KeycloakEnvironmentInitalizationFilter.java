@@ -14,6 +14,7 @@ package org.eclipse.che.multiuser.keycloak.server;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.security.Principal;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -44,7 +45,6 @@ import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilter {
 
   private final KeycloakUserManager userManager;
-  private final KeycloakSettings settings;
   private final RequestTokenExtractor tokenExtractor;
   private final PermissionChecker permissionChecker;
 
@@ -53,11 +53,12 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
       KeycloakUserManager userManager,
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
-      KeycloakSettings settings) {
+      KeycloakSettings settings)
+      throws MalformedURLException {
+    super(settings);
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
-    this.settings = settings;
   }
 
   @Override
@@ -82,7 +83,8 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
       try {
         String username =
-            claims.get(settings.get().get(KeycloakConstants.USERNAME_CLAIM_SETTING), String.class);
+            claims.get(
+                keycloakSettings.get().get(KeycloakConstants.USERNAME_CLAIM_SETTING), String.class);
         if (username == null) { // fallback to unique id promised by spec
           // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
           username = claims.getIssuer() + ":" + claims.getSubject();

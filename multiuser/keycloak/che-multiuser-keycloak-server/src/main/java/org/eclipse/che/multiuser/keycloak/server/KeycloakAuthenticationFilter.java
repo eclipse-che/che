@@ -11,11 +11,7 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import com.auth0.jwk.GuavaCachedJwkProvider;
-import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
-import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.UrlJwkProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -28,9 +24,7 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.Key;
-import java.security.PublicKey;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -49,10 +43,8 @@ import org.slf4j.LoggerFactory;
 public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakAuthenticationFilter.class);
 
-  private String jwksUrl;
   private long allowedClockSkewSec;
   private RequestTokenExtractor tokenExtractor;
-  private JwkProvider jwkProvider;
 
   @Inject
   public KeycloakAuthenticationFilter(
@@ -60,12 +52,9 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       @Named(KeycloakConstants.ALLOWED_CLOCK_SKEW_SEC) long allowedClockSkewSec,
       RequestTokenExtractor tokenExtractor)
       throws MalformedURLException {
-    this.jwksUrl = keycloakSettings.get().get(KeycloakConstants.JWKS_ENDPOINT_SETTING);
+    super(keycloakSettings);
     this.allowedClockSkewSec = allowedClockSkewSec;
     this.tokenExtractor = tokenExtractor;
-    if (jwksUrl != null) {
-      this.jwkProvider = new GuavaCachedJwkProvider(new UrlJwkProvider(new URL(jwksUrl)));
-    }
   }
 
   @Override
@@ -119,30 +108,6 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
     request.setAttribute("token", jwt);
     chain.doFilter(req, res);
-  }
-
-  private synchronized PublicKey getJwtPublicKey(JwsHeader<?> header) throws JwkException {
-    String kid = header.getKeyId();
-    if (kid == null) {
-      LOG.warn(
-          "'kid' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
-      return null;
-    }
-    String alg = header.getAlgorithm();
-    if (alg == null) {
-      LOG.warn(
-          "'alg' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
-      return null;
-    }
-
-    if (jwkProvider == null) {
-      LOG.warn(
-          "JWK provider is not available: This is not possible to validate the token with OIDC provider keys.\n"
-              + "Please look into the startup logs to find out the root cause");
-      return null;
-    }
-    Jwk jwk = jwkProvider.get(kid);
-    return jwk.getPublicKey();
   }
 
   private void send403(ServletResponse res, String message) throws IOException {

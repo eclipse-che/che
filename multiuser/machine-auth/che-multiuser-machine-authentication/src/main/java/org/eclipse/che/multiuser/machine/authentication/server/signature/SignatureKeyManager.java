@@ -84,11 +84,9 @@ public class SignatureKeyManager {
           @Override
           public void onEvent(WorkspaceStatusEvent event) {
             switch (event.getStatus()) {
-              case STARTING:
-                loadKeyPair(event.getWorkspaceId());
-                break;
               case STOPPED:
                 try {
+                  cachedPair.remove(event.getWorkspaceId());
                   signatureKeyDao.remove(event.getWorkspaceId());
                 } catch (ServerException e) {
                   LOG.error(e.getLocalizedMessage(), e);

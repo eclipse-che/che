@@ -13,18 +13,30 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
 
+import com.auth0.jwk.GuavaCachedJwkProvider;
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkException;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.Key;
 import java.security.PublicKey;
-import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base abstract class for the Keycloak-related servlet filters.
@@ -34,7 +46,18 @@ import org.eclipse.che.multiuser.machine.authentication.server.signature.Signatu
  */
 public abstract class AbstractKeycloakFilter implements Filter {
 
-  @Inject protected SignatureKeyManager signatureKeyManager;
+  protected KeycloakSettings keycloakSettings;
+  protected JwkProvider jwkProvider;
+
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractKeycloakFilter.class);
+
+  public AbstractKeycloakFilter(KeycloakSettings keycloakSettings) throws MalformedURLException {
+    this.keycloakSettings = keycloakSettings;
+    String jwksUrl = keycloakSettings.get().get(KeycloakConstants.JWKS_ENDPOINT_SETTING);
+    if (jwksUrl != null) {
+      this.jwkProvider = new GuavaCachedJwkProvider(new UrlJwkProvider(new URL(jwksUrl)));
+    }
+  }
 
   /** when a request came from a machine with valid token then auth is not required */
   protected boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
@@ -46,12 +69,13 @@ public abstract class AbstractKeycloakFilter implements Filter {
       return false;
     }
     try {
-      final PublicKey publicKey = signatureKeyManager.getKeyPair().getPublic();
-      final Jwt jwt = Jwts.parser().setSigningKey(publicKey).parse(token);
-      return MACHINE_TOKEN_KIND.equals(jwt.getHeader().get("kind"));
+      Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapterByKind()).parse(token);
+      return false;
     } catch (ExpiredJwtException | MalformedJwtException | SignatureException ex) {
       // given token is not signed by particular signature key so it must be checked in another way
       return false;
+    } catch (JwtException e) {
+      return true;
     }
   }
 
@@ -60,4 +84,57 @@ public abstract class AbstractKeycloakFilter implements Filter {
 
   @Override
   public void destroy() {}
+
+  private class SigningKeyResolverAdapterByKind extends SigningKeyResolverAdapter {
+
+    @Override
+    public Key resolveSigningKey(JwsHeader header, String plaintext) {
+      if (MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
+        throw new JwtException("Not a keycloak token");
+      }
+      try {
+        return getJwtPublicKey(header);
+      } catch (JwkException e) {
+        throw new JwtException(
+            "Error during the retrieval of the public key during JWT token validation", e);
+      }
+    }
+
+    @Override
+    public Key resolveSigningKey(JwsHeader header, Claims claims) {
+      if (MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
+        throw new JwtException("Not a keycloak token");
+      }
+      try {
+        return getJwtPublicKey(header);
+      } catch (JwkException e) {
+        throw new JwtException(
+            "Error during the retrieval of the public key during JWT token validation", e);
+      }
+    }
+  }
+
+  protected synchronized PublicKey getJwtPublicKey(JwsHeader<?> header) throws JwkException {
+    String kid = header.getKeyId();
+    if (kid == null) {
+      LOG.warn(
+          "'kid' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
+      return null;
+    }
+    String alg = header.getAlgorithm();
+    if (alg == null) {
+      LOG.warn(
+          "'alg' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
+      return null;
+    }
+
+    if (jwkProvider == null) {
+      LOG.warn(
+          "JWK provider is not available: This is not possible to validate the token with OIDC provider keys.\n"
+              + "Please look into the startup logs to find out the root cause");
+      return null;
+    }
+    Jwk jwk = jwkProvider.get(kid);
+    return jwk.getPublicKey();
+  }
 }

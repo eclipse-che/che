@@ -13,18 +13,18 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static io.jsonwebtoken.SignatureAlgorithm.RS256;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import io.jsonwebtoken.Jwts;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -46,6 +46,7 @@ public class AbstractKeycloakFilterTest {
 
   @Mock private HttpServletRequest request;
   @Mock private SignatureKeyManager signatureKeyManager;
+  @Mock private KeycloakSettings keycloakSettings;
 
   @InjectMocks private TestLoginFilter abstractKeycloakFilter;
 
@@ -65,7 +66,7 @@ public class AbstractKeycloakFilterTest {
             .signWith(RS256, keyPair.getPrivate())
             .compact();
 
-    when(signatureKeyManager.getKeyPair()).thenReturn(keyPair);
+    when(signatureKeyManager.getKeyPair(anyString())).thenReturn(keyPair);
     when(request.getRequestURI()).thenReturn(null);
   }
 
@@ -91,9 +92,13 @@ public class AbstractKeycloakFilterTest {
   }
 
   static class TestLoginFilter extends AbstractKeycloakFilter {
+
+    public TestLoginFilter(KeycloakSettings keycloakSettings) throws MalformedURLException {
+      super(keycloakSettings);
+    }
+
     @Override
     public void doFilter(
-        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-        throws IOException, ServletException {}
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {}
   }
 }
