@@ -165,6 +165,7 @@
                         <classe>org.eclipse.lsp4j.VersionedTextDocumentIdentifier</classe>
                         <class>org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange</class>
                         <class>org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit</class>
+                        <class>org.eclipse.che.jdt.ls.extension.api.dto.UpdateMavenModulesInfo</class>
                     </classes>
                     <dtoPackages>
                         <package>org.eclipse.che.jdt.ls.extension.api.dto</package>

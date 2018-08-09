@@ -17,9 +17,9 @@ import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_MAVEN_MODULE;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
+import static org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.UpdateMavenModulesInfoDto.fromJson;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.InputStream;
@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,9 +48,9 @@ import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
-import org.eclipse.che.jdt.ls.extension.api.dto.MavenProjectUpdateInfo;
 import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 import org.eclipse.che.jdt.ls.extension.api.dto.StatusReport;
+import org.eclipse.che.jdt.ls.extension.api.dto.UpdateMavenModulesInfo;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -156,30 +157,23 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   }
 
   private void updateMavenModule(ExecuteCommandParams params, List<Object> arguments) {
-    List<Object> newParameters = new ArrayList<>(arguments.size());
-    for (Object argument : arguments) {
-      Gson gson = new Gson();
-      MavenProjectUpdateInfo projectInfo =
-          gson.fromJson(argument.toString(), MavenProjectUpdateInfo.class);
-      if (projectInfo == null) {
-        break;
-      }
-      String projectPath = removePrefixUri(projectInfo.getProjectUri());
-      if (projectInfo.isCreated()) {
-        createProject(projectPath);
-      } else {
-        removeProject(projectPath);
-      }
-      newParameters.add(projectPath);
+    List<Object> newParameters = new LinkedList<>();
+    UpdateMavenModulesInfo updateModulesInfo = fromJson(arguments.get(0).toString());
+    for (String uri : updateModulesInfo.getCreated()) {
+      createProject(removePrefixUri(uri), newParameters);
+    }
+    for (String uri : updateModulesInfo.getRemoved()) {
+      removeProject(removePrefixUri(uri), newParameters);
     }
     params.setCommand(CLIENT_UPDATE_PROJECT);
     params.setArguments(newParameters);
   }
 
-  private void removeProject(String projectPath) {
+  private void removeProject(String projectPath, List<Object> parameters) {
     try {
       if (projectManager.getOrNull(projectPath) != null) {
         projectManager.removeType(projectPath, MAVEN_ID);
+        parameters.add(projectPath);
       }
     } catch (ServerException
         | ForbiddenException
@@ -190,9 +184,10 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     }
   }
 
-  private void createProject(String projectPath) {
+  private void createProject(String projectPath, List<Object> parameters) {
     try {
       projectManager.setType(projectPath, MAVEN_ID, false);
+      parameters.add(projectPath);
     } catch (ConflictException
         | ServerException
         | NotFoundException
