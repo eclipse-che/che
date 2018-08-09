@@ -53,8 +53,6 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
 
   private final ComposeServicesStartStrategy startStrategy;
   private final ComposeEnvironmentValidator composeValidator;
-  private final String defaultMachineMaxMemorySizeAttribute;
-  private final String defaultMachineRequestMemorySizeAttribute;
 
   @Inject
   public ComposeEnvironmentFactory(
@@ -65,13 +63,9 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
       ComposeServicesStartStrategy startStrategy,
       @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeMB,
       @Named("che.workspace.default_memory_request_mb") long defaultMachineRequestMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMaxMemorySizeMB, defaultMachineRequestMemorySizeMB);
     this.startStrategy = startStrategy;
     this.composeValidator = composeValidator;
-    this.defaultMachineMaxMemorySizeAttribute =
-        String.valueOf(defaultMachineMaxMemorySizeMB * 1024 * 1024);
-    this.defaultMachineRequestMemorySizeAttribute =
-        String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
   }
 
   @Override

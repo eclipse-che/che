@@ -366,4 +366,18 @@ public class ComposeEnvironmentValidatorTest {
     // when
     composeEnvironmentValidator.validate(composeEnv);
   }
+
+  @Test(
+          expectedExceptions = ValidationException.class,
+          expectedExceptionsMessageRegExp =
+                  "Memory limit less than memory request found in service '.*' of environment"
+  )
+  public void shouldFailIfMemoryLimitIsLessThenMemoryRequirement() throws Exception {
+    // given
+    when(service.getMemLimit()).thenReturn(1048576L);
+    when(service.getMemRequest()).thenReturn(2097152L);
+
+    // when
+    composeEnvironmentValidator.validate(composeEnv);
+  }
 }

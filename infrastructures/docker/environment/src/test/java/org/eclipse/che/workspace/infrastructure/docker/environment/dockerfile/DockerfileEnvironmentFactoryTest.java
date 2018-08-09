@@ -82,6 +82,30 @@ public class DockerfileEnvironmentFactoryTest {
     assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
 
+  @Test
+  public void testDefaultLimitLessThenRequestIsIgnored() throws Exception {
+    factory =
+            new DockerfileEnvironmentFactory(
+                    installerRegistry,
+                    recipeRetriever,
+                    machinesValidator,
+                    1024,
+                    2048);
+    final Map<String, InternalMachineConfig> machines =
+            ImmutableMap.of(MACHINE_NAME, mockInternalMachineConfig(new HashMap<>()));
+
+    factory.doCreate(recipe, machines, Collections.emptyList());
+
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    final long[] expectedLimits = new long[actualLimits.length];
+    fill(expectedLimits, 2048 * BYTES_IN_MB);
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    final long[] expectedRequests = new long[actualRequests.length];
+    fill(expectedRequests, 2048 * BYTES_IN_MB);
+    assertTrue(Arrays.equals(actualLimits, expectedLimits));
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
+  }
+
   private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
     final InternalMachineConfig machineConfigMock = mock(InternalMachineConfig.class);
     when(machineConfigMock.getAttributes()).thenReturn(attributes);

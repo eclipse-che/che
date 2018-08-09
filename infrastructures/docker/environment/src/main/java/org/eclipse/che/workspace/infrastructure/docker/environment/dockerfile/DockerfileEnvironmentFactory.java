@@ -11,34 +11,29 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile;
 
+import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.*;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.List;
+import java.util.Map;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
-import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
-
 /** @author Sergii Leshchenko */
 @Singleton
 public class DockerfileEnvironmentFactory
     extends InternalEnvironmentFactory<DockerfileEnvironment> {
 
-  private final String defaultMachineMaxMemorySizeAttribute;
-  private final String defaultMachineRequestMemorySizeAttribute;
 
   @Inject
   public DockerfileEnvironmentFactory(
@@ -47,11 +42,7 @@ public class DockerfileEnvironmentFactory
       MachineConfigsValidator machinesValidator,
       @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeMB,
       @Named("che.workspace.default_memory_request_mb") long defaultMachineRequestMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
-    this.defaultMachineMaxMemorySizeAttribute =
-        String.valueOf(defaultMachineMaxMemorySizeMB * 1024 * 1024);
-    this.defaultMachineRequestMemorySizeAttribute =
-        String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
+    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMaxMemorySizeMB, defaultMachineRequestMemorySizeMB);
   }
 
   @Override
@@ -63,6 +54,7 @@ public class DockerfileEnvironmentFactory
           format(
               "Dockerfile environment parser doesn't support recipe type '%s'", recipe.getType()));
     }
+
     String dockerfile = recipe.getContent();
 
     checkArgument(dockerfile != null, "Dockerfile content should not be null.");

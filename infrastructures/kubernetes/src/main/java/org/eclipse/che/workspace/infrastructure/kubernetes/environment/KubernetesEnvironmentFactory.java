@@ -77,8 +77,6 @@ public class KubernetesEnvironmentFactory
 
   private final KubernetesClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
-  private final String defaultMaxMachineMemorySizeAttribute;
-  private final String defaultRequestMachineMemorySizeAttribute;
 
   @Inject
   public KubernetesEnvironmentFactory(
@@ -89,13 +87,9 @@ public class KubernetesEnvironmentFactory
       KubernetesEnvironmentValidator envValidator,
       @Named("che.workspace.default_memory_limit_mb") long defaultMaxMachineMemorySizeMB,
       @Named("che.workspace.default_memory_request_mb") long defaultRequestMachineMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(installerRegistry, recipeRetriever, machinesValidator, defaultMaxMachineMemorySizeMB, defaultRequestMachineMemorySizeMB);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
-    this.defaultMaxMachineMemorySizeAttribute =
-        String.valueOf(defaultMaxMachineMemorySizeMB * 1024 * 1024);
-    this.defaultRequestMachineMemorySizeAttribute =
-        String.valueOf(defaultRequestMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -206,12 +200,12 @@ public class KubernetesEnvironmentFactory
         initIfEmpty(
             machineConfig,
             MEMORY_LIMIT_ATTRIBUTE,
-            defaultMaxMachineMemorySizeAttribute,
+                defaultMachineMaxMemorySizeAttribute,
             () -> Containers.getRamLimit(container));
         initIfEmpty(
             machineConfig,
             MEMORY_REQUEST_ATTRIBUTE,
-            defaultRequestMachineMemorySizeAttribute,
+                defaultMachineRequestMemorySizeAttribute,
             () -> Containers.getRamRequest(container));
       }
     }
