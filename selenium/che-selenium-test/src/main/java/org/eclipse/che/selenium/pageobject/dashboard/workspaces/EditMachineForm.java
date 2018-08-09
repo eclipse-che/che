@@ -14,7 +14,8 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.CLOSE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.CLOSE_ICON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.EDIT_MACHINE_FORM_BODY_XPATH;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.NAME_TEXT_FIELD_NAME;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.NAME_ERROR_MESSAGE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.NAME_TEXT_FIELD_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.RAM_TEXT_FIELD;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.RECIPE_EDITOR_BODY_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.RECIPE_EDITOR_TEXT_XPATH;
@@ -25,6 +26,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachi
 
 import com.google.inject.Inject;
 import java.util.stream.Collectors;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
@@ -45,7 +47,7 @@ public class EditMachineForm {
 
   public interface Locators {
     String EDIT_MACHINE_FORM_BODY_XPATH = "//md-dialog[@aria-label='Edit the machineName: ...']";
-    String NAME_TEXT_FIELD_NAME = "name";
+    String NAME_TEXT_FIELD_XPATH = EDIT_MACHINE_FORM_BODY_XPATH + "//input[@name='name']";
     String RECIPE_EDITOR_BODY_XPATH =
         EDIT_MACHINE_FORM_BODY_XPATH + "//div[@class='CodeMirror-scroll']";
     String RECIPE_EDITOR_TEXT_XPATH = RECIPE_EDITOR_BODY_XPATH + "//pre";
@@ -57,6 +59,15 @@ public class EditMachineForm {
     String SLIDER_BAR_XPATH = "//md-slider[@aria-label='Amount of RAM']";
     String SLIDER_RAM_TEXT_FIELD_XPATH =
         EDIT_MACHINE_FORM_BODY_XPATH + "//div[@class='ng-binding']";
+    String NAME_ERROR_MESSAGE = EDIT_MACHINE_FORM_BODY_XPATH + "//div/che-error-messages/div";
+  }
+
+  public void typeToRecipe(String text) {
+    seleniumWebDriverHelper.setText(By.xpath(RECIPE_EDITOR_TEXT_XPATH), text);
+  }
+
+  public void waitNameErrorMessage(String expectedMessage) {
+    seleniumWebDriverHelper.waitTextEqualsTo(By.xpath(NAME_ERROR_MESSAGE), expectedMessage);
   }
 
   public String getSliderRamValue() {
@@ -93,8 +104,12 @@ public class EditMachineForm {
     return seleniumWebDriverHelper.waitVisibility(By.xpath(RAM_TEXT_FIELD));
   }
 
-  public void typeTextToRamTextField(String text) {
-    seleniumWebDriverHelper.setValue(waitRamTextField(), text);
+  public void typeRam(String ramValue) {
+    seleniumWebDriverHelper.setValue(waitRamTextField(), ramValue);
+  }
+
+  public void waitRamFieldText(String expectedText) {
+    seleniumWebDriverHelper.waitValueEqualsTo(waitRamTextField(), expectedText);
   }
 
   public boolean isRamValueValid() {
@@ -149,14 +164,25 @@ public class EditMachineForm {
 
   public void waitForm() {
     testWebElementRenderChecker.waitElementIsRendered(By.xpath(EDIT_MACHINE_FORM_BODY_XPATH));
+    waitSaveButton();
+    waitCloseButton();
+    WaitUtils.sleepQuietly(1);
+  }
+
+  public void waitFormInvisibility() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(EDIT_MACHINE_FORM_BODY_XPATH));
   }
 
   public WebElement waitNameField() {
-    return seleniumWebDriverHelper.waitVisibility(By.name(NAME_TEXT_FIELD_NAME));
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(NAME_TEXT_FIELD_XPATH));
   }
 
   public void typeName(String name) {
     seleniumWebDriverHelper.setValue(waitNameField(), name);
+  }
+
+  public void waitName(String expectedName) {
+    seleniumWebDriverHelper.waitValueEqualsTo(waitNameField(), expectedName);
   }
 
   public boolean isNameHighlightedByRed() {

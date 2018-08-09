@@ -25,10 +25,12 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class WorkspaceDetailsMachinesTest {
+public class WorkspaceDetailsMachinesRamTest {
   private static final String MACHINE_NAME = "dev-machine";
   private static final String IMAGE_NAME = "eclipse/ubuntu_jdk8";
   private static final String EXPECTED_RAM_VALUE = "2";
+  private static final String MAX_RAM_VALID_VALUE = "100";
+  private static final String MIN_RAM_VALID_VALUE = "0.5";
 
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -50,9 +52,6 @@ public class WorkspaceDetailsMachinesTest {
 
   @Test
   public void checkRamSection() {
-    final String maxRamValidValue = "100";
-    final String minRamValidValue = "0.5";
-
     workspaceDetailsMachines.waitMachinesListItemWithAllAttributes(
         MACHINE_NAME, IMAGE_NAME, EXPECTED_RAM_VALUE);
 
@@ -69,24 +68,24 @@ public class WorkspaceDetailsMachinesTest {
     workspaceDetails.waitInvisibility(SAVE_BUTTON, CANCEL_BUTTON, APPLY_BUTTON);
 
     // check increment, decrement RAM buttons
-    workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, maxRamValidValue);
+    workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, MAX_RAM_VALID_VALUE);
     workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
     workspaceDetails.waitEnabled(SAVE_BUTTON);
 
     workspaceDetailsMachines.clickOnIncrementRamButton(MACHINE_NAME);
     workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
-    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, maxRamValidValue);
+    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, MAX_RAM_VALID_VALUE);
 
     workspaceDetailsMachines.clickOnDecrementRamButton(MACHINE_NAME);
     workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
     workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "95.5");
 
-    workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, minRamValidValue);
+    workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, MIN_RAM_VALID_VALUE);
     workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
     workspaceDetails.waitEnabled(SAVE_BUTTON);
 
     workspaceDetailsMachines.clickOnDecrementRamButton(MACHINE_NAME);
-    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, minRamValidValue);
+    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, MIN_RAM_VALID_VALUE);
     workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
 
     workspaceDetailsMachines.clickOnIncrementRamButton(MACHINE_NAME);

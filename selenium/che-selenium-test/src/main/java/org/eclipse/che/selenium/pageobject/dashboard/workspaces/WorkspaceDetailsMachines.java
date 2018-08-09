@@ -178,7 +178,8 @@ public class WorkspaceDetailsMachines {
   }
 
   public void waitRamAmount(String machineName, String ramAmount) {
-    seleniumWebDriverHelper.waitSuccessCondition(driver -> getRamAmount(machineName) == ramAmount);
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> getRamAmount(machineName).equals(ramAmount));
   }
 
   public void typeRamAmount(String machineName, String ramAmount) {

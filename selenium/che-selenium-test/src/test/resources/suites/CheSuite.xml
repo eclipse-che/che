@@ -66,6 +66,7 @@
           <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsSingleMachineTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsOverviewTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsComposeTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
