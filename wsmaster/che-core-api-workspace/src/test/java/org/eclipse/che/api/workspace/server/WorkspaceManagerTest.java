@@ -406,9 +406,8 @@ public class WorkspaceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Workspace '.*' doesn't contain environment '.*'"
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Workspace '.*' doesn't contain environment '.*'")
   public void throwsNotFoundExceptionWhenStartWorkspaceWithNotExistingEnv() throws Exception {
     final WorkspaceImpl workspace = createAndMockWorkspace();
 

@@ -47,9 +47,8 @@ public class KubernetesEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Environment should contain at least 1 pod"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Environment should contain at least 1 pod")
   public void shouldThrowExceptionWhenEnvDoesNotHaveAnyPods() throws Exception {
     // given
     when(kubernetesEnvironment.getPods()).thenReturn(emptyMap());
@@ -59,10 +58,9 @@ public class KubernetesEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment contains machines that are missing in recipe: pod1/db"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment contains machines that are missing in recipe: pod1/db")
   public void shouldThrowExceptionWhenMachineIsDeclaredButThereIsNotContainerInKubernetesRecipe()
       throws Exception {
     // given

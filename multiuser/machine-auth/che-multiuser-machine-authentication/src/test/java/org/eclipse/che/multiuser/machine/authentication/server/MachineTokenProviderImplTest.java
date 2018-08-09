@@ -76,11 +76,10 @@ public class MachineTokenProviderImplTest {
   }
 
   @Test(
-    expectedExceptions = IllegalStateException.class,
-    expectedExceptionsMessageRegExp =
-        "Unable to get machine token of the workspace "
-            + "'workspace123' because it does not exist for an anonymous user\\."
-  )
+      expectedExceptions = IllegalStateException.class,
+      expectedExceptionsMessageRegExp =
+          "Unable to get machine token of the workspace "
+              + "'workspace123' because it does not exist for an anonymous user\\.")
   public void shouldThrowExceptionIfCurrentSubjectIsAnonymous() throws Exception {
     // given
     doReturn(true).when(currentSubject).isAnonymous();
@@ -90,10 +89,9 @@ public class MachineTokenProviderImplTest {
   }
 
   @Test(
-    expectedExceptions = MachineAccessForbidden.class,
-    expectedExceptionsMessageRegExp =
-        "The user `user123` doesn't have the required `use` permission for workspace `workspace123`"
-  )
+      expectedExceptions = MachineAccessForbidden.class,
+      expectedExceptionsMessageRegExp =
+          "The user `user123` doesn't have the required `use` permission for workspace `workspace123`")
   public void shouldThrowExceptionIfCurrentSubjectDoesNotHavePermissionToRetrieveToken()
       throws Exception {
     // given
@@ -126,10 +124,9 @@ public class MachineTokenProviderImplTest {
   }
 
   @Test(
-    expectedExceptions = MachineAccessForbidden.class,
-    expectedExceptionsMessageRegExp =
-        "The user `user123` doesn't have the required `use` permission for workspace `workspace123`"
-  )
+      expectedExceptions = MachineAccessForbidden.class,
+      expectedExceptionsMessageRegExp =
+          "The user `user123` doesn't have the required `use` permission for workspace `workspace123`")
   public void shouldThrowExceptionIfTheSpecifiedUserDoesNotHavePermissionToRetrieveToken()
       throws Exception {
     // given

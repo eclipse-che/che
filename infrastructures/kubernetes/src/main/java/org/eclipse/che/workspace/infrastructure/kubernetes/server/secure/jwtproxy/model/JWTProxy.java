@@ -24,7 +24,7 @@ public class JWTProxy {
   private List<VerifierProxyConfig> verifiedProxyConfigs;
 
   @JsonProperty("signer_proxy")
-  private SignerProxy signerProxy;
+  private SignerProxyConfig signerProxy;
 
   public List<VerifierProxyConfig> getVerifiedProxyConfigs() {
     return verifiedProxyConfigs;
@@ -39,15 +39,15 @@ public class JWTProxy {
     return this;
   }
 
-  public SignerProxy getSignerProxy() {
+  public SignerProxyConfig getSignerProxy() {
     return signerProxy;
   }
 
-  public void setSignerProxy(SignerProxy signerProxy) {
+  public void setSignerProxy(SignerProxyConfig signerProxy) {
     this.signerProxy = signerProxy;
   }
 
-  public JWTProxy withSignerProxy(SignerProxy signerProxy) {
+  public JWTProxy withSignerProxy(SignerProxyConfig signerProxy) {
     this.signerProxy = signerProxy;
     return this;
   }

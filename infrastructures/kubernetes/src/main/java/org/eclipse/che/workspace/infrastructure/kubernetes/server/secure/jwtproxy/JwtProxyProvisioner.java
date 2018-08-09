@@ -93,12 +93,15 @@ public class JwtProxyProvisioner {
   private final String serviceName;
   private int availablePort;
 
-  public JwtProxyProvisioner(RuntimeIdentity identity, SignatureKeyManager signatureKeyManager) {
+  public JwtProxyProvisioner(
+      RuntimeIdentity identity,
+      SignatureKeyManager signatureKeyManager,
+      JwtProxyConfigBuilder jwtProxyConfigBuilder) {
     this.signatureKeyManager = signatureKeyManager;
 
     this.identity = identity;
 
-    this.proxyConfigBuilder = new JwtProxyConfigBuilder(identity.getWorkspaceId());
+    this.proxyConfigBuilder = jwtProxyConfigBuilder;
 
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
     this.availablePort = FIRST_AVAILABLE_PORT;

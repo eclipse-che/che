@@ -46,9 +46,8 @@ public class RemoveTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testNotCachedRemove(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -62,9 +61,8 @@ public class RemoveTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCachedRemove(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given

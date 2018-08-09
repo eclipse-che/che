@@ -186,30 +186,13 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        let response;
-                        try {
-                            response = JSON.parse(xhr.responseText);
-                        } catch (e) {}
-
-                        if (response) {
-                            reject(response);
-                        } else if (xhr.statusText) {
-                            reject(xhr.statusText);
-                        } else {
-                            reject("Unknown error");
-                        }
+                        const errorMessage = 'Failed to get the workspace' + this.getRequestErrorMessage(xhr);
+                        reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
                 };
             });
-        }).catch((error: any) => {
-            let errorMessage = '';
-            if (error) {
-                errorMessage = error.message ? error.message.toString() : error.toString();
-            }
-            errorMessage = `Failed to get the workspace` + (errorMessage ? `: "${errorMessage}"` : '.');
-            return Promise.reject(errorMessage);
         });
     }
 
@@ -225,31 +208,32 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        let response;
-                        try {
-                            response = JSON.parse(xhr.responseText);
-                        } catch (e) {}
-
-                        if (response) {
-                            reject(response);
-                        } else if (xhr.statusText) {
-                            reject(xhr.statusText);
-                        } else {
-                            reject("Unknown error");
-                        }
+                        const errorMessage = 'Failed to start the workspace'  + this.getRequestErrorMessage(xhr);
+                        reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
                 };
             });
-        }).catch((error: any) => {
-            let errorMessage = '';
-            if (error) {
-                errorMessage = error.message ? error.message.toString() : error.toString();
-            }
-            errorMessage = `Failed to start the workspace` + (errorMessage ? `: "${errorMessage}"` : '.');
-            return Promise.reject(errorMessage);
         });
+    }
+
+    getRequestErrorMessage(xhr: XMLHttpRequest): string {
+        let errorMessage;
+        try {
+            const response = JSON.parse(xhr.responseText);
+            errorMessage = response.message;
+        } catch (e) { }
+
+        if (errorMessage) {
+            return errorMessage;
+        }
+
+        if (xhr.statusText) {
+            return xhr.statusText;
+        }
+
+        return "Unknown error";
     }
 
     /**
@@ -274,13 +258,9 @@ export class WorkspaceLoader {
 
         const runningOnConnectionPromise = masterApiConnectionPromise
             .then((masterApi: CheJsonRpcMasterApi) => {
-                return new Promise((resolve) => {
+                return new Promise((resolve, reject) => {
                     masterApi.addListener('open', () => {
-                        this.getWorkspace(this.workspace.id).then((workspace) => {
-                            if (workspace.status === 'RUNNING') {
-                                resolve();
-                            }
-                        });
+                        this.checkWorkspaceRuntime().then(resolve, reject);
                     });
                 });
             });
@@ -322,13 +302,27 @@ export class WorkspaceLoader {
             masterApi.subscribeWorkspaceStatus(this.workspace.id,
                 (message: any) => {
                     if (message.error) {
-                        this.loader.error(message.error);
+                        reject(new Error(`Failed to run the workspace: "${message.error}"`));
                     } else if (message.status === 'RUNNING') {
-                        resolve();
+                        this.checkWorkspaceRuntime().then(resolve, reject);
                     } else if (message.status === 'STOPPED') {
                         this.startWorkspace().catch((error: any) => reject(error));
                     }
                 });
+        });
+    }
+
+    checkWorkspaceRuntime(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getWorkspace(this.workspace.id).then((workspace) => {
+                if (workspace.status === 'RUNNING') {
+                    if (workspace.runtime) {
+                        resolve();
+                    } else {
+                        reject(new Error('You do not have permissions to access workspace runtime, in this case IDE cannot be loaded.'));
+                    }
+                }
+            });
         });
     }
 

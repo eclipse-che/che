@@ -71,9 +71,8 @@ public class FreeResourceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NullPointerException.class,
-    expectedExceptionsMessageRegExp = "Required non-null free resources limit"
-  )
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "Required non-null free resources limit")
   public void shouldThrowNpeOnStoringNullableFreeResourcesLimit() throws Exception {
     // when
     manager.store(null);
@@ -97,9 +96,8 @@ public class FreeResourceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NullPointerException.class,
-    expectedExceptionsMessageRegExp = "Required non-null account id"
-  )
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "Required non-null account id")
   public void shouldThrowNpeOnGettingFreeResourcesLimitByNullableAccountId() throws Exception {
     // when
     manager.get(null);
@@ -115,9 +113,8 @@ public class FreeResourceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NullPointerException.class,
-    expectedExceptionsMessageRegExp = "Required non-null account id"
-  )
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "Required non-null account id")
   public void shouldThrowNpeOnRemovingFreeResourcesLimitByNullableAccountId() throws Exception {
     // when
     manager.remove(null);

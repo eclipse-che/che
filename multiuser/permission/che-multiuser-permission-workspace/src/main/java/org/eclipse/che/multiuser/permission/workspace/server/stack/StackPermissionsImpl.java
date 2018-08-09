@@ -35,34 +35,31 @@ import org.eclipse.che.multiuser.api.permission.shared.model.Permissions;
 @Entity(name = "StackPermissions")
 @NamedQueries({
   @NamedQuery(
-    name = "StackPermissions.getByStackId",
-    query = "SELECT stack " + "FROM StackPermissions stack " + "WHERE stack.stackId = :stackId "
-  ),
+      name = "StackPermissions.getByStackId",
+      query = "SELECT stack " + "FROM StackPermissions stack " + "WHERE stack.stackId = :stackId "),
   @NamedQuery(
-    name = "StackPermissions.getCountByStackId",
-    query =
-        "SELECT COUNT(stack) " + "FROM StackPermissions stack " + "WHERE stack.stackId = :stackId "
-  ),
+      name = "StackPermissions.getCountByStackId",
+      query =
+          "SELECT COUNT(stack) "
+              + "FROM StackPermissions stack "
+              + "WHERE stack.stackId = :stackId "),
   @NamedQuery(
-    name = "StackPermissions.getByUserId",
-    query = "SELECT stack " + "FROM StackPermissions stack " + "WHERE stack.userId = :userId "
-  ),
+      name = "StackPermissions.getByUserId",
+      query = "SELECT stack " + "FROM StackPermissions stack " + "WHERE stack.userId = :userId "),
   @NamedQuery(
-    name = "StackPermissions.getByUserAndStackId",
-    query =
-        "SELECT stack "
-            + "FROM StackPermissions stack "
-            + "WHERE stack.stackId = :stackId "
-            + "AND stack.userId = :userId "
-  ),
+      name = "StackPermissions.getByUserAndStackId",
+      query =
+          "SELECT stack "
+              + "FROM StackPermissions stack "
+              + "WHERE stack.stackId = :stackId "
+              + "AND stack.userId = :userId "),
   @NamedQuery(
-    name = "StackPermissions.getByStackIdPublic",
-    query =
-        "SELECT stack "
-            + "FROM StackPermissions stack "
-            + "WHERE stack.stackId = :stackId "
-            + "AND stack.userId IS NULL "
-  )
+      name = "StackPermissions.getByStackIdPublic",
+      query =
+          "SELECT stack "
+              + "FROM StackPermissions stack "
+              + "WHERE stack.stackId = :stackId "
+              + "AND stack.userId IS NULL ")
 })
 @Table(name = "che_stack_permissions")
 public class StackPermissionsImpl extends AbstractPermissions {
@@ -77,9 +74,8 @@ public class StackPermissionsImpl extends AbstractPermissions {
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
   @CollectionTable(
-    name = "che_stack_permissions_actions",
-    joinColumns = @JoinColumn(name = "stack_permissions_id")
-  )
+      name = "che_stack_permissions_actions",
+      joinColumns = @JoinColumn(name = "stack_permissions_id"))
   protected List<String> actions;
 
   public StackPermissionsImpl() {}

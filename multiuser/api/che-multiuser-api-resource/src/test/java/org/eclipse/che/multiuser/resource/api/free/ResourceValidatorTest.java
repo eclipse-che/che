@@ -50,19 +50,17 @@ public class ResourceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Specified resources type 'unsupported' is not supported"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Specified resources type 'unsupported' is not supported")
   public void shouldThrowBadRequestExceptionWhenResourceHasNonSupportedType() throws Exception {
     // when
     validator.validate(DtoFactory.newDto(ResourceDto.class).withType("unsupported").withUnit("mb"));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp =
-        "Specified resources type 'test' support only following units: mb, gb"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "Specified resources type 'test' support only following units: mb, gb")
   public void shouldThrowBadRequestExceptionWhenResourceHasNonSupportedUnit() throws Exception {
     // when
     validator.validate(DtoFactory.newDto(ResourceDto.class).withType(RESOURCE_TYPE).withUnit("kb"));
@@ -82,9 +80,8 @@ public class ResourceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Resources with type 'test' has negative amount"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Resources with type 'test' has negative amount")
   public void shouldThrowBadRequestExceptionWhenResourceHasNegativeAmount() throws Exception {
     // when
     validator.validate(

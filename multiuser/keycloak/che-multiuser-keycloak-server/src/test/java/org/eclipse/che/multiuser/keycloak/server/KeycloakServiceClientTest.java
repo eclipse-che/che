@@ -86,9 +86,8 @@ public class KeycloakServiceClientTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Invalid token."
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Invalid token.")
   public void shouldThrowBadRequestException() throws Exception {
     keycloakService =
         new KeycloakService(null, null, null, new BadRequestException("Invalid token."));
@@ -96,18 +95,16 @@ public class KeycloakServiceClientTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "Forbidden."
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp = "Forbidden.")
   public void shouldThrowForbiddenException() throws Exception {
     keycloakService = new KeycloakService(null, null, null, new ForbiddenException("Forbidden."));
     keycloakServiceClient.getIdentityProviderToken("github");
   }
 
   @Test(
-    expectedExceptions = UnauthorizedException.class,
-    expectedExceptionsMessageRegExp = "Unauthorized."
-  )
+      expectedExceptions = UnauthorizedException.class,
+      expectedExceptionsMessageRegExp = "Unauthorized.")
   public void shouldThrowUnauthorizedException() throws Exception {
     keycloakService =
         new KeycloakService(null, null, null, new UnauthorizedException("Unauthorized."));
@@ -115,9 +112,8 @@ public class KeycloakServiceClientTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Not found."
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Not found.")
   public void shouldThrowNotFoundException() throws Exception {
     keycloakService = new KeycloakService(null, null, null, new NotFoundException("Not found."));
     keycloakServiceClient.getIdentityProviderToken("github");
@@ -125,9 +121,8 @@ public class KeycloakServiceClientTest {
 
   // Special case
   @Test(
-    expectedExceptions = UnauthorizedException.class,
-    expectedExceptionsMessageRegExp = "User (.+) is not associated with identity provider (.+)."
-  )
+      expectedExceptions = UnauthorizedException.class,
+      expectedExceptionsMessageRegExp = "User (.+) is not associated with identity provider (.+).")
   public void shouldThrowUnauthorizedExceptionWhenNoProviderLink() throws Exception {
     keycloakService =
         new KeycloakService(

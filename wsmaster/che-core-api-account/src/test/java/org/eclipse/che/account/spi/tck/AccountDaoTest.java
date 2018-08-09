@@ -152,9 +152,8 @@ public class AccountDaoTest {
   }
 
   @Test(
-    dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingAccountById",
-    expectedExceptions = NotFoundException.class
-  )
+      dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingAccountById",
+      expectedExceptions = NotFoundException.class)
   public void shouldRemoveAccount() throws Exception {
     String toRemove = accounts[0].getId();
 

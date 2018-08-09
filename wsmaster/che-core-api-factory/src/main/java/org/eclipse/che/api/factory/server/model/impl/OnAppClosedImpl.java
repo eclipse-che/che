@@ -44,10 +44,9 @@ public class OnAppClosedImpl implements OnAppClosed {
 
   @OneToMany(cascade = ALL, orphanRemoval = true)
   @JoinTable(
-    name = "che_factory_on_app_closed_action_value",
-    joinColumns = @JoinColumn(name = "on_app_closed_id"),
-    inverseJoinColumns = @JoinColumn(name = "action_entity_id")
-  )
+      name = "che_factory_on_app_closed_action_value",
+      joinColumns = @JoinColumn(name = "on_app_closed_id"),
+      inverseJoinColumns = @JoinColumn(name = "action_entity_id"))
   private List<ActionImpl> actions;
 
   public OnAppClosedImpl() {}

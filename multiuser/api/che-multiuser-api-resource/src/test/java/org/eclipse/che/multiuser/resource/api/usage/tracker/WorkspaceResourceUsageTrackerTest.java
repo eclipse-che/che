@@ -61,9 +61,8 @@ public class WorkspaceResourceUsageTrackerTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Account was not found"
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Account was not found")
   public void shouldThrowNotFoundExceptionWhenAccountDoesNotExistOnGettingUsedWorkspaces()
       throws Exception {
     when(accountManager.getById(any())).thenThrow(new NotFoundException("Account was not found"));

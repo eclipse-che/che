@@ -125,9 +125,8 @@ public class OrganizationResourcesDistributorTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp = "It is not allowed to cap resources for root organization."
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp = "It is not allowed to cap resources for root organization.")
   public void shouldThrowConflictExceptionOnCappingResourcesForRootOrganization() throws Exception {
     // when
     manager.capResources(PARENT_ORG_ID, Collections.emptyList());
@@ -212,9 +211,8 @@ public class OrganizationResourcesDistributorTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp = "Resources are currently in use. Denied."
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp = "Resources are currently in use. Denied.")
   public void shouldResourceAvailabilityCappingResourcesWhenResourceCapIsGreaterThanUsedOne()
       throws Exception {
     // given

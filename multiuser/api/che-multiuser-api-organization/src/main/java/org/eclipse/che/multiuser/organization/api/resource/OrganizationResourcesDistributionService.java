@@ -51,9 +51,8 @@ import org.eclipse.che.multiuser.resource.shared.dto.ResourceDto;
  * @author Sergii Leschenko
  */
 @Api(
-  value = "organization-resource",
-  description = "REST API for resources distribution between suborganizations"
-)
+    value = "organization-resource",
+    description = "REST API for resources distribution between suborganizations")
 @Path("/organization/resource")
 public class OrganizationResourcesDistributionService extends Service {
   private final OrganizationResourcesDistributor resourcesDistributor;
@@ -70,11 +69,10 @@ public class OrganizationResourcesDistributionService extends Service {
   @Path("/{suborganizationId}/cap")
   @Consumes(APPLICATION_JSON)
   @ApiOperation(
-    value = "Cap usage of shared resources.",
-    notes =
-        "By default suborganization is able to use all parent organization resources."
-            + "Cap allow to limit usage of shared resources by suborganization."
-  )
+      value = "Cap usage of shared resources.",
+      notes =
+          "By default suborganization is able to use all parent organization resources."
+              + "Cap allow to limit usage of shared resources by suborganization.")
   @ApiResponses({
     @ApiResponse(code = 204, message = "Resources successfully capped"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -106,10 +104,9 @@ public class OrganizationResourcesDistributionService extends Service {
   @Path("/{suborganizationId}/cap")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get resources cap of specified suborganization.",
-    response = OrganizationDistributedResourcesDto.class,
-    responseContainer = "list"
-  )
+      value = "Get resources cap of specified suborganization.",
+      response = OrganizationDistributedResourcesDto.class,
+      responseContainer = "list")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Resources caps successfully fetched"),
     @ApiResponse(code = 404, message = "Specified organization was not found"),
@@ -130,10 +127,9 @@ public class OrganizationResourcesDistributionService extends Service {
   @Path("/{organizationId}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get resources which are distributed by specified parent.",
-    response = OrganizationDistributedResourcesDto.class,
-    responseContainer = "list"
-  )
+      value = "Get resources which are distributed by specified parent.",
+      response = OrganizationDistributedResourcesDto.class,
+      responseContainer = "list")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Resources caps successfully fetched"),
     @ApiResponse(code = 500, message = "Internal server error occurred")

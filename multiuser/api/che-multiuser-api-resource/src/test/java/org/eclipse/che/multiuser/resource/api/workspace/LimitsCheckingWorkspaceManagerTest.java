@@ -107,12 +107,11 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-    expectedExceptions = LimitExceededException.class,
-    expectedExceptionsMessageRegExp =
-        "Workspace namespace/workspace.. needs 3000MB to start\\. "
-            + "Your account has 200MB available and 100MB in use\\. "
-            + "The workspace can't be start. Stop other workspaces or grant more resources\\."
-  )
+      expectedExceptions = LimitExceededException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace namespace/workspace.. needs 3000MB to start\\. "
+              + "Your account has 200MB available and 100MB in use\\. "
+              + "The workspace can't be start. Stop other workspaces or grant more resources\\.")
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRamResource()
       throws Exception {
     doThrow(
@@ -160,9 +159,8 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-    expectedExceptions = LimitExceededException.class,
-    expectedExceptionsMessageRegExp = "You are not allowed to create more workspaces\\."
-  )
+      expectedExceptions = LimitExceededException.class,
+      expectedExceptionsMessageRegExp = "You are not allowed to create more workspaces\\.")
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableWorkspaceResource()
       throws Exception {
     // given
@@ -199,9 +197,8 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-    expectedExceptions = LimitExceededException.class,
-    expectedExceptionsMessageRegExp = "You are not allowed to start more workspaces\\."
-  )
+      expectedExceptions = LimitExceededException.class,
+      expectedExceptionsMessageRegExp = "You are not allowed to start more workspaces\\.")
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRuntimeResource()
       throws Exception {
     // given
@@ -219,9 +216,8 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-    expectedExceptions = LimitExceededException.class,
-    expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace."
-  )
+      expectedExceptions = LimitExceededException.class,
+      expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace.")
   public void shouldNotBeAbleToCreateWorkspaceWhichExceedsRamLimit() throws Exception {
     when(environmentRamCalculator.calculate(any(Environment.class))).thenReturn(3072L);
     final WorkspaceConfig config = createConfig("3gb");
