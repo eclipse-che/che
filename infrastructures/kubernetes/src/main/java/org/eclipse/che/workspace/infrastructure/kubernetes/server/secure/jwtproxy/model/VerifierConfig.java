@@ -18,7 +18,7 @@ import java.util.Set;
 
 @JsonInclude(Include.NON_NULL)
 /**
- * Desribes JWT verifier configuration
+ * Describes JWT verifier configuration
  *
  * @author Mykhailo Kuznietsov
  */
@@ -41,6 +41,9 @@ public class VerifierConfig {
 
   @JsonProperty("claims_verifiers")
   private Set<RegistrableComponentConfig> claimsVerifiers;
+
+  @JsonProperty("auth_redirect_url")
+  private String authUrl;
 
   private Set<String> excludes;
 
@@ -145,6 +148,19 @@ public class VerifierConfig {
 
   public VerifierConfig withExcludes(Set<String> excludes) {
     this.excludes = excludes;
+    return this;
+  }
+
+  public String getAuthUrl() {
+    return authUrl;
+  }
+
+  public void setAuthUrl(String authUrl) {
+    this.authUrl = authUrl;
+  }
+
+  public VerifierConfig withAuthUrl(String authUrl) {
+    this.authUrl = authUrl;
     return this;
   }
 }

@@ -45,14 +45,13 @@ import org.eclipse.che.commons.lang.NameGenerator;
 @Entity(name = "Stack")
 @NamedQueries({
   @NamedQuery(
-    name = "Stack.getByTags",
-    query =
-        "SELECT stack "
-            + "FROM Stack stack, stack.tags tag "
-            + "WHERE tag IN :tags "
-            + "GROUP BY stack.id "
-            + "HAVING COUNT(tag) = :tagsSize"
-  ),
+      name = "Stack.getByTags",
+      query =
+          "SELECT stack "
+              + "FROM Stack stack, stack.tags tag "
+              + "WHERE tag IN :tags "
+              + "GROUP BY stack.id "
+              + "HAVING COUNT(tag) = :tagsSize"),
   @NamedQuery(name = "Stack.getAll", query = "SELECT stack FROM Stack stack")
 })
 @Table(name = "stack")

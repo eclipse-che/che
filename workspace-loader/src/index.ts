@@ -140,32 +140,13 @@ export class WorkspaceLoader {
                 this.workspace = workspace;
                 return this.handleWorkspace();
             })
+            .then(() => this.openIDE())
             .catch(err => {
                 console.error(err);
+                this.loader.error(err);
+                this.loader.hideLoader();
+                this.loader.showReload();
             });
-    }
-
-    /**
-     * Determines whether the workspace has preconfigured IDE.
-     */
-    hasPreconfiguredIDE() : boolean {
-        if (this.workspace.config.defaultEnv && this.workspace.config.environments) {
-            let defaultEnvironment = this.workspace.config.defaultEnv;
-            let environment = this.workspace.config.environments[defaultEnvironment];
-
-            let machines = environment.machines;
-            for (let machineName in machines) {
-                let servers = machines[machineName].servers;
-                for (let serverName in servers) {
-                    let attributes = servers[serverName].attributes;
-                    if (attributes['type'] === 'ide') {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -205,7 +186,8 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        reject(xhr.status ? xhr.statusText : "Unknown error");
+                        const errorMessage = 'Failed to get the workspace' + this.getRequestErrorMessage(xhr);
+                        reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
@@ -226,7 +208,8 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        reject(xhr.status ? xhr.statusText : "Unknown error");
+                        const errorMessage = 'Failed to start the workspace'  + this.getRequestErrorMessage(xhr);
+                        reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
@@ -235,22 +218,59 @@ export class WorkspaceLoader {
         });
     }
 
+    getRequestErrorMessage(xhr: XMLHttpRequest): string {
+        let errorMessage;
+        try {
+            const response = JSON.parse(xhr.responseText);
+            errorMessage = response.message;
+        } catch (e) { }
+
+        if (errorMessage) {
+            return errorMessage;
+        }
+
+        if (xhr.statusText) {
+            return xhr.statusText;
+        }
+
+        return "Unknown error";
+    }
+
     /**
      * Handles workspace status.
      */
     handleWorkspace(): Promise<void> {
         if (this.workspace.status === 'RUNNING') {
-            this.openIDE();
-            return;
+            return Promise.resolve();
+        } else if (this.workspace.status === 'STOPPING') {
+            this.startAfterStopping = true;
         }
 
-        return this.subscribeWorkspaceEvents().then(() => {
+        const masterApiConnectionPromise = new Promise((resolve, reject) => {
             if (this.workspace.status === 'STOPPED') {
-                this.startWorkspace();
-            } else if (this.workspace.status === 'STOPPING') {
-                this.startAfterStopping = true;
+                this.startWorkspace().then(resolve, reject);
+            } else {
+                resolve();
             }
+        }).then(() => {
+            return this.connectMasterApi();
         });
+
+        const runningOnConnectionPromise = masterApiConnectionPromise
+            .then((masterApi: CheJsonRpcMasterApi) => {
+                return new Promise((resolve, reject) => {
+                    masterApi.addListener('open', () => {
+                        this.checkWorkspaceRuntime().then(resolve, reject);
+                    });
+                });
+            });
+
+        const runningOnStatusChangePromise = masterApiConnectionPromise
+            .then((masterApi: CheJsonRpcMasterApi) => {
+                return this.subscribeWorkspaceEvents(masterApi);
+            });
+
+        return Promise.race([runningOnConnectionPromise, runningOnStatusChangePromise]);
     }
 
     /**
@@ -262,46 +282,46 @@ export class WorkspaceLoader {
         this.loader.log(message);
     }
 
-    /**
-     * Handles changing of workspace status.
-     * 
-     * @param status workspace status
-     */
-    onWorkspaceStatusChanged(status) : void {
-        if (status === 'RUNNING') {
-            this.openIDE();
-        } else if (status === 'STOPPED' && this.startAfterStopping) {
-            this.startWorkspace();
-        }
+    connectMasterApi(): Promise<CheJsonRpcMasterApi> {
+        return new Promise((resolve, reject) => {
+            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
+            const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint);
+            master.connect(entryPoint)
+                .then(() => resolve(master))
+                .catch((error: any) => reject(error));
+        });
     }
 
     /**
      * Subscribes to the workspace events.
      */
-    subscribeWorkspaceEvents() : Promise<void> {
-        const websocketClient = new WebsocketClient();
-        websocketClient.addListener('open', () => {
-            this.getWorkspace(this.workspace.id).then((workspace) => {
-                this.onWorkspaceStatusChanged(workspace.status ? workspace.status : '');
-            });
-        });
-        const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
-        const master = new CheJsonRpcMasterApi(websocketClient, entryPoint);
-        return new Promise((resolve) => {
-            master.connect(entryPoint).then(() => {
-                master.subscribeEnvironmentOutput(this.workspace.id, 
-                    (message: any) => this.onEnvironmentOutput(message.text));
-
-                master.subscribeWorkspaceStatus(this.workspace.id, 
-                    (message: any) => {
+    subscribeWorkspaceEvents(masterApi: CheJsonRpcMasterApi) : Promise<any> {
+        return new Promise((resolve, reject) => {
+            masterApi.subscribeEnvironmentOutput(this.workspace.id,
+                (message: any) => this.onEnvironmentOutput(message.text));
+            masterApi.subscribeWorkspaceStatus(this.workspace.id,
+                (message: any) => {
                     if (message.error) {
-                        this.loader.error(message.error);
-                    } else {
-                        this.onWorkspaceStatusChanged(message.status);
+                        reject(new Error(`Failed to run the workspace: "${message.error}"`));
+                    } else if (message.status === 'RUNNING') {
+                        this.checkWorkspaceRuntime().then(resolve, reject);
+                    } else if (message.status === 'STOPPED') {
+                        this.startWorkspace().catch((error: any) => reject(error));
                     }
                 });
+        });
+    }
 
-                resolve();
+    checkWorkspaceRuntime(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getWorkspace(this.workspace.id).then((workspace) => {
+                if (workspace.status === 'RUNNING') {
+                    if (workspace.runtime) {
+                        resolve();
+                    } else {
+                        reject(new Error('You do not have permissions to access workspace runtime, in this case IDE cannot be loaded.'));
+                    }
+                }
             });
         });
     }

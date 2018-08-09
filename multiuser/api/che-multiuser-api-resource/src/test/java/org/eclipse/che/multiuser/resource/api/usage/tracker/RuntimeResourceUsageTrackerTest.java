@@ -65,9 +65,8 @@ public class RuntimeResourceUsageTrackerTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Account was not found"
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Account was not found")
   public void shouldThrowNotFoundExceptionWhenAccountDoesNotExistOnGettingUsedRuntimes()
       throws Exception {
     when(accountManager.getById(any())).thenThrow(new NotFoundException("Account was not found"));

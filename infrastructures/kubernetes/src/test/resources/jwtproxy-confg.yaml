@@ -6,6 +6,7 @@ jwtproxy:
   - listen_addr: ":8080"
     verifier:
       audience: "workspace123"
+      auth_redirect_url: "http://che-host.com/app/loader.html"
       claims_verifiers:
       - options:
           iss: "wsmaster"
@@ -17,13 +18,14 @@ jwtproxy:
           public_key_path: "/config/mykey.pub"
         type: "preshared"
       max_skew: "1m"
-      max_ttl: "8800h"
+      max_ttl: "1m"
       nonce_storage:
         type: "void"
       upstream: "http://tomcat:8080"
   - listen_addr: ":4101"
     verifier:
       audience: "workspace123"
+      auth_redirect_url: "http://che-host.com/app/loader.html"
       claims_verifiers:
       - options:
           iss: "wsmaster"
@@ -38,7 +40,7 @@ jwtproxy:
           public_key_path: "/config/mykey.pub"
         type: "preshared"
       max_skew: "1m"
-      max_ttl: "8800h"
+      max_ttl: "1m"
       nonce_storage:
         type: "void"
       upstream: "ws://terminal:4101"

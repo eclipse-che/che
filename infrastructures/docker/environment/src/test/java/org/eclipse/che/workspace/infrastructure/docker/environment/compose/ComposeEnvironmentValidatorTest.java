@@ -96,9 +96,8 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Environment should contain at least 1 service"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Environment should contain at least 1 service")
   public void shouldFailIfContainersListIsEmpty() throws Exception {
     // given
     when(composeEnv.getServices()).thenReturn(newLinkedHashMap());
@@ -108,9 +107,8 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Environment should contain at least 1 service"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Environment should contain at least 1 service")
   public void shouldFailIfContainersListIsNull() throws Exception {
     // given
     when(composeEnv.getServices()).thenReturn(null);
@@ -120,10 +118,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment contains machines that are missing in environment recipe: .*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment contains machines that are missing in environment recipe: .*")
   public void shouldFailIfMachineIsNotInServicesList() throws Exception {
     // given
     when(composeEnv.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machineConfig));
@@ -134,10 +131,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    dataProvider = "badServiceNameProvider",
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Name of service '.*' in environment is invalid"
-  )
+      dataProvider = "badServiceNameProvider",
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Name of service '.*' in environment is invalid")
   public void shouldFailIfContainerNameIsInvalid(String name) throws Exception {
     // given
     when(composeEnv.getServices()).thenReturn(newLinkedHashMap(singletonMap(name, service)));
@@ -155,10 +151,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Field 'image' or 'build.context' is required in service '.*' in environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Field 'image' or 'build.context' is required in service '.*' in environment")
   public void shouldFailIfNeitherImageNorBuildAreProvided() throws Exception {
     // given
     when(service.getBuild()).thenReturn(null);
@@ -169,10 +164,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Service '.*' in environment contains mutually exclusive dockerfile content and build context."
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Service '.*' in environment contains mutually exclusive dockerfile content and build context.")
   public void shouldFailIfBothDockerfileAndBuildContextAreProvided() throws Exception {
     // given
     when(service.getImage()).thenReturn(null);
@@ -199,10 +193,10 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Exposed port '.*' in service '.*' in environment is invalid",
-    dataProvider = "invalidExposeProvider"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Exposed port '.*' in service '.*' in environment is invalid",
+      dataProvider = "invalidExposeProvider")
   public void shouldFailIfContainerExposeIsInvalid(String expose) throws Exception {
     // given
     when(service.getExpose()).thenReturn(ImmutableSet.of(expose));
@@ -217,9 +211,8 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Link '.*' in service '.*' in environment is invalid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Link '.*' in service '.*' in environment is invalid")
   public void shouldFailIfContainerLinkIsInvalid() throws Exception {
     // given
     when(service.getLinks()).thenReturn(singletonList(MACHINE_NAME + "->alias1"));
@@ -229,9 +222,8 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Container '.*' has illegal link to itself"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Container '.*' has illegal link to itself")
   public void shouldFailIfContainerHasLinkToItself() throws Exception {
     // given
     when(service.getLinks()).thenReturn(singletonList(MACHINE_NAME + ":alias1"));
@@ -241,10 +233,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Service '.*' in environment contains link to non existing service '.*'"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Service '.*' in environment contains link to non existing service '.*'")
   public void shouldFailIfContainerLinkContainsMissingContainer() throws Exception {
     // given
     when(service.getLinks()).thenReturn(singletonList("nonExistingContainer:alias1"));
@@ -254,9 +245,8 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Dependency '.*' in service '.*' in environment is invalid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Dependency '.*' in service '.*' in environment is invalid")
   public void shouldFailIfContainerDependencyIsInvalid() throws Exception {
     // given
     when(service.getDependsOn()).thenReturn(singletonList("!--service"));
@@ -266,9 +256,8 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Container '.*' has illegal dependency to itself"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Container '.*' has illegal dependency to itself")
   public void shouldFailIfContainerHasDependencyToItself() throws Exception {
     // given
     when(service.getDependsOn()).thenReturn(singletonList(MACHINE_NAME));
@@ -278,10 +267,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Service '.*' in environment contains dependency to non existing service '.*'"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Service '.*' in environment contains dependency to non existing service '.*'")
   public void shouldFailIfContainerDependencyContainsMissingContainer() throws Exception {
     // given
     when(service.getDependsOn()).thenReturn(singletonList("nonExistingContainer"));
@@ -291,10 +279,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Service name '.*' in field 'volumes_from' of service '.*' in environment is invalid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Service name '.*' in field 'volumes_from' of service '.*' in environment is invalid")
   public void shouldFailIfContainerVolumeFromIsInvalid() throws Exception {
     // given
     when(service.getVolumesFrom()).thenReturn(singletonList(MACHINE_NAME + ":777"));
@@ -304,10 +291,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Service '.*' in environment contains non existing service '.*' in 'volumes_from' field"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Service '.*' in environment contains non existing service '.*' in 'volumes_from' field")
   public void shouldFailIfContainerVolumeFromContainsMissingContainer() throws Exception {
     // given
     when(service.getVolumesFrom()).thenReturn(singletonList("nonExistingContainer"));
@@ -317,9 +303,8 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Container '.*' can not mount volume from itself"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Container '.*' can not mount volume from itself")
   public void shouldFailIfContainerHasVolumeFromItself() throws Exception {
     // given
     when(service.getVolumesFrom()).thenReturn(singletonList(MACHINE_NAME));
@@ -329,10 +314,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Ports binding is forbidden but found in service '.*' of environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Ports binding is forbidden but found in service '.*' of environment")
   public void shouldFailIfThereIsPortBindingInContainer() throws Exception {
     // given
     when(service.getPorts()).thenReturn(singletonList("8080:8080"));
@@ -342,10 +326,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Volumes binding is forbidden but found in service '.*' of environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Volumes binding is forbidden but found in service '.*' of environment")
   public void shouldFailIfThereIsVolumeBindingInContainer() throws Exception {
     // given
     when(service.getVolumes()).thenReturn(singletonList("/etc:/etc"));
@@ -355,10 +338,9 @@ public class ComposeEnvironmentValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Networks configuration is forbidden but found in service '.*' of environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Networks configuration is forbidden but found in service '.*' of environment")
   public void shouldFailIfThereIsNetworkInContainer() throws Exception {
     // given
     when(service.getNetworks()).thenReturn(singletonList("newNetwork"));

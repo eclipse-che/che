@@ -197,9 +197,8 @@ public class WorkspaceDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingWorkspaceById"
-  )
+      expectedExceptions = NotFoundException.class,
+      dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingWorkspaceById")
   public void shouldRemoveWorkspace() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 

@@ -38,9 +38,8 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 @Table(name = "che_k8s_machine")
 @NamedQueries({
   @NamedQuery(
-    name = "KubernetesMachine.getByWorkspaceId",
-    query = "SELECT m FROM KubernetesMachine m WHERE m.machineId.workspaceId = :workspaceId"
-  )
+      name = "KubernetesMachine.getByWorkspaceId",
+      query = "SELECT m FROM KubernetesMachine m WHERE m.machineId.workspaceId = :workspaceId")
 })
 public class KubernetesMachineImpl implements Machine {
 
@@ -57,12 +56,11 @@ public class KubernetesMachineImpl implements Machine {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "che_k8s_machine_attributes",
-    joinColumns = {
-      @JoinColumn(name = "workspace_id", referencedColumnName = "workspace_id"),
-      @JoinColumn(name = "machine_name", referencedColumnName = "machine_name")
-    }
-  )
+      name = "che_k8s_machine_attributes",
+      joinColumns = {
+        @JoinColumn(name = "workspace_id", referencedColumnName = "workspace_id"),
+        @JoinColumn(name = "machine_name", referencedColumnName = "machine_name")
+      })
   @MapKeyColumn(name = "attribute_key")
   @Column(name = "attribute")
   private Map<String, String> attributes;

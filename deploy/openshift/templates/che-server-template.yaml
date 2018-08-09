@@ -95,12 +95,6 @@ objects:
             value: "5"
           - name: CHE_INFRA_KUBERNETES_MASTER__URL
             value: "${CHE_INFRA_KUBERNETES_MASTER__URL}"
-          - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
-            value: "${OPENSHIFT_TOKEN}"
-          - name: CHE_INFRA_KUBERNETES_USERNAME
-            value: "${OPENSHIFT_USERNAME}"
-          - name: CHE_INFRA_KUBERNETES_PASSWORD
-            value: "${OPENSHIFT_PASSWORD}"
           - name: CHE_INFRA_OPENSHIFT_PROJECT
             value: "${CHE_INFRA_OPENSHIFT_PROJECT}"
           - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
@@ -218,15 +212,6 @@ parameters:
   displayName: Che Multi-user flavor
   description: False i.e. single user by default
   value: 'false'
-- name: OPENSHIFT_USERNAME
-  displayName: OpenShift Username
-  description: OpenShift username that will be used to create workspace objects
-- name: OPENSHIFT_PASSWORD
-  displayName: OpenShift Password
-  description: OpenShift Password that will be used to create workspace objects
-- name: OPENSHIFT_TOKEN
-  displayName: OpenShift token
-  description: OpenShift token to be used to create workspace objects. Must be set if username/password are impossible to use. Do not set if username/pass are provided!
 - name: PROTOCOL
   displayName: HTTP protocol
   description: Protocol to be used in Che communications

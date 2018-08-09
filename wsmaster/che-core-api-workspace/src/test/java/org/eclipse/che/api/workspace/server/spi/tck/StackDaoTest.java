@@ -110,9 +110,8 @@ public class StackDaoTest {
   }
 
   @Test(
-    dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingStack",
-    expectedExceptions = NotFoundException.class
-  )
+      dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingStack",
+      expectedExceptions = NotFoundException.class)
   public void shouldNotCreateStackWhenSubscriberThrowsExceptionOnStackStoring() throws Exception {
     final StackImpl stack = createStack("new-stack", "new-stack-name");
 
@@ -152,9 +151,8 @@ public class StackDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingStack"
-  )
+      expectedExceptions = NotFoundException.class,
+      dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingStack")
   public void shouldRemoveStack() throws Exception {
     final StackImpl stack = stacks[0];
 

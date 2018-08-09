@@ -38,18 +38,16 @@ public class FreeResourcesLimitValidatorTest {
   @InjectMocks private FreeResourcesLimitValidator validator;
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Missed free resources limit description."
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Missed free resources limit description.")
   public void shouldThrowBadRequestExceptionWhenFreeResourcesIsNull() throws Exception {
     // when
     validator.check(null);
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Missed account id."
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Missed account id.")
   public void shouldThrowBadRequestExceptionWhenAccountIdIsMissed() throws Exception {
     // when
     validator.check(
@@ -63,9 +61,8 @@ public class FreeResourcesLimitValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "invalid resource"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "invalid resource")
   public void shouldRethrowBadRequestExceptionWhenThereIsAnyInvalidResource() throws Exception {
     // given
     Mockito.doNothing()
@@ -90,10 +87,9 @@ public class FreeResourcesLimitValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp =
-        "Free resources limit should contain only one resources with type 'test'."
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "Free resources limit should contain only one resources with type 'test'.")
   public void
       shouldThrowBadRequestExceptionWhenAccountResourcesLimitContainTwoResourcesWithTheSameType()
           throws Exception {

@@ -34,9 +34,8 @@ public interface DtoWithDelegate extends TestInterface {
   DtoWithDelegate withLastName(String lastName);
 
   @DelegateTo(
-    client = @DelegateRule(type = Util.class, method = "addPrefix"),
-    server = @DelegateRule(type = Util.class, method = "addPrefix")
-  )
+      client = @DelegateRule(type = Util.class, method = "addPrefix"),
+      server = @DelegateRule(type = Util.class, method = "addPrefix"))
   String nameWithPrefix(String prefix);
 
   //    @Override

@@ -35,9 +35,8 @@ public class EmbeddedOAuthAPITest {
   @InjectMocks EmbeddedOAuthAPI embeddedOAuthAPI;
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Unsupported OAuth provider unknown"
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Unsupported OAuth provider unknown")
   public void shouldThrowExceptionIfNoSuchProviderFound() throws Exception {
     embeddedOAuthAPI.getToken("unknown");
   }

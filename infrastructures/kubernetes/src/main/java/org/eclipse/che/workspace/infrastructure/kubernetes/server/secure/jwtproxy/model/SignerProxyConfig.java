@@ -16,7 +16,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
  *
  * @author Mykhailo Kuznietsov
  */
-public class SignerProxy {
+public class SignerProxyConfig {
 
   private boolean enabled;
 
@@ -28,7 +28,7 @@ public class SignerProxy {
     this.enabled = enabled;
   }
 
-  public SignerProxy withEnabled(boolean enabled) {
+  public SignerProxyConfig withEnabled(boolean enabled) {
     this.enabled = enabled;
     return this;
   }

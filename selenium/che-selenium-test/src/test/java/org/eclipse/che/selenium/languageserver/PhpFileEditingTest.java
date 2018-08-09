@@ -110,7 +110,7 @@ public class PhpFileEditingTest {
     // check expected proposals in Autocomplete container
     expectedProposals.forEach(
         proposal -> {
-          editor.waitTextIntoAutocompleteContainer(proposal);
+          editor.waitProposalIntoAutocompleteContainer(proposal);
         });
   }
 

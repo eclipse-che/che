@@ -55,10 +55,15 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
   public JwtProxySecureServerExposer(
       @Assisted RuntimeIdentity identity,
       SignatureKeyManager signatureKeyManager,
+      JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
       ExternalServerExposerStrategy<T> exposerStrategy) {
     this.exposerStrategy = exposerStrategy;
 
-    proxyProvisioner = new JwtProxyProvisioner(identity, signatureKeyManager);
+    proxyProvisioner =
+        new JwtProxyProvisioner(
+            identity,
+            signatureKeyManager,
+            jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId()));
   }
 
   @Override
