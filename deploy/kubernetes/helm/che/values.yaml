@@ -41,4 +41,4 @@ global:
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
   cheWorkspacesNamespace: ""
-  wsAgentInactiveStopTimeout: "0"
+  workspaceIdleTimeout: "-1"
