@@ -111,10 +111,9 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Workspace.Next configuration can be applied to a workspace with one pod only"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace.Next configuration can be applied to a workspace with one pod only")
   public void throwsExceptionWhenTheNumberOfPodsIsNot1() throws Exception {
     when(internalEnvironment.getPods()).thenReturn(of("pod1", pod, "pod2", pod));
 
@@ -338,12 +337,11 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Applying of sidecar tooling failed. Kubernetes service with name '"
-            + CHE_PLUGIN_ENDPOINT_NAME
-            + "' already exists in the workspace environment."
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Applying of sidecar tooling failed. Kubernetes service with name '"
+              + CHE_PLUGIN_ENDPOINT_NAME
+              + "' already exists in the workspace environment.")
   public void throwsExceptionOnAddingChePluginEndpointServiceIfServiceExists() throws Exception {
     // given
     ChePluginEndpoint endpoint1 =

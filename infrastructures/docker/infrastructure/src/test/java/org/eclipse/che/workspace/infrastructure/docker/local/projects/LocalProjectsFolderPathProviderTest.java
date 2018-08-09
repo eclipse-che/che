@@ -212,9 +212,8 @@ public class LocalProjectsFolderPathProviderTest {
   }
 
   @Test(
-    expectedExceptions = IOException.class,
-    expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory"
-  )
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory")
   public void throwsExceptionIfFileIsFoundByWorkspacesPath() throws Exception {
     assertTrue(Paths.get(workspacesRoot, WS_ID).toFile().createNewFile());
     LocalProjectsFolderPathProvider provider =
@@ -226,10 +225,9 @@ public class LocalProjectsFolderPathProviderTest {
   }
 
   @Test(
-    expectedExceptions = IOException.class,
-    expectedExceptionsMessageRegExp =
-        "Workspace folder '.*' is not directory. Check .* configuration property"
-  )
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace folder '.*' is not directory. Check .* configuration property")
   public void throwsExceptionIfFileIsFoundByWorkspacesRootPath() throws Exception {
     Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
     LocalProjectsFolderPathProvider provider =
@@ -247,10 +245,9 @@ public class LocalProjectsFolderPathProviderTest {
   }
 
   @Test(
-    expectedExceptions = IOException.class,
-    expectedExceptionsMessageRegExp =
-        "Workspace folder '.*' is not directory. Check .* configuration property"
-  )
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace folder '.*' is not directory. Check .* configuration property")
   public void throwsExceptionIfFileIsFoundBySingleWorkspacePath() throws Exception {
     Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
     LocalProjectsFolderPathProvider provider =
@@ -269,9 +266,8 @@ public class LocalProjectsFolderPathProviderTest {
   }
 
   @Test(
-    expectedExceptions = IOException.class,
-    expectedExceptionsMessageRegExp = "expected test exception"
-  )
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp = "expected test exception")
   public void throwsIOExceptionIfWorkspaceRetrievalFails() throws Exception {
     when(workspaceDao.get(WS_NAME, WS_NAMESPACE))
         .thenThrow(new ServerException("expected test exception"));

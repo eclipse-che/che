@@ -47,11 +47,10 @@ public class AppStateService {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Load saved serialized IDE state of current workspace by user identifier",
-    notes =
-        "It is expected that saved IDE state object is valid, so any validations are not performed. "
-            + "Empty string will be returned when IDE state is not found."
-  )
+      value = "Load saved serialized IDE state of current workspace by user identifier",
+      notes =
+          "It is expected that saved IDE state object is valid, so any validations are not performed. "
+              + "Empty string will be returned when IDE state is not found.")
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 400, message = "User ID should be defined"),
@@ -71,10 +70,9 @@ public class AppStateService {
   @Path("update")
   @Consumes(APPLICATION_JSON)
   @ApiOperation(
-    value = "Save serialized IDE state of current workspace for given user",
-    notes =
-        "It is expected that incoming IDE state object is valid, so any validations are not performed."
-  )
+      value = "Save serialized IDE state of current workspace for given user",
+      notes =
+          "It is expected that incoming IDE state object is valid, so any validations are not performed.")
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 400, message = "User ID should be defined"),

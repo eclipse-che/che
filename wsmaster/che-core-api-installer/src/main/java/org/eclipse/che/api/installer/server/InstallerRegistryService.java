@@ -81,14 +81,12 @@ public class InstallerRegistryService extends Service {
   @Path("/{id}/versions")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get a list of available versions of the specified installer",
-    response = List.class
-  )
+      value = "Get a list of available versions of the specified installer",
+      response = List.class)
   @ApiResponses({
     @ApiResponse(
-      code = 200,
-      message = "The response contains available versions of the specified installers"
-    ),
+        code = 200,
+        message = "The response contains available versions of the specified installers"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public List<String> getVersions(@ApiParam("The installer id") @PathParam("id") String id)
@@ -99,10 +97,9 @@ public class InstallerRegistryService extends Service {
   @GET
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get a collection of the available installers",
-    response = Installer.class,
-    responseContainer = "collection"
-  )
+      value = "Get a collection of the available installers",
+      response = Installer.class,
+      responseContainer = "collection")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The response contains collection of available installers"),
     @ApiResponse(code = 400, message = "Bad Request"),
@@ -130,10 +127,9 @@ public class InstallerRegistryService extends Service {
   @Path("/orders")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Order the specified installers",
-    response = Installer.class,
-    responseContainer = "list"
-  )
+      value = "Order the specified installers",
+      response = Installer.class,
+      responseContainer = "list")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The response contains the list of ordered installers"),
     @ApiResponse(code = 400, message = "Specified list contains invalid installer key"),
@@ -154,9 +150,8 @@ public class InstallerRegistryService extends Service {
   @ApiResponses({
     @ApiResponse(code = 201, message = "Installer successfully added"),
     @ApiResponse(
-      code = 409,
-      message = "Installer with corresponding fully-qualified name already exists"
-    ),
+        code = 409,
+        message = "Installer with corresponding fully-qualified name already exists"),
     @ApiResponse(code = 500, message = "Couldn't create installer due to internal server error")
   })
   public Response add(InstallerDto installerDto) throws InstallerException {
@@ -183,9 +178,9 @@ public class InstallerRegistryService extends Service {
   @ApiResponses({
     @ApiResponse(code = 204, message = "Installer successfully updated"),
     @ApiResponse(
-      code = 404,
-      message = "Installer with corresponding fully-qualified name doesn't exist in the registry"
-    ),
+        code = 404,
+        message =
+            "Installer with corresponding fully-qualified name doesn't exist in the registry"),
     @ApiResponse(code = 500, message = "Couldn't update installer due to internal server error")
   })
   public void update(InstallerDto installerDto) throws InstallerException {

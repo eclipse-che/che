@@ -183,9 +183,8 @@ public class ServersCheckerTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "oops!"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "oops!")
   public void throwsExceptionIfAnyServerIsNotAvailable() throws InfrastructureException {
     doThrow(new InfrastructureException("oops!")).when(connectionChecker).checkOnce(any());
 

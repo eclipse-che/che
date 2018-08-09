@@ -27,14 +27,12 @@ public interface Hyperlinks {
   void setLinks(List<Link> links);
 
   @DelegateTo(
-    client = @DelegateRule(type = Links.class, method = "getLinks"),
-    server = @DelegateRule(type = Links.class, method = "getLinks")
-  )
+      client = @DelegateRule(type = Links.class, method = "getLinks"),
+      server = @DelegateRule(type = Links.class, method = "getLinks"))
   List<Link> getLinks(String rel);
 
   @DelegateTo(
-    client = @DelegateRule(type = Links.class, method = "getLink"),
-    server = @DelegateRule(type = Links.class, method = "getLink")
-  )
+      client = @DelegateRule(type = Links.class, method = "getLink"),
+      server = @DelegateRule(type = Links.class, method = "getLink"))
   Link getLink(String rel);
 }

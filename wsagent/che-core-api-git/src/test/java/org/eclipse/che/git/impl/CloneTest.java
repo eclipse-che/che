@@ -54,9 +54,8 @@ public class CloneTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testSimpleClone(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
     // given
@@ -74,9 +73,8 @@ public class CloneTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testLineConsumerOutputWhenCloning(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
     // given

@@ -42,9 +42,8 @@ public class GdbTargetRemoteTest {
   }
 
   @Test(
-    expectedExceptions = DebuggerException.class,
-    expectedExceptionsMessageRegExp = "localhost:1223: Connection timed out."
-  )
+      expectedExceptions = DebuggerException.class,
+      expectedExceptionsMessageRegExp = "localhost:1223: Connection timed out.")
   public void testShouldThrowDebuggerExceptionIfConnectionTimedOut() throws Exception {
     GdbOutput gdbOutput = GdbOutput.of("localhost:1223: Connection timed out.");
 

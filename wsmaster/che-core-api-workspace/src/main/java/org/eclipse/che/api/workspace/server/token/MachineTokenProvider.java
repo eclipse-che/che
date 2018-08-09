@@ -26,8 +26,9 @@ public interface MachineTokenProvider {
    * EnvironmentContext#getSubject()}.
    *
    * @param workspaceId identifier of workspace to fetch token
+   * @throws IllegalStateException when the current subject in context is {@link Subject#ANONYMOUS}
+   * @throws MachineAccessForbidden when the current subject doesn't have the needed permissions
    * @throws MachineTokenException when any exception occurs on token fetching
-   * @throws IllegalStateException when subject in context is {@link Subject#ANONYMOUS}
    */
   String getToken(String workspaceId) throws MachineTokenException;
 
@@ -35,6 +36,7 @@ public interface MachineTokenProvider {
    * Returns the machine's token for the specified pair: user, workspace.
    *
    * @param workspaceId identifier of workspace to fetch token
+   * @throws MachineAccessForbidden when the specified user doesn't have the needed permissions
    * @throws MachineTokenException when any exception occurs on token fetching
    */
   String getToken(String userId, String workspaceId) throws MachineTokenException;

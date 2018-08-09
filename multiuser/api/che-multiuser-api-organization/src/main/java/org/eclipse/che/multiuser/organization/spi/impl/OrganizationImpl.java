@@ -33,26 +33,21 @@ import org.eclipse.che.multiuser.organization.shared.model.Organization;
 @Entity(name = "Organization")
 @NamedQueries({
   @NamedQuery(
-    name = "Organization.getByName",
-    query = "SELECT o " + "FROM Organization o " + "WHERE o.account.name = :name"
-  ),
+      name = "Organization.getByName",
+      query = "SELECT o " + "FROM Organization o " + "WHERE o.account.name = :name"),
   @NamedQuery(
-    name = "Organization.getByParent",
-    query = "SELECT o " + "FROM Organization o " + "WHERE o.parent = :parent "
-  ),
+      name = "Organization.getByParent",
+      query = "SELECT o " + "FROM Organization o " + "WHERE o.parent = :parent "),
   @NamedQuery(
-    name = "Organization.getByParentCount",
-    query = "SELECT COUNT(o) " + "FROM Organization o " + "WHERE o.parent = :parent "
-  ),
+      name = "Organization.getByParentCount",
+      query = "SELECT COUNT(o) " + "FROM Organization o " + "WHERE o.parent = :parent "),
   @NamedQuery(
-    name = "Organization.getSuborganizations",
-    query = "SELECT o " + "FROM Organization o " + "WHERE o.account.name LIKE :qualifiedName "
-  ),
+      name = "Organization.getSuborganizations",
+      query = "SELECT o " + "FROM Organization o " + "WHERE o.account.name LIKE :qualifiedName "),
   @NamedQuery(
-    name = "Organization.getSuborganizationsCount",
-    query =
-        "SELECT COUNT(o) " + "FROM Organization o " + "WHERE o.account.name LIKE :qualifiedName "
-  )
+      name = "Organization.getSuborganizationsCount",
+      query =
+          "SELECT COUNT(o) " + "FROM Organization o " + "WHERE o.account.name LIKE :qualifiedName ")
 })
 @Table(name = "che_organization")
 public class OrganizationImpl implements Organization {

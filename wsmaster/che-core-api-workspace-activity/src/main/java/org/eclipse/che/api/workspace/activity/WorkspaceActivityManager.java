@@ -120,9 +120,8 @@ public class WorkspaceActivityManager {
   }
 
   @ScheduleDelay(
-    initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
-    delayParameterName = "che.workspace.activity_check_scheduler_period_s"
-  )
+      initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
+      delayParameterName = "che.workspace.activity_check_scheduler_period_s")
   private void invalidate() {
     try {
       activityDao.findExpired(System.currentTimeMillis()).forEach(this::stopExpired);

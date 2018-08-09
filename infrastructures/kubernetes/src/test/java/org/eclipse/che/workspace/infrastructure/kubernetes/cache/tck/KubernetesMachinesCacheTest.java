@@ -132,9 +132,8 @@ public class KubernetesMachinesCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Machine is already in cache"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Machine is already in cache")
   public void shouldThrowExceptionIfMachineIsAlreadyInCacheOnTryToPutMachine() throws Exception {
     // given
     KubernetesMachineImpl machine =
@@ -180,9 +179,8 @@ public class KubernetesMachinesCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found")
   public void shouldThrowExceptionWhenServerWasNotFoundOnGetting() throws Exception {
     // given
     RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
@@ -207,9 +205,8 @@ public class KubernetesMachinesCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found")
   public void shouldThrowExceptionWhenServerWasNotFoundOnStatusUpdating() throws Exception {
     // given
     RuntimeId runtimeId = runtimeStates[0].getRuntimeId();

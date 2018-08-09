@@ -99,9 +99,9 @@ public class StackDomainSetPermissionsCheckerTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "Following actions are not supported for setting as public:.*"
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp =
+          "Following actions are not supported for setting as public:.*")
   public void throwsForbiddenExceptionWhenSetPublicPermissionsWithUnsupportedActionByAdmin()
       throws Exception {
     final Permissions permissions =
@@ -127,9 +127,9 @@ public class StackDomainSetPermissionsCheckerTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "Following actions are not supported for setting as public:.*"
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp =
+          "Following actions are not supported for setting as public:.*")
   public void throwsForbiddenExceptionWhenSetPublicPermissionsWithUnsupportedActionByNonAdminUser()
       throws Exception {
     final Permissions permissions = new StackPermissionsImpl("*", "stack73", singletonList(DELETE));

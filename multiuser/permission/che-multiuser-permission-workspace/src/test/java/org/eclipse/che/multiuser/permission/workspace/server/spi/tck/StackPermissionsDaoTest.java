@@ -141,10 +141,9 @@ public class StackPermissionsDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp =
-        "Permissions on stack 'instance' of user 'user' was not found."
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp =
+          "Permissions on stack 'instance' of user 'user' was not found.")
   public void shouldThrowNotFoundExceptionWhenPermissionsWasNotFoundOnRemove() throws Exception {
     dao.remove("user", "instance");
   }
@@ -193,10 +192,9 @@ public class StackPermissionsDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp =
-        "Permissions on stack 'instance' of user 'user' was not found."
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp =
+          "Permissions on stack 'instance' of user 'user' was not found.")
   public void
       shouldThrowNotFoundExceptionWhenThereIsNotAnyPermissionsForGivenUserAndDomainAndInstance()
           throws Exception {

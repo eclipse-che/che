@@ -93,9 +93,8 @@ public interface ProjectConfigDto extends ProjectConfig {
    * empty.
    */
   @ApiModelProperty(
-    value =
-        "Optional information about project errors. If project doesn't have any error this field is empty"
-  )
+      value =
+          "Optional information about project errors. If project doesn't have any error this field is empty")
   @Override
   List<ProjectProblemDto> getProblems();
 

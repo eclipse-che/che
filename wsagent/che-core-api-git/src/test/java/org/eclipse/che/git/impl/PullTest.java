@@ -60,9 +60,8 @@ public class PullTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testSimplePull(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -80,9 +79,8 @@ public class PullTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testPullWithRebase(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -110,9 +108,8 @@ public class PullTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testPullWithRefSpec(GitConnectionFactory connectionFactory)
       throws ServerException, URISyntaxException, IOException, UnauthorizedException {
     // given
@@ -135,9 +132,8 @@ public class PullTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testPullRemote(GitConnectionFactory connectionFactory)
       throws GitException, IOException, URISyntaxException, UnauthorizedException {
     // given
@@ -160,14 +156,13 @@ public class PullTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "No remote repository specified.  "
-            + "Please, specify either a URL or a remote name from "
-            + "which new revisions should be fetched in request."
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "No remote repository specified.  "
+              + "Please, specify either a URL or a remote name from "
+              + "which new revisions should be fetched in request.")
   public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory)
       throws Exception {
     // given
@@ -178,14 +173,13 @@ public class PullTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "No remote repository specified.  "
-            + "Please, specify either a URL or a remote name from "
-            + "which new revisions should be fetched in request."
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "No remote repository specified.  "
+              + "Please, specify either a URL or a remote name from "
+              + "which new revisions should be fetched in request.")
   public void testWhenThereAreNoAnyRemotesBehindTheProxy(GitConnectionFactory connectionFactory)
       throws Exception {
     // given
