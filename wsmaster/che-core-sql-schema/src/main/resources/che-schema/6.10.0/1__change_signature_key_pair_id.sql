@@ -9,6 +9,8 @@
 --   Red Hat, Inc. - initial API and implementation
 --
 
+-- Remove old data
+TRUNCATE TABLE che_sign_key_pair;
 
 -- Rename field
 ALTER TABLE che_sign_key_pair RENAME COLUMN id TO workspace_id;

@@ -13,8 +13,10 @@ package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -26,9 +28,16 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
@@ -48,6 +57,9 @@ public class SignatureKeyManagerTest {
   private static final String ALGORITHM = "RSA";
 
   @Mock SignatureKeyDao signatureKeyDao;
+  @Mock EventService eventService;
+
+  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> captor;
 
   private KeyPairGenerator kpg;
   private SignatureKeyManager signatureKeyManager;
@@ -56,7 +68,8 @@ public class SignatureKeyManagerTest {
   public void createEntities() throws Exception {
     kpg = KeyPairGenerator.getInstance(ALGORITHM);
     kpg.initialize(KEY_SIZE);
-    signatureKeyManager = new SignatureKeyManager(KEY_SIZE, ALGORITHM, signatureKeyDao);
+    signatureKeyManager =
+        new SignatureKeyManager(KEY_SIZE, ALGORITHM, eventService, signatureKeyDao);
   }
 
   @Test
@@ -123,6 +136,37 @@ public class SignatureKeyManagerTest {
 
     verify(signatureKeyDao).get(anyString());
     assertNull(cachedPair);
+  }
+
+  @Test
+  public void shouldRemoveKeyPairOnWorkspaceStop() throws Exception {
+    final String wsId = "ws123";
+    signatureKeyManager.subscribe();
+    verify(eventService).subscribe(captor.capture());
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
+
+    subscriber.onEvent(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withStatus(WorkspaceStatus.STOPPED)
+            .withWorkspaceId(wsId));
+
+    verify(signatureKeyDao, times(1)).remove(eq(wsId));
+  }
+
+  @Test
+  public void shouldCreateKeyPairOnWorkspaceStart() throws Exception {
+    final String wsId = "ws123";
+    signatureKeyManager.subscribe();
+    verify(eventService).subscribe(captor.capture());
+    final SignatureKeyPairImpl kp = newKeyPair(wsId);
+    when(signatureKeyDao.get(eq(wsId))).thenReturn(kp);
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
+    subscriber.onEvent(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withStatus(WorkspaceStatus.STARTING)
+            .withWorkspaceId(wsId));
+
+    verify(signatureKeyDao, times(1)).get(wsId);
   }
 
   private SignatureKeyPairImpl newKeyPair(String id) {

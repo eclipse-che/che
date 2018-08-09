@@ -32,6 +32,9 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
@@ -57,6 +60,8 @@ public class SignatureKeyManager {
 
   private final String algorithm;
   private final SignatureKeyDao signatureKeyDao;
+  private final EventService eventService;
+  private final EventSubscriber<?> workspaceEventsSubscriber;
 
   @Inject
   @SuppressWarnings("unused")
@@ -68,10 +73,32 @@ public class SignatureKeyManager {
   public SignatureKeyManager(
       @Named("che.auth.signature_key_size") int keySize,
       @Named("che.auth.signature_key_algorithm") String algorithm,
+      EventService eventService,
       SignatureKeyDao signatureKeyDao) {
     this.keySize = keySize;
     this.algorithm = algorithm;
+    this.eventService = eventService;
     this.signatureKeyDao = signatureKeyDao;
+    this.workspaceEventsSubscriber =
+        new EventSubscriber<WorkspaceStatusEvent>() {
+          @Override
+          public void onEvent(WorkspaceStatusEvent event) {
+            switch (event.getStatus()) {
+              case STARTING:
+                loadKeyPair(event.getWorkspaceId());
+                break;
+              case STOPPED:
+                try {
+                  signatureKeyDao.remove(event.getWorkspaceId());
+                } catch (ServerException e) {
+                  LOG.error(e.getLocalizedMessage(), e);
+                }
+                break;
+              default:
+                // do nothing
+            }
+          }
+        };
   }
 
   /** Returns cached instance of {@link KeyPair} or null when failed to load key pair. */
@@ -96,10 +123,12 @@ public class SignatureKeyManager {
         cachedPair.put(
             workspaceId, toJavaKeyPair(signatureKeyDao.create(generateKeyPair(workspaceId))));
       } catch (ConflictException | ServerException ex) {
-        LOG.error("Failed to store signature keys. Cause: {}", ex.getMessage());
+        LOG.error(
+            "Failed to store signature keys for ws {}. Cause: {}", workspaceId, ex.getMessage());
       }
     } catch (ServerException ex) {
-      LOG.error("Failed to load signature keys. Cause: {}", ex.getMessage());
+      LOG.error(
+          "Failed to load signature keys for ws  {}. Cause: {}", workspaceId, ex.getMessage());
       return;
     }
   }
@@ -150,5 +179,11 @@ public class SignatureKeyManager {
         throw new IllegalArgumentException(
             String.format("Unsupported key spec '%s' for signature keys", key.getFormat()));
     }
+  }
+
+  @VisibleForTesting
+  @PostConstruct
+  public void subscribe() {
+    eventService.subscribe(workspaceEventsSubscriber);
   }
 }
