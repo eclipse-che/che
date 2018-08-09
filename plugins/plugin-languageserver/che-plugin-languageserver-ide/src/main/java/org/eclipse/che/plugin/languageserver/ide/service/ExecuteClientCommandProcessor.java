@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
-
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
@@ -40,8 +39,8 @@ public class ExecuteClientCommandProcessor {
   private final ProjectServiceClient projectService;
 
   @Inject
-  public ExecuteClientCommandProcessor(EventBus eventBus, AppContext appContext,
-                                       ProjectServiceClient projectService) {
+  public ExecuteClientCommandProcessor(
+      EventBus eventBus, AppContext appContext, ProjectServiceClient projectService) {
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.projectService = projectService;
@@ -57,9 +56,9 @@ public class ExecuteClientCommandProcessor {
       case CLIENT_UPDATE_PROJECT:
         updateProject(stringValue(params.getArguments()));
         break;
-        case CLIENT_UPDATE_PROJECT_CONFIG:
-            updateProjectConfig(stringValue(params.getArguments()));
-            break;
+      case CLIENT_UPDATE_PROJECT_CONFIG:
+        updateProjectConfig(stringValue(params.getArguments()));
+        break;
       default:
         break;
     }
@@ -77,21 +76,27 @@ public class ExecuteClientCommandProcessor {
             });
   }
 
-    private void updateProjectConfig(String project) {
-        appContext
-                .getWorkspaceRoot()
-                .getContainer(project)
-                .then(
-                        container -> {
-                            projectService.getProject(Path.valueOf(project)).then(projectConfigDto -> {
-                                projectService.updateProject(projectConfigDto).then(arg -> {
-                                    if (container.isPresent()) {
-                                        container.get().synchronize();
-                                    }
+  private void updateProjectConfig(String project) {
+    appContext
+        .getWorkspaceRoot()
+        .getContainer(project)
+        .then(
+            container -> {
+              projectService
+                  .getProject(Path.valueOf(project))
+                  .then(
+                      projectConfigDto -> {
+                        projectService
+                            .updateProject(projectConfigDto)
+                            .then(
+                                arg -> {
+                                  if (container.isPresent()) {
+                                    container.get().synchronize();
+                                  }
                                 });
-                            });
-                        });    }
-
+                      });
+            });
+  }
 
   private String stringValue(Object value) {
     return value instanceof JSONString
