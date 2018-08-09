@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -31,17 +32,20 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
-import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
+import org.eclipse.che.api.workspace.server.wsnext.model.PluginMeta;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
+import org.slf4j.Logger;
 
 /** @author Sergii Leshchenko */
 @Singleton
 public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   public static final String NAME = "kubernetes";
+
+  private static final Logger LOG = getLogger(KubernetesInfrastructure.class);
 
   private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
@@ -113,16 +117,30 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   private void applyWorkspaceNext(InternalEnvironment environment) throws InfrastructureException {
     String recipeType = environment.getRecipe().getType();
-    Collection<ChePlugin> chePlugins =
+    Collection<PluginMeta> pluginsMeta =
         workspaceNextObjectsRetriever.get(environment.getAttributes());
-    if (chePlugins.isEmpty()) {
+    if (pluginsMeta.isEmpty()) {
       return;
     }
+
+    // TODO
+    // Start container with a broker
+    // Pass Metas to it
+    // Retrieve actual state of Plugin broker
+    // Once finished successfully fetch workspace tooling config
+    // Consider pushing logs from Broker to workspace logs
+
+    // TODO remove this. Added for the Walking skeleton development purposes
+    LOG.error("Walking skeleton attributes: {}", environment.getAttributes());
+    LOG.error("Walking skeleton metadata: {}", pluginsMeta);
+
+
     WorkspaceNextApplier wsNext = workspaceNextAppliers.get(recipeType);
     if (wsNext == null) {
       throw new InfrastructureException(
-          "Workspace.Next features are not supported for recipe type " + recipeType);
+          "Workspace.Next configuration is not supported with recipe type " + recipeType);
     }
-    wsNext.apply(environment, chePlugins);
+    // TODO Apply tooling config to InternalEnvironment
+    // wsNext.apply(environment, plugins);
   }
 }
