@@ -18,6 +18,7 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
@@ -249,7 +250,7 @@ public class WorkingWithTerminalTest {
   }
 
   @Test
-  public void shouldCancelProcessByCtrlC() throws InterruptedException {
+  public void shouldCancelProcessByCtrlC() {
     terminal.typeIntoActiveTerminal("cd /" + Keys.ENTER);
 
     // launch bash script
@@ -271,7 +272,7 @@ public class WorkingWithTerminalTest {
   }
 
   @Test
-  public void shouldBeClear() {
+  public void shouldBeClear() throws ExecutionException, InterruptedException {
     terminal.typeIntoActiveTerminal("cd / && ls -l" + Keys.ENTER);
 
     // clear terminal
@@ -279,11 +280,11 @@ public class WorkingWithTerminalTest {
     terminal.waitNoTextInFirstTerminal("clear");
 
     terminal.waitFirstTerminalIsNotEmpty();
-    terminal.waitTextInFirstTerminal("user@");
+    terminal.waitTextInFirstTerminal(workspace.getId());
   }
 
   @Test
-  public void shouldBeReset() {
+  public void shouldBeReset() throws ExecutionException, InterruptedException {
     terminal.typeIntoActiveTerminal("cd / && ls -l" + Keys.ENTER);
 
     // clear terminal
@@ -291,7 +292,7 @@ public class WorkingWithTerminalTest {
     terminal.waitNoTextInFirstTerminal("reset");
 
     terminal.waitFirstTerminalIsNotEmpty();
-    terminal.waitTextInFirstTerminal("user@");
+    terminal.waitTextInFirstTerminal(workspace.getId());
   }
 
   @Test
@@ -343,7 +344,7 @@ public class WorkingWithTerminalTest {
       terminal.waitTextInFirstTerminal(partOfContent);
     }
     terminal.typeIntoActiveTerminal("cd ~" + Keys.ENTER);
-    terminal.waitTextInFirstTerminal(".cache");
+    terminal.waitTextInFirstTerminal("che");
     consoles.clickOnMaximizePanelIcon();
   }
 
@@ -372,7 +373,7 @@ public class WorkingWithTerminalTest {
   }
 
   @Test
-  public void checkDeleteAction() throws InterruptedException {
+  public void checkDeleteAction() {
     // if the bug exists -> the dialog appears and the terminal lose focus
     terminal.typeIntoActiveTerminal(Keys.DELETE.toString());
     terminal.typeIntoActiveTerminal("pwd");

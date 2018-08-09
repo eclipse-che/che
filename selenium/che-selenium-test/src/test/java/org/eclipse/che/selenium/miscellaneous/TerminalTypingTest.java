@@ -99,7 +99,7 @@ public class TerminalTypingTest {
 
     for (Pair<String, String> pair : keyPairs) {
       terminal.typeIntoActiveTerminal(pair.first());
-      terminal.waitTextInFirstTerminal("$ " + pair.first());
+      terminal.waitTextInFirstTerminal(pair.first());
       terminal.typeIntoActiveTerminal(Keys.BACK_SPACE.toString());
     }
   }
@@ -113,7 +113,7 @@ public class TerminalTypingTest {
 
     for (Pair<String, String> pair : keyPairs) {
       terminal.typeIntoActiveTerminal(Keys.SHIFT + pair.first());
-      terminal.waitTextInFirstTerminal("$ " + pair.second());
+      terminal.waitTextInFirstTerminal(pair.second());
       terminal.typeIntoActiveTerminal(Keys.BACK_SPACE.toString());
     }
   }
