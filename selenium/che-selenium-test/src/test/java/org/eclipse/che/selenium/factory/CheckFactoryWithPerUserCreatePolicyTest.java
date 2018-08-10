@@ -67,7 +67,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
-    events.clickOnEventPanelAndWaitMassage("Project Spring imported");
+    events.clickOnEventPanelAndWaitMessage("Project Spring imported");
 
     String workspaceUrl = seleniumWebDriver.getCurrentUrl();
 

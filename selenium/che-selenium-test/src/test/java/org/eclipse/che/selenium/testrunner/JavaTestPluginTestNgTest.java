@@ -128,7 +128,7 @@ public class JavaTestPluginTestNgTest {
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
-    events.clickOnEventPanelAndWaitMassage("Test runner executed successfully.");
+    events.clickOnEventPanelAndWaitMessage("Test runner executed successfully.");
   }
 
   @Test(priority = 1)
