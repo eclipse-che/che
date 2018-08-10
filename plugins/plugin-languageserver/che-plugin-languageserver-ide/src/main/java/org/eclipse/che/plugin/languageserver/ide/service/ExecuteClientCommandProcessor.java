@@ -63,7 +63,9 @@ public class ExecuteClientCommandProcessor {
         }
         break;
       case CLIENT_UPDATE_PROJECT:
-        updateProject(stringValue(params.getArguments()));
+        for (Object project : params.getArguments()) {
+          updateProject(stringValue(project));
+        }
         break;
       case CLIENT_UPDATE_PROJECT_CONFIG:
         updateProjectConfig(stringValue(params.getArguments()));
