@@ -13,10 +13,16 @@ package org.eclipse.che.plugin.java.plain.server.rest;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
+import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -33,6 +39,8 @@ import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service for updating classpath.
@@ -41,6 +49,8 @@ import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionSer
  */
 @Path("jdt/classpath/update")
 public class ClasspathUpdaterService {
+  private static final Logger LOG = LoggerFactory.getLogger(ClasspathUpdaterService.class);
+
   private final ProjectManager projectManager;
   private JavaLanguageServerExtensionService extensionService;
 
@@ -67,12 +77,17 @@ public class ClasspathUpdaterService {
       @QueryParam("projectpath") String projectPath, List<ClasspathEntry> entries)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException, IOException,
           BadRequestException {
-    extensionService.updateClasspath(prefixURI(projectPath), entries);
+    try {
+      extensionService.updateClasspathWithResult(prefixURI(projectPath), entries).get();
+      updateProjectConfig(projectPath).get();
+    } catch (InterruptedException | ExecutionException e) {
+      LOG.error(e.getMessage());
+    }
 
-    updateProjectConfig(projectPath);
+    notifyClientOnProjectUpdate(projectPath);
   }
 
-  private void updateProjectConfig(String projectWsPath)
+  private CompletableFuture<Object> updateProjectConfig(String projectWsPath)
       throws IOException, ForbiddenException, ConflictException, NotFoundException, ServerException,
           BadRequestException {
     String wsPath = absolutize(projectWsPath);
@@ -84,6 +99,13 @@ public class ClasspathUpdaterService {
     NewProjectConfig projectConfig =
         new NewProjectConfigImpl(
             projectWsPath, project.getName(), project.getType(), project.getSource());
-    projectManager.update(projectConfig);
+    RegisteredProject result = projectManager.update(projectConfig);
+    return CompletableFuture.completedFuture(result.getPath());
+  }
+
+  private void notifyClientOnProjectUpdate(String projectPath) {
+    List<Object> parameters = new ArrayList<>();
+    parameters.add(removePrefixUri(convertToJson(projectPath).getAsString()));
+    extensionService.executeClientCommand(CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED, parameters);
   }
 }

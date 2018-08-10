@@ -365,10 +365,8 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
   @NotNull
   private Operation<List<Node>> interceptChildren(@NotNull final Node parent) {
     return children -> {
-      if (nodeInterceptors.isEmpty()) {
-        onLoadSuccess(parent, children);
-        return;
-      }
+      // In case of nodeInterceptors is empty we still need to call iterate(...)
+      // in  order to call set parent on children and call onLoadSuccess(...)
 
       LinkedList<NodeInterceptor> sortedByPriorityQueue = new LinkedList<>(nodeInterceptors);
       sortedByPriorityQueue.sort(priorityComparator);
