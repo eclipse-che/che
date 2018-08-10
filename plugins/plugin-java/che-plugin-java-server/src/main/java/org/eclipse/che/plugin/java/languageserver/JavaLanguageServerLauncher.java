@@ -148,7 +148,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
             singletonList(removePrefixUri(convertToJson(projectUri).getAsString())));
         break;
       case CLIENT_UPDATE_MAVEN_MODULE:
-        updateMavenModule(params, arguments);
+        updateMavenModules(params, arguments);
         break;
       default:
         break;
@@ -156,20 +156,21 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     return params;
   }
 
-  private void updateMavenModule(ExecuteCommandParams params, List<Object> arguments) {
+  private void updateMavenModules(ExecuteCommandParams params, List<Object> arguments) {
     List<Object> newParameters = new LinkedList<>();
     UpdateMavenModulesInfo updateModulesInfo = fromJson(arguments.get(0).toString());
-    for (String uri : updateModulesInfo.getCreated()) {
-      createProject(removePrefixUri(uri), newParameters);
+    String projectUri = removePrefixUri(updateModulesInfo.getProjectUri());
+    for (String uri : updateModulesInfo.getAdded()) {
+      addMavenProjectType(Paths.get(projectUri, uri).toString(), newParameters);
     }
     for (String uri : updateModulesInfo.getRemoved()) {
-      removeProject(removePrefixUri(uri), newParameters);
+      removeMavenProjectType(Paths.get(projectUri, uri).toString(), newParameters);
     }
     params.setCommand(CLIENT_UPDATE_PROJECT);
     params.setArguments(newParameters);
   }
 
-  private void removeProject(String projectPath, List<Object> parameters) {
+  private void removeMavenProjectType(String projectPath, List<Object> parameters) {
     try {
       if (projectManager.getOrNull(projectPath) != null) {
         projectManager.removeType(projectPath, MAVEN_ID);
@@ -184,7 +185,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     }
   }
 
-  private void createProject(String projectPath, List<Object> parameters) {
+  private void addMavenProjectType(String projectPath, List<Object> parameters) {
     try {
       projectManager.setType(projectPath, MAVEN_ID, false);
       parameters.add(projectPath);
