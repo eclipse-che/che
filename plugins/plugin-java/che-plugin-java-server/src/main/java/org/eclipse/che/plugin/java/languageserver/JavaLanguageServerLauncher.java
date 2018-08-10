@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT_CONFIG;
@@ -96,6 +97,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
             registeredProject -> {
               if (!registeredProject.getProblems().isEmpty()) {
                 try {
+
                   projectManager.update(registeredProject);
                   eventService.publish(new ProjectUpdatedEvent(registeredProject.getPath()));
                 } catch (ForbiddenException
@@ -131,6 +133,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     String command = params.getCommand();
     switch (command) {
       case CLIENT_UPDATE_PROJECTS_CLASSPATH:
+      case CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
         List<Object> fixedPathList = new ArrayList<>(params.getArguments().size());
         for (Object uri : params.getArguments()) {
           fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
