@@ -18,6 +18,7 @@ import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -37,6 +38,7 @@ public class CheckGeneratingMavenArchetypeTest {
   @Inject private CodenvyEditor editor;
   @Inject private Ide ide;
   @Inject private TestWorkspace workspace;
+  @Inject private ConfigureClasspath selectPath;;
 
   @Test
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
@@ -73,5 +75,20 @@ public class CheckGeneratingMavenArchetypeTest {
     expectedItems.forEach(projectExplorer::waitItem);
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitTextIntoEditor(expectedContnetInPomXml);
+  }
+
+  @Test(priority = 1)
+  public void shouldHideTheArchetypeFieldIfProjectPathIsNonRoot() throws Exception {
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
+    projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
+    projectWizard.clickOnSelectPathForParentBtn();
+    selectPath.openItemInSelectPathForm("Workspace");
+    selectPath.selectItemInSelectPathForm(PROJECT_NAME);
+    selectPath.clickSelectBtnSelectPathForm();
+    projectWizard.typeProjectNameOnWizard(PROJECT_NAME);
+    projectWizard.clickNextButton();
+    projectWizard.waitInvisibilityOfAchetypeSection();
   }
 }

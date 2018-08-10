@@ -101,6 +101,10 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
           "Missed some required option (archetypeGroupId, archetypeArtifactId or archetypeVersion)");
     }
 
+    if (projectPath.split(separator).length > 2) {
+      throw new ServerException("Non root project path is not allowed");
+    }
+
     MavenArchetype mavenArchetype =
         new MavenArchetypeImpl(
             archetypeGroupId,
