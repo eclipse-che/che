@@ -18,16 +18,22 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceInstallers;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,6 +52,7 @@ public class WorkspaceDetailsMachineActionsTest {
   private static final String MAX_VALID_RAM_VALUE = "100";
   private static final String NOT_EXISTED_IMAGE = NameGenerator.generate("wrong/image", 5);
   private static final String CHANGED_RAM_SIZE = "7";
+  private static final String MIN_VALID_RAM_VALUE = "0.5";
 
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -54,6 +61,10 @@ public class WorkspaceDetailsMachineActionsTest {
   @Inject private TestWorkspace testWorkspace;
   @Inject private EditMachineForm editMachineForm;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private WorkspaceInstallers workspaceInstallers;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private WorkspaceServers workspaceServers;
+  @Inject private WorkspaceEnvVariables workspaceEnvVariables;
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -67,7 +78,7 @@ public class WorkspaceDetailsMachineActionsTest {
     workspaceDetails.selectTabInWorkspaceMenu(MACHINES);
   }
 
-  // @Test
+  @Test
   public void checkEditFormClosing() {
     workspaceDetailsMachines.waitMachinesListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, EXPECTED_RAM_VALUE);
@@ -91,7 +102,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitFormInvisibility();
   }
 
-  // @Test
+  @Test
   public void checkEditFormNameField() {
     // check default values
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
@@ -117,7 +128,7 @@ public class WorkspaceDetailsMachineActionsTest {
 
     // max valid name
     editMachineForm.typeName(MAX_VALID_NAME);
-    editMachineForm.waitNameValidHighliting();
+    editMachineForm.waitNameValidHighlighting();
     editMachineForm.waitSaveButtonEnabling();
 
     // too long name
@@ -126,71 +137,131 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitSaveButtonDisabling();
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkRamSection() {
-    final String minValidRamValue = "0.5";
-
+    // check machine name editing
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
-    editMachineForm.typeName(CHANGED_MACHINE_NAME);
-    editMachineForm.waitNameValidHighliting();
-    editMachineForm.waitSaveButtonEnabling();
+    /*editMachineForm.typeName(CHANGED_MACHINE_NAME);
+    editMachineForm.waitNameValidHighlighting();
+    editMachineForm.waitSaveButtonEnabling();*/
 
-    editMachineForm.typeRam(minValidRamValue);
-    editMachineForm.waitSliderRamValue(minValidRamValue + " GB");
+    // check RAM field behavior with min valid value
+    editMachineForm.typeRam(MIN_VALID_RAM_VALUE);
+    editMachineForm.waitSliderRamValue(MIN_VALID_RAM_VALUE + " GB");
     seleniumWebDriverHelper.sendKeys(ARROW_DOWN.toString());
-    editMachineForm.waitSliderRamValue(minValidRamValue + " GB");
-    editMachineForm.waitRamFieldText(minValidRamValue);
+    editMachineForm.waitSliderRamValue(MIN_VALID_RAM_VALUE + " GB");
+    editMachineForm.waitRamFieldText(MIN_VALID_RAM_VALUE);
 
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
     editMachineForm.waitRamFieldText("1");
     editMachineForm.waitSliderRamValue("1 GB");
 
+    // check RAM behavior with more than max valid value
     editMachineForm.typeRam(BIGGER_THAN_VALID_RAM_SIZE);
     editMachineForm.waitSaveButtonDisabling();
     editMachineForm.waitSliderRamValue("GB");
 
+    // check RAM behavior with max valid value
     editMachineForm.typeRam("100");
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.waitSliderRamValue(MAX_VALID_RAM_VALUE + " GB");
 
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
-    editMachineForm.waitNameValidHighliting();
+    editMachineForm.waitNameValidHighlighting();
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.waitRamFieldText(MAX_VALID_RAM_VALUE);
     editMachineForm.waitSliderRamValue(MAX_VALID_RAM_VALUE + " GB");
 
     seleniumWebDriverHelper.sendKeys(ARROW_DOWN.toString());
-    editMachineForm.waitNameValidHighliting();
+    editMachineForm.waitNameValidHighlighting();
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.waitRamFieldText("99.5");
     editMachineForm.waitSliderRamValue("99.5 GB");
 
+    // check restoring of default values after clicking on "Cancel" button
     editMachineForm.typeRam("4");
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.waitSliderRamValue("4 GB");
-
-    editMachineForm.typeToRecipe(NOT_EXISTED_IMAGE);
     editMachineForm.clickOnCancelButton();
+    editMachineForm.waitFormInvisibility();
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
-    editMachineForm.waitRecipeText(IMAGE_NAME);
+    waitRecipeText(IMAGE_NAME);
 
+    // check saving of the changes
     editMachineForm.typeRam(CHANGED_RAM_SIZE);
+    editMachineForm.waitRamFieldText(CHANGED_RAM_SIZE);
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.clickOnSaveButton();
     editMachineForm.waitFormInvisibility();
     workspaceDetails.waitEnabled(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
     workspaceDetailsMachines.waitMachinesListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, CHANGED_RAM_SIZE);
+    workspaceDetails.waitEnabled(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
     workspaceDetails.waitAndClickOn(SAVE_BUTTON);
-    workspaceDetails.waitInvisibility(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
     workspaceDetailsMachines.waitMachinesListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, CHANGED_RAM_SIZE);
   }
 
+  @Test
+  public void checkSettingsButton() {
+    final String installerName = "Exec";
+    final String serverName = "tomcat8";
+    final String envVariable = "CHE_MACHINE_NAME";
+
+    // check the "Installers" link
+    waitMachineListItemAndClickOnSettingsButton();
+    workspaceDetailsMachines.clickOnInstallersLink();
+    workspaceInstallers.checkInstallerExists(installerName);
+
+    seleniumWebDriver.navigate().back();
+
+    // check the "Servers" link
+    waitMachineListItemAndClickOnSettingsButton();
+    workspaceDetailsMachines.clickOnServersLink();
+    workspaceServers.checkServerName(serverName);
+
+    seleniumWebDriver.navigate().back();
+
+    // Check the "Environment Variables" link
+    waitMachineListItemAndClickOnSettingsButton();
+    workspaceDetailsMachines.clickOnEnvironmentVariablesLink();
+    workspaceEnvVariables.checkEnvVariableExists(envVariable);
+
+    seleniumWebDriver.navigate().back();
+
+    workspaceDetailsMachines.waitMachinesListItem(MACHINE_NAME);
+    closeSettingsPopoverIfOpen();
+  }
+
+  private void waitMachineListItemAndClickOnSettingsButton() {
+    workspaceDetailsMachines.waitMachinesListItem(MACHINE_NAME);
+    closeSettingsPopoverIfOpen();
+    workspaceDetailsMachines.clickOnSettingsButton(MACHINE_NAME);
+    workspaceDetailsMachines.waitSettingsPopover();
+  }
+
+  private void closeSettingsPopoverIfOpen() {
+    if (!workspaceDetailsMachines.isSettingsPopoverOpened()) {
+      return;
+    }
+
+    workspaceDetailsMachines.clickOnSettingsButton(MACHINE_NAME);
+    workspaceDetailsMachines.waitSettingsPopoverInvisibility();
+  }
+
   private void setValidName() {
     editMachineForm.typeName(MACHINE_NAME);
-    editMachineForm.waitNameValidHighliting();
+    editMachineForm.waitNameValidHighlighting();
+  }
+
+  private void waitRecipeText(String expectedText) {
+    try {
+      editMachineForm.waitRecipeText(expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10732", ex);
+    }
   }
 }

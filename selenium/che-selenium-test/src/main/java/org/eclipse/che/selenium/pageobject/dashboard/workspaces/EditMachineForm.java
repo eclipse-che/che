@@ -136,6 +136,10 @@ public class EditMachineForm {
   }
 
   public void clickOnSaveButton() {
+    // leads to saving of the form properties,
+    // for real user can't be reproduced because real user does not able to perform so fast click.
+    WaitUtils.sleepQuietly(1);
+
     waitSaveButton().click();
   }
 
@@ -196,7 +200,7 @@ public class EditMachineForm {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isNameHighlightedByRed());
   }
 
-  public void waitNameValidHighliting() {
+  public void waitNameValidHighlighting() {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isNameHighlightedByRed());
   }
 

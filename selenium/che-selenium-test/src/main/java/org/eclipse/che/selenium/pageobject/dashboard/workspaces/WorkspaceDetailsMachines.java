@@ -150,6 +150,10 @@ public class WorkspaceDetailsMachines {
     seleniumWebDriverHelper.waitVisibility(By.xpath(SETTINGS_POPOVER_CONTAINER_XPATH));
   }
 
+  public boolean isSettingsPopoverOpened() {
+    return seleniumWebDriverHelper.isVisible(By.xpath(SETTINGS_POPOVER_CONTAINER_XPATH));
+  }
+
   public void waitSettingsPopoverInvisibility() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(SETTINGS_POPOVER_CONTAINER_XPATH));
   }

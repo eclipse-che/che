@@ -164,8 +164,6 @@ public class WorkspaceDetails {
   @FindBy(xpath = Locators.CLOSE_DIALOG_BUTTON)
   WebElement closeBtn;
 
-  //////////////////////////
-
   public WebElement wait(ActionButton actionButton) {
     return seleniumWebDriverHelper.waitVisibility(actionButton.getLocator());
   }
@@ -197,8 +195,6 @@ public class WorkspaceDetails {
   public void waitEnabled(ActionButton... actionButtons) {
     asList(actionButtons).forEach(actionButton -> waitState(actionButton, true));
   }
-
-  //////////////////////////
 
   /**
    * Check state of workspace in 'Workspace Information'
