@@ -14,6 +14,7 @@ package org.eclipse.che.ide.menu;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -135,8 +136,16 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
       popupMenu.getElement().getStyle().setLeft(x, PX);
     }
 
-    if (y + popupMenu.getOffsetHeight() > Window.getClientHeight()) {
-      popupMenu.getElement().getStyle().setTop(y - popupMenu.getOffsetHeight() - 1, PX);
+    // adjust popup menu by the client window height (add scrollbars if necessary)
+    if (popupMenu.getOffsetHeight() > Window.getClientHeight()) {
+      popupMenu.getElement().getStyle().setOverflowY(Style.Overflow.SCROLL);
+      popupMenu.getElement().getStyle().setTop(5., PX);
+      popupMenu.getElement().getStyle().setBottom(5., PX);
+    } else if (y + popupMenu.getOffsetHeight() > Window.getClientHeight()) {
+      popupMenu
+          .getElement()
+          .getStyle()
+          .setTop(Math.max(y - popupMenu.getOffsetHeight() - 1, 5), PX);
     } else {
       popupMenu.getElement().getStyle().setTop(y, PX);
     }

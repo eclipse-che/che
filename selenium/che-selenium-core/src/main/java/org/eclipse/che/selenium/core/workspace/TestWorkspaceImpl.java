@@ -88,8 +88,8 @@ public class TestWorkspaceImpl implements TestWorkspace {
   }
 
   @Override
-  public String getName() throws ExecutionException, InterruptedException {
-    return future.thenApply(aVoid -> name).get();
+  public String getName() {
+    return name;
   }
 
   @Override
@@ -106,13 +106,10 @@ public class TestWorkspaceImpl implements TestWorkspace {
   @Override
   @SuppressWarnings("FutureReturnValueIgnored")
   public void delete() {
-    future.thenAccept(
-        aVoid -> {
-          try {
-            workspaceServiceClient.delete(name, owner.getName());
-          } catch (Exception e) {
-            throw new RuntimeException(format("Failed to remove workspace '%s'", this), e);
-          }
-        });
+    try {
+      workspaceServiceClient.delete(name, owner.getName());
+    } catch (Exception e) {
+      throw new RuntimeException(format("Failed to remove workspace '%s'", this), e);
+    }
   }
 }

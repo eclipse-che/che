@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -33,6 +34,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -67,7 +69,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Test
   public void launchClonedWepAppTest() throws Exception {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
-    wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
+    selectProjectAndCreateSpringProject();
     wizard.waitCreateProjectWizardFormIsClosed();
     projectExplorer.waitItem(PROJECT_NAME);
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
@@ -108,7 +110,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
     waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
     commandsToolbar.waitTimerValuePattern("\\d\\d:\\d\\d");
-    commandsToolbar.waitNumOfProcessCounter(3);
+    commandsToolbar.waitNumOfProcessCounter(2);
 
     checkTestAppByPreviewButtonAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
@@ -187,5 +189,14 @@ public class CheckIntelligenceCommandFromToolbarTest {
   private String getBodyText() {
     return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until((ExpectedCondition<String>) driver -> getBody().getText());
+  }
+
+  private void selectProjectAndCreateSpringProject() {
+    try {
+      wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10713", ex);
+    }
   }
 }
