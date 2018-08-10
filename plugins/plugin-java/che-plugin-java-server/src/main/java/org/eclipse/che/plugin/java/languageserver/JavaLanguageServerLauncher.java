@@ -15,10 +15,12 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_MAVEN_MODULE;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
 import static org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.UpdateMavenModulesInfoDto.fromJson;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT_CONFIG;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -100,6 +102,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
             registeredProject -> {
               if (!registeredProject.getProblems().isEmpty()) {
                 try {
+
                   projectManager.update(registeredProject);
                   eventService.publish(new ProjectUpdatedEvent(registeredProject.getPath()));
                 } catch (ForbiddenException
@@ -136,6 +139,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     List<Object> arguments = params.getArguments();
     switch (command) {
       case CLIENT_UPDATE_PROJECTS_CLASSPATH:
+          case CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
         List<Object> fixedPathList = new ArrayList<>(arguments.size());
         for (Object uri : arguments) {
           fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
@@ -143,6 +147,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
         params.setArguments(fixedPathList);
         break;
       case CLIENT_UPDATE_PROJECT:
+        case CLIENT_UPDATE_PROJECT_CONFIG:
         Object projectUri = arguments.get(0);
         params.setArguments(
             singletonList(removePrefixUri(convertToJson(projectUri).getAsString())));
