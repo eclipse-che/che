@@ -63,39 +63,29 @@ public class ExecuteClientCommandProcessor {
         }
         break;
       case CLIENT_UPDATE_PROJECT:
-          updateProject(params.getArguments());
+        for (Object project : params.getArguments()) {
+          updateProject(stringValue(project));
+        }
         break;
-        case CLIENT_UPDATE_PROJECT_CONFIG:
-            updateProjectConfig(stringValue(params.getArguments()));
-            break;
-        case CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
-            for (Object project : params.getArguments()) {
-                updateProject(stringValue(project))
-                        .then(
-                                container -> {
-                                    eventBus.fireEvent(
-                                            new ProjectClasspathChangedEvent(
-                                                    stringValue(container.getLocation().toString())));
-                                });
-            }
-            break;
+      case CLIENT_UPDATE_PROJECT_CONFIG:
+        updateProjectConfig(stringValue(params.getArguments()));
+        break;
+      case CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
+        for (Object project : params.getArguments()) {
+          updateProject(stringValue(project))
+              .then(
+                  container -> {
+                    eventBus.fireEvent(
+                        new ProjectClasspathChangedEvent(
+                            stringValue(container.getLocation().toString())));
+                  });
+        }
+        break;
       default:
         break;
     }
   }
 
-  private void updateProject(List<Object> projects) {
-    for (Object project : projects) {
-      appContext
-          .getWorkspaceRoot()
-          .getContainer(stringValue(project))
-          .then(
-              container -> {
-                if (container.isPresent()) {
-                  container.get().synchronize();
-                }
-              });
-    }
   private Promise<Container> updateProject(String project) {
     return appContext
         .getWorkspaceRoot()
