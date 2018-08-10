@@ -312,7 +312,7 @@ public class WorkspaceRuntimes {
     final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
     try {
       InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getAttributes());
+          createInternalEnvironment(environment, workspace.getConfig().getAttributes());
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
 
@@ -587,7 +587,7 @@ public class WorkspaceRuntimes {
     InternalRuntime runtime;
     try {
       InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getAttributes());
+          createInternalEnvironment(environment, workspace.getConfig().getAttributes());
       runtime = infra.prepare(identity, internalEnv).getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
@@ -741,7 +741,7 @@ public class WorkspaceRuntimes {
   }
 
   private InternalEnvironment createInternalEnvironment(
-      Environment environment, Map<String, String> workspaceAttributes)
+      Environment environment, Map<String, String> workspaceConfigAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType = environment.getRecipe().getType();
     InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
@@ -751,7 +751,7 @@ public class WorkspaceRuntimes {
     }
     InternalEnvironment internalEnvironment = factory.create(environment);
 
-    applyWorkspaceNext(internalEnvironment, workspaceAttributes, recipeType);
+    applyWorkspaceNext(internalEnvironment, workspaceConfigAttributes, recipeType);
 
     return internalEnvironment;
   }
