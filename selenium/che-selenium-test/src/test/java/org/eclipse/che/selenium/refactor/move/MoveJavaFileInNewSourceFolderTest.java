@@ -77,7 +77,6 @@ public class MoveJavaFileInNewSourceFolderTest {
     // create new folder and configure as source
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     createNewFolder(NEW_FOLDER_NAME);
-    projectExplorer.waitItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
     createNewFolder(NEW_SOURCE_FOLDER);
     projectExplorer.waitAndSelectItem(PATH_NEW_SOURCE_FOLDER);
