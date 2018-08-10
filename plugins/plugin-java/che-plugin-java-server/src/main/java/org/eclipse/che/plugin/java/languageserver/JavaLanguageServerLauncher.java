@@ -14,10 +14,13 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_MAVEN_MODULE;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT_CONFIG;
+import static org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.UpdateMavenModulesInfoDto.fromJson;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +52,7 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 import org.eclipse.che.jdt.ls.extension.api.dto.StatusReport;
+import org.eclipse.che.jdt.ls.extension.api.dto.UpdateMavenModulesInfo;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -65,10 +70,10 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private static final Logger LOG = LoggerFactory.getLogger(JavaLanguageServerLauncher.class);
 
   private final Path launchScript;
-  private ProcessorJsonRpcCommunication processorJsonRpcCommunication;
-  private ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter;
-  private EventService eventService;
-  private ProjectManager projectManager;
+  private final ProcessorJsonRpcCommunication processorJsonRpcCommunication;
+  private final ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter;
+  private final EventService eventService;
+  private final ProjectManager projectManager;
 
   @Inject
   public JavaLanguageServerLauncher(
@@ -126,30 +131,76 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   }
 
   public CompletableFuture<Object> executeClientCommand(ExecuteCommandParams params) {
-    return executeCliendCommandTransmitter.executeClientCommand(convertParams(params));
+    return executeCliendCommandTransmitter.executeClientCommand(analyzeParams(params));
   }
 
-  private ExecuteCommandParams convertParams(ExecuteCommandParams params) {
+  private ExecuteCommandParams analyzeParams(ExecuteCommandParams params) {
     String command = params.getCommand();
+    List<Object> arguments = params.getArguments();
     switch (command) {
       case CLIENT_UPDATE_PROJECTS_CLASSPATH:
       case CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
-        List<Object> fixedPathList = new ArrayList<>(params.getArguments().size());
-        for (Object uri : params.getArguments()) {
+        List<Object> fixedPathList = new ArrayList<>(arguments.size());
+        for (Object uri : arguments) {
           fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
         }
         params.setArguments(fixedPathList);
         break;
       case CLIENT_UPDATE_PROJECT:
       case CLIENT_UPDATE_PROJECT_CONFIG:
-        Object projectUri = params.getArguments().get(0);
+        Object projectUri = arguments.get(0);
         params.setArguments(
             singletonList(removePrefixUri(convertToJson(projectUri).getAsString())));
+        break;
+      case CLIENT_UPDATE_MAVEN_MODULE:
+        updateMavenModules(params, arguments);
         break;
       default:
         break;
     }
     return params;
+  }
+
+  private void updateMavenModules(ExecuteCommandParams params, List<Object> arguments) {
+    List<Object> newParameters = new LinkedList<>();
+    UpdateMavenModulesInfo updateModulesInfo = fromJson(arguments.get(0).toString());
+    String projectUri = removePrefixUri(updateModulesInfo.getProjectUri());
+    for (String uri : updateModulesInfo.getAdded()) {
+      addMavenProjectType(Paths.get(projectUri, uri).toString(), newParameters);
+    }
+    for (String uri : updateModulesInfo.getRemoved()) {
+      removeMavenProjectType(Paths.get(projectUri, uri).toString(), newParameters);
+    }
+    params.setCommand(CLIENT_UPDATE_PROJECT);
+    params.setArguments(newParameters);
+  }
+
+  private void removeMavenProjectType(String projectPath, List<Object> parameters) {
+    try {
+      if (projectManager.getOrNull(projectPath) != null) {
+        projectManager.removeType(projectPath, MAVEN_ID);
+        parameters.add(projectPath);
+      }
+    } catch (ServerException
+        | ForbiddenException
+        | ConflictException
+        | NotFoundException
+        | BadRequestException e) {
+      LOG.error("Can't remove project: " + projectPath, e);
+    }
+  }
+
+  private void addMavenProjectType(String projectPath, List<Object> parameters) {
+    try {
+      projectManager.setType(projectPath, MAVEN_ID, false);
+      parameters.add(projectPath);
+    } catch (ConflictException
+        | ServerException
+        | NotFoundException
+        | BadRequestException
+        | ForbiddenException e) {
+      LOG.error("Can't add new project: " + projectPath, e);
+    }
   }
 
   @Override
