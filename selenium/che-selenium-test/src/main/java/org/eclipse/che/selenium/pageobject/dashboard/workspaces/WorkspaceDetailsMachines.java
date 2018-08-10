@@ -118,7 +118,7 @@ public class WorkspaceDetailsMachines {
     seleniumWebDriverHelper.waitVisibility(getMachineListItemLocator(machineName));
   }
 
-  public void waitMachinesListItemWithAllAttributes(
+  public void waitMachinesListItemWithAttributes(
       String machineName, String imageName, String expectedRamValue) {
     waitMachinesListItem(machineName);
     waitEditButton(machineName);

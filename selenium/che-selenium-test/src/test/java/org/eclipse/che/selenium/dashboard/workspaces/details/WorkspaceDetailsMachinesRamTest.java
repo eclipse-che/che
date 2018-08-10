@@ -52,7 +52,7 @@ public class WorkspaceDetailsMachinesRamTest {
 
   @Test
   public void checkRamSection() {
-    workspaceDetailsMachines.waitMachinesListItemWithAllAttributes(
+    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, EXPECTED_RAM_VALUE);
 
     // check behavior with invalid RAM value

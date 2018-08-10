@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.APPLY_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.CANCEL_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.SAVE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.MACHINES;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
@@ -39,9 +42,10 @@ public class WorkspaceDetailsMachineActionsTest {
   private static final String NAME_WITH_SPECIAL_CHARACTERS = "@#$^&*(!";
   private static final String MAX_VALID_NAME = NameGenerator.generate("max_name", 120);
   private static final String INVALID_LENGTH_NAME = NameGenerator.generate(MAX_VALID_NAME, 1);
-  private static final String BIGGER_THAN_WALID_RAM_SIZE = "1000";
+  private static final String BIGGER_THAN_VALID_RAM_SIZE = "1000";
   private static final String MAX_VALID_RAM_VALUE = "100";
   private static final String NOT_EXISTED_IMAGE = NameGenerator.generate("wrong/image", 5);
+  private static final String CHANGED_RAM_SIZE = "7";
 
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -65,7 +69,7 @@ public class WorkspaceDetailsMachineActionsTest {
 
   // @Test
   public void checkEditFormClosing() {
-    workspaceDetailsMachines.waitMachinesListItemWithAllAttributes(
+    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, EXPECTED_RAM_VALUE);
 
     // close form by "ESC" button
@@ -142,7 +146,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitRamFieldText("1");
     editMachineForm.waitSliderRamValue("1 GB");
 
-    editMachineForm.typeRam(BIGGER_THAN_WALID_RAM_SIZE);
+    editMachineForm.typeRam(BIGGER_THAN_VALID_RAM_SIZE);
     editMachineForm.waitSaveButtonDisabling();
     editMachineForm.waitSliderRamValue("GB");
 
@@ -172,9 +176,17 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitForm();
     editMachineForm.waitRecipeText(IMAGE_NAME);
 
-    editMachineForm.typeName(CHANGED_MACHINE_NAME);
-    editMachineForm.typeRam("7");
-    editMachineForm.typeToRecipe(NOT_EXISTED_IMAGE);
+    editMachineForm.typeRam(CHANGED_RAM_SIZE);
+    editMachineForm.waitSaveButtonEnabling();
+    editMachineForm.clickOnSaveButton();
+    editMachineForm.waitFormInvisibility();
+    workspaceDetails.waitEnabled(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
+    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
+        MACHINE_NAME, IMAGE_NAME, CHANGED_RAM_SIZE);
+    workspaceDetails.waitAndClickOn(SAVE_BUTTON);
+    workspaceDetails.waitInvisibility(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
+    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
+        MACHINE_NAME, IMAGE_NAME, CHANGED_RAM_SIZE);
   }
 
   private void setValidName() {
