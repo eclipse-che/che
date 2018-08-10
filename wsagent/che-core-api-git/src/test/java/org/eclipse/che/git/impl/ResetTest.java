@@ -54,9 +54,8 @@ public class ResetTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testResetHard(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -80,9 +79,8 @@ public class ResetTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testResetSoft(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -107,9 +105,8 @@ public class ResetTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testResetMixed(GitConnectionFactory connectionFactory) throws Exception {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);

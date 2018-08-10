@@ -69,9 +69,8 @@ public class DockerContainersTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "oops"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "oops")
   public void
       findsIdentitiesRethrowsIOExceptionThrownWhileListingContainersAsInternalInfraException()
           throws Exception {
@@ -106,9 +105,8 @@ public class DockerContainersTest {
   }
 
   @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp = "oops"
-  )
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp = "oops")
   public void
       findContainersRethrowsIOExceptionThrownWhileListingContainersAsInternalInfraException()
           throws Exception {

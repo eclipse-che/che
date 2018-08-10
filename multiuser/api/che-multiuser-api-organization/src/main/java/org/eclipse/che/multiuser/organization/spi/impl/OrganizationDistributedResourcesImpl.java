@@ -38,26 +38,23 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
 @Entity(name = "OrganizationDistributedResources")
 @NamedQueries({
   @NamedQuery(
-    name = "OrganizationDistributedResources.get",
-    query =
-        "SELECT r "
-            + "FROM OrganizationDistributedResources r "
-            + "WHERE r.organizationId = :organizationId"
-  ),
+      name = "OrganizationDistributedResources.get",
+      query =
+          "SELECT r "
+              + "FROM OrganizationDistributedResources r "
+              + "WHERE r.organizationId = :organizationId"),
   @NamedQuery(
-    name = "OrganizationDistributedResources.getByParent",
-    query =
-        "SELECT r "
-            + "FROM OrganizationDistributedResources r "
-            + "WHERE r.organization.parent = :parent"
-  ),
+      name = "OrganizationDistributedResources.getByParent",
+      query =
+          "SELECT r "
+              + "FROM OrganizationDistributedResources r "
+              + "WHERE r.organization.parent = :parent"),
   @NamedQuery(
-    name = "OrganizationDistributedResources.getCountByParent",
-    query =
-        "SELECT COUNT(r) "
-            + "FROM OrganizationDistributedResources r "
-            + "WHERE r.organization.parent = :parent"
-  )
+      name = "OrganizationDistributedResources.getCountByParent",
+      query =
+          "SELECT COUNT(r) "
+              + "FROM OrganizationDistributedResources r "
+              + "WHERE r.organization.parent = :parent")
 })
 @Table(name = "che_organization_distributed_resources")
 public class OrganizationDistributedResourcesImpl implements OrganizationDistributedResources {
@@ -69,10 +66,9 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
-    name = "che_organization_distributed_resources_resource",
-    joinColumns = @JoinColumn(name = "organization_distributed_resources_id"),
-    inverseJoinColumns = @JoinColumn(name = "resource_id")
-  )
+      name = "che_organization_distributed_resources_resource",
+      joinColumns = @JoinColumn(name = "organization_distributed_resources_id"),
+      inverseJoinColumns = @JoinColumn(name = "resource_id"))
   private List<ResourceImpl> resourcesCap;
 
   public OrganizationDistributedResourcesImpl() {}

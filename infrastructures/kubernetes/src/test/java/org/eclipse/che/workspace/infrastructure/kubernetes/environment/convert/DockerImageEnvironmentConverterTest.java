@@ -86,10 +86,9 @@ public class DockerImageEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "DockerImage environment must contain at least one machine configuration"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "DockerImage environment must contain at least one machine configuration")
   public void throwsValidationExceptionWhenNoMachineConfigProvided() throws Exception {
     when(dockerEnv.getMachines()).thenReturn(emptyMap());
 

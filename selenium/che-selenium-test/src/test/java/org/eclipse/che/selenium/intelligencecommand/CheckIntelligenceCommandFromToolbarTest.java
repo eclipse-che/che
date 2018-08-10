@@ -83,17 +83,15 @@ public class CheckIntelligenceCommandFromToolbarTest {
   }
 
   @Test(
-    priority = 1,
-    groups = {TestGroup.DOCKER}
-  )
+      priority = 1,
+      groups = {TestGroup.DOCKER})
   public void checkButtonsOnToolbarOnDocker() {
     checkButtonsOnToolbar("This site can’t be reached");
   }
 
   @Test(
-    priority = 1,
-    groups = {TestGroup.OPENSHIFT, TestGroup.K8S}
-  )
+      priority = 1,
+      groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
   public void checkButtonsOnToolbarOnOpenshift() {
     checkButtonsOnToolbar("Application is not available");
   }

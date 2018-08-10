@@ -115,10 +115,9 @@ public class ProjectService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Gets list of projects in root folder",
-    response = ProjectConfigDto.class,
-    responseContainer = "List"
-  )
+      value = "Gets list of projects in root folder",
+      response = ProjectConfigDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 500, message = "Server error")
@@ -134,9 +133,8 @@ public class ProjectService {
   @Path("/{path:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Gets project by ID of workspace and project's path",
-    response = ProjectConfigDto.class
-  )
+      value = "Gets project by ID of workspace and project's path",
+      response = ProjectConfigDto.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
@@ -176,12 +174,11 @@ public class ProjectService {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Creates batch of projects according to their configurations",
-    notes =
-        "A project will be created by importing when project configuration contains source object. "
-            + "For creating a project by generator options should be specified.",
-    response = ProjectConfigDto.class
-  )
+      value = "Creates batch of projects according to their configurations",
+      notes =
+          "A project will be created by importing when project configuration contains source object. "
+              + "For creating a project by generator options should be specified.",
+      response = ProjectConfigDto.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 400, message = "Path for new project should be defined"),
@@ -227,11 +224,10 @@ public class ProjectService {
   @DELETE
   @Path("/{path:.*}")
   @ApiOperation(
-    value = "Delete a resource",
-    notes =
-        "Delete resources. If you want to delete a single project, specify project name. If a folder or file needs to "
-            + "be deleted a path to the requested resource needs to be specified"
-  )
+      value = "Delete a resource",
+      notes =
+          "Delete resources. If you want to delete a single project, specify project name. If a folder or file needs to "
+              + "be deleted a path to the requested resource needs to be specified")
   @ApiResponses({
     @ApiResponse(code = 204, message = ""),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -248,9 +244,8 @@ public class ProjectService {
   @Path("/estimate/{path:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Estimates if the folder supposed to be project of certain type",
-    response = Map.class
-  )
+      value = "Estimates if the folder supposed to be project of certain type",
+      response = Map.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
@@ -283,11 +278,10 @@ public class ProjectService {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Import resource",
-    notes =
-        "Import resource. JSON with a designated importer and project location is sent. It is possible to import from "
-            + "VCS or ZIP"
-  )
+      value = "Import resource",
+      notes =
+          "Import resource. JSON with a designated importer and project location is sent. It is possible to import from "
+              + "VCS or ZIP")
   @ApiResponses({
     @ApiResponse(code = 204, message = ""),
     @ApiResponse(code = 401, message = "User not authorized to call this operation"),
@@ -313,10 +307,9 @@ public class ProjectService {
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   @Produces({MediaType.APPLICATION_JSON})
   @ApiOperation(
-    value = "Create file",
-    notes =
-        "Create a new file in a project. If file type isn't specified the server will resolve its type."
-  )
+      value = "Create file",
+      notes =
+          "Create a new file in a project. If file type isn't specified the server will resolve its type.")
   @ApiResponses({
     @ApiResponse(code = 201, message = ""),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -379,10 +372,9 @@ public class ProjectService {
   @Consumes({MediaType.MULTIPART_FORM_DATA})
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Upload zip folder",
-    notes = "Upload folder from local zip",
-    response = Response.class
-  )
+      value = "Upload zip folder",
+      notes = "Upload folder from local zip",
+      response = Response.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = ""),
     @ApiResponse(code = 401, message = "User not authorized to call this operation"),
@@ -438,9 +430,8 @@ public class ProjectService {
   @Path("/copy/{path:.*}")
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Copy resource",
-    notes = "Copy resource to a new location which is specified in a query parameter"
-  )
+      value = "Copy resource",
+      notes = "Copy resource to a new location which is specified in a query parameter")
   @ApiResponses({
     @ApiResponse(code = 201, message = ""),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -462,9 +453,8 @@ public class ProjectService {
   @Path("/move/{path:.*}")
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Move resource",
-    notes = "Move resource to a new location which is specified in a query parameter"
-  )
+      value = "Move resource",
+      notes = "Move resource to a new location which is specified in a query parameter")
   @ApiResponses({
     @ApiResponse(code = 201, message = ""),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -486,10 +476,9 @@ public class ProjectService {
   @Consumes({MediaType.MULTIPART_FORM_DATA})
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Upload zip project",
-    notes = "Upload project from local zip",
-    response = ProjectConfigDto.class
-  )
+      value = "Upload zip project",
+      notes = "Upload project from local zip",
+      response = ProjectConfigDto.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = ""),
     @ApiResponse(code = 401, message = "User not authorized to call this operation"),
@@ -533,9 +522,8 @@ public class ProjectService {
   @Path("/export/{path:.*}")
   @Produces(ExtMediaType.APPLICATION_ZIP)
   @ApiOperation(
-    value = "Download ZIP",
-    notes = "Export resource as zip. It can be an entire project or folder"
-  )
+      value = "Download ZIP",
+      notes = "Export resource as zip. It can be an entire project or folder")
   @ApiResponses({
     @ApiResponse(code = 201, message = ""),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -563,11 +551,10 @@ public class ProjectService {
   @Path("/children/{parent:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Get project children items",
-    notes = "Request all children items for a project, such as files and folders",
-    response = ItemReference.class,
-    responseContainer = "List"
-  )
+      value = "Get project children items",
+      notes = "Request all children items for a project, such as files and folders",
+      response = ItemReference.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -585,10 +572,9 @@ public class ProjectService {
   @Path("/tree/{parent:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Get project tree",
-    notes = "Get project tree. Depth is specified in a query parameter",
-    response = TreeElement.class
-  )
+      value = "Get project tree",
+      notes = "Get project tree. Depth is specified in a query parameter",
+      response = TreeElement.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -600,17 +586,15 @@ public class ProjectService {
           @PathParam("parent")
           String wsPath,
       @ApiParam(
-            value =
-                "Tree depth. This parameter can be dropped. If not specified ?depth=1 is used by default"
-          )
+              value =
+                  "Tree depth. This parameter can be dropped. If not specified ?depth=1 is used by default")
           @DefaultValue("1")
           @QueryParam("depth")
           int depth,
       @ApiParam(
-            value =
-                "include children files (in addition to children folders). This parameter can be dropped"
-                    + ". If not specified ?includeFiles=false is used by default"
-          )
+              value =
+                  "include children files (in addition to children folders). This parameter can be dropped"
+                      + ". If not specified ?includeFiles=false is used by default")
           @DefaultValue("false")
           @QueryParam("includeFiles")
           boolean includeFiles)
@@ -642,11 +626,10 @@ public class ProjectService {
   @Path("/search/{path:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-    value = "Search for resources",
-    notes = "Search for resources applying a number of search filters as query parameters",
-    response = SearchResult.class,
-    responseContainer = "List"
-  )
+      value = "Search for resources",
+      notes = "Search for resources applying a number of search filters as query parameters",
+      response = SearchResult.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "OK"),
     @ApiResponse(code = 403, message = "User not authorized to call this operation"),
@@ -661,8 +644,7 @@ public class ProjectService {
       @ApiParam(value = "Resource name") @QueryParam("name") String name,
       @ApiParam(value = "Search keywords") @QueryParam("text") String text,
       @ApiParam(
-            value = "Maximum items to display. If this parameter is dropped, there are no limits"
-          )
+              value = "Maximum items to display. If this parameter is dropped, there are no limits")
           @QueryParam("maxItems")
           @DefaultValue("-1")
           int maxItems,

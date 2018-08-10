@@ -393,11 +393,10 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = RuntimeStartInterruptedException.class,
-    expectedExceptionsMessageRegExp =
-        "Runtime start for identity 'workspace: workspace123, "
-            + "environment: env1, ownerId: id1' is interrupted"
-  )
+      expectedExceptions = RuntimeStartInterruptedException.class,
+      expectedExceptionsMessageRegExp =
+          "Runtime start for identity 'workspace: workspace123, "
+              + "environment: env1, ownerId: id1' is interrupted")
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
     when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
@@ -582,9 +581,8 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = "Runtime is already started"
-  )
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = "Runtime is already started")
   public void shouldThrowExceptionIfRuntimeIsAlreadyStarting() throws Exception {
     // given
     runtimeStatesCache.putIfAbsent(
@@ -624,10 +622,9 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = "The environment must be running or starting",
-    dataProvider = "nonRunningStatuses"
-  )
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = "The environment must be running or starting",
+      dataProvider = "nonRunningStatuses")
   public void shouldThrowExceptionWhenTryToMakeNonRunningNorStartingRuntimeAsStopping(
       WorkspaceStatus status) throws Exception {
     // given

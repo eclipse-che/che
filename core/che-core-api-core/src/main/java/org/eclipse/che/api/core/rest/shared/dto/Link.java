@@ -111,9 +111,8 @@ public interface Link {
   List<LinkParameter> getParameters();
 
   @DelegateTo(
-    client = @DelegateRule(type = LinkParameterResolver.class, method = "getParameter"),
-    server = @DelegateRule(type = LinkParameterResolver.class, method = "getParameter")
-  )
+      client = @DelegateRule(type = LinkParameterResolver.class, method = "getParameter"),
+      server = @DelegateRule(type = LinkParameterResolver.class, method = "getParameter"))
   LinkParameter getParameter(String parameterName);
 
   Link withParameters(List<LinkParameter> parameters);

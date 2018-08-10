@@ -48,9 +48,8 @@ public class GetCommitersTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testGetCommitters(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);

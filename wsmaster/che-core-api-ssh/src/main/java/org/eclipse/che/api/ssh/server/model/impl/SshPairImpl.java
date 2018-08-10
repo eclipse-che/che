@@ -30,17 +30,15 @@ import org.eclipse.che.commons.annotation.Nullable;
 @Entity(name = "SshKeyPair")
 @NamedQueries({
   @NamedQuery(
-    name = "SshKeyPair.getByOwnerAndService",
-    query =
-        "SELECT pair "
-            + "FROM SshKeyPair pair "
-            + "WHERE pair.owner = :owner "
-            + "  AND pair.service = :service"
-  ),
+      name = "SshKeyPair.getByOwnerAndService",
+      query =
+          "SELECT pair "
+              + "FROM SshKeyPair pair "
+              + "WHERE pair.owner = :owner "
+              + "  AND pair.service = :service"),
   @NamedQuery(
-    name = "SshKeyPair.getByOwner",
-    query = "SELECT pair " + "FROM SshKeyPair pair " + "WHERE pair.owner = :owner"
-  )
+      name = "SshKeyPair.getByOwner",
+      query = "SELECT pair " + "FROM SshKeyPair pair " + "WHERE pair.owner = :owner")
 })
 @IdClass(SshPairPrimaryKey.class)
 @Table(name = "sshkeypair")

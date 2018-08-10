@@ -89,9 +89,8 @@ public class UserService extends Service {
   @ApiOperation(value = "Create a new user", response = UserDto.class)
   @ApiResponses({
     @ApiResponse(
-      code = 201,
-      message = "User successfully created, response contains created entity"
-    ),
+        code = 201,
+        message = "User successfully created, response contains created entity"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 401, message = "Missed token parameter"),
     @ApiResponse(code = 500, message = "Couldn't create user due to internal server error")
@@ -132,19 +131,18 @@ public class UserService extends Service {
   @Consumes(APPLICATION_FORM_URLENCODED)
   @GenerateLink(rel = LINK_REL_CURRENT_USER_PASSWORD)
   @ApiOperation(
-    value = "Update password of logged in user",
-    notes =
-        "Password must contain at least 8 characters, " + "passport must contain letters and digits"
-  )
+      value = "Update password of logged in user",
+      notes =
+          "Password must contain at least 8 characters, "
+              + "passport must contain letters and digits")
   @ApiResponses({
     @ApiResponse(code = 204, message = "Password successfully updated"),
     @ApiResponse(
-      code = 400,
-      message =
-          "Incoming password is invalid value."
-              + "Valid password must contain at least 8 character "
-              + "which are letters and digits"
-    ),
+        code = 400,
+        message =
+            "Incoming password is invalid value."
+                + "Valid password must contain at least 8 character "
+                + "which are letters and digits"),
     @ApiResponse(code = 500, message = "Couldn't update password due to internal server error")
   })
   public void updatePassword(
@@ -206,9 +204,8 @@ public class UserService extends Service {
   @ApiResponses({
     @ApiResponse(code = 204, message = "User successfully removed"),
     @ApiResponse(
-      code = 409,
-      message = "Couldn't remove user due to conflict(e.g. it has related entities)"
-    ),
+        code = 409,
+        message = "Couldn't remove user due to conflict(e.g. it has related entities)"),
     @ApiResponse(code = 500, message = "Couldn't remove user due to internal server error")
   })
   public void remove(@ApiParam("User identifier") @PathParam("id") String id)

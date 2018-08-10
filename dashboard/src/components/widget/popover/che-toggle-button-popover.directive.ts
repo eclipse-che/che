@@ -81,7 +81,7 @@ export class CheToggleButtonPopover implements ng.IDirective {
                                   popover-title="{{chePopoverTitle ? chePopoverTitle : ''}}"
                                   popover-placement="{{chePopoverPlacement ? chePopoverPlacement : 'bottom'}}"
                                   popover-is-open="isOpenPopover"
-                                  popover-trigger="{{chePopoverTriggerOutsideClick ? 'outsideClick' : 'none'}}" 
+                                  popover-trigger="{{chePopoverTriggerOutsideClick ? 'outsideClick' : 'none'}}"
                                   uib-popover-html="'<div class=\\'che-transclude\\'></div>'"></toggle-single-button>`;
   }
 

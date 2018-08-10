@@ -126,6 +126,18 @@ public class AddOrImportForm {
     seleniumWebDriverHelper.waitAndClick(By.id(ADD_BUTTON_ID));
   }
 
+  public void addSampleToWorkspace(String sampleName) {
+    waitAddOrImportFormOpened();
+
+    if (!isSampleCheckboxEnabled(sampleName)) {
+      clickOnSampleCheckbox(sampleName);
+    }
+
+    waitSampleCheckboxEnabled(sampleName);
+    clickOnAddButton();
+    waitProjectTabAppearance(sampleName);
+  }
+
   public void clickOnCancelButton() {
     seleniumWebDriverHelper.waitAndClick(By.id(CANCEL_BUTTON_ID));
   }
@@ -297,6 +309,14 @@ public class AddOrImportForm {
 
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format("//*[@id='%s']/md-checkbox/div", checkboxId)));
+  }
+
+  public boolean isSampleCheckboxEnabled(String sampleName) {
+    String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
+    String checkboxLocator = format("//div[@id='%s']/md-checkbox", checkboxId);
+    return seleniumWebDriverHelper
+        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), "aria-checked")
+        .equals("true");
   }
 
   private void waitSampleCheckboxState(String sampleName, boolean state) {

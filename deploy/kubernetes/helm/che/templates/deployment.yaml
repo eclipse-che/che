@@ -107,11 +107,6 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_MASTER__URL
               name: che
-        - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
-          valueFrom:
-            configMapKeyRef:
-              key: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
-              name: che
         - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
           valueFrom:
             configMapKeyRef:
@@ -137,20 +132,10 @@ spec:
             configMapKeyRef:
               key: JAVA_OPTS
               name: che
-        - name: CHE_INFRA_KUBERNETES_PASSWORD
-          valueFrom:
-            configMapKeyRef:
-              key: CHE_INFRA_KUBERNETES_PASSWORD
-              name: che
         - name: CHE_INFRA_KUBERNETES_TRUST__CERTS
           valueFrom:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_TRUST__CERTS
-              name: che
-        - name: CHE_INFRA_KUBERNETES_USERNAME
-          valueFrom:
-            configMapKeyRef:
-              key: CHE_INFRA_KUBERNETES_USERNAME
               name: che
 {{- if .Values.global.multiuser }}
 #Client_id should always be supplied in multiuser scenario

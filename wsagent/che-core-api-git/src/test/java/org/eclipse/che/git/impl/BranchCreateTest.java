@@ -51,9 +51,8 @@ public class BranchCreateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleBranchCreate(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -73,9 +72,8 @@ public class BranchCreateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testBranchCreateWithStartPoint(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given

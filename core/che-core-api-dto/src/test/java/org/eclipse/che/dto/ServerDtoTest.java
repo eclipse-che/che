@@ -433,19 +433,17 @@ public class ServerDtoTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "Only interfaces can be DTO, but class java.lang.String is not"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Only interfaces can be DTO, but class java.lang.String is not")
   public void shouldThrowExceptionWhenThereIsClassType() {
     DtoFactory.newDto(String.class);
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "interface org.eclipse.che.dto.definitions.DTOHierarchy\\$GrandchildWithoutDto is not a DTO type"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "interface org.eclipse.che.dto.definitions.DTOHierarchy\\$GrandchildWithoutDto is not a DTO type")
   public void shouldThrowExceptionWhenInterfaceIsNotAnnotatedAsDto() {
     DtoFactory.newDto(DTOHierarchy.GrandchildWithoutDto.class);
   }

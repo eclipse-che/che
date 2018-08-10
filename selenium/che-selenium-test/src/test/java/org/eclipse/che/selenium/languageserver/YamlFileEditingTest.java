@@ -107,17 +107,17 @@ public class YamlFileEditingTest {
 
     // launch autocomplete feature and check proposal documentation
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("diskName");
+    editor.waitProposalIntoAutocompleteContainer("diskName");
     editor.selectAutocompleteProposal("diskName");
     editor.checkProposalDocumentation("The Name of the data disk in the blob storage");
-    editor.waitTextIntoAutocompleteContainer("diskURI");
+    editor.waitProposalIntoAutocompleteContainer("diskURI");
     editor.selectAutocompleteProposal("diskURI");
     editor.checkProposalDocumentation("The URI the data disk in the blob storage");
 
     // select proposal and check expected text in the Editor
     editor.enterAutocompleteProposal("kind");
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("PersistentVolume");
+    editor.waitProposalIntoAutocompleteContainer("PersistentVolume");
     editor.enterAutocompleteProposal("PersistentVolume");
     editor.waitTextIntoEditor("kind: PersistentVolume");
     editor.typeTextIntoEditor(ENTER.toString());
@@ -138,7 +138,7 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor("metadata:");
 
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("status");
+    editor.waitProposalIntoAutocompleteContainer("status");
     editor.enterAutocompleteProposal("status");
     editor.waitMarkerInPosition(ERROR, 4);
     editor.moveToMarkerAndWaitAssistContent(ERROR);

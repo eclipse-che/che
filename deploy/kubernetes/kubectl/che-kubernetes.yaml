@@ -50,9 +50,6 @@ items:
     CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: http://192.168.99.100.nip.io/agent-binaries/linux_amd64/bootstrapper/bootstrapper
     CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN: "5"
     CHE_INFRA_KUBERNETES_MASTER__URL: ""
-    CHE_INFRA_KUBERNETES_OAUTH__TOKEN: ""
-    CHE_INFRA_KUBERNETES_PASSWORD: ""
-    CHE_INFRA_KUBERNETES_USERNAME: ""
     CHE_INFRA_KUBERNETES_NAMESPACE: ""
     CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
     CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
@@ -157,11 +154,6 @@ items:
               configMapKeyRef:
                 key: CHE_INFRA_KUBERNETES_MASTER__URL
                 name: che
-          - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
-                name: che
           - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
             valueFrom:
               configMapKeyRef:
@@ -187,20 +179,10 @@ items:
               configMapKeyRef:
                 key: JAVA_OPTS
                 name: che
-          - name: CHE_INFRA_KUBERNETES_PASSWORD
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_KUBERNETES_PASSWORD
-                name: che
           - name: CHE_INFRA_KUBERNETES_TRUST__CERTS
             valueFrom:
               configMapKeyRef:
                 key: CHE_INFRA_KUBERNETES_TRUST__CERTS
-                name: che
-          - name: CHE_INFRA_KUBERNETES_USERNAME
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_KUBERNETES_USERNAME
                 name: che
           - name: CHE_INFRA_KUBERNETES_NAMESPACE
             valueFrom:

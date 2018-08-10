@@ -234,6 +234,11 @@ public class NewWorkspace {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(workspaceNameInput);
   }
 
+  public void waitWorkspaceNameFieldValue(String expectedName) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        (driver) -> getWorkspaceNameValue().equals(expectedName));
+  }
+
   public void waitErrorMessage(String message) {
     seleniumWebDriverHelper.waitTextEqualsTo(By.id(ERROR_MESSAGE), message);
   }
