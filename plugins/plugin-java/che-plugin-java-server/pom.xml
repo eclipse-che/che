@@ -103,6 +103,10 @@
             <artifactId>che-plugin-java-ext-lang-shared</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-maven-shared</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
@@ -161,6 +165,7 @@
                         <classe>org.eclipse.lsp4j.VersionedTextDocumentIdentifier</classe>
                         <class>org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange</class>
                         <class>org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit</class>
+                        <class>org.eclipse.che.jdt.ls.extension.api.dto.UpdateMavenModulesInfo</class>
                     </classes>
                     <dtoPackages>
                         <package>org.eclipse.che.jdt.ls.extension.api.dto</package>
