@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
@@ -42,6 +43,7 @@ public class RenamePrivateFieldSmokeTest {
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
+  @Inject private Loader loader;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private Refactor refactor;
@@ -59,14 +61,14 @@ public class RenamePrivateFieldSmokeTest {
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
+    loader.waitOnClosed();
   }
 
   @Test
   public void checkRenamePrivateField0() throws Exception {
     setFieldsForTest("test0");
-    projectExplorer.waitItem(PROJECT_NAME);
-    consoles.closeProcessesArea();
-    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
