@@ -100,10 +100,12 @@ public class WorkspaceNextObjectsRetriever {
       }
     }
     if (isNullOrEmpty(editorAttribute)) {
-      Collection<Pair<String, String>> editorIdVersionCollection = parseIdsVersions(editorAttribute);
+      Collection<Pair<String, String>> editorIdVersionCollection =
+          parseIdsVersions(editorAttribute);
       if (editorIdVersionCollection.size() > 1) {
-        throw new InfrastructureException("Multiple editors found in workspace attributes. "
-            + "It is not supported. Please, use one editor only.");
+        throw new InfrastructureException(
+            "Multiple editors found in workspace attributes. "
+                + "It is not supported. Please, use one editor only.");
       }
       metasIdsVersions.addAll(editorIdVersionCollection);
     }
@@ -116,9 +118,7 @@ public class WorkspaceNextObjectsRetriever {
     Map<String, Pair<String, String>> collectedIdVersion = new HashMap<>();
     for (String plugin : idsVersions) {
       String[] idVersion = plugin.split(":");
-      if (idVersion.length != 2
-          || idVersion[0].isEmpty()
-          || idVersion[1].isEmpty()) {
+      if (idVersion.length != 2 || idVersion[0].isEmpty() || idVersion[1].isEmpty()) {
         throw new InfrastructureException(
             "Plugin format is illegal. Problematic plugin entry:" + plugin);
       }
@@ -144,8 +144,7 @@ public class WorkspaceNextObjectsRetriever {
 
   private PluginMeta getMeta(String id, String version) throws InfrastructureException {
     try {
-      URI metaURI =
-          pluginRegistry.clone().path(id).path(version).build();
+      URI metaURI = pluginRegistry.clone().path(id).path(version).build();
 
       PluginMeta meta = getBody(metaURI, PluginMeta.class);
       validateMeta(meta, id, version);
@@ -163,8 +162,7 @@ public class WorkspaceNextObjectsRetriever {
 
   private void validateMeta(PluginMeta meta, String id, String version)
       throws InfrastructureException {
-    requireNotNullNorEmpty(
-        meta.getId(), CHE_PLUGIN_OBJECT_ERROR, id, version, "ID is missing.");
+    requireNotNullNorEmpty(meta.getId(), CHE_PLUGIN_OBJECT_ERROR, id, version, "ID is missing.");
     requireEqual(
         id,
         meta.getId(),
@@ -179,8 +177,7 @@ public class WorkspaceNextObjectsRetriever {
         meta.getName(), CHE_PLUGIN_OBJECT_ERROR, id, version, "Name is missing.");
     requireNotNullNorEmpty(
         meta.getType(), CHE_PLUGIN_OBJECT_ERROR, id, version, "Type is missing.");
-    requireNotNullNorEmpty(
-        meta.getUrl(), CHE_PLUGIN_OBJECT_ERROR, id, version, "URL is missing.");
+    requireNotNullNorEmpty(meta.getUrl(), CHE_PLUGIN_OBJECT_ERROR, id, version, "URL is missing.");
   }
 
   @VisibleForTesting
