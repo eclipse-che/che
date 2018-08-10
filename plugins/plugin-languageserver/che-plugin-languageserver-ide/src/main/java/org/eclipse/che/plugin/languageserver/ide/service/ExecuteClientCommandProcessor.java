@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT_CONFIG;
@@ -20,7 +21,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
 import org.eclipse.che.ide.resource.Path;
@@ -37,13 +41,18 @@ public class ExecuteClientCommandProcessor {
   private EventBus eventBus;
   private AppContext appContext;
   private final ProjectServiceClient projectService;
+  private final PromiseProvider promises;
 
   @Inject
   public ExecuteClientCommandProcessor(
-      EventBus eventBus, AppContext appContext, ProjectServiceClient projectService) {
+      EventBus eventBus,
+      AppContext appContext,
+      ProjectServiceClient projectService,
+      PromiseProvider promises) {
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.projectService = projectService;
+    this.promises = promises;
   }
 
   public void execute(ExecuteCommandParams params) {
@@ -59,20 +68,34 @@ public class ExecuteClientCommandProcessor {
       case CLIENT_UPDATE_PROJECT_CONFIG:
         updateProjectConfig(stringValue(params.getArguments()));
         break;
+      case CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
+        for (Object project : params.getArguments()) {
+          updateProject(stringValue(project))
+              .then(
+                  container -> {
+                    eventBus.fireEvent(
+                        new ProjectClasspathChangedEvent(
+                            stringValue(container.getLocation().toString())));
+                  });
+        }
+        break;
       default:
         break;
     }
   }
 
-  private void updateProject(String project) {
-    appContext
+  private Promise<Container> updateProject(String project) {
+    return appContext
         .getWorkspaceRoot()
         .getContainer(project)
-        .then(
-            container -> {
-              if (container.isPresent()) {
-                container.get().synchronize();
+        .thenPromise(
+            optContainer -> {
+              if (optContainer.isPresent()) {
+                Container container = optContainer.get();
+                container.synchronize();
+                return promises.resolve(container);
               }
+              return promises.resolve(null);
             });
   }
 
