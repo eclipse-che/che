@@ -19,6 +19,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.IMAGE_FIELD_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.INCREMENT_RAM_BUTTON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.MACHINE_LIST_ITEM_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.NOTIFICATION_MESSAGE_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.POPOVER_ENVIRONMENT_VARIABLES_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.POPOVER_INSTALLERS_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.POPOVER_SERVERS_LINK_XPATH;
@@ -66,6 +67,7 @@ public class WorkspaceDetailsMachines {
         SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Environment Variables']";
     String IMAGE_FIELD_XPATH_TEMPLATE =
         MACHINE_LIST_ITEM_XPATH_TEMPLATE + "//span[@machine-image ='%s']";
+    String NOTIFICATION_MESSAGE_XPATH_TEMPLATE = "//md-toast[@che-info-text='%s']";
   }
 
   private By getImageFieldLocator(String machineName, String imageName) {
@@ -112,6 +114,12 @@ public class WorkspaceDetailsMachines {
     final String ramAmountTextFieldXpath =
         format(RAM_AMOUNT_TEXT_FIELD_XPATH_TEMPLATE, machineName);
     return By.xpath(ramAmountTextFieldXpath);
+  }
+
+  public void waitNotificationMessage(String expectedMessage) {
+    final String notificationMessageXpath =
+        format(NOTIFICATION_MESSAGE_XPATH_TEMPLATE, expectedMessage);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(notificationMessageXpath));
   }
 
   public void waitMachinesListItem(String machineName) {

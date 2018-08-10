@@ -31,6 +31,7 @@ public class WorkspaceDetailsMachinesRamTest {
   private static final String EXPECTED_RAM_VALUE = "2";
   private static final String MAX_RAM_VALID_VALUE = "100";
   private static final String MIN_RAM_VALID_VALUE = "0.5";
+  private static final String SUCCESS_NOTIFICATION_MESSAGE = "Workspace updated.";
 
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -65,7 +66,7 @@ public class WorkspaceDetailsMachinesRamTest {
     workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
     workspaceDetails.waitEnabled(SAVE_BUTTON);
     workspaceDetails.waitAndClickOn(SAVE_BUTTON);
-    workspaceDetails.waitInvisibility(SAVE_BUTTON, CANCEL_BUTTON, APPLY_BUTTON);
+    workspaceDetailsMachines.waitNotificationMessage(SUCCESS_NOTIFICATION_MESSAGE);
 
     // check increment, decrement RAM buttons
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, MAX_RAM_VALID_VALUE);
