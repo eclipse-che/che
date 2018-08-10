@@ -144,4 +144,9 @@ public class Events {
     }
     waitEmptyEventsPanel();
   }
+
+  public void clickOnEventPanelAndWaitMassage(String message) {
+    clickEventLogBtn();
+    waitExpectedMessage(message);
+  }
 }
