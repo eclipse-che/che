@@ -63,7 +63,6 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.core.db.DBInitializer;
@@ -95,8 +94,6 @@ public class WorkspaceRuntimesTest {
 
   @Mock private WorkspaceStatusCache statuses;
 
-  @Mock private WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
-
   private RuntimeInfrastructure infrastructure;
 
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
@@ -110,16 +107,14 @@ public class WorkspaceRuntimesTest {
     runtimes =
         new WorkspaceRuntimes(
             eventService,
-            ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
+            new InternalEnvironmentProvider(ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory)),
             infrastructure,
             sharedPool,
             workspaceDao,
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            emptyMap(),
-            workspaceNextObjectsRetriever);
+            lockService);
   }
 
   @Test
@@ -199,16 +194,14 @@ public class WorkspaceRuntimesTest {
     WorkspaceRuntimes localRuntimes =
         new WorkspaceRuntimes(
             localEventService,
-            ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
+            new InternalEnvironmentProvider(ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory)),
             infrastructure,
             sharedPool,
             workspaceDao,
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            emptyMap(),
-            workspaceNextObjectsRetriever);
+            lockService);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)
@@ -260,16 +253,14 @@ public class WorkspaceRuntimesTest {
         new WorkspaceRuntimes(
             runtimesStorage,
             eventService,
-            ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
+            new InternalEnvironmentProvider(ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory)),
             infrastructure,
             sharedPool,
             workspaceDao,
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            emptyMap(),
-            workspaceNextObjectsRetriever);
+            lockService);
 
     // when
     localRuntimes.injectRuntime(workspace);
@@ -483,12 +474,12 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
-    protected void internalStop(Map stopOptions) throws InfrastructureException {
+    protected void internalStop(Map stopOptions) {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    protected void internalStart(Map startOptions) throws InfrastructureException {
+    protected void internalStart(Map startOptions) {
       throw new UnsupportedOperationException();
     }
   }
