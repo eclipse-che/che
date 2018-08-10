@@ -186,7 +186,7 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        const errorMessage = 'Failed to get the workspace' + this.getRequestErrorMessage(xhr);
+                        const errorMessage = 'Failed to get the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
                         reject(new Error(errorMessage));
                         return;
                     }
@@ -208,7 +208,7 @@ export class WorkspaceLoader {
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        const errorMessage = 'Failed to start the workspace'  + this.getRequestErrorMessage(xhr);
+                        const errorMessage = 'Failed to start the workspace: "'  + this.getRequestErrorMessage(xhr) + '"';
                         reject(new Error(errorMessage));
                         return;
                     }
@@ -241,7 +241,9 @@ export class WorkspaceLoader {
      */
     handleWorkspace(): Promise<void> {
         if (this.workspace.status === 'RUNNING') {
-            return Promise.resolve();
+            return new Promise((resolve, reject) => {
+                this.checkWorkspaceRuntime().then(resolve, reject);
+            });
         } else if (this.workspace.status === 'STOPPING') {
             this.startAfterStopping = true;
         }
