@@ -25,7 +25,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.RAM_AMOUNT_TEXT_FIELD_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.SERVERS_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.SETTINGS_BUTTON_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.SETTINGS_POPOVER_CONTAINER_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.SETTINGS_CONTAINER_XPATH;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -58,12 +58,12 @@ public class WorkspaceDetailsMachines {
     String SETTINGS_BUTTON_XPATH_TEMPLATE =
         MACHINE_LIST_ITEM_XPATH_TEMPLATE + "//span[@uib-tooltip='Settings']";
     String DELETE_BUTTON_XPATH_TEMPLATE = "//div[@delete-machine='%s']";
-    String SETTINGS_POPOVER_CONTAINER_XPATH =
+    String SETTINGS_CONTAINER_XPATH =
         "//div[contains(@class, 'workspace-machine-actions-popover') and @is-open='isOpen']";
-    String INSTALLERS_LINK_XPATH = SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Installers']";
-    String SERVERS_LINK_XPATH = SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Servers']";
+    String INSTALLERS_LINK_XPATH = SETTINGS_CONTAINER_XPATH + "//a[text()='Installers']";
+    String SERVERS_LINK_XPATH = SETTINGS_CONTAINER_XPATH + "//a[text()='Servers']";
     String ENVIRONMENT_VARIABLES_LINK_XPATH =
-        SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Environment Variables']";
+        SETTINGS_CONTAINER_XPATH + "//a[text()='Environment Variables']";
     String IMAGE_FIELD_XPATH_TEMPLATE =
         MACHINE_LIST_ITEM_XPATH_TEMPLATE + "//span[@machine-image ='%s']";
     String NOTIFICATION_MESSAGE_XPATH_TEMPLATE = "//md-toast[@che-info-text='%s']";
@@ -154,15 +154,15 @@ public class WorkspaceDetailsMachines {
   }
 
   public void waitSettingsPopover() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(SETTINGS_POPOVER_CONTAINER_XPATH));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(SETTINGS_CONTAINER_XPATH));
   }
 
   public boolean isSettingsPopoverOpened() {
-    return seleniumWebDriverHelper.isVisible(By.xpath(SETTINGS_POPOVER_CONTAINER_XPATH));
+    return seleniumWebDriverHelper.isVisible(By.xpath(SETTINGS_CONTAINER_XPATH));
   }
 
   public void waitSettingsPopoverInvisibility() {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(SETTINGS_POPOVER_CONTAINER_XPATH));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(SETTINGS_CONTAINER_XPATH));
   }
 
   public boolean isRamValueValid(String machineName) {
