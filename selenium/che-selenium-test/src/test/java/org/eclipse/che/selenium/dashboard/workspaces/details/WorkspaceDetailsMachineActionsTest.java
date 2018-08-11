@@ -47,8 +47,8 @@ public class WorkspaceDetailsMachineActionsTest {
       "The name should not contain special characters like space, dollar, etc.";
   private static final String NAME_WITH_SPECIAL_CHARACTERS = "@#$^&*(!";
   private static final String MAX_VALID_NAME = NameGenerator.generate("max_name", 120);
-  private static final String INVALID_LENGTH_NAME = NameGenerator.generate(MAX_VALID_NAME, 1);
-  private static final String BIGGER_THAN_VALID_RAM_SIZE = "1000";
+  private static final String TOO_BIG_NAME = NameGenerator.generate(MAX_VALID_NAME, 1);
+  private static final String TOO_BIG_RAM_SIZE = "1000";
   private static final String MAX_VALID_RAM_VALUE = "100";
   private static final String NOT_EXISTED_IMAGE = NameGenerator.generate("wrong/image", 5);
   private static final String CHANGED_RAM_SIZE = "7";
@@ -80,7 +80,7 @@ public class WorkspaceDetailsMachineActionsTest {
 
   @Test
   public void checkEditFormClosing() {
-    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
+    workspaceDetailsMachines.waitMachineListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, EXPECTED_RAM_VALUE);
 
     // close form by "ESC" button
@@ -103,37 +103,37 @@ public class WorkspaceDetailsMachineActionsTest {
   }
 
   @Test
-  public void checkEditFormNameField() {
+  public void checkEditOfMachineName() {
     // check default values
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
     editMachineForm.waitName(MACHINE_NAME);
-    editMachineForm.waitSliderRamValue("2 GB");
-    editMachineForm.waitRamFieldText("2");
+    editMachineForm.waitSliderRamValue(EXPECTED_RAM_VALUE + " GB");
+    editMachineForm.waitRamFieldText(EXPECTED_RAM_VALUE);
     editMachineForm.waitRecipeText(IMAGE_NAME);
 
     // name empty field
     editMachineForm.typeName("");
-    editMachineForm.waitNameInvalidHighliting();
+    editMachineForm.waitInvalidNameHighlighting();
     editMachineForm.waitNameErrorMessage(EMPTY_NAME_ERROR_MESSAGE);
     editMachineForm.waitSaveButtonDisabling();
     setValidName();
 
     // special characters
     editMachineForm.typeName(NAME_WITH_SPECIAL_CHARACTERS);
-    editMachineForm.waitNameInvalidHighliting();
+    editMachineForm.waitInvalidNameHighlighting();
     editMachineForm.waitNameErrorMessage(SPECIAL_CHARACTERS_ERRORS_MESSAGE);
     editMachineForm.waitSaveButtonDisabling();
     setValidName();
 
     // max valid name
     editMachineForm.typeName(MAX_VALID_NAME);
-    editMachineForm.waitNameValidHighlighting();
+    editMachineForm.waitValidNameHighlighting();
     editMachineForm.waitSaveButtonEnabling();
 
     // too long name
-    editMachineForm.typeName(INVALID_LENGTH_NAME);
-    editMachineForm.waitNameInvalidHighliting();
+    editMachineForm.typeName(TOO_BIG_NAME);
+    editMachineForm.waitInvalidNameHighlighting();
     editMachineForm.waitSaveButtonDisabling();
   }
 
@@ -142,9 +142,9 @@ public class WorkspaceDetailsMachineActionsTest {
     // check machine name editing
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
-    /*editMachineForm.typeName(CHANGED_MACHINE_NAME);
-    editMachineForm.waitNameValidHighlighting();
-    editMachineForm.waitSaveButtonEnabling();*/
+    editMachineForm.typeName(CHANGED_MACHINE_NAME);
+    editMachineForm.waitValidNameHighlighting();
+    editMachineForm.waitSaveButtonEnabling();
 
     // check RAM field behavior with min valid value
     editMachineForm.typeRam(MIN_VALID_RAM_VALUE);
@@ -158,7 +158,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitSliderRamValue("1 GB");
 
     // check RAM behavior with more than max valid value
-    editMachineForm.typeRam(BIGGER_THAN_VALID_RAM_SIZE);
+    editMachineForm.typeRam(TOO_BIG_RAM_SIZE);
     editMachineForm.waitSaveButtonDisabling();
     editMachineForm.waitSliderRamValue("GB");
 
@@ -168,13 +168,13 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitSliderRamValue(MAX_VALID_RAM_VALUE + " GB");
 
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
-    editMachineForm.waitNameValidHighlighting();
+    editMachineForm.waitValidNameHighlighting();
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.waitRamFieldText(MAX_VALID_RAM_VALUE);
     editMachineForm.waitSliderRamValue(MAX_VALID_RAM_VALUE + " GB");
 
     seleniumWebDriverHelper.sendKeys(ARROW_DOWN.toString());
-    editMachineForm.waitNameValidHighlighting();
+    editMachineForm.waitValidNameHighlighting();
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.waitRamFieldText("99.5");
     editMachineForm.waitSliderRamValue("99.5 GB");
@@ -195,17 +195,17 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.clickOnSaveButton();
     editMachineForm.waitFormInvisibility();
-    workspaceDetails.waitEnabled(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
-    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
+    workspaceDetails.waitAllEnabled(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
+    workspaceDetailsMachines.waitMachineListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, CHANGED_RAM_SIZE);
-    workspaceDetails.waitEnabled(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
+    workspaceDetails.waitAllEnabled(SAVE_BUTTON, APPLY_BUTTON, CANCEL_BUTTON);
     workspaceDetails.waitAndClickOn(SAVE_BUTTON);
-    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
+    workspaceDetailsMachines.waitMachineListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, CHANGED_RAM_SIZE);
   }
 
   @Test
-  public void checkSettingsButton() {
+  public void checkMachineSettings() {
     final String installerName = "Exec";
     final String serverName = "tomcat8";
     final String envVariable = "CHE_MACHINE_NAME";
@@ -231,12 +231,12 @@ public class WorkspaceDetailsMachineActionsTest {
 
     seleniumWebDriver.navigate().back();
 
-    workspaceDetailsMachines.waitMachinesListItem(MACHINE_NAME);
+    workspaceDetailsMachines.waitMachineListItem(MACHINE_NAME);
     closeSettingsPopoverIfOpen();
   }
 
   private void waitMachineListItemAndClickOnSettingsButton() {
-    workspaceDetailsMachines.waitMachinesListItem(MACHINE_NAME);
+    workspaceDetailsMachines.waitMachineListItem(MACHINE_NAME);
     closeSettingsPopoverIfOpen();
     workspaceDetailsMachines.clickOnSettingsButton(MACHINE_NAME);
     workspaceDetailsMachines.waitSettingsPopover();
@@ -253,7 +253,7 @@ public class WorkspaceDetailsMachineActionsTest {
 
   private void setValidName() {
     editMachineForm.typeName(MACHINE_NAME);
-    editMachineForm.waitNameValidHighlighting();
+    editMachineForm.waitValidNameHighlighting();
   }
 
   private void waitRecipeText(String expectedText) {

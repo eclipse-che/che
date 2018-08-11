@@ -87,7 +87,7 @@ public class EditMachineForm {
     return seleniumWebDriverHelper.waitVisibility(By.xpath(SLIDER_BAR_XPATH));
   }
 
-  public void drugSliderButtonToSliderBarCenter() {
+  public void dragSliderButtonToSliderBarCenter() {
     Actions action = seleniumWebDriverHelper.getAction();
 
     action.clickAndHold(waitSliderButton()).perform();
@@ -113,17 +113,17 @@ public class EditMachineForm {
   }
 
   public boolean isRamValueValid() {
-    final String validationAttribute = "aria-invalid";
+    final String invalidRamFlagAttribute = "aria-invalid";
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetAttribute(waitRamTextField(), validationAttribute)
+        .waitVisibilityAndGetAttribute(waitRamTextField(), invalidRamFlagAttribute)
         .equals("false");
   }
 
-  public void waitRamFieldValidHighlighting() {
+  public void waitValidRamFieldHighlighting() {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isRamValueValid());
   }
 
-  public void waitRamFieldInvalidHighlighting() {
+  public void waitInvalideRamFieldHighlighting() {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isRamValueValid());
   }
 
@@ -196,11 +196,11 @@ public class EditMachineForm {
         .equals("true");
   }
 
-  public void waitNameInvalidHighliting() {
+  public void waitInvalidNameHighlighting() {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isNameHighlightedByRed());
   }
 
-  public void waitNameValidHighlighting() {
+  public void waitValidNameHighlighting() {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isNameHighlightedByRed());
   }
 

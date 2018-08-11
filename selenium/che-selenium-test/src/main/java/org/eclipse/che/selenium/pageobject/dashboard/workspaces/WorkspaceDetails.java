@@ -109,18 +109,18 @@ public class WorkspaceDetails {
   }
 
   public enum ActionButton {
-    SAVE_BUTTON("save-button"),
-    APPLY_BUTTON("apply-button"),
-    CANCEL_BUTTON("cancel-button");
+    SAVE_BUTTON(By.name("save-button")),
+    APPLY_BUTTON(By.name("apply-button")),
+    CANCEL_BUTTON(By.name("cancel-button"));
 
-    private final String buttonNameAttribute;
+    private final By buttonLocator;
 
-    ActionButton(String buttonNameAttribute) {
-      this.buttonNameAttribute = buttonNameAttribute;
+    ActionButton(By buttonLocator) {
+      this.buttonLocator = buttonLocator;
     }
 
     public By getLocator() {
-      return By.name(this.buttonNameAttribute);
+      return this.buttonLocator;
     }
   }
 
@@ -168,7 +168,7 @@ public class WorkspaceDetails {
     return seleniumWebDriverHelper.waitVisibility(actionButton.getLocator());
   }
 
-  public void waitInvisibility(ActionButton... actionButtons) {
+  public void waitAllInvisibility(ActionButton... actionButtons) {
     asList(actionButtons)
         .forEach(
             actionButton -> seleniumWebDriverHelper.waitInvisibility(actionButton.getLocator()));
@@ -188,11 +188,11 @@ public class WorkspaceDetails {
         locator, buttonStateAttribute, Boolean.toString(!enabled));
   }
 
-  public void waitDisabled(ActionButton... actionButtons) {
+  public void waitAllDisabled(ActionButton... actionButtons) {
     asList(actionButtons).forEach(actionButton -> waitState(actionButton, false));
   }
 
-  public void waitEnabled(ActionButton... actionButtons) {
+  public void waitAllEnabled(ActionButton... actionButtons) {
     asList(actionButtons).forEach(actionButton -> waitState(actionButton, true));
   }
 

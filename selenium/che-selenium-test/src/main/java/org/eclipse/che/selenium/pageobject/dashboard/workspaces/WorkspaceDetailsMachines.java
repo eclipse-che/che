@@ -16,14 +16,14 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.DECREMENT_RAM_BUTTON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.DELETE_BUTTON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.EDIT_BUTTON_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.ENVIRONMENT_VARIABLES_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.IMAGE_FIELD_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.INCREMENT_RAM_BUTTON_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.INSTALLERS_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.MACHINE_LIST_ITEM_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.NOTIFICATION_MESSAGE_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.POPOVER_ENVIRONMENT_VARIABLES_LINK_XPATH;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.POPOVER_INSTALLERS_LINK_XPATH;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.POPOVER_SERVERS_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.RAM_AMOUNT_TEXT_FIELD_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.SERVERS_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.SETTINGS_BUTTON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.SETTINGS_POPOVER_CONTAINER_XPATH;
 
@@ -60,10 +60,9 @@ public class WorkspaceDetailsMachines {
     String DELETE_BUTTON_XPATH_TEMPLATE = "//div[@delete-machine='%s']";
     String SETTINGS_POPOVER_CONTAINER_XPATH =
         "//div[contains(@class, 'workspace-machine-actions-popover') and @is-open='isOpen']";
-    String POPOVER_INSTALLERS_LINK_XPATH =
-        SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Installers']";
-    String POPOVER_SERVERS_LINK_XPATH = SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Servers']";
-    String POPOVER_ENVIRONMENT_VARIABLES_LINK_XPATH =
+    String INSTALLERS_LINK_XPATH = SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Installers']";
+    String SERVERS_LINK_XPATH = SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Servers']";
+    String ENVIRONMENT_VARIABLES_LINK_XPATH =
         SETTINGS_POPOVER_CONTAINER_XPATH + "//a[text()='Environment Variables']";
     String IMAGE_FIELD_XPATH_TEMPLATE =
         MACHINE_LIST_ITEM_XPATH_TEMPLATE + "//span[@machine-image ='%s']";
@@ -122,13 +121,13 @@ public class WorkspaceDetailsMachines {
     seleniumWebDriverHelper.waitVisibility(By.xpath(notificationMessageXpath));
   }
 
-  public void waitMachinesListItem(String machineName) {
+  public void waitMachineListItem(String machineName) {
     seleniumWebDriverHelper.waitVisibility(getMachineListItemLocator(machineName));
   }
 
-  public void waitMachinesListItemWithAttributes(
+  public void waitMachineListItemWithAttributes(
       String machineName, String imageName, String expectedRamValue) {
-    waitMachinesListItem(machineName);
+    waitMachineListItem(machineName);
     waitEditButton(machineName);
     waitSettindsButton(machineName);
     waitDeleteButton(machineName);
@@ -143,15 +142,15 @@ public class WorkspaceDetailsMachines {
   }
 
   public void clickOnInstallersLink() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(POPOVER_INSTALLERS_LINK_XPATH));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(INSTALLERS_LINK_XPATH));
   }
 
   public void clickOnServersLink() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(POPOVER_SERVERS_LINK_XPATH));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(SERVERS_LINK_XPATH));
   }
 
   public void clickOnEnvironmentVariablesLink() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(POPOVER_ENVIRONMENT_VARIABLES_LINK_XPATH));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(ENVIRONMENT_VARIABLES_LINK_XPATH));
   }
 
   public void waitSettingsPopover() {
@@ -174,11 +173,11 @@ public class WorkspaceDetailsMachines {
         .equals("false");
   }
 
-  public void waitRamValidHighlighting(String machineName) {
+  public void waitValidRamHighlighting(String machineName) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isRamValueValid(machineName));
   }
 
-  public void waitRamInvalidHighlighting(String machineName) {
+  public void waitInvalidRamHighlighting(String machineName) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isRamValueValid(machineName));
   }
 

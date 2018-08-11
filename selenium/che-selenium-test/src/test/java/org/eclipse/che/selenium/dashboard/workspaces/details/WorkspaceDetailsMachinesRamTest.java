@@ -53,55 +53,57 @@ public class WorkspaceDetailsMachinesRamTest {
 
   @Test
   public void checkRamSection() {
-    workspaceDetailsMachines.waitMachinesListItemWithAttributes(
+    workspaceDetailsMachines.waitMachineListItemWithAttributes(
         MACHINE_NAME, IMAGE_NAME, EXPECTED_RAM_VALUE);
 
     // check behavior with invalid RAM value
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, "");
-    workspaceDetailsMachines.waitRamInvalidHighlighting(MACHINE_NAME);
-    workspaceDetails.waitInvisibility(SAVE_BUTTON, CANCEL_BUTTON, APPLY_BUTTON);
+    workspaceDetailsMachines.waitInvalidRamHighlighting(MACHINE_NAME);
+    workspaceDetails.waitAllInvisibility(SAVE_BUTTON, CANCEL_BUTTON, APPLY_BUTTON);
 
     // check saving behavior
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, "3");
-    workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
-    workspaceDetails.waitEnabled(SAVE_BUTTON);
+    workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
+    workspaceDetails.waitAllEnabled(SAVE_BUTTON);
     workspaceDetails.waitAndClickOn(SAVE_BUTTON);
     workspaceDetailsMachines.waitNotificationMessage(SUCCESS_NOTIFICATION_MESSAGE);
 
     // check increment, decrement RAM buttons
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, MAX_RAM_VALID_VALUE);
-    workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
-    workspaceDetails.waitEnabled(SAVE_BUTTON);
+    workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
+    workspaceDetails.waitAllEnabled(SAVE_BUTTON);
 
     workspaceDetailsMachines.clickOnIncrementRamButton(MACHINE_NAME);
-    workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
+    workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
     workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, MAX_RAM_VALID_VALUE);
 
     workspaceDetailsMachines.clickOnDecrementRamButton(MACHINE_NAME);
-    workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
+    workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
     workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "95.5");
 
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, MIN_RAM_VALID_VALUE);
-    workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
-    workspaceDetails.waitEnabled(SAVE_BUTTON);
+    workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
+    workspaceDetails.waitAllEnabled(SAVE_BUTTON);
 
     workspaceDetailsMachines.clickOnDecrementRamButton(MACHINE_NAME);
     workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, MIN_RAM_VALID_VALUE);
-    workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
+    workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
 
     workspaceDetailsMachines.clickOnIncrementRamButton(MACHINE_NAME);
     workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "1");
 
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, "3");
-    workspaceDetailsMachines.waitRamValidHighlighting(MACHINE_NAME);
-    workspaceDetails.waitEnabled(SAVE_BUTTON);
+    workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
+    workspaceDetails.waitAllEnabled(SAVE_BUTTON);
     workspaceDetails.waitAndClickOn(SAVE_BUTTON);
+
     workspaceDetailsMachines.clickOnIncrementRamButton(MACHINE_NAME);
-    workspaceDetails.waitEnabled(SAVE_BUTTON);
-    workspaceDetails.waitEnabled(CANCEL_BUTTON);
+    workspaceDetails.waitAllEnabled(SAVE_BUTTON);
+    workspaceDetails.waitAllEnabled(CANCEL_BUTTON);
+
     workspaceDetails.waitAndClickOn(CANCEL_BUTTON);
     workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "3");
-    workspaceDetails.waitInvisibility(SAVE_BUTTON);
-    workspaceDetails.waitInvisibility(CANCEL_BUTTON);
+    workspaceDetails.waitAllInvisibility(SAVE_BUTTON);
+    workspaceDetails.waitAllInvisibility(CANCEL_BUTTON);
   }
 }
