@@ -436,9 +436,11 @@ public class AddOrImportProjectFormTest {
     prepareJavaWorkspaceAndOpenCreateDialog(TEST_JAVA_WORKSPACE_NAME_EDIT);
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
     newWorkspace.clickOnOpenInIDEButton();
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+
     testWorkspaceServiceClient.waitStatus(
         TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName(), RUNNING);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(SPRING_SAMPLE_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(

@@ -70,19 +70,9 @@
           <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.AddOrImportProjectFormTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.NewWorkspacePageTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfSubOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.FilterOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.MemberOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.OrganizationMembersTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.RenameOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.AddWorkspaceToOrganizationTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
           <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
           <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest"/>
@@ -291,6 +281,9 @@
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
           <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
+
+          <!-- Next tests can unexpectedly affect on other tests and so should be executed at the end -->
+          <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
         </classes>
     </test>
 

@@ -27,21 +27,16 @@ import org.testng.annotations.Test;
 
 public class OpenExternalLibraryFileAfterRefreshTest {
   private static final String PROJECT_NAME = NameGenerator.generate("ExternalFileTest", 4);
-  private static final String CHECKING_FILE_NAME = "Filter";
+  private static final String CHECKING_FILE_NAME = "DNSNameService";
   private static final String EXPECTED_EDITOR_TEXT =
       "\n"
           + " // Failed to get sources. Instead, stub sources have been generated.\n"
           + " // Implementation of methods is unavailable.\n"
-          + "package javax.servlet;\n"
-          + "public interface Filter {\n"
-          + "\n"
-          + "    public void init(javax.servlet.FilterConfig arg0) throws javax.servlet.ServletException;\n"
-          + "\n"
-          + "    public void doFilter(javax.servlet.ServletRequest arg0, javax.servlet.ServletResponse arg1, javax.servlet.FilterChain arg2) throws java.io.IOException, javax.servlet.ServletException;\n"
-          + "\n"
-          + "    public void destroy();\n"
-          + "\n"
-          + "}\n";
+          + "package sun.net.spi.nameservice.dns;\n"
+          + "public final class DNSNameService implements sun.net.spi.nameservice.NameService {\n"
+          + "    private java.util.LinkedList<java.lang.String> domainList;\n"
+          + "    private java.lang.String nameProviderUrl;\n"
+          + "    private static java.lang.ThreadLocal<java.lang.ref.SoftReference<sun.net.spi.nameservice.dns.DNSNameService.ThreadContext>> contextRef;\n";
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspace testWorkspace;
@@ -83,7 +78,7 @@ public class OpenExternalLibraryFileAfterRefreshTest {
     projectExplorer.waitVisibilitySeveralItemsByName("README.md", "pom.xml", "External Libraries");
 
     projectExplorer.openSeveralItemsByVisibleNameInExplorer(
-        "External Libraries", "servlet-api-2.5.jar", "javax.servlet", CHECKING_FILE_NAME);
+        "External Libraries", "dnsns.jar", "sun.net.spi.nameservice.dns", CHECKING_FILE_NAME);
 
     editor.waitActive();
     editor.waitTabIsPresent(CHECKING_FILE_NAME);
