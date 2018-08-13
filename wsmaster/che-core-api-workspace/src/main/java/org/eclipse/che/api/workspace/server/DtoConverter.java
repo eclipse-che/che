@@ -97,6 +97,7 @@ public final class DtoConverter {
         .withCommands(commands)
         .withProjects(projects)
         .withEnvironments(environments)
+        .withAttributes(workspace.getAttributes())
         .withDescription(workspace.getDescription());
   }
 

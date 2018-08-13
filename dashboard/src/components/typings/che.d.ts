@@ -309,6 +309,7 @@ declare namespace che {
     };
     projects?: Array <any>;
     commands?: Array <any>;
+    attributes?: {[attrName: string]: string};
   }
 
   export interface IWorkspaceEnvironment {
