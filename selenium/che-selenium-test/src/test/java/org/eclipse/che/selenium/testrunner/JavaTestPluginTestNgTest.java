@@ -42,6 +42,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -120,15 +121,22 @@ public class JavaTestPluginTestNgTest {
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
 
     // then
-    pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
+    try {
+
+      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+          "Test runner executed successfully.");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
+    pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
-    events.clickOnEventPanelAndWaitMessage("Test runner executed successfully.");
   }
 
   @Test(priority = 1)
@@ -140,6 +148,14 @@ public class JavaTestPluginTestNgTest {
     editor.waitActive();
     editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
+    try {
+
+      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+          "Test runner executed successfully.");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.goToCursorPositionVisible(31, 17);
@@ -168,6 +184,14 @@ public class JavaTestPluginTestNgTest {
     editor.waitActive();
     editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
+    try {
+
+      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+          "Test runner executed successfully.");
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
     try {
       pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     } catch (TimeoutException ex) {
