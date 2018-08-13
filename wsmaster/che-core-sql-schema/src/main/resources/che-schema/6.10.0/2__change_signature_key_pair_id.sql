@@ -10,14 +10,29 @@
 --   Red Hat, Inc. - initial API and implementation
 --
 
--- Remove old data
-TRUNCATE TABLE che_sign_key_pair;
+-- Rename old table
+ALTER TABLE che_sign_key_pair RENAME TO che_sign_key_pair_old;
 
--- Rename field
-ALTER TABLE che_sign_key_pair RENAME COLUMN id TO workspace_id;
+-- Create new key pair table
+CREATE TABLE che_sign_key_pair (
+    workspace_id        VARCHAR(255) NOT NULL,
+    public_key          BIGINT       NOT NULL,
+    private_key         BIGINT       NOT NULL,
 
--- Add workspace reference
+    PRIMARY KEY (workspace_id)
+);
+-- Constraints
 ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspace (id);
-
--- Index
+ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_public_key_id FOREIGN KEY (public_key) REFERENCES che_sign_key (id);
+ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_private_key_id FOREIGN KEY (private_key) REFERENCES che_sign_key (id);
+-- Indexes
 CREATE INDEX index_sign_private_key_pair_id ON che_sign_key_pair (workspace_id);
+CREATE INDEX index_sign_public_key_id ON che_sign_key_pair (public_key);
+CREATE INDEX index_sign_private_key_id ON che_sign_key_pair (private_key);
+
+-- Copy data
+INSERT  INTO che_sign_key_pair
+WITH q1 AS (select workspace_id from che_k8s_runtime)
+   , q2 AS (select public_key, private_key from che_k8s_runtime, che_sign_key_pair_old LIMIT 1)
+SELECT * FROM q1, q2;
+
