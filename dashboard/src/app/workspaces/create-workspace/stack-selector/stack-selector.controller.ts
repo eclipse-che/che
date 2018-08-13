@@ -320,11 +320,15 @@ export class StackSelectorController {
     this.stacksFiltered = this.$filter('orderBy')(this.stacksFiltered, this.stackOrderBy);
 
     if (this.priorityStacks) {
-      let priorityStacks = this.lodash.remove(this.stacksFiltered, (stack: che.IStack) => {
+      const priorityStacksToSort = this.lodash.remove(this.stacksFiltered, (stack: che.IStack) => {
         return this.priorityStacks.indexOf(stack.name) >= 0;
       });
 
-      this.stacksFiltered = priorityStacks.concat(this.stacksFiltered);
+      const priorityStacksSorted = this.priorityStacks.map((stackName: string) => {
+        return priorityStacksToSort.find((stack: che.IStack) => stack.name === stackName);
+      });
+
+      this.stacksFiltered = priorityStacksSorted.concat(this.stacksFiltered);
     }
 
     this.updateTags();
@@ -379,6 +383,14 @@ export class StackSelectorController {
       this.allStackTags = this.allStackTags.concat(stack.tags);
     });
     this.allStackTags = this.lodash.uniq(this.allStackTags);
+  }
+
+  /**
+   * Returns `true` if a stack is pinned to the top.
+   * @param stack
+   */
+  private isPinned(stack: che.IStack): boolean {
+    return this.priorityStacks.indexOf(stack.name) >= 0;
   }
 
 }
