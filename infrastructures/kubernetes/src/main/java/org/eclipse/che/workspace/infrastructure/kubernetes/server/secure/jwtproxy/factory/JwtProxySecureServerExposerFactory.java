@@ -9,11 +9,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxySecureServerExposer;
 
 /**
  * Helps to create {@link JwtProxySecureServerExposerFactory} with fields injected from DI

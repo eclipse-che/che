@@ -19,10 +19,10 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
 
 /**
  * Exposes secure servers with JWTProxy.
@@ -54,16 +54,10 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
   @Inject
   public JwtProxySecureServerExposer(
       @Assisted RuntimeIdentity identity,
-      SignatureKeyManager signatureKeyManager,
-      JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
+      JwtProxyProvisionerFactory jwtProxyProvisionerFactory,
       ExternalServerExposerStrategy<T> exposerStrategy) {
     this.exposerStrategy = exposerStrategy;
-
-    proxyProvisioner =
-        new JwtProxyProvisioner(
-            identity,
-            signatureKeyManager,
-            jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId()));
+    this.proxyProvisioner = jwtProxyProvisionerFactory.create(identity);
   }
 
   @Override

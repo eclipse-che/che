@@ -17,6 +17,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_PUBLIC_KEY_FILE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.PUBLIC_KEY_FOOTER;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.PUBLIC_KEY_HEADER;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -36,6 +37,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -59,6 +61,7 @@ public class JwtProxyProvisionerTest {
   @Mock private SignatureKeyManager signatureKeyManager;
   private KeyPair keyPair;
   @Mock private PublicKey publicKey;
+  @Mock private JwtProxyConfigBuilderFactory configBuilderFactory;
 
   private JwtProxyProvisioner jwtProxyProvisioner;
   private KubernetesEnvironment k8sEnv;
@@ -69,12 +72,13 @@ public class JwtProxyProvisionerTest {
     when(signatureKeyManager.getKeyPair()).thenReturn(keyPair);
     when(publicKey.getEncoded()).thenReturn("publickey".getBytes());
 
-    jwtProxyProvisioner =
-        new JwtProxyProvisioner(
-            runtimeId,
-            signatureKeyManager,
+    when(configBuilderFactory.create(any()))
+        .thenReturn(
             new JwtProxyConfigBuilder(
                 URI.create("http://che.api"), "iss", "1h", "", runtimeId.getWorkspaceId()));
+    jwtProxyProvisioner =
+        new JwtProxyProvisioner(
+            signatureKeyManager, configBuilderFactory, "eclipse/che-jwtproxy", "128mb", runtimeId);
     k8sEnv = KubernetesEnvironment.builder().build();
   }
 
