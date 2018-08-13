@@ -23,6 +23,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -41,6 +42,7 @@ import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.TimeoutException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -94,6 +96,16 @@ public class PullRequestPluginWithForkTest {
     menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
     preferences.generateAndUploadSshKeyOnGithub(githubUserName, githubUserPassword);
+  }
+
+  @AfterClass
+  public void removeTestRepository() {
+    try {
+      new TestGitHubRepository(githubUserName, githubUserPassword, testAuxiliaryRepo.getName())
+          .delete();
+    } catch (IOException e) {
+      // ignore IOException in case of there is no repository to delete
+    }
   }
 
   @Test

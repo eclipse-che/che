@@ -326,9 +326,9 @@ export class CheWorkspace {
   /**
    * Ask for loading the workspaces in asynchronous way
    * If there are no changes, it's not updated
-   * @returns {ng.IPromise<any>}
+   * @returns {ng.IPromise<Array<che.IWorkspace>>}
    */
-  fetchWorkspaces(): ng.IPromise<any> {
+  fetchWorkspaces(): ng.IPromise<Array<che.IWorkspace>> {
     let promise = this.remoteWorkspaceAPI.query().$promise;
     let updatedPromise = promise.then((data: Array<che.IWorkspace>) => {
       this.workspaces.length = 0;
@@ -345,7 +345,7 @@ export class CheWorkspace {
       return this.$q.reject(error);
     });
 
-    let callbackPromises = updatedPromise.then((data: any) => {
+    let callbackPromises = updatedPromise.then((data: Array<che.IWorkspace>) => {
       let promises = [];
       promises.push(updatedPromise);
 
@@ -353,7 +353,7 @@ export class CheWorkspace {
         let promise = listener.onChangeWorkspaces(data);
         promises.push(promise);
       });
-      return this.$q.all(promises);
+      return this.$q.all(promises).then(() => data);
     }, (error: any) => {
       return this.$q.reject(error);
     });
