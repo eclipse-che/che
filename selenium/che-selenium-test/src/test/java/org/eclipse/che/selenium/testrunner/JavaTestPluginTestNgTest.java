@@ -188,7 +188,7 @@ public class JavaTestPluginTestNgTest {
     try {
       notifications.waitExpectedMessageOnProgressPanelAndClosed(
           "Test runner executed successfully.");
-    } catch (WebDriverException ex) {
+    } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/10728");
     }
