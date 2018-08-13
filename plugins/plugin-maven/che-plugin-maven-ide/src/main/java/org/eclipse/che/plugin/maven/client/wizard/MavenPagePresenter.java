@@ -50,6 +50,8 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.project.ProjectServiceClient;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.MavenArchetype;
@@ -67,18 +69,21 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
   private final MavenLocalizationConstant localization;
+  private final ProjectServiceClient projectService;
 
   @Inject
   public MavenPagePresenter(
       MavenPageView view,
       DialogFactory dialogFactory,
       AppContext appContext,
-      MavenLocalizationConstant localization) {
+      MavenLocalizationConstant localization,
+      ProjectServiceClient projectService) {
     super();
     this.view = view;
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
     this.localization = localization;
+    this.projectService = projectService;
     view.setDelegate(this);
   }
 
@@ -197,7 +202,6 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
 
   @Override
   public void go(AcceptsOneWidget container) {
-    container.setWidget(view);
 
     final ProjectWizardMode wizardMode = ProjectWizardMode.parse(context.get(WIZARD_MODE_KEY));
     final String projectName = dataObject.getName();
@@ -212,12 +216,25 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
       }
       updateDelegate.updateControls();
     }
+    projectService
+        .getItem(Path.valueOf(dataObject.getPath()).parent().append("pom.xml"))
+        .then(
+            result -> {
+              updateView(container, false);
+            })
+        .catchError(
+            arg -> {
+              updateView(container, CREATE == wizardMode);
+            });
+  }
+
+  private void updateView(AcceptsOneWidget container, boolean showArchetype) {
+    container.setWidget(view);
 
     updateView();
     validateCoordinates();
 
-    view.setArchetypeSectionVisibility(
-        CREATE == wizardMode && dataObject.getPath().equals("/" + projectName));
+    view.setArchetypeSectionVisibility(showArchetype);
     view.enableArchetypes(view.isGenerateFromArchetypeSelected());
   }
 

@@ -20,7 +20,9 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_VERSIO
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.GROUP_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -101,8 +103,9 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
           "Missed some required option (archetypeGroupId, archetypeArtifactId or archetypeVersion)");
     }
 
-    if (projectPath.split(separator).length > 2) {
-      throw new ServerException("Non root project path is not allowed");
+    Path projectFolder = Paths.get(rootDirPathProvider.get(), projectPath).getParent();
+    if (Files.exists(projectFolder.resolve("pom.xml"))) {
+      throw new ServerException("Project path witch contains 'pom.xml' file is not allowed");
     }
 
     MavenArchetype mavenArchetype =
@@ -119,6 +122,6 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
     mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectName));
     mavenArtifact.setVersion(getFirst(version.getList(), DEFAULT_VERSION));
     archetypeGenerator.generateFromArchetype(
-        projectName, new File(rootDirPathProvider.get()), mavenArchetype, mavenArtifact);
+        projectName, projectFolder.toFile(), mavenArchetype, mavenArtifact);
   }
 }

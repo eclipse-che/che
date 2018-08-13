@@ -78,7 +78,7 @@ public class CheckGeneratingMavenArchetypeTest {
   }
 
   @Test(priority = 1)
-  public void shouldHideTheArchetypeFieldIfProjectPathIsNonRoot() throws Exception {
+  public void shouldHideTheArchetypeFieldIfProjectPathHasPomXml() {
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
