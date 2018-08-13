@@ -258,6 +258,28 @@ public class TestGitHubRepository {
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
   }
 
+  public static void deleteAllRepos(String repoPrefix, String gitHubUsername, String gitHubPassword)
+      throws IOException {
+    GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
+
+    gitHub
+        .getMyself()
+        .getAllRepositories()
+        .keySet()
+        .stream()
+        .filter(repoName -> repoName.startsWith(repoPrefix))
+        .forEach(
+            repoName -> {
+              String repoAddress = gitHubUsername + "/" + repoName;
+              LOG.info("Removing repo " + repoAddress + "...");
+              try {
+                gitHub.getRepository(repoAddress).delete();
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            });
+  }
+
   public String getHtmlUrl() {
     return ghRepo.getHtmlUrl().toString();
   }
