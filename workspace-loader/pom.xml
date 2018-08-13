@@ -63,13 +63,6 @@
                             <directory>${basedir}/dist</directory>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
-                        <fileset>
-                            <directory>${basedir}</directory>
-                            <includes>
-                                <include>**/package-lock.json</include>
-                            </includes>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
                     </filesets>
                 </configuration>
             </plugin>

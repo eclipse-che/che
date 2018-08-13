@@ -50,11 +50,6 @@
             <artifactId>infrastructure-kubernetes</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.infrastructure</groupId>
-            <artifactId>infrastructure-kubernetes</artifactId>
-            <classifier>tests</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-machine-authentication</artifactId>
             <classifier>tests</classifier>
@@ -219,18 +214,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>analyze</id>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <excludes>
@@ -242,6 +225,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
                     <execution>
                         <goals>
                             <goal>unpack-dependencies</goal>

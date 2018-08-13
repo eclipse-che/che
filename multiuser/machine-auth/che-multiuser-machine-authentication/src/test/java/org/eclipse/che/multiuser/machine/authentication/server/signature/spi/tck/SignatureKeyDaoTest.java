@@ -78,15 +78,18 @@ public class SignatureKeyDaoTest {
     workspaceRepository.createAll(
         Arrays.asList(
             new WorkspaceImpl(
-                "ws0", account, new WorkspaceConfigImpl("ws-name0", "", "cfg0", null, null, null)),
+                "ws0", account,
+                new WorkspaceConfigImpl("ws-name0", "", "cfg0", null, null, null, null)),
             new WorkspaceImpl(
-                "ws1", account, new WorkspaceConfigImpl("ws-name1", "", "cfg1", null, null, null)),
+                "ws1", account,
+                new WorkspaceConfigImpl("ws-name1", "", "cfg1", null, null, null, null)),
             new WorkspaceImpl(
-                "ws2", account, new WorkspaceConfigImpl("ws-name2", "", "cfg2", null, null, null)),
+                "ws2", account,
+                new WorkspaceConfigImpl("ws-name2", "", "cfg2", null, null, null, null)),
             new WorkspaceImpl(
                 "id_10",
                 account,
-                new WorkspaceConfigImpl("ws-name10", "", "cfg1", null, null, null))));
+                new WorkspaceConfigImpl("ws-name10", "", "cfg1", null, null, null, null))));
 
     storedKeyPairs = new SignatureKeyPairImpl[COUNT_KEY_PAIRS];
     kpg = KeyPairGenerator.getInstance(ALGORITHM);
@@ -100,9 +103,8 @@ public class SignatureKeyDaoTest {
 
   @Test
   public void testGetsAllKeys() throws Exception {
-    List<SignatureKeyPairImpl> foundKeys = new ArrayList();
-    for (int i = 0; i < storedKeyPairs.length; i++) {
-      SignatureKeyPairImpl expected = storedKeyPairs[i];
+    List<SignatureKeyPairImpl> foundKeys = new ArrayList<>();
+    for (SignatureKeyPairImpl expected : storedKeyPairs) {
       foundKeys.add(dao.get(expected.getWorkspaceId()));
     }
     assertEquals(new HashSet<>(foundKeys), new HashSet<>(asList(storedKeyPairs)));

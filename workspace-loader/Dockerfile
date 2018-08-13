@@ -11,14 +11,17 @@
 #  $ docker run --rm eclipse-che-workspace-loader | tar -C target/ -zxf -
 FROM node:6.11.2
 
+RUN npm i -g yarn@1.9.4
+
 COPY package.json /workspace-loader/
-RUN cd /workspace-loader && npm install
+COPY yarn.lock /workspace-loader/
+RUN cd /workspace-loader && yarn
 
 COPY . /workspace-loader/
 
 RUN cd /workspace-loader && \
-    npm run build && \
-    npm run test && \
+    yarn run build && \
+    yarn run test && \
     cd target && \
     tar zcf /tmp/workspace-loader.tar.gz dist
 
