@@ -22,7 +22,6 @@ import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -41,7 +40,6 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private Events events;
   private TestFactory testFactory;
   private final Logger LOG = LoggerFactory.getLogger(CheckFactoryWithPerUserCreatePolicyTest.class);
 
@@ -67,8 +65,8 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
-    try {
 
+    try {
       notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
           "Project Spring imported");
     } catch (TimeoutException ex) {
@@ -77,7 +75,6 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     }
 
     String workspaceUrl = seleniumWebDriver.getCurrentUrl();
-
     // accept factory
     testFactory.open(seleniumWebDriver);
 
