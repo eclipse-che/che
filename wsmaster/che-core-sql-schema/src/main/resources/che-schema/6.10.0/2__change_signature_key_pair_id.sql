@@ -21,18 +21,17 @@ CREATE TABLE che_sign_key_pair (
 
     PRIMARY KEY (workspace_id)
 );
--- Constraints
+-- Constraint
 ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspace (id);
-ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_public_key_id FOREIGN KEY (public_key) REFERENCES che_sign_key (id);
-ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_private_key_id FOREIGN KEY (private_key) REFERENCES che_sign_key (id);
--- Indexes
+-- Index
 CREATE INDEX index_sign_private_key_pair_id ON che_sign_key_pair (workspace_id);
-CREATE INDEX index_sign_public_key_id ON che_sign_key_pair (public_key);
-CREATE INDEX index_sign_private_key_id ON che_sign_key_pair (private_key);
 
 -- Copy data
 INSERT  INTO che_sign_key_pair
 WITH q1 AS (select workspace_id from che_k8s_runtime)
    , q2 AS (select public_key, private_key from che_k8s_runtime, che_sign_key_pair_old LIMIT 1)
 SELECT * FROM q1, q2;
+
+-- Cleanup
+DROP TABLE che_sign_key_pair_old;
 
