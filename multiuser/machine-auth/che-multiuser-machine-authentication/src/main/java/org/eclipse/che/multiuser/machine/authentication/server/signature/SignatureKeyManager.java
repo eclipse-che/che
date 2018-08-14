@@ -98,12 +98,14 @@ public class SignatureKeyManager {
                 });
 
     this.workspaceEventsSubscriber =
-        (EventSubscriber<WorkspaceStatusEvent>)
-            event -> {
-              if (event.getStatus() == STOPPED) {
-                removeKeyPair(event.getWorkspaceId());
-              }
-            };
+        new EventSubscriber<WorkspaceStatusEvent>() {
+          @Override
+          public void onEvent(WorkspaceStatusEvent event) {
+            if (event.getStatus() == STOPPED) {
+              removeKeyPair(event.getWorkspaceId());
+            }
+          }
+        };
   }
 
   /** Returns cached instance of {@link KeyPair} or null when failed to load key pair. */
