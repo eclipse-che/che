@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
+import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
@@ -62,6 +64,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.IAnnotationTransformer;
 import org.testng.IConfigurationListener;
 import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
@@ -74,6 +77,7 @@ import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 import org.testng.TestException;
+import org.testng.annotations.ITestAnnotation;
 
 /**
  * Tests lifecycle handler.
@@ -85,7 +89,11 @@ import org.testng.TestException;
  * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener, ISuiteListener, IInvokedMethodListener, IExecutionListener {
+    implements ITestListener,
+        ISuiteListener,
+        IInvokedMethodListener,
+        IExecutionListener,
+        IAnnotationTransformer {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -119,8 +127,16 @@ public abstract class SeleniumTestHandler
   private String gitHubPassword;
 
   @Inject
-  @Named("sys.includedGroups")
-  private String includedGroups;
+  @Named("sys.excludedGroups")
+  private String excludedGroups;
+
+  @Inject
+  @Named("che.infrastructure")
+  private Infrastructure infrastructure;
+
+  @Inject
+  @Named("che.multiuser")
+  private boolean isMultiuser;
 
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
@@ -149,7 +165,7 @@ public abstract class SeleniumTestHandler
 
   private void revokeGithubOauthToken() {
     // do not revoke if github tests are not being executed
-    if (includedGroups != null && !includedGroups.contains(TestGroup.GITHUB)) {
+    if (excludedGroups != null && excludedGroups.contains(TestGroup.GITHUB)) {
       return;
     }
 
@@ -597,4 +613,41 @@ public abstract class SeleniumTestHandler
   /** Returns list of child modules */
   @NotNull
   public abstract List<Module> getChildModules();
+
+  @Override
+  public void transform(
+      ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
+    excludeTestOfImproperGroup(annotation);
+  }
+
+  private void excludeTestOfImproperGroup(ITestAnnotation annotation) {
+    if (annotation.getGroups() == null) {
+      return;
+    }
+
+    List groups = Arrays.asList(annotation.getGroups());
+
+    // exclude test which doesn't comply singleuser/multiuser flag
+    if (groups.contains(TestGroup.MULTIUSER) && !isMultiuser) {
+      annotation.setEnabled(false);
+      return;
+    }
+
+    if (groups.contains(TestGroup.SINGLEUSER) && isMultiuser) {
+      annotation.setEnabled(false);
+      return;
+    }
+
+    // exclude test with group from excludedGroups doesn't support current infrastructure
+    if (excludedGroups != null
+        && Arrays.stream(excludedGroups.split(",")).anyMatch(groups::contains)) {
+      annotation.setEnabled(false);
+      return;
+    }
+
+    // exclude test which doesn't support current infrastructure
+    if (!groups.isEmpty() && !groups.contains(infrastructure.toString().toLowerCase())) {
+      annotation.setEnabled(false);
+    }
+  }
 }

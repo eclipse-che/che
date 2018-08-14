@@ -79,14 +79,11 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
 
-    SUPPORTED_INFRASTRUCTURES=(docker openshift k8s osio)
-
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
     unset TMP_SUITE_PATH
     unset ORIGIN_TESTS_SCOPE
     unset TMP_DIR
-    unset INCLUDE_PARAM
     unset EXCLUDE_PARAM
 }
 
@@ -211,9 +208,6 @@ applyCustomOptions() {
 
         elif [[ "$var" =~ --exclude=.* ]]; then
             EXCLUDE_PARAM=$(echo "$var" | sed -e "s/--exclude=//g")
-
-        elif [[ "$var" =~ --include=.* ]]; then
-            INCLUDE_PARAM=$(echo "$var" | sed -e "s/--include=//g")
 
         fi
     done
@@ -466,9 +460,8 @@ printRunOptions() {
     echo "[TEST] Product Host        : ${PRODUCT_HOST}"
     echo "[TEST] Product Port        : ${PRODUCT_PORT}"
     echo "[TEST] Product Config      : $(getProductConfig)"
-    echo "[TEST] Tests scope:        : ${TESTS_SCOPE}"
-    echo "[TEST] - groups to include : $(getIncludedGroups)"
-    echo "[TEST] - groups to exclude : $(getExcludedGroups)"
+    echo "[TEST] Tests scope         : ${TESTS_SCOPE}"
+    echo "[TEST] Tests to exclude    : $(getExcludedGroups)"
     echo "[TEST] Threads             : ${THREADS}"
     echo "[TEST] Workspace pool size : ${WORKSPACE_POOL_SIZE}"
     echo "[TEST] Web browser         : ${BROWSER}"
@@ -711,7 +704,6 @@ runTests() {
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
                 -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
-                -DincludedGroups="$(getIncludedGroups)" \
                 -DexcludedGroups="$(getExcludedGroups)" \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
@@ -731,49 +723,10 @@ getProductConfig() {
   echo ${testGroups}
 }
 
-# Prepare list of test groups to include.
-# It consists of "--include" parameter value + list of groups which comply with product config
-getIncludedGroups() {
-    local includeParamArray=(${INCLUDE_PARAM//,/ })
-
-    local productConfig=$(getProductConfig)
-    local productConfigArray=(${productConfig//,/ })
-
-    local includedGroups=("${productConfigArray[@]}" "${includeParamArray[@]}" "github")
-
-    local excludeParamArray=(${EXCLUDE_PARAM//,/ })
-
-    for excludeParam in ${excludeParamArray[*]}; do
-      for i in ${!includedGroups[@]}; do
-        if [[ "${includedGroups[i]}" == "${excludeParam}" ]]; then
-          unset includedGroups[i]
-        fi
-      done
-    done
-
-    echo $(IFS=$','; echo "${includedGroups[*]}")
-}
-
 # Prepare list of test groups to exclude.
-# It consists of "--exclude" parameter value + list of groups which don't comply with product config
 getExcludedGroups() {
     local excludeParamArray=(${EXCLUDE_PARAM//,/ })
-
-    local productConfig=$(getProductConfig)
-    local productConfigArray=(${productConfig//,/ })
-
-    local uncomplyingGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singleuser multiuser)
-
-    for productConfigGroup in ${productConfigArray[*]}; do
-        for i in ${!uncomplyingGroups[@]}; do
-            if [[ "${productConfigGroup}" == "${uncomplyingGroups[i]}" ]]; then
-                unset uncomplyingGroups[i]
-            fi
-        done
-    done
-
-    local excludedGroups=("${uncomplyingGroups[@]}" "${excludeParamArray[@]}")
-    echo $(IFS=$','; echo "${excludedGroups[*]}")
+    echo $(IFS=$','; echo "${excludeParamArray[*]}")
 }
 
 # Reruns failed tests

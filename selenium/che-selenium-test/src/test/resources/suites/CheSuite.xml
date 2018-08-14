@@ -18,37 +18,6 @@
        thread-count="4">
 
     <test name="all">
-      <method-selectors>
-        <method-selector>
-          <script language="beanshell">
-                    <![CDATA[
-    boolean isTestGroupsAgreedWithRequestedGroups() {
-      if (groups.isEmpty()) {
-        return true;
-      }
-
-      includedGroupsVal = System.getProperty("includedGroups");
-      for (String includedGroup: includedGroupsVal.split(",")) {
-        if (groups.contains(includedGroup)) {
-          return true;
-        }
-      }
-
-      excludedGroupsVal = System.getProperty("excludedGroups");
-      for (String excludedGroup: excludedGroupsVal.split(",")) {
-        if (groups.contains(excludedGroup)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    isTestGroupsAgreedWithRequestedGroups();
-]]>
-          </script>
-        </method-selector>
-      </method-selectors>
       <classes>
           <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest"/>
           <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
