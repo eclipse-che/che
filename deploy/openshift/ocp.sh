@@ -224,7 +224,7 @@ run_ocp() {
                           --base-dir=${OKD_DIR} \
                           "${ENABLE_COMPONENTS}"
     wait_ocp
-#    wait_for_automation_service_broker
+    wait_for_automation_service_broker
 }
 
 deploy_che_to_ocp() {
