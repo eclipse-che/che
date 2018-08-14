@@ -116,6 +116,7 @@ public class SignatureKeyManager {
     }
   }
 
+  /** Removes key pair from cache and DB. */
   public void removeKeyPair(String workspaceId) {
     try {
       cachedPair.invalidate(workspaceId);
