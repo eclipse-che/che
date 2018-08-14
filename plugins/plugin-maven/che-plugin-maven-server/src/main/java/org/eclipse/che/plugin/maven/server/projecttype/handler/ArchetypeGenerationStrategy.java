@@ -103,9 +103,9 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
           "Missed some required option (archetypeGroupId, archetypeArtifactId or archetypeVersion)");
     }
 
-    Path projectFolder = Paths.get(rootDirPathProvider.get(), projectPath).getParent();
-    if (Files.exists(projectFolder.resolve("pom.xml"))) {
-      throw new ServerException("Project path witch contains 'pom.xml' file is not allowed");
+    Path projectsParentPath = Paths.get(rootDirPathProvider.get(), projectPath).getParent();
+    if (Files.exists(projectsParentPath.resolve("pom.xml"))) {
+      throw new ServerException("Parent path witch contains 'pom.xml' file is not allowed");
     }
 
     MavenArchetype mavenArchetype =
@@ -122,6 +122,6 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
     mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectName));
     mavenArtifact.setVersion(getFirst(version.getList(), DEFAULT_VERSION));
     archetypeGenerator.generateFromArchetype(
-        projectName, projectFolder.toFile(), mavenArchetype, mavenArtifact);
+        projectName, projectsParentPath.toFile(), mavenArchetype, mavenArtifact);
   }
 }
