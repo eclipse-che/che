@@ -110,7 +110,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
     waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
     commandsToolbar.waitTimerValuePattern("\\d\\d:\\d\\d");
-    commandsToolbar.waitNumOfProcessCounter(2);
+    commandsToolbar.waitNumOfProcessCounter(3);
 
     checkTestAppByPreviewButtonAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
