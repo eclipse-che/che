@@ -22,8 +22,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import java.io.IOException;
 import java.security.Key;
@@ -61,8 +61,8 @@ public class MachineLoginFilter implements Filter {
 
   private final RequestTokenExtractor tokenExtractor;
   private final UserManager userManager;
-  private final SignatureKeyManager keyManager;
   private final PermissionChecker permissionChecker;
+  private final JwtParser jwtParser;
 
   @Inject
   public MachineLoginFilter(
@@ -72,8 +72,20 @@ public class MachineLoginFilter implements Filter {
       PermissionChecker permissionChecker) {
     this.tokenExtractor = tokenExtractor;
     this.userManager = userManager;
-    this.keyManager = keyManager;
     this.permissionChecker = permissionChecker;
+    this.jwtParser =
+        Jwts.parser()
+            .setSigningKeyResolver(
+                new SigningKeyResolverAdapter() {
+                  @Override
+                  public Key resolveSigningKey(JwsHeader header, Claims claims) {
+                    if (!MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
+                      throw new JwtException("Not a machine token");
+                    }
+                    String wsId = claims.get(WORKSPACE_ID_CLAIM, String.class);
+                    return keyManager.getKeyPair(wsId).getPublic();
+                  }
+                });
   }
 
   @Override
@@ -92,8 +104,7 @@ public class MachineLoginFilter implements Filter {
 
     // check token signature and verify is this token machine or not
     try {
-      final Jws<Claims> jwt =
-          Jwts.parser().setSigningKeyResolver(workspaceSigningKeyResolver).parseClaimsJws(token);
+      final Jws<Claims> jwt = jwtParser.parseClaimsJws(token);
       final Claims claims = jwt.getBody();
       try {
         final String userId = claims.get(USER_ID_CLAIM, String.class);
@@ -146,16 +157,4 @@ public class MachineLoginFilter implements Filter {
 
   @Override
   public void destroy() {}
-
-  private SigningKeyResolver workspaceSigningKeyResolver =
-      new SigningKeyResolverAdapter() {
-        @Override
-        public Key resolveSigningKey(JwsHeader header, Claims claims) {
-          if (!MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
-            throw new JwtException("Not a machine token");
-          }
-          String wsId = claims.get(WORKSPACE_ID_CLAIM, String.class);
-          return keyManager.getKeyPair(wsId).getPublic();
-        }
-      };
 }

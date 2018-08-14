@@ -22,6 +22,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -32,7 +33,6 @@ import java.security.Key;
 import java.security.PublicKey;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.slf4j.Logger;
@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractKeycloakFilter implements Filter {
 
+  private final JwtParser jwtParser;
   protected KeycloakSettings keycloakSettings;
   protected JwkProvider jwkProvider;
 
@@ -57,6 +58,7 @@ public abstract class AbstractKeycloakFilter implements Filter {
     if (jwksUrl != null) {
       this.jwkProvider = new GuavaCachedJwkProvider(new UrlJwkProvider(new URL(jwksUrl)));
     }
+    jwtParser = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverByKind());
   }
 
   /** when a request came from a machine with valid token then auth is not required */
@@ -69,7 +71,7 @@ public abstract class AbstractKeycloakFilter implements Filter {
       return false;
     }
     try {
-      Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapterByKind()).parse(token);
+      jwtParser.parse(token);
       return false;
     } catch (ExpiredJwtException | MalformedJwtException | SignatureException ex) {
       // given token is not signed by particular signature key so it must be checked in another way
@@ -80,12 +82,12 @@ public abstract class AbstractKeycloakFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {}
+  public void init(FilterConfig filterConfig) {}
 
   @Override
   public void destroy() {}
 
-  private class SigningKeyResolverAdapterByKind extends SigningKeyResolverAdapter {
+  private class SigningKeyResolverByKind extends SigningKeyResolverAdapter {
 
     @Override
     public Key resolveSigningKey(JwsHeader header, String plaintext) {
@@ -119,20 +121,20 @@ public abstract class AbstractKeycloakFilter implements Filter {
     if (kid == null) {
       LOG.warn(
           "'kid' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
-      return null;
+      throw new JwtException("'kid' is missing in the JWT token header.");
     }
     String alg = header.getAlgorithm();
     if (alg == null) {
       LOG.warn(
           "'alg' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
-      return null;
+      throw new JwtException("'alg' is missing in the JWT token header.");
     }
 
     if (jwkProvider == null) {
       LOG.warn(
           "JWK provider is not available: This is not possible to validate the token with OIDC provider keys.\n"
               + "Please look into the startup logs to find out the root cause");
-      return null;
+      throw new JwtException("JWK provider is not available");
     }
     Jwk jwk = jwkProvider.get(kid);
     return jwk.getPublicKey();

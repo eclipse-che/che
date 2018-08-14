@@ -38,7 +38,7 @@ public interface SignatureKeyDao {
   /**
    * Removes signature key pair with given workspace id.
    *
-   * @param workspaceId workspace key identifier to remove keypair from
+   * @param workspaceId workspace identifier to remove keypair from
    * @throws ServerException when any errors occur while removing signature key pair
    */
   void remove(String workspaceId) throws ServerException;

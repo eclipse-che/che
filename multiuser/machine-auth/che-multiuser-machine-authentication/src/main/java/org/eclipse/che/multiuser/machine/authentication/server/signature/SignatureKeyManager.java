@@ -89,7 +89,10 @@ public class SignatureKeyManager {
                   cachedPair.remove(event.getWorkspaceId());
                   signatureKeyDao.remove(event.getWorkspaceId());
                 } catch (ServerException e) {
-                  LOG.error(e.getLocalizedMessage(), e);
+                  LOG.error(
+                      "Unable to cleanup machine token signature keypairs for ws {}. Cause: {}",
+                      event.getWorkspaceId(),
+                      e.getMessage());
                 }
                 break;
               default:
