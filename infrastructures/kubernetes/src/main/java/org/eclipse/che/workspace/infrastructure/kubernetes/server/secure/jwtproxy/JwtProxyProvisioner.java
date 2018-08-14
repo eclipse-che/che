@@ -192,8 +192,8 @@ public class JwtProxyProvisioner {
         keyPair = signatureKeyManager.getKeyPair(identity.getWorkspaceId());
       } catch (ServerException e) {
         throw new InternalInfrastructureException(
-            "Signature key pair for machine authentication cannot be retrieved. Reason: " + e
-                .getMessage());
+            "Signature key pair for machine authentication cannot be retrieved. Reason: "
+                + e.getMessage());
       }
       Map<String, String> initConfigMapData = new HashMap<>();
       initConfigMapData.put(

@@ -68,7 +68,7 @@ public class JwtProxyProvisionerTest {
   private KubernetesEnvironment k8sEnv;
 
   @BeforeMethod
-  public void setUp() {
+  public void setUp() throws Exception {
     keyPair = new KeyPair(publicKey, null);
     when(signatureKeyManager.getKeyPair(anyString())).thenReturn(keyPair);
     when(publicKey.getEncoded()).thenReturn("publickey".getBytes());
