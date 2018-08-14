@@ -83,7 +83,12 @@ public class MachineLoginFilter implements Filter {
                       throw new JwtException("Not a machine token");
                     }
                     String wsId = claims.get(WORKSPACE_ID_CLAIM, String.class);
-                    return keyManager.getKeyPair(wsId).getPublic();
+                    try {
+                      return keyManager.getKeyPair(wsId).getPublic();
+                    } catch (ServerException e) {
+                      throw new JwtException(
+                          "Unable to fetch signature key pair:" + e.getMessage());
+                    }
                   }
                 });
   }

@@ -13,6 +13,9 @@ package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -23,8 +26,8 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -67,7 +70,7 @@ public class SignatureKeyManager {
   @SuppressWarnings("unused")
   private DBInitializer dbInitializer;
 
-  private Map<String, KeyPair> cachedPair = new HashMap<>();
+  private LoadingCache<String, KeyPair> cachedPair;
 
   @Inject
   public SignatureKeyManager(
@@ -79,6 +82,18 @@ public class SignatureKeyManager {
     this.algorithm = algorithm;
     this.eventService = eventService;
     this.signatureKeyDao = signatureKeyDao;
+
+    cachedPair =
+        CacheBuilder.newBuilder()
+            .maximumSize(100)
+            .expireAfterAccess(2, TimeUnit.HOURS)
+            .build(
+                new CacheLoader<String, KeyPair>() {
+                  public KeyPair load(String key) throws Exception {
+                    return loadKeyPair(key);
+                  }
+                });
+
     this.workspaceEventsSubscriber =
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
@@ -86,7 +101,7 @@ public class SignatureKeyManager {
             switch (event.getStatus()) {
               case STOPPED:
                 try {
-                  cachedPair.remove(event.getWorkspaceId());
+                  cachedPair.invalidate(event.getWorkspaceId());
                   signatureKeyDao.remove(event.getWorkspaceId());
                 } catch (ServerException e) {
                   LOG.error(
@@ -104,33 +119,32 @@ public class SignatureKeyManager {
 
   /** Returns cached instance of {@link KeyPair} or null when failed to load key pair. */
   @Nullable
-  public KeyPair getKeyPair(String workspaceId) {
-    if (cachedPair.get(workspaceId) == null) {
-      loadKeyPair(workspaceId);
+  public KeyPair getKeyPair(String workspaceId) throws ServerException {
+    try {
+      return cachedPair.get(workspaceId);
+    } catch (ExecutionException e) {
+      throw new ServerException(e.getCause());
     }
-    return cachedPair.get(workspaceId);
   }
 
   /** Loads signature key pair if no existing keys found then stores a newly generated key pair. */
   @PostConstruct
   @VisibleForTesting
-  void loadKeyPair(String workspaceId) {
+  KeyPair loadKeyPair(String workspaceId) throws ServerException, ConflictException {
     try {
-      final SignatureKeyPairImpl kp = signatureKeyDao.get(workspaceId);
-      cachedPair.put(workspaceId, toJavaKeyPair(kp));
-      return;
+      return toJavaKeyPair(signatureKeyDao.get(workspaceId));
     } catch (NotFoundException nfe) {
       try {
-        cachedPair.put(
-            workspaceId, toJavaKeyPair(signatureKeyDao.create(generateKeyPair(workspaceId))));
+        return toJavaKeyPair(signatureKeyDao.create(generateKeyPair(workspaceId)));
       } catch (ConflictException | ServerException ex) {
         LOG.error(
             "Failed to store signature keys for ws {}. Cause: {}", workspaceId, ex.getMessage());
+        throw ex;
       }
     } catch (ServerException ex) {
       LOG.error(
           "Failed to load signature keys for ws  {}. Cause: {}", workspaceId, ex.getMessage());
-      return;
+      throw ex;
     }
   }
 

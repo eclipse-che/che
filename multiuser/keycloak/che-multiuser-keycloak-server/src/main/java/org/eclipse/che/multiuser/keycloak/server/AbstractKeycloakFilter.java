@@ -18,6 +18,7 @@ import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
+import com.google.common.annotations.VisibleForTesting;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwsHeader;
@@ -87,11 +88,13 @@ public abstract class AbstractKeycloakFilter implements Filter {
   @Override
   public void destroy() {}
 
-  private class SigningKeyResolverByKind extends SigningKeyResolverAdapter {
+  @VisibleForTesting
+  class SigningKeyResolverByKind extends SigningKeyResolverAdapter {
 
     @Override
     public Key resolveSigningKey(JwsHeader header, String plaintext) {
       if (MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
+        // it's a  machine token, doesn't need to verify
         throw new JwtException("Not a keycloak token");
       }
       try {
@@ -105,6 +108,7 @@ public abstract class AbstractKeycloakFilter implements Filter {
     @Override
     public Key resolveSigningKey(JwsHeader header, Claims claims) {
       if (MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
+        // it's a machine token, doesn't need to verify
         throw new JwtException("Not a keycloak token");
       }
       try {

@@ -21,7 +21,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 import java.security.Key;
 import java.security.KeyPair;
@@ -112,30 +111,28 @@ public class SignatureKeyManagerTest {
     assertNotNull(cachedPair);
   }
 
-  @Test
-  public void testReturnNullKeyPairWhenFailedToLoadAndGenerateKeys() throws Exception {
+  @Test(expectedExceptions = ServerException.class)
+  public void testThrowsExceptionWhenFailedToLoadAndGenerateKeys() throws Exception {
     doThrow(NotFoundException.class).when(signatureKeyDao).get(anyString());
     when(signatureKeyDao.create(any(SignatureKeyPairImpl.class)))
         .thenThrow(new ServerException("unexpected end of stack"));
 
-    final KeyPair cachedPair = signatureKeyManager.getKeyPair("ws1");
+    signatureKeyManager.getKeyPair("ws1");
 
     verify(signatureKeyDao).get(anyString());
     verify(signatureKeyDao).create(any(SignatureKeyPairImpl.class));
-    assertNull(cachedPair);
   }
 
-  @Test
-  public void testReturnNullKeyPairWhenAlgorithmIsNotSupported() throws Exception {
+  @Test(expectedExceptions = ServerException.class)
+  public void testThrowsExceptionWhenAlgorithmIsNotSupported() throws Exception {
     final SignatureKeyImpl publicKey = new SignatureKeyImpl(new byte[] {}, "ECDH", "PKCS#15");
     final SignatureKeyImpl privateKey = new SignatureKeyImpl(new byte[] {}, "ECDH", "PKCS#3");
     final SignatureKeyPairImpl kp = new SignatureKeyPairImpl("id_" + 1, publicKey, privateKey);
     doReturn(kp).when(signatureKeyDao).get(anyString());
 
-    final KeyPair cachedPair = signatureKeyManager.getKeyPair("ws1");
+    signatureKeyManager.getKeyPair("ws1");
 
     verify(signatureKeyDao).get(anyString());
-    assertNull(cachedPair);
   }
 
   @Test
