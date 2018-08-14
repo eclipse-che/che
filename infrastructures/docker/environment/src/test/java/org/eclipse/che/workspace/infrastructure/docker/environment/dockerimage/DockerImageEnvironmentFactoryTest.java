@@ -82,7 +82,7 @@ public class DockerImageEnvironmentFactoryTest {
   }
 
   @Test
-  public void testRamDefaultMemoryLimitIsIgnoredIfLessThanDefaultRamRequest() throws Exception {
+  public void testRamDefaultMemoryRequestIsIgnoredIfGreaterThanDefaultRamLimit() throws Exception {
     factory =
         new DockerImageEnvironmentFactory(
             installerRegistry, recipeRetriever, machinesValidator, 1024, 2048);
@@ -93,11 +93,11 @@ public class DockerImageEnvironmentFactoryTest {
 
     final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
     final long[] expectedLimits = new long[actualLimits.length];
-    fill(expectedLimits, 2048 * BYTES_IN_MB);
+    fill(expectedLimits, 1024 * BYTES_IN_MB);
     assertTrue(Arrays.equals(actualLimits, expectedLimits));
     final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
     final long[] expectedRequests = new long[actualRequests.length];
-    fill(expectedRequests, 2048 * BYTES_IN_MB);
+    fill(expectedRequests, 1024 * BYTES_IN_MB);
     assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
 

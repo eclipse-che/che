@@ -29,9 +29,11 @@ public interface MachineConfig {
   String MEMORY_LIMIT_ATTRIBUTE = "memoryLimitBytes";
 
   /**
-   * Name of the attribute from {@link #getAttributes()} which if present defines memory limit of
-   * the machine in bytes. If memory limit is set in environment specific recipe this attribute used
-   * in {@code MachineConfig} should override value from recipe.
+   * Name of the attribute from {@link #getAttributes()} which if present defines requested memory
+   * allocation of the machine in bytes. If memory request is set in environment specific recipe
+   * this attribute used in {@code MachineConfig} should override value from recipe. If both request
+   * and limit are defined, and memory request is greater than the memory limit, this value is
+   * ignored and only limit is used
    */
   String MEMORY_REQUEST_ATTRIBUTE = "memoryRequestBytes";
 

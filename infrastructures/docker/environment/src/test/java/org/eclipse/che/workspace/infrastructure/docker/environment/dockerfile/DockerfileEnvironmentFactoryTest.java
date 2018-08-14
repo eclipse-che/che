@@ -83,7 +83,7 @@ public class DockerfileEnvironmentFactoryTest {
   }
 
   @Test
-  public void testDefaultLimitLessThenRequestIsIgnored() throws Exception {
+  public void testDefaultRequestGreaterThanLimitIsIgnored() throws Exception {
     factory =
         new DockerfileEnvironmentFactory(
             installerRegistry, recipeRetriever, machinesValidator, 1024, 2048);
@@ -94,10 +94,10 @@ public class DockerfileEnvironmentFactoryTest {
 
     final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
     final long[] expectedLimits = new long[actualLimits.length];
-    fill(expectedLimits, 2048 * BYTES_IN_MB);
+    fill(expectedLimits, 1024 * BYTES_IN_MB);
     final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
     final long[] expectedRequests = new long[actualRequests.length];
-    fill(expectedRequests, 2048 * BYTES_IN_MB);
+    fill(expectedRequests, 1024 * BYTES_IN_MB);
     assertTrue(Arrays.equals(actualLimits, expectedLimits));
     assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }

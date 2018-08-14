@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -121,32 +121,25 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
         machineConfig = new InternalMachineConfig();
         machines.put(entry.getKey(), machineConfig);
       }
-
-      initIfEmpty(
-          () -> entry.getValue().getMemLimit(),
-          machineConfig,
-          MEMORY_LIMIT_ATTRIBUTE,
-          defaultMachineMaxMemorySizeAttribute);
-      initIfEmpty(
-          () -> entry.getValue().getMemRequest(),
-          machineConfig,
-          MEMORY_REQUEST_ATTRIBUTE,
-          defaultMachineRequestMemorySizeAttribute);
-    }
-  }
-
-  private void initIfEmpty(
-      Supplier<Long> attributeValueSupplier,
-      InternalMachineConfig machineConfig,
-      String attribute,
-      String defaultValue) {
-    final Map<String, String> attributes = machineConfig.getAttributes();
-    if (isNullOrEmpty(attributes.get(attribute))) {
-      final Long attribValue = attributeValueSupplier.get();
-      if (attribValue != null && attribValue > 0) {
-        attributes.put(attribute, String.valueOf(attribValue));
-      } else {
-        attributes.put(attribute, defaultValue);
+      Long memLimit = entry.getValue().getMemLimit();
+      Long memRequest = entry.getValue().getMemRequest();
+      // if both properties are not defined
+      if ((memLimit == null || memLimit <= 0) && (memRequest == null || memRequest <= 0)) {
+        memLimit = Long.valueOf(defaultMachineMaxMemorySizeAttribute);
+        memRequest = Long.valueOf(defaultMachineRequestMemorySizeAttribute);
+      } else if ((memLimit == null || memLimit <= 0)) { // if memLimit only is undefined
+        memLimit = memRequest;
+      } else if ((memRequest == null || memRequest <= 0)) { // if memRequest only is undefined
+        memRequest = memLimit;
+      } else if (memRequest > memLimit) { // if both properties are defined, but not consistent
+        memRequest = memLimit;
+      }
+      final Map<String, String> attributes = machineConfig.getAttributes();
+      if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
+        attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(memLimit));
+      }
+      if (isNullOrEmpty(attributes.get(MEMORY_REQUEST_ATTRIBUTE))) {
+        attributes.put(MEMORY_REQUEST_ATTRIBUTE, String.valueOf(memRequest));
       }
     }
   }

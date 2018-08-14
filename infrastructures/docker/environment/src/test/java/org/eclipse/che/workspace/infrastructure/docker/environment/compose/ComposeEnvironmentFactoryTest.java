@@ -166,7 +166,7 @@ public class ComposeEnvironmentFactoryTest {
   }
 
   @Test
-  public void testSetRamAttributesIgnoresLimitDefaultLessThanRequest() throws Exception {
+  public void testSetRamAttributesIgnoresRequestDefaultGreaterThanLimit() throws Exception {
     composeEnvironmentFactory =
         new ComposeEnvironmentFactory(
             installerRegistry,
@@ -185,11 +185,70 @@ public class ComposeEnvironmentFactoryTest {
 
     final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
     final long[] expectedLimits = new long[actualLimits.length];
-    fill(expectedLimits, 2048 * BYTES_IN_MB);
+    fill(expectedLimits, 1024 * BYTES_IN_MB);
     assertTrue(Arrays.equals(actualLimits, expectedLimits));
     final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
     final long[] expectedRequests = new long[actualRequests.length];
-    fill(expectedRequests, 2048 * BYTES_IN_MB);
+    fill(expectedRequests, 1024 * BYTES_IN_MB);
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
+  }
+
+  @Test
+  public void testSetsRamAttributesFromWhenOnlyLimitPresentInComposeServiceSetsRequestEqualToLimit()
+      throws Exception {
+    final long firstMachineLimit = 3072 * BYTES_IN_MB;
+    final Map<String, InternalMachineConfig> machines =
+        ImmutableMap.of(MACHINE_NAME_1, mockInternalMachineConfig(new HashMap<>()));
+    final Map<String, ComposeService> services =
+        ImmutableMap.of(MACHINE_NAME_1, mockComposeService(firstMachineLimit, 0));
+
+    composeEnvironmentFactory.addRamAttributes(machines, services);
+
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    long[] expectedLimits = new long[] {firstMachineLimit};
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    long[] expectedRequests = new long[] {firstMachineLimit};
+    assertTrue(Arrays.equals(actualLimits, expectedLimits));
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
+  }
+
+  @Test
+  public void
+      testSetsRamAttributesFromWhenOnlyRequestPresentInComposeServiceSetsLimitEqualToRequest()
+          throws Exception {
+    final long firstMachineRequest = 1536 * BYTES_IN_MB;
+    final Map<String, InternalMachineConfig> machines =
+        ImmutableMap.of(MACHINE_NAME_1, mockInternalMachineConfig(new HashMap<>()));
+    final Map<String, ComposeService> services =
+        ImmutableMap.of(MACHINE_NAME_1, mockComposeService(0, firstMachineRequest));
+
+    composeEnvironmentFactory.addRamAttributes(machines, services);
+
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    long[] expectedLimits = new long[] {firstMachineRequest};
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    long[] expectedRequests = new long[] {firstMachineRequest};
+    assertTrue(Arrays.equals(actualLimits, expectedLimits));
+    assertTrue(Arrays.equals(actualRequests, expectedRequests));
+  }
+
+  @Test
+  public void testSetsRamAttributesFromWhenRequestIsGreaterThanLimitInComposeServiceIgnoresRequest()
+      throws Exception {
+    final long firstMachineRequest = 3072 * BYTES_IN_MB;
+    final long firstMachineLimit = 1536 * BYTES_IN_MB;
+    final Map<String, InternalMachineConfig> machines =
+        ImmutableMap.of(MACHINE_NAME_1, mockInternalMachineConfig(new HashMap<>()));
+    final Map<String, ComposeService> services =
+        ImmutableMap.of(MACHINE_NAME_1, mockComposeService(firstMachineLimit, firstMachineRequest));
+
+    composeEnvironmentFactory.addRamAttributes(machines, services);
+
+    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
+    long[] expectedLimits = new long[] {firstMachineLimit};
+    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
+    long[] expectedRequests = new long[] {firstMachineLimit};
+    assertTrue(Arrays.equals(actualLimits, expectedLimits));
     assertTrue(Arrays.equals(actualRequests, expectedRequests));
   }
 

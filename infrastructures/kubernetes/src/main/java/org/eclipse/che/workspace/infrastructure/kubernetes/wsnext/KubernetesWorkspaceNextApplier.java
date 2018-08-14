@@ -15,7 +15,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.annotations.Beta;
@@ -61,17 +60,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 @Beta
 public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
 
-  private final String defaultMaxMachineMemorySizeAttribute;
-  private final String defaultRequestMachineMemorySizeAttribute;
+  private final String defaultMachineMemorySizeAttribute;
 
   @Inject
   public KubernetesWorkspaceNextApplier(
-      @Named("che.workspace.default_memory_limit_mb") long defaultMaxMachineMemorySizeMB,
-      @Named("che.workspace.default_memory_request_mb") long defaultRequestMachineMemorySizeMB) {
-    this.defaultMaxMachineMemorySizeAttribute =
-        String.valueOf(defaultMaxMachineMemorySizeMB * 1024 * 1024);
-    this.defaultRequestMachineMemorySizeAttribute =
-        String.valueOf(defaultRequestMachineMemorySizeMB * 1024 * 1024);
+      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+    this.defaultMachineMemorySizeAttribute =
+        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -226,13 +221,7 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
     if (ramLimit > 0) {
       attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
     } else {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMaxMachineMemorySizeAttribute);
-    }
-    long ramRequest = Containers.getRamRequest(container);
-    if (ramRequest > 0) {
-      attributes.put(MEMORY_REQUEST_ATTRIBUTE, String.valueOf(ramRequest));
-    } else {
-      attributes.put(MEMORY_REQUEST_ATTRIBUTE, defaultRequestMachineMemorySizeAttribute);
+      attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
     }
   }
 

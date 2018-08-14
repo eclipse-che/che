@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
-import static java.lang.Long.max;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_ENV_VAR;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -73,14 +72,15 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
     this.installerRegistry = installerRegistry;
     this.recipeRetriever = recipeRetriever;
     this.machinesValidator = machinesValidator;
-    // if the passed default limit is less than the default request, limit is ignored
-    long defaultMemLimit = max(defaultMachineMaxMemorySizeMB, defaultMachineRequestMemorySizeMB);
-    if (defaultMemLimit != defaultMachineMaxMemorySizeMB) {
+    // if the passed default request is greater than the default limit, request is ignored
+    if (defaultMachineRequestMemorySizeMB > defaultMachineMaxMemorySizeMB) {
+      defaultMachineRequestMemorySizeMB = defaultMachineMaxMemorySizeMB;
       LOG.error(
-          "Requested default container memory limit is less than default memory request. Memory limit parameter is ignored.");
+          "Requested default container memory limit is less than default memory request. Memory request parameter is ignored.");
     }
 
-    this.defaultMachineMaxMemorySizeAttribute = String.valueOf(defaultMemLimit * 1024 * 1024);
+    this.defaultMachineMaxMemorySizeAttribute =
+        String.valueOf(defaultMachineMaxMemorySizeMB * 1024 * 1024);
     this.defaultMachineRequestMemorySizeAttribute =
         String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
   }
