@@ -150,11 +150,11 @@ public class TestProjectServiceClient {
       throw new IOException(format("%s not a directory", sourceFolder));
     }
 
+    Path zip = Files.createTempFile("project", projectName);
     if (PLAIN_JAVA.equals(template)) {
-      Path dotClasspath = createFile(sourceFolder.resolve(".classpath"));
-      Path dotProject = Files.createFile(sourceFolder.resolve(".project"));
-      Files.deleteIfExists(dotProject);
-      Files.deleteIfExists(dotClasspath);
+      Path tmpDir = Files.createTempDirectory("TestProject");
+      Path dotClasspath = createFile(tmpDir.resolve(".classpath"));
+      Path dotProject = Files.createFile(tmpDir.resolve(".project"));
       write(
           dotProject,
           format(
@@ -162,10 +162,11 @@ public class TestProjectServiceClient {
                   projectName)
               .getBytes());
       write(dotClasspath, toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
+      ZipUtils.zipFiles(
+          zip.toFile(), sourceFolder.toFile(), dotClasspath.toFile(), dotProject.toFile());
+    } else {
+      ZipUtils.zipFiles(zip.toFile(), sourceFolder.toFile());
     }
-
-    Path zip = Files.createTempFile("project", projectName);
-    ZipUtils.zipDir(sourceFolder.toString(), sourceFolder.toFile(), zip.toFile(), null);
 
     importZipProject(workspaceId, zip, projectName, template);
   }
