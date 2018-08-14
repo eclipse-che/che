@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.*;
+
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
@@ -52,7 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 @Beta
 @Singleton
-public class SignatureKeyManager implements EventSubscriber<WorkspaceStatusEvent> {
+public class SignatureKeyManager {
 
   public static final String PKCS_8 = "PKCS#8";
   public static final String X_509 = "X.509";
@@ -64,6 +66,7 @@ public class SignatureKeyManager implements EventSubscriber<WorkspaceStatusEvent
   private final String algorithm;
   private final SignatureKeyDao signatureKeyDao;
   private final EventService eventService;
+  private final EventSubscriber<?> workspaceEventsSubscriber;
 
   @Inject
   @SuppressWarnings("unused")
@@ -93,6 +96,14 @@ public class SignatureKeyManager implements EventSubscriber<WorkspaceStatusEvent
                     return loadKeyPair(key);
                   }
                 });
+
+    this.workspaceEventsSubscriber =
+        (EventSubscriber<WorkspaceStatusEvent>)
+            event -> {
+              if (event.getStatus() == STOPPED) {
+                removeKeyPair(event.getWorkspaceId());
+              }
+            };
   }
 
   /** Returns cached instance of {@link KeyPair} or null when failed to load key pair. */
@@ -102,6 +113,18 @@ public class SignatureKeyManager implements EventSubscriber<WorkspaceStatusEvent
       return cachedPair.get(workspaceId);
     } catch (ExecutionException e) {
       throw new ServerException(e.getCause());
+    }
+  }
+
+  public void removeKeyPair(String workspaceId) {
+    try {
+      cachedPair.invalidate(workspaceId);
+      signatureKeyDao.remove(workspaceId);
+    } catch (ServerException e) {
+      LOG.error(
+          "Unable to cleanup machine token signature keypairs for ws {}. Cause: {}",
+          workspaceId,
+          e.getMessage());
     }
   }
 
@@ -174,28 +197,9 @@ public class SignatureKeyManager implements EventSubscriber<WorkspaceStatusEvent
     }
   }
 
-  @Override
-  public void onEvent(WorkspaceStatusEvent event) {
-    switch (event.getStatus()) {
-      case STOPPED:
-        try {
-          cachedPair.invalidate(event.getWorkspaceId());
-          signatureKeyDao.remove(event.getWorkspaceId());
-        } catch (ServerException e) {
-          LOG.error(
-              "Unable to cleanup machine token signature keypairs for ws {}. Cause: {}",
-              event.getWorkspaceId(),
-              e.getMessage());
-        }
-        break;
-      default:
-        // do nothing
-    }
-  }
-
   @VisibleForTesting
   @PostConstruct
   public void subscribe() {
-    eventService.subscribe(this);
+    eventService.subscribe(workspaceEventsSubscriber);
   }
 }
