@@ -14,7 +14,6 @@ package org.eclipse.che.multiuser.keycloak.server;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
 
 import com.auth0.jwk.GuavaCachedJwkProvider;
-import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
@@ -94,8 +93,7 @@ public abstract class AbstractKeycloakFilter implements Filter {
     @Override
     public Key resolveSigningKey(JwsHeader header, String plaintext) {
       if (MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
-        // it's a  machine token, doesn't need to verify
-        throw new JwtException("Not a keycloak token");
+        throw new JwtException("Not a keycloak token"); // machine token, doesn't need to verify
       }
       try {
         return getJwtPublicKey(header);
@@ -108,8 +106,7 @@ public abstract class AbstractKeycloakFilter implements Filter {
     @Override
     public Key resolveSigningKey(JwsHeader header, Claims claims) {
       if (MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
-        // it's a machine token, doesn't need to verify
-        throw new JwtException("Not a keycloak token");
+        throw new JwtException("Not a keycloak token"); // machine token, doesn't need to verify
       }
       try {
         return getJwtPublicKey(header);
@@ -122,13 +119,12 @@ public abstract class AbstractKeycloakFilter implements Filter {
 
   protected synchronized PublicKey getJwtPublicKey(JwsHeader<?> header) throws JwkException {
     String kid = header.getKeyId();
-    if (kid == null) {
+    if (header.getKeyId() == null) {
       LOG.warn(
           "'kid' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
       throw new JwtException("'kid' is missing in the JWT token header.");
     }
-    String alg = header.getAlgorithm();
-    if (alg == null) {
+    if (header.getAlgorithm() == null) {
       LOG.warn(
           "'alg' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
       throw new JwtException("'alg' is missing in the JWT token header.");
@@ -140,7 +136,6 @@ public abstract class AbstractKeycloakFilter implements Filter {
               + "Please look into the startup logs to find out the root cause");
       throw new JwtException("JWK provider is not available");
     }
-    Jwk jwk = jwkProvider.get(kid);
-    return jwk.getPublicKey();
+    return jwkProvider.get(kid).getPublicKey();
   }
 }
