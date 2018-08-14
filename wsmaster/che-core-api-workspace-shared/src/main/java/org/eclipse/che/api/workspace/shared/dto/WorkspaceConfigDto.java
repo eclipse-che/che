@@ -75,5 +75,13 @@ public interface WorkspaceConfigDto extends WorkspaceConfig, Hyperlinks {
   WorkspaceConfigDto withEnvironments(Map<String, EnvironmentDto> environments);
 
   @Override
+  @FactoryParameter(obligation = OPTIONAL)
+  Map<String, String> getAttributes();
+
+  void setAttributes(Map<String, String> attributes);
+
+  WorkspaceConfigDto withAttributes(Map<String, String> attributes);
+
+  @Override
   WorkspaceConfigDto withLinks(List<Link> links);
 }

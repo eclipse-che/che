@@ -78,10 +78,11 @@
           <!-- Name -->
           <div flex-gt-xs="25"
                layout="row"
-               class="workspace-item-name">
+               class="workspace-item-name"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>Name</span>
             <div layout="row" flex>
-              <workspace-status-indicator flex="none" che-status="workspace.status"></workspace-status-indicator>
+              <workspace-status-indicator flex="none" che-status="listOrganizationWorkspacesController.getWorkspaceStatus(workspace.id)"></workspace-status-indicator>
               <div class="workspace-name-clip" id="ws-full-name-{{workspace.namespace}}/{{workspace.config.name}}">
             <span
               uib-tooltip="{{'RUNNING' === workspace.status ? 'Running' : 'Last modified: ' + (workspace.attributes.updated | amTimeAgo)}}"
@@ -116,6 +117,8 @@
             <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
             <div class="che-list-actions" ng-if="listOrganizationWorkspacesController.isOwnWorkspace(workspace.id)"
                  ng-if="listOrganizationWorkspacesController.isSupported(workspace) === true">
+              <che-workspace-status workspace-id="workspace.id"
+                                    name="workspace-stop-start-button"></che-workspace-status>
               <a href="#/workspace/{{workspace.namespace}}/{{workspace.config.name}}?tab=Config"
                  name="configure-workspace-button"
                  uib-tooltip="Configure workspace">
