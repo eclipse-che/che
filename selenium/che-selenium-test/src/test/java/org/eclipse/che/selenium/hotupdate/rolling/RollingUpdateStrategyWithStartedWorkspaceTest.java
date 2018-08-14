@@ -1,5 +1,7 @@
 package org.eclipse.che.selenium.hotupdate.rolling;
 
+import static org.testng.Assert.assertEquals;
+
 import com.google.inject.Inject;
 import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
@@ -8,8 +10,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
 
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
@@ -23,40 +23,36 @@ import static org.testng.Assert.assertEquals;
  */
 
 /** @author Katerina Kanova */
-
 public class RollingUpdateStrategyWithStartedWorkspaceTest {
 
-    @Inject
-    private TestWorkspace workspaceForStopping;
-    @Inject private CheTestSystemClient cheTestSystemClient;
-    @Inject private Dashboard dashboard;
-    @Inject private Workspaces workspaces;
-    @Inject private HotUpdateUtil hotUpdateUtil;
+  @Inject private TestWorkspace workspaceForStopping;
+  @Inject private CheTestSystemClient cheTestSystemClient;
+  @Inject private Dashboard dashboard;
+  @Inject private Workspaces workspaces;
+  @Inject private HotUpdateUtil hotUpdateUtil;
 
-    @Test
-    public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
-        int currentRevision = hotUpdateUtil.getMasterPodRevision();
+  @Test
+  public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
+    int currentRevision = hotUpdateUtil.getMasterPodRevision();
 
-        // open 'Workspaces' page
-        dashboard.open();
-        dashboard.waitDashboardToolbarTitle();
-        dashboard.selectWorkspacesItemOnDashboard();
+    // open 'Workspaces' page
+    dashboard.open();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
 
-        // check existing of expected workspace and its status
-        workspaces.waitPageLoading();
-        workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
-        workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
+    // check existing of expected workspace and its status
+    workspaces.waitPageLoading();
+    workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
+    workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
 
-        hotUpdateUtil.executeMasterPodUpdateCommand();
+    hotUpdateUtil.executeMasterPodUpdateCommand();
 
+    // check that che is updated
+    hotUpdateUtil.waitMasterPodRevision(currentRevision + 1);
+    hotUpdateUtil.waitFullMasterPodUpdate(currentRevision);
 
-        // check that che is updated
-        hotUpdateUtil.waitMasterPodRevision(currentRevision + 1);
-        hotUpdateUtil.waitFullMasterPodUpdate(currentRevision);
-
-        assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
-        workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
-        workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
-
-    }
+    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
+    workspaces.waitWorkspaceIsPresent(workspaceForStopping.getName());
+    workspaces.waitWorkspaceStatus(workspaceForStopping.getName(), Workspaces.Status.RUNNING);
+  }
 }

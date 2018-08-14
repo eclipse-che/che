@@ -35,7 +35,8 @@ public class HotUpdateUtil {
   private static final String PODS_LIST_COMMAND = "get pods | awk 'NR > 1 {print $1}'";
   private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
       "get dc | grep che | awk '{print $2}'";
-  private static final String UPDATE_COMMAND = "rollout latest $(oc get dc | grep che | awk '{print $1}')";
+  private static final String UPDATE_COMMAND =
+      "rollout latest $(oc get dc | grep che | awk '{print $1}')";
 
   private final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   private final WebDriverWaitFactory webDriverWaitFactory;
