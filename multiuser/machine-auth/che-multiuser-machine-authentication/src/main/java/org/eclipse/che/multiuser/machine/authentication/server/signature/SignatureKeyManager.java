@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 @Beta
 @Singleton
-public class SignatureKeyManager {
+public class SignatureKeyManager implements EventSubscriber<WorkspaceStatusEvent> {
 
   public static final String PKCS_8 = "PKCS#8";
   public static final String X_509 = "X.509";
@@ -64,7 +64,6 @@ public class SignatureKeyManager {
   private final String algorithm;
   private final SignatureKeyDao signatureKeyDao;
   private final EventService eventService;
-  private final EventSubscriber<?> workspaceEventsSubscriber;
 
   @Inject
   @SuppressWarnings("unused")
@@ -83,38 +82,17 @@ public class SignatureKeyManager {
     this.eventService = eventService;
     this.signatureKeyDao = signatureKeyDao;
 
-    cachedPair =
+    this.cachedPair =
         CacheBuilder.newBuilder()
             .maximumSize(100)
             .expireAfterAccess(2, TimeUnit.HOURS)
             .build(
                 new CacheLoader<String, KeyPair>() {
+                  @Override
                   public KeyPair load(String key) throws Exception {
                     return loadKeyPair(key);
                   }
                 });
-
-    this.workspaceEventsSubscriber =
-        new EventSubscriber<WorkspaceStatusEvent>() {
-          @Override
-          public void onEvent(WorkspaceStatusEvent event) {
-            switch (event.getStatus()) {
-              case STOPPED:
-                try {
-                  cachedPair.invalidate(event.getWorkspaceId());
-                  signatureKeyDao.remove(event.getWorkspaceId());
-                } catch (ServerException e) {
-                  LOG.error(
-                      "Unable to cleanup machine token signature keypairs for ws {}. Cause: {}",
-                      event.getWorkspaceId(),
-                      e.getMessage());
-                }
-                break;
-              default:
-                // do nothing
-            }
-          }
-        };
   }
 
   /** Returns cached instance of {@link KeyPair} or null when failed to load key pair. */
@@ -196,9 +174,28 @@ public class SignatureKeyManager {
     }
   }
 
+  @Override
+  public void onEvent(WorkspaceStatusEvent event) {
+    switch (event.getStatus()) {
+      case STOPPED:
+        try {
+          cachedPair.invalidate(event.getWorkspaceId());
+          signatureKeyDao.remove(event.getWorkspaceId());
+        } catch (ServerException e) {
+          LOG.error(
+              "Unable to cleanup machine token signature keypairs for ws {}. Cause: {}",
+              event.getWorkspaceId(),
+              e.getMessage());
+        }
+        break;
+      default:
+        // do nothing
+    }
+  }
+
   @VisibleForTesting
   @PostConstruct
   public void subscribe() {
-    eventService.subscribe(workspaceEventsSubscriber);
+    eventService.subscribe(this);
   }
 }
