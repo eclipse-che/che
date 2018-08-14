@@ -63,11 +63,10 @@ public class LoggerService extends Service {
   @GET
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get loggers which are configured",
-    notes = "This operation can be performed only by authorized user",
-    response = LoggerDto.class,
-    responseContainer = "List"
-  )
+      value = "Get loggers which are configured",
+      notes = "This operation can be performed only by authorized user",
+      response = LoggerDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The loggers successfully fetched"),
   })

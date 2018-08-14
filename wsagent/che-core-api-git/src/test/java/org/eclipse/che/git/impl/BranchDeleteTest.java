@@ -54,9 +54,8 @@ public class BranchDeleteTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleDelete(GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {
     // given
@@ -97,9 +96,8 @@ public class BranchDeleteTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void shouldDeleteNotFullyMergedBranchWithForce(GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {
     // given
@@ -131,10 +129,9 @@ public class BranchDeleteTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class)
   public void shouldThrowExceptionOnDeletingNotFullyMergedBranchWithoutForce(
       GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException, NoSuchFieldException,

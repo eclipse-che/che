@@ -61,9 +61,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleCheckout(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -90,9 +89,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleFileCheckout(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -123,9 +121,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCheckoutTwoFiles(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -171,9 +168,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCreateNewAndCheckout(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -193,9 +189,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCheckoutFromStartPoint(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -227,9 +222,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testTrackRemoteBranch(GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {
     // given
@@ -261,11 +255,10 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp = "A branch named 'new' exists in more than one remote repos"
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp = "A branch named 'new' exists in more than one remote repos")
   public void shouldThrowExceptionIfTheBranchIsPresentInSeveralRemotes(
       GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {

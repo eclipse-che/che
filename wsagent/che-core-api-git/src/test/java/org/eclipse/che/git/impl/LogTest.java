@@ -49,9 +49,8 @@ public class LogTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testSimpleLog(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -78,9 +77,8 @@ public class LogTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testLogWithFileFilter(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -125,9 +123,8 @@ public class LogTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testLogSkip(GitConnectionFactory connectionFactory) throws GitException, IOException {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -186,9 +183,8 @@ public class LogTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testLogMaxCount(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -231,9 +227,8 @@ public class LogTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testLogWithSkipAndMaxCount(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -293,9 +288,8 @@ public class LogTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testLogSince(GitConnectionFactory connectionFactory)
       throws GitException, IOException, InterruptedException {
     // given

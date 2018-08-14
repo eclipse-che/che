@@ -69,7 +69,7 @@ public final class TestObjectsFactory {
 
   public static WorkspaceConfigImpl createWorkspaceConfig(String id) {
     return new WorkspaceConfigImpl(
-        id + "_name", id + "description", "default-env", null, null, null);
+        id + "_name", id + "description", "default-env", null, null, null, null);
   }
 
   public static WorkspaceImpl createWorkspace(String id, Account account) {

@@ -164,9 +164,9 @@ public class SshDaoTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    dependsOnMethods = "shouldThrowNotFoundExceptionIfPairWithSuchNameOwnerAndServiceDoesNotExist"
-  )
+      expectedExceptions = NotFoundException.class,
+      dependsOnMethods =
+          "shouldThrowNotFoundExceptionIfPairWithSuchNameOwnerAndServiceDoesNotExist")
   public void shouldRemoveSshKeyPair() throws Exception {
     final SshPairImpl pair = pairs[4];
 

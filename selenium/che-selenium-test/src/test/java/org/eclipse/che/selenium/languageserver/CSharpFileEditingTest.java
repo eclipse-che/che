@@ -11,8 +11,12 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.INFO;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.ASP_DOT_NET_WEB_SIMPLE;
+import static org.openqa.selenium.Keys.BACK_SPACE;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -20,7 +24,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
@@ -32,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -42,7 +44,9 @@ import org.testng.annotations.Test;
 public class CSharpFileEditingTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
-  private final String COMMAND_NAME_FOR_RESTORE_LS = PROJECT_NAME + ": update dependencies";
+  private final String LANGUAGE_SERVER_INIT_MESSAGE =
+      "Finished language servers initialization, file path";
+  private final String NAME_OF_EDITING_FILE = "Program.cs";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
@@ -63,8 +67,7 @@ public class CSharpFileEditingTest {
   public void setUp() throws Exception {
     ide.open(workspace);
     createDotNetAppFromWizard();
-    restoreDependenciesForLanguageServerByCommand();
-    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
+    initLanguageServer();
   }
 
   @AfterMethod
@@ -73,13 +76,11 @@ public class CSharpFileEditingTest {
     testWorkspaceServiceClient.stop(workspace.getName(), workspace.getOwner().getName());
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
-    restoreDependenciesForLanguageServerByCommand();
-    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/Program.cs");
+    initLanguageServer();
   }
 
   @Test
   public void checkCodeEditing() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
     checkCodeValidation();
   }
 
@@ -98,11 +99,19 @@ public class CSharpFileEditingTest {
   public void checkCodeValidation() {
     editor.goToCursorPositionVisible(24, 12);
     for (int i = 0; i < 9; i++) {
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+      editor.typeTextIntoEditor(BACK_SPACE.toString());
     }
     editor.waitMarkerInPosition(INFO, 23);
     editor.waitMarkerInPosition(ERROR, 21);
     checkAutocompletion();
+  }
+
+  private void initLanguageServer() {
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
+    consoles.selectProcessByTabName("dev-machine");
+    consoles.waitExpectedTextIntoConsole(LANGUAGE_SERVER_INIT_MESSAGE);
+    editor.selectTabByName(NAME_OF_EDITING_FILE);
   }
 
   private void checkAutocompletion() {
@@ -116,18 +125,10 @@ public class CSharpFileEditingTest {
 
   private void createDotNetAppFromWizard() {
     projectExplorer.waitProjectExplorer();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
-    wizard.selectSample(Wizard.SamplesName.ASP_DOT_NET_WEB_SIMPLE);
+    menu.runCommand(WORKSPACE, CREATE_PROJECT);
+    wizard.selectSample(ASP_DOT_NET_WEB_SIMPLE);
     wizard.typeProjectNameOnWizard(PROJECT_NAME);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
-  }
-
-  private void restoreDependenciesForLanguageServerByCommand() {
-    commandsPalette.openCommandPalette();
-    commandsPalette.startCommandByDoubleClick(COMMAND_NAME_FOR_RESTORE_LS);
-    consoles.waitExpectedTextIntoConsole("Restore completed");
   }
 }

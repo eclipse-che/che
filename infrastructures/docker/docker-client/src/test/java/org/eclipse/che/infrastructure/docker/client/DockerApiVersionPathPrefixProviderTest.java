@@ -70,12 +70,11 @@ public class DockerApiVersionPathPrefixProviderTest {
   }
 
   @Test(
-    dataProvider = "invalidApiVersionValues",
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "Invalid property format: '.*'. Valid docker api version contains digits "
-            + "which can be separated by symbol '.'. For example: '1', '1.18'"
-  )
+      dataProvider = "invalidApiVersionValues",
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Invalid property format: '.*'. Valid docker api version contains digits "
+              + "which can be separated by symbol '.'. For example: '1', '1.18'")
   public void apiVersionPrefixShouldBeEmpty(String apiVersion) {
     dockerApiVersionPathPrefixProvider = new DockerApiVersionPathPrefixProvider(apiVersion);
   }

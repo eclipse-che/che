@@ -55,9 +55,6 @@ ENV vars: this script automatically detect envs vars beginning with "CHE_" and p
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
 CHE_IMAGE_TAG - Set che-server image tag, defaults to "nightly"
 CHE_INFRA_OPENSHIFT_PROJECT - namespace for workspace objects (defaults to current namespace of Che pod (CHE_OPENSHIFT_PROJECT which defaults to eclipse-che)). It can be overriden with -p|--project param. A separate ws namespace can be used only if username/password or token is provided
-CHE_INFRA_KUBERNETES_USERNAME - OpenShift username to create workspace objects with. Not used by default (service account is used instead)
-CHE_INFRA_KUBERNETES_PASSWORD - OpenShift password
-CHE_INFRA_KUBERNETES_OAUTH__TOKEN - OpenShift token to create workspace objects with. Not used by default (service account is used instead)
 CHE_INFRA_KUBERNETES_PVC_STRATEGY - One PVC per workspace (unique) or one PVC shared by all workspaced (common). Defaults to unique
 CHE_INFRA_KUBERNETES_PVC_QUANTITY - PVC default claim. Set to 1Gi.
 CHE_KEYCLOAK_AUTH__SERVER__URL - URL of a Keycloak auth server. Defaults to route of a Keycloak deployment

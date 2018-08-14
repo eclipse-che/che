@@ -36,26 +36,25 @@ import org.eclipse.che.multiuser.permission.workspace.server.model.Worker;
 @Entity(name = "Worker")
 @NamedQueries({
   @NamedQuery(
-    name = "Worker.getByWorkspaceId",
-    query = "SELECT worker " + "FROM Worker worker " + "WHERE worker.workspaceId = :workspaceId "
-  ),
+      name = "Worker.getByWorkspaceId",
+      query =
+          "SELECT worker " + "FROM Worker worker " + "WHERE worker.workspaceId = :workspaceId "),
   @NamedQuery(
-    name = "Worker.getCountByWorkspaceId",
-    query =
-        "SELECT COUNT(worker) " + "FROM Worker worker " + "WHERE worker.workspaceId = :workspaceId "
-  ),
+      name = "Worker.getCountByWorkspaceId",
+      query =
+          "SELECT COUNT(worker) "
+              + "FROM Worker worker "
+              + "WHERE worker.workspaceId = :workspaceId "),
   @NamedQuery(
-    name = "Worker.getByUserId",
-    query = "SELECT worker " + "FROM Worker worker " + "WHERE worker.userId = :userId "
-  ),
+      name = "Worker.getByUserId",
+      query = "SELECT worker " + "FROM Worker worker " + "WHERE worker.userId = :userId "),
   @NamedQuery(
-    name = "Worker.getByUserAndWorkspaceId",
-    query =
-        "SELECT worker "
-            + "FROM Worker worker "
-            + "WHERE worker.userId = :userId "
-            + "AND worker.workspaceId = :workspaceId "
-  )
+      name = "Worker.getByUserAndWorkspaceId",
+      query =
+          "SELECT worker "
+              + "FROM Worker worker "
+              + "WHERE worker.userId = :userId "
+              + "AND worker.workspaceId = :workspaceId ")
 })
 @Table(name = "che_worker")
 public class WorkerImpl extends AbstractPermissions implements Worker {

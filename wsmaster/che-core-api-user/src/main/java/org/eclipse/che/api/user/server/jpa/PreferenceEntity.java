@@ -39,9 +39,8 @@ public class PreferenceEntity {
 
   @ElementCollection
   @CollectionTable(
-    name = "preference_preferences",
-    joinColumns = @JoinColumn(name = "preference_userid")
-  )
+      name = "preference_preferences",
+      joinColumns = @JoinColumn(name = "preference_userid"))
   @MapKeyColumn(name = "name")
   @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> preferences;

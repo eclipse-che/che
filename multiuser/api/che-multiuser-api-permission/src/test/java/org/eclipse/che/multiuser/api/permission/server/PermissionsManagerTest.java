@@ -70,11 +70,10 @@ public class PermissionsManagerTest {
   }
 
   @Test(
-    expectedExceptions = ServerException.class,
-    expectedExceptionsMessageRegExp =
-        "Permissions Domain 'test' should be stored in only one storage. "
-            + "Duplicated in class org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao.* and class org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao.*"
-  )
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Permissions Domain 'test' should be stored in only one storage. "
+              + "Duplicated in class org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao.* and class org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao.*")
   public void shouldThrowExceptionIfThereAreTwoStoragesWhichServeOneDomain() throws Exception {
     @SuppressWarnings("unchecked")
     final PermissionsDao anotherStorage = mock(PermissionsDao.class);
@@ -104,10 +103,9 @@ public class PermissionsManagerTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp =
-        "Domain with id 'test' doesn't support following action\\(s\\): unsupported"
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Domain with id 'test' doesn't support following action\\(s\\): unsupported")
   public void shouldNotStorePermissionsWhenItHasUnsupportedAction() throws Exception {
     final Permissions permissions =
         DtoFactory.newDto(PermissionsDto.class)
@@ -119,10 +117,9 @@ public class PermissionsManagerTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp =
-        "Can't edit permissions because there is not any another user with permission 'setPermissions'"
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Can't edit permissions because there is not any another user with permission 'setPermissions'")
   public void shouldNotStorePermissionsWhenItRemoveLastSetPermissions() throws Exception {
     final TestPermissionsImpl foreignPermissions =
         new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
@@ -181,10 +178,9 @@ public class PermissionsManagerTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp =
-        "Can't remove permissions because there is not any another user with permission 'setPermissions'"
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Can't remove permissions because there is not any another user with permission 'setPermissions'")
   public void shouldNotRemovePermissionsWhenItContainsLastSetPermissionsAction() throws Exception {
     final TestPermissionsImpl firstPermissions =
         new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
@@ -272,9 +268,8 @@ public class PermissionsManagerTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Requested unsupported domain 'unsupported'"
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Requested unsupported domain 'unsupported'")
   public void shouldThrowExceptionWhenRequestedUnsupportedDomain() throws Exception {
     permissionsManager.getDomain("unsupported");
   }
@@ -286,10 +281,9 @@ public class PermissionsManagerTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp =
-        "Domain with id 'test' doesn't support following action\\(s\\): unsupported"
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Domain with id 'test' doesn't support following action\\(s\\): unsupported")
   public void
       shouldThrowConflictExceptionOnActionSupportingCheckingWhenListContainsUnsupportedAction()
           throws Exception {

@@ -57,4 +57,10 @@ public interface WorkspaceConfig {
    * least 1 default environment and may contain N environments.
    */
   Map<String, ? extends Environment> getEnvironments();
+
+  /**
+   * Returns workspace config attributes. Workspace config attributes must not contain null keys or
+   * values.
+   */
+  Map<String, String> getAttributes();
 }

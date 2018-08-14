@@ -58,9 +58,9 @@ public class ExternalIpURLRewriterTest {
   }
 
   @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Rewriting of host 'localhost' in URL ':' failed. Error: .*"
-  )
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Rewriting of host 'localhost' in URL ':' failed. Error: .*")
   public void shouldThrowExceptionWhenRewritingFails() throws Exception {
     String toRewrite = ":";
     ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter("localhost");

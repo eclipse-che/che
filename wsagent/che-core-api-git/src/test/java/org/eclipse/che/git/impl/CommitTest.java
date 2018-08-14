@@ -54,9 +54,8 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -76,9 +75,8 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCommitWithAddAll(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -99,9 +97,8 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testAmendCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -124,9 +121,8 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testChangeMessageOfLastCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -149,9 +145,8 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testChangeMessageOfLastCommitWithSpecifiedPath(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -177,9 +172,8 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCommitSeparateFiles(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -197,11 +191,10 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp = "No changes added to commit"
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp = "No changes added to commit")
   public void testCommitWithNotStagedChanges(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -221,11 +214,10 @@ public class CommitTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp = "Nothing to commit, working directory clean"
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp = "Nothing to commit, working directory clean")
   public void testCommitWithCleanIndex(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
