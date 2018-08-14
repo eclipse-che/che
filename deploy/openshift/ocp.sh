@@ -205,6 +205,7 @@ wait_for_automation_service_broker() {
             echo "Ansible service catalog deployed successfully"
         elif [ "${progressing}" == "False" ]; then
             echo "Ansible service catalog deployment failed. Aborting."
+            exit 1
         elif [ ${SECONDS} -ge ${end} ]; then
             echo "Deployment timeout. Aborting."
             exit 1
@@ -223,7 +224,7 @@ run_ocp() {
                           --base-dir=${OKD_DIR} \
                           "${ENABLE_COMPONENTS}"
     wait_ocp
-    wait_for_automation_service_broker
+#    wait_for_automation_service_broker
 }
 
 deploy_che_to_ocp() {
