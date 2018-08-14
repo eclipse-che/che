@@ -186,9 +186,9 @@ wait_for_automation_service_broker() {
         $OC_BINARY get cm/broker-config -n=openshift-automation-service-broker -o=json | sed 's/edit/admin/g' | oc apply -f -
         echo "[OCP] re-deploying openshift-automation-service-broker..."
         # TODO: replace with oc rollout cancel and oc rollout latest when the latets tag works
-        $OC_BINARY set image dc/openshift-automation-service-broker -n=openshift-automation-service-broker \
-                                broker="${ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE}":"${ORIGIN_ANSIBLE_SERVICE_BROKER_TAG}" \
-                                broker-redirector="${ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE}":"${ORIGIN_ANSIBLE_SERVICE_BROKER_TAG}"
+        $OC_BINARY rollout cancel dc/openshift-automation-service-broker -n=openshift-automation-service-broker
+        sleep 5
+        $OC_BINARY rollout latest dc/openshift-automation-service-broker -n=openshift-automation-service-broker
         available=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[0].status})
         progressing=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[1].status})
         DEPLOYMENT_TIMEOUT_SEC=1200
