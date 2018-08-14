@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.maven.client.wizard;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
@@ -41,11 +43,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
+
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
@@ -53,6 +59,7 @@ import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.MavenArchetype;
 import org.eclipse.che.plugin.maven.client.MavenExtension;
@@ -69,6 +76,7 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
   private final MavenLocalizationConstant localization;
+  private final NotificationManager notificationManager;
   private final ProjectServiceClient projectService;
 
   @Inject
@@ -77,12 +85,14 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
       DialogFactory dialogFactory,
       AppContext appContext,
       MavenLocalizationConstant localization,
+      NotificationManager notificationManager,
       ProjectServiceClient projectService) {
     super();
     this.view = view;
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
     this.localization = localization;
+    this.notificationManager = notificationManager;
     this.projectService = projectService;
     view.setDelegate(this);
   }
@@ -216,16 +226,25 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
       }
       updateDelegate.updateControls();
     }
-    projectService
-        .getItem(Path.valueOf(dataObject.getPath()).parent().append("pom.xml"))
-        .then(
-            result -> {
-              updateView(container, false);
-            })
-        .catchError(
-            arg -> {
-              updateView(container, CREATE == wizardMode);
-            });
+    if (CREATE == wizardMode) {
+      projectService
+          .getItem(Path.valueOf(dataObject.getPath()).parent().append("pom.xml"))
+          .then(
+              result -> {
+                notificationManager.notify(
+                    localization.mavenPageArchetypeDisabledTitle(),
+                    localization.mavenPageArchetypeDisabledMessage(),
+                    WARNING,
+                    EMERGE_MODE);
+                updateView(container, false);
+              })
+          .catchError(
+              error -> {
+                updateView(container, true);
+              });
+    } else {
+      updateView(container, false);
+    }
   }
 
   private void updateView(AcceptsOneWidget container, boolean showArchetype) {
