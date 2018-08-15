@@ -45,12 +45,14 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -235,7 +237,12 @@ public class Refactor {
 
   /** wait the 'Rename Method' form is closed */
   public void waitRenameMethodFormIsClosed() {
-    elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
+    try {
+      elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
+    }
   }
 
   /** wait the 'Rename Field' form is open */

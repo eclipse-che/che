@@ -113,9 +113,9 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
         STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_PROJECT),
         DEV_MACHINE_NAME);
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
-    terminal.typeIntoTerminal("ps ax");
-    terminal.typeIntoTerminal(ENTER.toString());
-    terminal.waitExpectedTextNotPresentTerminal(tomcatIsRunning);
+    terminal.typeIntoActiveTerminal("ps ax");
+    terminal.typeIntoActiveTerminal(ENTER.toString());
+    terminal.waitNoTextInFirstTerminal(tomcatIsRunning);
 
     consoles.executeCommandFromProcessesArea(
         DEV_MACHINE_NAME,

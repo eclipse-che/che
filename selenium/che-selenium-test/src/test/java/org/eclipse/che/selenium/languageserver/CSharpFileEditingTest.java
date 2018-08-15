@@ -87,6 +87,7 @@ public class CSharpFileEditingTest {
   @Test(priority = 1)
   public void checkInitializingAfterFirstStarting() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
+
     try {
       editor.waitMarkerInPosition(INFO, 1);
       editor.waitMarkerInPosition(INFO, 2);
@@ -94,6 +95,7 @@ public class CSharpFileEditingTest {
       // remove try-catch block after issue has been resolved
       fail("Known issue: https://github.com/eclipse/che/issues/10151", ex);
     }
+
   }
 
   public void checkCodeValidation() {
@@ -101,7 +103,13 @@ public class CSharpFileEditingTest {
     for (int i = 0; i < 9; i++) {
       editor.typeTextIntoEditor(BACK_SPACE.toString());
     }
-    editor.waitMarkerInPosition(INFO, 23);
+
+    try {
+      editor.waitMarkerInPosition(INFO, 23);
+    } catch (TimeoutException ex) {
+      fail("Known issue: https://github.com/eclipse/che/issues/10789", ex);
+    }
+
     editor.waitMarkerInPosition(ERROR, 21);
     checkAutocompletion();
   }

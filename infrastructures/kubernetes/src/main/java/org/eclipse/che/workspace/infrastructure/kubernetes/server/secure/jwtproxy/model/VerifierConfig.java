@@ -45,6 +45,9 @@ public class VerifierConfig {
   @JsonProperty("auth_redirect_url")
   private String authUrl;
 
+  @JsonProperty("auth_cookies_enabled")
+  private boolean cookiesEnabled;
+
   private Set<String> excludes;
 
   public String getAudience() {
@@ -161,6 +164,20 @@ public class VerifierConfig {
 
   public VerifierConfig withAuthUrl(String authUrl) {
     this.authUrl = authUrl;
+    return this;
+  }
+
+  public boolean getCookiesEnabled() {
+    return cookiesEnabled;
+  }
+
+  public VerifierConfig setCookiesEnabled(boolean cookiesEnabled) {
+    this.cookiesEnabled = cookiesEnabled;
+    return this;
+  }
+
+  public VerifierConfig withCookiesEnabled(boolean cookiesEnabled) {
+    this.cookiesEnabled = cookiesEnabled;
     return this;
   }
 }

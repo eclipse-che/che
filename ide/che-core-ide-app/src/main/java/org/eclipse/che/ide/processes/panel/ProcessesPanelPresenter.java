@@ -108,8 +108,8 @@ import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoProvider;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoWidgetFactory;
 import org.eclipse.che.ide.terminal.TerminalFactory;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 import org.eclipse.che.ide.terminal.TerminalPresenter;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
@@ -241,6 +241,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     Scheduler.get().scheduleDeferred(() -> workspaceLoadingTrackerProvider.get().startTracking());
 
     Scheduler.get().scheduleDeferred(this::updateMachineList);
+
+    registerNative();
   }
 
   protected void displayMachineOutput(DisplayMachineOutputEvent event) {
@@ -372,7 +374,7 @@ public class ProcessesPanelPresenter extends BasePresenter
    */
   public void provideTerminal() {
     if (terminals.isEmpty()) {
-      newTerminal(TerminalOptionsJso.createDefault(), true);
+      newTerminal(TerminalOptionsJso.create(), true);
       return;
     }
 
@@ -384,7 +386,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     ProcessTreeNode terminalNode = view.getNodeById(lastActiveTerminalId);
     if (terminalNode == null) {
-      newTerminal(TerminalOptionsJso.createDefault(), true);
+      newTerminal(TerminalOptionsJso.create(), true);
       return;
     }
 
@@ -393,18 +395,18 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   /** Opens new terminal for the selected machine. */
-  public void newTerminal(TerminalOptionsJso options) {
-    newTerminal(options, true);
+  public void newTerminal(TerminalOptionsJso options, boolean focusOnOpen) {
+    newTerminal(options, true, focusOnOpen);
   }
 
   /** Opens new terminal for the selected machine and activates terminal tab. */
-  public void newTerminal(TerminalOptionsJso options, boolean activate) {
+  public void newTerminal(TerminalOptionsJso options, boolean activate, boolean focusOnOpen) {
     final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
 
     final Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (selectedTreeNode == null && devMachine.isPresent()) {
-      onAddTerminal(devMachine.get().getName(), options, activate);
+      onAddTerminal(devMachine.get().getName(), options, activate, focusOnOpen);
       return;
     }
 
@@ -417,14 +419,14 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     if (selectedTreeNode.getType() == MACHINE_NODE) {
       String machineName = (String) selectedTreeNode.getData();
-      onAddTerminal(machineName, options, activate);
+      onAddTerminal(machineName, options, activate, focusOnOpen);
       return;
     }
 
     ProcessTreeNode parent = selectedTreeNode.getParent();
     if (parent != null && parent.getType() == MACHINE_NODE) {
       String machineName = (String) parent.getData();
-      onAddTerminal(machineName, options, activate);
+      onAddTerminal(machineName, options, activate, focusOnOpen);
     }
   }
 
@@ -476,8 +478,9 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param options terminal options
    */
   @Override
-  public void onAddTerminal(final String machineId, TerminalOptionsJso options) {
-    onAddTerminal(machineId, options, true);
+  public void onAddTerminal(
+      final String machineId, TerminalOptionsJso options, boolean focusOnOpen) {
+    onAddTerminal(machineId, options, true, focusOnOpen);
   }
 
   /**
@@ -487,7 +490,8 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param options terminal options
    * @param activate activate terminal tab
    */
-  public void onAddTerminal(final String machineId, TerminalOptionsJso options, boolean activate) {
+  public void onAddTerminal(
+      final String machineId, TerminalOptionsJso options, boolean activate, boolean focusOnOpen) {
     final MachineImpl machine = getMachine(machineId);
     if (machine == null) {
       notificationManager.notify(
@@ -504,7 +508,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       return;
     }
 
-    final TerminalPresenter newTerminal = terminalFactory.create(machine, options);
+    final TerminalPresenter newTerminal = terminalFactory.create(machine, options, focusOnOpen);
     final IsWidget terminalWidget = newTerminal.getView();
     final String terminalName = getUniqueTerminalName(machineTreeNode);
     final ProcessTreeNode terminalNode =
@@ -1130,8 +1134,8 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
       selectDevMachine();
-      TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
-      newTerminal(options);
+      TerminalOptionsJso options = TerminalOptionsJso.create();
+      newTerminal(options, false);
     }
   }
 
@@ -1143,8 +1147,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     if (devMachine.isPresent() && event.getMachineName().equals(devMachine.get().getName())) {
       provideMachineNode(event.getMachineName(), true, false);
 
-      TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
-      newTerminal(options, false);
+      TerminalOptionsJso options = TerminalOptionsJso.create();
+      newTerminal(options, false, false);
     }
   }
 
@@ -1486,4 +1490,38 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     $doc.body.removeChild(element);
   }-*/;
+
+  /*
+   * Expose Terminal internal API to the world, to allow automated Selenium scripts get text from the terminal.
+   */
+  private native void registerNative() /*-{
+    var that = this;
+    var TerminalContentProvider = {};
+
+    TerminalContentProvider.getVisibleText = $entry(function(terminalName, machineName) {
+        return  that.@org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter::getRenderedTerminalLines(*)(terminalName, machineName);
+    });
+
+    $wnd.IDE.TerminalContentProvider = TerminalContentProvider;
+  }-*/;
+
+  private String[] getRenderedTerminalLines(String terminalName, String machineName) {
+    for (ProcessTreeNode machineNode : rootNode.getChildren()) {
+      if (machineNode.getName().equals(machineName)) {
+        for (ProcessTreeNode machineChildNode : machineNode.getChildren()) {
+          if (machineChildNode.getName().equals(terminalName)) {
+            TerminalPresenter terminalPresenter = terminals.get(machineChildNode.getId());
+            if (terminalPresenter != null) {
+              return terminalPresenter.getRenderedLines();
+            }
+          }
+        }
+      }
+    }
+    throw new RuntimeException(
+        "Unable to find terminal by machineName: "
+            + machineName
+            + " and terminal name: "
+            + terminalName);
+  };
 }

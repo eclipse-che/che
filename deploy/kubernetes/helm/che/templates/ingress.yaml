@@ -26,7 +26,7 @@ spec:
   tls:
   - hosts:
     - {{ template "cheHost" . }}
-    secretName: che-tls
+    secretName: {{ .Values.global.tls.secretName }}
 {{- end }}
   rules:
 {{- if ne .Values.global.serverStrategy "default-host" }}
