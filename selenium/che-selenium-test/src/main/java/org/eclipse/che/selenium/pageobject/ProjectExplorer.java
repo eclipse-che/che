@@ -264,6 +264,7 @@ public class ProjectExplorer {
   public void waitProjectExplorer(int timeout) {
     try {
       seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
+      loader.waitOnClosed();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
