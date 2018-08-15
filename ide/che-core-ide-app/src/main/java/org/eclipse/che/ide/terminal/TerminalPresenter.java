@@ -15,6 +15,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REF
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.terminal.TerminalInitializer.FIT_ADDON;
+import static org.eclipse.che.ide.terminal.TerminalInitializer.XTERM_JS_MODULE;
 import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_NORMAL;
 
 import com.google.common.base.Strings;
@@ -30,10 +32,14 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.theme.Theme;
+import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.core.AgentURLModifier;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalThemeJso;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.requirejs.ModuleHolder;
 
@@ -41,12 +47,14 @@ import org.eclipse.che.requirejs.ModuleHolder;
  * The class defines methods which contains business logic to control machine's terminal.
  *
  * @author Dmitry Shnurenko
+ * @author Oleksandr Andriienko
  */
 public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate {
 
   // event which is performed when user input data into terminal
   private static final String DATA_EVENT_NAME = "data";
   private static final String TYPE = "type";
+  private static final String RESIZE_EVENT_NAME = "resize";
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
   private final TerminalView view;
@@ -56,14 +64,13 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private final TerminalInitializePromiseHolder terminalHolder;
   private final ModuleHolder moduleHolder;
   private final AgentURLModifier agentURLModifier;
+  private final ThemeAgent themeAgent;
+  private final boolean focusOnOpen;
 
   private WebSocket socket;
   private boolean connected;
   private int countRetry;
-  private TerminalJso terminal;
   private TerminalStateListener terminalStateListener;
-  private int width;
-  private int height;
 
   @Inject
   public TerminalPresenter(
@@ -71,10 +78,14 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       NotificationManager notificationManager,
       CoreLocalizationConstant locale,
       @NotNull @Assisted MachineImpl machine,
+      @Assisted TerminalOptionsJso options,
+      @Assisted boolean focusOnOpen,
       final TerminalInitializePromiseHolder terminalHolder,
       final ModuleHolder moduleHolder,
-      AgentURLModifier agentURLModifier) {
+      AgentURLModifier agentURLModifier,
+      ThemeAgent themeAgent) {
     this.view = view;
+    this.focusOnOpen = focusOnOpen;
     this.agentURLModifier = agentURLModifier;
     view.setDelegate(this);
     this.notificationManager = notificationManager;
@@ -85,6 +96,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     countRetry = 2;
     this.terminalHolder = terminalHolder;
     this.moduleHolder = moduleHolder;
+    this.themeAgent = themeAgent;
   }
 
   /**
@@ -92,7 +104,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
    * side. The terminal is initialized only when the method is called the first time.
    */
   public void connect() {
-    connect(TerminalOptionsJso.createDefault());
+    connect(TerminalOptionsJso.create());
   }
 
   /**
@@ -169,7 +181,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
   private void connectToTerminal(@NotNull String wsUrl, TerminalOptionsJso options) {
     countRetry--;
-
+    TerminalJso terminal = createTerminal(options);
     socket = WebSocket.create(wsUrl);
 
     socket.setOnMessageHandler(event -> terminal.write(event.getMessage()));
@@ -179,16 +191,22 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
           if (CLOSE_NORMAL == event.getCode()) {
             connected = false;
             terminalStateListener.onExit();
+            terminal.destroy();
           }
         });
 
     socket.setOnOpenHandler(
         () -> {
-          JavaScriptObject terminalJso = moduleHolder.getModule("Xterm");
-          terminal = TerminalJso.create(terminalJso, options);
           connected = true;
 
-          view.openTerminal(terminal);
+          view.setTerminal(terminal, focusOnOpen);
+
+          terminal.on(
+              RESIZE_EVENT_NAME,
+              data -> {
+                TerminalGeometryJso geometry = (TerminalGeometryJso) data;
+                setTerminalSize(geometry.getCols(), geometry.getRows());
+              });
 
           terminal.on(
               DATA_EVENT_NAME,
@@ -222,6 +240,32 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
         });
   }
 
+  private TerminalJso createTerminal(TerminalOptionsJso options) {
+    setUpTerminalTheme(options);
+
+    JavaScriptObject terminalJso = moduleHolder.getModule(XTERM_JS_MODULE);
+    TerminalJso terminal = TerminalJso.create(terminalJso, options);
+
+    JavaScriptObject fitJso = moduleHolder.getModule(FIT_ADDON);
+    terminal.applyAddon(fitJso);
+
+    terminal.attachCustomKeyEventHandler(CustomKeyEventTerminalHandler.create());
+
+    return terminal;
+  }
+
+  private void setUpTerminalTheme(TerminalOptionsJso options) {
+    if (options.getTheme() == null) {
+      Theme ideTheme = themeAgent.getTheme(themeAgent.getCurrentThemeId());
+      TerminalThemeJso terminalTheme = TerminalThemeJso.create();
+      terminalTheme.setCursor(ideTheme.getBlueIconColor());
+      terminalTheme.setBackGround(ideTheme.outputBackgroundColor());
+      terminalTheme.setForeGround(ideTheme.getOutputFontColor());
+
+      options.setTheme(terminalTheme);
+    }
+  }
+
   /** Sends 'close' message on server side to stop terminal. */
   public void stopTerminal() {
     if (connected) {
@@ -252,14 +296,6 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       return;
     }
 
-    if (width == x && height == y) {
-      return;
-    }
-
-    terminal.resize(x, y);
-    width = x;
-    height = y;
-
     Jso jso = Jso.create();
     JsArrayInteger arr = Jso.createArray().cast();
     arr.set(0, x);
@@ -267,6 +303,10 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
     jso.addField(TYPE, "resize");
     jso.addField(DATA_EVENT_NAME, arr);
     socket.send(jso.serialize());
+  }
+
+  public String[] getRenderedLines() {
+    return this.view.getRenderedLines();
   }
 
   /** Sets listener that will be called when a terminal state changed */

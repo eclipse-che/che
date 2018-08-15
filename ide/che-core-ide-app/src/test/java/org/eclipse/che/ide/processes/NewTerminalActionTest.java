@@ -50,6 +50,6 @@ public class NewTerminalActionTest {
   public void actionShouldBePerformed() throws Exception {
     action.actionPerformed(actionEvent);
 
-    verify(processesPanelPresenter).newTerminal(any());
+    verify(processesPanelPresenter).newTerminal(any(), true);
   }
 }

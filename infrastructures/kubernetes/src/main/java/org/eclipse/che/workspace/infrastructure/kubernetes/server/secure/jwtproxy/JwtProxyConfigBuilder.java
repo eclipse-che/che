@@ -71,8 +71,9 @@ public class JwtProxyConfigBuilder {
     this.ttl = ttl;
   }
 
-  public void addVerifierProxy(Integer listenPort, String upstream, Set<String> excludes) {
-    verifierProxies.add(new VerifierProxy(listenPort, upstream, excludes));
+  public void addVerifierProxy(
+      Integer listenPort, String upstream, Set<String> excludes, Boolean cookiesAuthEnabled) {
+    verifierProxies.add(new VerifierProxy(listenPort, upstream, excludes, cookiesAuthEnabled));
   }
 
   public String build() throws InternalInfrastructureException {
@@ -102,6 +103,7 @@ public class JwtProxyConfigBuilder {
                               workspaceId,
                               "public_key_path",
                               JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_PUBLIC_KEY_FILE)))
+              .withCookiesEnabled(verifierProxy.cookiesAuthEnabled)
               .withClaimsVerifier(
                   Collections.singleton(
                       new RegistrableComponentConfig()
@@ -113,7 +115,7 @@ public class JwtProxyConfigBuilder {
         verifierConfig.setExcludes(verifierProxy.excludes);
       }
 
-      if (authPageUrl != null) {
+      if (verifierProxy.cookiesAuthEnabled && authPageUrl != null) {
         verifierConfig.setAuthUrl(authPageUrl.toString());
       }
 
@@ -137,11 +139,14 @@ public class JwtProxyConfigBuilder {
     private Integer listenPort;
     private String upstream;
     private Set<String> excludes;
+    private boolean cookiesAuthEnabled;
 
-    VerifierProxy(Integer listenPort, String upstream, Set<String> excludes) {
+    VerifierProxy(
+        Integer listenPort, String upstream, Set<String> excludes, boolean cookiesAuthEnabled) {
       this.listenPort = listenPort;
       this.upstream = upstream;
       this.excludes = excludes;
+      this.cookiesAuthEnabled = cookiesAuthEnabled;
     }
   }
 }

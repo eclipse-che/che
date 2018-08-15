@@ -139,12 +139,13 @@ public class GitChangeMarkersTest {
     editor.typeTextIntoEditor("//", 13);
     editor.waitGitModificationMarkerInPosition(13, 12);
 
-    terminal.selectTerminalTab();
-    terminal.typeIntoTerminal("cd " + PROJECT_NAME + Keys.ENTER);
-    terminal.typeIntoTerminal("git config --global user.email \"git@email.com\"" + Keys.ENTER);
-    terminal.typeIntoTerminal("git config --global user.name \"name\"" + Keys.ENTER);
-    terminal.typeIntoTerminal("git commit -a -m 'Terminal commit'" + Keys.ENTER);
-    terminal.waitExpectedTextIntoTerminal("1 file changed, 1 insertion(+), 1 deletion(-)");
+    terminal.selectFirstTerminalTab();
+    terminal.typeIntoActiveTerminal("cd " + PROJECT_NAME + Keys.ENTER);
+    terminal.typeIntoActiveTerminal(
+        "git config --global user.email \"git@email.com\"" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("git config --global user.name \"name\"" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("git commit -a -m 'Terminal commit'" + Keys.ENTER);
+    terminal.waitTextInFirstTerminal("1 file changed, 1 insertion(+), 1 deletion(-)");
 
     editor.waitNoGitChangeMarkers();
   }
@@ -169,12 +170,12 @@ public class GitChangeMarkersTest {
   @Test(priority = 6)
   public void testChangeMarkersOnAddedToIndexAndUntrackedFileFromTerminal() {
     // Add file to index
-    terminal.selectTerminalTab();
-    terminal.typeIntoTerminal("git add src/com/company/Main.java" + Keys.ENTER);
+    terminal.selectFirstTerminalTab();
+    terminal.typeIntoActiveTerminal("git add src/com/company/Main.java" + Keys.ENTER);
     editor.waitGitModificationMarkerInPosition(14, 13);
 
     // Remove file from index
-    terminal.typeIntoTerminal("git rm --cached src/com/company/Main.java" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("git rm --cached src/com/company/Main.java" + Keys.ENTER);
 
     editor.waitNoGitChangeMarkers();
   }

@@ -101,9 +101,9 @@ public class CreateWorkspaceFromPHPStackTest {
     consoles.executeCommandFromProjectExplorer(
         WEB_PHP_PROJECT, RUN_GOAL, STOP_APACHE_COMMAND, "Stopping Apache httpd web server apache2");
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
-    terminal.typeIntoTerminal("ps ax");
-    terminal.typeIntoTerminal(ENTER.toString());
-    terminal.waitExpectedTextNotPresentTerminal(apacheIsRunning);
+    terminal.typeIntoActiveTerminal("ps ax");
+    terminal.typeIntoActiveTerminal(ENTER.toString());
+    terminal.waitNoTextInFirstTerminal(apacheIsRunning);
   }
 
   @Test(priority = 1)

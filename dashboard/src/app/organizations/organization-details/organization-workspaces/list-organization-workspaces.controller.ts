@@ -330,4 +330,15 @@ export class ListOrganizationWorkspacesController {
 
     return (total > 0) ? Math.round(total) + ' MB' : '-';
   }
+
+  /**
+   * Returns current status of a workspace.
+   * @param {string} workspaceId a workspace ID
+   * @returns {string}
+   */
+  getWorkspaceStatus(workspaceId: string): string {
+    const workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+    return workspace && workspace.status ? workspace.status : 'unknown';
+  }
+
 }

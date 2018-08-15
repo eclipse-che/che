@@ -12,7 +12,6 @@
 package org.eclipse.che.ide.terminal;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -28,6 +27,7 @@ import javax.validation.constraints.NotNull;
  * The class contains methods to display terminal.
  *
  * @author Dmitry Shnurenko
+ * @author Oleksandr Andriienko
  */
 final class TerminalViewImpl extends Composite implements TerminalView, Focusable, RequiresResize {
 
@@ -40,37 +40,25 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   @UiField Label unavailableLabel;
 
-  private ActionDelegate delegate;
-
   private TerminalJso terminal;
-  private Element terminalElement;
+  private boolean isOpen;
+  private boolean focusOnOpen;
 
   public TerminalViewImpl() {
     initWidget(UI_BINDER.createAndBindUi(this));
   }
 
   @Override
-  public void setDelegate(ActionDelegate delegate) {
-    this.delegate = delegate;
-  }
+  public void setDelegate(ActionDelegate delegate) {}
 
   /** {@inheritDoc} */
   @Override
-  public void openTerminal(@NotNull final TerminalJso terminal) {
+  public void setTerminal(@NotNull final TerminalJso terminal, boolean focusOnOpen) {
     unavailableLabel.setVisible(false);
 
-    this.terminal = terminal;
-    terminalElement = terminalPanel.getElement();
     terminalPanel.setVisible(true);
-    terminalElement.getStyle().setProperty("opacity", "0");
-
-    terminal.open(terminalPanel.getElement());
-    terminal.attachCustomKeyDownHandler(CustomKeyDownTerminalHandler.create());
-    resizeTerminal();
-
-    terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
-    terminalElement.getFirstChildElement().getStyle().clearProperty("color");
-    terminalElement.getStyle().clearProperty("opacity");
+    this.focusOnOpen = focusOnOpen;
+    this.terminal = terminal;
   }
 
   /** {@inheritDoc} */
@@ -82,6 +70,14 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     terminalPanel.setVisible(false);
   }
 
+  @Override
+  public String[] getRenderedLines() {
+    if (terminal != null) {
+      return terminal.getRenderedLines();
+    }
+    return null;
+  }
+
   /**
    * Resize {@link TerminalJso} to current widget size. To improve performance we should resize only
    * visible terminals, because "resize terminal" is quite expensive operation. When you click on
@@ -90,8 +86,12 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
    */
   @Override
   public void onResize() {
-    if (terminalElement != null && isVisible()) {
-      resizeTimer.schedule(200);
+    if (terminal != null) {
+      if (isOpen) {
+        resizeTimer.schedule(200);
+      } else {
+        open();
+      }
     }
   }
 
@@ -103,17 +103,24 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
         }
       };
 
+  private void open() {
+    if (getElement().getOffsetWidth() > 0 && getElement().getOffsetHeight() > 0) {
+      terminal.open(terminalPanel.getElement());
+      if (focusOnOpen) {
+        terminal.focus();
+      }
+      isOpen = true;
+    }
+  }
+
   private void resizeTerminal() {
     TerminalGeometryJso geometryJso = terminal.proposeGeometry();
     int x = geometryJso.getCols();
     int y = geometryJso.getRows();
-    if (x <= 0 || y <= 0) {
-      resizeTimer.cancel();
-      resizeTimer.schedule(500);
-      return;
-    }
 
-    delegate.setTerminalSize(x, y);
+    if (x > 0 && y > 0 && isVisible() && isAttached()) {
+      terminal.resize(geometryJso.getCols(), geometryJso.getRows());
+    }
   }
 
   @Override
@@ -124,22 +131,10 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   @Override
   public void setAccessKey(char key) {}
 
-  private Timer focusTimer =
-      new Timer() {
-        @Override
-        public void run() {
-          terminal.focus();
-        }
-      };
-
   @Override
   public void setFocus(boolean focused) {
-    if (terminal == null || terminal.getElement() == null) {
-      return;
-    }
-
-    if (focused && !terminal.hasSelection()) {
-      focusTimer.schedule(10);
+    if (terminal != null && isOpen) {
+      terminal.focus();
     }
   }
 
