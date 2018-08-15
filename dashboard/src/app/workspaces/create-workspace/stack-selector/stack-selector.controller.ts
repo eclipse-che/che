@@ -321,11 +321,11 @@ export class StackSelectorController {
 
     if (this.priorityStacks) {
       const priorityStacksToSort = this.lodash.remove(this.stacksFiltered, (stack: che.IStack) => {
-        return this.priorityStacks.indexOf(stack.name) >= 0;
+        return this.priorityStacks.indexOf(stack.name) !== -1;
       });
 
-      const priorityStacksSorted = this.priorityStacks.map((stackName: string) => {
-        return priorityStacksToSort.find((stack: che.IStack) => stack.name === stackName);
+      const priorityStacksSorted = priorityStacksToSort.sort((stackA: che.IStack, stackB: che.IStack) => {
+        return this.priorityStacks.indexOf(stackA.name) > this.priorityStacks.indexOf(stackB.name);
       });
 
       this.stacksFiltered = priorityStacksSorted.concat(this.stacksFiltered);
