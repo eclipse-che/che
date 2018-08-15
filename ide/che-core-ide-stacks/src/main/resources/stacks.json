@@ -67,7 +67,7 @@
   {
     "id": "java-theia-openshift",
     "creator": "ide",
-    "name": "Java Theia (openshift)",
+    "name": "Java Theia on openshift",
     "description": "Che development + Theia in a sidecar container (openshift)",
     "scope": "general",
     "tags": [
