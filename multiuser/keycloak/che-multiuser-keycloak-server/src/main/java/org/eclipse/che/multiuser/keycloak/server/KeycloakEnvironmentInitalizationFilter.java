@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.Principal;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -52,10 +53,11 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
   public KeycloakEnvironmentInitalizationFilter(
       KeycloakUserManager userManager,
       RequestTokenExtractor tokenExtractor,
+      @Named(KeycloakConstants.ALLOWED_CLOCK_SKEW_SEC) long allowedClockSkewSec,
       PermissionChecker permissionChecker,
       KeycloakSettings settings)
       throws MalformedURLException {
-    super(settings);
+    super(settings, allowedClockSkewSec);
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;

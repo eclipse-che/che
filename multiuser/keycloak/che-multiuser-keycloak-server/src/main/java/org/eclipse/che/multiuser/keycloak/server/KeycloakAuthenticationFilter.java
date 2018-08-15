@@ -11,20 +11,12 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import com.auth0.jwk.JwkException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
-import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.security.Key;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -41,9 +33,9 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
+
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakAuthenticationFilter.class);
 
-  private long allowedClockSkewSec;
   private RequestTokenExtractor tokenExtractor;
 
   @Inject
@@ -52,8 +44,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       @Named(KeycloakConstants.ALLOWED_CLOCK_SKEW_SEC) long allowedClockSkewSec,
       RequestTokenExtractor tokenExtractor)
       throws MalformedURLException {
-    super(keycloakSettings);
-    this.allowedClockSkewSec = allowedClockSkewSec;
+    super(keycloakSettings, allowedClockSkewSec);
     this.tokenExtractor = tokenExtractor;
   }
 
@@ -63,11 +54,6 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
     HttpServletRequest request = (HttpServletRequest) req;
 
     final String token = tokenExtractor.getToken(request);
-    if (shouldSkipAuthentication(request, token)) {
-      chain.doFilter(req, res);
-      return;
-    }
-
     if (token == null) {
       send403(res, "Authorization token is missed");
       return;
@@ -75,37 +61,20 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
     Jws<Claims> jwt;
     try {
-      jwt =
-          Jwts.parser()
-              .setAllowedClockSkewSeconds(allowedClockSkewSec)
-              .setSigningKeyResolver(
-                  new SigningKeyResolverAdapter() {
-                    @Override
-                    public Key resolveSigningKey(
-                        @SuppressWarnings("rawtypes") JwsHeader header, Claims claims) {
-                      try {
-                        return getJwtPublicKey(header);
-                      } catch (JwkException e) {
-                        throw new JwtException(
-                            "Error during the retrieval of the public key during JWT token validation",
-                            e);
-                      }
-                    }
-                  })
-              .parseClaimsJws(token);
+      if (shouldSkipAuthentication(request, token)) {
+        chain.doFilter(req, res);
+        return;
+      }
+      jwt = jwtParser.parseClaimsJws(token);
       LOG.debug("JWT = ", jwt);
       // OK, we can trust this JWT
-    } catch (SignatureException
-        | IllegalArgumentException
-        | MalformedJwtException
-        | UnsupportedJwtException e) {
-      send403(res, "The specified token is not a valid. " + e.getMessage());
-      return;
     } catch (ExpiredJwtException e) {
       send403(res, "The specified token is expired");
       return;
+    } catch (JwtException e) {
+      send403(res, "Token validation failed: " + e.getMessage());
+      return;
     }
-
     request.setAttribute("token", jwt);
     chain.doFilter(req, res);
   }

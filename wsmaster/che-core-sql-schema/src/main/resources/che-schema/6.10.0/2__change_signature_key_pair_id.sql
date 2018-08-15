@@ -23,14 +23,12 @@ CREATE TABLE che_sign_key_pair (
 );
 -- Constraint
 ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspace (id);
--- Index  (old indexes still preserved)
-CREATE INDEX index_sign_private_key_pair_id ON che_sign_key_pair (workspace_id);
 
 -- Copy data
 INSERT  INTO che_sign_key_pair
 SELECT r.workspace_id, k.public_key, k.private_key
 FROM che_k8s_runtime AS r,
-(SELECT public_key, private_key from che_sign_key_pair_old LIMIT 1) as k;
+(SELECT public_key, private_key FROM che_sign_key_pair_old LIMIT 1) AS k;
 
 -- Cleanup
 DROP TABLE che_sign_key_pair_old CASCADE;

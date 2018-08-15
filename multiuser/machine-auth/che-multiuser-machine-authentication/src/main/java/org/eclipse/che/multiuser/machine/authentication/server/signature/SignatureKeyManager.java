@@ -164,7 +164,7 @@ public class SignatureKeyManager {
     final KeyPair pair = kpg.generateKeyPair();
     final SignatureKeyPairImpl kp =
         new SignatureKeyPairImpl(workspaceId, pair.getPublic(), pair.getPrivate());
-    LOG.info(
+    LOG.debug(
         "Generated signature key pair with ws id {} and algorithm {}.",
         kp.getWorkspaceId(),
         algorithm);

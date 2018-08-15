@@ -22,13 +22,17 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.DefaultHeader;
 import io.jsonwebtoken.impl.DefaultJwt;
+import java.lang.reflect.Field;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashMap;
@@ -66,6 +70,8 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @Mock private HttpServletRequest request;
   @Mock private HttpServletResponse response;
   @Mock private HttpSession session;
+  @Mock private JwkProvider jwkProvider;
+  @Mock private Jwk jwk;
 
   private KeycloakEnvironmentInitalizationFilter filter;
 
@@ -78,24 +84,26 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     EnvironmentContext.setCurrent(context);
     filter =
         new KeycloakEnvironmentInitalizationFilter(
-            userManager, tokenExtractor, permissionChecker, keycloakSettings);
+            userManager, tokenExtractor, 1000, permissionChecker, keycloakSettings);
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
+    Field provider = filter.getClass().getSuperclass().getDeclaredField("jwkProvider");
+    provider.setAccessible(true);
+    provider.set(filter, jwkProvider);
     when(keyManager.getKeyPair(anyString())).thenReturn(kp);
+    when(jwkProvider.get(anyString())).thenReturn(jwk);
+    when(jwk.getPublicKey()).thenReturn(kp.getPublic());
   }
 
   @Test
   public void shouldSkipRequestsWithMachineTokens() throws Exception {
-    final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-    kpg.initialize(1024);
-    final KeyPair keyPair = kpg.generateKeyPair();
-    when(keyManager.getKeyPair(anyString())).thenReturn(keyPair);
+    when(keyManager.getKeyPair(anyString())).thenReturn(getKeyPair());
     final Map<String, Object> header = new HashMap<>();
     header.put("kind", Constants.MACHINE_TOKEN_KIND);
     final String token =
         Jwts.builder()
             .setPayload("payload")
             .setHeader(header)
-            .signWith(RS512, keyPair.getPrivate())
+            .signWith(RS512, getKeyPair().getPrivate())
             .compact();
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
 
@@ -112,13 +120,24 @@ public class KeycloakEnvironmentInitalizationFilterTest {
 
     Subject existingSubject = new SubjectImpl("name", "id1", "token", false);
     UserImpl user = new UserImpl("id2", "test2@test.com", "username2");
-    Subject expectedSubject = new SubjectImpl(user.getName(), user.getId(), "token2", false);
+
+    final Map<String, Object> header = new HashMap<>();
+    header.put("kid", "123");
 
     ArgumentCaptor<AuthorizedSubject> captor = ArgumentCaptor.forClass(AuthorizedSubject.class);
-
+    final KeyPair keyPair = getKeyPair();
+    DefaultJwt<Claims> claims = createJwt();
+    final String token =
+        Jwts.builder()
+            .setPayload("payload")
+            .setHeader(header)
+            .signWith(RS512, keyPair.getPrivate())
+            .compact();
+    Subject expectedSubject = new SubjectImpl(user.getName(), user.getId(), token, false);
     // given
-    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
-    when(request.getAttribute("token")).thenReturn(createJwt());
+    when(jwk.getPublicKey()).thenReturn(keyPair.getPublic());
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
+    when(request.getAttribute("token")).thenReturn(claims);
     when(session.getAttribute(eq("che_subject"))).thenReturn(existingSubject);
     when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(user);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
@@ -136,6 +155,12 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     assertEquals(expectedSubject.getUserId(), captor.getAllValues().get(1).getUserId());
     assertEquals(expectedSubject.getUserName(), captor.getAllValues().get(0).getUserName());
     assertEquals(expectedSubject.getUserName(), captor.getAllValues().get(1).getUserName());
+  }
+
+  private KeyPair getKeyPair() throws NoSuchAlgorithmException {
+    final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+    kpg.initialize(1024);
+    return kpg.generateKeyPair();
   }
 
   private DefaultJwt<Claims> createJwt() {
