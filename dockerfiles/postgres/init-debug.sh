@@ -10,7 +10,13 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 #
-if [ -n "${POSTGRESQL_DEBUG+set}" ]; then
-    echo "POSTGRESQL_DEBUG is set, possibly to the empty string"
-    cp /opt/app-root/src/postgresql-cfg/postgresql.conf.debug /opt/app-root/src/postgresql-cfg/postgresql.conf
+if [ -n "${POSTGRESQL_LOG_DEBUG+set}" ]; then
+    echo "POSTGRESQL_LOG_DEBUG is set, enabling additional logging configuration"
+
+    if [ ! -f /opt/app-root/src/postgresql-cfg/postgresql.log.debug.conf ]; then
+        echo "postgresql.conf not found!"
+        mv /opt/app-root/src/postgresql-cfg/postgresql.conf.debug /opt/app-root/src/postgresql-cfg/postgresql.log.debug.conf
+     else
+        echo OK
+     fi
 fi

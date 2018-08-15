@@ -14,6 +14,6 @@ RUN cat /var/lib/pgsql/init-che-user.sh.erb | \
 USER root
 RUN chmod +x /var/lib/pgsql/init-che-user-and-run.sh
 USER postgres
-ADD postgresql.conf.debug /opt/app-root/src/postgresql-cfg/
+ADD --chown=postgres postgresql.conf.debug /opt/app-root/src/postgresql-cfg/
 ADD init-debug.sh /opt/app-root/src/postgresql-pre-start/
 CMD ["/var/lib/pgsql/init-che-user-and-run.sh"]
