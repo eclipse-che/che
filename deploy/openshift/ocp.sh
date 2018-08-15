@@ -185,7 +185,6 @@ wait_for_automation_service_broker() {
         echo "[OCP] updating automation-broker configMap with admin sandbox role..."
         $OC_BINARY get cm/broker-config -n=openshift-automation-service-broker -o=json | sed 's/edit/admin/g' | oc apply -f -
         echo "[OCP] re-deploying openshift-automation-service-broker..."
-        # TODO: replace with oc rollout cancel and oc rollout latest when the latets tag works
         $OC_BINARY rollout cancel dc/openshift-automation-service-broker -n=openshift-automation-service-broker
         sleep 5
         $OC_BINARY rollout latest dc/openshift-automation-service-broker -n=openshift-automation-service-broker
