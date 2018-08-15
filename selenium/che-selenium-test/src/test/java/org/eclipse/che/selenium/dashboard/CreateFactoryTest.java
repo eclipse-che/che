@@ -202,7 +202,7 @@ public class CreateFactoryTest {
     // enter factory name with a less than 3 symbols
     createFactoryPage.typeFactoryName(generate("", 2));
     createFactoryPage.waitErrorMessage(TOO_SHORT_NAME_MESAAGE);
-    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
 
     // enter factory name with exactly 3 symbols
     createFactoryPage.typeFactoryName(MIN_FACTORY_NAME);
@@ -212,12 +212,12 @@ public class CreateFactoryTest {
     // enter factory name with special symbols
     createFactoryPage.typeFactoryName(SPECIAL_SYMBOLS_NAME);
     createFactoryPage.waitErrorMessage(SPECIAL_SYMBOLS_ERROR_MESSAGE);
-    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
 
     // enter factory name with more than 20 symbols
     createFactoryPage.typeFactoryName(generate("", 21));
     createFactoryPage.waitErrorMessage(TOO_LONG_NAME_MESSAGE);
-    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
 
     // enter factory name with exactly 20 symbols
     createFactoryPage.typeFactoryName(MAX_FACTORY_NAME);
