@@ -114,8 +114,8 @@ public class AbstractKeycloakFilterTest {
 
   static class TestLoginFilter extends AbstractKeycloakFilter {
 
-    public TestLoginFilter(KeycloakSettings keycloakSettings) throws MalformedURLException {
-      super(keycloakSettings, 1000);
+    public TestLoginFilter(KeycloakSettings keycloakSettings)  {
+
     }
 
     @Override

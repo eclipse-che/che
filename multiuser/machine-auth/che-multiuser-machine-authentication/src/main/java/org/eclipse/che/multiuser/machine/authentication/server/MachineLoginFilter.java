@@ -14,18 +14,13 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
-import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
 import java.io.IOException;
-import java.security.Key;
 import java.security.Principal;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -47,7 +42,6 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 
 /**
  * Handles requests that comes from machines with specific machine token.
@@ -67,29 +61,12 @@ public class MachineLoginFilter implements Filter {
   public MachineLoginFilter(
       RequestTokenExtractor tokenExtractor,
       UserManager userManager,
-      SignatureKeyManager keyManager,
+      MachineSigningKeyResolver machineKeyResolver,
       PermissionChecker permissionChecker) {
     this.tokenExtractor = tokenExtractor;
     this.userManager = userManager;
     this.permissionChecker = permissionChecker;
-    this.jwtParser =
-        Jwts.parser()
-            .setSigningKeyResolver(
-                new SigningKeyResolverAdapter() {
-                  @Override
-                  public Key resolveSigningKey(JwsHeader header, Claims claims) {
-                    if (!MACHINE_TOKEN_KIND.equals(header.get("kind"))) {
-                      throw new JwtException("Not a machine token");
-                    }
-                    String wsId = claims.get(WORKSPACE_ID_CLAIM, String.class);
-                    try {
-                      return keyManager.getKeyPair(wsId).getPublic();
-                    } catch (ServerException e) {
-                      throw new JwtException(
-                          "Unable to fetch signature key pair:" + e.getMessage());
-                    }
-                  }
-                });
+    this.jwtParser = Jwts.parser().setSigningKeyResolver(machineKeyResolver);
   }
 
   @Override
@@ -100,12 +77,10 @@ public class MachineLoginFilter implements Filter {
       throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final String token = tokenExtractor.getToken(httpRequest);
-
     if (isNullOrEmpty(token)) {
       chain.doFilter(request, response);
       return;
     }
-
     // check token signature and verify is this token machine or not
     try {
       final Claims claims = jwtParser.parseClaimsJws(token).getBody();
@@ -123,17 +98,17 @@ public class MachineLoginFilter implements Filter {
             response,
             SC_UNAUTHORIZED,
             "Authentication with machine token failed because user for this token no longer exist.");
-      } catch (ServerException ex) {
-        sendErr(
-            response,
-            SC_UNAUTHORIZED,
-            format("Authentication with machine token failed cause: %s", ex.getMessage()));
       } finally {
         EnvironmentContext.reset();
       }
-    } catch (JwtException ex) {
-      // signature check failed
+    } catch (NotMachineTokenJwtException ex) {
+      // not a machine token, bypass
       chain.doFilter(request, response);
+    } catch (ServerException | JwtException e) {
+      sendErr(
+          response,
+          SC_UNAUTHORIZED,
+          format("Authentication with machine token failed cause: %s", e.getMessage()));
     }
   }
 

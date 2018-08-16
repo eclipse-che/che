@@ -44,11 +44,11 @@ public interface SignatureKeyDao {
   void remove(String workspaceId) throws ServerException;
 
   /**
-   * Returns all the signature key pairs.
+   * Returns signature key pair for given workspace id.
    *
    * @param workspaceId identifier of workspace which key pair belongs to
    * @return signature key pair for the given workspace
    * @throws NotFoundException when any errors occur while fetching the key pairs
    */
-  SignatureKeyPairImpl get(String workspaceId) throws NotFoundException;
+  SignatureKeyPairImpl get(String workspaceId) throws NotFoundException, ServerException;
 }

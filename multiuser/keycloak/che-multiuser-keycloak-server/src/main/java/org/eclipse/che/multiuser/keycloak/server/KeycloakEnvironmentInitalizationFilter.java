@@ -14,10 +14,8 @@ package org.eclipse.che.multiuser.keycloak.server;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.security.Principal;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -48,19 +46,18 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
   private final KeycloakUserManager userManager;
   private final RequestTokenExtractor tokenExtractor;
   private final PermissionChecker permissionChecker;
+  private final KeycloakSettings keycloakSettings;
 
   @Inject
   public KeycloakEnvironmentInitalizationFilter(
       KeycloakUserManager userManager,
       RequestTokenExtractor tokenExtractor,
-      @Named(KeycloakConstants.ALLOWED_CLOCK_SKEW_SEC) long allowedClockSkewSec,
       PermissionChecker permissionChecker,
-      KeycloakSettings settings)
-      throws MalformedURLException {
-    super(settings, allowedClockSkewSec);
+      KeycloakSettings settings) {
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
+    this.keycloakSettings = settings;
   }
 
   @Override

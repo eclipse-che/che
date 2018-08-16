@@ -84,7 +84,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     EnvironmentContext.setCurrent(context);
     filter =
         new KeycloakEnvironmentInitalizationFilter(
-            userManager, tokenExtractor, 1000, permissionChecker, keycloakSettings);
+            userManager, tokenExtractor, permissionChecker, keycloakSettings);
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
     Field provider = filter.getClass().getSuperclass().getDeclaredField("jwkProvider");
     provider.setAccessible(true);

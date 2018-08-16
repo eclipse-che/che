@@ -100,7 +100,10 @@ public class MachineLoginFilterTest {
             .compact();
     machineLoginFilter =
         new MachineLoginFilter(
-            tokenExtractorMock, userManagerMock, keyManagerMock, permissionCheckerMock);
+            tokenExtractorMock,
+            userManagerMock,
+            new MachineSigningKeyResolver(keyManagerMock),
+            permissionCheckerMock);
 
     when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
     when(keyManagerMock.getKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
@@ -119,19 +122,21 @@ public class MachineLoginFilterTest {
   }
 
   @Test
-  public void testProceedRequestWhenSignatureCheckIsFailed() throws Exception {
-    final String tokenWithInvalidSignature = "keycloak_token";
+  public void testNotProceedRequestWhenSignatureCheckIsFailed() throws Exception {
     final HttpServletRequest requestMock = getRequestMock();
-    when(tokenExtractorMock.getToken(any(HttpServletRequest.class)))
-        .thenReturn(tokenWithInvalidSignature);
+    final KeyPairGenerator kpg = KeyPairGenerator.getInstance(SIGNATURE_ALGORITHM);
+    kpg.initialize(KEY_SIZE);
+    final KeyPair pair = kpg.generateKeyPair();
+    when(keyManagerMock.getKeyPair(eq(WORKSPACE_ID))).thenReturn(pair);
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
     verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
-    verify(chainMock).doFilter(requestMock, responseMock);
-    verifyZeroInteractions(keyManagerMock);
-    verifyZeroInteractions(userManagerMock);
-    verifyZeroInteractions(responseMock);
+    verify(responseMock)
+        .sendError(
+            401,
+            "Authentication with machine token failed cause: JWT signature does not match locally computed signature."
+                + " JWT validity cannot be asserted and should not be trusted.");
   }
 
   @Test

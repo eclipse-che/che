@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.*;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;

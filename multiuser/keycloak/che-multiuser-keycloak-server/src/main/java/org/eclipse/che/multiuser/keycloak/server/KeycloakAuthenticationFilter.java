@@ -16,9 +16,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -27,7 +25,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
-import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +36,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
   private RequestTokenExtractor tokenExtractor;
 
   @Inject
-  public KeycloakAuthenticationFilter(
-      KeycloakSettings keycloakSettings,
-      @Named(KeycloakConstants.ALLOWED_CLOCK_SKEW_SEC) long allowedClockSkewSec,
-      RequestTokenExtractor tokenExtractor)
-      throws MalformedURLException {
-    super(keycloakSettings, allowedClockSkewSec);
+  public KeycloakAuthenticationFilter(RequestTokenExtractor tokenExtractor) {
     this.tokenExtractor = tokenExtractor;
   }
 
@@ -55,7 +47,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
     final String token = tokenExtractor.getToken(request);
     if (token == null) {
-      send403(res, "Authorization token is missed");
+      send401(res, "Authorization token is missed");
       return;
     }
 
@@ -69,19 +61,19 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       LOG.debug("JWT = ", jwt);
       // OK, we can trust this JWT
     } catch (ExpiredJwtException e) {
-      send403(res, "The specified token is expired");
+      send401(res, "The specified token is expired");
       return;
     } catch (JwtException e) {
-      send403(res, "Token validation failed: " + e.getMessage());
+      send401(res, "Token validation failed: " + e.getMessage());
       return;
     }
     request.setAttribute("token", jwt);
     chain.doFilter(req, res);
   }
 
-  private void send403(ServletResponse res, String message) throws IOException {
+  private void send401(ServletResponse res, String message) throws IOException {
     HttpServletResponse response = (HttpServletResponse) res;
     response.getOutputStream().write(message.getBytes());
-    response.setStatus(403);
+    response.setStatus(401);
   }
 }

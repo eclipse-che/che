@@ -81,10 +81,9 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
 
   @Transactional
   protected void doRemove(String workspaceId) {
-    final SignatureKeyPairImpl keyPair =
-        managerProvider.get().find(SignatureKeyPairImpl.class, workspaceId);
+    final EntityManager manager = managerProvider.get();
+    final SignatureKeyPairImpl keyPair = manager.find(SignatureKeyPairImpl.class, workspaceId);
     if (keyPair != null) {
-      final EntityManager manager = managerProvider.get();
       manager.remove(keyPair);
       manager.flush();
     }
@@ -92,7 +91,7 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
 
   @Override
   @Transactional
-  public SignatureKeyPairImpl get(String workspaceId) throws NotFoundException {
+  public SignatureKeyPairImpl get(String workspaceId) throws NotFoundException, ServerException {
     final EntityManager manager = managerProvider.get();
     try {
       return new SignatureKeyPairImpl(
@@ -103,6 +102,8 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
     } catch (NoResultException x) {
       throw new NotFoundException(
           format("Signature key pair for workspace '%s' doesn't exist", workspaceId));
+    } catch (RuntimeException ex) {
+      throw new ServerException(ex.getMessage(), ex);
     }
   }
 
