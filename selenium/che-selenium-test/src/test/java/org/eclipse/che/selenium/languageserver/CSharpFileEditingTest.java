@@ -95,7 +95,6 @@ public class CSharpFileEditingTest {
       // remove try-catch block after issue has been resolved
       fail("Known issue: https://github.com/eclipse/che/issues/10151", ex);
     }
-
   }
 
   public void checkCodeValidation() {
