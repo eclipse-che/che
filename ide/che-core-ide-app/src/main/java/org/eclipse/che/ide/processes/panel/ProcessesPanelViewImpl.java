@@ -38,7 +38,7 @@ import org.eclipse.che.ide.processes.ProcessDataAdapter;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeRenderer;
 import org.eclipse.che.ide.processes.StopProcessHandler;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.SplitterFancyUtil;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
@@ -105,7 +105,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     widget2TreeNodes = new HashMap<>();
 
     renderer.addAddTerminalClickHandler(
-        machineId -> delegate.onAddTerminal(machineId, TerminalOptionsJso.createDefault()));
+        machineId -> delegate.onAddTerminal(machineId, TerminalOptionsJso.create(), true));
     renderer.addPreviewSshClickHandler(machineId -> delegate.onPreviewSsh(machineId));
     renderer.addStopProcessHandler(
         new StopProcessHandler() {

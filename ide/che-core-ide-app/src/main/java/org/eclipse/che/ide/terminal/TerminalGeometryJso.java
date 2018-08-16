@@ -13,7 +13,11 @@ package org.eclipse.che.ide.terminal;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-/** @author Alexander Andrienko */
+/**
+ * Defines current terminal widget size.
+ *
+ * @author Oleksandr Andriienko
+ */
 public class TerminalGeometryJso extends JavaScriptObject {
 
   protected TerminalGeometryJso() {}
