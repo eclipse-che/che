@@ -19,7 +19,6 @@ import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
@@ -109,8 +108,7 @@ public class MachineLoginFilter implements Filter {
 
     // check token signature and verify is this token machine or not
     try {
-      final Jws<Claims> jwt = jwtParser.parseClaimsJws(token);
-      final Claims claims = jwt.getBody();
+      final Claims claims = jwtParser.parseClaimsJws(token).getBody();
       try {
         final String userId = claims.get(USER_ID_CLAIM, String.class);
         // check if user with such id exists

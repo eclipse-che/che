@@ -63,13 +63,10 @@ public abstract class AbstractKeycloakFilter implements Filter {
   }
 
   /** when a request came from a machine with valid token then auth is not required */
-  protected boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
+  boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
     if (token == null) {
-      if (request.getRequestURI() != null
-          && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js")) {
-        return true;
-      }
-      return false;
+      return request.getRequestURI() != null
+          && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js");
     }
     try {
       jwtParser.parse(token);
