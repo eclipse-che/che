@@ -195,7 +195,6 @@ public class NewWorkspacePageTest {
       asList(
           JAVA.getId(),
           BLANK.getId(),
-          DOT_NET.getId(),
           JAVA_THEIA_DOCKER.getId(),
           RAILS.getId(),
           PYTHON.getId(),
@@ -205,7 +204,8 @@ public class NewWorkspacePageTest {
           GO.getId(),
           ECLIPSE_CHE.getId(),
           CPP.getId(),
-          ANDROID.getId());
+          ANDROID.getId(),
+          DOT_NET.getId());
 
   private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
