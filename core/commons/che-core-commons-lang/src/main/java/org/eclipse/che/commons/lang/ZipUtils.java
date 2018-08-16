@@ -15,13 +15,14 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -38,89 +39,86 @@ import java.util.zip.ZipOutputStream;
  *
  * @author Eugene Voevodin
  * @author Sergii Kabashniuk
+ * @author Thomas Mäder
  */
 public class ZipUtils {
   private static final int BUF_SIZE = 4096;
 
-  public static void zipDir(String parentPath, File dir, File zip, FilenameFilter filter)
-      throws IOException {
-    if (!dir.isDirectory()) {
-      throw new IllegalArgumentException("Not a directory.");
-    }
-    if (!dir.getAbsolutePath().startsWith(parentPath)) {
-      throw new IllegalArgumentException("Invalid parent directory path " + parentPath);
-    }
-    if (filter == null) {
-      filter = IoUtil.ANY_FILTER;
-    }
-    try (ZipOutputStream zipOut =
-        new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zip)))) {
-      zipOut.setLevel(0); // TODO: move in parameters of method
-      addDirectoryRecursively(zipOut, parentPath, dir, filter);
-      zipOut.finish();
+  private static class ExceptionWrapper extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
+    public ExceptionWrapper(Throwable cause) {
+      super(cause);
     }
   }
 
   /**
-   * Create an output ZIP stream and add each file to that stream. Directory files are added
-   * recursively. The contents of the zip are written to the given file.
+   * Creates a {@link ZipOutputStream} with proper buffering and options
    *
-   * @param zip The file to write the zip contents to.
-   * @param files The files to add to the zip stream.
-   * @throws IOException
+   * @param zip
+   * @return a newly opened stream
+   * @throws FileNotFoundException
    */
-  public static void zipFiles(File zip, File... files) throws IOException {
-    try (BufferedOutputStream bufferedOut = new BufferedOutputStream(new FileOutputStream(zip))) {
-      zipFiles(bufferedOut, files);
-    }
+  public static ZipOutputStream stream(Path zip) throws FileNotFoundException {
+    ZipOutputStream result =
+        new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zip.toFile())));
+    result.setLevel(0);
+    return result;
   }
 
   /**
-   * Create an output ZIP stream and add each file to that stream. Directory files are added
-   * recursively. The contents of the zip are written to the given stream.
+   * This is equivalent to writing {@code #add(out, f, f.getParent())}
    *
-   * @param output The stream to write the zip contents to.
-   * @param files The files to add to the zip stream.
+   * @param out the stream to write to
+   * @param f the file or directory
    * @throws IOException
    */
-  public static void zipFiles(OutputStream output, File... files) throws IOException {
-    try (ZipOutputStream zipOut = new ZipOutputStream(output)) {
-      for (File f : files) {
-        if (f.isDirectory()) {
-          addDirectoryEntry(zipOut, f.getName());
-          final String parentPath = f.getParentFile().getAbsolutePath();
-          addDirectoryRecursively(zipOut, parentPath, f, IoUtil.ANY_FILTER);
-        } else if (f.isFile()) {
-          addFileEntry(zipOut, f.getName(), f);
-        }
-      }
+  public static void add(ZipOutputStream out, Path f) throws IOException {
+    add(out, f, f.getParent());
+  }
+
+  /**
+   * Recursively add the contents of the given file or directory to a {@link ZipOutputStream}
+   *
+   * @param out The zip file to add to
+   * @param f the file or directory to add to
+   * @param rootPath The path the zip entries are relative to. If f is /a/b/c and rootPath is /a,
+   *     the entry corresponding to f will be named b/c. Must be a prefix of f.
+   * @throws IOException
+   */
+  public static void add(ZipOutputStream out, Path f, Path rootPath) throws IOException {
+    if (!f.startsWith(rootPath)) {
+      throw new IllegalArgumentException(
+          "'" + String.valueOf(rootPath) + "' is not a prefix of '" + String.valueOf(f) + "'");
+    }
+    if (Files.isDirectory(f)) {
+      addDirectory(out, f, rootPath);
+    } else {
+      addFileEntry(out, relativePath(rootPath, f), f.toFile());
     }
   }
 
-  private static void addDirectoryRecursively(
-      ZipOutputStream zipOut, String parentPath, File dir, FilenameFilter filter)
-      throws IOException {
-    final int parentPathLength = parentPath.length() + 1;
-    final LinkedList<File> q = new LinkedList<>();
-    q.add(dir);
-    while (!q.isEmpty()) {
-      final File current = q.pop();
-      final File[] list = current.listFiles();
-      if (list != null) {
-        for (File f : list) {
-          if (filter.accept(current, f.getName())) {
-            final String entryName =
-                f.getAbsolutePath().substring(parentPathLength).replace('\\', '/');
-            if (f.isDirectory()) {
-              addDirectoryEntry(zipOut, entryName);
-              q.push(f);
-            } else if (f.isFile()) {
-              addFileEntry(zipOut, entryName, f);
-            }
-          }
-        }
-      }
+  private static void addDirectory(ZipOutputStream out, Path d, Path root) throws IOException {
+    if (!root.equals(d)) {
+      addDirectoryEntry(out, relativePath(root, d));
     }
+    try {
+      Files.list(d)
+          .forEach(
+              path -> {
+                try {
+                  add(out, path, root);
+                } catch (IOException e) {
+                  throw new ExceptionWrapper(e);
+                }
+              });
+    } catch (ExceptionWrapper e) {
+      throw (IOException) e.getCause();
+    }
+  }
+
+  private static String relativePath(Path root, Path f) {
+    return root.relativize(f).toString().replaceAll(File.pathSeparator, "/");
   }
 
   private static void addDirectoryEntry(ZipOutputStream zipOut, String entryName)
