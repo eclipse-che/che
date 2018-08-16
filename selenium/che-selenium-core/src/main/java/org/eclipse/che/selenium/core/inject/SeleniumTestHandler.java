@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.core.inject;
 import static com.google.inject.Guice.createInjector;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -349,7 +350,7 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      if (obj == null || !(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
+      if (!(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
         continue;
       }
 
@@ -621,22 +622,11 @@ public abstract class SeleniumTestHandler
   }
 
   private void excludeTestOfImproperGroup(ITestAnnotation annotation) {
-    if (annotation.getGroups() == null) {
+    if (annotation.getGroups().length == 0) {
       return;
     }
 
-    List groups = Arrays.asList(annotation.getGroups());
-
-    // exclude test which doesn't comply singleuser/multiuser flag
-    if (groups.contains(TestGroup.MULTIUSER) && !isMultiuser) {
-      annotation.setEnabled(false);
-      return;
-    }
-
-    if (groups.contains(TestGroup.SINGLEUSER) && isMultiuser) {
-      annotation.setEnabled(false);
-      return;
-    }
+    List<String> groups = new ArrayList<>(asList(annotation.getGroups()));
 
     // exclude test with group from excludedGroups doesn't support current infrastructure
     if (excludedGroups != null
@@ -645,7 +635,25 @@ public abstract class SeleniumTestHandler
       return;
     }
 
+    // exclude test which doesn't comply multiuser flag
+    if (isMultiuser
+        && groups.contains(TestGroup.SINGLEUSER)
+        && !groups.contains(TestGroup.MULTIUSER)) {
+      annotation.setEnabled(false);
+      return;
+    }
+
+    // exclude test which doesn't comply singleuser flag
+    if (!isMultiuser
+        && groups.contains(TestGroup.MULTIUSER)
+        && !groups.contains(TestGroup.SINGLEUSER)) {
+      annotation.setEnabled(false);
+      return;
+    }
+
     // exclude test which doesn't support current infrastructure
+    groups.remove(TestGroup.SINGLEUSER);
+    groups.remove(TestGroup.MULTIUSER);
     if (!groups.isEmpty() && !groups.contains(infrastructure.toString().toLowerCase())) {
       annotation.setEnabled(false);
     }
