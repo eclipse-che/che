@@ -11,14 +11,14 @@ using build script:
 with native docker:
 
 ```
-docker build -t eclipse/machine-exec:nightly .
+docker build -t eclipse/che-machine-exec:nightly .
 ```
 
 # Run container from image manually:
 To run container with machine-exec you need docker.sock. Command to run container manually:
 
 ```
-docker run -v /var/run/docker.sock:/var/run/docker.sock eclipse/machine-exec:nightly
+docker run -v /var/run/docker.sock:/var/run/docker.sock eclipse/che-machine-exec:nightly
 ```
 
 # How to use machine-exec image with Eclipse CHE workspace on the docker infrastructure:
