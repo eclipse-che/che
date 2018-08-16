@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 
 /**
  * Action to open new terminal and navigate to selected directory. If on selected folder in Project
@@ -79,7 +79,6 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
     Path path = resource.getLocation().makeRelative();
     Command cmdTmpl = GWT.create(Command.class);
     String command = cmdTmpl.openInTerminalCommand(path.toString()).asString();
-    processesPanelPresenter.newTerminal(
-        TerminalOptionsJso.createDefault().withCommand(command).withFocusOnOpen(true));
+    processesPanelPresenter.newTerminal(TerminalOptionsJso.create().withCommand(command), true);
   }
 }

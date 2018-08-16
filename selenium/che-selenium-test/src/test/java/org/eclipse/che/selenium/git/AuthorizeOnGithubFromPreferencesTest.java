@@ -100,7 +100,7 @@ public class AuthorizeOnGithubFromPreferencesTest {
   private void deletePrivateSshKey() throws Exception {
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
 
     // open Preferences Vcs Form
     openPreferencesVcsForm();

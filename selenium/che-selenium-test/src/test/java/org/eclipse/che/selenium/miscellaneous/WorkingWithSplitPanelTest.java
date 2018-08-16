@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static java.util.Arrays.stream;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.CLOSE_ALL_TABS;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -77,7 +79,7 @@ public class WorkingWithSplitPanelTest {
   public void checkMultiSplitPane() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
     loader.waitOnClosed();
 
     // open menu of the split pane
@@ -127,15 +129,15 @@ public class WorkingWithSplitPanelTest {
     consoles.clickOnTerminalItemInContextMenu();
     consoles.startTerminalFromProcessesArea("dev-machine");
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitTerminalIsNotEmpty(2); // terminal.waitTerminalIsNotEmpty(2)
     loader.waitOnClosed();
-    terminal.typeIntoTerminal("mc");
-    terminal.typeIntoTerminal(Keys.ENTER.toString());
-    terminal.waitTerminalIsNotEmpty();
+    terminal.typeIntoActiveTerminal("mc");
+    terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
+    terminal.waitTerminalIsNotEmpty(3);
     loader.waitOnClosed();
-    for (String partOfContent : checkMcTerminal) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
-    }
+    String visibleTextFromTerminal = terminal.getVisibleTextFromTerminal(3);
+    stream(checkMcTerminal)
+        .forEach(content -> assertTrue(visibleTextFromTerminal.contains(content)));
     multiSplitPanel.waitTabProcessIsNotPresent(2, BUILD_COMM);
   }
 
