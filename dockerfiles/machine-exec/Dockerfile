@@ -36,5 +36,4 @@ RUN yum -y update && yum install -y git && git --version && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-# CMD machine-exec-server
 CMD machine-exec-server
