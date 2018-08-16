@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.ZipOutputStream;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -151,21 +152,22 @@ public class TestProjectServiceClient {
     }
 
     Path zip = Files.createTempFile("project", projectName);
-    if (PLAIN_JAVA.equals(template)) {
-      Path tmpDir = Files.createTempDirectory("TestProject");
-      Path dotClasspath = createFile(tmpDir.resolve(".classpath"));
-      Path dotProject = Files.createFile(tmpDir.resolve(".project"));
-      write(
-          dotProject,
-          format(
-                  Resources.toString(getResource("projects/jdt-ls-project-files/project"), UTF_8),
-                  projectName)
-              .getBytes());
-      write(dotClasspath, toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
-      ZipUtils.zipFiles(
-          zip.toFile(), sourceFolder.toFile(), dotClasspath.toFile(), dotProject.toFile());
-    } else {
-      ZipUtils.zipFiles(zip.toFile(), sourceFolder.toFile());
+    try (ZipOutputStream out = ZipUtils.stream(zip)) {
+      ZipUtils.add(out, sourceFolder, sourceFolder);
+      if (PLAIN_JAVA.equals(template)) {
+        Path tmpDir = Files.createTempDirectory("TestProject");
+        Path dotClasspath = createFile(tmpDir.resolve(".classpath"));
+        Path dotProject = Files.createFile(tmpDir.resolve(".project"));
+        write(
+            dotProject,
+            format(
+                    Resources.toString(getResource("projects/jdt-ls-project-files/project"), UTF_8),
+                    projectName)
+                .getBytes());
+        write(dotClasspath, toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
+        ZipUtils.add(out, dotClasspath);
+        ZipUtils.add(out, dotProject);
+      }
     }
 
     importZipProject(workspaceId, zip, projectName, template);
