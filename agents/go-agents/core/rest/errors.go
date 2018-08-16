@@ -46,3 +46,8 @@ func Forbidden(err error) error {
 func Unauthorized(err error) error {
 	return APIError{err, http.StatusUnauthorized}
 }
+
+// ServerError represents http error with 500 code
+func ServerError(err error) error {
+	return APIError{err, http.StatusInternalServerError}
+}
