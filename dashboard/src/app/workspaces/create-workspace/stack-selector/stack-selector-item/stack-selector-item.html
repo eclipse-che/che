@@ -25,6 +25,11 @@
             <div ng-if="!stackIconLink" class="stack-selector-item-icon blank-icon">
               <div class="chefont cheico-type-blank"></div>
             </div>
+
+            <div class="stack-selector-item-thumb-tack"
+                 ng-if="isPinned(stack)">
+              <i class="fa fa-thumb-tack" aria-hidden="true"></i>
+            </div>
           </div>
 
           <div layout="column" flex>

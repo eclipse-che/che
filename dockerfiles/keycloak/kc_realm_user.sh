@@ -20,6 +20,9 @@ if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
     sed -i -e "s#\"UPDATE_PASSWORD\"##" /scripts/che-users-0.json
 fi
 
+DEFAULT_CHE_HOST="che-${NAMESPACE}.${ROUTING_SUFFIX}"
+CHE_HOST=${CHE_HOST:-${DEFAULT_CHE_HOST}}
+
 cat /scripts/che-realm.json.erb | \
                                 sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://${CHE_HOST}@" \
                                 > /scripts/che-realm.json
