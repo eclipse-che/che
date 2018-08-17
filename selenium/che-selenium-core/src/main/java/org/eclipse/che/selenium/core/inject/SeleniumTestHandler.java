@@ -14,7 +14,6 @@ package org.eclipse.che.selenium.core.inject;
 import static com.google.inject.Guice.createInjector;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -33,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +47,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
@@ -131,20 +128,13 @@ public abstract class SeleniumTestHandler
   @Named("sys.excludedGroups")
   private String excludedGroups;
 
-  @Inject
-  @Named("che.infrastructure")
-  private Infrastructure infrastructure;
-
-  @Inject
-  @Named("che.multiuser")
-  private boolean isMultiuser;
-
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
   @Inject private WebDriverLogsReaderFactory webDriverLogsReaderFactory;
+  @Inject private TestFilter testFilter;
 
   private final Injector injector;
 
@@ -283,6 +273,12 @@ public abstract class SeleniumTestHandler
   @Override
   public void onExecutionFinish() {
     shutdown();
+  }
+
+  @Override
+  public void transform(
+      ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
+    testFilter.excludeTestOfImproperGroup(annotation);
   }
 
   /** Injects dependencies into the given test class using {@link Guice} and custom injectors. */
@@ -614,48 +610,4 @@ public abstract class SeleniumTestHandler
   /** Returns list of child modules */
   @NotNull
   public abstract List<Module> getChildModules();
-
-  @Override
-  public void transform(
-      ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
-    excludeTestOfImproperGroup(annotation);
-  }
-
-  private void excludeTestOfImproperGroup(ITestAnnotation annotation) {
-    if (annotation.getGroups().length == 0) {
-      return;
-    }
-
-    List<String> groups = new ArrayList<>(asList(annotation.getGroups()));
-
-    // exclude test with group from excludedGroups doesn't support current infrastructure
-    if (excludedGroups != null
-        && Arrays.stream(excludedGroups.split(",")).anyMatch(groups::contains)) {
-      annotation.setEnabled(false);
-      return;
-    }
-
-    // exclude test which doesn't comply multiuser flag
-    if (isMultiuser
-        && groups.contains(TestGroup.SINGLEUSER)
-        && !groups.contains(TestGroup.MULTIUSER)) {
-      annotation.setEnabled(false);
-      return;
-    }
-
-    // exclude test which doesn't comply singleuser flag
-    if (!isMultiuser
-        && groups.contains(TestGroup.MULTIUSER)
-        && !groups.contains(TestGroup.SINGLEUSER)) {
-      annotation.setEnabled(false);
-      return;
-    }
-
-    // exclude test which doesn't support current infrastructure
-    groups.remove(TestGroup.SINGLEUSER);
-    groups.remove(TestGroup.MULTIUSER);
-    if (!groups.isEmpty() && !groups.contains(infrastructure.toString().toLowerCase())) {
-      annotation.setEnabled(false);
-    }
-  }
 }
