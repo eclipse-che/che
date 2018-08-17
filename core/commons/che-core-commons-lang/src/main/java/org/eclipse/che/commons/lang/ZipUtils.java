@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -102,16 +103,15 @@ public class ZipUtils {
     if (!root.equals(d)) {
       addDirectoryEntry(out, relativePath(root, d));
     }
-    try {
-      Files.list(d)
-          .forEach(
-              path -> {
-                try {
-                  add(out, path, root);
-                } catch (IOException e) {
-                  throw new ExceptionWrapper(e);
-                }
-              });
+    try (Stream<Path> entries = Files.list(d)) {
+      entries.forEach(
+          path -> {
+            try {
+              add(out, path, root);
+            } catch (IOException e) {
+              throw new ExceptionWrapper(e);
+            }
+          });
     } catch (ExceptionWrapper e) {
       throw (IOException) e.getCause();
     }
