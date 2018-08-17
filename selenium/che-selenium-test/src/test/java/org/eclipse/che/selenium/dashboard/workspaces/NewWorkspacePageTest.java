@@ -75,8 +75,8 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_JDK_STACKS = asList(JAVA, ECLIPSE_CHE);
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_QUICK_START_STACKS =
       asList(
-          BLANK,
           JAVA,
+          BLANK,
           DOT_NET,
           ANDROID,
           CPP,
@@ -91,9 +91,9 @@ public class NewWorkspacePageTest {
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
-          BLANK,
           JAVA,
           JAVA_MYSQL,
+          BLANK,
           DOT_NET,
           ANDROID,
           CPP,
@@ -107,8 +107,8 @@ public class NewWorkspacePageTest {
 
   private static List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER =
       asList(
-          BLANK.getId(),
           JAVA.getId(),
+          BLANK.getId(),
           DOT_NET.getId(),
           ANDROID.getId(),
           CPP.getId(),
@@ -123,9 +123,9 @@ public class NewWorkspacePageTest {
 
   private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_ORDER =
       asList(
-          BLANK.getId(),
           JAVA.getId(),
           JAVA_MYSQL.getId(),
+          BLANK.getId(),
           DOT_NET.getId(),
           ANDROID.getId(),
           CPP.getId(),
@@ -139,8 +139,8 @@ public class NewWorkspacePageTest {
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
-          BLANK,
           JAVA,
+          BLANK,
           DOT_NET,
           ANDROID,
           CPP,
@@ -163,8 +163,8 @@ public class NewWorkspacePageTest {
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
-          BLANK,
           JAVA,
+          BLANK,
           DOT_NET,
           ANDROID,
           CPP,
@@ -193,9 +193,8 @@ public class NewWorkspacePageTest {
 
   private static final List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          BLANK.getId(),
           JAVA.getId(),
-          DOT_NET.getId(),
+          BLANK.getId(),
           JAVA_THEIA_DOCKER.getId(),
           RAILS.getId(),
           PYTHON.getId(),
@@ -205,13 +204,14 @@ public class NewWorkspacePageTest {
           GO.getId(),
           ECLIPSE_CHE.getId(),
           CPP.getId(),
-          ANDROID.getId());
+          ANDROID.getId(),
+          DOT_NET.getId());
 
   private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          BLANK.getId(),
           JAVA.getId(),
           JAVA_MYSQL.getId(),
+          BLANK.getId(),
           JAVA_THEIA_DOCKER.getId(),
           RAILS.getId(),
           PYTHON.getId(),
@@ -227,7 +227,7 @@ public class NewWorkspacePageTest {
       asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_THEIA_OPENSHIFT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_JAVA_STACKS =
-      asList(JAVA_MYSQL, JAVA, ECLIPSE_CHE, ANDROID);
+      asList(JAVA, JAVA_MYSQL, ECLIPSE_CHE, ANDROID);
 
   private static final List<String> EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);

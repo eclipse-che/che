@@ -83,6 +83,7 @@
                                stack-machines="stackSelectorController.stackMachines[stack.id]"
                                stack-id-selected="stackSelectorController.selectedStackId"
                                stack-on-click="stackSelectorController.selectStack(stackId)"
+                               is-pinned="stackSelectorController.isPinned(stack)"
                                data-stack-id="{{stack.id}}"></stack-selector-item>
         </che-list>
       </div>

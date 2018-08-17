@@ -12,6 +12,8 @@
 package org.eclipse.che.plugin.csharp.ide.inject;
 
 import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
+import static org.eclipse.che.plugin.csharp.ide.CSharpResources.INSTANCE;
+import static org.eclipse.che.plugin.csharp.shared.Constants.CSHARP_EXT;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Provides;
@@ -20,11 +22,10 @@ import com.google.inject.name.Named;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.plugin.csharp.ide.CSharpLanguageDescriptionProvider;
-import org.eclipse.che.plugin.csharp.ide.CSharpResources;
 import org.eclipse.che.plugin.csharp.ide.project.CSharpProjectWizardRegistrar;
-import org.eclipse.che.plugin.csharp.shared.Constants;
 
 /** @author Vitalii Parfonov */
 @ExtensionGinModule
@@ -45,7 +46,7 @@ public class CSharpGinModule extends AbstractGinModule {
   @Provides
   @Singleton
   @Named("CSharpFileType")
-  protected FileType provideCppFile() {
-    return new FileType(CSharpResources.INSTANCE.csharpFile(), Constants.CSHARP_EXT);
+  protected FileType provideCSharpFile(FileTypeProvider fileTypeProvider) {
+    return fileTypeProvider.getByExtension(INSTANCE.csharpFile(), CSHARP_EXT);
   }
 }

@@ -31,6 +31,9 @@ public class InMemoryTestConfiguration implements TestConfiguration {
     for (TestConfiguration testConfiguration : configuration) {
       addAll(testConfiguration.getMap());
     }
+    // convert value of CHE_INFRASTRUCTURE to upper case to comply with Infrastructure
+    // enumeration;
+    config.put("che.infrastructure", config.get("che.infrastructure").toUpperCase());
   }
 
   public InMemoryTestConfiguration(Map<String, String> config) {
