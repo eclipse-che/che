@@ -127,7 +127,6 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesByDoubleClick(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
-    findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
