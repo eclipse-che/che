@@ -21,7 +21,7 @@ import javax.inject.Provider;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 
-/** Constructs URL JWkProvider based on Jwk endpoint from keycloak settings */
+/** Constructs {@link UrlJwkProvider} based on Jwk endpoint from keycloak settings */
 public class KeycloakJwkProvider implements Provider<JwkProvider> {
 
   private final JwkProvider jwkProvider;

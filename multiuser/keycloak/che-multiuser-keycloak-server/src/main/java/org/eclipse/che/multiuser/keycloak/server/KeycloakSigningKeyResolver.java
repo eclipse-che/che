@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Resolves signing key based on id from JWT header */
 @Singleton
 public class KeycloakSigningKeyResolver extends SigningKeyResolverAdapter {
 
@@ -54,7 +55,7 @@ public class KeycloakSigningKeyResolver extends SigningKeyResolverAdapter {
     return getJwtPublicKey(header);
   }
 
-  protected synchronized PublicKey getJwtPublicKey(JwsHeader<?> header) {
+  private synchronized PublicKey getJwtPublicKey(JwsHeader<?> header) {
     String kid = header.getKeyId();
     if (header.getKeyId() == null) {
       LOG.warn(

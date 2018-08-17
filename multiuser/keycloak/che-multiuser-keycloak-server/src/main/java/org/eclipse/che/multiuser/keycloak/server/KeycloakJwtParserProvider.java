@@ -16,8 +16,11 @@ import io.jsonwebtoken.Jwts;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 
+/** Provides instance of {@link JwtParser} */
+@Singleton
 public class KeycloakJwtParserProvider implements Provider<JwtParser> {
 
   private final JwtParser jwtParser;
