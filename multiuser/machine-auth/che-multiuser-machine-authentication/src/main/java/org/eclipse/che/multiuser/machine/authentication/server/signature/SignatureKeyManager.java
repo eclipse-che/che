@@ -202,7 +202,7 @@ public class SignatureKeyManager {
 
   @VisibleForTesting
   @PostConstruct
-  public void subscribe() {
+  void subscribe() {
     eventService.subscribe(workspaceEventsSubscriber);
   }
 }
