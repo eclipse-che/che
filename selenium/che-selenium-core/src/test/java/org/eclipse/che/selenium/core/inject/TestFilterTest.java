@@ -78,6 +78,7 @@ public class TestFilterTest {
         CHE_MULTIUSER,
         Infrastructure.DOCKER
       },
+      {new String[] {OPENSHIFT}, EMPTY_EXCLUDED_GROUPS, CHE_SINGLEUSER, Infrastructure.DOCKER},
       {
         new String[] {K8S, SINGLEUSER, MULTIUSER},
         EMPTY_EXCLUDED_GROUPS,
