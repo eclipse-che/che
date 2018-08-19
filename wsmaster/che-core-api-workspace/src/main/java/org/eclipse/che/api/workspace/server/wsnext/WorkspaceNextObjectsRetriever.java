@@ -68,7 +68,7 @@ public class WorkspaceNextObjectsRetriever {
           "Workspace.Next is disabled - Che plugin registry API endpoint property 'che.workspace.feature.api' is not configured");
       this.pluginRegistry = null;
     } else {
-      this.pluginRegistry = UriBuilder.fromUri(pluginRegistry);
+      this.pluginRegistry = UriBuilder.fromUri(pluginRegistry).path("plugins");
     }
   }
 
@@ -92,14 +92,14 @@ public class WorkspaceNextObjectsRetriever {
     String editorAttribute = attributes.get(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE);
 
     ArrayList<Pair<String, String>> metasIdsVersions = new ArrayList<>();
-    if (isNullOrEmpty(pluginsAttribute)) {
+    if (!isNullOrEmpty(pluginsAttribute)) {
       String[] plugins = pluginsAttribute.split(" *, *");
       if (plugins.length != 0) {
         Collection<Pair<String, String>> pluginsIdsVersions = parseIdsVersions(plugins);
         metasIdsVersions.addAll(pluginsIdsVersions);
       }
     }
-    if (isNullOrEmpty(editorAttribute)) {
+    if (!isNullOrEmpty(editorAttribute)) {
       Collection<Pair<String, String>> editorIdVersionCollection =
           parseIdsVersions(editorAttribute);
       if (editorIdVersionCollection.size() > 1) {
@@ -144,7 +144,7 @@ public class WorkspaceNextObjectsRetriever {
 
   private PluginMeta getMeta(String id, String version) throws InfrastructureException {
     try {
-      URI metaURI = pluginRegistry.clone().path(id).path(version).build();
+      URI metaURI = pluginRegistry.clone().path(id).path(version).path("meta.yaml").build();
 
       PluginMeta meta = getBody(metaURI, PluginMeta.class);
       validateMeta(meta, id, version);
