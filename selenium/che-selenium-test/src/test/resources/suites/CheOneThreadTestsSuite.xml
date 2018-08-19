@@ -16,33 +16,7 @@
        verbose="10"
        parallel="classes"
        thread-count="1">
-
     <test name="all">
-        <method-selectors>
-            <method-selector>
-                <script language="beanshell">
-                    <![CDATA[
-    boolean isTestGroupsAgreedWithRequestedGroups() {
-      excludedGroupsVal = System.getProperty("excludedGroups");
-      if (excludedGroupsVal == null || excludedGroupsVal.isEmpty() || groups.isEmpty()) {
-        return true;
-      }
-
-      excludedGroups = excludedGroupsVal.split(",");
-      for (String group: groups.keySet()) {
-        if (Arrays.asList(excludedGroups).contains(group)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    isTestGroupsAgreedWithRequestedGroups();
-]]>
-                </script>
-            </method-selector>
-        </method-selectors>
         <classes>
             <class name="org.eclipse.che.selenium.dashboard.organization.AddWorkspaceToOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>

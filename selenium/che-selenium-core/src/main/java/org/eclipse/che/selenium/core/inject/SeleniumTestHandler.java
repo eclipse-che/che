@@ -62,6 +62,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.IAnnotationTransformer;
 import org.testng.IConfigurationListener;
 import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
@@ -74,6 +75,7 @@ import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 import org.testng.TestException;
+import org.testng.annotations.ITestAnnotation;
 
 /**
  * Tests lifecycle handler.
@@ -85,7 +87,11 @@ import org.testng.TestException;
  * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener, ISuiteListener, IInvokedMethodListener, IExecutionListener {
+    implements ITestListener,
+        ISuiteListener,
+        IInvokedMethodListener,
+        IExecutionListener,
+        IAnnotationTransformer {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -128,6 +134,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
   @Inject private WebDriverLogsReaderFactory webDriverLogsReaderFactory;
+  @Inject private TestFilter testFilter;
 
   private final Injector injector;
 
@@ -204,8 +211,9 @@ public abstract class SeleniumTestHandler
   @Override
   public void onStart(ISuite suite) {
     suite.setParentInjector(injector);
-    LOG.info(
-        "Starting suite '{}' with {} test methods.", suite.getName(), suite.getAllMethods().size());
+    long numberOfEnabledTests =
+        suite.getAllMethods().parallelStream().filter(ITestNGMethod::getEnabled).count();
+    LOG.info("Starting suite '{}' with {} test methods.", suite.getName(), numberOfEnabledTests);
   }
 
   /** Check if webdriver session can be created without errors. */
@@ -266,6 +274,12 @@ public abstract class SeleniumTestHandler
   @Override
   public void onExecutionFinish() {
     shutdown();
+  }
+
+  @Override
+  public void transform(
+      ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
+    testFilter.excludeTestOfImproperGroup(annotation);
   }
 
   /** Injects dependencies into the given test class using {@link Guice} and custom injectors. */
@@ -333,7 +347,7 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      if (obj == null || !(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
+      if (!(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
         continue;
       }
 
