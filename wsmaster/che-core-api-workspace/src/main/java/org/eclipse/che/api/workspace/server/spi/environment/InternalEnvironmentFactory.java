@@ -44,12 +44,6 @@ import org.slf4j.LoggerFactory;
  *   envFactories.addBinding("recipe_type_1").to(SubclassOfInternalEnvironmentFactory.class);
  * </pre>
  *
- * defaultMachineMaxMemorySizeAttribute defines default machine memory limit
- * defaultMachineRequestMemorySizeAttribute defines default requested machine memory allocation
- *
- * <p>if default requested memory allocation is greater then default memory limit, memory limit is
- * set to be equal to requested memory allocation.
- *
  * @author gazarenkov
  * @author Sergii Leshchenko
  */
@@ -60,29 +54,14 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
   private final InstallerRegistry installerRegistry;
   private final RecipeRetriever recipeRetriever;
   private final MachineConfigsValidator machinesValidator;
-  protected final String defaultMachineMaxMemorySizeAttribute;
-  protected final String defaultMachineRequestMemorySizeAttribute;
 
   public InternalEnvironmentFactory(
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
-      MachineConfigsValidator machinesValidator,
-      long defaultMachineMaxMemorySizeMB,
-      long defaultMachineRequestMemorySizeMB) {
+      MachineConfigsValidator machinesValidator) {
     this.installerRegistry = installerRegistry;
     this.recipeRetriever = recipeRetriever;
     this.machinesValidator = machinesValidator;
-    // if the passed default request is greater than the default limit, request is ignored
-    if (defaultMachineRequestMemorySizeMB > defaultMachineMaxMemorySizeMB) {
-      defaultMachineRequestMemorySizeMB = defaultMachineMaxMemorySizeMB;
-      LOG.error(
-          "Requested default container memory limit is less than default memory request. Memory request parameter is ignored.");
-    }
-
-    this.defaultMachineMaxMemorySizeAttribute =
-        String.valueOf(defaultMachineMaxMemorySizeMB * 1024 * 1024);
-    this.defaultMachineRequestMemorySizeAttribute =
-        String.valueOf(defaultMachineRequestMemorySizeMB * 1024 * 1024);
   }
 
   /**

@@ -13,12 +13,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.Arrays.fill;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.CONFIG_MAP_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.CONFIG_MAP_IGNORED_WARNING_MESSAGE;
@@ -29,7 +26,9 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.Ku
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.SECRET_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -54,8 +53,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +61,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -80,8 +78,6 @@ import org.testng.annotations.Test;
 public class KubernetesEnvironmentFactoryTest {
 
   private static final String YAML_RECIPE = "application/x-yaml";
-  private static final long DEFAULT_RAM_LIMIT_MB = 2048;
-  private static final long DEFAULT_RAM_REQUEST_MB = 1024;
   public static final String MACHINE_NAME_1 = "machine1";
   public static final String MACHINE_NAME_2 = "machine2";
 
@@ -96,6 +92,7 @@ public class KubernetesEnvironmentFactoryTest {
   @Mock private KubernetesList validatedObjects;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
+  @Mock private MemoryAttributeProvisioner memoryProvisioner;
 
   private Map<String, InternalMachineConfig> machines;
 
@@ -107,13 +104,7 @@ public class KubernetesEnvironmentFactoryTest {
   public void setup() throws Exception {
     k8sEnvironmentFactory =
         new KubernetesEnvironmentFactory(
-            null,
-            null,
-            null,
-            clientFactory,
-            k8sEnvValidator,
-            DEFAULT_RAM_LIMIT_MB,
-            DEFAULT_RAM_REQUEST_MB);
+            null, null, null, clientFactory, k8sEnvValidator, memoryProvisioner);
     when(clientFactory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
@@ -185,7 +176,7 @@ public class KubernetesEnvironmentFactoryTest {
   }
 
   @Test
-  public void testSetsRamAttributesFromKubernetesResource() throws Exception {
+  public void testProvisionRamAttributesIsInvoked() throws Exception {
     final long firstMachineRamLimit = 3072;
     final long firstMachineRamRequest = 1536;
     final long secondMachineRamLimit = 1024;
@@ -199,59 +190,10 @@ public class KubernetesEnvironmentFactoryTest {
 
     k8sEnvironmentFactory.addRamAttributes(machines, pods);
 
-    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
-    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
-    final long[] expectedLimits = new long[] {firstMachineRamLimit, secondMachineRamLimit};
-    final long[] expectedRequests = new long[] {firstMachineRamRequest, secondMachineRamRequest};
-    assertTrue(Arrays.equals(actualLimits, expectedLimits));
-    assertTrue(Arrays.equals(actualRequests, expectedRequests));
-  }
-
-  @Test
-  public void testDoNotOverrideRamAttributeWhenItAlreadyPresent() throws Exception {
-    final long customRamLimit = 3072;
-    final long customRamRequest = 3072;
-    final Map<String, String> attributes =
-        ImmutableMap.of(
-            MEMORY_LIMIT_ATTRIBUTE,
-            String.valueOf(customRamLimit),
-            MEMORY_REQUEST_ATTRIBUTE,
-            String.valueOf(customRamRequest));
-    when(machineConfig1.getAttributes()).thenReturn(attributes);
-    when(machineConfig2.getAttributes()).thenReturn(attributes);
-    final Pod pod1 = mockPod(MACHINE_NAME_1, 0, 0);
-    final Pod pod2 = mockPod(MACHINE_NAME_2, 0, 0);
-    final Set<Pod> pods = ImmutableSet.of(pod1, pod2);
-
-    k8sEnvironmentFactory.addRamAttributes(machines, pods);
-
-    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
-    final long[] expectedLimits = new long[actualLimits.length];
-    fill(expectedLimits, customRamLimit);
-    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
-    final long[] expectedRequests = new long[actualRequests.length];
-    fill(expectedRequests, customRamRequest);
-    assertTrue(Arrays.equals(actualRequests, expectedRequests));
-  }
-
-  @Test
-  public void testAddsMachineConfIntoEnvAndSetsRamAttributesWhenMachinePresentOnlyInRecipe()
-      throws Exception {
-    final long customRamLimit = 2048;
-    final long customRamRequest = 1024;
-    final Map<String, InternalMachineConfig> machines = new HashMap<>();
-    final Set<Pod> pods =
-        ImmutableSet.of(mockPod(MACHINE_NAME_2, customRamLimit, customRamRequest));
-
-    k8sEnvironmentFactory.addRamAttributes(machines, pods);
-
-    final long[] actualLimits = machinesRam(machines.values(), MEMORY_LIMIT_ATTRIBUTE);
-    final long[] expectedLimits = new long[actualLimits.length];
-    fill(expectedLimits, customRamLimit);
-    final long[] actualRequests = machinesRam(machines.values(), MEMORY_REQUEST_ATTRIBUTE);
-    final long[] expectedRequests = new long[actualRequests.length];
-    fill(expectedRequests, customRamRequest);
-    assertTrue(Arrays.equals(actualRequests, expectedRequests));
+    verify(memoryProvisioner)
+        .provision(eq(machineConfig1), eq(firstMachineRamLimit), eq(firstMachineRamRequest));
+    verify(memoryProvisioner)
+        .provision(eq(machineConfig2), eq(secondMachineRamLimit), eq(secondMachineRamRequest));
   }
 
   private static Pod mockPod(String machineName, long ramLimit, long ramRequest) {
@@ -276,12 +218,5 @@ public class KubernetesEnvironmentFactoryTest {
             ImmutableMap.of(format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName));
     when(specMock.getContainers()).thenReturn(ImmutableList.of(containerMock));
     return podMock;
-  }
-
-  private static long[] machinesRam(Collection<InternalMachineConfig> configs, String attribute) {
-    return configs
-        .stream()
-        .mapToLong(m -> Long.parseLong(m.getAttributes().get(attribute)))
-        .toArray();
   }
 }

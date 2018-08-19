@@ -11,10 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -32,20 +29,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import javax.inject.Inject;
-import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
-import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
@@ -77,6 +67,7 @@ public class KubernetesEnvironmentFactory
 
   private final KubernetesClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
+  private final MemoryAttributeProvisioner memoryProvisioner;
 
   @Inject
   public KubernetesEnvironmentFactory(
@@ -85,16 +76,11 @@ public class KubernetesEnvironmentFactory
       MachineConfigsValidator machinesValidator,
       KubernetesClientFactory clientFactory,
       KubernetesEnvironmentValidator envValidator,
-      @Named("che.workspace.default_memory_limit_mb") long defaultMaxMachineMemorySizeMB,
-      @Named("che.workspace.default_memory_request_mb") long defaultRequestMachineMemorySizeMB) {
-    super(
-        installerRegistry,
-        recipeRetriever,
-        machinesValidator,
-        defaultMaxMachineMemorySizeMB,
-        defaultRequestMachineMemorySizeMB);
+      MemoryAttributeProvisioner memoryProvisioner) {
+    super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
+    this.memoryProvisioner = memoryProvisioner;
   }
 
   @Override
@@ -202,32 +188,8 @@ public class KubernetesEnvironmentFactory
           machineConfig = new InternalMachineConfig();
           machines.put(machineName, machineConfig);
         }
-        initIfEmpty(
-            machineConfig,
-            MEMORY_LIMIT_ATTRIBUTE,
-            defaultMachineMaxMemorySizeAttribute,
-            () -> Containers.getRamLimit(container));
-        initIfEmpty(
-            machineConfig,
-            MEMORY_REQUEST_ATTRIBUTE,
-            defaultMachineRequestMemorySizeAttribute,
-            () -> Containers.getRamRequest(container));
-      }
-    }
-  }
-
-  private void initIfEmpty(
-      InternalMachineConfig machineConfig,
-      String attribute,
-      String defaultValue,
-      Supplier<Long> containerValueProvider) {
-    final Map<String, String> attributes = machineConfig.getAttributes();
-    if (isNullOrEmpty(attributes.get(attribute))) {
-      final long containerValue = containerValueProvider.get();
-      if (containerValue > 0) {
-        attributes.put(attribute, String.valueOf(containerValue));
-      } else {
-        attributes.put(attribute, defaultValue);
+        memoryProvisioner.provision(
+            machineConfig, Containers.getRamLimit(container), Containers.getRamRequest(container));
       }
     }
   }

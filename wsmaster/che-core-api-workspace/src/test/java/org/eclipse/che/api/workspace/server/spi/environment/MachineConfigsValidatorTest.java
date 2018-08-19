@@ -14,10 +14,14 @@ package org.eclipse.che.api.workspace.server.spi.environment;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -162,6 +166,49 @@ public class MachineConfigsValidatorTest {
   @DataProvider(name = "invalidServerProtocols")
   public Object[][] invalidServerProtocols() {
     return new Object[][] {{"0"}, {"0sds"}, {"TCP"}, {"UDP"}, {"http@"}};
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Machine '.*' in environment contains inconsistent memory attributes: Memory limit: '.*', Memory request: '.*'")
+  public void shouldFailIfMemoryAttributesAreInconsistent() throws Exception {
+    // given
+    when(machineConfig.getAttributes())
+        .thenReturn(
+            ImmutableMap.of(
+                MEMORY_LIMIT_ATTRIBUTE,
+                String.valueOf(1024L * 1024L * 1024L),
+                MEMORY_REQUEST_ATTRIBUTE,
+                String.valueOf(2048L * 1024L * 1024L)));
+    // when
+    machinesValidator.validate(singletonMap(MACHINE_NAME, machineConfig));
+  }
+
+  @Test(dataProvider = "validMemoryAttributes")
+  public void shouldSucceedIfMemoryAttributesAreConsistentOrNotPresent(
+      String memoryLimit, String memoryRequest) throws Exception {
+    // given
+    Map<String, String> attributes = new HashMap<>();
+    if (memoryLimit != null) {
+      attributes.put(MEMORY_LIMIT_ATTRIBUTE, memoryLimit);
+    }
+    if (memoryRequest != null) {
+      attributes.put(MEMORY_LIMIT_ATTRIBUTE, memoryRequest);
+    }
+    when(machineConfig.getAttributes()).thenReturn(attributes);
+    // when
+    machinesValidator.validate(singletonMap(MACHINE_NAME, machineConfig));
+  }
+
+  @DataProvider(name = "validMemoryAttributes")
+  public Object[][] validMemoryAttributes() {
+    return new Object[][] {
+      {null, String.valueOf(2048L * 1024L * 1024L)},
+      {String.valueOf(2048L * 1024L * 1024L), null},
+      {null, null},
+      {String.valueOf(2048L * 1024L * 1024L), String.valueOf(2048L * 1024L * 1024L)}
+    };
   }
 
   @Test(dataProvider = "validServerProtocols")

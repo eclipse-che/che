@@ -12,15 +12,11 @@
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
@@ -35,19 +31,16 @@ import org.eclipse.che.api.workspace.server.spi.environment.*;
 public class DockerImageEnvironmentFactory
     extends InternalEnvironmentFactory<DockerImageEnvironment> {
 
+  private final MemoryAttributeProvisioner memoryProvisioner;
+
   @Inject
   public DockerImageEnvironmentFactory(
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
-      @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeMB,
-      @Named("che.workspace.default_memory_request_mb") long defaultMachineRequestMemorySizeMB) {
-    super(
-        installerRegistry,
-        recipeRetriever,
-        machinesValidator,
-        defaultMachineMaxMemorySizeMB,
-        defaultMachineRequestMemorySizeMB);
+      MemoryAttributeProvisioner memoryProvisioner) {
+    super(installerRegistry, recipeRetriever, machinesValidator);
+    this.memoryProvisioner = memoryProvisioner;
   }
 
   @Override
@@ -84,18 +77,8 @@ public class DockerImageEnvironmentFactory
   }
 
   private void addRamAttributes(Map<String, InternalMachineConfig> machines) {
-    // sets default ram limit attribute if not present
     for (InternalMachineConfig machineConfig : machines.values()) {
-      initIfEmpty(machineConfig, MEMORY_LIMIT_ATTRIBUTE, defaultMachineMaxMemorySizeAttribute);
-      initIfEmpty(
-          machineConfig, MEMORY_REQUEST_ATTRIBUTE, defaultMachineRequestMemorySizeAttribute);
-    }
-  }
-
-  private void initIfEmpty(
-      InternalMachineConfig machineConfig, String attribute, String defaultValue) {
-    if (isNullOrEmpty(machineConfig.getAttributes().get(attribute))) {
-      machineConfig.getAttributes().put(attribute, defaultValue);
+      memoryProvisioner.provision(machineConfig, 0L, 0L);
     }
   }
 }

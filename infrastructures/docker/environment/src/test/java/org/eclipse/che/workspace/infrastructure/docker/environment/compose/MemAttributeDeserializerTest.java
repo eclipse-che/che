@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.MemAttributeDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
@@ -35,6 +36,7 @@ public class MemAttributeDeserializerTest {
   @Mock private MachineConfigsValidator machinesValidator;
   @Mock private ComposeEnvironmentValidator composeValidator;
   @Mock private ComposeServicesStartStrategy startStrategy;
+  @Mock private MemoryAttributeProvisioner memoryProvisioner;
 
   private ComposeEnvironmentFactory factory;
 
@@ -54,8 +56,7 @@ public class MemAttributeDeserializerTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            2048,
-            1024);
+            memoryProvisioner);
   }
 
   @Test(dataProvider = "validValues")

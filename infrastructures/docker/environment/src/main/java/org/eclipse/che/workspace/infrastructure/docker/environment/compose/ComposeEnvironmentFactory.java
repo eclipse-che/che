@@ -12,11 +12,8 @@
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -28,17 +25,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
-import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 
@@ -53,6 +45,7 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
 
   private final ComposeServicesStartStrategy startStrategy;
   private final ComposeEnvironmentValidator composeValidator;
+  private final MemoryAttributeProvisioner memoryProvisioner;
 
   @Inject
   public ComposeEnvironmentFactory(
@@ -61,16 +54,11 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
       MachineConfigsValidator machinesValidator,
       ComposeEnvironmentValidator composeValidator,
       ComposeServicesStartStrategy startStrategy,
-      @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeMB,
-      @Named("che.workspace.default_memory_request_mb") long defaultMachineRequestMemorySizeMB) {
-    super(
-        installerRegistry,
-        recipeRetriever,
-        machinesValidator,
-        defaultMachineMaxMemorySizeMB,
-        defaultMachineRequestMemorySizeMB);
+      MemoryAttributeProvisioner memoryProvisioner) {
+    super(installerRegistry, recipeRetriever, machinesValidator);
     this.startStrategy = startStrategy;
     this.composeValidator = composeValidator;
+    this.memoryProvisioner = memoryProvisioner;
   }
 
   @Override
@@ -121,26 +109,8 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
         machineConfig = new InternalMachineConfig();
         machines.put(entry.getKey(), machineConfig);
       }
-      Long memLimit = entry.getValue().getMemLimit();
-      Long memRequest = entry.getValue().getMemRequest();
-      // if both properties are not defined
-      if ((memLimit == null || memLimit <= 0) && (memRequest == null || memRequest <= 0)) {
-        memLimit = Long.valueOf(defaultMachineMaxMemorySizeAttribute);
-        memRequest = Long.valueOf(defaultMachineRequestMemorySizeAttribute);
-      } else if ((memLimit == null || memLimit <= 0)) { // if memLimit only is undefined
-        memLimit = memRequest;
-      } else if ((memRequest == null || memRequest <= 0)) { // if memRequest only is undefined
-        memRequest = memLimit;
-      } else if (memRequest > memLimit) { // if both properties are defined, but not consistent
-        memRequest = memLimit;
-      }
-      final Map<String, String> attributes = machineConfig.getAttributes();
-      if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
-        attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(memLimit));
-      }
-      if (isNullOrEmpty(attributes.get(MEMORY_REQUEST_ATTRIBUTE))) {
-        attributes.put(MEMORY_REQUEST_ATTRIBUTE, String.valueOf(memRequest));
-      }
+      memoryProvisioner.provision(
+          machineConfig, entry.getValue().getMemLimit(), entry.getValue().getMemRequest());
     }
   }
 
