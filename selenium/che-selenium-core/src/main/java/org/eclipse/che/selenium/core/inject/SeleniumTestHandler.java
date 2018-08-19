@@ -211,8 +211,9 @@ public abstract class SeleniumTestHandler
   @Override
   public void onStart(ISuite suite) {
     suite.setParentInjector(injector);
-    LOG.info(
-        "Starting suite '{}' with {} test methods.", suite.getName(), suite.getAllMethods().size());
+    long numberOfEnabledTests =
+        suite.getAllMethods().parallelStream().filter(ITestNGMethod::getEnabled).count();
+    LOG.info("Starting suite '{}' with {} test methods.", suite.getName(), numberOfEnabledTests);
   }
 
   /** Check if webdriver session can be created without errors. */
