@@ -16,6 +16,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import java.util.Map;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
@@ -43,6 +44,7 @@ public class MemoryAttributeProvisioner {
   private final String defaultMachineMaxMemorySizeAttribute;
   private final String defaultMachineRequestMemorySizeAttribute;
 
+  @Inject
   public MemoryAttributeProvisioner(
       @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeAttribute,
       @Named("che.workspace.default_memory_request_mb")
