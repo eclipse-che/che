@@ -35,7 +35,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class AddWorkspaceToOrganizationTest {
 
   private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);

@@ -33,7 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
-@Test(groups = {TestGroup.MULTIUSER})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class OrganizationMembersTest {
   private static final String NEW_ORG_NAME = generate("new-org-", 5);
 

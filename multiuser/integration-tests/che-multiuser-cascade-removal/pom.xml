@@ -140,6 +140,16 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-authorization</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-authorization-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-organization</artifactId>
             <scope>test</scope>
         </dependency>
@@ -156,6 +166,11 @@
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-resource</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-machine-authentication</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

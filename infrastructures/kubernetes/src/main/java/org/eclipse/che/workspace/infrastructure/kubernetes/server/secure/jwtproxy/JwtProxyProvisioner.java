@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -208,10 +209,13 @@ public class JwtProxyProvisioner {
       k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
       k8sEnv.getPods().put(JWT_PROXY_POD_NAME, createJwtProxyPod(identity));
 
-      KeyPair keyPair = signatureKeyManager.getKeyPair();
-      if (keyPair == null) {
+      KeyPair keyPair;
+      try {
+        keyPair = signatureKeyManager.getKeyPair(identity.getWorkspaceId());
+      } catch (ServerException e) {
         throw new InternalInfrastructureException(
-            "Key pair for machine authentication does not exist");
+            "Signature key pair for machine authentication cannot be retrieved. Reason: "
+                + e.getMessage());
       }
       Map<String, String> initConfigMapData = new HashMap<>();
       initConfigMapData.put(

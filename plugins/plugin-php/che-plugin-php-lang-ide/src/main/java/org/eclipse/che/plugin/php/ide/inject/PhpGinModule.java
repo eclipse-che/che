@@ -20,6 +20,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.plugin.php.ide.PhpLanguageDescriptionProvider;
 import org.eclipse.che.plugin.php.ide.PhpResources;
@@ -45,7 +46,7 @@ public class PhpGinModule extends AbstractGinModule {
   @Provides
   @Singleton
   @Named("PhpFileType")
-  protected FileType provideCppFile() {
-    return new FileType(PhpResources.INSTANCE.phpFile(), Constants.PHP_EXT);
+  protected FileType provideCppFile(FileTypeProvider fileTypeProvider) {
+    return fileTypeProvider.getByExtension(PhpResources.INSTANCE.phpFile(), Constants.PHP_EXT);
   }
 }

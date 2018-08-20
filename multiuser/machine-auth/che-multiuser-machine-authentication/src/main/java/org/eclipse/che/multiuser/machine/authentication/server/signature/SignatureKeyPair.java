@@ -22,8 +22,8 @@ import com.google.common.annotations.Beta;
 @Beta
 public interface SignatureKeyPair {
 
-  /** Returns unique identifier for this sign key pair. */
-  String getId();
+  /** Returns workspace identifier for this sign key pair. */
+  String getWorkspaceId();
 
   /** Returns public part for this sign key pair. */
   SignatureKey getPublicKey();
