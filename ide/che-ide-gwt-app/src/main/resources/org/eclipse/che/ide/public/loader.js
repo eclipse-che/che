@@ -29,7 +29,7 @@ class KeycloakLoader {
                     if (request.status == 200) {
                         resolve(this.injectKeycloakScript(JSON.parse(request.responseText)));
                     } else {
-                        reject(new Error());
+                        reject(new Error(msg));
                     }
                 };
 
@@ -182,7 +182,8 @@ class Loader {
                         return;
                     }
                     if (xhr.status !== 200) {
-                        reject(new Error(xhr.status ? xhr.statusText : "Unknown error"));
+                        const errorMessage = 'Failed to get the workspace: "'  + this.getRequestErrorMessage(xhr) + '"';
+                        reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
@@ -278,12 +279,31 @@ class Loader {
                     return;
                 }
                 if (request.status !== 204) {
-                    reject(new Error(request.status ? request.statusText : "Unknown error"));
+                    const errorMessage = 'Failed to authenticate: "'  + this.getRequestErrorMessage(xhr) + '"';
+                    reject(new Error(errorMessage));
                     return;
                 }
                 resolve();
             };
         });
+    }
+
+    getRequestErrorMessage(xhr) {
+        let errorMessage;
+        try {
+            const response = JSON.parse(xhr.responseText);
+            errorMessage = response.message;
+        } catch (e) { }
+
+        if (errorMessage) {
+            return errorMessage;
+        }
+
+        if (xhr.statusText) {
+            return xhr.statusText;
+        }
+
+        return "Unknown error";
     }
 
 }
