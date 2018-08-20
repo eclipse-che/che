@@ -228,7 +228,7 @@ public class CreateFactoryTest {
     createFactoryPage.typeFactoryName(FACTORY_NAME_EXIST);
     createFactoryPage.waitErrorMessage(EXIST_NAME_ERROR_MESSAGE);
 
-    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
   }
 
   @Test
