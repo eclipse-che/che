@@ -63,8 +63,7 @@ public class RenameNotPrivateFieldTest {
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    new Services(projectExplorer, notificationsPopupPanel, refactor)
-        .expandSpringProjectNodes(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
   }
 
   @AfterMethod
@@ -81,7 +80,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameNotPrivateField0() throws Exception {
     setFieldsForTest("test0");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -102,7 +100,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkRenameNotPrivateField1() throws Exception {
     setFieldsForTest("test1");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -121,7 +118,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkRenameNotPrivateField2() throws Exception {
     setFieldsForTest("test2");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -137,7 +133,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkRenameNotPrivateField3() throws Exception {
     setFieldsForTest("test3");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -156,7 +151,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameNotPrivateField4() throws Exception {
     setFieldsForTest("test4");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -177,7 +171,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameNotPrivateField5() throws Exception {
     setFieldsForTest("test5");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -198,7 +191,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameNotPrivateField6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -220,7 +212,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameNotPrivateField7() throws Exception {
     setFieldsForTest("test7");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -244,7 +235,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameNotPrivateField8() throws Exception {
     setFieldsForTest("test8");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -268,7 +258,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameNotPrivateField9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -288,7 +277,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkRenameNotPrivateField10() throws Exception {
     setFieldsForTest("test10");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -306,7 +294,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkRenameAnnotation24() throws Exception {
     setFieldsForTest("test24");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -323,7 +310,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkRenameAnnotation25() throws Exception {
     setFieldsForTest("test25");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -339,7 +325,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkBugFiveEightTwoOne26() throws Exception {
     setFieldsForTest("test26");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -355,7 +340,6 @@ public class RenameNotPrivateFieldTest {
   @Test
   public void checkRenameDelegate28() throws Exception {
     setFieldsForTest("test28");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -374,7 +358,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameEnumField31() throws Exception {
     setFieldsForTest("test31");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -395,7 +378,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameGenerics32() throws Exception {
     setFieldsForTest("test32");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -416,7 +398,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameGenerics33() throws Exception {
     setFieldsForTest("test33");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
@@ -437,7 +418,6 @@ public class RenameNotPrivateFieldTest {
   public void checkRenameGenerics36() throws Exception {
     setFieldsForTest("test36");
     projectExplorer.scrollAndSelectItem(pathToCurrentPackage);
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
