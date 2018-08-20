@@ -41,7 +41,6 @@ import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
@@ -52,7 +51,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -455,13 +453,7 @@ public class NewWorkspacePageTest {
     newWorkspace.clickOnQuickStartButton();
     newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
     newWorkspace.clickNameButton();
-
-    try {
-      newWorkspace.waitStacksOrder(expectedQuickStartStacksReverseOrder);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/5650", ex);
-    }
+    newWorkspace.waitStacksOrder(expectedQuickStartStacksReverseOrder);
 
     newWorkspace.clickNameButton();
     newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);

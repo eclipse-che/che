@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -30,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationLi
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -152,13 +150,7 @@ public class AddWorkspaceToOrganizationTest {
     organizationPage.clickOnWorkspacesTab();
     workspaces.waitWorkspaceIsPresent(WORKSPACE_FOR_MEMBER_1);
     workspaces.selectWorkspaceItemName(WORKSPACE_FOR_MEMBER_1);
-
-    try {
-      workspaceDetails.waitToolbarTitleName(WORKSPACE_FOR_MEMBER_1);
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9148", ex);
-    }
+    workspaceDetails.waitToolbarTitleName(WORKSPACE_FOR_MEMBER_1);
   }
 
   private void createWorkspace(String organizationName, String workspaceName) {

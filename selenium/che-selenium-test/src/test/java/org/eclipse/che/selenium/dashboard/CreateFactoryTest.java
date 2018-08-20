@@ -228,9 +228,7 @@ public class CreateFactoryTest {
     createFactoryPage.typeFactoryName(FACTORY_NAME_EXIST);
     createFactoryPage.waitErrorMessage(EXIST_NAME_ERROR_MESSAGE);
 
-    assertFalse(
-        createFactoryPage.isCreateFactoryButtonEnabled(),
-        "Known issue https://github.com/eclipse/che/issues/10121");
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
   }
 
   @Test
