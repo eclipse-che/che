@@ -119,53 +119,6 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS);
 
-  private static List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER =
-      asList(
-          JAVA.getId(),
-          BLANK.getId(),
-          DOT_NET.getId(),
-          ANDROID.getId(),
-          CPP.getId(),
-          ECLIPSE_CHE.getId(),
-          GO.getId(),
-          JAVA_THEIA_OPENSHIFT.getId(),
-          NODE.getId(),
-          PHP.getId(),
-          PYTHON.getId(),
-          RAILS.getId(),
-          JAVA_THEIA_DOCKER.getId());
-
-  private static List<String> EXPECTED_K8S_QUICK_START_STACKS_ORDER =
-      asList(
-          JAVA.getId(),
-          BLANK.getId(),
-          DOT_NET.getId(),
-          ANDROID.getId(),
-          CPP.getId(),
-          ECLIPSE_CHE.getId(),
-          GO.getId(),
-          NODE.getId(),
-          PHP.getId(),
-          PYTHON.getId(),
-          RAILS.getId(),
-          JAVA_THEIA_DOCKER.getId());
-
-  private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_ORDER =
-      asList(
-          JAVA.getId(),
-          JAVA_MYSQL.getId(),
-          BLANK.getId(),
-          DOT_NET.getId(),
-          ANDROID.getId(),
-          CPP.getId(),
-          ECLIPSE_CHE.getId(),
-          GO.getId(),
-          NODE.getId(),
-          PHP.getId(),
-          PYTHON.getId(),
-          RAILS.getId(),
-          JAVA_THEIA_DOCKER.getId());
-
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
           JAVA,
@@ -247,52 +200,53 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
       asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
 
-  private static final List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
-      asList(
-          JAVA.getId(),
-          BLANK.getId(),
-          JAVA_THEIA_DOCKER.getId(),
-          RAILS.getId(),
-          PYTHON.getId(),
-          PHP.getId(),
-          NODE.getId(),
-          JAVA_THEIA_OPENSHIFT.getId(),
-          GO.getId(),
-          ECLIPSE_CHE.getId(),
-          CPP.getId(),
-          ANDROID.getId(),
-          DOT_NET.getId());
+  private static final List<NewWorkspace.Stack>
+      EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
+          asList(
+              JAVA,
+              BLANK,
+              JAVA_THEIA_DOCKER,
+              RAILS,
+              PYTHON,
+              PHP,
+              NODE,
+              JAVA_THEIA_OPENSHIFT,
+              GO,
+              ECLIPSE_CHE,
+              CPP,
+              ANDROID,
+              DOT_NET);
 
-  private static final List<String> EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER =
+  private static final List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          JAVA.getId(),
-          BLANK.getId(),
-          JAVA_THEIA_DOCKER.getId(),
-          RAILS.getId(),
-          PYTHON.getId(),
-          PHP.getId(),
-          NODE.getId(),
-          GO.getId(),
-          ECLIPSE_CHE.getId(),
-          CPP.getId(),
-          ANDROID.getId(),
-          DOT_NET.getId());
+          JAVA,
+          BLANK,
+          JAVA_THEIA_DOCKER,
+          RAILS,
+          PYTHON,
+          PHP,
+          NODE,
+          GO,
+          ECLIPSE_CHE,
+          CPP,
+          ANDROID,
+          DOT_NET);
 
-  private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
+  private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          JAVA.getId(),
-          JAVA_MYSQL.getId(),
-          BLANK.getId(),
-          JAVA_THEIA_DOCKER.getId(),
-          RAILS.getId(),
-          PYTHON.getId(),
-          PHP.getId(),
-          NODE.getId(),
-          GO.getId(),
-          ECLIPSE_CHE.getId(),
-          CPP.getId(),
-          ANDROID.getId(),
-          DOT_NET.getId());
+          JAVA,
+          JAVA_MYSQL,
+          BLANK,
+          JAVA_THEIA_DOCKER,
+          RAILS,
+          PYTHON,
+          PHP,
+          NODE,
+          GO,
+          ECLIPSE_CHE,
+          CPP,
+          ANDROID,
+          DOT_NET);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_JAVA_STACKS =
       asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_THEIA_OPENSHIFT);
@@ -379,7 +333,6 @@ public class NewWorkspacePageTest {
         EXPECTED_OPENSHIFT_QUICK_START_STACKS,
         EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS,
         EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS,
-        EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER,
         EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
@@ -389,7 +342,6 @@ public class NewWorkspacePageTest {
         EXPECTED_K8S_QUICK_START_STACKS,
         EXPECTED_K8S_SINGLE_MACHINE_STACKS,
         EXPECTED_K8S_MULTI_MACHINE_STACKS,
-        EXPECTED_K8S_QUICK_START_STACKS_ORDER,
         EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
@@ -399,7 +351,6 @@ public class NewWorkspacePageTest {
         EXPECTED_DOCKER_QUICK_START_STACKS,
         EXPECTED_DOCKER_SINGLE_MACHINE_STACKS,
         EXPECTED_DOCKER_MULTI_MACHINE_STACKS,
-        EXPECTED_DOCKER_QUICK_START_STACKS_ORDER,
         EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
@@ -514,8 +465,7 @@ public class NewWorkspacePageTest {
       List<NewWorkspace.Stack> expectedQuickStartStacks,
       List<NewWorkspace.Stack> expectedSingleMachineStacks,
       List<NewWorkspace.Stack> expectedMultiMachineStacks,
-      List<String> expectedQuickStartStacksOrder,
-      List<String> expectedQuickStartStacksReverseOrder) {
+      List<NewWorkspace.Stack> expectedQuickStartStacksReverseOrder) {
 
     newWorkspace.waitPageLoad();
     newWorkspace.waitQuickStartButton();
@@ -542,12 +492,12 @@ public class NewWorkspacePageTest {
 
     // quick start stacks
     newWorkspace.clickOnQuickStartButton();
-    newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
+    newWorkspace.waitStacksOrder(expectedQuickStartStacks);
     newWorkspace.clickNameButton();
     newWorkspace.waitStacksOrder(expectedQuickStartStacksReverseOrder);
 
     newWorkspace.clickNameButton();
-    newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
+    newWorkspace.waitStacksOrder(expectedQuickStartStacks);
   }
 
   private void checkFiltersButton(
