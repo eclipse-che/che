@@ -71,6 +71,7 @@ public class NewWorkspacePageTest {
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
   private static final List<NewWorkspace.Stack> EXPECTED_JDK_STACKS = asList(JAVA, ECLIPSE_CHE);
+
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_QUICK_START_STACKS =
       asList(
           JAVA,
@@ -81,6 +82,21 @@ public class NewWorkspacePageTest {
           ECLIPSE_CHE,
           GO,
           JAVA_THEIA_OPENSHIFT,
+          NODE,
+          PHP,
+          PYTHON,
+          RAILS,
+          JAVA_THEIA_DOCKER);
+
+  private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
+      asList(
+          JAVA,
+          BLANK,
+          DOT_NET,
+          ANDROID,
+          CPP,
+          ECLIPSE_CHE,
+          GO,
           NODE,
           PHP,
           PYTHON,
@@ -119,6 +135,21 @@ public class NewWorkspacePageTest {
           RAILS.getId(),
           JAVA_THEIA_DOCKER.getId());
 
+  private static List<String> EXPECTED_K8S_QUICK_START_STACKS_ORDER =
+      asList(
+          JAVA.getId(),
+          BLANK.getId(),
+          DOT_NET.getId(),
+          ANDROID.getId(),
+          CPP.getId(),
+          ECLIPSE_CHE.getId(),
+          GO.getId(),
+          NODE.getId(),
+          PHP.getId(),
+          PYTHON.getId(),
+          RAILS.getId(),
+          JAVA_THEIA_DOCKER.getId());
+
   private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_ORDER =
       asList(
           JAVA.getId(),
@@ -136,6 +167,30 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_DOCKER.getId());
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
+      asList(
+          JAVA,
+          BLANK,
+          DOT_NET,
+          ANDROID,
+          CPP,
+          CENTOS_BLANK,
+          CENTOS_GO,
+          CENTOS_NODEJS,
+          CENTOS_WILDFLY_SWARM,
+          CEYLON_WITH_JAVA_JAVASCRIPT,
+          ECLIPSE_CHE,
+          ECLIPSE_VERTX,
+          GO,
+          JAVA_CENTOS,
+          KOTLIN,
+          NODE,
+          PHP,
+          PYTHON,
+          RAILS,
+          SPRING_BOOT,
+          JAVA_THEIA_DOCKER);
+
+  private static List<NewWorkspace.Stack> EXPECTED_K8S_SINGLE_MACHINE_STACKS =
       asList(
           JAVA,
           BLANK,
@@ -186,6 +241,9 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
       asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
 
+  private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
       asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
 
@@ -199,6 +257,21 @@ public class NewWorkspacePageTest {
           PHP.getId(),
           NODE.getId(),
           JAVA_THEIA_OPENSHIFT.getId(),
+          GO.getId(),
+          ECLIPSE_CHE.getId(),
+          CPP.getId(),
+          ANDROID.getId(),
+          DOT_NET.getId());
+
+  private static final List<String> EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER =
+      asList(
+          JAVA.getId(),
+          BLANK.getId(),
+          JAVA_THEIA_DOCKER.getId(),
+          RAILS.getId(),
+          PYTHON.getId(),
+          PHP.getId(),
+          NODE.getId(),
           GO.getId(),
           ECLIPSE_CHE.getId(),
           CPP.getId(),
@@ -229,6 +302,9 @@ public class NewWorkspacePageTest {
 
   private static final List<String> EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);
+
+  private static final List<String> EXPECTED_K8S_FILTERS_SUGGESTIONS =
+      asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE);
 
   private static final List<String> EXPECTED_DOCKER_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_TOMCAT_MYSQL_SUGGESTION_TITLE);
@@ -297,7 +373,7 @@ public class NewWorkspacePageTest {
     checkValidNames();
   }
 
-  @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
+  @Test(groups = {TestGroup.OPENSHIFT})
   public void checkOpenshiftStackButtons() {
     checkStackButtons(
         EXPECTED_OPENSHIFT_QUICK_START_STACKS,
@@ -305,6 +381,16 @@ public class NewWorkspacePageTest {
         EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS,
         EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER,
         EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER);
+  }
+
+  @Test(groups = {TestGroup.K8S})
+  public void checkK8SStackButtons() {
+    checkStackButtons(
+        EXPECTED_K8S_QUICK_START_STACKS,
+        EXPECTED_K8S_SINGLE_MACHINE_STACKS,
+        EXPECTED_K8S_MULTI_MACHINE_STACKS,
+        EXPECTED_K8S_QUICK_START_STACKS_ORDER,
+        EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
   @Test(groups = TestGroup.DOCKER)
@@ -317,15 +403,20 @@ public class NewWorkspacePageTest {
         EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
-  @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
+  @Test(groups = {TestGroup.OPENSHIFT})
   public void checkOpenshiftFiltersButton() {
     checkFiltersButton(
-        EXPECTED_OPENSHIFT_QUICK_START_STACKS, EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS);
+        EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS, EXPECTED_OPENSHIFT_QUICK_START_STACKS);
+  }
+
+  @Test(groups = {TestGroup.K8S})
+  public void checkK8SFiltersButton() {
+    checkFiltersButton(EXPECTED_K8S_FILTERS_SUGGESTIONS, EXPECTED_K8S_QUICK_START_STACKS);
   }
 
   @Test(groups = TestGroup.DOCKER)
   public void checkDockerFiltersButton() {
-    checkFiltersButton(EXPECTED_DOCKER_QUICK_START_STACKS, EXPECTED_DOCKER_FILTERS_SUGGESTIONS);
+    checkFiltersButton(EXPECTED_DOCKER_FILTERS_SUGGESTIONS, EXPECTED_DOCKER_QUICK_START_STACKS);
   }
 
   @Test
@@ -460,7 +551,7 @@ public class NewWorkspacePageTest {
   }
 
   private void checkFiltersButton(
-      List<NewWorkspace.Stack> expectedQuickStartStacks, List<String> expectedSuggestions) {
+      List<String> expectedSuggestions, List<NewWorkspace.Stack> expectedQuickStartStacks) {
     newWorkspace.waitPageLoad();
 
     // close by "Escape" button
