@@ -171,9 +171,14 @@ public class WorkingWithTerminalTest {
   public void shouldResizeTerminal() {
     openMC("/");
 
-    // check the root content of the midnight commander
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitTextInFirstTerminal(partOfContent);
+    try {
+      // check the root content of the midnight commander
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitTextInFirstTerminal(partOfContent);
+      }
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
     }
 
     terminal.waitNoTextInFirstTerminal(".dockerenv");
@@ -182,7 +187,12 @@ public class WorkingWithTerminalTest {
 
     // check resize of the terminal
     for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitTextInFirstTerminal(partOfContent);
+      try {
+        terminal.waitTextInFirstTerminal(partOfContent);
+      } catch (TimeoutException ex) {
+        // remove try-catch block after issue has been resolved
+        fail("Known issue https://github.com/eclipse/che/issues/10854");
+      }
     }
 
     terminal.waitTextInFirstTerminal(".dockerenv");
@@ -208,9 +218,14 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal(Keys.ARROW_DOWN.toString());
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
 
-    // check the home content of the midnight commander
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitTextInFirstTerminal(partOfContent);
+    try {
+      // check the home content of the midnight commander
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitTextInFirstTerminal(partOfContent);
+      }
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
     }
 
     terminal.typeIntoActiveTerminal(Keys.F10.toString());
