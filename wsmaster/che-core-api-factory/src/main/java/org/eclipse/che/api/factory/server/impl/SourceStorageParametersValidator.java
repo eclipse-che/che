@@ -47,7 +47,7 @@ public class SourceStorageParametersValidator implements FactoryParameterValidat
             throw new ConflictException(
                 format(
                     PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE,
-                    "source.project.parameters.skipFirstLevel",
+                    "project.source.parameters.skipFirstLevel",
                     entry.getValue()));
           }
           break;
