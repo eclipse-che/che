@@ -18,7 +18,6 @@ import com.google.inject.name.Named;
 import java.nio.file.Paths;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.server.rest.JavaFormatterService;
-import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 /** @author Evgen Vidolob */
@@ -29,7 +28,6 @@ public class JdtGuiceModule extends AbstractModule {
   protected void configure() {
     bind(JavaFormatterService.class);
     bind(ResourcesPlugin.class).asEagerSingleton();
-    bind(FileBuffersPlugin.class).asEagerSingleton();
   }
 
   @Provides
