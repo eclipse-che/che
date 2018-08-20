@@ -16,6 +16,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -78,7 +79,7 @@ public class Swagger {
   private void expandWorkSpaceItem() {
     Wait fluentWait =
         new FluentWait(seleniumWebDriver)
-            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
+            .withTimeout(WIDGET_TIMEOUT_SEC, SECONDS)
             .pollingEvery(MINIMUM_SEC, SECONDS)
             .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
     fluentWait.until((ExpectedCondition<Boolean>) input -> workSpaceLink.isEnabled());
