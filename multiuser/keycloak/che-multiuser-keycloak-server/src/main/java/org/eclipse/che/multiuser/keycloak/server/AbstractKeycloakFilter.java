@@ -11,52 +11,38 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
-
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import java.security.PublicKey;
+import io.jsonwebtoken.JwtParser;
 import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 
 /**
  * Base abstract class for the Keycloak-related servlet filters.
  *
- * <p>In particular it defines commnon use-cases when the authentication / multi-user logic should
- * be skipped
+ * <p>In particular it defines common use-cases when the authentication / multi-user logic should be
+ * skipped
  */
 public abstract class AbstractKeycloakFilter implements Filter {
 
-  @Inject protected SignatureKeyManager signatureKeyManager;
+  @Inject protected JwtParser jwtParser;
 
   /** when a request came from a machine with valid token then auth is not required */
-  protected boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
+  boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
     if (token == null) {
-      if (request.getRequestURI() != null
-          && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js")) {
-        return true;
-      }
-      return false;
+      return request.getRequestURI() != null
+          && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js");
     }
     try {
-      final PublicKey publicKey = signatureKeyManager.getKeyPair().getPublic();
-      final Jwt jwt = Jwts.parser().setSigningKey(publicKey).parse(token);
-      return MACHINE_TOKEN_KIND.equals(jwt.getHeader().get("kind"));
-    } catch (ExpiredJwtException | MalformedJwtException | SignatureException ex) {
-      // given token is not signed by particular signature key so it must be checked in another way
+      jwtParser.parse(token);
       return false;
+    } catch (MachineTokenJwtException e) {
+      return true;
     }
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {}
+  public void init(FilterConfig filterConfig) {}
 
   @Override
   public void destroy() {}

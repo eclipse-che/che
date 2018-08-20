@@ -37,6 +37,8 @@ public class MachineAuthModule extends AbstractModule {
 
     bind(SignatureKeyManager.class);
     bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
+    bind(JpaSignatureKeyDao.RemoveKeyPairsBeforeWorkspaceRemovedEventSubscriber.class)
+        .asEagerSingleton();
     final Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(SignaturePublicKeyEnvProvider.class);
