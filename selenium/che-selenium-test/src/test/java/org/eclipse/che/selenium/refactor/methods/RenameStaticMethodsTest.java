@@ -19,8 +19,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Random;
-
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -43,11 +41,12 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class RenameStaticMethodsTest {
-  private static final Logger LOG                      = LoggerFactory.getLogger(RenameStaticMethodsTest.class);
-  private static final String NAME_OFP_ROJECT          = NameGenerator.generate(RenameStaticMethodsTest.class.getSimpleName(), 3);
+  private static final Logger LOG = LoggerFactory.getLogger(RenameStaticMethodsTest.class);
+  private static final String NAME_OFP_ROJECT =
+      NameGenerator.generate(RenameStaticMethodsTest.class.getSimpleName(), 3);
   private static final String pathToPackageInChePrefix =
-          NAME_OFP_ROJECT + "/src" + "/main" + "/java" + "/renameStaticMethods";
-  private static final String testsFail5ErrorMess      =
+      NAME_OFP_ROJECT + "/src" + "/main" + "/java" + "/renameStaticMethods";
+  private static final String testsFail5ErrorMess =
       "Related method 'm' (declared in 'renameStaticMethods.testFail5.A') is native. Renaming will cause an UnsatisfiedLinkError on runtime.";
 
   private String pathToCurrentPackage;

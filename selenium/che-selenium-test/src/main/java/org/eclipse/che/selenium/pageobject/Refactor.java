@@ -71,7 +71,8 @@ public class Refactor {
   private final ProjectExplorer projectExplorer;
 
   @Inject
-  public Refactor(SeleniumWebDriver seleniumWebDriver, Loader loader, ProjectExplorer projectExplorer) {
+  public Refactor(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ProjectExplorer projectExplorer) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.redrawUiElementWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
@@ -706,7 +707,6 @@ public class Refactor {
     waitRenameCompilationUnitFormIsOpen();
   }
 
-
   private void waitExpectedText(By locator, String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
@@ -720,5 +720,4 @@ public class Refactor {
   private WebElement waitElementVisibility(By locator) {
     return loadPageWait.until(visibilityOfElementLocated(locator));
   }
-
 }

@@ -27,7 +27,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.eclipse.che.selenium.refactor.Services;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
