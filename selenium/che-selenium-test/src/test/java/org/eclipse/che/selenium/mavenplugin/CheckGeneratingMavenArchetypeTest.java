@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.testng.annotations.Test;
@@ -38,7 +39,8 @@ public class CheckGeneratingMavenArchetypeTest {
   @Inject private CodenvyEditor editor;
   @Inject private Ide ide;
   @Inject private TestWorkspace workspace;
-  @Inject private ConfigureClasspath selectPath;;
+  @Inject private ConfigureClasspath selectPath;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
   @Test
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
@@ -90,5 +92,7 @@ public class CheckGeneratingMavenArchetypeTest {
     projectWizard.typeProjectNameOnWizard(PROJECT_NAME);
     projectWizard.clickNextButton();
     projectWizard.waitInvisibilityOfAchetypeSection();
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
+        "'From Archetype' section is disabled because selected parent contains 'pom.xml' file");
   }
 }
