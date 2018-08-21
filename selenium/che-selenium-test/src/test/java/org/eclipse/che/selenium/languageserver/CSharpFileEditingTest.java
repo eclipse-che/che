@@ -137,5 +137,7 @@ public class CSharpFileEditingTest {
     wizard.typeProjectNameOnWizard(PROJECT_NAME);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
+
+    projectExplorer.waitItem(PROJECT_NAME);
   }
 }
