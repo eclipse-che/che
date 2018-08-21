@@ -91,8 +91,11 @@ public class MachineLoginFilter implements Filter {
     try {
       final Claims claims = jwtParser.parseClaimsJws(token).getBody();
       LOG.info(
-          "Machine token requested:" + httpRequest.getRequestURL() + firstNonNull(
-              httpRequest.getQueryString(), "") + " wsId:" + claims.get(WORKSPACE_ID_CLAIM));
+          "Machine token requested:"
+              + httpRequest.getRequestURL()
+              + firstNonNull(httpRequest.getQueryString(), "")
+              + " wsId:"
+              + claims.get(WORKSPACE_ID_CLAIM));
       try {
         final String userId = claims.get(USER_ID_CLAIM, String.class);
         // check if user with such id exists
