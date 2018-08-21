@@ -1,9 +1,13 @@
 #!/bin/sh
+#
 # Copyright (c) 2017 Red Hat, Inc.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 
 init_usage() {
   USAGE="
@@ -122,7 +126,7 @@ init_global_vars() {
   DEFAULT_CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR="/scripts/base"
   CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR=${CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR:-${DEFAULT_CHE_BASE_SCRIPTS_CONTAINER_SOURCE_DIR}}
 
-  DEFAULT_CHE_LICENSE_URL="https://www.eclipse.org/legal/epl-v10.html"
+  DEFAULT_CHE_LICENSE_URL="https://www.eclipse.org/legal/epl-2.0/"
   CHE_LICENSE_URL=${CHE_LICENSE_URL:-${DEFAULT_CHE_LICENSE_URL}}
 
   DEFAULT_CHE_IMAGE_FULLNAME="eclipse/che-cli:<version>"
