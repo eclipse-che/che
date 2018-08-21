@@ -19,7 +19,8 @@
   <div class="create-factory" ng-hide="createFactoryCtrl.isLoading">
     <ng-form name="factoryNameForm">
       <!-- Name -->
-      <che-input-box che-label-name="Name"
+      <che-input-box ng-init="createFactoryCtrl.setForm(factoryNameForm)"
+                     che-label-name="Name"
                      che-form="factoryNameForm"
                      che-name="name"
                      che-place-holder="Name of the factory"

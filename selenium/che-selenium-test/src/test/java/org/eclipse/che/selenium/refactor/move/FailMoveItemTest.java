@@ -60,7 +60,7 @@ public class FailMoveItemTest {
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();

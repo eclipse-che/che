@@ -32,10 +32,12 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 public class HotUpdateUtil {
   private static final int TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS = 600;
   private static final int DELAY_BETWEEN_ATTEMPTS_IN_SECONDS = 5;
-  private static final String UPDATE_COMMAND = "rollout latest che";
   private static final String PODS_LIST_COMMAND = "get pods | awk 'NR > 1 {print $1}'";
-  private static final String COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE =
+  private static final String COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT =
       "get dc | grep che | awk '{print $2}'";
+  private static final String COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT =
+      "get dc | grep che | awk '{print $1}'";
+  private static final String UPDATE_COMMAND_TEMPLATE = "rollout latest %s";
 
   private final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   private final WebDriverWaitFactory webDriverWaitFactory;
@@ -58,10 +60,8 @@ public class HotUpdateUtil {
    *
    * @param masterRevisionBeforeUpdate - revision of the master pod before updating.
    * @param timeout - waiting time in seconds.
-   * @throws Exception
    */
-  public void waitFullMasterPodUpdate(int masterRevisionBeforeUpdate, int timeout)
-      throws Exception {
+  public void waitFullMasterPodUpdate(int masterRevisionBeforeUpdate, int timeout) {
     final int numberOfUpdatedVersion = masterRevisionBeforeUpdate + 1;
     final String beforeUpdatePodNamePattern = "che-" + masterRevisionBeforeUpdate;
     final String updatedPodNamePattern = "che-" + numberOfUpdatedVersion;
@@ -109,7 +109,8 @@ public class HotUpdateUtil {
    * @throws Exception
    */
   public void executeMasterPodUpdateCommand() throws Exception {
-    openShiftCliCommandExecutor.execute(UPDATE_COMMAND);
+    String updateCommand = String.format(UPDATE_COMMAND_TEMPLATE, getMasterPodName());
+    openShiftCliCommandExecutor.execute(updateCommand);
   }
 
   /** Performs GET request to master pod API for checking its availability. */
@@ -129,7 +130,20 @@ public class HotUpdateUtil {
   public int getMasterPodRevision() {
     try {
       return Integer.parseInt(
-          openShiftCliCommandExecutor.execute(COMMAND_FOR_GETTING_CURRENT_DEPLOYMENT_CHE));
+          openShiftCliCommandExecutor.execute(COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT));
+    } catch (IOException ex) {
+      throw new RuntimeException(ex.getLocalizedMessage(), ex);
+    }
+  }
+
+  /**
+   * Performs CLI request to the master pod to get its name.
+   *
+   * @return name of Che master pod.
+   */
+  public String getMasterPodName() {
+    try {
+      return openShiftCliCommandExecutor.execute(COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT);
     } catch (IOException ex) {
       throw new RuntimeException(ex.getLocalizedMessage(), ex);
     }

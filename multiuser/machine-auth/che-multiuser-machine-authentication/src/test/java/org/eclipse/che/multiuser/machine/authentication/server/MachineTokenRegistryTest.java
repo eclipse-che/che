@@ -69,7 +69,7 @@ public class MachineTokenRegistryTest {
     keyPair = kpg.generateKeyPair();
 
     mockUser(USER_ID, USER_NAME);
-    when(signatureKeyManager.getKeyPair()).thenReturn(keyPair);
+    when(signatureKeyManager.getKeyPair(anyString())).thenReturn(keyPair);
   }
 
   @Test
@@ -89,7 +89,7 @@ public class MachineTokenRegistryTest {
     assertEquals(subject.getUserName(), USER_NAME);
     assertEquals(claims.get(WORKSPACE_ID_CLAIM, String.class), WORKSPACE_ID);
     verify(userManager).getById(USER_ID);
-    verify(signatureKeyManager).getKeyPair();
+    verify(signatureKeyManager).getKeyPair(anyString());
     assertNotNull(generatedToken);
   }
 

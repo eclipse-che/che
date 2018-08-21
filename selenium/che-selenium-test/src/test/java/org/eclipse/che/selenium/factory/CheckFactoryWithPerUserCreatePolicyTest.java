@@ -65,10 +65,16 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
+
+    try {
+      notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
+          "Project Spring imported");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
 
     String workspaceUrl = seleniumWebDriver.getCurrentUrl();
-
     // accept factory
     testFactory.open(seleniumWebDriver);
 

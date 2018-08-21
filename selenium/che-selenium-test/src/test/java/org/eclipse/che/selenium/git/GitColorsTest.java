@@ -127,16 +127,16 @@ public class GitColorsTest {
   @Test(priority = 1)
   public void testUntrackedFileColorFromTerminal() {
     // Remove file from index
-    terminal.selectTerminalTab();
-    terminal.typeIntoTerminal("cd " + PROJECT_NAME + Keys.ENTER);
-    terminal.typeIntoTerminal("git rm --cached README.md" + Keys.ENTER);
+    terminal.selectFirstTerminalTab();
+    terminal.typeIntoActiveTerminal("cd " + PROJECT_NAME + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("git rm --cached README.md" + Keys.ENTER);
 
     // Check file colors are yellow
     projectExplorer.waitYellowNode(PROJECT_NAME + "/README.md");
     editor.waitYellowTab("README.md");
 
     // Add to index
-    terminal.typeIntoTerminal("git add README.md" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("git add README.md" + Keys.ENTER);
 
     // Check files are in default color
     projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
@@ -224,12 +224,13 @@ public class GitColorsTest {
     git.waitResetWindowClose();
 
     loader.waitOnClosed();
-    terminal.selectTerminalTab();
-    terminal.typeIntoTerminal("cd " + PROJECT_NAME + Keys.ENTER);
-    terminal.typeIntoTerminal("git config --global user.email \"git@email.com\"" + Keys.ENTER);
-    terminal.typeIntoTerminal("git config --global user.name \"name\"" + Keys.ENTER);
-    terminal.typeIntoTerminal("git commit -a -m 'Terminal commit'" + Keys.ENTER);
-    terminal.waitExpectedTextIntoTerminal("2 files changed, 1 insertion(+), 1 deletion(-)");
+    terminal.selectFirstTerminalTab();
+    terminal.typeIntoActiveTerminal("cd " + PROJECT_NAME + Keys.ENTER);
+    terminal.typeIntoActiveTerminal(
+        "git config --global user.email \"git@email.com\"" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("git config --global user.name \"name\"" + Keys.ENTER);
+    terminal.typeIntoActiveTerminal("git commit -a -m 'Terminal commit'" + Keys.ENTER);
+    terminal.waitTextInFirstTerminal("2 files changed, 1 insertion(+), 1 deletion(-)");
 
     // Check files are colored in default color
     projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/newFile");

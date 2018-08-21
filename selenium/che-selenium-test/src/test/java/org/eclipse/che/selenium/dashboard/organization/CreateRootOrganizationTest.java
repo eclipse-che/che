@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Test(groups = {TestGroup.MULTIUSER})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class CreateRootOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-", 4);
   private static final String CHILD_ORG_NAME = generate("child-", 4);

@@ -11,7 +11,13 @@
  */
 package org.eclipse.che.ide.api.filetypes;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.EMPTY_SET;
+
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -20,7 +26,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * <ul>
  *   <li><code>image</code> - image resource associated with file
  *   <li><code>extension</code> - extension associated with file
- *   <li><code>namePattern</code> - name pattern
+ *   <li><code>namePatterns</code> - set of name patterns
  * </ul>
  *
  * @author Evgen Vidolob
@@ -28,22 +34,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public class FileType {
 
   private SVGResource image;
-
   private String extension;
-
-  private String namePattern;
-
-  public void setImage(SVGResource image) {
-    this.image = image;
-  }
-
-  public void setExtension(String extension) {
-    this.extension = extension;
-  }
-
-  public void setNamePattern(String namePattern) {
-    this.namePattern = namePattern;
-  }
+  private Set<String> namePatterns;
 
   public FileType(SVGResource image, String extension) {
     this(image, extension, null);
@@ -52,22 +44,68 @@ public class FileType {
   public FileType(SVGResource image, String extension, String namePattern) {
     this.image = image;
     this.extension = extension;
-    this.namePattern = namePattern;
+    this.namePatterns = new HashSet<>();
+    addNamePattern(namePattern);
   }
 
-  /** @return the extension */
+  /** Returns the image resource associated with file */
+  public SVGResource getImage() {
+    return image;
+  }
+
+  /** Returns the extension associated with file */
   public String getExtension() {
     return extension;
   }
 
-  /** @return the namePatterns */
+  /**
+   * Returns some element of the name patterns set or {@code null} if the set is empty.
+   *
+   * @deprecated FileType can contain a few name patterns, so use {@link #getNamePatterns()} instead
+   */
+  @Nullable
   public String getNamePattern() {
-    return namePattern;
+    return namePatterns.isEmpty() ? null : namePatterns.iterator().next();
   }
 
-  /** @return the SVG resource */
-  public SVGResource getImage() {
-    return image;
+  /** Returns the name patterns set describing the file type */
+  public Set<String> getNamePatterns() {
+    return namePatterns.isEmpty() ? EMPTY_SET : new HashSet<>(namePatterns);
+  }
+
+  /** Sets image associated with the file type */
+  public void setImage(SVGResource image) {
+    this.image = image;
+  }
+
+  /** Sets extension associated with the file type */
+  public void setExtension(String extension) {
+    this.extension = extension;
+  }
+
+  /**
+   * Adds name pattern describing the file type
+   *
+   * @deprecated FileType can contain a few name patterns, so use {@link #addNamePattern(String)}
+   *     instead
+   */
+  public void setNamePattern(String namePattern) {
+    addNamePattern(namePattern);
+  }
+
+  /**
+   * Adds name pattern describing the file type
+   *
+   * @param namePattern pattern for adding
+   * @return {@code true} if the pattern was added and {@code false} if given pattern is illegal
+   *     ({@code null} or empty) either if it is already present
+   */
+  public boolean addNamePattern(String namePattern) {
+    if (isNullOrEmpty(namePattern)) {
+      return false;
+    }
+
+    return namePatterns.add(namePattern);
   }
 
   @Override
@@ -77,17 +115,15 @@ public class FileType {
 
     FileType fileType = (FileType) o;
 
-    if (extension != null ? !extension.equals(fileType.extension) : fileType.extension != null)
+    if (!Objects.equals(this.extension, fileType.extension)) {
       return false;
-    if (namePattern != null
-        ? !namePattern.equals(fileType.namePattern)
-        : fileType.namePattern != null) return false;
-
-    return true;
+    } else {
+      return getNamePatterns().equals(fileType.getNamePatterns());
+    }
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(extension, namePattern);
+    return Objects.hash(extension, getNamePatterns());
   }
 }

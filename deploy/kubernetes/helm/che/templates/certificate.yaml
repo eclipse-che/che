@@ -11,7 +11,7 @@ kind: Certificate
 metadata:
   name: che-host-cert
 spec:
-  secretName: che-tls
+  secretName: {{ .Values.global.tls.secretName }}
   issuerRef:
     name: letsencrypt
   commonName: {{ .Values.global.cheDomain }}

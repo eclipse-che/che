@@ -24,7 +24,7 @@ spec:
   tls:
   - hosts:
     - {{ template "keycloakHost" . }}
-    secretName: che-tls
+    secretName: {{ .Values.global.tls.secretName }}
 {{- end }}
   rules:
 {{- if eq .Values.global.serverStrategy "default-host" }}

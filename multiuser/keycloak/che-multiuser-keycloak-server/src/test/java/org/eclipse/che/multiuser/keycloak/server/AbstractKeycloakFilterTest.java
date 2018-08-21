@@ -11,26 +11,21 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import static io.jsonwebtoken.SignatureAlgorithm.RS256;
-import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import io.jsonwebtoken.Jwts;
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.util.HashMap;
-import java.util.Map;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtParser;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -45,27 +40,12 @@ import org.testng.annotations.Test;
 public class AbstractKeycloakFilterTest {
 
   @Mock private HttpServletRequest request;
-  @Mock private SignatureKeyManager signatureKeyManager;
+  @Mock private JwtParser jwtParser;
 
   @InjectMocks private TestLoginFilter abstractKeycloakFilter;
 
-  private String machineToken;
-
   @BeforeMethod
-  public void setup() throws Exception {
-    final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-    kpg.initialize(512);
-    final KeyPair keyPair = kpg.generateKeyPair();
-    final Map<String, Object> header = new HashMap<>();
-    header.put("kind", MACHINE_TOKEN_KIND);
-    machineToken =
-        Jwts.builder()
-            .setPayload("payload")
-            .setHeader(header)
-            .signWith(RS256, keyPair.getPrivate())
-            .compact();
-
-    when(signatureKeyManager.getKeyPair()).thenReturn(keyPair);
+  public void setup() {
     when(request.getRequestURI()).thenReturn(null);
   }
 
@@ -82,18 +62,23 @@ public class AbstractKeycloakFilterTest {
 
   @Test
   public void testShouldNotSkipAuthWhenProvidedTokenIsNotMachine() {
-    assertFalse(abstractKeycloakFilter.shouldSkipAuthentication(request, "testToken"));
+    Jwt mock = Mockito.mock(Jwt.class);
+    doReturn(mock).when(jwtParser).parse(anyString());
+    assertFalse(abstractKeycloakFilter.shouldSkipAuthentication(request, "token"));
   }
 
   @Test
-  public void testAuthIsNotNeededWhenMachineTokenProvided() throws Exception {
-    assertTrue(abstractKeycloakFilter.shouldSkipAuthentication(request, machineToken));
+  public void testAuthIsNotNeededWhenMachineTokenProvided() {
+    when(jwtParser.parse(anyString())).thenThrow(MachineTokenJwtException.class);
+    assertTrue(abstractKeycloakFilter.shouldSkipAuthentication(request, "token"));
   }
 
   static class TestLoginFilter extends AbstractKeycloakFilter {
+
+    public TestLoginFilter() {}
+
     @Override
     public void doFilter(
-        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-        throws IOException, ServletException {}
+        ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {}
   }
 }

@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
+import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.UNSECURED_PATHS_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
@@ -20,6 +22,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.Kuberne
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -40,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -137,20 +141,39 @@ public class JwtProxyProvisioner {
       String protocol,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
+    Preconditions.checkArgument(
+        secureServers != null && !secureServers.isEmpty(), "Secure servers are missing");
     ensureJwtProxyInjected(k8sEnv);
 
     int listenPort = availablePort++;
 
     Set<String> excludes = new HashSet<>();
+    Boolean cookiesAuthEnabled = null;
     for (ServerConfig config : secureServers.values()) {
+      // accumulate unsecured paths
       if (config.getAttributes().containsKey(UNSECURED_PATHS_ATTRIBUTE)) {
         Collections.addAll(
             excludes, config.getAttributes().get(UNSECURED_PATHS_ATTRIBUTE).split(","));
       }
+
+      // calculate `cookiesAuthEnabled` attributes
+      Boolean serverCookiesAuthEnabled =
+          parseBoolean(config.getAttributes().get(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE));
+      if (cookiesAuthEnabled == null) {
+        cookiesAuthEnabled = serverCookiesAuthEnabled;
+      } else {
+        if (!cookiesAuthEnabled.equals(serverCookiesAuthEnabled)) {
+          throw new InfrastructureException(
+              "Secure servers which expose the same port should have the same `cookiesAuthEnabled` value.");
+        }
+      }
     }
 
     proxyConfigBuilder.addVerifierProxy(
-        listenPort, "http://" + backendServiceName + ":" + backendServicePort, excludes);
+        listenPort,
+        "http://" + backendServiceName + ":" + backendServicePort,
+        excludes,
+        cookiesAuthEnabled);
     k8sEnv
         .getConfigMaps()
         .get(getConfigMapName())
@@ -186,10 +209,13 @@ public class JwtProxyProvisioner {
       k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
       k8sEnv.getPods().put(JWT_PROXY_POD_NAME, createJwtProxyPod(identity));
 
-      KeyPair keyPair = signatureKeyManager.getKeyPair();
-      if (keyPair == null) {
+      KeyPair keyPair;
+      try {
+        keyPair = signatureKeyManager.getKeyPair(identity.getWorkspaceId());
+      } catch (ServerException e) {
         throw new InternalInfrastructureException(
-            "Key pair for machine authentication does not exist");
+            "Signature key pair for machine authentication cannot be retrieved. Reason: "
+                + e.getMessage());
       }
       Map<String, String> initConfigMapData = new HashMap<>();
       initConfigMapData.put(

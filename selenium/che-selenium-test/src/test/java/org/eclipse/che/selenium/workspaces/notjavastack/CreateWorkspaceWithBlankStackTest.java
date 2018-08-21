@@ -67,6 +67,6 @@ public class CreateWorkspaceWithBlankStackTest {
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(60);
+    terminal.waitFirstTerminalTab(60);
   }
 }
