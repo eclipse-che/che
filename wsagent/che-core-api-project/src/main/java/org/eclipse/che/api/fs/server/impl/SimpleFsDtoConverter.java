@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
