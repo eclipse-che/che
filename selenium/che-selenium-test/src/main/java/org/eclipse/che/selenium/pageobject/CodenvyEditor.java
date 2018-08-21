@@ -591,7 +591,9 @@ public class CodenvyEditor {
    * @param text text which should be typed
    */
   public void typeTextIntoEditor(String text) {
+    loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(text);
+    loader.waitOnClosed();
   }
 
   /**
@@ -702,6 +704,7 @@ public class CodenvyEditor {
 
   /** Launches code assistant by "ctrl" + "space" keys pressing. */
   public void launchAutocomplete() {
+    loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
     typeTextIntoEditor(SPACE.toString());
@@ -950,7 +953,7 @@ public class CodenvyEditor {
    */
   public void selectAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[.='%s']", item)));
+        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item)));
   }
 
   /**
@@ -2120,11 +2123,8 @@ public class CodenvyEditor {
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
   }
 
-  public String getProposalDocumentationHTML() {
-    return seleniumWebDriverHelper
-        .waitVisibility(proposalDoc)
-        .findElement(By.tagName("div"))
-        .getAttribute("innerHTML");
+  public void checkProposalDocumentation(String expectedText) {
+    seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
   }
 
   public void launchCommentCodeFeature() {
