@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.editor.autocomplete;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -96,8 +95,7 @@ public class AutocompleteProposalJavaDocTest {
         "concat(String part1, String part2, char divider) : String App");
 
     // then
-    assertEquals(
-        editor.getProposalDocumentationHTML(),
+    editor.waitProposalDocumentationHTML(
         "<p><strong>Deprecated</strong>  <em>As of version 1.0, use <a href=\"jdt://contents/commons-lang-2.6.jar/org.apache.commons.lang/StringUtils.class?=app/%5C/home%5C/user%5C/.m2%5C/repository%5C/commons-lang%5C/commons-lang%5C/2.6%5C/commons-lang-2.6.jar%3Corg.apache.commons.lang%28StringUtils.class#3169\">org.apache.commons.lang.StringUtils.join(Object [], char)</a></em></p>\n"
             + "<p>Returns concatination of two strings into one divided by special symbol.</p>\n"
             + "<ul>\n"
@@ -134,7 +132,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("App() multimodule.App");
 
     // then
-    assertEquals(editor.getProposalDocumentationHTML(), "<p>No documentation found.</p>\n");
+    editor.waitProposalDocumentationHTML("<p>No documentation found.</p>\n");
   }
 
   @Test
@@ -147,8 +145,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("isEquals(Object o) : boolean Book");
 
     // then
-    assertEquals(
-        editor.getProposalDocumentationHTML(),
+    editor.waitProposalDocumentationHTML(
         "<p>Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code></p>\n"
             + "<ul>\n"
             + "<li><p><strong>Parameters:</strong></p>\n"
@@ -190,10 +187,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("BookImpl - multimodule.model");
 
     // then
-    assertTrue(
-        editor
-            .getProposalDocumentationHTML()
-            .contains("UPDATE. Implementation of Book interface."));
+    editor.waitProposalDocumentationHTML("UPDATE. Implementation of Book interface.");
   }
 
   @Test
@@ -206,12 +200,9 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("hashCode() : int Object");
 
     // then
-    assertTrue(
-        editor
-            .getProposalDocumentationHTML()
-            .contains(
-                "Returns a hash code value for the object. "
-                    + "This method is supported for the benefit of hash tables such as those provided by"));
+    editor.waitProposalDocumentationHTML(
+        "Returns a hash code value for the object. "
+            + "This method is supported for the benefit of hash tables such as those provided by");
   }
 
   @Test
@@ -227,7 +218,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("info(String msg) : void Logger");
 
     // then
-    assertEquals(editor.getProposalDocumentationHTML(), ".*No documentation found.*");
+    editor.waitProposalDocumentationHTML(".*No documentation found.*");
 
     // when
     editor.closeAutocomplete();
