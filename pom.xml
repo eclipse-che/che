@@ -864,12 +864,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-test-ls</artifactId>
-                <version>${che.lib.version}</version>
-                <type>tar.gz</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-tomcat8-slf4j-logback</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
