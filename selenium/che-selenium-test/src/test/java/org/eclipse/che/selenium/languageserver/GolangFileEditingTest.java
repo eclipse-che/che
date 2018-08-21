@@ -132,7 +132,7 @@ public class GolangFileEditingTest {
     editor.typeTextIntoEditor("fmt.");
     editor.launchAutocompleteAndWaitContainer();
 
-    assertEquals(editor.getProposalDocumentationHTML(), "No documentation found.");
+    editor.waitProposalDocumentationHTML("<p>No documentation found.</p>\n");
     editor.waitProposalsIntoAutocompleteContainer(expectedProposals);
 
     editor.deleteCurrentLine();

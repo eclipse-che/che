@@ -681,7 +681,9 @@ public class CodenvyEditor {
    * @param text text which should be typed
    */
   public void typeTextIntoEditor(String text) {
+    loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(text);
+    loader.waitOnClosed();
   }
 
   /**
@@ -796,6 +798,7 @@ public class CodenvyEditor {
 
   /** Launches code assistant by "ctrl" + "space" keys pressing. */
   public void launchAutocomplete() {
+    loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
     typeTextIntoEditor(SPACE.toString());
@@ -1050,7 +1053,7 @@ public class CodenvyEditor {
    */
   public void selectAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[.='%s']", item)));
+        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item)));
   }
 
   /**
