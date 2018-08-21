@@ -116,10 +116,9 @@ public class CreateFactoryFromUiWithKeepDirTest {
     // TODO sometimes after importing project doest not open to keep folder. Need investigate later
     try {
       projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
-    } catch (Exception e) {
-      LOG.error(e.getLocalizedMessage(), e);
-      projectExplorer.openItemByPath(PROJECT_NAME);
-      projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
+    } catch (TimeoutException e) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10852", e);
     }
 
     events.clickEventLogBtn();

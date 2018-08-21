@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.ITestAnnotation;
+import org.testng.annotations.ITestOrConfiguration;
 import org.testng.annotations.Test;
 
 /** @author Dmytro Nochevnov */
@@ -38,7 +38,7 @@ public class TestFilterTest {
   public static final String EMPTY_EXCLUDED_GROUPS = "";
   public static final boolean CHE_SINGLEUSER = false;
   public static final boolean CHE_MULTIUSER = true;
-  @Mock private ITestAnnotation mockTestAnnotation;
+  @Mock private ITestOrConfiguration mockTestAnnotation;
 
   @BeforeMethod
   public void setup() {

@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.constant.Infrastructure;
-import org.testng.annotations.ITestAnnotation;
+import org.testng.annotations.ITestOrConfiguration;
 
 /**
  * This class is aimed to filter TestNG tests.
@@ -50,12 +50,12 @@ public class TestFilter {
    * @param annotation annotation of test method which reflects {@link org.testng.annotations.Test}
    *     annotation attributes.
    */
-  public void excludeTestOfImproperGroup(ITestAnnotation annotation) {
+  public void excludeTestOfImproperGroup(ITestOrConfiguration annotation) {
     if (annotation.getGroups().length == 0) {
       return;
     }
 
-    List<String> groups = new ArrayList<String>(Arrays.asList(annotation.getGroups()));
+    List<String> groups = new ArrayList<>(Arrays.asList(annotation.getGroups()));
 
     // exclude test with group from excludedGroups
     if (excludedGroups != null
