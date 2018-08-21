@@ -363,7 +363,7 @@ ${CHE_VAR_ARRAY}"
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
         # create secret with OpenShift certificate
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat /var/lib/origin/openshift.local.config/master/ca.crt)"
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat ${OKD_DIR}/openshift-apiserver/ca.crt)"
       fi
 
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml \
