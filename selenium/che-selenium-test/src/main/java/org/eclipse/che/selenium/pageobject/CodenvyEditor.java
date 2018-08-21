@@ -1675,6 +1675,15 @@ public class CodenvyEditor {
   }
 
   /**
+   * Clicks on the selected element in the editor.
+   *
+   * @param nameElement visible name of the element
+   */
+  public String getSelectedTextInEditor() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(format(SELECTED_ITEM_IN_EDITOR)));
+  }
+
+  /**
    * Waits until the 'Implementation(s)' form is opened.
    *
    * @param fileName is name of the selected file

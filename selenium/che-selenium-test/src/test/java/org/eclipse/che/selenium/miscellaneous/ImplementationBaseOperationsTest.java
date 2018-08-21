@@ -22,10 +22,13 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -56,6 +59,7 @@ public class ImplementationBaseOperationsTest {
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -63,6 +67,7 @@ public class ImplementationBaseOperationsTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -130,7 +135,11 @@ public class ImplementationBaseOperationsTest {
     editor.waitTextElementsActiveLine("interface Employee extends Serializable");
     editor.clickOnSelectedElementInEditor("Serializable");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
-    editor.waitImplementationFormIsOpen("Serializable");
+    try {
+      editor.waitImplementationFormIsOpen("Serializable");
+    } catch (TimeoutException e) {
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/10857" );
+    }
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitImplementationFormIsClosed("Serializable");
