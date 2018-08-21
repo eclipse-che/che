@@ -140,6 +140,6 @@ public class TypeScriptEditingTest {
     editor.goToPosition(25, 20);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitActiveTabFileName("testPrint.ts");
-    editor.waitCursorPosition(15, 6);
+    editor.waitCursorPosition(15, 1);
   }
 }
