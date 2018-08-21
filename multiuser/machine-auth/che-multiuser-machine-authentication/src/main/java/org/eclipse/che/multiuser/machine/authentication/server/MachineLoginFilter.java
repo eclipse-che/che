@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
+import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -42,6 +44,8 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles requests that comes from machines with specific machine token.
@@ -51,6 +55,8 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
  */
 @Singleton
 public class MachineLoginFilter implements Filter {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MachineLoginFilter.class);
 
   private final RequestTokenExtractor tokenExtractor;
   private final UserManager userManager;
@@ -84,6 +90,9 @@ public class MachineLoginFilter implements Filter {
     // check token signature and verify is this token machine or not
     try {
       final Claims claims = jwtParser.parseClaimsJws(token).getBody();
+      LOG.info(
+          "Machine token requested:" + httpRequest.getRequestURL() + firstNonNull(
+              httpRequest.getQueryString(), "") + " wsId:" + claims.get(WORKSPACE_ID_CLAIM));
       try {
         final String userId = claims.get(USER_ID_CLAIM, String.class);
         // check if user with such id exists
