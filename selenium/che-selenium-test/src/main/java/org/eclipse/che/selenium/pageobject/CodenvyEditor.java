@@ -80,6 +80,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -190,10 +191,10 @@ public class CodenvyEditor {
     String JAVA_DOC_POPUP = "//div[contains(@class, 'textviewTooltip')]";
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div[@id='gwt-debug-content-assist-doc-popup']//div[@class='gwt-HTML']";
-    String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
+    String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[contains(.,'%s')]";
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
-        ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
+        ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(.,'%s')]";
     String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
     String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
   }
@@ -373,6 +374,25 @@ public class CodenvyEditor {
     return getTextFromOrionLines(inner);
   }
 
+  private void waitForText(String expectedText, int timeout, Supplier<String> textProvider) {
+    String[] result = new String[1];
+    webDriverWaitFactory
+        .get(timeout)
+        .withMessage(
+            () ->
+                "Timeout waiting for txt, expected= '"
+                    + expectedText
+                    + "', actual='"
+                    + result[0]
+                    + "'")
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  result[0] = textProvider.get();
+                  return result[0].contains(expectedText);
+                });
+  }
+
   /**
    * Waits during {@code timeout} until specified {@code expectedText} is present in editor.
    *
@@ -380,16 +400,7 @@ public class CodenvyEditor {
    * @param timeout waiting time in seconds
    */
   public void waitTextIntoEditor(final String expectedText, final int timeout) {
-    String[] result = new String[1];
-    webDriverWaitFactory
-        .get(timeout)
-        .withMessage(() -> "Timeout waiting for txt, actual='" + result[0] + "'")
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  result[0] = getVisibleTextFromEditor();
-                  return result[0].contains(expectedText);
-                });
+    waitForText(expectedText, timeout, () -> getVisibleTextFromEditor());
   }
 
   /**
@@ -411,11 +422,7 @@ public class CodenvyEditor {
    */
   public void waitTextInDefinedSplitEditor(
       int indexOfEditor, final int timeout, String expectedText) {
-    webDriverWaitFactory
-        .get(timeout)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> getTextFromSplitEditor(indexOfEditor).contains(expectedText));
+    waitForText(expectedText, timeout, () -> getTextFromSplitEditor(indexOfEditor));
   }
 
   /**
@@ -2080,6 +2087,14 @@ public class CodenvyEditor {
   public void moveCursorToText(String text) {
     seleniumWebDriverHelper.moveCursorTo(
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
+  }
+
+  public void waitProposalDocumentationHTML(String expectedText, int timeout) {
+    waitForText(expectedText, timeout, () -> getProposalDocumentationHTML());
+  }
+
+  public void waitProposalDocumentationHTML(String expectedText) {
+    waitProposalDocumentationHTML(expectedText, LOAD_PAGE_TIMEOUT_SEC);
   }
 
   public String getProposalDocumentationHTML() {
