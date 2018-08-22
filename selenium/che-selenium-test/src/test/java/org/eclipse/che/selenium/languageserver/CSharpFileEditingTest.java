@@ -60,7 +60,7 @@ public class CSharpFileEditingTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
-  @Inject TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private Consoles consoles;
 
   @BeforeClass
@@ -137,5 +137,7 @@ public class CSharpFileEditingTest {
     wizard.typeProjectNameOnWizard(PROJECT_NAME);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
+
+    projectExplorer.waitProjectInitialization(PROJECT_NAME);
   }
 }

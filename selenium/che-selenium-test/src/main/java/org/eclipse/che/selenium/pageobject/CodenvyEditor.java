@@ -77,6 +77,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNested
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -99,6 +100,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -446,7 +448,12 @@ public class CodenvyEditor {
    * @param expectedText the expected text into hover pop-up
    */
   public void waitTextInHoverPopup(String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    try {
+      seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   /**
