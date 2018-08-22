@@ -29,7 +29,7 @@ exports.paths = {
  */
 exports.wiredep = {
   exclude: [/bootstrap\.js/, /bootstrap\.css/, /bootstrap\.css/, /foundation\.css/],
-  directory: 'bower_components'
+  directory: 'node_modules'
 };
 
 

@@ -19,7 +19,7 @@ var conf = require('./conf');
 var $ = require('gulp-load-plugins')();
 
 gulp.task('material-svgfonts', function() {
-  return gulp.src('bower_components/material-design-icons/**/production/*')
+  return gulp.src('node_modules/material-design-icons/**/production/*')
     .pipe($.iconfontCss({
       fontName: 'material-design',
       targetPath: '../styles/material-design.css',
