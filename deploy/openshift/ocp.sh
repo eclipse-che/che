@@ -19,12 +19,12 @@ BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-mac.zip"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-mac.zip"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
@@ -57,6 +57,16 @@ export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
 export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
+
+# OKD config local dir
+DEFAULT_OKD_DIR="${HOME}/.okd"
+export OKD_DIR=${OKD_DIR:-${DEFAULT_OKD_DIR}}
+
+# Docker image and tag for ansible-service-broker. Currently nightly, since latest does not work
+DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE="ansibleplaybookbundle/origin-ansible-service-broker"
+DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_TAG="nightly"
+export ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE=${ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE:-${DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE}}
+export ORIGIN_ANSIBLE_SERVICE_BROKER_TAG=${ORIGIN_ANSIBLE_SERVICE_BROKER_TAG:-${DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_TAG}}
 
 DEFAULT_WAIT_FOR_CHE=true
 export WAIT_FOR_CHE=${WAIT_FOR_CHE:-${DEFAULT_WAIT_FOR_CHE}}
@@ -164,10 +174,58 @@ wait_ocp() {
   done
 }
 
+add_user_as_admin() {
+    $OC_BINARY login -u system:admin >/dev/null
+    echo "[OCP] adding cluster-admin role to user developer..."
+    $OC_BINARY adm policy add-cluster-role-to-user cluster-admin developer
+}
+
+wait_for_automation_service_broker() {
+
+    if [ "${APB}" == "true" ]; then
+        $OC_BINARY login -u system:admin
+        echo "[OCP] updating automation-broker configMap with admin sandbox role..."
+        $OC_BINARY get cm/broker-config -n=openshift-automation-service-broker -o=json | sed 's/edit/admin/g' | oc apply -f -
+        echo "[OCP] re-deploying openshift-automation-service-broker..."
+        $OC_BINARY rollout cancel dc/openshift-automation-service-broker -n=openshift-automation-service-broker
+        sleep 5
+        $OC_BINARY rollout latest dc/openshift-automation-service-broker -n=openshift-automation-service-broker
+        available=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[0].status})
+        progressing=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[1].status})
+        DEPLOYMENT_TIMEOUT_SEC=1200
+        POLLING_INTERVAL_SEC=5
+        end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+        while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
+            available=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+            progressing=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+            timeout_in=$((end-SECONDS))
+            echo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
+            sleep ${POLLING_INTERVAL_SEC}
+        done
+        if [ "${progressing}" == "\"True\"" ]; then
+            echo "Ansible service catalog deployed successfully"
+        elif [ "${progressing}" == "False" ]; then
+            echo "Ansible service catalog deployment failed. Aborting."
+            exit 1
+        elif [ ${SECONDS} -ge ${end} ]; then
+            echo "Deployment timeout. Aborting."
+            exit 1
+        fi
+    fi
+}
+
 run_ocp() {
     test_dns_provider
-    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
+    if [ "${APB}" == "true" ]; then
+        export  ENABLE_COMPONENTS="--enable=service-catalog,router,registry,web-console,persistent-volumes,rhel-imagestreams,automation-service-broker"
+        echo "[OCP] start OKD with '${ENABLE_COMPONENTS}'"
+    fi
+    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" \
+                          --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}" \
+                          --base-dir=${OKD_DIR} \
+                          "${ENABLE_COMPONENTS}"
     wait_ocp
+    wait_for_automation_service_broker
 }
 
 deploy_che_to_ocp() {
@@ -183,6 +241,7 @@ destroy_ocp() {
     $OC_BINARY delete pvc --all
     $OC_BINARY delete all --all
     $OC_BINARY cluster down
+    docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*"
 }
 
 remove_che_from_ocp() {
@@ -225,6 +284,8 @@ parse_args() {
     HELP="valid args:
     --help - this help menu
     --run-ocp - run ocp cluster
+    --enable-apb - enable ansible service broker (APBs)
+    --admin - add cluster-admin role to developer user
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --project | -p - OpenShift namespace to deploy Che (defaults to eclipse-che). Example: --project=myproject
@@ -254,11 +315,22 @@ parse_args() {
       remove_che_from_ocp
     fi
 
+    if [[ "$@" == *"--enable-apb"* ]]; then
+       export APB="true"
+    fi
+
     for i in "${@}"
     do
         case $i in
            --run-ocp)
                run_ocp
+               shift
+           ;;
+           --enable-apb)
+               shift
+           ;;
+           --admin)
+               add_user_as_admin
                shift
            ;;
            --destroy)
