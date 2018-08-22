@@ -524,7 +524,7 @@ public class Consoles {
     waitPreviewUrlIsPresent();
     waitPreviewUrlIsResponsive(10);
 
-    // wait for 2 sec after page returned Status.OK
+    // wait for 2 sec to prevent "Application is not available" error
     WaitUtils.sleepQuietly(2);
     clickOnPreviewUrl();
 
