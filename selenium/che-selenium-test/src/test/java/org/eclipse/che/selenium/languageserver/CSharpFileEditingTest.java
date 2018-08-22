@@ -60,7 +60,7 @@ public class CSharpFileEditingTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
-  @Inject TestWorkspaceServiceClient testWorkspaceServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private Consoles consoles;
 
   @BeforeClass

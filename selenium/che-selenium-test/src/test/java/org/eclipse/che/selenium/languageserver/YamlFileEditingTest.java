@@ -21,7 +21,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.Preferences.DropDownLanguageServerSettings.YAML;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -38,7 +37,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -161,13 +159,7 @@ public class YamlFileEditingTest {
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
-
-    try {
-      editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
-    }
+    editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
 
     editor.moveCursorToText("kind:");
     editor.waitTextInHoverPopup(
