@@ -30,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.eclipse.che.selenium.refactor.Services;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
@@ -68,8 +67,7 @@ public class RenamePrivateFieldTest {
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    new Services(projectExplorer, notificationsPopupPanel, refactor)
-        .expandSpringProjectNodes(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
   }
 
   @AfterMethod
@@ -85,7 +83,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField0() throws Exception {
     setFieldsForTest("test0");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -106,7 +103,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField1() throws Exception {
     setFieldsForTest("test1");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -127,7 +123,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField2() throws Exception {
     setFieldsForTest("test2");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -148,7 +143,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField3() throws Exception {
     setFieldsForTest("test3");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -172,7 +166,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField4() throws Exception {
     setFieldsForTest("test4");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -196,7 +189,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField5() throws Exception {
     setFieldsForTest("test5");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -219,7 +211,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField6() throws Exception {
     setFieldsForTest("test6");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -242,7 +233,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField7() throws Exception {
     setFieldsForTest("test7");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -265,7 +255,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField8() throws Exception {
     setFieldsForTest("test8");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -286,7 +275,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField9() throws Exception {
     setFieldsForTest("test9");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -307,7 +295,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField10() throws Exception {
     setFieldsForTest("test10");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
@@ -331,7 +318,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenamePrivateField11() throws Exception {
     setFieldsForTest("test11");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     consoles.closeProcessesArea();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
@@ -356,7 +342,6 @@ public class RenamePrivateFieldTest {
   @Test
   public void checkRenameUnicode12() throws Exception {
     setFieldsForTest("test12");
-    projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
