@@ -17,7 +17,6 @@ import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_G
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.openqa.selenium.Keys.F4;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -95,7 +94,7 @@ public class GolangFileEditingTest {
     editor.typeTextIntoEditor("fmt.");
     editor.launchAutocompleteAndWaitContainer();
 
-    assertEquals(editor.getProposalDocumentationHTML(), "No documentation found.");
+    editor.waitProposalDocumentationHTML("<p>No documentation found.</p>\n");
     editor.waitProposalsIntoAutocompleteContainer(expectedProposals);
 
     editor.deleteCurrentLine();
