@@ -1680,7 +1680,8 @@ public class CodenvyEditor {
    * @param nameElement visible name of the element
    */
   public String getSelectedTextInEditor() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(format(SELECTED_ITEM_IN_EDITOR)));
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(
+        By.xpath(format(SELECTED_ITEM_IN_EDITOR)));
   }
 
   /**
