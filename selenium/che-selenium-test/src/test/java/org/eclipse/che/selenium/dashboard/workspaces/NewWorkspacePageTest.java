@@ -113,11 +113,11 @@ public class NewWorkspacePageTest {
           CPP,
           ECLIPSE_CHE,
           GO,
-          JAVA_THEIA_DOCKER,
           NODE,
           PHP,
           PYTHON,
-          RAILS);
+          RAILS,
+          JAVA_THEIA_DOCKER);
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
