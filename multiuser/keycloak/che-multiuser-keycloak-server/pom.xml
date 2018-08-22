@@ -132,10 +132,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-machine-authentication</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-machine-authentication-shared</artifactId>
         </dependency>
         <dependency>
@@ -154,6 +150,11 @@
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-machine-authentication</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
