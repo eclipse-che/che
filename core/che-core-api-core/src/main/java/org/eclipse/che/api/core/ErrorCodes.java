@@ -34,4 +34,5 @@ public class ErrorCodes {
   public static final int PROJECT_TYPE_IS_NOT_REGISTERED = 12;
   public static final int ATTRIBUTE_NAME_PROBLEM = 13;
   public static final int NOT_UPDATED_PROJECT = 14;
+  public static final int ITEM_NOT_FOUND = 15;
 }

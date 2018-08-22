@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -512,6 +513,14 @@ public class Wizard {
   public void waitArcheTypeDropdawn() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(archetypeDropDown));
+  }
+
+  /** wait for the archetype section in the import widget to be invisible */
+  public void waitInvisibilityOfAchetypeSection() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.invisibilityOfAllElements(singletonList(fromArchetypeChkBox)));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.invisibilityOfAllElements(singletonList(archetypeDropDown)));
   }
 
   public void selectArcheTypeFromList(Archetypes type) {
