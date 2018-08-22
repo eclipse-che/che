@@ -21,7 +21,6 @@ import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_C
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.DEBUG_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
 
 import com.google.common.collect.ImmutableList;
@@ -72,7 +71,7 @@ public class CreateWorkspaceFromSpringBootStackTest {
     createWorkspaceHelper.createWorkspaceFromStackWithProjects(
         SPRING_BOOT, WORKSPACE_NAME, projects);
 
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse(APPLICATION_START_TIMEOUT_SEC);
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     projectExplorer.waitProjectInitialization(SPRING_BOOT_HEALTH_CHECK_PROJECT);
     projectExplorer.waitProjectInitialization(SPRING_BOOT_HTTP_PROJECT);
