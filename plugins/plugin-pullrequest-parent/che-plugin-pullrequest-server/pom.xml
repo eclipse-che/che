@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-pullrequest-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.10.0-SNAPSHOT</version>
+        <version>6.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-pullrequest-server</artifactId>
     <name>Che Plugin :: Pull request :: Server</name>
