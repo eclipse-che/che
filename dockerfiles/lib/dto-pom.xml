@@ -18,21 +18,38 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>6.10.0-SNAPSHOT</version>
+        <version>6.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>dto-typescript</artifactId>
     <packaging>pom</packaging>
     <name>Che TypeScript DTO</name>
     <properties>
-        <che.version>6.10.0-SNAPSHOT</che.version>
+        <che.version>6.11.0-SNAPSHOT</che.version>
     </properties>
     <repositories>
         <repository>
             <id>ossrh</id>
+            <name>central public releases</name>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>ossrh-snapshots</id>
             <name>central public snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>codenvy-public-repo</id>
+            <name>ossrh releases</name>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>ossrh-snapshots</id>
+            <name>ossrh snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
     <build>
         <plugins>
             <plugin>
