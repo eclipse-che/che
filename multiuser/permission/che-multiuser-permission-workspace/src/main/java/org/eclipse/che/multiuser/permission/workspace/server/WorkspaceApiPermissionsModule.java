@@ -20,6 +20,7 @@ import org.eclipse.che.multiuser.api.permission.server.SuperPrivilegesChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.RemovePermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.SetPermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.shared.model.PermissionsDomain;
+import org.eclipse.che.multiuser.permission.workspace.server.filters.InstallerServicePermissionFilter;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.PublicPermissionsRemoveChecker;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.StackDomainSetPermissionsChecker;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.StackPermissionsFilter;
@@ -34,6 +35,7 @@ public class WorkspaceApiPermissionsModule extends AbstractModule {
   protected void configure() {
     bind(WorkspacePermissionsFilter.class);
     bind(StackPermissionsFilter.class);
+    bind(InstallerServicePermissionFilter.class).asEagerSingleton();
 
     bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
     bind(StackCreatorPermissionsProvider.class).asEagerSingleton();
