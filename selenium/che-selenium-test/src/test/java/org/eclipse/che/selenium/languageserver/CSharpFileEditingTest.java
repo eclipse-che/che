@@ -138,6 +138,6 @@ public class CSharpFileEditingTest {
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
 
-    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.waitProjectInitialization(PROJECT_NAME);
   }
 }
