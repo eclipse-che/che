@@ -168,8 +168,7 @@ export class CheFactoryTemplates {
               'dev-machine': {
                 'installers': [
                   'org.eclipse.che.terminal',
-                  'org.eclipse.che.ws-agent',
-                  'org.eclipse.che.ssh'
+                  'org.eclipse.che.ws-agent'
                 ],
                 'servers': {},
                 'attributes': {
