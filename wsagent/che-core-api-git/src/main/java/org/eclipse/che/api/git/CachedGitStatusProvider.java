@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -86,7 +87,10 @@ public class CachedGitStatusProvider implements VcsStatusProvider {
     this.eventService = eventService;
     this.statusCache = new HashMap<>();
     this.projectFiles = new HashMap<>();
+  }
 
+  @PostConstruct
+  private void postConstruct() {
     subscribeToEvents();
     collectProjectFiles(rootDirPathProvider.get());
   }
