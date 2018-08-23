@@ -18,7 +18,7 @@ import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 
 /**
  * An implementation of {@link Subject} which should be used when request was signed by machine
- * token. This implementation limits all workspace related permissions to the only workspace for
+ * token. This implementation limits all workspace related permissions to the single workspace for
  * which the machine token was issued.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
