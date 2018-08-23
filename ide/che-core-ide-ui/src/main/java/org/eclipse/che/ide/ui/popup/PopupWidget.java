@@ -112,14 +112,10 @@ public abstract class PopupWidget<T> {
 
     Scheduler.get()
         .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                popupElement.getStyle().setOpacity(1);
-              }
-            });
+                () -> popupElement.getStyle().setOpacity(1));
 
     Elements.getDocument().addEventListener(Event.MOUSEDOWN, popupListener, false);
+    Elements.getDocument().addEventListener(Event.KEYDOWN, keyboardListener, false);
 
     // does it fit inside the doc body?
     // This does exactly the same thing for height/top and width/left
@@ -207,7 +203,8 @@ public abstract class PopupWidget<T> {
     }.schedule(250);
 
     // remove the keyboard listener
-    listElement.removeEventListener(Event.KEYDOWN, keyboardListener, false);
+    listElement.removeEventListener(Event.KEYDOWN, keyboardListener);
+    Elements.getDocument().removeEventListener(Event.KEYDOWN, keyboardListener);
 
     // remove the mouse listener
     Elements.getDocument().removeEventListener(Event.MOUSEDOWN, popupListener);

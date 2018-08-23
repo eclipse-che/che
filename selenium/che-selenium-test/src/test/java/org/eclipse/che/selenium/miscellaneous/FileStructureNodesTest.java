@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
 import static org.openqa.selenium.Keys.ESCAPE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -43,7 +42,7 @@ public class FileStructureNodesTest {
   private static final String INNER_CLASS_NAME = "CompanyHelper";
   private static final String INTERFACE_NAME = "Inter";
 
-  private static final String ITEMS_CLASS =
+  public static final String ITEMS_CLASS =
       "Company\n"
           + "Company()\n"
           + "CompanyHelper\n"
@@ -55,60 +54,60 @@ public class FileStructureNodesTest {
           + "ASD\n"
           + "FIVE\n"
           + "TEN\n"
-          + "setDate()\n"
-          + "getId()\n"
-          + "getDate()\n"
-          + "getInstance()\n"
+          + "setDate():void\n"
+          + "getId():double\n"
+          + "getDate():String\n"
+          + "getInstance():Company\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
-          + "doListId()\n"
-          + "doListName()\n"
-          + "doListDate()\n"
-          + "createListEmpl()\n"
-          + "createListEmpl(int)\n"
-          + "removeEmployee(String)\n"
-          + "getListEmployees()\n"
-          + "sortSalary()\n"
-          + "sortSurname()\n"
-          + "sortId()\n"
-          + "sortDate()";
+          + "doListId():List<String>\n"
+          + "doListName():List<String>\n"
+          + "doListDate():List<String>\n"
+          + "createListEmpl():List<Employee>\n"
+          + "createListEmpl(int):List<Employee>\n"
+          + "removeEmployee(String):List<Employee>\n"
+          + "getListEmployees():List<Employee>\n"
+          + "sortSalary():List<Employee>\n"
+          + "sortSurname():List<Employee>\n"
+          + "sortId():List<Employee>\n"
+          + "sortDate():List<Employee>";
 
-  private static final String ITEMS_CLASS_1 =
+  public static final String ITEMS_CLASS_1 =
       "Company\n"
           + "Company()\n"
           + "CompanyHelper\n"
           + "Inter\n"
-          + "getInstance()\n"
+          + "getInstance():Company\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
-          + "doListId()\n"
-          + "doListName()\n"
-          + "doListDate()\n"
-          + "createListEmpl()\n"
-          + "createListEmpl(int)\n"
-          + "removeEmployee(String)\n"
-          + "getListEmployees()\n"
-          + "sortSalary()\n"
-          + "sortSurname()\n"
-          + "sortId()\n"
-          + "sortDate()";
+          + "doListId():List<String>\n"
+          + "doListName():List<String>\n"
+          + "doListDate():List<String>\n"
+          + "createListEmpl():List<Employee>\n"
+          + "createListEmpl(int):List<Employee>\n"
+          + "removeEmployee(String):List<Employee>\n"
+          + "getListEmployees():List<Employee>\n"
+          + "sortSalary():List<Employee>\n"
+          + "sortSurname():List<Employee>\n"
+          + "sortId():List<Employee>\n"
+          + "sortDate():List<Employee>";
 
-  private static final String ITEMS_INNER_CLASS = "INSTANCE\n" + "ONE\n" + "QWE\n" + "TWO\n";
+  public static final String ITEMS_INNER_CLASS = "INSTANCE\n" + "ONE\n" + "QWE\n" + "TWO\n";
 
-  private static final String ITEMS_INTERFACE =
-      "ASD\n" + "FIVE\n" + "TEN\n" + "setDate()\n" + "getId()\n" + "getDate()";
+  public static final String ITEMS_INTERFACE =
+      "ASD\n" + "FIVE\n" + "TEN\n" + "setDate():void\n" + "getId():double\n" + "getDate():String";
 
   private static final String ITEMS_FILTERED_GET =
       "Company\n"
           + "Inter\n"
-          + "getId()\n"
-          + "getDate()\n"
-          + "getInstance()\n"
-          + "getListEmployees()\n";
+          + "getId():double\n"
+          + "getDate():String\n"
+          + "getInstance():Company\n"
+          + "getListEmployees():List<Employee>\n";
 
   private static final String ITEMS_FILTERED_I =
       "Company\n"
@@ -116,20 +115,25 @@ public class FileStructureNodesTest {
           + "INSTANCE\n"
           + "Inter\n"
           + "FIVE\n"
-          + "getId()\n"
-          + "getInstance()\n"
+          + "setDate():void\n"
+          + "getId():double\n"
+          + "getDate():String\n"
+          + "getInstance():Company\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
-          + "doListId()\n"
-          + "doListName()\n"
-          + "doListDate()\n"
-          + "createListEmpl()\n"
-          + "createListEmpl(int)\n"
-          + "removeEmployee(String)\n"
-          + "getListEmployees()\n"
-          + "sortId()";
+          + "doListId():List<String>\n"
+          + "doListName():List<String>\n"
+          + "doListDate():List<String>\n"
+          + "createListEmpl():List<Employee>\n"
+          + "createListEmpl(int):List<Employee>\n"
+          + "removeEmployee(String):List<Employee>\n"
+          + "getListEmployees():List<Employee>\n"
+          + "sortSalary():List<Employee>\n"
+          + "sortSurname():List<Employee>\n"
+          + "sortId():List<Employee>\n"
+          + "sortDate():List<Employee>";
 
   @Inject private Ide ide;
   @Inject private Menu menu;
