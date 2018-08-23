@@ -64,7 +64,6 @@ public class WorkspaceDetailsSingleMachineTest {
           .put("JSON language server", false)
           .put("PHP language server", false)
           .put("Python language server", false)
-          .put("Simple Test language server", false)
           .put("SSH", false)
           .put("Terminal", true)
           .put("TypeScript language server", false)
@@ -266,12 +265,6 @@ public class WorkspaceDetailsSingleMachineTest {
 
   private void clickOnSaveButton() {
     workspaceDetails.clickOnSaveChangesBtn();
-    dashboard.waitNotificationMessage("Workspace updated");
-    dashboard.waitNotificationIsClosed();
-  }
-
-  private void clickOnApplyButton() {
-    workspaceDetails.clickOnApplyChangesBtn();
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
   }
