@@ -11,69 +11,61 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsnext;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
+import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
+import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsnext.model.PluginMeta;
-import org.slf4j.Logger;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
  * Provisions sidecars-powered development tooling in a workspace.
  *
  * @author Oleksandr Garagatyi
  */
+@Beta
 public class SidecarToolingProvisioner {
-
-  private static final Logger LOG = getLogger(SidecarToolingProvisioner.class);
 
   private final Map<String, WorkspaceNextApplier> workspaceNextAppliers;
   private final WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
+  private final PluginBrokerManager pluginBrokerManager;
 
   @Inject
   public SidecarToolingProvisioner(
       Map<String, WorkspaceNextApplier> workspaceNextAppliers,
-      WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever) {
+      WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever,
+      PluginBrokerManager pluginBrokerManager) {
     this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
     this.workspaceNextObjectsRetriever = workspaceNextObjectsRetriever;
+    this.pluginBrokerManager = pluginBrokerManager;
   }
 
-  public void provision(InternalEnvironment environment) throws InfrastructureException {
-    String recipeType = environment.getRecipe().getType();
+  @Beta
+  public void provision(RuntimeIdentity id, KubernetesEnvironment environment)
+      throws InfrastructureException {
+
     Collection<PluginMeta> pluginsMeta =
         workspaceNextObjectsRetriever.get(environment.getAttributes());
     if (pluginsMeta.isEmpty()) {
       return;
     }
 
-    // TODO
-    // Start container with a broker
-    // Pass Metas to it
-    // Ping it to retrieve actual state of Plugin broker execution process
-    // Once finished successfully fetch workspace tooling config
-    // Consider pushing logs from Broker to workspace logs
-
-    // TODO remove this. Added for the Walking skeleton development purposes
-    LOG.error("Sidecar tooling workspace attributes: {}", environment.getAttributes());
-    LOG.error("Sidecar tooling metadata: {}", pluginsMeta);
-
+    String recipeType = environment.getRecipe().getType();
     WorkspaceNextApplier wsNext = workspaceNextAppliers.get(recipeType);
     if (wsNext == null) {
       throw new InfrastructureException(
           "Sidecar tooling configuration is not supported with recipe type " + recipeType);
     }
-    // TODO Apply tooling config to InternalEnvironment
-    // wsNext.apply(environment, plugins);
 
-    throw new InfrastructureException(
-        "Sidecar powered Che tooling is not implemented yet. "
-            + "Workspace start is not possible. Remove 'editor' and 'plugins' attributes from "
-            + "workspace to switch to a regular tooling.");
+    List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta, environment);
+
+    wsNext.apply(environment, chePlugins);
   }
 }

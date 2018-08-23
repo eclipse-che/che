@@ -74,11 +74,15 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
 
+    // Sidecar-based tooling for now supports k8s/OS env only
+    // Convert other env types to a k8s type to use this tooling with other env types
+    final KubernetesEnvironment kubernetesEnvironment = asKubernetesEnv(environment);
+
     // We need to provision development tooling here because there is environment variables
     // provisioning in the superclass which might be important
-    workspaceNext.provision(environment);
+    workspaceNext.provision(id, kubernetesEnvironment);
 
-    return super.prepare(id, environment);
+    return super.prepare(id, kubernetesEnvironment);
   }
 
   @Override
