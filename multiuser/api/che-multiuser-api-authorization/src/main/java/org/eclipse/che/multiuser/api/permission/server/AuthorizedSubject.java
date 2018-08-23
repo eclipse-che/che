@@ -33,7 +33,6 @@ public class AuthorizedSubject implements Subject {
   private final Subject baseSubject;
   private final PermissionChecker permissionChecker;
 
-
   public AuthorizedSubject(Subject baseSubject, PermissionChecker permissionChecker) {
     this.baseSubject = baseSubject;
     this.permissionChecker = permissionChecker;

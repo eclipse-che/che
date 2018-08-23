@@ -16,20 +16,26 @@ import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 
+/**
+ * An implementation of {@link Subject} which should be used when request was signed by machine
+ * token. This implementation limits all workspace related permissions to the only workspace for
+ * which the machine token was issued.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
 public class MachineTokenAuthorizedSubject extends AuthorizedSubject {
 
-  private final String scopeWorkspaceId;
+  private final String claimsWorkspaceId;
 
-  public MachineTokenAuthorizedSubject(Subject baseSubject,
-      PermissionChecker permissionChecker, String scopeWorkspaceId) {
+  public MachineTokenAuthorizedSubject(
+      Subject baseSubject, PermissionChecker permissionChecker, String claimsWorkspaceId) {
     super(baseSubject, permissionChecker);
-    this.scopeWorkspaceId = scopeWorkspaceId;
+    this.claimsWorkspaceId = claimsWorkspaceId;
   }
-
 
   @Override
   public boolean hasPermission(String domain, String instance, String action) {
-    if (domain.equals(WorkspaceDomain.DOMAIN_ID) && !instance.equals(scopeWorkspaceId)) {
+    if (domain.equals(WorkspaceDomain.DOMAIN_ID) && !instance.equals(claimsWorkspaceId)) {
       return false;
     }
     return super.hasPermission(domain, instance, action);
