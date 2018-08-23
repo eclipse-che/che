@@ -61,6 +61,7 @@ export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OP
 # OKD config local dir
 DEFAULT_OKD_DIR="${HOME}/.okd"
 export OKD_DIR=${OKD_DIR:-${DEFAULT_OKD_DIR}}
+mkdir -p ${OKD_DIR}
 
 # Docker image and tag for ansible-service-broker. Currently nightly, since latest does not work
 DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE="ansibleplaybookbundle/origin-ansible-service-broker"
