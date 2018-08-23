@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyImpl;
@@ -57,6 +58,7 @@ public class SignatureKeyManagerTest {
 
   @Mock SignatureKeyDao signatureKeyDao;
   @Mock EventService eventService;
+  @Mock WorkspaceManager workspaceManager;
 
   @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> captor;
 
@@ -68,7 +70,8 @@ public class SignatureKeyManagerTest {
     kpg = KeyPairGenerator.getInstance(ALGORITHM);
     kpg.initialize(KEY_SIZE);
     signatureKeyManager =
-        new SignatureKeyManager(KEY_SIZE, ALGORITHM, eventService, signatureKeyDao);
+        new SignatureKeyManager(
+            KEY_SIZE, ALGORITHM, eventService, workspaceManager, signatureKeyDao);
   }
 
   @Test
@@ -109,6 +112,14 @@ public class SignatureKeyManagerTest {
     verify(signatureKeyDao).get(anyString());
     verify(signatureKeyDao).create(any(SignatureKeyPairImpl.class));
     assertNotNull(cachedPair);
+  }
+
+  @Test(expectedExceptions = ServerException.class)
+  public void testThrowsExceptionWhenNoWorkspaceFound() throws Exception {
+    doThrow(NotFoundException.class).when(signatureKeyDao).get(anyString());
+    doThrow(NotFoundException.class).when(workspaceManager).getWorkspace(anyString());
+
+    signatureKeyManager.getKeyPair("ws1");
   }
 
   @Test(expectedExceptions = ServerException.class)

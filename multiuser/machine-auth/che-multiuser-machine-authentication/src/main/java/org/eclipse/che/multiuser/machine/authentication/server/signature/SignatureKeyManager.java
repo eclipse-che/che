@@ -39,6 +39,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.core.db.DBInitializer;
@@ -66,6 +67,7 @@ public class SignatureKeyManager {
   private final String algorithm;
   private final SignatureKeyDao signatureKeyDao;
   private final EventService eventService;
+  private final WorkspaceManager workspaceManager;
   private final EventSubscriber<?> workspaceEventsSubscriber;
 
   @Inject
@@ -79,10 +81,12 @@ public class SignatureKeyManager {
       @Named("che.auth.signature_key_size") int keySize,
       @Named("che.auth.signature_key_algorithm") String algorithm,
       EventService eventService,
+      WorkspaceManager workspaceManager,
       SignatureKeyDao signatureKeyDao) {
     this.keySize = keySize;
     this.algorithm = algorithm;
     this.eventService = eventService;
+    this.workspaceManager = workspaceManager;
     this.signatureKeyDao = signatureKeyDao;
 
     this.cachedPair =
@@ -134,13 +138,15 @@ public class SignatureKeyManager {
   /** Loads signature key pair if no existing keys found then stores a newly generated key pair. */
   @PostConstruct
   @VisibleForTesting
-  KeyPair loadKeyPair(String workspaceId) throws ServerException, ConflictException {
+  KeyPair loadKeyPair(String workspaceId)
+      throws ServerException, ConflictException, NotFoundException {
     try {
       return toJavaKeyPair(signatureKeyDao.get(workspaceId));
     } catch (NotFoundException nfe) {
       try {
+        workspaceManager.getWorkspace(workspaceId); // Make sure workspace still exists
         return toJavaKeyPair(signatureKeyDao.create(generateKeyPair(workspaceId)));
-      } catch (ConflictException | ServerException ex) {
+      } catch (NotFoundException | ConflictException | ServerException ex) {
         LOG.error(
             "Failed to store signature keys for ws {}. Cause: {}", workspaceId, ex.getMessage());
         throw ex;

@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.multiuser.machine.authentication.shared.Constants;
 
@@ -66,9 +67,9 @@ public class MachineTokenRegistry {
    * @param userId id of user to get token
    * @param workspaceId id of workspace to get token
    * @return machine security token for for given user and workspace
-   * @throws IllegalStateException when user with given id not found or any errors occurs
+   * @throws MachineTokenException when user with given id not found or any errors occurs
    */
-  public String getOrCreateToken(String userId, String workspaceId) {
+  public String getOrCreateToken(String userId, String workspaceId) throws MachineTokenException {
     lock.writeLock().lock();
     try {
       final Map<String, String> wsRow = tokens.row(workspaceId);
@@ -78,7 +79,7 @@ public class MachineTokenRegistry {
       }
       return token;
     } catch (NotFoundException | ServerException ex) {
-      throw new IllegalStateException(
+      throw new MachineTokenException(
           format(
               "Failed to generate machine token for user '%s' and workspace '%s'. Cause: '%s'",
               userId, workspaceId, ex.getMessage()),
