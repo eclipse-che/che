@@ -86,6 +86,9 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
     Pod pod = pods.values().iterator().next();
 
     for (ChePlugin chePlugin : chePlugins) {
+      if (chePlugin.getContainers() == null) {
+        continue;
+      }
       for (CheContainer container : chePlugin.getContainers()) {
         addMachine(pod, container, chePlugin, kubernetesEnvironment);
       }
@@ -265,9 +268,11 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
   private List<io.fabric8.kubernetes.api.model.EnvVar> toK8sEnv(List<EnvVar> env) {
     List<io.fabric8.kubernetes.api.model.EnvVar> result = new ArrayList<>();
 
-    for (EnvVar envVar : env) {
-      result.add(
-          new io.fabric8.kubernetes.api.model.EnvVar(envVar.getName(), envVar.getValue(), null));
+    if (env != null) {
+      for (EnvVar envVar : env) {
+        result.add(
+            new io.fabric8.kubernetes.api.model.EnvVar(envVar.getName(), envVar.getValue(), null));
+      }
     }
 
     return result;
