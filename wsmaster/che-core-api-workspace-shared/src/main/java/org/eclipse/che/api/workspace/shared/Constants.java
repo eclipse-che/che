@@ -26,6 +26,7 @@ public final class Constants {
   public static final String LINK_REL_ENVIRONMENT_STATUS_CHANNEL = "environment/statusChannel";
 
   public static final String WORKSPACE_STOPPED_BY = "stopped_by";
+  public static final String WORKSPACE_STOP_REASON = "stop_reason";
 
   public static final String LINK_REL_CREATE_STACK = "create stack";
   public static final String LINK_REL_UPDATE_STACK = "update stack";
