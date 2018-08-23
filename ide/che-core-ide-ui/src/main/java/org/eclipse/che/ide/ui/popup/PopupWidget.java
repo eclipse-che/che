@@ -110,9 +110,7 @@ public abstract class PopupWidget<T> {
     popupElement.getStyle().setOpacity(0);
     Elements.getDocument().getBody().appendChild(popupElement);
 
-    Scheduler.get()
-        .scheduleDeferred(
-                () -> popupElement.getStyle().setOpacity(1));
+    Scheduler.get().scheduleDeferred(() -> popupElement.getStyle().setOpacity(1));
 
     Elements.getDocument().addEventListener(Event.MOUSEDOWN, popupListener, false);
     Elements.getDocument().addEventListener(Event.KEYDOWN, keyboardListener, false);
