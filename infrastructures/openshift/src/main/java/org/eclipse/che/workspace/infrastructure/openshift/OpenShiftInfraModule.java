@@ -47,6 +47,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.Default
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.events.BrokerService;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
@@ -115,5 +116,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     secureServerExposerFactories
         .addBinding("default")
         .to(new TypeLiteral<DefaultSecureServersFactory<OpenShiftEnvironment>>() {});
+
+    bind(BrokerService.class);
   }
 }

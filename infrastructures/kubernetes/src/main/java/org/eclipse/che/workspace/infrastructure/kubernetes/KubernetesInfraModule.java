@@ -56,6 +56,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.Default
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.events.BrokerService;
 
 /** @author Sergii Leshchenko */
 public class KubernetesInfraModule extends AbstractModule {
@@ -139,5 +140,7 @@ public class KubernetesInfraModule extends AbstractModule {
     secureServerExposerFactories
         .addBinding("default")
         .to(new TypeLiteral<DefaultSecureServersFactory<KubernetesEnvironment>>() {});
+
+    bind(BrokerService.class);
   }
 }
