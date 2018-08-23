@@ -80,11 +80,11 @@ public class ContextMenuEditorTest {
           + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {\n"
           + "        String numGuessByUser = request.getParameter(\"numGuess\");\n"
           + "        String result = \"\";\n"
-          + "        \n"
+          + "\n"
           + "        if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
           + "            result = \"Congrats! The number is \" + secretNum;\n"
-          + "        } \n"
-          + "        \n"
+          + "        }\n"
+          + "\n"
           + "        else if (numGuessByUser != null) {\n"
           + "            result = \"Sorry, you failed. Try again later!\";\n"
           + "        }\n"
@@ -135,6 +135,7 @@ public class ContextMenuEditorTest {
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     consoles.closeProcessesArea();
   }
 
