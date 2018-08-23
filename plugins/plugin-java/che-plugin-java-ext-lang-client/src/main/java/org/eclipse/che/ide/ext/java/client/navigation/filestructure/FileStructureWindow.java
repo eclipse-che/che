@@ -80,6 +80,7 @@ public final class FileStructureWindow extends Window
     view = new FileStructureView(nodeFactory);
 
     treeContainer.add(view);
+    ensureDebugId("file-structure");
   }
 
   public void setShowInherited(boolean on) {

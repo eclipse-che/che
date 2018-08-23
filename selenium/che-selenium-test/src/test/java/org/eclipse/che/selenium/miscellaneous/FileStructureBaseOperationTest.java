@@ -40,23 +40,24 @@ public class FileStructureBaseOperationTest {
 
   private static final String CLASS_MEMBERS_2 =
       "AppController\n"
-          + "handleRequest(HttpServletRequest, HttpServletResponse) : ModelAndView -> AppController\n"
-          + "secretNum -> AppController";
+          + "secretNum\n"
+          + "handleRequest(HttpServletRequest, HttpServletResponse):ModelAndView\n";
 
   private static final String INHERITED_MEMBERS =
-      "Object() : void -> Object\n"
-          + "registerNatives() : void -> Object\n"
-          + "getClass() : java.lang.Class<?> -> Object\n"
-          + "hashCode() : int -> Object\n"
-          + "equals(Object) : boolean -> Object\n"
-          + "clone() : java.lang.Object -> Object\n"
-          + "toString() : java.lang.String -> Object\n"
-          + "notify() : void -> Object\n"
-          + "notifyAll() : void -> Object\n"
-          + "wait(long) : void -> Object\n"
-          + "wait(long, int) : void -> Object\n"
-          + "wait() : void -> Object\n"
-          + "finalize() : void -> Object";
+      "Object() - java.lang.Object\n"
+          + "registerNatives() - java.lang.Object\n"
+          + "getClass() - java.lang.Object\n"
+          + "hashCode() - java.lang.Object\n"
+          + "equals(...) - java.lang.Object\n"
+          + "clone() - java.lang.Object\n"
+          + "toString() - java.lang.Object\n"
+          + "notify() - java.lang.Object\n"
+          + "notifyAll() - java.lang.Object\n"
+          + "wait(...) - java.lang.Object\n"
+          + "wait(...) - java.lang.Object\n"
+          + "wait() - java.lang.Object\n"
+          + "finalize() - java.lang.Object\n"
+          + "<clinit>() - java.lang.Object";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
