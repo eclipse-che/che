@@ -120,7 +120,7 @@ function getApis(keycloak: any): Promise<void> {
         if (xhr.status === 200) {
           resolve();
         } else {
-          reject(xhr.statusText ? xhr.statusText : 'Unknown error');
+          reject(xhr.responseText ? xhr.responseText : 'Unknown error');
         }
       };
     });
