@@ -11,9 +11,9 @@
  */
 package com.codenvy.qa;
 
-import java.io.Serializable;
+import java.rmi.Remote;
 
-public abstract class Empl implements Serializable {
+public abstract class Empl implements Remote {
 
     private String employeeNumber;
     private String surname;
