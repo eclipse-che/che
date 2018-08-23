@@ -238,11 +238,13 @@ deploy_che_to_ocp() {
 }
 
 destroy_ocp() {
+    if [ -d "${OKD_DIR}" ]; then
+      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*"
+    fi
     $OC_BINARY login -u system:admin
     $OC_BINARY delete pvc --all
     $OC_BINARY delete all --all
     $OC_BINARY cluster down
-    docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*"
 }
 
 remove_che_from_ocp() {
