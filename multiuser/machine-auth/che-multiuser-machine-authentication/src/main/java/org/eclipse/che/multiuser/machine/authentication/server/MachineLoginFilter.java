@@ -24,6 +24,7 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collections;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
@@ -44,6 +45,7 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
+import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +104,9 @@ public class MachineLoginFilter implements Filter {
         final String userName = userManager.getById(userId).getName();
         final Subject authorizedSubject =
             new AuthorizedSubject(
-                new SubjectImpl(userName, userId, token, false), permissionChecker);
+                new SubjectImpl(userName, userId, token, false), permissionChecker, Collections
+                .singletonMap(WorkspaceDomain.DOMAIN_ID,
+                    Collections.singleton((String)claims.get(WORKSPACE_ID_CLAIM))));
         EnvironmentContext.getCurrent().setSubject(authorizedSubject);
         chain.doFilter(addUserInRequest(httpRequest, authorizedSubject), response);
       } catch (NotFoundException ex) {
