@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
  * default machine memory limit - che.workspace.default_memory_request_mb - defines default
  * requested machine memory allocation
  *
- * <p>if default requested memory allocation is greater then default memory limit, memory limit is
- * set to be equal to requested memory allocation.
+ * <p>if default requested memory allocation is greater then default memory limit, requested memory
+ * allocation is set to be equal to memory limit.
  */
 @Singleton
 public class MemoryAttributeProvisioner {
@@ -62,6 +62,18 @@ public class MemoryAttributeProvisioner {
         String.valueOf(defaultMachineRequestMemorySizeAttribute * 1024 * 1024);
   }
 
+  /**
+   * Configures memory attributes, if they are missing in {@link MachineConfig}
+   *
+   * <p>Note: Default memory request and memory will only be used if BOTH memoryLimit and
+   * memoryRequest are null or 0, otherwise the provided value will be used for both parameters.
+   *
+   * @param machineConfig - given machine configuration
+   * @param memoryLimit - memory limit parameter configured by user in specific infra recipe. Can be
+   *     null or 0 if defaults should be used
+   * @param memoryRequest - memory request parameter configured by user in specific infra recipe.
+   *     Can be null or 0 if defaults should be used
+   */
   public void provision(
       InternalMachineConfig machineConfig,
       @Nullable Long memoryLimit,
