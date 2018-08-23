@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -31,11 +30,7 @@ public abstract class AbstractKeycloakFilter implements Filter {
   @Inject protected JwtParser jwtParser;
 
   /** when a request came from a machine with valid token then auth is not required */
-  boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
-    if (token == null) {
-      return request.getRequestURI() != null
-          && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js");
-    }
+  boolean shouldSkipAuthentication(String token) {
     try {
       jwtParser.parse(token);
       return false;

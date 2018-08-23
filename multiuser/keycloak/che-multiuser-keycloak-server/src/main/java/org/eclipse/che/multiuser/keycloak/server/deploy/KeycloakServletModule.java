@@ -19,18 +19,25 @@ import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitalizatio
 import org.eclipse.che.multiuser.keycloak.server.UnavailableResourceInMultiUserFilter;
 
 public class KeycloakServletModule extends ServletModule {
+
+  private static final String KEYCLOAK_FILTER_PATHS =
+      "^"
+          // not equals to /keycloak/OIDCKeycloak.js
+          + "(?!/keycloak/OIDCKeycloak.js)"
+          // not contains /docs/ (for swagger)
+          + "(?!.*(/docs/))"
+          // not ends with '/oauth/callback/' or '/keycloak/settings/' or '/system/state'
+          + "(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$)"
+          // all other
+          + ".*";
+
   @Override
   protected void configureServlets() {
     bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
 
-    // Not contains /docs/ (for swagger) and not ends with '/oauth/callback/' or
-    // '/keycloak/settings/' or '/system/state'
-    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$).*")
-        .through(KeycloakAuthenticationFilter.class);
-    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$).*")
-        .through(KeycloakEnvironmentInitalizationFilter.class);
-    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
-        .through(IdentityIdLoggerFilter.class);
+    filterRegex(KEYCLOAK_FILTER_PATHS).through(KeycloakAuthenticationFilter.class);
+    filterRegex(KEYCLOAK_FILTER_PATHS).through(KeycloakEnvironmentInitalizationFilter.class);
+    filterRegex(KEYCLOAK_FILTER_PATHS).through(IdentityIdLoggerFilter.class);
 
     // Ban change password (POST /user/password) and create a user (POST /user/) methods
     // but not remove user (DELETE /user/{USER_ID}
