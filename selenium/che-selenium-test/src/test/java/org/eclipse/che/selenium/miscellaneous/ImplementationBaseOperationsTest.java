@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -22,10 +23,12 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,6 +38,7 @@ public class ImplementationBaseOperationsTest {
   private static final String JAVA_FILE_NAME = "Company";
   private static final String ABSTRACT_CLASS_NAME = "Empl";
   private static final String INTERFACE_NAME = "Employee";
+  private static final String GENERAL_INTERFACE_NAME = "Remote";
   private static final String NO_FOUND_TEXT = "No implementations found";
   private static final String LIST_IMPLEMENTATIONS =
       "Empl - (/"
@@ -56,6 +60,7 @@ public class ImplementationBaseOperationsTest {
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -63,6 +68,7 @@ public class ImplementationBaseOperationsTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -93,7 +99,7 @@ public class ImplementationBaseOperationsTest {
     projectExplorer.openItemByVisibleNameInExplorer(ABSTRACT_CLASS_NAME + ".java");
     editor.goToCursorPositionVisible(16, 25);
     editor.waitActive();
-    editor.waitTextElementsActiveLine("Empl");
+    editor.waitTextElementsActiveLine(ABSTRACT_CLASS_NAME);
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeFixedSalary");
     editor.expectedNumberOfActiveLine(14);
@@ -111,7 +117,7 @@ public class ImplementationBaseOperationsTest {
     // check the 'implementations' for interface
     projectExplorer.openItemByVisibleNameInExplorer(INTERFACE_NAME + ".java");
     editor.goToCursorPositionVisible(16, 20);
-    editor.waitTextElementsActiveLine("Employee");
+    editor.waitTextElementsActiveLine(INTERFACE_NAME);
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeHourlyWages");
     editor.expectedNumberOfActiveLine(15);
@@ -126,31 +132,35 @@ public class ImplementationBaseOperationsTest {
     editor.expectedNumberOfActiveLine(59);
     editor.waitTextElementsActiveLine("toString");
     editor.selectTabByName(INTERFACE_NAME);
-    editor.setCursorToLine(16);
-    editor.waitTextElementsActiveLine("interface Employee extends Serializable");
-    editor.clickOnSelectedElementInEditor("Serializable");
+    editor.goToCursorPositionVisible(16, 38);
+    editor.waitTextElementsActiveLine("interface Employee extends Remote");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
-    editor.waitImplementationFormIsOpen("Serializable");
+    try {
+      editor.waitImplementationFormIsOpen(GENERAL_INTERFACE_NAME);
+    } catch (TimeoutException e) {
+      fail("Known issue https://github.com/eclipse/che/issues/10857");
+    }
+
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitImplementationFormIsClosed("Serializable");
+    editor.waitImplementationFormIsClosed(GENERAL_INTERFACE_NAME);
     editor.waitActiveTabFileName(ABSTRACT_CLASS_NAME);
     editor.setCursorToLine(16);
-    editor.waitTextElementsActiveLine("class Empl implements Serializable");
+    editor.waitTextElementsActiveLine("class Empl implements Remote");
     editor.selectTabByName(INTERFACE_NAME);
     editor.launchImplementationFormByKeyboard();
-    editor.waitImplementationFormIsOpen("Serializable");
+    editor.waitImplementationFormIsOpen(GENERAL_INTERFACE_NAME);
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.selectImplementationByClick("EmployeeHourlyWages");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitImplementationFormIsClosed("Serializable");
+    editor.waitImplementationFormIsClosed(GENERAL_INTERFACE_NAME);
     editor.waitActiveTabFileName("EmployeeHourlyWages");
     editor.selectTabByName(INTERFACE_NAME);
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
-    editor.waitImplementationFormIsOpen("Serializable");
+    editor.waitImplementationFormIsOpen(GENERAL_INTERFACE_NAME);
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.chooseImplementationByDoubleClick("EmployeeFixedSalary");
-    editor.waitImplementationFormIsClosed("Serializable");
+    editor.waitImplementationFormIsClosed(GENERAL_INTERFACE_NAME);
     editor.waitActiveTabFileName("EmployeeFixedSalary");
   }
 
