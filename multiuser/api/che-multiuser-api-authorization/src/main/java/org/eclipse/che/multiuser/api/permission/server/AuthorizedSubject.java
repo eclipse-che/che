@@ -12,17 +12,12 @@
 package org.eclipse.che.multiuser.api.permission.server;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.unmodifiableMap;
 
-import java.util.Map;
-import java.util.Set;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.multiuser.api.permission.shared.model.PermissionsDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,21 +32,11 @@ public class AuthorizedSubject implements Subject {
 
   private final Subject baseSubject;
   private final PermissionChecker permissionChecker;
-  /** An {@link PermissionsDomain} ID / instance ID set map to which current user auth scope limited to. */
-  private final Map<String, Set<String>> limitingScopes;
 
 
   public AuthorizedSubject(Subject baseSubject, PermissionChecker permissionChecker) {
     this.baseSubject = baseSubject;
     this.permissionChecker = permissionChecker;
-    this.limitingScopes = emptyMap();
-  }
-
-  public AuthorizedSubject(Subject baseSubject, PermissionChecker permissionChecker,
-      Map<String, Set<String>> limitingScopes) {
-    this.baseSubject = baseSubject;
-    this.permissionChecker = permissionChecker;
-    this.limitingScopes = limitingScopes !=null ? unmodifiableMap(limitingScopes) : emptyMap();
   }
 
   @Override
@@ -61,9 +46,6 @@ public class AuthorizedSubject implements Subject {
 
   @Override
   public boolean hasPermission(String domain, String instance, String action) {
-    if (limitingScopes.get(domain) != null && !limitingScopes.get(domain).contains(instance)) {
-      return false;
-    }
     try {
       return permissionChecker.hasPermission(getUserId(), domain, instance, action);
     } catch (NotFoundException nfe) {

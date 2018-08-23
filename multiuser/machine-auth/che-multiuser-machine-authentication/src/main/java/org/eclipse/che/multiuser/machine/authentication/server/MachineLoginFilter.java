@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
@@ -24,7 +24,6 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Collections;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
@@ -43,9 +42,7 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
-import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,21 +89,20 @@ public class MachineLoginFilter implements Filter {
     // check token signature and verify is this token machine or not
     try {
       final Claims claims = jwtParser.parseClaimsJws(token).getBody();
-      LOG.info(
-          "Machine token requested:"
-              + httpRequest.getRequestURL()
-              + firstNonNull(httpRequest.getQueryString(), "")
-              + " wsId:"
-              + claims.get(WORKSPACE_ID_CLAIM));
       try {
         final String userId = claims.get(USER_ID_CLAIM, String.class);
         // check if user with such id exists
         final String userName = userManager.getById(userId).getName();
+        final String workspaceId = claims.get(WORKSPACE_ID_CLAIM, String.class);
+        if (isNullOrEmpty(workspaceId)) {
+          sendErr(
+              response,
+              SC_BAD_REQUEST,
+              "Authentication with machine token failed because no workspace specified.");
+        }
         final Subject authorizedSubject =
-            new AuthorizedSubject(
-                new SubjectImpl(userName, userId, token, false), permissionChecker, Collections
-                .singletonMap(WorkspaceDomain.DOMAIN_ID,
-                    Collections.singleton((String)claims.get(WORKSPACE_ID_CLAIM))));
+            new MachineTokenAuthorizedSubject(
+                new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
         EnvironmentContext.getCurrent().setSubject(authorizedSubject);
         chain.doFilter(addUserInRequest(httpRequest, authorizedSubject), response);
       } catch (NotFoundException ex) {
