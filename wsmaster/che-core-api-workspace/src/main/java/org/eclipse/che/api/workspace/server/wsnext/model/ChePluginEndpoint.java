@@ -19,7 +19,7 @@ import java.util.Objects;
 public class ChePluginEndpoint {
   private String name = null;
 
-  @JsonProperty("isPublic")
+  @JsonProperty("public")
   private boolean isPublic = false;
 
   private int targetPort = 0;

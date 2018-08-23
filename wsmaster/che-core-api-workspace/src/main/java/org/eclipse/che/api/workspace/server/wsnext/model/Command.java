@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.wsnext.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +19,7 @@ import java.util.Objects;
 public class Command {
 
   private String name = null;
+  @JsonProperty("working-dir")
   private String workingDir = null;
   private List<String> command = new ArrayList<String>();
 
