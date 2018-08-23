@@ -111,8 +111,6 @@ public class AutocompleteFeaturesInEditorTest {
   };
 
   private static final String[] autocompleteContentAfterSecondAfterScroll = {
-    "replaceFirst(String regex, String replacement) : String String",
-    "replaceAll(String regex, String replacement) : String String",
     "replace(CharSequence target, CharSequence replacement) : String String",
     "replace(char oldChar, char newChar) : String String",
     "regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len) : boolean String",
