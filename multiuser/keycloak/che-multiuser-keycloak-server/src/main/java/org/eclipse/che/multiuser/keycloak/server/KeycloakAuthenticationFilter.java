@@ -23,7 +23,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
     final String token = tokenExtractor.getToken(request);
     if (token == null) {
-      send401(res, "Authorization token is missed");
+      sendError(res, 401, "Authorization token is missed");
       return;
     }
 
@@ -61,19 +60,13 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       LOG.debug("JWT = ", jwt);
       // OK, we can trust this JWT
     } catch (ExpiredJwtException e) {
-      send401(res, "The specified token is expired");
+      sendError(res, 401, "The specified token is expired");
       return;
     } catch (JwtException e) {
-      send401(res, "Token validation failed: " + e.getMessage());
+      sendError(res, 401, "Token validation failed: " + e.getMessage());
       return;
     }
     request.setAttribute("token", jwt);
     chain.doFilter(req, res);
-  }
-
-  private void send401(ServletResponse res, String message) throws IOException {
-    HttpServletResponse response = (HttpServletResponse) res;
-    response.getOutputStream().write(message.getBytes());
-    response.setStatus(401);
   }
 }
