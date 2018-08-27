@@ -73,11 +73,7 @@ data:
 {{- if .Values.global.log.loggerConfig }}
   CHE_LOGGER_CONFIG: {{ .Values.global.log.loggerConfig }}
 {{- end }}
-{{- if .Values.global.log.customAppenderName }}
-  CHE_LOGS_APPENDERS_IMPL: {{ .Values.global.log.customAppenderName }}
-{{- else }}
-  CHE_LOGS_APPENDERS_IMPL: "plaintext"
-{{- end }}
+  CHE_LOGS_APPENDERS_IMPL: {{ .Values.global.log.appenderName }}
   CHE_WORKSPACE_HTTP__PROXY: {{ .Values.cheWorkspaceHttpProxy }}
   CHE_WORKSPACE_HTTPS__PROXY: {{ .Values.cheWorkspaceHttpsProxy }}
   CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy }}

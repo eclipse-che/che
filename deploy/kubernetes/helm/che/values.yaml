@@ -46,4 +46,4 @@ global:
   workspaceIdleTimeout: "-1"
   log:
     loggerConfig: ""
-    customAppenderName: ""
+    appenderName: "plaintext"
