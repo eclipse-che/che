@@ -12,10 +12,13 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import io.jsonwebtoken.JwtParser;
+import java.io.IOException;
 import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Base abstract class for the Keycloak-related servlet filters.
@@ -46,4 +49,10 @@ public abstract class AbstractKeycloakFilter implements Filter {
 
   @Override
   public void destroy() {}
+
+  protected void sendError(ServletResponse res, int errorCode, String message) throws IOException {
+    HttpServletResponse response = (HttpServletResponse) res;
+    response.getOutputStream().write(message.getBytes());
+    response.setStatus(errorCode);
+  }
 }
