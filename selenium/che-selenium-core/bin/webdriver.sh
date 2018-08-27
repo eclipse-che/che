@@ -811,11 +811,11 @@ generateFailSafeReport () {
     done
 
     # attach screenshots
-    for f in target/screenshots/*
+    for f in target/site/images/screenshots/*
     do
         local test=$(basename ${f} | sed 's/\(.*\)_.*/\1/')
         local divTag="<div id=\""${test}"error\" style=\"display:none;\">"
-        local imgTag="<img src=\"..\/screenshots\/"$(basename ${f})"\">"
+        local imgTag="<img src=\"images\/screenshots\/"$(basename ${f})"\">"
         sed -i "s/${divTag}/${divTag}${imgTag}/" ${FAILSAFE_REPORT}
     done
 
