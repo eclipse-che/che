@@ -149,7 +149,7 @@ public class SignatureKeyManager {
       } catch (NotFoundException e) {
         LOG.error(e.getMessage(), e);
         throw e;
-      } catch ( ConflictException | ServerException ex) {
+      } catch (ConflictException | ServerException ex) {
         LOG.error(
             "Failed to store signature keys for ws {}. Cause: {}", workspaceId, ex.getMessage());
         throw ex;
