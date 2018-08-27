@@ -198,10 +198,17 @@ public class WorkingWithTerminalTest {
     terminal.waitTextInFirstTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
+
     for (String partOfContent : CHECK_MC_OPENING) {
       terminal.waitTextInFirstTerminal(partOfContent);
     }
-    terminal.waitNoTextInFirstTerminal(".dockerenv");
+
+    try {
+      terminal.waitNoTextInFirstTerminal(".dockerenv");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
+    }
   }
 
   @Test

@@ -37,6 +37,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.utils.HttpUtil;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
@@ -522,6 +523,9 @@ public class Consoles {
 
     waitPreviewUrlIsPresent();
     waitPreviewUrlIsResponsive(10);
+
+    // wait for 2 sec to prevent "Application is not available" error
+    WaitUtils.sleepQuietly(2);
     clickOnPreviewUrl();
 
     seleniumWebDriverHelper.switchToNextWindow(currentWindow);

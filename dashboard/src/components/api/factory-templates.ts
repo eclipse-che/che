@@ -139,4 +139,51 @@ export class CheFactoryTemplates {
     });
   }
 
+  static get GIT(): string {
+    return JSON.stringify({
+      'v': '4.0',
+      'workspace': {
+        'commands': [],
+        'projects': [
+          {
+            'name': 'my-project',
+            'type': 'blank',
+            'source': {
+              'location': 'http://git-project',
+              'type': 'git'
+            },
+            'modules': [],
+            'path': '/my-project',
+            'mixins': [
+              'git'
+            ],
+            'problems': []
+          }
+        ],
+        'defaultEnv': 'wss',
+        'name': 'wss',
+        'environments': {
+          'wss': {
+            'machines': {
+              'dev-machine': {
+                'installers': [
+                  'org.eclipse.che.terminal',
+                  'org.eclipse.che.ws-agent'
+                ],
+                'servers': {},
+                'attributes': {
+                  'memoryLimitBytes': '2147483648'
+                }
+              }
+            },
+            'recipe': {
+              'content': 'eclipse/ubuntu_jdk8',
+              'type': 'dockerimage'
+            }
+          }
+        }
+      }
+    });
+  }
+
 }

@@ -71,7 +71,7 @@ public class UploadIntoProjectTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(testWorkspace);
-    projectExplorer.waitVisibleItem(PROJECT_NAME);
+    projectExplorer.waitProjectInitialization(PROJECT_NAME);
   }
 
   @BeforeMethod
