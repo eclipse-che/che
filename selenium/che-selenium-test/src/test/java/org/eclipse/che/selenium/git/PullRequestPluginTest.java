@@ -39,6 +39,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -97,6 +98,7 @@ public class PullRequestPluginTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -106,7 +108,7 @@ public class PullRequestPluginTest {
     testRepo2.addContent(entryPath);
 
     ide.open(testWorkspace);
-
+    consoles.waitExpectedTextIntoConsole("Starting: 100% Starting Java Language Server");
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, user.getEmail());
 
