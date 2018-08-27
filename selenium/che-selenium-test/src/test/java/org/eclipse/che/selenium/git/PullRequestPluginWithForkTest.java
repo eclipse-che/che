@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -78,6 +79,7 @@ public class PullRequestPluginWithForkTest {
   @Inject private PullRequestPanel pullRequestPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -86,6 +88,8 @@ public class PullRequestPluginWithForkTest {
     testAuxiliaryRepo.addContent(entryPath);
 
     ide.open(testWorkspace);
+    // wait until jdt.ls initialized this need to avoid problem in next steps of test
+    consoles.waitUntilJdtLsStarted();
 
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(githubUserName, testUser.getEmail());

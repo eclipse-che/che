@@ -49,6 +49,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -71,6 +72,7 @@ import org.testng.annotations.Test;
  */
 @Test(groups = TestGroup.GITHUB)
 public class PullRequestPluginTest {
+
   private static final String FIRST_PROJECT_NAME = "pull-request-plugin-test";
   private static final String SECOND_PROJECT_NAME = "second-project-for-switching";
   private static final String CREATE_BRANCH = "Create new branch...";
@@ -125,6 +127,7 @@ public class PullRequestPluginTest {
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -139,6 +142,8 @@ public class PullRequestPluginTest {
     ide.open(testWorkspace);
     mainBrowserTabHandle = seleniumWebDriver.getWindowHandle();
 
+    // wait until jdt.ls initialized this need to avoid problem in next steps of test
+    consoles.waitUntilJdtLsStarted();
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, user.getEmail());
 
