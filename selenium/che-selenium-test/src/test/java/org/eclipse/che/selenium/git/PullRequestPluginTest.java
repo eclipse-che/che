@@ -108,6 +108,7 @@ public class PullRequestPluginTest {
     testRepo2.addContent(entryPath);
 
     ide.open(testWorkspace);
+    // wait until jdt.ls initialized this need to avoid problem in next steps of test
     consoles.waitExpectedTextIntoConsole("Starting: 100% Starting Java Language Server");
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, user.getEmail());
