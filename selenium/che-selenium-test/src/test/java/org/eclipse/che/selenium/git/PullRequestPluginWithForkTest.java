@@ -91,7 +91,7 @@ public class PullRequestPluginWithForkTest {
 
     ide.open(testWorkspace);
     // wait until jdt.ls initialized this need to avoid problem in next steps of test
-    consoles.waitExpectedTextIntoConsole(PullRequestPluginTest.STARTING_JAVA_LANGUAGE_SERVER);
+    consoles.waitUntilJdtLsStarted();
 
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(githubUserName, testUser.getEmail());
