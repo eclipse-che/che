@@ -200,11 +200,14 @@ public class KubernetesClientFactory {
    */
   private KubernetesClient create(Config config) {
     try {
-      String namespaceFile = FileUtils
-          .readFileToString(new File("/var/run/secrets/kubernetes.io/serviceaccount/namespace"));
+      String namespaceFile =
+          FileUtils.readFileToString(
+              new File("/var/run/secrets/kubernetes.io/serviceaccount/namespace"));
       LOG.info("Before OC client create # Namespace file content: '{}'", namespaceFile);
     } catch (IOException e) {
-      LOG.info("Before OC client create # Failed to read namespace file content. Cause: '{}'", e.getMessage());
+      LOG.info(
+          "Before OC client create # Failed to read namespace file content. Cause: '{}'",
+          e.getMessage());
     }
 
     OkHttpClient clientHttpClient =
