@@ -16,14 +16,13 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
-import org.eclipse.che.plugin.java.languageserver.WorkspaceSynchronizer;
 
 /** @author Vitaly Parfonov */
 @Singleton
 public class MavenProjectInitHandler implements ProjectInitHandler {
 
   @Inject
-  public MavenProjectInitHandler(WorkspaceSynchronizer workspaceSynchronizer) {}
+  public MavenProjectInitHandler() {}
 
   @Override
   public String getProjectType() {
