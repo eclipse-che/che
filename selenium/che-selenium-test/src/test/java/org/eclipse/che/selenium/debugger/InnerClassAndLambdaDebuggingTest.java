@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.debugger;
 
 import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.BTN_DISCONNECT;
 import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.RESUME_BTN_ID;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
@@ -33,6 +34,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -110,7 +112,14 @@ public class InnerClassAndLambdaDebuggingTest {
         String.format(
             "//*[@id=\"%1$s/%2$s\" or @id=\"topmenu/Run/Debug/Debug '%2$s'\"]",
             TestMenuCommandsConstants.Run.DEBUG, PROJECT));
-    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+
+    try {
+      notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
+
     editor.waitActiveBreakpoint(42);
   }
 
