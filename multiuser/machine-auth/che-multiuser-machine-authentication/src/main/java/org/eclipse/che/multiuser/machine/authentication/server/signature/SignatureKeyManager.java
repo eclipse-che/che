@@ -146,7 +146,10 @@ public class SignatureKeyManager {
       try {
         workspaceManager.getWorkspace(workspaceId); // Make sure workspace still exists
         return toJavaKeyPair(signatureKeyDao.create(generateKeyPair(workspaceId)));
-      } catch (NotFoundException | ConflictException | ServerException ex) {
+      } catch (NotFoundException e) {
+        LOG.error(e.getMessage(), e);
+        throw e;
+      } catch ( ConflictException | ServerException ex) {
         LOG.error(
             "Failed to store signature keys for ws {}. Cause: {}", workspaceId, ex.getMessage());
         throw ex;
