@@ -60,11 +60,12 @@ public class SplitEditorFeatureTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    String pathToFile = PROJECT_NAME + "/src/main/java/org.eclipse.che.examples";
+    String javaFileName = "GreetingController.java";
     ide.open(workspace);
     createProject(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PATH_JAVA_FILE);
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(pathToFile, javaFileName);
     loader.waitOnClosed();
   }
 

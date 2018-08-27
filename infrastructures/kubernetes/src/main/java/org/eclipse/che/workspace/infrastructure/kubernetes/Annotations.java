@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -115,11 +116,17 @@ public class Annotations {
         if (refMatcher.matches()) {
           String ref = refMatcher.group("ref");
           if (!servers.containsKey(ref)) {
+            // Null is serialized to empty string in annotations, but empty string as protocol
+            // doesn't make any sense, so convert empty protocol to null which is respected
+            // in other components
+            String protocol =
+                Strings.emptyToNull(
+                    annotations.get(String.format(SERVER_PROTOCOL_ANNOTATION_FMT, ref)));
             servers.put(
                 ref,
                 new ServerConfigImpl(
                     annotations.get(String.format(SERVER_PORT_ANNOTATION_FMT, ref)),
-                    annotations.get(String.format(SERVER_PROTOCOL_ANNOTATION_FMT, ref)),
+                    protocol,
                     annotations.get(String.format(SERVER_PATH_ANNOTATION_FMT, ref)),
                     GSON.fromJson(
                         annotations.get(String.format(SERVER_ATTR_ANNOTATION_FMT, ref)),

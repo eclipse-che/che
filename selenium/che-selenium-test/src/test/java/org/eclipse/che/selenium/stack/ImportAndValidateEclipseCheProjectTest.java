@@ -82,7 +82,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   @Test
   public void checkImportAndResolveDependenciesEclipceCheProject() {
     final int timeoutToOpenInfoPanel = 120;
-    final int timeoutToClosingInfoPanel = 2900;
+    final int timeoutToClosingInfoPanel = 5400;
 
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();

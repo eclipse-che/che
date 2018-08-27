@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import java.io.IOException;
@@ -76,7 +78,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     if (subject == null || !subject.getToken().equals(token)) {
       Jwt jwtToken = (Jwt) httpRequest.getAttribute("token");
       if (jwtToken == null) {
-        throw new ServletException("Cannot detect or instantiate user.");
+        sendError(response, 401, "Cannot detect or instantiate user.");
       }
       Claims claims = (Claims) jwtToken.getBody();
 
@@ -88,9 +90,15 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
           // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
           username = claims.getIssuer() + ":" + claims.getSubject();
         }
-        User user =
-            userManager.getOrCreateUser(
-                claims.getSubject(), claims.get("email", String.class), username);
+        String email = claims.get("email", String.class);
+        if (isNullOrEmpty(email)) {
+          sendError(
+              response,
+              400,
+              "Unable to authenticate user because email address is not set in keycloak profile");
+          return;
+        }
+        User user = userManager.getOrCreateUser(claims.getSubject(), email, username);
         subject =
             new AuthorizedSubject(
                 new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);

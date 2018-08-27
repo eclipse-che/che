@@ -62,9 +62,9 @@ objects:
                 key: ca.crt
                 name: openshift-identity-provider
                 optional: true
-          image: '${IMAGE_KEYCLOAK}:${CHE_VERSION}'
+          image: '${IMAGE_KEYCLOAK}:${KEYCLOAK_IMAGE_TAG}'
           command: ["/scripts/kc_realm_user.sh"]
-          imagePullPolicy: Always
+          imagePullPolicy: "${KEYCLOAK_IMAGE_PULL_POLICY}"
           name: keycloak
           livenessProbe:
             failureThreshold: 11
@@ -162,18 +162,22 @@ parameters:
 - name: ROUTING_SUFFIX
   displayName: Routing suffix of your OpenShift cluster
   description: This is the suffix appended to routes in your OpenShift cluster <route>.<project>.<routing_suffix>
-- name: CHE_VERSION
+- name: KEYCLOAK_IMAGE_TAG
   displayName: Eclipse Che version
   description: Eclipse Che version which defaults to nightly
-  value: nightly
+  value: 'nightly'
 - name: IMAGE_KEYCLOAK
   displayName: Keycloak Image
   description: Keycloak Image. Defaults to docker.io/eclipse/che-keycloak
-  value: eclipse/che-keycloak
+  value: 'eclipse/che-keycloak'
 - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
   displayName: Require admin password update
   description: Ask for a password update after 1st login by admin user
   value: "true"
+- name: KEYCLOAK_IMAGE_PULL_POLICY
+  displayName: Keycloak image pull policy
+  description: Always pull by default. Can be IfNotPresent
+  value: 'Always'
 labels:
   app: keycloak
   template: keycloak
