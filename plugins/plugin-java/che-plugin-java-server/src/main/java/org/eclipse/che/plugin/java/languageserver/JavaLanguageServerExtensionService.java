@@ -79,6 +79,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -164,6 +165,8 @@ public class JavaLanguageServerExtensionService {
   private final EventService eventService;
   private final LanguageServerInitializer initializer;
   private final ExecuteClientCommandJsonRpcTransmitter clientCommandTransmitter;
+  private final AtomicReference<CompletableFuture<ServerCapabilities>> serverCapabilities =
+      new AtomicReference<>();
 
   @Inject
   public JavaLanguageServerExtensionService(
@@ -460,6 +463,18 @@ public class JavaLanguageServerExtensionService {
     if (findInitializedLanguageServer() == null) {
       throw new IllegalStateException("Language server isn't initialized");
     }
+  }
+
+  private CompletableFuture<ServerCapabilities> getOrInitializeLanguageServer() {
+    if (serverCapabilities.get() == null) {
+      synchronized (serverCapabilities) {
+        if (serverCapabilities.get() == null) {
+          this.serverCapabilities.set(initializer.initialize(prefixURI("/init.java")));
+        }
+      }
+    }
+
+    return serverCapabilities.get();
   }
 
   /**
@@ -1009,8 +1024,7 @@ public class JavaLanguageServerExtensionService {
 
   private CompletableFuture<Object> executeCommand(String commandId, List<Object> parameters) {
     ExecuteCommandParams params = new ExecuteCommandParams(commandId, parameters);
-    return initializer
-        .initialize(prefixURI("/init.java"))
+    return getOrInitializeLanguageServer()
         .thenCompose(
             (ServerCapabilities cap) -> {
               ExtendedLanguageServer ls = findInitializedLanguageServer();
