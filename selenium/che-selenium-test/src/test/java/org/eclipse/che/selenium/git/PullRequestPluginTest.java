@@ -59,6 +59,8 @@ import org.testng.annotations.Test;
  */
 @Test(groups = TestGroup.GITHUB)
 public class PullRequestPluginTest {
+  public static final String STARTING_JAVA_LANGUAGE_SERVER =
+      "Starting: 100% Starting Java Language Server";
   private static final String FIRST_PROJECT_NAME = "pull-request-plugin-test";
   private static final String SECOND_PROJECT_NAME = "second-project-for-switching";
   private static final String CREATE_BRANCH = "Create new branch...";
@@ -109,7 +111,7 @@ public class PullRequestPluginTest {
 
     ide.open(testWorkspace);
     // wait until jdt.ls initialized this need to avoid problem in next steps of test
-    consoles.waitExpectedTextIntoConsole("Starting: 100% Starting Java Language Server");
+    consoles.waitExpectedTextIntoConsole(STARTING_JAVA_LANGUAGE_SERVER);
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, user.getEmail());
 
