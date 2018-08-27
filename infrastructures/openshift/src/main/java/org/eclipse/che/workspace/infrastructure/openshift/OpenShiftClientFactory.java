@@ -25,6 +25,8 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import io.fabric8.openshift.client.internal.OpenShiftOAuthInterceptor;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,9 +37,12 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Sergii Leshchenko
@@ -45,6 +50,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
  */
 @Singleton
 public class OpenShiftClientFactory extends KubernetesClientFactory {
+
+  private static final Logger LOG = LoggerFactory.getLogger("OCP 3.10 # DEBUG");
 
   private static final String AUTHORIZATION = "Authorization";
   private static final String AUTHORIZE_PATH =
@@ -203,6 +210,14 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   private OpenShiftClient createOC(Config config) {
+    try {
+      String namespaceFile = FileUtils
+          .readFileToString(new File("/var/run/secrets/kubernetes.io/serviceaccount/namespace"));
+      LOG.info("Before OC client create # Namespace file content: '{}'", namespaceFile);
+    } catch (IOException e) {
+      LOG.info("Before OC client create # Failed to read namespace file content. Cause: '{}'", e.getMessage());
+    }
+
     OkHttpClient clientHttpClient =
         getHttpClient().newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();
