@@ -27,9 +27,6 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.ext.java.client.action.GetEffectivePomAction;
 import org.eclipse.che.ide.ext.java.client.action.ReimportMavenDependenciesAction;
-import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
-import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
-import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -46,12 +43,7 @@ public class MavenExtension {
 
   @Inject
   public MavenExtension(
-      PreSelectedProjectTypeManager preSelectedProjectManager,
-      //      MavenMessagesHandler messagesHandler,
-      ClassFileSourcesDownloader downloader,
-      MavenModelImporter importMavenModelHandler,
-      MavenResources resources,
-      ResolvingMavenProjectStateHolder resolvingProjectStateHolder) {
+      PreSelectedProjectTypeManager preSelectedProjectManager, MavenResources resources) {
     this.resources = resources;
     preSelectedProjectManager.setProjectTypeIdToPreselect(MavenAttributes.MAVEN_ID, 100);
 
