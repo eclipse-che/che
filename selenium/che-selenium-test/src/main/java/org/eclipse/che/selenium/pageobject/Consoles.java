@@ -100,6 +100,8 @@ public class Consoles {
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
   public static final String LANGUAGE_SERVER_UPDATE_MESSAGE =
       "Workspace updated. Result code: '0', message: 'OK'. Added projects: '[file:///projects/%s]', removed projects: '[]'";
+  public static final String JAVA_LANGUAGE_SERVER_STARTED =
+      "Starting: 100% Starting Java Language Server";
 
   public interface CommandsGoal {
     String COMMON = "gwt-debug-contextMenu/Commands/goal_Common";
@@ -408,6 +410,11 @@ public class Consoles {
   /** wait expected text into 'Command console' */
   public void waitExpectedTextIntoConsole(String expectedText) {
     updateProjDriverWait.until(textToBePresentInElement(consoleContainer, expectedText));
+  }
+
+  /** wait on staring jdt.ls */
+  public void waitUntilJdtLsStarted() {
+    waitExpectedTextIntoConsole(JAVA_LANGUAGE_SERVER_STARTED);
   }
 
   /** wait JDT LS message about project is updated */
