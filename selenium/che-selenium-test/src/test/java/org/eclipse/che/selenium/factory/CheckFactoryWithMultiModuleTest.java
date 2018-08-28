@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
@@ -45,7 +46,10 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
-  @Inject private TestGitHubRepository testRepo;
+
+@Inject private Consoles consoles;  @Inject
+
+  private TestGitHubRepository testRepo;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
@@ -94,6 +98,7 @@ public class CheckFactoryWithMultiModuleTest {
       fail("Known issue https://github.com/eclipse/che/issues/10728");
     }
 
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
