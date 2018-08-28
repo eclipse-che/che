@@ -221,7 +221,8 @@ public class ProjectServiceApi {
       throws NotFoundException, ConflictException, ForbiddenException, ServerException, IOException,
           BadRequestException {
     if (wsPath != null) {
-      projectConfigDto.setPath(absolutize(wsPath));
+      wsPath = absolutize(wsPath);
+      projectConfigDto.setPath(wsPath);
     }
     boolean registeredEarly = projectManager.isRegistered(wsPath);
     RegisteredProject updated = projectManager.update(projectConfigDto);

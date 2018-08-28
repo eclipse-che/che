@@ -114,7 +114,7 @@ public class LanguageServerInitializer {
   public CompletableFuture<ServerCapabilities> initialize(String wsPath) {
     return supplyAsync(
         () -> {
-          LOG.info("Started language servers initialization, file path '{}'", wsPath);
+          LOG.debug("Started language servers initialization, file path '{}'", wsPath);
 
           configInitializer.initialize();
           Set<ServerCapabilities> serverCapabilitiesSet =
@@ -131,7 +131,7 @@ public class LanguageServerInitializer {
                   .filter(Objects::nonNull)
                   .collect(toSet());
 
-          LOG.info("Finished language servers initialization, file path '{}'", wsPath);
+          LOG.debug("Finished language servers initialization, file path '{}'", wsPath);
 
           LOG.debug("Calculating number of initialized servers and accumulating capabilities");
           if (serverCapabilitiesSet.isEmpty()) {
