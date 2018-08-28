@@ -222,9 +222,7 @@ run_ocp() {
         echo "[OCP] start OKD with '${ENABLE_COMPONENTS}'"
     fi
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" \
-                          --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}" \
-                          --host-config-dir=${OKD_DIR} \
-                          "${ENABLE_COMPONENTS}"
+                          --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
     wait_for_automation_service_broker
 }
