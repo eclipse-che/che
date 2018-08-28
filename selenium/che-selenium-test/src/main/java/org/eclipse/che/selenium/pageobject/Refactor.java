@@ -68,7 +68,7 @@ public class Refactor {
   private final WebDriverWait redrawUiElementWait;
   private final WebDriverWait loadPageWait;
   private final WebDriverWait elementWait;
-  private NotificationsPopupPanel notifications;
+  private final NotificationsPopupPanel notifications;
 
   @Inject
   public Refactor(
