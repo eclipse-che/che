@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -44,6 +45,7 @@ import org.testng.annotations.Test;
  */
 public class OpenOnGitHubTest {
   private static final String PROJECT_NAME = generate("project", 4);
+  private static final String PROJECT_WITHOUT_GIT_FOLDER = "projectWithoutGitCVS";
   private static final String PATH_TO_EXPAND = "/src/main/java/che/eclipse/sample";
   private String mainBrowserTabHandle;
 
@@ -94,6 +96,9 @@ public class OpenOnGitHubTest {
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
     Path entryPath =
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
+    testProjectServiceClient.importProject(
+        workspace.getId(), entryPath, PROJECT_WITHOUT_GIT_FOLDER, ProjectTemplates.MAVEN_SPRING);
+
     testRepo.addContent(entryPath);
     ide.open(workspace);
     mainBrowserTabHandle = seleniumWebDriver.getWindowHandle();
@@ -104,7 +109,9 @@ public class OpenOnGitHubTest {
 
   @AfterMethod
   public void returnToMainWindow() {
-    seleniumWebDriverHelper.closeCurrentWinAndReturnToMainTab(mainBrowserTabHandle);
+    if (seleniumWebDriver.getWindowHandles().size() > 1) {
+      seleniumWebDriverHelper.closeCurrentWinAndReturnToMainTab(mainBrowserTabHandle);
+    }
   }
 
   @Test
@@ -139,5 +146,15 @@ public class OpenOnGitHubTest {
     Assert.assertEquals(
         seleniumWebDriver.getCurrentUrl(),
         testRepo.getHtmlUrl() + "/blob/master" + PATH_TO_EXPAND + "/Aclass.java#L14-L16");
+  }
+
+  @Test
+  public void checkProjectWithoutGitFolder() {
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_WITHOUT_GIT_FOLDER);
+    projectExplorer.waitItemOnContexMenuIsNotVisible(
+        TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
+    // for closing context menu
+    projectExplorer.clickOnItemInContextMenu(
+        TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.COPY);
   }
 }
