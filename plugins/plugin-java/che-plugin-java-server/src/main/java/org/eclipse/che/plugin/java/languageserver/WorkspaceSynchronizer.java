@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Monitors projects activity and updates jdt.ls workspace.
+ * Asynchronously updates jdt.ls workspace.
  *
  * @author Anatolii Bazko
  */
@@ -57,7 +57,7 @@ public class WorkspaceSynchronizer {
           switch (jobResult.getSeverity()) {
             case ERROR:
               LOG.error(
-                  "Workspace updated. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
+                  "Failed to update workspace. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
                   jobResult.getResultCode(),
                   jobResult.getMessage(),
                   updateWorkspaceParameters.getAddedProjectsUri().toString(),
@@ -66,13 +66,17 @@ public class WorkspaceSynchronizer {
             case WARNING:
             case CANCEL:
               LOG.warn(
-                  "Workspace updated. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
+                  "Failed to update workspace. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
                   jobResult.getResultCode(),
                   jobResult.getMessage(),
                   updateWorkspaceParameters.getAddedProjectsUri().toString(),
                   updateWorkspaceParameters.getRemovedProjectsUri().toString());
               break;
             default:
+              updateWorkspaceParameters
+                  .getAddedProjectsUri()
+                  .forEach(projectsSynchronizer::synchronize);
+
               LOG.info(
                   "Workspace updated. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
                   jobResult.getResultCode(),
@@ -81,10 +85,6 @@ public class WorkspaceSynchronizer {
                   updateWorkspaceParameters.getRemovedProjectsUri().toString());
               break;
           }
-
-          updateWorkspaceParameters
-              .getAddedProjectsUri()
-              .forEach(projectsSynchronizer::synchronize);
         });
   }
 }

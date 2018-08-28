@@ -63,7 +63,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   private static final String PROJECT_URL = "https://github.com/spring-guides/gs-rest-service";
   private static final String KEEPED_DIR = "complete";
   private static final String[] autocompleteContentAfterFirst = {
-    "GreetingController()", "Greeting", "GreetingController", "Greeting() : void"
+    "GreetingController", "GreetingControllerTest", "Greeting"
   };
   private static final String FACTORY_NAME = NameGenerator.generate("keepFactory", 2);
 
@@ -110,6 +110,8 @@ public class CreateFactoryFromUiWithKeepDirTest {
     projectExplorer.waitProjectExplorer();
     makeKeepDirectoryFromGitUrl(PROJECT_URL, PROJECT_NAME, KEEPED_DIR);
     setUpModuleForFactory();
+    consoles.clickOnProcessesButton();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     checkAutocompletion();
     checkOpenDeclaration();
   }
