@@ -28,7 +28,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 /**
  * PHPUnit tests running engine.
@@ -51,7 +50,7 @@ public class PHPUnitTestEngine {
   public ProcessHandler executeTests(TestExecutionContext context) throws IOException {
     String projectPath = context.getProjectPath();
     String testTargetRelativePath = context.getFilePath();
-    String projectAbsolutePath = ResourcesPlugin.getPathToWorkspace() + projectPath;
+    String projectAbsolutePath = projectsRoot.resolve(projectPath).toString();
     File testTargetFile = getTestTargetFile(testTargetRelativePath, projectAbsolutePath);
     File testTargetWorkingDirectory =
         testTargetFile.isDirectory() ? testTargetFile : testTargetFile.getParentFile();
