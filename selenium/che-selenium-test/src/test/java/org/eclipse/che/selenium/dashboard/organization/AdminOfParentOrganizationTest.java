@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Test(groups = {TestGroup.MULTIUSER})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class AdminOfParentOrganizationTest {
   private int initialOrgCount;
   private TestOrganizationServiceClient userTestOrganizationServiceClient;

@@ -34,7 +34,8 @@ export class StackSelectorItem implements ng.IDirective {
       stackIconLink: '=',
       stackMachines: '=',
       stackIdSelected: '=',
-      stackOnClick: '&'
+      stackOnClick: '&',
+      isPinned: '&'
     };
   }
 }

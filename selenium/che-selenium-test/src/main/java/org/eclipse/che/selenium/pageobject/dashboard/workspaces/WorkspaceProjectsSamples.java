@@ -65,6 +65,7 @@ public class WorkspaceProjectsSamples {
       this.buttonId = buttonId;
     }
 
+    @Override
     public String get() {
       return this.buttonId;
     }
@@ -80,6 +81,7 @@ public class WorkspaceProjectsSamples {
       this.buttonId = buttonId;
     }
 
+    @Override
     public String get() {
       return this.buttonId;
     }

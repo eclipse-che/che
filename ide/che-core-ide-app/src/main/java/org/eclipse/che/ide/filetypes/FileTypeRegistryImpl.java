@@ -11,38 +11,52 @@
  */
 package org.eclipse.che.ide.filetypes;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
-import com.google.common.base.Strings;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /**
- * Implementation of {@link org.eclipse.che.ide.api.filetypes.FileTypeRegistry}
+ * Implementation of {@link FileTypeRegistry}
  *
  * @author Artem Zatsarynnyi
  */
 @Singleton
 public class FileTypeRegistryImpl implements FileTypeRegistry {
   private final FileType unknownFileType;
-  private final List<FileType> fileTypes;
+  private final Set<FileType> fileTypes = new HashSet<>();
 
   @Inject
   public FileTypeRegistryImpl(@Named("defaultFileType") FileType unknownFileType) {
     this.unknownFileType = unknownFileType;
-    fileTypes = new ArrayList<>();
   }
 
   @Override
-  public void registerFileType(FileType fileType) {
-    fileTypes.add(fileType);
+  public void registerFileType(FileType candidate) {
+    if (candidate == null) {
+      throw new IllegalArgumentException("Can not register Illegal File Type");
+    }
+
+    String extension = candidate.getExtension();
+    FileType duplicate = getFileTypeByExtension(extension);
+    if (duplicate != unknownFileType && duplicate != candidate) {
+      throw new IllegalStateException(
+          "File Type with extension " + extension + " is already registered");
+    }
+
+    fileTypes.add(candidate);
   }
 
   @Override
@@ -51,40 +65,87 @@ public class FileTypeRegistryImpl implements FileTypeRegistry {
   }
 
   @Override
+  public Set<FileType> getFileTypes() {
+    return new HashSet<>(fileTypes);
+  }
+
+  @Override
   public FileType getFileTypeByFile(VirtualFile file) {
-    FileType fileType = getFileTypeByFileName(file.getName());
+    String fileName = file.getName();
+    String fileExtension = getFileExtension(fileName);
+
+    FileType fileType = getFileTypeByFileName(fileName);
     if (fileType == unknownFileType) {
-      fileType = getFileTypeByExtension(getFileExtension(file.getName()));
+      fileType = getFileTypeByExtension(fileExtension);
     }
     return fileType != null ? fileType : unknownFileType;
   }
 
   @Override
   public FileType getFileTypeByExtension(String extension) {
-    if (!Strings.isNullOrEmpty(extension)) {
-      for (FileType type : fileTypes) {
-        if (type.getExtension() != null && type.getExtension().equals(extension)) {
-          return type;
-        }
-      }
+    if (isNullOrEmpty(extension)) {
+      return unknownFileType;
     }
 
-    return unknownFileType;
+    Set<FileType> typesByExtension =
+        fileTypes.stream().filter(type -> extension.equals(type.getExtension())).collect(toSet());
+    if (typesByExtension.isEmpty()) {
+      return unknownFileType;
+    }
+
+    String nameToTest = '.' + extension;
+    Optional<FileType> fileType =
+        typesByExtension
+            .stream()
+            .filter(type -> doesFileNameMatchType(nameToTest, type))
+            .findFirst();
+    if (fileType.isPresent()) {
+      return fileType.get();
+    }
+
+    fileType =
+        typesByExtension.stream().filter(type -> type.getNamePatterns().isEmpty()).findFirst();
+    return fileType.orElseGet(() -> typesByExtension.iterator().next());
   }
 
   @Override
   public FileType getFileTypeByFileName(String name) {
-    if (!Strings.isNullOrEmpty(name)) {
-      for (FileType type : fileTypes) {
-        if (type.getNamePattern() != null) {
-          RegExp regExp = RegExp.compile(type.getNamePattern());
-          if (regExp.test(name)) {
-            return type;
-          }
-        }
-      }
+    if (isNullOrEmpty(name)) {
+      return unknownFileType;
     }
 
-    return unknownFileType;
+    Set<FileType> typesByNamePattern =
+        fileTypes.stream().filter(type -> doesFileNameMatchType(name, type)).collect(toSet());
+
+    if (typesByNamePattern.isEmpty()) {
+      return unknownFileType;
+    }
+
+    if (typesByNamePattern.size() == 1) {
+      return typesByNamePattern.iterator().next();
+    }
+
+    String fileExtension = getFileExtension(name);
+    if (isNullOrEmpty(fileExtension)) {
+      return typesByNamePattern.iterator().next();
+    }
+
+    Optional<FileType> fileType =
+        typesByNamePattern
+            .stream()
+            .filter(type -> fileExtension.equals(type.getExtension()))
+            .findFirst();
+    return fileType.orElseGet(() -> typesByNamePattern.iterator().next());
+  }
+
+  private boolean doesFileNameMatchType(String nameToTest, FileType fileType) {
+    return fileType
+        .getNamePatterns()
+        .stream()
+        .anyMatch(
+            namePattern -> {
+              RegExp regExp = RegExp.compile(namePattern);
+              return regExp.test(nameToTest);
+            });
   }
 }

@@ -41,6 +41,16 @@ public class SourceStorageParametersValidator implements FactoryParameterValidat
                     entry.getValue()));
           }
           break;
+        case "skipFirstLevel":
+          final String skipFirstLevel = entry.getValue();
+          if (!"true".equals(skipFirstLevel) && !"false".equals(skipFirstLevel)) {
+            throw new ConflictException(
+                format(
+                    PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE,
+                    "project.source.parameters.skipFirstLevel",
+                    entry.getValue()));
+          }
+          break;
         case "branch":
         case "startPoint":
         case "commitId":

@@ -35,6 +35,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
   private List<CommandImpl> commands;
   private List<ProjectConfigImpl> projects;
   private Map<String, EnvironmentImpl> environments;
+  private Map<String, String> attributes;
 
   public WorkspaceConfigImpl(
       String name,
@@ -42,7 +43,8 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
       String defaultEnv,
       List<? extends Command> commands,
       List<? extends ProjectConfig> projects,
-      Map<String, ? extends Environment> environments) {
+      Map<String, ? extends Environment> environments,
+      Map<String, String> attributes) {
     this.name = name;
     this.defaultEnv = defaultEnv;
     this.description = description;
@@ -59,6 +61,9 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     if (projects != null) {
       this.projects = projects.stream().map(ProjectConfigImpl::new).collect(toList());
     }
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    }
   }
 
   public WorkspaceConfigImpl(WorkspaceConfig workspaceConfig) {
@@ -68,7 +73,8 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         workspaceConfig.getDefaultEnv(),
         workspaceConfig.getCommands(),
         workspaceConfig.getProjects(),
-        workspaceConfig.getEnvironments());
+        workspaceConfig.getEnvironments(),
+        workspaceConfig.getAttributes());
   }
 
   @Override
@@ -112,6 +118,14 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
   }
 
   @Override
+  public Map<String, String> getAttributes() {
+    if (attributes == null) {
+      return new HashMap<>();
+    }
+    return attributes;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -125,7 +139,8 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         && Objects.equals(defaultEnv, that.defaultEnv)
         && getCommands().equals(that.getCommands())
         && getProjects().equals(that.getProjects())
-        && getEnvironments().equals(that.getEnvironments());
+        && getEnvironments().equals(that.getEnvironments())
+        && getAttributes().equals(that.getAttributes());
   }
 
   @Override
@@ -137,6 +152,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     hash = 31 * hash + getCommands().hashCode();
     hash = 31 * hash + getProjects().hashCode();
     hash = 31 * hash + getEnvironments().hashCode();
+    hash = 31 * hash + getAttributes().hashCode();
     return hash;
   }
 
@@ -158,6 +174,8 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         + projects
         + ", environments="
         + environments
+        + ", attributes="
+        + attributes
         + '}';
   }
 }

@@ -18,32 +18,6 @@
        thread-count="4">
 
     <test name="all">
-        <method-selectors>
-            <method-selector>
-                <script language="beanshell">
-                    <![CDATA[
-    boolean isTestGroupsAgreedWithRequestedGroups() {
-      excludedGroupsVal = System.getProperty("excludedGroups");
-      if (excludedGroupsVal == null || excludedGroupsVal.isEmpty() || groups.isEmpty()) {
-        return true;
-      }
-
-      excludedGroups = excludedGroupsVal.split(",");
-      for (String group: groups.keySet()) {
-        if (Arrays.asList(excludedGroups).contains(group)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    isTestGroupsAgreedWithRequestedGroups();
-]]>
-                </script>
-            </method-selector>
-        </method-selectors>
-
       <classes>
           <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest"/>
           <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
@@ -70,7 +44,6 @@
           <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsMachinesRamTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsMachineActionsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.AddOrImportProjectFormTest"/>

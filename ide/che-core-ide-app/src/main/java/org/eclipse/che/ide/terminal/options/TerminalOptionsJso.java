@@ -9,31 +9,36 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.terminal;
+package org.eclipse.che.ide.terminal.options;
 
 import org.eclipse.che.ide.collections.Jso;
 
-/** @author Evgen Vidolob */
+/**
+ * Options to configure xterm.js.
+ *
+ * @author Evgen Vidolob
+ * @author Oleksandr Andriienko
+ */
 public class TerminalOptionsJso extends Jso {
   protected TerminalOptionsJso() {}
 
-  public static native TerminalOptionsJso createDefault() /*-{
+  public static native TerminalOptionsJso create() /*-{
         return {
             cols: 80,
             rows: 24,
             screenKeys: true,
-            focusOnOpen: true,
-            command: ""
+            command: "",
+            fontSize: 12,
+            fontFamily: "DejaVu Sans Mono"
         }
     }-*/;
 
-  /**
-   * @param focusOnOpen set true it need to set focus on just opened terminal
-   * @return
-   */
-  public final native TerminalOptionsJso withFocusOnOpen(boolean focusOnOpen) /*-{
-        this.focusOnOpen = focusOnOpen;
-        return this;
+  public final native TerminalThemeJso getTheme() /*-{
+      return this.theme;
+    }-*/;
+
+  public final native void setTheme(TerminalThemeJso theme) /*-{
+        this.theme = theme;
     }-*/;
 
   /**

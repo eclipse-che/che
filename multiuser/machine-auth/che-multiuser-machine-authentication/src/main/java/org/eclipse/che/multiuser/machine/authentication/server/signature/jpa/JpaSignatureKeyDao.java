@@ -11,20 +11,23 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server.signature.jpa;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 
 import com.google.inject.persist.Transactional;
-import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
@@ -52,7 +55,7 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
       doCreate(keyPair);
     } catch (DuplicateKeyException dkEx) {
       throw new ConflictException(
-          format("Signature key pair with id '%s' already exists", keyPair.getId()));
+          format("Signature key pair for workspace '%s' already exists", keyPair.getWorkspaceId()));
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getMessage(), ex);
     }
@@ -67,20 +70,20 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
   }
 
   @Override
-  public void remove(String id) throws ServerException {
-    requireNonNull(id, "Required non-null key pair");
+  public void remove(String workspaceId) throws ServerException {
+    requireNonNull(workspaceId, "Required non-null workspace Id");
     try {
-      doRemove(id);
+      doRemove(workspaceId);
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getMessage(), ex);
     }
   }
 
   @Transactional
-  protected void doRemove(String id) {
-    final SignatureKeyPairImpl keyPair = managerProvider.get().find(SignatureKeyPairImpl.class, id);
+  protected void doRemove(String workspaceId) {
+    final EntityManager manager = managerProvider.get();
+    final SignatureKeyPairImpl keyPair = manager.find(SignatureKeyPairImpl.class, workspaceId);
     if (keyPair != null) {
-      final EntityManager manager = managerProvider.get();
       manager.remove(keyPair);
       manager.flush();
     }
@@ -88,27 +91,41 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
 
   @Override
   @Transactional
-  public Page<SignatureKeyPairImpl> getAll(int maxItems, long skipCount) throws ServerException {
-    checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
-    checkArgument(
-        skipCount >= 0,
-        "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
+  public SignatureKeyPairImpl get(String workspaceId) throws NotFoundException, ServerException {
+    final EntityManager manager = managerProvider.get();
     try {
-      final EntityManager manager = managerProvider.get();
-      final List<SignatureKeyPairImpl> list =
+      return new SignatureKeyPairImpl(
           manager
               .createNamedQuery("SignKeyPair.getAll", SignatureKeyPairImpl.class)
-              .setMaxResults(maxItems)
-              .setFirstResult((int) skipCount)
-              .getResultList()
-              .stream()
-              .map(SignatureKeyPairImpl::new)
-              .collect(toList());
-      final long count =
-          manager.createNamedQuery("SignKeyPair.getAllCount", Long.class).getSingleResult();
-      return new Page<>(list, skipCount, maxItems, count);
+              .setParameter("workspaceId", workspaceId)
+              .getSingleResult());
+    } catch (NoResultException x) {
+      throw new NotFoundException(
+          format("Signature key pair for workspace '%s' doesn't exist", workspaceId));
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getMessage(), ex);
+    }
+  }
+
+  @Singleton
+  public static class RemoveKeyPairsBeforeWorkspaceRemovedEventSubscriber
+      extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
+    @Inject private EventService eventService;
+    @Inject private SignatureKeyDao signatureKeyDao;
+
+    @PostConstruct
+    public void subscribe() {
+      eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
+    }
+
+    @PreDestroy
+    public void unsubscribe() {
+      eventService.unsubscribe(this, BeforeWorkspaceRemovedEvent.class);
+    }
+
+    @Override
+    public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+      signatureKeyDao.remove(event.getWorkspace().getId());
     }
   }
 }

@@ -23,20 +23,26 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyPair;
 
 /** @author Anton Korneta */
 @Entity(name = "SignKeyPair")
 @Table(name = "che_sign_key_pair")
 @NamedQueries({
-  @NamedQuery(name = "SignKeyPair.getAll", query = "SELECT kp FROM SignKeyPair kp"),
-  @NamedQuery(name = "SignKeyPair.getAllCount", query = "SELECT COUNT(kp) FROM SignKeyPair kp")
+  @NamedQuery(
+      name = "SignKeyPair.getAll",
+      query = "SELECT kp FROM SignKeyPair kp WHERE kp.workspaceId = :workspaceId"),
 })
 public class SignatureKeyPairImpl implements SignatureKeyPair {
 
   @Id
-  @Column(name = "id")
-  private String id;
+  @Column(name = "workspace_id")
+  private String workspaceId;
+
+  @OneToOne
+  @JoinColumn(name = "workspace_id", insertable = false, updatable = false)
+  private WorkspaceImpl workspace;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "public_key")
@@ -49,26 +55,27 @@ public class SignatureKeyPairImpl implements SignatureKeyPair {
   public SignatureKeyPairImpl() {}
 
   public SignatureKeyPairImpl(SignatureKeyPairImpl keyPair) {
-    this(keyPair.getId(), keyPair.getPublicKey(), keyPair.getPrivateKey());
+    this(keyPair.getWorkspaceId(), keyPair.getPublicKey(), keyPair.getPrivateKey());
   }
 
-  public SignatureKeyPairImpl(String id, PublicKey publicKey, PrivateKey privateKey) {
-    this(id, new SignatureKeyImpl(publicKey), new SignatureKeyImpl(privateKey));
+  public SignatureKeyPairImpl(String workspaceId, PublicKey publicKey, PrivateKey privateKey) {
+    this(workspaceId, new SignatureKeyImpl(publicKey), new SignatureKeyImpl(privateKey));
   }
 
-  public SignatureKeyPairImpl(String id, SignatureKeyImpl publicKey, SignatureKeyImpl privateKey) {
-    this.id = id;
+  public SignatureKeyPairImpl(
+      String workspaceId, SignatureKeyImpl publicKey, SignatureKeyImpl privateKey) {
+    this.workspaceId = workspaceId;
     this.publicKey = publicKey;
     this.privateKey = privateKey;
   }
 
   @Override
-  public String getId() {
-    return id;
+  public String getWorkspaceId() {
+    return workspaceId;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setWorkspaceId(String workspaceId) {
+    this.workspaceId = workspaceId;
   }
 
   @Override
@@ -98,7 +105,7 @@ public class SignatureKeyPairImpl implements SignatureKeyPair {
       return false;
     }
     final SignatureKeyPairImpl that = (SignatureKeyPairImpl) obj;
-    return Objects.equals(id, that.id)
+    return Objects.equals(workspaceId, that.workspaceId)
         && Objects.equals(publicKey, that.publicKey)
         && Objects.equals(privateKey, that.privateKey);
   }
@@ -106,7 +113,7 @@ public class SignatureKeyPairImpl implements SignatureKeyPair {
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 31 * hash + Objects.hashCode(id);
+    hash = 31 * hash + Objects.hashCode(workspaceId);
     hash = 31 * hash + Objects.hashCode(publicKey);
     hash = 31 * hash + Objects.hashCode(privateKey);
     return hash;
@@ -115,8 +122,8 @@ public class SignatureKeyPairImpl implements SignatureKeyPair {
   @Override
   public String toString() {
     return "SignatureKeyPairImpl{"
-        + "id='"
-        + id
+        + "workspaceId='"
+        + workspaceId
         + '\''
         + ", publicKey="
         + publicKey

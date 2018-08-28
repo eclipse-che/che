@@ -28,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.eclipse.che.selenium.refactor.Services;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
@@ -47,7 +46,6 @@ public class TestFailTest {
 
   private String renameItem = "B.java";
   private String pathToCurrentPackage;
-  private Services services;
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -63,8 +61,6 @@ public class TestFailTest {
 
   @BeforeClass
   public void setup() throws Exception {
-    services = new Services(projectExplorer, notificationsPopupPanel, refactor);
-
     URL resource = TestFailTest.this.getClass().getResource("/projects/RenameType");
     testProjectServiceClient.importProject(
         workspace.getId(),
@@ -105,7 +101,7 @@ public class TestFailTest {
     loader.waitOnClosed();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
-    services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
+    refactor.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
     doRefactorWithWidget(renameItem);
     refactorPanel.waitTextInErrorMessage("Compilation unit 'B.java' already exists");
     refactorPanel.clickCancelButtonRefactorForm();
@@ -115,7 +111,7 @@ public class TestFailTest {
   public void testFail35() {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
-    services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
+    refactor.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
     doRefactorWithWidget(renameItem);
     askDialog.waitFormToOpen();
     askDialog.acceptDialogWithText(
@@ -127,7 +123,7 @@ public class TestFailTest {
   public void testFail80() {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
-    services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
+    refactor.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
     doRefactorWithWidget(renameItem);
     askDialog.waitFormToOpen();
     askDialog.acceptDialogWithText(

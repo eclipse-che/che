@@ -140,9 +140,9 @@ public class CreateWorkspaceFromJavaCentosStackTest {
         WEB_JAVA_SPRING_PROJECT,
         STOP_TOMCAT_COMMAND_ITEM.getItem(WEB_JAVA_SPRING_PROJECT));
     consoles.selectProcessInProcessConsoleTreeByName("Terminal");
-    terminal.typeIntoTerminal("ps ax");
-    terminal.typeIntoTerminal(ENTER.toString());
-    terminal.waitExpectedTextNotPresentTerminal(tomcatIsRunning);
+    terminal.typeIntoActiveTerminal("ps ax");
+    terminal.typeIntoActiveTerminal(ENTER.toString());
+    terminal.waitNoTextInFirstTerminal(tomcatIsRunning);
 
     consoles.executeCommandFromProjectExplorer(
         WEB_JAVA_SPRING_PROJECT,

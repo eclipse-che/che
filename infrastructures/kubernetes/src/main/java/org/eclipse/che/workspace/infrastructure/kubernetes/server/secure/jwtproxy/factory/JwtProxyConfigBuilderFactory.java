@@ -9,7 +9,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory;
+
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyConfigBuilder;
 
 public interface JwtProxyConfigBuilderFactory {
   JwtProxyConfigBuilder create(String workspaceId);

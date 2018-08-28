@@ -87,34 +87,34 @@ public class TerminalTypingTest {
   public void setUp() throws Exception {
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
   }
 
   @Test
   public void checkTerminalTypingCharsWithoutShift() {
     loader.waitOnClosed();
-    terminal.selectTerminalTab();
+    terminal.selectFirstTerminalTab();
     terminal.waitTerminalConsole();
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
 
     for (Pair<String, String> pair : keyPairs) {
-      terminal.typeIntoTerminal(pair.first());
-      terminal.waitExpectedTextIntoTerminal("$ " + pair.first());
-      terminal.typeIntoTerminal(Keys.BACK_SPACE.toString());
+      terminal.typeIntoActiveTerminal(pair.first());
+      terminal.waitTextInFirstTerminal(pair.first());
+      terminal.typeIntoActiveTerminal(Keys.BACK_SPACE.toString());
     }
   }
 
   @Test
   public void checkTerminalTypingWithShift() {
     loader.waitOnClosed();
-    terminal.selectTerminalTab();
+    terminal.selectFirstTerminalTab();
     terminal.waitTerminalConsole();
-    terminal.waitTerminalIsNotEmpty();
+    terminal.waitFirstTerminalIsNotEmpty();
 
     for (Pair<String, String> pair : keyPairs) {
-      terminal.typeIntoTerminal(Keys.SHIFT + pair.first());
-      terminal.waitExpectedTextIntoTerminal("$ " + pair.second());
-      terminal.typeIntoTerminal(Keys.BACK_SPACE.toString());
+      terminal.typeIntoActiveTerminal(Keys.SHIFT + pair.first());
+      terminal.waitTextInFirstTerminal(pair.second());
+      terminal.typeIntoActiveTerminal(Keys.BACK_SPACE.toString());
     }
   }
 }

@@ -13,7 +13,7 @@ package org.eclipse.che.multiuser.machine.authentication.server.signature.spi;
 
 import com.google.common.annotations.Beta;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
 
@@ -36,21 +36,19 @@ public interface SignatureKeyDao {
       throws ConflictException, ServerException;
 
   /**
-   * Removes signature key pair with given id.
+   * Removes signature key pair with given workspace id.
    *
-   * @param id signature key identifier
+   * @param workspaceId workspace identifier to remove keypair from
    * @throws ServerException when any errors occur while removing signature key pair
    */
-  void remove(String id) throws ServerException;
+  void remove(String workspaceId) throws ServerException;
 
   /**
-   * Returns all the signature key pairs.
+   * Returns signature key pair for given workspace id.
    *
-   * @param skipCount the number of signature key pairs to skip
-   * @param maxItems the maximum number of signature key pairs to return
-   * @return list of signature key pairs or an empty list when no keys were found
-   * @throws ServerException when any errors occur while fetching the key pairs
-   * @throws IllegalArgumentException when {@code maxItems} or {@code skipCount} is negative
+   * @param workspaceId identifier of workspace which key pair belongs to
+   * @return signature key pair for the given workspace
+   * @throws NotFoundException when any errors occur while fetching the key pairs
    */
-  Page<SignatureKeyPairImpl> getAll(int maxItems, long skipCount) throws ServerException;
+  SignatureKeyPairImpl get(String workspaceId) throws NotFoundException, ServerException;
 }

@@ -78,7 +78,7 @@ public class KeyBindingsTest {
     navigateToFile.waitFormToOpen();
     navigateToFile.closeNavigateToFileForm();
     keyBindings.enterKeyCombination(Keys.ALT, Keys.F12);
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
     WaitUtils.sleepQuietly(1);
     consoles.closeTerminalIntoConsoles();
     consoles.closeProcessesArea();

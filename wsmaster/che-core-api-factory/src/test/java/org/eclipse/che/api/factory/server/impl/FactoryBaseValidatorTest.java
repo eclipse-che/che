@@ -104,7 +104,7 @@ public class FactoryBaseValidatorTest {
       expectedExceptionsMessageRegExp =
           "The parameter project.source.location has a value submitted http://codenvy.com/git/04%2 with a value that is "
               + "unexpected. "
-              + "For more information, please visit http://docs.codenvy.com/user/project-lifecycle/#configuration-reference")
+              + "For more information, please visit https://www.eclipse.org/che/docs/workspace-data-model.html#projects")
   public void shouldNotValidateIfStorageLocationContainIncorrectEncodedSymbol()
       throws ApiException {
     // given

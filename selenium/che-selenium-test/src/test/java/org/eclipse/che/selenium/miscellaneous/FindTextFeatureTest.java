@@ -129,8 +129,8 @@ public class FindTextFeatureTest {
     consoles.clickOnProcessesButton();
 
     // Create a file from terminal
-    terminal.waitTerminalTab();
-    terminal.selectTerminalTab();
+    terminal.waitFirstTerminalTab();
+    terminal.selectFirstTerminalTab();
     createFileInTerminal(fileNameCreatedFromTerminal);
     WaitUtils.sleepQuietly(LOAD_PAGE_TIMEOUT_SEC);
 
@@ -473,10 +473,10 @@ public class FindTextFeatureTest {
   }
 
   private void createFileInTerminal(String fileName) {
-    terminal.typeIntoTerminal("cd " + PROJECT_NAME + ENTER);
-    terminal.typeIntoTerminal("df > " + fileName + ENTER);
-    terminal.typeIntoTerminal("cat " + fileName + ENTER);
-    terminal.typeIntoTerminal("ls" + ENTER);
-    terminal.waitExpectedTextIntoTerminal(fileName);
+    terminal.typeIntoActiveTerminal("cd " + PROJECT_NAME + ENTER);
+    terminal.typeIntoActiveTerminal("df > " + fileName + ENTER);
+    terminal.typeIntoActiveTerminal("cat " + fileName + ENTER);
+    terminal.typeIntoActiveTerminal("ls" + ENTER);
+    terminal.waitTextInFirstTerminal(fileName);
   }
 }
