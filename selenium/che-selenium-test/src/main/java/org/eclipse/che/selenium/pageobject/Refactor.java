@@ -69,16 +69,21 @@ public class Refactor {
   private final WebDriverWait loadPageWait;
   private final WebDriverWait elementWait;
   private final ProjectExplorer projectExplorer;
+  private final NotificationsPopupPanel notifications;
 
   @Inject
   public Refactor(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ProjectExplorer projectExplorer) {
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ProjectExplorer projectExplorer,
+      NotificationsPopupPanel notifications) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.redrawUiElementWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     this.elementWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
     this.projectExplorer = projectExplorer;
+    this.notifications = notifications;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -277,6 +282,7 @@ public class Refactor {
   /** wait the 'Move item' form is closed */
   public void waitMoveItemFormIsClosed() {
     elementWait.until(invisibilityOfElementLocated(By.xpath(Locators.MOVE_ITEM_FORM)));
+    notifications.waitPopupPanelsAreClosed();
   }
 
   /**
