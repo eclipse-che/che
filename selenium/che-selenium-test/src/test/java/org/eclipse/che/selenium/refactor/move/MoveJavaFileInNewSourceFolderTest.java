@@ -26,6 +26,7 @@ import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuCons
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -57,6 +58,7 @@ public class MoveJavaFileInNewSourceFolderTest {
   @Inject private ToastLoader toastLoader;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -64,6 +66,7 @@ public class MoveJavaFileInNewSourceFolderTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
