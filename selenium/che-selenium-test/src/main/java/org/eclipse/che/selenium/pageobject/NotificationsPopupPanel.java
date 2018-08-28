@@ -74,8 +74,8 @@ public class NotificationsPopupPanel {
    *
    * @param message expected text
    */
-  public void waitExpectedMessageOnProgressPanelAndClosed(final String message) {
-    waitExpectedMessageOnProgressPanelAndClosed(message, ELEMENT_TIMEOUT_SEC);
+  public void waitExpectedMessageOnProgressPanelAndClose(final String message) {
+    waitExpectedMessageOnProgressPanelAndClose(message, ELEMENT_TIMEOUT_SEC);
   }
 
   /**
@@ -84,8 +84,12 @@ public class NotificationsPopupPanel {
    * @param message expected text
    * @param timeout timeout defined by user
    */
-  public void waitExpectedMessageOnProgressPanelAndClosed(final String message, final int timeout) {
+  public void waitExpectedMessageOnProgressPanelAndClose(final String message, final int timeout) {
     seleniumWebDriverHelper.waitTextContains(progressPopupPanel, message, timeout);
+
+    // close popup panel
+    closePopupButton.click();
+
     waitProgressPopupPanelClose(timeout);
   }
 

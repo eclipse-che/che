@@ -119,7 +119,7 @@ public class JavaTestPluginTestNgTest {
 
     // then
     try {
-      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+      notifications.waitExpectedMessageOnProgressPanelAndClose(
           "Test runner executed successfully.");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
@@ -146,7 +146,7 @@ public class JavaTestPluginTestNgTest {
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
 
     try {
-      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+      notifications.waitExpectedMessageOnProgressPanelAndClose(
           "Test runner executed successfully.");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
@@ -185,7 +185,7 @@ public class JavaTestPluginTestNgTest {
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
 
     try {
-      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+      notifications.waitExpectedMessageOnProgressPanelAndClose(
           "Test runner executed successfully.");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved

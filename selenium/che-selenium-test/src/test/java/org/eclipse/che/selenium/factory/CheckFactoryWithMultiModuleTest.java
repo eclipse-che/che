@@ -79,7 +79,7 @@ public class CheckFactoryWithMultiModuleTest {
     projectExplorer.waitProjectExplorer();
 
     try {
-      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+      notifications.waitExpectedMessageOnProgressPanelAndClose(
           "Project " + PROJECT_NAME + " imported");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved

@@ -110,7 +110,7 @@ public class InnerClassAndLambdaDebuggingTest {
         String.format(
             "//*[@id=\"%1$s/%2$s\" or @id=\"topmenu/Run/Debug/Debug '%2$s'\"]",
             TestMenuCommandsConstants.Run.DEBUG, PROJECT));
-    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
     editor.waitActiveBreakpoint(42);
   }
 
