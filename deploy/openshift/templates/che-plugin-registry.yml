@@ -84,10 +84,13 @@ objects:
 parameters:
 - name: IMAGE
   value: eclipse/che-plugin-registry
+  displayName: Eclipse Che plugin registry image
+  description: Che plugin registry Docker image. Defaults to eclipse/che-plugin-registry
 - name: IMAGE_TAG
   value: latest
-- description: Maximum amount of memory the container can use.
+  displayName: Eclipse Che plugin registry version
+  description: Eclipse Che plugin registry version which defaults to latest
+- name: MEMORY_LIMIT
+  description: Maximum amount of memory the container can use. Defaults 256Mi
   displayName: Memory Limit
-  name: MEMORY_LIMIT
   value: 256Mi
-
