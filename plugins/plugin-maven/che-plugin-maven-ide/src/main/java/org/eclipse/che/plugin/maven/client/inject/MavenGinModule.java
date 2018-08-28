@@ -20,11 +20,9 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
-import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.MavenLanguageDescriptionProvider;
 import org.eclipse.che.plugin.maven.client.command.MavenCommandType;
 import org.eclipse.che.plugin.maven.client.preference.MavenPreferencePresenter;
-import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.resource.MavenProjectInterceptor;
 import org.eclipse.che.plugin.maven.client.resource.MavenSourceFolderInterceptor;
 import org.eclipse.che.plugin.maven.client.resource.PomInterceptor;
@@ -58,10 +56,6 @@ public class MavenGinModule extends AbstractGinModule {
     newSetBinder(binder(), ResourceInterceptor.class)
         .addBinding()
         .to(MavenProjectInterceptor.class);
-
-    newSetBinder(binder(), ResolvingProjectStateHolder.class)
-        .addBinding()
-        .to(ResolvingMavenProjectStateHolder.class);
 
     newSetBinder(binder(), LanguageDescription.class)
         .addBinding()
