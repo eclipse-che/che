@@ -412,8 +412,8 @@ public class Consoles {
     updateProjDriverWait.until(textToBePresentInElement(consoleContainer, expectedText));
   }
 
-  /** wait on staring jdt.ls */
-  public void waitUntilJdtLsStarted() {
+  /** wait on "Starting: 100% Starting Java Language Server" message appears in console */
+  public void waitJDTLSStartedMessage() {
     waitExpectedTextIntoConsole(JAVA_LANGUAGE_SERVER_STARTED);
   }
 
