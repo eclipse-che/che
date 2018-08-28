@@ -50,6 +50,8 @@ public interface MavenAttributes {
 
   String POM_XML = "pom.xml";
 
+  String UNKNOWN_VALUE = "unknown";
+
   /** Name of WebSocket chanel */
   String MAVEN_CHANEL_NAME = "maven:workspace";
 
