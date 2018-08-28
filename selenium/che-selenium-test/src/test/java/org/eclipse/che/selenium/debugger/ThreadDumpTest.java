@@ -99,15 +99,15 @@ public class ThreadDumpTest {
 
     String[] frames = debugPanel.getFrames();
     assertEquals(frames.length, 1);
-    assertTrue(frames[0].contains("main(String[]):20, multimodule.App"));
+    assertEquals("main(String[]):20, App", frames[0]);
 
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
     debugPanel.waitDebugHighlightedText("this.title = title;");
 
     frames = debugPanel.getFrames();
     assertEquals(frames.length, 2);
-    assertTrue(frames[0].contains("<init>(String, String):19, multimodule.model.BookImpl"));
-    assertTrue(frames[1].contains("main(String[]):20, multimodule.App"));
+    assertEquals("<init>(String, String):19, BookImpl", frames[0]);
+    assertEquals("main(String[]):20, App", frames[1]);
 
     editor.closeAllTabs();
 
