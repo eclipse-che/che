@@ -67,6 +67,7 @@ public class TestEnumerationsTest {
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
