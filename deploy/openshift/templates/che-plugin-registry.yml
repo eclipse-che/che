@@ -39,7 +39,7 @@ objects:
       spec:
         containers:
         - image: ${IMAGE}:${IMAGE_TAG}
-          imagePullPolicy: Always
+          imagePullPolicy: "${PULL_POLICY}"
           name: che-plugin-registry
           ports:
           - containerPort: 8080
@@ -91,6 +91,10 @@ parameters:
   displayName: Eclipse Che plugin registry version
   description: Eclipse Che plugin registry version which defaults to latest
 - name: MEMORY_LIMIT
-  description: Maximum amount of memory the container can use. Defaults 256Mi
-  displayName: Memory Limit
   value: 256Mi
+  displayName: Memory Limit
+  description: Maximum amount of memory the container can use. Defaults 256Mi
+- name: PULL_POLICY
+  value: Always
+  displayName: Eclipse Che plugin registry image pull policy
+  description: Always pull by default. Can be IfNotPresent
