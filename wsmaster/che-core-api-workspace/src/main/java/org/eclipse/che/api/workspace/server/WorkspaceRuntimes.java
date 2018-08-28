@@ -25,6 +25,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_RUNTIMES_ID_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -312,7 +313,7 @@ public class WorkspaceRuntimes {
     final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
     try {
       InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getAttributes());
+          createInternalEnvironment(environment, workspace.getConfig().getAttributes());
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
 
@@ -449,7 +450,7 @@ public class WorkspaceRuntimes {
         workspace.getConfig().getName(),
         workspace.getId(),
         stoppedBy);
-    publishWorkspaceStatusEvent(workspaceId, STOPPING, status, null);
+    publishWorkspaceStatusEvent(workspaceId, STOPPING, status, options.get(WORKSPACE_STOP_REASON));
     return CompletableFuture.runAsync(
         ThreadLocalPropagateContext.wrap(new StopRuntimeTask(workspace, options, stoppedBy)),
         sharedPool.getExecutor());
@@ -587,7 +588,7 @@ public class WorkspaceRuntimes {
     InternalRuntime runtime;
     try {
       InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getAttributes());
+          createInternalEnvironment(environment, workspace.getConfig().getAttributes());
       runtime = infra.prepare(identity, internalEnv).getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
@@ -741,7 +742,7 @@ public class WorkspaceRuntimes {
   }
 
   private InternalEnvironment createInternalEnvironment(
-      Environment environment, Map<String, String> workspaceAttributes)
+      Environment environment, Map<String, String> workspaceConfigAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType = environment.getRecipe().getType();
     InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
@@ -751,7 +752,7 @@ public class WorkspaceRuntimes {
     }
     InternalEnvironment internalEnvironment = factory.create(environment);
 
-    applyWorkspaceNext(internalEnvironment, workspaceAttributes, recipeType);
+    applyWorkspaceNext(internalEnvironment, workspaceConfigAttributes, recipeType);
 
     return internalEnvironment;
   }

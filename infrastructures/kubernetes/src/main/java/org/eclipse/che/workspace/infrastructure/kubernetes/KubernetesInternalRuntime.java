@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
@@ -750,7 +751,16 @@ public class KubernetesInternalRuntime<
     /** Returns true if event belongs to one of the workspace pods, false otherwise */
     private boolean isWorkspaceEvent(PodEvent event) {
       String podName = event.getPodName();
-      return workspacePods.containsKey(podName);
+      if (Strings.isNullOrEmpty(podName)) {
+        return false;
+      }
+      // Note it is necessary to compare via startsWith rather than equals here, as pods managed by
+      // deployments have their name set as [deploymentName]-[hash]. `workspacePodName` is used to
+      // define the deployment name, so pods that are created aren't an exact match.
+      return workspacePods
+          .keySet()
+          .stream()
+          .anyMatch(workspacePodName -> podName.startsWith(workspacePodName));
     }
 
     /**

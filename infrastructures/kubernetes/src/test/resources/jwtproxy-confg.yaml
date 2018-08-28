@@ -6,7 +6,7 @@ jwtproxy:
   - listen_addr: ":8080"
     verifier:
       audience: "workspace123"
-      auth_redirect_url: "http://che-host.com/app/loader.html"
+      auth_cookies_enabled: false
       claims_verifiers:
       - options:
           iss: "wsmaster"
@@ -25,6 +25,7 @@ jwtproxy:
   - listen_addr: ":4101"
     verifier:
       audience: "workspace123"
+      auth_cookies_enabled: true
       auth_redirect_url: "http://che-host.com/app/loader.html"
       claims_verifiers:
       - options:

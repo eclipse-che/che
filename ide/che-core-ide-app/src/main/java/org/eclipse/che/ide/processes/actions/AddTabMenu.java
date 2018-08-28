@@ -36,7 +36,7 @@ import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.processes.DisplayMachineOutputEvent;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 
 /**
  * Menu for adding new tab in processes panel.
@@ -128,7 +128,7 @@ public class AddTabMenu extends ContextMenu {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      processesPanelPresenter.onAddTerminal(machineName, TerminalOptionsJso.createDefault());
+      processesPanelPresenter.onAddTerminal(machineName, TerminalOptionsJso.create(), true);
     }
   }
 

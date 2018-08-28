@@ -669,7 +669,8 @@ public class EditorAgentImpl
     }
     final boolean active = file.hasKey("ACTIVE") && file.getBoolean("ACTIVE");
 
-    final EditorProvider provider = editorRegistry.findEditorProviderById(providerId);
+    final FileType fileType = fileTypeRegistry.getFileTypeByFile(resourceFile);
+    final EditorProvider provider = editorRegistry.getEditor(fileType);
     if (provider instanceof AsyncEditorProvider) {
       ((AsyncEditorProvider) provider)
           .createEditor(resourceFile)

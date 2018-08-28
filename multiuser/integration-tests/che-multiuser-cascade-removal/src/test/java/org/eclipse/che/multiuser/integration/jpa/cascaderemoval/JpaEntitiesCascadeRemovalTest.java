@@ -20,6 +20,7 @@ import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjec
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createFreeResourcesLimit;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createProfile;
+import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createSignatureKeyPair;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createStack;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createUser;
@@ -44,6 +45,7 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -95,8 +97,13 @@ import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
+import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
+import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
+import org.eclipse.che.multiuser.api.permission.server.PermissionsManager;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationManager;
 import org.eclipse.che.multiuser.organization.api.listener.RemoveOrganizationOnLastUserRemovedEventSubscriber;
@@ -147,6 +154,7 @@ public class JpaEntitiesCascadeRemovalTest {
   private FactoryDao factoryDao;
   private StackDao stackDao;
   private WorkerDao workerDao;
+  private SignatureKeyDao signatureKeyDao;
   private JpaStackPermissionsDao stackPermissionsDao;
   private FreeResourcesLimitDao freeResourcesLimitDao;
   private OrganizationManager organizationManager;
@@ -229,6 +237,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new FactoryJpaModule());
                 install(new OrganizationJpaModule());
                 install(new MultiuserWorkspaceJpaModule());
+                install(new MachineAuthModule());
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
@@ -237,6 +246,8 @@ public class JpaEntitiesCascadeRemovalTest {
                 bind(WorkspaceStatusCache.class).to(DefaultWorkspaceStatusCache.class);
                 bind(RuntimeInfrastructure.class).toInstance(mock(RuntimeInfrastructure.class));
                 MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
+                bind(PermissionsManager.class);
+                bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
                 bind(AccountManager.class);
                 bind(Boolean.class)
                     .annotatedWith(Names.named("che.workspace.auto_snapshot"))
@@ -293,6 +304,7 @@ public class JpaEntitiesCascadeRemovalTest {
     factoryDao = injector.getInstance(FactoryDao.class);
     stackDao = injector.getInstance(StackDao.class);
     workerDao = injector.getInstance(WorkerDao.class);
+    signatureKeyDao = injector.getInstance(SignatureKeyDao.class);
     freeResourcesLimitDao = injector.getInstance(FreeResourcesLimitDao.class);
     organizationManager = injector.getInstance(OrganizationManager.class);
     memberDao = injector.getInstance(MemberDao.class);
@@ -361,6 +373,10 @@ public class JpaEntitiesCascadeRemovalTest {
     assertNull(notFoundToNull(() -> freeResourcesLimitDao.get(user.getId())));
     assertNull(notFoundToNull(() -> freeResourcesLimitDao.get(user2.getId())));
 
+    // machine token keypairs
+    assertNull(notFoundToNull(() -> signatureKeyDao.get(workspace1.getId())));
+    assertNull(notFoundToNull(() -> signatureKeyDao.get(workspace2.getId())));
+
     // distributed resources is removed
     assertNull(
         notFoundToNull(() -> organizationResourcesDistributor.get(childOrganization.getId())));
@@ -395,6 +411,7 @@ public class JpaEntitiesCascadeRemovalTest {
     assertNotNull(notFoundToNull(() -> organizationManager.getById(organization.getId())));
     assertNotNull(notFoundToNull(() -> organizationManager.getById(childOrganization.getId())));
     assertNotNull(notFoundToNull(() -> organizationManager.getById(organization2.getId())));
+    assertNotNull(notFoundToNull(() -> signatureKeyDao.get(workspace2.getId())));
     assertFalse(
         organizationResourcesDistributor.getResourcesCaps(childOrganization.getId()).isEmpty());
     wipeTestData();
@@ -408,7 +425,8 @@ public class JpaEntitiesCascadeRemovalTest {
     };
   }
 
-  private void createTestData() throws NotFoundException, ConflictException, ServerException {
+  private void createTestData()
+      throws NotFoundException, ConflictException, ServerException, NoSuchAlgorithmException {
     userDao.create(user = createUser("bobby"));
     accountDao.create(account = createAccount("bobby"));
     // test permissions users
@@ -434,6 +452,9 @@ public class JpaEntitiesCascadeRemovalTest {
     stackDao.create(stack3 = createStack("stack3", "st3"));
 
     workerDao.store(createWorker(user2.getId(), workspace3.getId()));
+
+    signatureKeyDao.create(createSignatureKeyPair(workspace1.getId()));
+    signatureKeyDao.create(createSignatureKeyPair(workspace2.getId()));
 
     stackPermissionsDao.store(
         new StackPermissionsImpl(
@@ -510,6 +531,9 @@ public class JpaEntitiesCascadeRemovalTest {
 
     sshDao.remove(sshPair1.getOwner(), sshPair1.getService(), sshPair1.getName());
     sshDao.remove(sshPair2.getOwner(), sshPair2.getService(), sshPair2.getName());
+
+    signatureKeyDao.remove(workspace1.getId());
+    signatureKeyDao.remove(workspace2.getId());
 
     workspaceDao.remove(workspace1.getId());
     workspaceDao.remove(workspace2.getId());

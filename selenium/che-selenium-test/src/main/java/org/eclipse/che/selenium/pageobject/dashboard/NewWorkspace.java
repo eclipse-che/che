@@ -42,6 +42,7 @@ import static org.openqa.selenium.Keys.BACK_SPACE;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
@@ -177,6 +178,14 @@ public class NewWorkspace {
 
     Stack(String id) {
       this.id = id;
+    }
+
+    public static Stack getById(String id) {
+      Optional<Stack> first =
+          asList(values()).stream().filter(stack -> stack.getId().equals(id)).findFirst();
+      first.orElseThrow(
+          () -> new RuntimeException(String.format("Stack with id '%s' not found.", id)));
+      return first.get();
     }
 
     public String getId() {
@@ -694,11 +703,11 @@ public class NewWorkspace {
     waitPageLoad(DEFAULT_TIMEOUT);
   }
 
-  public List<String> getAvailableStacks() {
+  public List<Stack> getAvailableStacks() {
     return seleniumWebDriverHelper
         .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
         .stream()
-        .map(webElement -> webElement.getAttribute("data-stack-id"))
+        .map(webElement -> Stack.getById(webElement.getAttribute("data-stack-id")))
         .collect(toList());
   }
 
@@ -710,16 +719,16 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitVisibility(By.xpath(selectedStackXpath));
   }
 
-  public List<String> getVisibleStacks() {
+  public List<Stack> getVisibleStacks() {
     return seleniumWebDriverHelper
         .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
         .stream()
         .filter(seleniumWebDriverHelper::isVisible)
-        .map(webElement -> webElement.getAttribute("data-stack-id"))
+        .map(webElement -> Stack.getById(webElement.getAttribute("data-stack-id")))
         .collect(Collectors.toList());
   }
 
-  public void waitVisibleStacks(List<String> expectedVisibleStacks) {
+  public void waitVisibleStacks(List<Stack> expectedVisibleStacks) {
     webDriverWaitFactory
         .get()
         .until(
@@ -744,17 +753,16 @@ public class NewWorkspace {
     return getAvailableStacks().size();
   }
 
-  public void waitStacksNotPresent(List<String> stacksIdForChecking) {
+  public void waitStacksNotPresent(List<Stack> stacksIdForChecking) {
     stacksIdForChecking.forEach(
-        stackId ->
+        stack ->
             webDriverWaitFactory
                 .get()
                 .until(
-                    (ExpectedCondition<Boolean>)
-                        driver -> !getAvailableStacks().contains(stackId)));
+                    (ExpectedCondition<Boolean>) driver -> !getAvailableStacks().contains(stack)));
   }
 
-  public void waitStacksOrder(List<String> expectedOrder) {
+  public void waitStacksOrder(List<Stack> expectedOrder) {
     webDriverWaitFactory
         .get()
         .until((ExpectedCondition<Boolean>) driver -> expectedOrder.equals(getAvailableStacks()));

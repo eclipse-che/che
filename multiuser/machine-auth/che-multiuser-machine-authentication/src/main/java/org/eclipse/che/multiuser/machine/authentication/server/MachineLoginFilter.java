@@ -14,16 +14,12 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import java.security.Principal;
 import javax.inject.Inject;
@@ -46,7 +42,6 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 
 /**
  * Handles requests that comes from machines with specific machine token.
@@ -59,46 +54,36 @@ public class MachineLoginFilter implements Filter {
 
   private final RequestTokenExtractor tokenExtractor;
   private final UserManager userManager;
-  private final SignatureKeyManager keyManager;
   private final PermissionChecker permissionChecker;
+  private final JwtParser jwtParser;
 
   @Inject
   public MachineLoginFilter(
       RequestTokenExtractor tokenExtractor,
       UserManager userManager,
-      SignatureKeyManager keyManager,
+      MachineSigningKeyResolver machineKeyResolver,
       PermissionChecker permissionChecker) {
     this.tokenExtractor = tokenExtractor;
     this.userManager = userManager;
-    this.keyManager = keyManager;
     this.permissionChecker = permissionChecker;
+    this.jwtParser = Jwts.parser().setSigningKeyResolver(machineKeyResolver);
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {}
+  public void init(FilterConfig filterConfig) {}
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final String token = tokenExtractor.getToken(httpRequest);
-
     if (isNullOrEmpty(token)) {
       chain.doFilter(request, response);
       return;
     }
-
     // check token signature and verify is this token machine or not
     try {
-      final Jws<Claims> jwt =
-          Jwts.parser().setSigningKey(keyManager.getKeyPair().getPublic()).parseClaimsJws(token);
-      final Claims claims = jwt.getBody();
-
-      if (!isMachineToken(jwt)) {
-        chain.doFilter(request, response);
-        return;
-      }
-
+      final Claims claims = jwtParser.parseClaimsJws(token).getBody();
       try {
         final String userId = claims.get(USER_ID_CLAIM, String.class);
         // check if user with such id exists
@@ -113,26 +98,18 @@ public class MachineLoginFilter implements Filter {
             response,
             SC_UNAUTHORIZED,
             "Authentication with machine token failed because user for this token no longer exist.");
-      } catch (ServerException ex) {
-        sendErr(
-            response,
-            SC_UNAUTHORIZED,
-            format("Authentication with machine token failed cause: %s", ex.getMessage()));
       } finally {
         EnvironmentContext.reset();
       }
-    } catch (UnsupportedJwtException
-        | MalformedJwtException
-        | SignatureException
-        | ExpiredJwtException ex) {
-      // signature check failed
+    } catch (NotMachineTokenJwtException ex) {
+      // not a machine token, bypass
       chain.doFilter(request, response);
+    } catch (ServerException | JwtException e) {
+      sendErr(
+          response,
+          SC_UNAUTHORIZED,
+          format("Authentication with machine token failed cause: %s", e.getMessage()));
     }
-  }
-
-  /** Checks whether given token from a machine. */
-  private boolean isMachineToken(Jws<Claims> jwt) {
-    return MACHINE_TOKEN_KIND.equals(jwt.getHeader().get("kind"));
   }
 
   /** Sets given error code with err message into give response. */

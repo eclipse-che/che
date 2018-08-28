@@ -161,9 +161,9 @@ export class CreateWorkspaceSvc {
    *
    * @param {che.IWorkspaceConfig} workspaceConfig the config of workspace which will be created
    * @param {any} attributes the attributes of the workspace
-   * @returns {ng.IPromise<any>}
+   * @returns {ng.IPromise<che.IWorkspace>}
    */
-  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<any> {
+  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
@@ -171,6 +171,9 @@ export class CreateWorkspaceSvc {
       workspaceConfig.projects = projectTemplates;
       this.addProjectCommands(workspaceConfig, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
+        return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
+      })
+      .then((workspace: che.IWorkspace) => {
         this.projectSourceSelectorService.clearTemplatesList();
         const workspaces = this.cheWorkspace.getWorkspaces();
         if (workspaces.findIndex((_workspace: che.IWorkspace) => {
@@ -178,7 +181,6 @@ export class CreateWorkspaceSvc {
           }) === -1) {
           workspaces.push(workspace);
         }
-        this.cheWorkspace.getWorkspacesById().set(workspace.id, workspace);
         this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
 
         return workspace;

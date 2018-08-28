@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.allOf;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_DEPLOYMENT_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_RUNNING;
@@ -88,7 +89,7 @@ public class KubernetesDeployments {
 
   // TODO https://github.com/eclipse/che/issues/7656
   public static final int POD_REMOVAL_TIMEOUT_MIN = 5;
-  public static final int POD_CREATION_TIMEOUT_MIN = 5;
+  public static final int POD_CREATION_TIMEOUT_MIN = 1;
 
   private static final String POD_OBJECT_KIND = "Pod";
   // error stream data initial capacity
@@ -123,29 +124,58 @@ public class KubernetesDeployments {
    */
   public Pod deploy(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
+
     ObjectMeta metadata = pod.getMetadata();
+    // Note: metadata.name will be changed as for pods it is set by the deployment.
+    String originalName = metadata.getName();
+    putLabel(pod, CHE_DEPLOYMENT_NAME_LABEL, originalName);
+
     PodSpec podSpec = pod.getSpec();
     podSpec.setRestartPolicy("Always"); // Only allowable value
+    final CompletableFuture<Pod> createFuture = new CompletableFuture<>();
+    final Watch createWatch =
+        clientFactory
+            .create(workspaceId)
+            .pods()
+            .inNamespace(namespace)
+            .watch(new CreateWatcher(createFuture, workspaceId, originalName));
     try {
-      Deployment deployment =
-          clientFactory
-              .create(workspaceId)
-              .extensions()
-              .deployments()
-              .inNamespace(namespace)
-              .createNew()
-              .withMetadata(metadata)
-              .withNewSpec()
-              .withReplicas(1)
-              .withNewTemplate()
-              .withMetadata(metadata)
-              .withSpec(podSpec)
-              .endTemplate()
-              .endSpec()
-              .done();
-      return awaitAndGetPod(deployment);
+      clientFactory
+          .create(workspaceId)
+          .extensions()
+          .deployments()
+          .inNamespace(namespace)
+          .createNew()
+          .withMetadata(metadata)
+          .withNewSpec()
+          .withReplicas(1)
+          .withNewTemplate()
+          .withMetadata(metadata)
+          .withSpec(podSpec)
+          .endTemplate()
+          .endSpec()
+          .done();
+      return createFuture.get(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new InfrastructureException(
+          String.format(
+              "Interrupted while waiting for Pod creation. -id: %s -message: %s",
+              metadata.getName(), e.getMessage()));
+    } catch (ExecutionException e) {
+      throw new InfrastructureException(
+          String.format(
+              "Error occured while waiting for Pod creation. -id: %s -message: %s",
+              metadata.getName(), e.getCause().getMessage()));
+    } catch (TimeoutException e) {
+      throw new InfrastructureException(
+          String.format(
+              "Pod creation timeout exceeded. -id: %s -message: %s",
+              metadata.getName(), e.getMessage()));
+    } finally {
+      createWatch.close();
     }
   }
 
@@ -731,34 +761,6 @@ public class KubernetesDeployments {
   }
 
   /**
-   * Wait until deployment is ready and return created Pod
-   *
-   * @param deploy the deployment responsible for creating the pod
-   * @return the created Pod
-   * @throws InfrastructureException if timeout elapses while waiting.
-   */
-  private Pod awaitAndGetPod(Deployment deploy) throws InfrastructureException {
-    String deploymentName = deploy.getMetadata().getName();
-    try {
-      clientFactory
-          .create(workspaceId)
-          .extensions()
-          .deployments()
-          .inNamespace(namespace)
-          .withName(deploymentName)
-          .waitUntilReady(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
-      return get(deploymentName)
-          .orElseThrow(
-              () ->
-                  new InfrastructureException(
-                      String.format("Failed to create Deployment %s", deploymentName)));
-    } catch (InterruptedException e) {
-      throw new InfrastructureException(
-          String.format("Timeout while creating Deployment %s", deploymentName));
-    }
-  }
-
-  /**
    * Get the Deployment resource that owns a specified Pod via the Pod's owner references.
    *
    * @param pod the pod controlled by desired deployment
@@ -853,6 +855,34 @@ public class KubernetesDeployments {
     return pods.get(0).getMetadata().getName();
   }
 
+  private static class CreateWatcher implements Watcher<Pod> {
+
+    private final CompletableFuture<Pod> future;
+    private final String workspaceId;
+    private final String originalName;
+
+    private CreateWatcher(CompletableFuture<Pod> future, String workspaceId, String originalName) {
+      this.future = future;
+      this.workspaceId = workspaceId;
+      this.originalName = originalName;
+    }
+
+    @Override
+    public void eventReceived(Action action, Pod resource) {
+      Map<String, String> labels = resource.getMetadata().getLabels();
+      if (workspaceId.equals(labels.get(CHE_WORKSPACE_ID_LABEL))
+          && originalName.equals(labels.get(CHE_DEPLOYMENT_NAME_LABEL))) {
+        future.complete(resource);
+      }
+    }
+
+    @Override
+    public void onClose(KubernetesClientException cause) {
+      future.completeExceptionally(
+          new RuntimeException("Websocket connection closed before Pod creation event received"));
+    }
+  }
+
   private static class DeleteWatcher implements Watcher<Pod> {
 
     private final CompletableFuture<Void> future;
@@ -873,7 +903,7 @@ public class KubernetesDeployments {
       // if event about removing is received then this completion has no effect
       future.completeExceptionally(
           new RuntimeException(
-              "Webscoket connection is closed. But event about removing is not received.", e));
+              "Websocket connection is closed. But event about removing is not received.", e));
     }
   }
 

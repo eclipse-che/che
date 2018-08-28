@@ -78,7 +78,7 @@ export class StackValidationService {
    */
   getWorkspaceConfigValidation(workspaceConfig: che.IWorkspaceConfig): che.IValidation {
     let mandatoryKeys: Array<string> = ['name', 'environments', 'defaultEnv'];
-    let additionalKeys: Array<string> = ['commands', 'projects', 'description', 'links'];
+    let additionalKeys: Array<string> = ['commands', 'projects', 'description', 'links', 'attributes'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;

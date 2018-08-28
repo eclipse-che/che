@@ -45,6 +45,13 @@ public interface ServerConfig {
   String UNSECURED_PATHS_ATTRIBUTE = "unsecuredPaths";
 
   /**
+   * {@link ServerConfig} and {@link Server} attribute name which indicates whether authentication
+   * with cookies is allowed or not. Attribute value {@code true} cookies authentication enabled,
+   * any other value or lack of the attribute denies to use cookies authentication.
+   */
+  String SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE = "cookiesAuthEnabled";
+
+  /**
    * Port used by server.
    *
    * <p>It may contain protocol(tcp or udp) after '/' symbol. If protocol is missing tcp will be

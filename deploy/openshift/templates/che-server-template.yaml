@@ -1,9 +1,12 @@
-# Copyright (c) 2012-2018 Red Hat, Inc
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
 #
+# Copyright (c) 2012-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 ---
 kind: Template
 apiVersion: v1
@@ -71,6 +74,8 @@ objects:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: CHE_MULTIUSER
+            value: "${CHE_MULTIUSER}"
           - name: CHE_WORKSPACE_HTTP__PROXY
             value: "${CHE_WORKSPACE_HTTP__PROXY}"
           - name: CHE_WORKSPACE_HTTPS__PROXY
@@ -141,7 +146,7 @@ objects:
                 name: openshift-identity-provider
                 optional: true
           - name: CHE_WORKSPACE_FEATURE_API
-            value: "http://marketplace:80"
+            value: "http://che-plugin-registry:80"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
