@@ -110,7 +110,7 @@ public class PullRequestPluginTest {
 
     ide.open(testWorkspace);
     // wait until jdt.ls initialized this need to avoid problem in next steps of test
-    consoles.waitUntilJdtLsStarted();
+    consoles.waitJDTLSStartedMessage();
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, user.getEmail());
 
