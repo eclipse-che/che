@@ -12,12 +12,19 @@
 package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.OPEN_ON_GITHUB;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 
 import com.google.inject.Inject;
-import java.util.Collections;
+import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
@@ -27,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -38,8 +44,8 @@ import org.testng.annotations.Test;
  */
 public class OpenOnGitHubTest {
   private static final String PROJECT_NAME = generate("project", 4);
-  private static final String PATH_TO_EXPAND = "/src/main/java/commenttest";
-  private static final String FILE = "/README.md";
+  private static final String PATH_TO_EXPAND = "/src/main/java/che/eclipse/sample";
+  private String mainBrowserTabHandle;
 
   @SuppressWarnings("unused")
   @Inject
@@ -71,19 +77,29 @@ public class OpenOnGitHubTest {
 
   @Inject private CodenvyEditor editor;
 
-  private static final String REPO_URL = "https://github.com/iedexmain1/testRepo-1";
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
-  private String mainBrowserTabHandle;
+  @Inject private DefaultTestUser productUser;
+
+  @Inject private TestGitHubRepository testRepo;
+
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
+
+  @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
 
   @BeforeClass
   public void setUp() throws Exception {
-    testProjectServiceClient.importProject(
-        workspace.getId(), PROJECT_NAME, REPO_URL, "github", Collections.emptyMap());
+    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
+    testRepo.addContent(entryPath);
     ide.open(workspace);
     mainBrowserTabHandle = seleniumWebDriver.getWindowHandle();
+    git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, BLANK);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-
   }
 
   @AfterMethod
@@ -91,7 +107,6 @@ public class OpenOnGitHubTest {
     seleniumWebDriverHelper.closeCurrentWinAndReturnToMainTab(mainBrowserTabHandle);
   }
 
-  /** */
   @Test
   public void openProjectOnGitHubTest() {
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
@@ -99,10 +114,9 @@ public class OpenOnGitHubTest {
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    Assert.assertTrue(seleniumWebDriver.getCurrentUrl().startsWith(REPO_URL));
+    Assert.assertTrue(seleniumWebDriver.getCurrentUrl().startsWith(testRepo.getHtmlUrl()));
   }
 
-  /** */
   @Test
   public void openFolderOnGitHubTest() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME + PATH_TO_EXPAND);
@@ -112,20 +126,18 @@ public class OpenOnGitHubTest {
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
     Assert.assertEquals(
-        seleniumWebDriver.getCurrentUrl(), REPO_URL + "/tree/master" + PATH_TO_EXPAND);
+        seleniumWebDriver.getCurrentUrl(), testRepo.getHtmlUrl() + "/tree/master" + PATH_TO_EXPAND);
   }
 
-  /** */
-   @Test
+  @Test
   public void openFileOnGitHubTest() {
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/java/commenttest/JavaCommentsTest.java");
-    editor.selectLines(10, 10);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/che/eclipse/sample/Aclass.java");
+    editor.selectLines(14, 8);
     editor.openContextMenuInEditor();
-    editor.clickOnItemInContextMenu(CodenvyEditor.ContextMenuLocator.OPEN_ON_GITHUB);
+    editor.clickOnItemInContextMenu(OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
     Assert.assertEquals(
         seleniumWebDriver.getCurrentUrl(),
-        REPO_URL + "/blob/master" + PATH_TO_EXPAND + "/JavaCommentsTest.java#L10-L20");
+        testRepo.getHtmlUrl() + "/blob/master" + PATH_TO_EXPAND + "/Aclass.java#L14-L16");
   }
 }
