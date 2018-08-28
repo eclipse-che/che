@@ -62,10 +62,6 @@
             <artifactId>che-plugin-java-ext-lang-shared</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.core.resources</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <scope>test</scope>
@@ -83,16 +79,6 @@
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.ui.ide</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>preferences</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
