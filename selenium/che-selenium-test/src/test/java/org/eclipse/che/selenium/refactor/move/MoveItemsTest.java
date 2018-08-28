@@ -30,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ public class MoveItemsTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
   @Inject private Events events;
+  @Inject private NotificationsPopupPanel notifications;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -87,6 +89,9 @@ public class MoveItemsTest {
     try {
       if (refactor.isWidgetOpened()) {
         refactor.clickCancelButtonRefactorForm();
+      }
+
+      if (editor.isAnyTabsOpened()) {
         editor.closeAllTabs();
       }
     } catch (Exception e) {
@@ -125,7 +130,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A0.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A0.java");
-    editor.closeFileByNameWithSaving("A0");
   }
 
   @Test
@@ -147,7 +151,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A1.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A1.java");
-    editor.closeFileByNameWithSaving("A1");
   }
 
   @Test
@@ -182,8 +185,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/fred2/B2.java");
     editor.waitTextIntoEditor(contentFromOutB);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A2.java");
-    editor.closeFileByNameWithSaving("A2");
-    editor.closeFileByNameWithSaving("B2");
   }
 
   @Test
@@ -211,8 +212,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A3.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/r/A3.java");
-    editor.closeFileByNameWithSaving("A3");
-    editor.closeFileByNameWithSaving("B3");
   }
 
   @Test
@@ -236,7 +235,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/r/A5.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A5.java");
-    editor.closeFileByNameWithSaving("A5");
   }
 
   @Test
@@ -258,7 +256,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A6.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A6.java");
-    editor.closeFileByNameWithSaving("A6");
   }
 
   @Test
@@ -285,7 +282,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/A7.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A7.java");
-    editor.closeFileByNameWithSaving("A7");
   }
 
   @Test
@@ -308,7 +304,6 @@ public class MoveItemsTest {
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(
         pathToPackageInChePrefix + "/java/lang/reflect/Klass.java");
-    editor.closeFileByNameWithSaving("Klass");
   }
 
   @Test
@@ -330,7 +325,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A9.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A9.java");
-    editor.closeFileByNameWithSaving("A9");
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {
