@@ -73,6 +73,7 @@ public class TestFailTest {
         ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
