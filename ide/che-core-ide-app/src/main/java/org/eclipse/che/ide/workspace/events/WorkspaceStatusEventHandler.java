@@ -76,7 +76,9 @@ class WorkspaceStatusEventHandler {
                 } else if (event.getStatus() == RUNNING) {
                   eventBus.fireEvent(new WorkspaceRunningEvent());
                 } else if (event.getStatus() == STOPPING) {
-                  eventBus.fireEvent(new WorkspaceStoppingEvent());
+                  WorkspaceStoppingEvent stoppingEvent = new WorkspaceStoppingEvent();
+                  stoppingEvent.setReason(event.getError());
+                  eventBus.fireEvent(stoppingEvent);
                 } else if (event.getStatus() == STOPPED) {
                   eventBus.fireEvent(
                       new WorkspaceStoppedEvent(
