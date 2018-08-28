@@ -337,6 +337,7 @@ fi
 }
 
 
+
 deployChe() {
     CHE_VAR_ARRAY=$(env | grep "^CHE_.")
     if [ ${#CHE_VAR_ARRAY[@]} -gt 0 ]; then

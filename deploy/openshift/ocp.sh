@@ -89,6 +89,13 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
+
+
+DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE_TAG="latest"
+export CHE_PLUGIN_REGISTRY_IMAGE_TAG=${CHE_PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE_TAG}}
+
+DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE="eclipse/che-plugin-registry"
+export CHE_PLUGIN_REGISTRY_IMAGE=${CHE_PLUGIN_REGISTRY_IMAGE:-${DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE}}
 }
 
 test_dns_provider() {
@@ -237,6 +244,19 @@ deploy_che_to_ocp() {
   fi
 }
 
+deployChePluginRegistry() {
+if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
+  echo "Deploying Che plugin registry..."
+  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-plugin-registry.yml \
+             -p IMAGE=${CHE_PLUGIN_REGISTRY_IMAGE} \
+             -p IMAGE_TAG=${CHE_PLUGIN_REGISTRY_IMAGE_TAG}
+  CHE_PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+  echo "Che plugin registry deployment complete. $CHE_PLUGIN_REGISTRY_ROUTE"
+  ${OC_BINARY} set env dc/che CHE_PLUGIN_REGISTRY_URL="http://$CHE_PLUGIN_REGISTRY_ROUTE/plugins/"
+fi
+}
+
+
 destroy_ocp() {
     if [ -d "${OKD_DIR}" ]; then
       docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*" || true
@@ -299,6 +319,7 @@ parse_args() {
     --image-che - override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
     --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
+    --deploy-che-plugin-registry - deploy Che plugin registry
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
@@ -383,6 +404,10 @@ parse_args() {
                echo -e "$HELP"
                exit 1
            ;;
+           --deploy-che-plugin-registry)
+               export DEPLOY_CHE_PLUGIN_REGISTRY=true
+               shift
+           ;;
            *)
                echo "You've passed wrong arg '$i'."
                echo -e "$HELP"
@@ -396,3 +421,4 @@ init
 get_tools
 parse_args "$@"
 deploy_che_to_ocp
+deployChePluginRegistry
