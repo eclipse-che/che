@@ -5,7 +5,7 @@ set -u
 for f in "/etc/passwd" "/etc/group"; do
     chgrp -R 0 ${f}
     chmod -R g+rwX ${f};
-        done
+done
 # Generate passwd.template
 cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template
 # Generate group.template
