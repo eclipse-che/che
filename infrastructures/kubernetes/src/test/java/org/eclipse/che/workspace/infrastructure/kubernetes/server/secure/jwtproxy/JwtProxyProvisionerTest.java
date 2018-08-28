@@ -19,6 +19,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.PUBLIC_KEY_FOOTER;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.PUBLIC_KEY_HEADER;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -73,8 +74,8 @@ public class JwtProxyProvisionerTest {
   private KubernetesEnvironment k8sEnv;
 
   @BeforeMethod
-  public void setUp() {
-    when(signatureKeyManager.getKeyPair()).thenReturn(new KeyPair(publicKey, null));
+  public void setUp() throws Exception {
+    when(signatureKeyManager.getKeyPair(anyString())).thenReturn(new KeyPair(publicKey, null));
     when(publicKey.getEncoded()).thenReturn("publickey".getBytes());
 
     when(configBuilderFactory.create(any()))

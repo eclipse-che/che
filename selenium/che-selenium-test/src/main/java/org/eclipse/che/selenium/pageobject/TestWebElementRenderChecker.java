@@ -11,15 +11,15 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -27,17 +27,17 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Singleton
 public class TestWebElementRenderChecker {
   private final SeleniumWebDriver seleniumWebDriver;
-  private final WebDriverWait loadPageWebDriverWait;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public TestWebElementRenderChecker(SeleniumWebDriver seleniumWebDriver) {
+  public TestWebElementRenderChecker(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loadPageWebDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
   }
 
   /**
@@ -117,10 +117,10 @@ public class TestWebElementRenderChecker {
   }
 
   private WebElement waitAndGetWebElement(WebElement webElement) {
-    return loadPageWebDriverWait.until(visibilityOf(webElement));
+    return seleniumWebDriverHelper.waitVisibility(webElement, ELEMENT_TIMEOUT_SEC);
   }
 
   private WebElement waitAndGetWebElement(By locator) {
-    return loadPageWebDriverWait.until(visibilityOfElementLocated(locator));
+    return seleniumWebDriverHelper.waitVisibility(locator, ELEMENT_TIMEOUT_SEC);
   }
 }

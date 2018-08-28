@@ -1,9 +1,11 @@
 #!/bin/bash
+#
 # Copyright (c) 2018 Red Hat, Inc.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
 #
 # This script is meant for quick & easy install of Che on OpenShift via:
 #
@@ -129,6 +131,15 @@ export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
 DEFAULT_CHE_IMAGE_TAG="nightly"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
+
+DEFAULT_IMAGE_KEYCLOAK="eclipse/che-keycloak"
+export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-${DEFAULT_IMAGE_KEYCLOAK}}
+
+DEFAULT_KEYCLOAK_IMAGE_TAG="nightly"
+export KEYCLOAK_IMAGE_TAG=${KEYCLOAK_IMAGE_TAG:-${DEFAULT_KEYCLOAK_IMAGE_TAG}}
+
+KEYCLOAK_IMAGE_PULL_POLICY="Always"
+export ${KEYCLOAK_IMAGE_PULL_POLICY:-${DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -354,7 +365,7 @@ ${CHE_VAR_ARRAY}"
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
         # create secret with OpenShift certificate
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat /var/lib/origin/openshift.local.config/master/ca.crt)"
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat ${OKD_DIR}/openshift-apiserver/ca.crt)"
       fi
 
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml \
@@ -362,7 +373,10 @@ ${CHE_VAR_ARRAY}"
         -p PROTOCOL=${HTTP_PROTOCOL} \
         -p KEYCLOAK_USER=${KEYCLOAK_USER} \
         -p KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD} \
-        ${KEYCLOAK_PARAM}
+        -p IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK} \
+        -p KEYCLOAK_IMAGE_TAG=${KEYCLOAK_IMAGE_TAG} \
+        -p KEYCLOAK_IMAGE_PULL_POLICY=${KEYCLOAK_IMAGE_PULL_POLICY} \
+         ${KEYCLOAK_PARAM}
       wait_for_keycloak
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then

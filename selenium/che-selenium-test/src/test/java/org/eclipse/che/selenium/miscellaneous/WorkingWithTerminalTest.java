@@ -89,25 +89,21 @@ public class WorkingWithTerminalTest {
 
   @BeforeMethod
   private void prepareNewTerminal() {
-    try {
-      panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM_ID);
+    panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM_ID);
 
-      projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.waitItem(PROJECT_NAME);
 
-      if (terminal.terminalIsPresent()) {
-        consoles.closeTerminalIntoConsoles();
-        terminal.waitTerminalIsNotPresent(1);
-      }
-
-      consoles.clickOnPlusMenuButton();
-      consoles.clickOnTerminalItemInContextMenu();
-
-      terminal.selectFirstTerminalTab();
-      terminal.waitTerminalConsole();
-      terminal.waitFirstTerminalIsNotEmpty();
-    } catch (Exception e) {
-      LOG.error(e.getLocalizedMessage(), e);
+    if (terminal.terminalIsPresent()) {
+      consoles.closeTerminalIntoConsoles();
+      terminal.waitTerminalIsNotPresent(1);
     }
+
+    consoles.clickOnPlusMenuButton();
+    consoles.clickOnTerminalItemInContextMenu();
+
+    terminal.selectFirstTerminalTab();
+    terminal.waitTerminalConsole();
+    terminal.waitFirstTerminalIsNotEmpty();
   }
 
   @Test
@@ -182,7 +178,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
     }
 
     terminal.waitNoTextInFirstTerminal(".dockerenv");
@@ -195,17 +191,24 @@ public class WorkingWithTerminalTest {
         terminal.waitTextInFirstTerminal(partOfContent);
       } catch (TimeoutException ex) {
         // remove try-catch block after issue has been resolved
-        fail("Known issue https://github.com/eclipse/che-lib/issues/57");
+        fail("Known issue https://github.com/eclipse/che/issues/10854");
       }
     }
 
     terminal.waitTextInFirstTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
+
     for (String partOfContent : CHECK_MC_OPENING) {
       terminal.waitTextInFirstTerminal(partOfContent);
     }
-    terminal.waitNoTextInFirstTerminal(".dockerenv");
+
+    try {
+      terminal.waitNoTextInFirstTerminal(".dockerenv");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
+    }
   }
 
   @Test
@@ -229,7 +232,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
     }
 
     terminal.typeIntoActiveTerminal(Keys.F10.toString());
@@ -239,7 +242,6 @@ public class WorkingWithTerminalTest {
   public void shouldCreateFileTest() {
     terminal.typeIntoActiveTerminal("cd ~" + Keys.ENTER);
     terminal.typeIntoActiveTerminal("ls" + Keys.ENTER);
-    terminal.waitFirstTerminalIsNotEmpty();
     terminal.waitTextInFirstTerminal("che");
     terminal.typeIntoActiveTerminal("touch a.txt" + Keys.ENTER);
 
@@ -278,9 +280,7 @@ public class WorkingWithTerminalTest {
     // clear terminal
     terminal.typeIntoActiveTerminal("clear" + Keys.ENTER);
     terminal.waitNoTextInFirstTerminal("clear");
-
-    terminal.waitFirstTerminalIsNotEmpty();
-    terminal.waitTextInFirstTerminal(workspace.getId());
+    terminal.waitTextInFirstTerminal("@");
   }
 
   @Test
@@ -290,9 +290,7 @@ public class WorkingWithTerminalTest {
     // clear terminal
     terminal.typeIntoActiveTerminal("reset" + Keys.ENTER.toString());
     terminal.waitNoTextInFirstTerminal("reset");
-
-    terminal.waitFirstTerminalIsNotEmpty();
-    terminal.waitTextInFirstTerminal(workspace.getId());
+    terminal.waitTextInFirstTerminal("@");
   }
 
   @Test
@@ -319,7 +317,6 @@ public class WorkingWithTerminalTest {
 
     // check "F1"
     terminal.typeIntoActiveTerminal(Keys.F1.toString());
-    terminal.waitFirstTerminalIsNotEmpty();
     terminal.waitTextInFirstTerminal(MC_HELP_DIALOG);
     terminal.typeIntoActiveTerminal(Keys.F10.toString());
     terminal.waitNoTextInFirstTerminal(MC_HELP_DIALOG);

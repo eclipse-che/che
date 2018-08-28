@@ -36,7 +36,7 @@ public class MachineSessionInvalidator implements EventSubscriber<WorkspaceStatu
   @Override
   public void onEvent(WorkspaceStatusEvent event) {
     if (WorkspaceStatus.STOPPED.equals(event.getStatus())) {
-      tokenRegistry.removeTokens(event.getWorkspaceId()).values();
+      tokenRegistry.removeTokens(event.getWorkspaceId());
     }
   }
 
