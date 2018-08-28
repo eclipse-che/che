@@ -90,6 +90,7 @@ public class MoveItemsTest {
       if (refactor.isWidgetOpened()) {
         refactor.clickCancelButtonRefactorForm();
       }
+
       if (editor.isAnyTabsOpened()) {
         editor.closeAllTabs();
       }
