@@ -41,10 +41,10 @@
           "dev-machine":{
             "installers":[
               "org.eclipse.che.terminal",
-              "org.eclipse.che.ws-agent"
+              "org.eclipse.che.ws-agent",
+              "org.eclipse.che.ls.java"
             ],
             "servers":{
-
             },
             "attributes":{
               "memoryLimitBytes":"2147483648"
