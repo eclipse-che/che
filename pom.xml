@@ -889,11 +889,6 @@
                 <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>org-eclipse-jdt-core-repack</artifactId>
-                <version>${che.lib.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.che.ls.jdt</groupId>
                 <artifactId>jdt.ls.extension.api</artifactId>
                 <version>${che.ls.jdt.version}</version>
@@ -1884,51 +1879,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-zend-debugger-server</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>maven-server-api</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>maven-server-impl</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.core.filesystem</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.core.resources</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.jface</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.jface.text</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.search</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.ui.ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

@@ -114,11 +114,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.core.resources</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
@@ -172,7 +167,6 @@
                         <configuration>
                             <ignoredDependencies>
                                 <ignoreDependency>org.eclipse.che.core:che-core-api-core</ignoreDependency>
-                                <ignoreDependency>org.eclipse.che.plugin:org.eclipse.core.resources</ignoreDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
