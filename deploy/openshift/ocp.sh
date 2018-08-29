@@ -400,4 +400,3 @@ init
 get_tools
 parse_args "$@"
 deploy_che_to_ocp
-
