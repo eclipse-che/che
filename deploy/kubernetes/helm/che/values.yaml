@@ -44,3 +44,6 @@ global:
   pvcClaim: "1Gi"
   cheWorkspacesNamespace: ""
   workspaceIdleTimeout: "-1"
+  log:
+    loggerConfig: ""
+    appenderName: "plaintext"
