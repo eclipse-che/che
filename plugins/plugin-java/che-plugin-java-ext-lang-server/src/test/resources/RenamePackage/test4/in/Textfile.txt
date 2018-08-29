@@ -1,0 +1,13 @@
+r.p1.B
+r.p1.B.Q
+r.p1.Bla
+r.p1.q
+"r.p1.B"
+r.p1
+r.p1.
+
+a.r.p1.B
+rr.p1.B
+.r.p1.B
+r.p1p.B
+ r.p1
