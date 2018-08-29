@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping auto-import="true">
+    <class name="p.Transient" schema="SMTH" table="SMTH"/>
+    <class name="p.Transient.class" schema="SMTH" table="SMTH"/>
+    <class name=" p.Transient" schema="SMTH" table="SMTH"/>
+    <class name="p.Transient " schema="SMTH" table="SMTH"/>
+    <class name="p.Transient(class)" schema="SMTH" table="SMTH"/>
+    
+    <class name="p.TransientProperty" schema="SMTH" table="SMTH"/>
+    <class name=".p.Transient" schema="SMTH" table="SMTH"/>
+    <class name="a.p.Transient" schema="SMTH" table="SMTH"/>
+    <class name="pp.Transient" schema="SMTH" table="SMTH"/>
+</hibernate-mapping>
