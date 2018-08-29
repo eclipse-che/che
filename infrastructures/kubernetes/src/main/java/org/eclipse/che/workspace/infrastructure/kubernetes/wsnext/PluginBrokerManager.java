@@ -115,7 +115,8 @@ public class PluginBrokerManager {
         new DeliverMetas(
             deployBroker, kubernetesNamespace, pluginsMeta, CONFIG_FILE, configMapName);
     PrepareStorage prepareStorage =
-        new PrepareStorage(deliverMetas,
+        new PrepareStorage(
+            deliverMetas,
             workspaceId,
             environment,
             volumesStrategy,

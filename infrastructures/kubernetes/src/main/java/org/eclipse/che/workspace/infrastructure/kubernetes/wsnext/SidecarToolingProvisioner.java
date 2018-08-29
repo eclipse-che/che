@@ -19,8 +19,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsnext.PluginMetaRetriever;
 import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
 import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsnext.model.PluginMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -34,16 +34,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class SidecarToolingProvisioner {
 
   private final Map<String, WorkspaceNextApplier> workspaceNextAppliers;
-  private final WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
+  private final PluginMetaRetriever pluginMetaRetriever;
   private final PluginBrokerManager pluginBrokerManager;
 
   @Inject
   public SidecarToolingProvisioner(
       Map<String, WorkspaceNextApplier> workspaceNextAppliers,
-      WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever,
+      PluginMetaRetriever pluginMetaRetriever,
       PluginBrokerManager pluginBrokerManager) {
     this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
-    this.workspaceNextObjectsRetriever = workspaceNextObjectsRetriever;
+    this.pluginMetaRetriever = pluginMetaRetriever;
     this.pluginBrokerManager = pluginBrokerManager;
   }
 
@@ -51,8 +51,7 @@ public class SidecarToolingProvisioner {
   public void provision(RuntimeIdentity id, KubernetesEnvironment environment)
       throws InfrastructureException {
 
-    Collection<PluginMeta> pluginsMeta =
-        workspaceNextObjectsRetriever.get(environment.getAttributes());
+    Collection<PluginMeta> pluginsMeta = pluginMetaRetriever.get(environment.getAttributes());
     if (pluginsMeta.isEmpty()) {
       return;
     }

@@ -46,26 +46,28 @@ import org.slf4j.LoggerFactory;
  * Fetches Che tooling plugin objects corresponding to attributes of a workspace.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
- * 
+ *
  * @author Oleksander Garagatyi
  */
 @Beta
-public class WorkspaceNextObjectsRetriever {
+public class PluginMetaRetriever {
 
-  private static final Logger LOG = LoggerFactory.getLogger(WorkspaceNextObjectsRetriever.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PluginMetaRetriever.class);
   private static final String CHE_PLUGIN_OBJECT_ERROR =
       "Che plugin '%s:%s' configuration is invalid. %s";
+  private static final String PLUGIN_REGISTRY_PROPERTY = "che.workspace.feature.api";
 
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 
   private final UriBuilder pluginRegistry;
 
   @Inject
-  public WorkspaceNextObjectsRetriever(
-      @Nullable @Named("che.workspace.feature.api") String pluginRegistry) {
+  public PluginMetaRetriever(@Nullable @Named(PLUGIN_REGISTRY_PROPERTY) String pluginRegistry) {
     if (pluginRegistry == null) {
       LOG.info(
-          "Workspace.Next is disabled - Che plugin registry API endpoint property 'che.workspace.feature.api' is not configured");
+          format(
+              "Che tooling plugins feature is disabled - Che plugin registry API endpoint property '%s' is not configured",
+              PLUGIN_REGISTRY_PROPERTY));
       this.pluginRegistry = null;
     } else {
       this.pluginRegistry = UriBuilder.fromUri(pluginRegistry).path("plugins");
@@ -73,15 +75,15 @@ public class WorkspaceNextObjectsRetriever {
   }
 
   /**
-   * Gets Che tooling plugins list from provided workspace attributes, fetches corresponding
-   * meta objects from Che plugin registry and returns list of {@link PluginMeta} with meta information
+   * Gets Che tooling plugins list from provided workspace attributes, fetches corresponding meta
+   * objects from Che plugin registry and returns list of {@link PluginMeta} with meta information
    * about plugins in a workspace.
-   * 
+   *
    * <p>This API is in <b>Beta</b> and is subject to changes or removal.
-   *  
+   *
    * @param attributes workspace attributes
-   * @throws InfrastructureException when attributes contain invalid Che plugins entries or Che plugin meta
-   * files retrieval from Che plugin registry fails or returns invalid data
+   * @throws InfrastructureException when attributes contain invalid Che plugins entries or Che
+   *     plugin meta files retrieval from Che plugin registry fails or returns invalid data
    */
   @Beta
   public Collection<PluginMeta> get(Map<String, String> attributes) throws InfrastructureException {
@@ -125,7 +127,7 @@ public class WorkspaceNextObjectsRetriever {
       String key = idVersion[0] + ':' + idVersion[1];
       if (collectedIdVersion.containsKey(key)) {
         throw new InfrastructureException(
-            format("Invalid Workspace.Next configuration: plugin %s is duplicated", key));
+            format("Invalid Che tooling plugins configuration: plugin %s is duplicated", key));
       }
       collectedIdVersion.put(key, Pair.of(idVersion[0], idVersion[1]));
     }

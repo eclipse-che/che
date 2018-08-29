@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 /**
  * Constants for Workspace API
@@ -73,24 +74,27 @@ public final class Constants {
 
   /**
    * Contains an identifier of an editor that should be used in a workspace. Should be set/read from
-   * {@link Workspace#getAttributes}.
+   * {@link WorkspaceConfig#getAttributes}.
    *
    * <p>Value is colon separated id, version.
+   *
    * <p>This is beta constant that is subject to change or removal.
+   *
    * <p>Example of the attribute value: 'org.eclipse.che.super-editor:0.0.1'
    */
   public static final String WORKSPACE_TOOLING_EDITOR_ATTRIBUTE = "editor";
 
   /**
-   * Contains a list of workspace tooling plugins that should be used in a workspace.
-   * Should be set/read from {@link Workspace#getAttributes}.
+   * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
+   * set/read from {@link WorkspaceConfig#getAttributes}.
    *
    * <p>Value is comma separated list of plugins in a format: '< plugin1ID >:< plugin1Version >,<
    * plugin2ID >/< plugin2Version >'<br>
    * Spaces around commas are trimmed. <br>
+   *
    * <p>This is beta constant that is subject to change or removal.
-   * <p>Example of the attribute value:
-   * 'org.eclipse.che.plugin1:0.0.1, com.redhat.plugin2:1.0.0'
+   *
+   * <p>Example of the attribute value: 'org.eclipse.che.plugin1:0.0.1, com.redhat.plugin2:1.0.0'
    */
   public static final String WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE = "plugins";
 

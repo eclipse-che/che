@@ -19,8 +19,10 @@ import java.util.Objects;
 public class Command {
 
   private String name = null;
+
   @JsonProperty("working-dir")
   private String workingDir = null;
+
   private List<String> command = new ArrayList<String>();
 
   /** */

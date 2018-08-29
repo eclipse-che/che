@@ -16,7 +16,7 @@ import org.eclipse.che.dto.shared.DTO;
 /**
  * Event initiated by a plugin broker with the results of the plugin broker invocation for a
  * workspace.
- * 
+ *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
  * @author Oleksandr Garagatyi

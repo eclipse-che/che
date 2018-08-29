@@ -29,8 +29,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 
 /**
- * Configure JSON_RPC consumers of Che plugin broker events.
- * Also converts {@link BrokerResultEvent} to {@link BrokerEvent}.
+ * Configure JSON_RPC consumers of Che plugin broker events. Also converts {@link BrokerResultEvent}
+ * to {@link BrokerEvent}.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
@@ -85,7 +85,7 @@ public class BrokerService {
       try {
         return objectMapper.readValue(toolingString, new TypeReference<List<ChePlugin>>() {});
       } catch (IOException e) {
-        LOG.error("Parsing Che plugin broker event failed. Error: " + e.getLocalizedMessage(), e);
+        LOG.error("Parsing Che plugin broker event failed. Error: " + e.getMessage(), e);
       }
     }
     return null;

@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 
@@ -97,7 +98,9 @@ public abstract class InternalEnvironment {
    * Note that this field is in Beta and is subject to be removed at any point of time without any
    * notification.
    *
-   * <p>Returns map of workspace attributes that can be used for workspace runtime creation.
+   * <p>Returns map of workspace config attributes that can be used for workspace runtime creation.
+   *
+   * @see WorkspaceConfig#getAttributes()
    */
   @Beta
   public Map<String, String> getAttributes() {
@@ -108,7 +111,9 @@ public abstract class InternalEnvironment {
    * Note that this field is in Beta and is subject to be removed at any point of time without any
    * notification.
    *
-   * @param attributes workspace attributes that might be used in creation of workspace runtime
+   * @param attributes workspace config attributes that might be used in creation of workspace
+   *     runtime
+   * @see WorkspaceConfig#getAttributes()
    */
   @Beta
   public InternalEnvironment setAttributes(Map<String, String> attributes) {

@@ -14,7 +14,7 @@ package org.eclipse.che.api.workspace.shared.dto;
 /**
  * Statuses of a plugin broker that is used in the process of workspace start when sidecar-based
  * tooling is used.
- * 
+ *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
  * @author Oleksandr Garagatyi
@@ -22,7 +22,7 @@ package org.eclipse.che.api.workspace.shared.dto;
 public enum BrokerStatus {
 
   /** Means that broker is started but neither error nor success was achieved yet. */
-  STARTING,
+  STARTED,
 
   /** Means that broker successfully finished execution. */
   DONE,

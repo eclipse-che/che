@@ -54,8 +54,7 @@ public class EditorCompatibility {
       return false;
     }
     EditorCompatibility that = (EditorCompatibility) o;
-    return Objects.equals(getId(), that.getId())
-        && Objects.equals(getPlugins(), that.getPlugins());
+    return Objects.equals(getId(), that.getId()) && Objects.equals(getPlugins(), that.getPlugins());
   }
 
   @Override
