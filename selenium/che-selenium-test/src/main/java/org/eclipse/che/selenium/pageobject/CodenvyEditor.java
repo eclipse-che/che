@@ -91,6 +91,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -442,6 +443,25 @@ public class CodenvyEditor {
     return getTextFromOrionLines(inner);
   }
 
+  private void waitForText(String expectedText, int timeout, Supplier<String> textProvider) {
+    String[] result = new String[1];
+    webDriverWaitFactory
+        .get(timeout)
+        .withMessage(
+            () ->
+                "Timeout waiting for txt, expected= '"
+                    + expectedText
+                    + "', actual='"
+                    + result[0]
+                    + "'")
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  result[0] = textProvider.get();
+                  return result[0].contains(expectedText);
+                });
+  }
+
   /**
    * Waits during {@code timeout} until specified {@code expectedText} is present in editor.
    *
@@ -449,16 +469,7 @@ public class CodenvyEditor {
    * @param timeout waiting time in seconds
    */
   public void waitTextIntoEditor(final String expectedText, final int timeout) {
-    String[] result = new String[1];
-    webDriverWaitFactory
-        .get(timeout)
-        .withMessage(() -> "Timeout waiting for txt, actual='" + result[0] + "'")
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  result[0] = getVisibleTextFromEditor();
-                  return result[0].contains(expectedText);
-                });
+    waitForText(expectedText, timeout, () -> getVisibleTextFromEditor());
   }
 
   /**
@@ -480,11 +491,7 @@ public class CodenvyEditor {
    */
   public void waitTextInDefinedSplitEditor(
       int indexOfEditor, final int timeout, String expectedText) {
-    webDriverWaitFactory
-        .get(timeout)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> getTextFromSplitEditor(indexOfEditor).contains(expectedText));
+    waitForText(expectedText, timeout, () -> getTextFromSplitEditor(indexOfEditor));
   }
 
   /**
@@ -669,9 +676,7 @@ public class CodenvyEditor {
    * @param text text which should be typed
    */
   public void typeTextIntoEditor(String text) {
-    loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(text);
-    loader.waitOnClosed();
   }
 
   /**
@@ -786,7 +791,6 @@ public class CodenvyEditor {
 
   /** Launches code assistant by "ctrl" + "space" keys pressing. */
   public void launchAutocomplete() {
-    loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
     typeTextIntoEditor(SPACE.toString());
@@ -1041,7 +1045,7 @@ public class CodenvyEditor {
    */
   public void selectAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item)));
+        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[.='%s']", item)));
   }
 
   /**
@@ -2278,8 +2282,19 @@ public class CodenvyEditor {
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
   }
 
-  public void checkProposalDocumentation(String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
+  public void waitProposalDocumentationHTML(String expectedText, int timeout) {
+    waitForText(expectedText, timeout, () -> getProposalDocumentationHTML());
+  }
+
+  public void waitProposalDocumentationHTML(String expectedText) {
+    waitProposalDocumentationHTML(expectedText, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public String getProposalDocumentationHTML() {
+    return seleniumWebDriverHelper
+        .waitVisibility(proposalDoc)
+        .findElement(By.tagName("div"))
+        .getAttribute("innerHTML");
   }
 
   /** enter the 'Ctrl + F12' */
