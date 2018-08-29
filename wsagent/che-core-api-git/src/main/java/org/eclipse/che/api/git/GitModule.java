@@ -38,7 +38,7 @@ public class GitModule extends AbstractModule {
 
     Multibinder<VcsStatusProvider> vcsStatusProviderMultibinder =
         newSetBinder(binder(), VcsStatusProvider.class);
-    vcsStatusProviderMultibinder.addBinding().to(GitStatusProvider.class);
+    vcsStatusProviderMultibinder.addBinding().to(CachedGitStatusProvider.class);
 
     Multibinder<ValueProviderFactory> multiBinder =
         Multibinder.newSetBinder(binder(), ValueProviderFactory.class);
