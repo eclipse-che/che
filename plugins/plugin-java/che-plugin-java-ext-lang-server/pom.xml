@@ -165,6 +165,17 @@
                     <excludes>
                         <exclude>**/*.jar</exclude>
                         <exclude>**/*.zip</exclude>
+                        <exclude>**/RenameMethodInInterface/**</exclude>
+                        <exclude>**/RenameNonPrivateField/**</exclude>
+                        <exclude>**/RenamePackage/**</exclude>
+                        <exclude>**/RenameParameters/**</exclude>
+                        <exclude>**/RenamePrivateField/**</exclude>
+                        <exclude>**/RenamePrivateMethod/**</exclude>
+                        <exclude>**/RenameStaticMethod/**</exclude>
+                        <exclude>**/RenameTests18/**</exclude>
+                        <exclude>**/RenameType/**</exclude>
+                        <exclude>**/RenameTypeParameter/**</exclude>
+                        <exclude>**/RenameVirtualMethodInClass/**</exclude>
                         <exclude>**/org/eclipse/che/plugin/java/server/test/Accessor.java</exclude>
                         <exclude>**/projects/**</exclude>
                         <exclude>**/org/eclipse/che/plugin/java/server/jdt/**</exclude>
