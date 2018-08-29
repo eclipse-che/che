@@ -203,10 +203,11 @@ public class WorkspaceDetailsMachines {
   }
 
   public void typeRamAmount(String machineName, String ramAmount) {
+    final String emptyValue = "";
     moveCursorToEditButton(machineName);
     clickOnRamField(machineName);
-    seleniumWebDriverHelper.setValue(getRamAmountTextFieldLocator(machineName), "");
 
+    seleniumWebDriverHelper.setValue(getRamAmountTextFieldLocator(machineName), emptyValue);
     if (ramAmount.isEmpty()) {
       return;
     }
