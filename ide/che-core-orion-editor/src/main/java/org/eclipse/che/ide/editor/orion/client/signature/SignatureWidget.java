@@ -58,6 +58,7 @@ import org.eclipse.che.ide.util.dom.Elements;
 public class SignatureWidget implements EventListener {
   private static final String DOCUMENTATION = "documentation";
   private static final int DOM_ITEMS_SIZE = 50;
+  private static final String SIGNATURES_CONTENT_ID = "signaturesContent";
 
   private final PopupResources popupResources;
   /** The related editor. */
@@ -107,6 +108,7 @@ public class SignatureWidget implements EventListener {
     popupElement.appendChild(headerElement);
 
     popupBodyElement = Elements.createDivElement(popupResources.popupStyle().body());
+    popupBodyElement.setId(SIGNATURES_CONTENT_ID);
     popupElement.appendChild(popupBodyElement);
 
     listElement = Elements.createUListElement();

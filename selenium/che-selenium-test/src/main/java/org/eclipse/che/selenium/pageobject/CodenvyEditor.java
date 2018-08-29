@@ -35,7 +35,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HOVER_P
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
@@ -53,6 +52,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FIL
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_LIST_BUTTON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_WITH_UNSAVED_STATUS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_RULER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_TOOLTIP;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TOOLTIP_TITLE_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.BLUE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.FOCUSED_DEFAULT;
@@ -167,7 +167,7 @@ public class CodenvyEditor {
     String ASSIST_CONTENT_CONTAINER = "//div[@class='contentassist']/following-sibling::div";
     String AUTOCOMPLETE_CONTAINER = "//div[text()='Proposals:']//following::div/ulist";
     String PROPOSITION_CONTAINER = "//div[@id='gwt_root']/following::div/ulist";
-    String SHOW_HINTS_POP_UP = "//div[@class='popupContent']/div[1]";
+    String SHOW_HINTS_POP_UP = "//div[@id='signaturesContent']";
     String RULER_ANNOTATIONS = "//div[@class='ruler annotations']";
     String RULER_OVERVIEW = "//div[@class='ruler overview']";
     String RULER_LINES = "//div[@class='ruler lines']";
@@ -180,7 +180,6 @@ public class CodenvyEditor {
         "//div[contains(text(), 'Choose Implementation of')]/following::span[text()='%s']";
     String PUNCTUATION_SEPARATOR = "//span[contains(@class,'punctuation separator space')]";
     String TEXT_VIEW_RULER = "//div[@class='textviewInnerRightRuler']";
-    String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
     String TAB_LIST_BUTTON = "gwt-debug-editorMenu";
     String ITEM_TAB_LIST = "//div[@class='popupContent']//div[text()='%s']/parent::div";
     String NOTIFICATION_PANEL_ID = "gwt-debug-leftNotificationGutter";
@@ -190,8 +189,8 @@ public class CodenvyEditor {
     String DEBUGGER_BREAKPOINT_CONDITION =
         "//div[@class='breakpoint %s condition' and text()='%d']";
     String DEBUGGER_BREAKPOINT_DISABLED = "//div[@class='breakpoint disabled' and text()='%d']";
-    String JAVA_DOC_POPUP = "//div[contains(@class, 'textviewTooltip')]";
-    String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
+    String TEXT_VIEW_TOOLTIP = "//div[contains(@class, 'textviewTooltip')]";
+    String AUTOCOMPLETE_PROPOSAL_DOC_POPUP =
         "//div[@id='gwt-debug-content-assist-doc-popup']//div[@class='gwt-HTML']";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
@@ -298,8 +297,8 @@ public class CodenvyEditor {
   @FindBy(xpath = PROPOSITION_CONTAINER)
   private WebElement propositionContainer;
 
-  @FindBy(xpath = JAVA_DOC_POPUP)
-  private WebElement javaDocPopUp;
+  @FindBy(xpath = TEXT_VIEW_TOOLTIP)
+  private WebElement textViewTooltip;
 
   @FindBy(xpath = ASSIST_CONTENT_CONTAINER)
   private WebElement assistContentContainer;
@@ -316,8 +315,8 @@ public class CodenvyEditor {
   @FindBy(xpath = ORION_ACTIVE_EDITOR_CONTAINER_XPATH)
   private WebElement activeEditorContainer;
 
-  @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
-  private WebElement autocompleteProposalJavaDocPopup;
+  @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_DOC_POPUP)
+  private WebElement autocompleteProposalDocPopup;
 
   @FindBy(xpath = ALL_TABS_XPATH)
   private WebElement someOpenedTab;
@@ -927,6 +926,17 @@ public class CodenvyEditor {
    */
   public void selectAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item)));
+  }
+
+  /**
+   * Selects composite {@code item} in the autocomplete container. It works when autocomplete item
+   * contains many <span> elements.
+   *
+   * @param item item from autocomplete container.
+   */
+  public void selectCompositeAutocompleteProposal(String item) {
+    seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[.='%s']", item)));
   }
 
@@ -1114,7 +1124,7 @@ public class CodenvyEditor {
 
   /** Gets visible text from the 'Show hints' popup panel. */
   public String getTextFromShowHintsPopUp() {
-    testWebElementRenderChecker.waitElementIsRendered(By.xpath("//div[@class='gwt-PopupPanel']"));
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath(Locators.SHOW_HINTS_POP_UP));
     return seleniumWebDriverHelper.waitVisibilityAndGetText(showHintsPopUp);
   }
 
@@ -1447,12 +1457,12 @@ public class CodenvyEditor {
 
   /** Waits until javadoc popup is opened. */
   public void waitJavaDocPopUpOpened() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(JAVA_DOC_POPUP), ELEMENT_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(TEXT_VIEW_TOOLTIP), ELEMENT_TIMEOUT_SEC);
   }
 
   /** Waits until javadoc popup is closed */
   public void waitJavaDocPopUpClosed() {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(JAVA_DOC_POPUP));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(TEXT_VIEW_TOOLTIP));
   }
 
   /** Waits until {@code expectedText} is present in javadoc's popup body */
@@ -1492,8 +1502,9 @@ public class CodenvyEditor {
    * @return true - if {@code expectedText} is present in javadoc body, false - if not
    */
   public boolean waitAndCheckTextPresenceInJavaDoc(String expectedText) {
+    seleniumWebDriverHelper.moveCursorTo(By.xpath(TEXT_VIEW_TOOLTIP));
     return seleniumWebDriverHelper
-        .waitVisibility(By.xpath(JAVA_DOC_POPUP))
+        .waitVisibility(By.xpath(TEXT_VIEW_TOOLTIP))
         .getText()
         .contains(expectedText);
   }
@@ -1505,7 +1516,7 @@ public class CodenvyEditor {
    * @param textLink visible link's text
    */
   public void checkTextAfterGoToLinkInJavaDocPopUp(String text, String textLink) {
-    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
+    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(TEXT_VIEW_TOOLTIP));
 
     WebElement link =
         seleniumWebDriverHelper.waitVisibility(By.xpath(format("//a[text()='%s']", textLink)));
@@ -1531,6 +1542,15 @@ public class CodenvyEditor {
         .sendKeys(Keys.chord("q"))
         .keyUp(CONTROL)
         .perform();
+  }
+
+  /**
+   * Checks visibility state of the java doc popup.
+   *
+   * @return {@code true} if the container is visible, otherwise returns {@code false}
+   */
+  public boolean isTooltipPopupVisible() {
+    return seleniumWebDriverHelper.isVisible(By.xpath(TEXT_VIEW_TOOLTIP));
   }
 
   /**
@@ -1883,11 +1903,6 @@ public class CodenvyEditor {
   /** Waits until the text view ruler is not present. */
   public void waitTextViewRulerIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(TEXT_VIEW_RULER));
-  }
-
-  /** Clicks on 'Download sources' link in the editor. */
-  public void clickOnDownloadSourcesLink() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.DOWNLOAD_SOURCES_LINK));
   }
 
   /**
