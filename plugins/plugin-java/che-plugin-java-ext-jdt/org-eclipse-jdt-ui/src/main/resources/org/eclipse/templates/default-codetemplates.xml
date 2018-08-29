@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+/*******************************************************************************
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
+ *******************************************************************************/
+-->
+
+<templates>
+<template name="gettercomment" id="org.eclipse.jdt.ui.text.codetemplates.gettercomment" description="%CodeTemplates.gettercomment" context="gettercomment_context" enabled="true">/**
+ * @return %CodeTemplates.gettercomment.returntagcontent
+ */</template>
+
+<template name="settercomment" id="org.eclipse.jdt.ui.text.codetemplates.settercomment" description="%CodeTemplates.settercomment" context="settercomment_context" enabled="true">/**
+ * @param ${param} %CodeTemplates.settercomment.paramtagcontent
+ */</template>
+
+<template name="constructorcomment" id="org.eclipse.jdt.ui.text.codetemplates.constructorcomment" description="%CodeTemplates.constructorcomment" context="constructorcomment_context" enabled="true">/**
+ * ${tags}
+ */</template>
+
+<template name="filecomment" id="org.eclipse.jdt.ui.text.codetemplates.filecomment" description="%CodeTemplates.filecomment" context="filecomment_context" enabled="true">/**
+ * 
+ */</template>
+
+<template name="typecomment" id="org.eclipse.jdt.ui.text.codetemplates.typecomment" description="%CodeTemplates.typecomment" context="typecomment_context" enabled="true">/**
+ * @author ${user}
+ *
+ * ${tags}
+ */</template>
+ 
+<template name="fieldcomment" id="org.eclipse.jdt.ui.text.codetemplates.fieldcomment" description="%CodeTemplates.fieldcomment" context="fieldcomment_context" enabled="true">/**
+ * 
+ */</template>
+ 
+<template name="methodcomment" id="org.eclipse.jdt.ui.text.codetemplates.methodcomment" description="%CodeTemplates.nonoverridingcomment" context="methodcomment_context" enabled="true">/**
+ * ${tags}
+ */</template>
+
+<template name="overridecomment" id="org.eclipse.jdt.ui.text.codetemplates.overridecomment" description="%CodeTemplates.overridecomment" context="overridecomment_context" enabled="true">/* %CodeTemplates.overridecomment.nonjd
+ * ${see_to_overridden}
+ */</template>
+
+<template name="delegatecomment" id="org.eclipse.jdt.ui.text.codetemplates.delegatecomment" description="%CodeTemplates.delegatecomment" context="delegatecomment_context" enabled="true">/**
+ * ${tags}
+ * ${see_to_target}
+ */</template>
+
+<template name="newtype" id="org.eclipse.jdt.ui.text.codetemplates.newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">${filecomment}
+${package_declaration}
+
+${typecomment}
+${type_declaration}</template>
+
+<template name="classbody" id="org.eclipse.jdt.ui.text.codetemplates.classbody" description="%CodeTemplates.classbody" context="classbody_context" enabled="true">
+</template>
+
+<template name="interfacebody" id="org.eclipse.jdt.ui.text.codetemplates.interfacebody" description="%CodeTemplates.interfacebody" context="interfacebody_context" enabled="true">
+</template>
+
+<template name="enumbody" id="org.eclipse.jdt.ui.text.codetemplates.enumbody" description="%CodeTemplates.enumbody" context="enumbody_context" enabled="true">
+</template>
+
+<template name="annotationbody" id="org.eclipse.jdt.ui.text.codetemplates.annotationbody" description="%CodeTemplates.annotationbody" context="annotationbody_context" enabled="true">
+</template>
+
+<template name="catchblock" id="org.eclipse.jdt.ui.text.codetemplates.catchblock" description="%CodeTemplates.catchblock" context="catchblock_context" enabled="true">// ${todo} %CodeTemplates.catchblock.tododesc
+${exception_var}.printStackTrace();</template>
+
+<template name="methodbody" id="org.eclipse.jdt.ui.text.codetemplates.methodbody" description="%CodeTemplates.methodstub" context="methodbody_context" enabled="true">// ${todo} %CodeTemplates.methodstub.tododesc
+${body_statement}</template>
+
+<template name="constructorbody" id="org.eclipse.jdt.ui.text.codetemplates.constructorbody" description="%CodeTemplates.constructorstub" context="constructorbody_context" enabled="true">${body_statement}
+// ${todo} %CodeTemplates.constructorstub.tododesc</template>
+
+<template name="getterbody" id="org.eclipse.jdt.ui.text.codetemplates.getterbody" description="%CodeTemplates.getterstub" context="getterbody_context" enabled="true">return ${field};</template>
+
+<template name="setterbody" id="org.eclipse.jdt.ui.text.codetemplates.setterbody" description="%CodeTemplates.setterstub" context="setterbody_context" enabled="true">${field} = ${param};</template>
+
+</templates>
