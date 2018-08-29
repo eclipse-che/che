@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.CHECKBOX_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.DECREMENT_RAM_BUTTON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines.Locators.DELETE_BUTTON_XPATH_TEMPLATE;
@@ -193,8 +194,29 @@ public class WorkspaceDetailsMachines {
         driver -> getRamAmount(machineName).equals(ramAmount));
   }
 
+  private void clickOnRamField(String machineName) {
+    seleniumWebDriverHelper.moveCursorToAndClick(getRamAmountTextFieldLocator(machineName));
+  }
+
+  private void moveCursorToEditButton(String machineName) {
+    seleniumWebDriverHelper.moveCursorTo(getEditButtonLocator(machineName));
+  }
+
   public void typeRamAmount(String machineName, String ramAmount) {
-    seleniumWebDriverHelper.setValue(getRamAmountTextFieldLocator(machineName), ramAmount);
+    moveCursorToEditButton(machineName);
+    clickOnRamField(machineName);
+    seleniumWebDriverHelper.setValue(getRamAmountTextFieldLocator(machineName), "");
+
+    if (ramAmount.isEmpty()) {
+      return;
+    }
+
+    for (int i = 0; i < ramAmount.length(); i++) {
+      seleniumWebDriverHelper.waitAndSendKeysTo(
+          getRamAmountTextFieldLocator(machineName), valueOf(ramAmount.charAt(i)));
+    }
+
+    seleniumWebDriverHelper.waitValueEqualsTo(getRamAmountTextFieldLocator(machineName), ramAmount);
   }
 
   public WebElement waitDecrementRamButton(String machineName) {
@@ -207,10 +229,12 @@ public class WorkspaceDetailsMachines {
 
   public void clickOnDecrementRamButton(String machineName) {
     waitDecrementRamButton(machineName).click();
+    moveCursorToEditButton(machineName);
   }
 
   public void clickOnIncrementRamButton(String machineName) {
     waitIncrementRamButton(machineName).click();
+    moveCursorToEditButton(machineName);
   }
 
   public boolean isCheckboxEnabled(String machineName) {
