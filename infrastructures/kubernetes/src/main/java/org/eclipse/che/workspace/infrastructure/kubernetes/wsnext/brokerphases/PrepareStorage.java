@@ -29,18 +29,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class PrepareStorage implements BrokerPhase {
+public class PrepareStorage extends BrokerPhase {
 
   private final String workspaceId;
   private final KubernetesEnvironment environment;
-  private final BrokerPhase nextPhase;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final String pvcName;
   private final String pvcAccessMode;
   private final String pvcQuantity;
 
   public PrepareStorage(
-      BrokerPhase nextPhase,
       String workspaceId,
       KubernetesEnvironment environment,
       WorkspaceVolumesStrategy volumesStrategy,
@@ -49,7 +47,6 @@ public class PrepareStorage implements BrokerPhase {
       String pvcQuantity) {
     this.workspaceId = workspaceId;
     this.environment = environment;
-    this.nextPhase = nextPhase;
     this.volumesStrategy = volumesStrategy;
     this.pvcName = pvcName;
     this.pvcAccessMode = pvcAccessMode;

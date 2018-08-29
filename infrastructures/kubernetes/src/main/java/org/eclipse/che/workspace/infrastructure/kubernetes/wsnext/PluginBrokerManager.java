@@ -98,38 +98,59 @@ public class PluginBrokerManager {
 
     String configMapName = generateUniqueConfigMapName();
 
-    WaitBrokerResult waitBrokerResult = new WaitBrokerResult(toolingFuture);
-    DeployBroker deployBroker =
-        new DeployBroker(
-            kubernetesNamespace,
-            workspaceId,
-            cheWebsocketEndpoint,
-            CONF_FOLDER,
-            CONFIG_FILE,
-            PVC_CLAIM_PROJECTS,
-            BROKER_VOLUME,
-            configMapName,
-            pluginBrokerImage,
-            waitBrokerResult);
+    ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, toolingFuture);
+    PrepareStorage prepareStorage = getPrepareStoragePhase(workspaceId, environment);
     DeliverMetas deliverMetas =
-        new DeliverMetas(
-            deployBroker, kubernetesNamespace, pluginsMeta, CONFIG_FILE, configMapName);
-    PrepareStorage prepareStorage =
-        new PrepareStorage(
-            deliverMetas,
-            workspaceId,
-            environment,
-            volumesStrategy,
-            pvcName,
-            pvcAccessMode,
-            pvcQuantity);
-    ListenBrokerEvents listenBrokerEvents =
-        new ListenBrokerEvents(prepareStorage, workspaceId, toolingFuture, eventService);
+        getDeliverPhaseMetas(kubernetesNamespace, pluginsMeta, configMapName);
+    WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(toolingFuture);
+    DeployBroker deployBroker =
+        getDeployBrokerPhase(kubernetesNamespace, workspaceId, configMapName);
 
+    listenBrokerEvents
+        .then(prepareStorage)
+        .then(deliverMetas)
+        .then(deployBroker)
+        .then(waitBrokerResult);
     return listenBrokerEvents.execute();
   }
 
   private String generateUniqueConfigMapName() {
     return NameGenerator.generate(CONFIG_MAP_NAME_SUFFIX, 6);
+  }
+
+  private ListenBrokerEvents getListenEventPhase(
+      String workspaceId, CompletableFuture<List<ChePlugin>> toolingFuture) {
+    return new ListenBrokerEvents(workspaceId, toolingFuture, eventService);
+  }
+
+  private PrepareStorage getPrepareStoragePhase(
+      String workspaceId, KubernetesEnvironment environment) {
+    return new PrepareStorage(
+        workspaceId, environment, volumesStrategy, pvcName, pvcAccessMode, pvcQuantity);
+  }
+
+  private DeliverMetas getDeliverPhaseMetas(
+      KubernetesNamespace kubernetesNamespace,
+      Collection<PluginMeta> pluginsMeta,
+      String configMapName) {
+    return new DeliverMetas(kubernetesNamespace, pluginsMeta, CONFIG_FILE, configMapName);
+  }
+
+  private DeployBroker getDeployBrokerPhase(
+      KubernetesNamespace kubernetesNamespace, String workspaceId, String configMapName) {
+    return new DeployBroker(
+        kubernetesNamespace,
+        workspaceId,
+        cheWebsocketEndpoint,
+        CONF_FOLDER,
+        CONFIG_FILE,
+        PVC_CLAIM_PROJECTS,
+        BROKER_VOLUME,
+        configMapName,
+        pluginBrokerImage);
+  }
+
+  private WaitBrokerResult getWaitBrokerPhase(CompletableFuture<List<ChePlugin>> toolingFuture) {
+    return new WaitBrokerResult(toolingFuture);
   }
 }

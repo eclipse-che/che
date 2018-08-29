@@ -29,25 +29,21 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.events.BrokerR
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class ListenBrokerEvents implements BrokerPhase {
+public class ListenBrokerEvents extends BrokerPhase {
 
   private final String workspaceId;
   private final CompletableFuture<List<ChePlugin>> toolingFuture;
-  private final BrokerPhase nextPhase;
   private final EventService eventService;
 
   public ListenBrokerEvents(
-      BrokerPhase nextPhase,
       String workspaceId,
       CompletableFuture<List<ChePlugin>> toolingFuture,
       EventService eventService) {
     this.workspaceId = workspaceId;
     this.toolingFuture = toolingFuture;
-    this.nextPhase = nextPhase;
     this.eventService = eventService;
   }
 
-  @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     BrokerResultListener brokerResultListener =
         new BrokerResultListener(workspaceId, toolingFuture);

@@ -29,7 +29,7 @@ import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class WaitBrokerResult implements BrokerPhase {
+public class WaitBrokerResult extends BrokerPhase {
 
   private final CompletableFuture<List<ChePlugin>> toolingFuture;
 

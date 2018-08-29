@@ -40,7 +40,7 @@ import org.slf4j.Logger;
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class DeployBroker implements BrokerPhase {
+public class DeployBroker extends BrokerPhase {
 
   private static final Logger LOG = getLogger(DeployBroker.class);
 
@@ -53,7 +53,6 @@ public class DeployBroker implements BrokerPhase {
   private final String configMapName;
   private final String pluginBrokerImage;
   private final KubernetesNamespace kubernetesNamespace;
-  private final BrokerPhase nextPhase;
 
   public DeployBroker(
       KubernetesNamespace kubernetesNamespace,
@@ -64,8 +63,7 @@ public class DeployBroker implements BrokerPhase {
       String pvcClaimProjects,
       String brokerVolume,
       String configMapName,
-      String pluginBrokerImage,
-      BrokerPhase nextPhase) {
+      String pluginBrokerImage) {
     this.kubernetesNamespace = kubernetesNamespace;
     this.workspaceId = workspaceId;
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
@@ -75,7 +73,6 @@ public class DeployBroker implements BrokerPhase {
     this.brokerVolume = brokerVolume;
     this.configMapName = configMapName;
     this.pluginBrokerImage = pluginBrokerImage;
-    this.nextPhase = nextPhase;
   }
 
   @Override

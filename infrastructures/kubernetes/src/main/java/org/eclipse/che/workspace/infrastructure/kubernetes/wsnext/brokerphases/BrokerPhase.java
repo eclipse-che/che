@@ -25,13 +25,24 @@ import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
  * @author Oleksandr Garagatyi
  */
 @Beta
-public interface BrokerPhase {
+public abstract class BrokerPhase {
+
+  protected BrokerPhase nextPhase;
+
+  @Beta
+  public BrokerPhase then(BrokerPhase next) {
+    this.nextPhase = next;
+    return next;
+  }
 
   /**
-   * Executes this phase. May involve nested call of another {@link BrokerPhase}.
+   * Executes this phase. Broker phase implementation should call next {@link BrokerPhase} if it is
+   * set.
    *
    * <p>This API is in <b>Beta</b> and is subject to changes or removal.
+   *
+   * @throws InfrastructureException when an error occurs during the progressing of this stage
    */
   @Beta
-  List<ChePlugin> execute() throws InfrastructureException;
+  public abstract List<ChePlugin> execute() throws InfrastructureException;
 }

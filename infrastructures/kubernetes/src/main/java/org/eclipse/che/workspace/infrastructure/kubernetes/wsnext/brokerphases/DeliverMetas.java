@@ -37,26 +37,23 @@ import org.slf4j.Logger;
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class DeliverMetas implements BrokerPhase {
+public class DeliverMetas extends BrokerPhase {
 
   private static final Logger LOG = getLogger(DeliverMetas.class);
   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
   private final KubernetesNamespace kubernetesNamespace;
   private final Collection<PluginMeta> pluginsMeta;
-  private final BrokerPhase nextPhase;
   private final String configFile;
   private final String configMapName;
 
   public DeliverMetas(
-      BrokerPhase nextPhase,
       KubernetesNamespace kubernetesNamespace,
       Collection<PluginMeta> pluginsMeta,
       String configFile,
       String configMapName) {
     this.kubernetesNamespace = kubernetesNamespace;
     this.pluginsMeta = pluginsMeta;
-    this.nextPhase = nextPhase;
     this.configFile = configFile;
     this.configMapName = configMapName;
   }
