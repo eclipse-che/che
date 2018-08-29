@@ -1,0 +1,3 @@
+package A;
+class A{
+}
