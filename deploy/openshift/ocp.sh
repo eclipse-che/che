@@ -90,15 +90,6 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
 
-DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE_TAG="latest"
-export CHE_PLUGIN_REGISTRY_IMAGE_TAG=${CHE_PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE_TAG}}
-
-DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE="eclipse/che-plugin-registry"
-export CHE_PLUGIN_REGISTRY_IMAGE=${CHE_PLUGIN_REGISTRY_IMAGE:-${DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE}}
-
-DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE_PULL_POLICY="Always"
-export CHE_PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${CHE_PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_CHE_PLUGIN_REGISTRY_IMAGE_PULL_POLICY}}
-
 }
 
 test_dns_provider() {
@@ -243,19 +234,6 @@ deploy_che_to_ocp() {
     $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
     ${BASE_DIR}/deploy_che.sh
   fi
-}
-
-deployChePluginRegistry() {
-if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
-  echo "Deploying Che plugin registry..."
-  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-plugin-registry.yml \
-             -p IMAGE=${CHE_PLUGIN_REGISTRY_IMAGE} \
-             -p IMAGE_TAG=${CHE_PLUGIN_REGISTRY_IMAGE_TAG} \
-             -p PULL_POLICY=${CHE_PLUGIN_REGISTRY_IMAGE_PULL_POLICY}
-  CHE_PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
-  echo "Che plugin registry deployment complete. $CHE_PLUGIN_REGISTRY_ROUTE"
-  ${OC_BINARY} set env dc/che CHE_PLUGIN_REGISTRY_URL="http://$CHE_PLUGIN_REGISTRY_ROUTE/plugins/"
-fi
 }
 
 destroy_ocp() {
@@ -422,4 +400,4 @@ init
 get_tools
 parse_args "$@"
 deploy_che_to_ocp
-deployChePluginRegistry
+
