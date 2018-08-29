@@ -37,7 +37,9 @@ import org.eclipse.che.api.project.server.VcsStatusProvider;
  * Git implementation of {@link VcsStatusProvider}.
  *
  * @author Igor Vinokur
+ * @deprecated use {@link CachedGitStatusProvider}
  */
+@Deprecated
 public class GitStatusProvider implements VcsStatusProvider {
 
   private final GitConnectionFactory gitConnectionFactory;
