@@ -19,12 +19,12 @@ BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-mac.zip"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-mac.zip"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
@@ -222,9 +222,7 @@ run_ocp() {
         echo "[OCP] start OKD with '${ENABLE_COMPONENTS}'"
     fi
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" \
-                          --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}" \
-                          --base-dir=${OKD_DIR} \
-                          "${ENABLE_COMPONENTS}"
+                          --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
     wait_for_automation_service_broker
 }
@@ -239,7 +237,7 @@ deploy_che_to_ocp() {
 
 destroy_ocp() {
     if [ -d "${OKD_DIR}" ]; then
-      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*" || true
+      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*" > /dev/null || true
     fi
     $OC_BINARY login -u system:admin
     $OC_BINARY delete pvc --all
