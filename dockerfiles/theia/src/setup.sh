@@ -2,6 +2,16 @@
 set -e
 set -u
 
+for f in "/etc/passwd" "/etc/group"; do
+    chgrp -R 0 ${f}
+    chmod -R g+rwX ${f};
+done
+# Generate passwd.template
+cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template
+# Generate group.template
+cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template
+
+
 # Install basic software used for checking github API rate limit
 yum install -y epel-release
 yum -y install curl jq expect
