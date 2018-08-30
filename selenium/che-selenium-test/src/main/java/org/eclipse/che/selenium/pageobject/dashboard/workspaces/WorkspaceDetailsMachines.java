@@ -116,6 +116,12 @@ public class WorkspaceDetailsMachines {
     return By.xpath(ramAmountTextFieldXpath);
   }
 
+  private By getRamAmountTextFieldContainerLocator(String machineName) {
+    final String ramAmountTextFieldXpath =
+        format(RAM_AMOUNT_TEXT_FIELD_XPATH_TEMPLATE + "//parent::div", machineName);
+    return By.xpath(ramAmountTextFieldXpath);
+  }
+
   public void waitNotificationMessage(String expectedMessage) {
     final String notificationMessageXpath =
         format(NOTIFICATION_MESSAGE_XPATH_TEMPLATE, expectedMessage);
@@ -195,16 +201,23 @@ public class WorkspaceDetailsMachines {
   }
 
   private void clickOnRamField(String machineName) {
-    seleniumWebDriverHelper.moveCursorToAndClick(getRamAmountTextFieldLocator(machineName));
+    seleniumWebDriverHelper.moveCursorToAndClick(
+        getRamAmountTextFieldContainerLocator(machineName));
   }
 
   private void moveCursorToEditButton(String machineName) {
     seleniumWebDriverHelper.moveCursorTo(getEditButtonLocator(machineName));
   }
 
+  private void waitEditButtonTooltip() {
+    final String editorButtonTooltipXpath = "//div[@content='Edit']";
+    seleniumWebDriverHelper.waitVisibility(By.xpath(editorButtonTooltipXpath));
+  }
+
   public void typeRamAmount(String machineName, String ramAmount) {
     final String emptyValue = "";
     moveCursorToEditButton(machineName);
+    waitEditButtonTooltip();
     clickOnRamField(machineName);
 
     seleniumWebDriverHelper.setValue(getRamAmountTextFieldLocator(machineName), emptyValue);
@@ -231,11 +244,13 @@ public class WorkspaceDetailsMachines {
   public void clickOnDecrementRamButton(String machineName) {
     waitDecrementRamButton(machineName).click();
     moveCursorToEditButton(machineName);
+    waitEditButtonTooltip();
   }
 
   public void clickOnIncrementRamButton(String machineName) {
     waitIncrementRamButton(machineName).click();
     moveCursorToEditButton(machineName);
+    waitEditButtonTooltip();
   }
 
   public boolean isCheckboxEnabled(String machineName) {
