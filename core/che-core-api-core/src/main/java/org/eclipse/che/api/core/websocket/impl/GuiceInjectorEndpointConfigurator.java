@@ -13,6 +13,9 @@ package org.eclipse.che.api.core.websocket.impl;
 
 import com.google.inject.Injector;
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+import javax.websocket.HandshakeResponse;
+import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
 
 /**
@@ -25,5 +28,15 @@ public class GuiceInjectorEndpointConfigurator extends ServerEndpointConfig.Conf
 
   public <T> T getEndpointInstance(Class<T> endpointClass) {
     return injector.getInstance(endpointClass);
+  }
+
+  @Override
+  public void modifyHandshake(
+      ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+    HttpSession httpSession = (HttpSession) request.getHttpSession();
+    Object sessionSubject = httpSession.getAttribute("che_subject");
+    if (sessionSubject != null) {
+      sec.getUserProperties().put("che_subject", sessionSubject);
+    }
   }
 }

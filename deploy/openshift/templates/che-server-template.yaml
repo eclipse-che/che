@@ -145,8 +145,8 @@ objects:
                 key: ca.crt
                 name: openshift-identity-provider
                 optional: true
-          - name: CHE_WORKSPACE_FEATURE_API
-            value: "http://che-plugin-registry:80"
+          - name: CHE_PLUGIN_REGISTRY_URL
+            value: "${CHE_PLUGIN_REGISTRY_URL}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -277,6 +277,10 @@ parameters:
   displayName: GitHub Client Secret
   description: GitHub oAuth app client servet. Applicable to Che single user only!
   value: ''
+- name: CHE_PLUGIN_REGISTRY_URL
+  displayName: Eclipse Che plugin registry URL
+  description: Url that used to get meta information about Eclipse Che tooling
+  value: 'NULL'
 labels:
   app: che
   template: che

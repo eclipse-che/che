@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.POM_XML;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.UNKNOWN_VALUE;
 
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.resources.Project;
@@ -42,7 +43,7 @@ public class PomInterceptor implements ResourceInterceptor {
           && project.isTypeOf(MAVEN_ID)
           && resource.getParent().getLocation().equals(project.getLocation())) {
         String artifact = project.getAttribute(ARTIFACT_ID);
-        if (!isNullOrEmpty(artifact)) {
+        if (!isNullOrEmpty(artifact) && !UNKNOWN_VALUE.equals(artifact)) {
           resource.addMarker(new PresentableTextMarker(artifact));
         }
       }

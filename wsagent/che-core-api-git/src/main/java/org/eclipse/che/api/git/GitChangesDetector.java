@@ -184,16 +184,18 @@ public class GitChangesDetector {
           fileStatus = NOT_MODIFIED;
         }
 
+        FileChangedEventDto changedEventDto =
+            newDto(FileChangedEventDto.class)
+                .withPath(wsPath)
+                .withStatus(fileStatus)
+                .withEditedRegions(
+                    fileStatus == MODIFIED ? gitConnection.getEditedRegions(itemPath) : null);
+        eventService.publish(changedEventDto);
         transmitter
             .newRequest()
             .endpointId(endpointId)
             .methodName(EVENT_GIT_FILE_CHANGED)
-            .paramsAsDto(
-                newDto(FileChangedEventDto.class)
-                    .withPath(wsPath)
-                    .withStatus(fileStatus)
-                    .withEditedRegions(
-                        fileStatus == MODIFIED ? gitConnection.getEditedRegions(itemPath) : null))
+            .paramsAsDto(changedEventDto)
             .sendAndSkipResult();
       } catch (GitCommitInProgressException | GitInvalidRepositoryException e) {
         // Silent ignore
