@@ -124,7 +124,9 @@ public class KubernetesInfraModule extends AbstractModule {
 
     MapBinder<String, ChePluginsApplier> chePluginsAppliers =
         MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
-    chePluginsAppliers.addBinding(KubernetesEnvironment.TYPE).to(KubernetesPluginsToolingApplier.class);
+    chePluginsAppliers
+        .addBinding(KubernetesEnvironment.TYPE)
+        .to(KubernetesPluginsToolingApplier.class);
 
     bind(new TypeLiteral<SecureServerExposerFactory<KubernetesEnvironment>>() {})
         .toProvider(
