@@ -682,7 +682,7 @@ public class ProjectExplorer {
   }
 
   /** Waits on context menu item is not visible */
-  public void waitItemOnContexMenuIsNotVisible(ContextMenuItems item) {
+  public void waitContexMenuItemIsNotVisible(ContextMenuItems item) {
     waitContextMenu();
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item.get())));

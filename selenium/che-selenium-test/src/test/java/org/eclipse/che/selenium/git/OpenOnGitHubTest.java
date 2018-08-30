@@ -115,7 +115,7 @@ public class OpenOnGitHubTest {
   @Test
   public void checkProjectWithoutGitFolder() {
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_WITHOUT_GIT_FOLDER);
-    projectExplorer.waitItemOnContexMenuIsNotVisible(
+    projectExplorer.waitContexMenuItemIsNotVisible(
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     // for closing context menu
     projectExplorer.clickOnItemInContextMenu(
