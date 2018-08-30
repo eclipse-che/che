@@ -68,7 +68,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -651,7 +650,10 @@ public class ProjectExplorer {
   }
 
   /**
-   * Opens context menu on item with specified {@code path}
+   * Opens context menu on item with specified {@code path} Selecting item and invoking context menu
+   * are two separate operations. If some item retakes focus then context menu will be invoked at
+   * wrong item. It might happen because project explorer is updated asynchronously and new appeared
+   * items retake focus. So, there are several tries to invoke context menu at correct item.
    *
    * @param path item's path in format: "Test/src/pom.xml".
    */
@@ -665,7 +667,7 @@ public class ProjectExplorer {
       try {
         waitItemIsSelected(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
         return;
-      } catch (WebDriverException e) {
+      } catch (TimeoutException e) {
         seleniumWebDriverHelper.hideContextMenu();
         waitContextMenuPopUpClosed();
         if (i == 2) {
@@ -1094,12 +1096,7 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void waitItemIsSelected(String path) {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath(
-            format(
-                "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
-                path)),
-        ELEMENT_TIMEOUT_SEC);
+    waitItemIsSelected(path, ELEMENT_TIMEOUT_SEC);
   }
 
   /**
