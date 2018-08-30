@@ -18,16 +18,18 @@ import static org.testng.Assert.fail;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.Events;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
@@ -38,11 +40,12 @@ import org.testng.annotations.Test;
 
 @Test(groups = TestGroup.GITHUB)
 public class DirectUrlFactoryWithSpecificBranchTest {
-  @Inject
-  @Named("github.auxiliary.username")
-  private String gitHubAuxiliaryUserName;
+  private static final String SECOND_BRANCH_NAME = "contrib";
 
-  @Inject private Ide ide;
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
+
   @Inject private ProjectExplorer projectExplorer;
   @Inject private DefaultTestUser testUser;
   @Inject private TestFactoryInitializer testFactoryInitializer;
@@ -52,25 +55,35 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
+  @Inject private TestGitHubRepository testRepo;
 
   private TestFactory testFactoryWithSpecificBranch;
 
   @BeforeClass
   public void setUp() throws Exception {
+    // preconditions - create test the repository
+    Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+    testRepo.addContent(entryPath);
+    String repositoryUrl = testRepo.getHtmlUrl();
+
+    // create another branch in the test repo
+    testRepo.createBranch(SECOND_BRANCH_NAME);
+
     testFactoryWithSpecificBranch =
-        testFactoryInitializer.fromUrl(
-            "https://github.com/" + gitHubAuxiliaryUserName + "/gitPullTest/tree/contrib-12092015");
+        testFactoryInitializer.fromUrl(repositoryUrl + "/tree/" + SECOND_BRANCH_NAME);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (workspaceServiceClient.exists(gitHubAuxiliaryUserName, testUser.getName())) {
+    if (workspaceServiceClient.exists(gitHubUsername, testUser.getName())) {
       testFactoryWithSpecificBranch.delete();
     }
   }
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
+    String repositoryName = testRepo.getName();
+
     try {
       testFactoryWithSpecificBranch.authenticateAndOpen();
     } catch (NoSuchElementException ex) {
@@ -82,19 +95,27 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
 
-    events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
     events.waitExpectedMessage(
-        "Successfully configured and cloned source code of gitPullTest.",
+        "Project " + repositoryName + " imported", UPDATING_PROJECT_TIMEOUT_SEC);
+    events.waitExpectedMessage(
+        "Successfully configured and cloned source code of " + repositoryName,
         UPDATING_PROJECT_TIMEOUT_SEC);
     events.waitExpectedMessage(
-        "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
+        "Project: "
+            + repositoryName
+            + " | cloned from: "
+            + repositoryName
+            + " | remote branch: refs/remotes/origin/"
+            + SECOND_BRANCH_NAME
+            + " | local branch: "
+            + SECOND_BRANCH_NAME,
         UPDATING_PROJECT_TIMEOUT_SEC);
 
-    projectExplorer.waitAndSelectItem("gitPullTest");
+    projectExplorer.waitAndSelectItem(repositoryName);
     pullRequestPanel.waitOpenPanel();
 
-    projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
-    projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
+    projectExplorer.expandPathInProjectExplorer(repositoryName + "/my-lib");
+    projectExplorer.waitItem(repositoryName + "/my-lib/pom.xml");
 
     String wsId =
         workspaceServiceClient
@@ -104,7 +125,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
     assertTrue(
         visibleItems.containsAll(
-            ImmutableList.of("gitPullTest", "my-lib", "my-webapp", "src", "pom.xml")));
+            ImmutableList.of(repositoryName, "my-lib", "my-webapp", "src", "pom.xml")));
 
     String projectType = testProjectServiceClient.getFirstProject(wsId).getType();
     assertTrue(projectType.equals("blank"));
