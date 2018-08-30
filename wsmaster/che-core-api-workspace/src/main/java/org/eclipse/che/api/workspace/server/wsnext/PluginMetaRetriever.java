@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Fetches Che tooling plugin objects corresponding to attributes of a workspace.
+ * Fetches Che tooling plugin objects corresponding to attributes of a workspace config.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
