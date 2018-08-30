@@ -815,7 +815,7 @@ generateFailSafeReport () {
     do
         local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
         local divTag="<div id=\""${test}"error\" style=\"display:none;\">"
-        local imgTag="<img src=\"screenshots\/"$(basename ${file})"\">"
+        local imgTag="<p><img src=\"screenshots\/"$(basename ${file})"\"><p>"
         sed -i "s/${divTag}/${divTag}${imgTag}/" ${FAILSAFE_REPORT}
     done
 
