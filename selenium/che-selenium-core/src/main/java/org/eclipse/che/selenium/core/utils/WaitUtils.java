@@ -13,6 +13,8 @@ package org.eclipse.che.selenium.core.utils;
 import static java.lang.Thread.sleep;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
+import java.util.Date;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import org.openqa.selenium.TimeoutException;
@@ -58,22 +60,43 @@ public class WaitUtils {
    * Waits during {@code timeout} until {@code condition} has a "true" state.
    *
    * @param condition expression which should be performed
-   * @param timeout waiting time in seconds
+   * @param timeout waiting time
+   * @param delayBetweenAttemptsInMilliseconds delay between tries of {@code condition} execution in milliseconds
    */
-  public static void waitSuccessCondition(BooleanSupplier condition, int timeout) {
-    final int delayBetweenTriesInSeconds = 1;
+  public static void waitSuccessCondition(BooleanSupplier condition, int timeout, int delayBetweenAttemptsInMilliseconds, TimeUnit timeUnit) {
+    final long waitingTime = timeUnit.toMillis(timeout);
+    final long startingTime = System.currentTimeMillis();
 
-    for (int i = 1; i <= timeout; i++) {
+    while(isTimeAvailable(startingTime, waitingTime)){
       if (condition.getAsBoolean()) {
         break;
       }
 
-      if (i == timeout) {
-        throw new TimeoutException("The condition has not being in \"true\" state during timeout");
-      }
-
-      sleepQuietly(delayBetweenTriesInSeconds);
+      sleepQuietly(delayBetweenAttemptsInMilliseconds, TimeUnit.MILLISECONDS);
     }
+
+    throw new TimeoutException("The condition has not being in \"true\" state during timeout");
+  }
+
+  /**
+   * Waits during {@code timeout} until {@code condition} has a "true" state.
+   *
+   * @param condition expression which should be performed
+   * @param timeout waiting time
+   */
+  public static void waitSuccessCondition(BooleanSupplier condition, int timeout, TimeUnit timeUnit){
+    final int delayBetweenAttemptsInMilliseconds = 500;
+    waitSuccessCondition(condition, timeout,delayBetweenAttemptsInMilliseconds, timeUnit);
+  }
+
+  /**
+   * Waits during {@code timeout} until {@code condition} has a "true" state.
+   *
+   * @param condition expression which should be performed
+   * @param timeout waiting time in seconds
+   */
+  public static void waitSuccessCondition(BooleanSupplier condition, int timeout){
+    waitSuccessCondition(condition, timeout, TimeUnit.SECONDS);
   }
 
   /**
@@ -84,5 +107,9 @@ public class WaitUtils {
   public static void waitSuccessCondition(BooleanSupplier condition) {
     final int defaultTimeout = LOAD_PAGE_TIMEOUT_SEC;
     waitSuccessCondition(condition, defaultTimeout);
+  }
+
+  private static boolean isTimeAvailable(final long startingTime, final long waitingTime){
+    return System.currentTimeMillis() < (startingTime + waitingTime);
   }
 }
