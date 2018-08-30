@@ -137,6 +137,7 @@ public class InheritClassTest {
     editor.enterAutocompleteProposal("umGuessByUser : String");
 
     editor.typeTextIntoEditor(" Code");
+    editor.waitTextIntoEditor("CodenvyTest codenvyTest = numGuessByUser Code");
     editor.waitCodeAssistMarkers(ERROR);
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
