@@ -11,8 +11,9 @@
  */
 package org.eclipse.che.plugin.github;
 
+import static org.testng.Assert.assertEquals;
+
 import org.eclipse.che.plugin.github.shared.GitHubUrlUtils;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class GitHUbUrlUtilsTest {
@@ -30,13 +31,13 @@ public class GitHUbUrlUtilsTest {
   @Test
   public void shouldConvertToHttps() {
     String https = GitHubUrlUtils.toHttpsIfNeed(SSH_URL);
-    Assert.assertEquals(https, HTTPS_URL);
+    assertEquals(https, HTTPS_URL);
   }
 
   @Test
   public void shouldReturnSameUrl() {
     String https = GitHubUrlUtils.toHttpsIfNeed(HTTPS_URL);
-    Assert.assertEquals(https, HTTPS_URL);
+    assertEquals(https, HTTPS_URL);
   }
 
   @Test
@@ -47,7 +48,7 @@ public class GitHUbUrlUtilsTest {
             "mysql",
             "src/test/java/org/springframework"
                 + "/samples/petclinic/service/ClinicServiceJdbcTests.java");
-    Assert.assertEquals(blobUrl, BLOB_URL);
+    assertEquals(blobUrl, BLOB_URL);
   }
 
   @Test
@@ -60,5 +61,15 @@ public class GitHUbUrlUtilsTest {
                 + "/samples/petclinic/service/ClinicServiceJdbcTests.java",
             10,
             20);
-     Assert.assertEquals(blobUrl, BLOB_URL + "#L10-L20");  }
+    assertEquals(blobUrl, BLOB_URL + "#L10-L20");
+  }
+
+  @Test
+  public void getTreeUrl() {
+    String rootGitRepoUrl = "https://github.com/eclipse/che/";
+    String ref = "master";
+    String path = "assembly/assembly-wsmaster-war";
+    String getTreeUrl = GitHubUrlUtils.getTreeUrl(rootGitRepoUrl, ref, path);
+    assertEquals(getTreeUrl, rootGitRepoUrl + "/tree/" + ref + "/" + path);
+  }
 }
