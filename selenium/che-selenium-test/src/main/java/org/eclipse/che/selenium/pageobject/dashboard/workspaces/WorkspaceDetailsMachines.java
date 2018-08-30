@@ -30,6 +30,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -200,25 +201,8 @@ public class WorkspaceDetailsMachines {
         driver -> getRamAmount(machineName).equals(ramAmount));
   }
 
-  private void clickOnRamField(String machineName) {
-    seleniumWebDriverHelper.moveCursorToAndClick(
-        getRamAmountTextFieldContainerLocator(machineName));
-  }
-
-  private void moveCursorToEditButton(String machineName) {
-    seleniumWebDriverHelper.moveCursorTo(getEditButtonLocator(machineName));
-  }
-
-  private void waitEditButtonTooltip() {
-    final String editorButtonTooltipXpath = "//div[@content='Edit']";
-    seleniumWebDriverHelper.waitVisibility(By.xpath(editorButtonTooltipXpath));
-  }
-
   public void typeRamAmount(String machineName, String ramAmount) {
     final String emptyValue = "";
-    moveCursorToEditButton(machineName);
-    waitEditButtonTooltip();
-    clickOnRamField(machineName);
 
     seleniumWebDriverHelper.setValue(getRamAmountTextFieldLocator(machineName), emptyValue);
     if (ramAmount.isEmpty()) {
@@ -243,14 +227,12 @@ public class WorkspaceDetailsMachines {
 
   public void clickOnDecrementRamButton(String machineName) {
     waitDecrementRamButton(machineName).click();
-    moveCursorToEditButton(machineName);
-    waitEditButtonTooltip();
+    WaitUtils.sleepQuietly(2);
   }
 
   public void clickOnIncrementRamButton(String machineName) {
     waitIncrementRamButton(machineName).click();
-    moveCursorToEditButton(machineName);
-    waitEditButtonTooltip();
+    WaitUtils.sleepQuietly(2);
   }
 
   public boolean isCheckboxEnabled(String machineName) {
