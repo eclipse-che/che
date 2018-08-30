@@ -75,13 +75,13 @@ public class PluginMetaRetriever {
   }
 
   /**
-   * Gets Che tooling plugins list from provided workspace attributes, fetches corresponding meta
-   * objects from Che plugin registry and returns list of {@link PluginMeta} with meta information
-   * about plugins in a workspace.
+   * Gets Che tooling plugins list from provided workspace config attributes, fetches corresponding
+   * meta objects from Che plugin registry and returns list of {@link PluginMeta} with meta
+   * information about plugins in a workspace.
    *
    * <p>This API is in <b>Beta</b> and is subject to changes or removal.
    *
-   * @param attributes workspace attributes
+   * @param attributes workspace config attributes
    * @throws InfrastructureException when attributes contain invalid Che plugins entries or Che
    *     plugin meta files retrieval from Che plugin registry fails or returns invalid data
    */
@@ -106,7 +106,7 @@ public class PluginMetaRetriever {
           parseIdsVersions(editorAttribute);
       if (editorIdVersionCollection.size() > 1) {
         throw new InfrastructureException(
-            "Multiple editors found in workspace attributes. "
+            "Multiple editors found in workspace config attributes. "
                 + "It is not supported. Please, use one editor only.");
       }
       metasIdsVersions.addAll(editorIdVersionCollection);
@@ -174,7 +174,7 @@ public class PluginMetaRetriever {
     requireEqual(
         version,
         meta.getVersion(),
-        "Plugin version in workspace attributes doesn't match plugin metadata. Plugin object seems broken.");
+        "Plugin version in workspace config attributes doesn't match plugin metadata. Plugin object seems broken.");
     requireNotNullNorEmpty(
         meta.getName(), CHE_PLUGIN_OBJECT_ERROR, id, version, "Name is missing.");
     requireNotNullNorEmpty(
