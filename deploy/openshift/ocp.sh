@@ -89,6 +89,7 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
+
 }
 
 test_dns_provider() {
@@ -297,6 +298,7 @@ parse_args() {
     --image-che - override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
     --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
+    --deploy-che-plugin-registry - deploy Che plugin registry
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
@@ -380,6 +382,10 @@ parse_args() {
            --help)
                echo -e "$HELP"
                exit 1
+           ;;
+           --deploy-che-plugin-registry)
+               export DEPLOY_CHE_PLUGIN_REGISTRY=true
+               shift
            ;;
            *)
                echo "You've passed wrong arg '$i'."
