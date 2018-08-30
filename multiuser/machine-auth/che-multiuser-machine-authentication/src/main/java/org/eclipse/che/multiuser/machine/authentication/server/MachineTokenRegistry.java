@@ -29,6 +29,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
@@ -78,7 +79,7 @@ public class MachineTokenRegistry {
         token = createToken(userId, workspaceId);
       }
       return token;
-    } catch (NotFoundException | ServerException ex) {
+    } catch (NotFoundException | ServerException | ConflictException ex) {
       throw new MachineTokenException(
           format(
               "Failed to generate machine token for user '%s' and workspace '%s'. Cause: '%s'",
@@ -91,7 +92,7 @@ public class MachineTokenRegistry {
 
   /** Creates new token with given data. */
   private String createToken(String userId, String workspaceId)
-      throws NotFoundException, ServerException {
+      throws NotFoundException, ServerException, ConflictException {
     final PrivateKey privateKey = signatureKeyManager.getKeyPair(workspaceId).getPrivate();
     final User user = userManager.getById(userId);
     final Map<String, Object> header = new HashMap<>(2);

@@ -21,6 +21,7 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import java.security.Key;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 
@@ -47,7 +48,7 @@ public class MachineSigningKeyResolver extends SigningKeyResolverAdapter {
     }
     try {
       return keyManager.getKeyPair(wsId).getPublic();
-    } catch (ServerException e) {
+    } catch (ServerException | ConflictException e) {
       throw new JwtException("Unable to fetch signature key pair:" + e.getMessage());
     }
   }

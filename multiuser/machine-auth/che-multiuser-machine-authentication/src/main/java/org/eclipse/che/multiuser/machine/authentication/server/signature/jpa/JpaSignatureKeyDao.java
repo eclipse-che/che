@@ -53,6 +53,12 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
     requireNonNull(keyPair, "Required non-null key pair");
     try {
       doCreate(keyPair);
+    } catch (org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException x) {
+      throw new ConflictException(
+          format(
+              "Workspace with id '%s' referenced by signature key pair doesn't exist",
+              keyPair.getWorkspaceId()));
+
     } catch (DuplicateKeyException dkEx) {
       throw new ConflictException(
           format("Signature key pair for workspace '%s' already exists", keyPair.getWorkspaceId()));
