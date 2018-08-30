@@ -140,8 +140,8 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
   /** {@inheritDoc} */
   @Override
   public void submit() {
-    overwrite.setFormValue(overwrite.getValue().toString());
-    skipFirstLevel.setFormValue(skipFirstLevel.getValue().toString());
+    // overwrite.setFormValue(overwrite.getValue().toString());
+    // skipFirstLevel.setFormValue(skipFirstLevel.getValue().toString());
     submitForm.submit();
     btnUpload.setEnabled(false);
   }
@@ -164,6 +164,11 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
   @Override
   public boolean isOverwriteFileSelected() {
     return overwrite.getValue();
+  }
+
+  @Override
+  public boolean isSkipRootFolderSelected() {
+    return skipFirstLevel.getValue();
   }
 
   private void addFileUploadForm() {

@@ -166,9 +166,9 @@ public class ProjectServiceTest {
 
   @Test
   public void shouldCallUploadFolderFromZip() throws Exception {
-    projectService.uploadFolderFromZip(PARENT_WS_PATH, fileItemIterator);
+    projectService.uploadFolderFromZip(PARENT_WS_PATH, fileItemIterator, false, false);
 
-    verify(projectServiceApi).uploadFolderFromZip(PARENT_WS_PATH, fileItemIterator);
+    verify(projectServiceApi).uploadFolderFromZip(PARENT_WS_PATH, fileItemIterator, false, false);
   }
 
   @Test
