@@ -30,7 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.SidecarToolingProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -42,7 +42,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
-  private final SidecarToolingProvisioner workspaceNext;
+  private final SidecarToolingProvisioner toolingProvisioner;
 
   @Inject
   public KubernetesInfrastructure(
@@ -52,7 +52,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
       KubernetesRuntimeStateCache runtimeStatusesCache,
-      SidecarToolingProvisioner workspaceNext) {
+      SidecarToolingProvisioner toolingProvisioner) {
     super(
         NAME,
         ImmutableSet.of(KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE),
@@ -62,7 +62,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
     this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
-    this.workspaceNext = workspaceNext;
+    this.toolingProvisioner = toolingProvisioner;
   }
 
   @Override
@@ -80,7 +80,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
     // We need to provision development tooling here because there is environment variables
     // provisioning in the superclass which might be important
-    workspaceNext.provision(id, kubernetesEnvironment);
+    toolingProvisioner.provision(id, kubernetesEnvironment);
 
     return super.prepare(id, kubernetesEnvironment);
   }

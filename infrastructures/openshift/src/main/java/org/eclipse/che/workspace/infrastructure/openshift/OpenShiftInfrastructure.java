@@ -30,7 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.SidecarToolingProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /** @author Sergii Leshchenko */
@@ -43,7 +43,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   private final OpenShiftRuntimeContextFactory runtimeContextFactory;
   private final OpenShiftEnvironmentProvisioner osEnvProvisioner;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
-  private final SidecarToolingProvisioner workspaceNext;
+  private final SidecarToolingProvisioner toolingProvisioner;
 
   @Inject
   public OpenShiftInfrastructure(
@@ -53,7 +53,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
       KubernetesRuntimeStateCache runtimeStatusesCache,
-      SidecarToolingProvisioner workspaceNext) {
+      SidecarToolingProvisioner toolingProvisioner) {
     super(
         NAME,
         ImmutableSet.of(
@@ -64,7 +64,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     this.osEnvProvisioner = osEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
-    this.workspaceNext = workspaceNext;
+    this.toolingProvisioner = toolingProvisioner;
   }
 
   @Override
@@ -81,7 +81,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     final OpenShiftEnvironment openShiftEnvironment = asOpenShiftEnv(environment);
     // We need to provision development tooling here because there is environment variables
     // provisioning in the superclass which might be important
-    workspaceNext.provision(id, openShiftEnvironment);
+    toolingProvisioner.provision(id, openShiftEnvironment);
 
     return super.prepare(id, openShiftEnvironment);
   }
