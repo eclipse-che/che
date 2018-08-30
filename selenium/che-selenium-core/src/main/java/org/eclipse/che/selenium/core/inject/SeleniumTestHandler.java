@@ -42,8 +42,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
@@ -369,8 +371,22 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestReference(result));
+      String testReference = getTestReference(result);
+      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, testReference);
       testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
+      Path pathToZipWithWorkspaceLogs =
+          pathToStoreWorkspaceLogs.getParent().resolve(testReference + ".zip");
+
+      try {
+        ZipUtils.zipDir(
+            pathToStoreWorkspaceLogs.toFile().getAbsolutePath(),
+            pathToStoreWorkspaceLogs.toFile(),
+            pathToZipWithWorkspaceLogs.toFile(),
+            null);
+        FileUtils.deleteQuietly(pathToStoreWorkspaceLogs.toFile());
+      } catch (IOException e) {
+        LOG.warn("Error of creation zip-file with workspace logs.", e);
+      }
     }
   }
 

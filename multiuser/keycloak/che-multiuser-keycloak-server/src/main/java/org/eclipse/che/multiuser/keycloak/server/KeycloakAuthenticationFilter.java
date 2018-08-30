@@ -52,7 +52,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
     Jws<Claims> jwt;
     try {
-      if (shouldSkipAuthentication(request, token)) {
+      if (shouldSkipAuthentication(token)) {
         chain.doFilter(req, res);
         return;
       }

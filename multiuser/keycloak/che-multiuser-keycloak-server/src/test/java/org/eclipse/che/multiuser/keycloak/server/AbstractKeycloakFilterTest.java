@@ -50,27 +50,21 @@ public class AbstractKeycloakFilterTest {
   }
 
   @Test
-  public void testShouldSkipAuthWhenRetrievingOIDCKeycloakJsFile() {
-    when(request.getRequestURI()).thenReturn("https://localhost:8080/api/keycloak/OIDCKeycloak.js");
-    assertTrue(abstractKeycloakFilter.shouldSkipAuthentication(request, null));
-  }
-
-  @Test
   public void testShouldNotSkipAuthWhenNullTokenProvided() {
-    assertFalse(abstractKeycloakFilter.shouldSkipAuthentication(request, null));
+    assertFalse(abstractKeycloakFilter.shouldSkipAuthentication(null));
   }
 
   @Test
   public void testShouldNotSkipAuthWhenProvidedTokenIsNotMachine() {
     Jwt mock = Mockito.mock(Jwt.class);
     doReturn(mock).when(jwtParser).parse(anyString());
-    assertFalse(abstractKeycloakFilter.shouldSkipAuthentication(request, "token"));
+    assertFalse(abstractKeycloakFilter.shouldSkipAuthentication("token"));
   }
 
   @Test
   public void testAuthIsNotNeededWhenMachineTokenProvided() {
     when(jwtParser.parse(anyString())).thenThrow(MachineTokenJwtException.class);
-    assertTrue(abstractKeycloakFilter.shouldSkipAuthentication(request, "token"));
+    assertTrue(abstractKeycloakFilter.shouldSkipAuthentication("token"));
   }
 
   static class TestLoginFilter extends AbstractKeycloakFilter {
