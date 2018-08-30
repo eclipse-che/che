@@ -1394,8 +1394,26 @@ public class SeleniumWebDriverHelper {
     waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
 
-  public void closeCurrentWinAndReturnToMainTab(String mainTabHandle) {
+  /**
+   * wait url with specified text fragment
+   *
+   * @param url fragment
+   */
+  public void waitUrlContains(String url) {
+    webDriverWaitFactory.get().until(ExpectedConditions.urlContains(url));
+  }
+
+  /**
+   * wait specified url in the browser
+   *
+   * @param url expected url
+   */
+  public void waitUrlToBe(String url) {
+    webDriverWaitFactory.get().until(ExpectedConditions.urlToBe(url));
+  }
+
+  public void closeCurrentWinAndReturnToPreviewsOne(String mainWindowHandle) {
     seleniumWebDriver.close();
-    seleniumWebDriver.switchTo().window(mainTabHandle);
+    seleniumWebDriver.switchTo().window(mainWindowHandle);
   }
 }

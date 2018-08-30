@@ -32,13 +32,13 @@ import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.testng.Assert;
+import org.eclipse.che.selenium.pageobject.git.Git;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test "Open in Terminal" action. Will check action calling from context menu on selected project,
+ * Test "Open on Github" action. Will check action calling from context menu on selected project,
  * folder and file
  *
  * @author Vitalii Parfonov
@@ -46,12 +46,10 @@ import org.testng.annotations.Test;
 public class OpenOnGitHubTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String PROJECT_WITHOUT_GIT_FOLDER = "projectWithoutGitCVS";
-  private static final String PATH_TO_EXPAND = "/src/main/java/che/eclipse/sample";
+  private static final String PATH_TO_EXPAND = "src/main/java/che/eclipse/sample";
   private String mainBrowserTabHandle;
 
-  @SuppressWarnings("unused")
-  @Inject
-  private TestWorkspace workspace;
+  @Inject private TestWorkspace workspace;
 
   @SuppressWarnings("unused")
   @Inject
@@ -89,7 +87,7 @@ public class OpenOnGitHubTest {
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
+  @Inject private Git git;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -110,42 +108,8 @@ public class OpenOnGitHubTest {
   @AfterMethod
   public void returnToMainWindow() {
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
-      seleniumWebDriverHelper.closeCurrentWinAndReturnToMainTab(mainBrowserTabHandle);
+      seleniumWebDriverHelper.closeCurrentWinAndReturnToPreviewsOne(mainBrowserTabHandle);
     }
-  }
-
-  @Test
-  public void openProjectOnGitHubTest() {
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    projectExplorer.waitContextMenu();
-    projectExplorer.clickOnItemInContextMenu(
-        TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
-    seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    Assert.assertTrue(seleniumWebDriver.getCurrentUrl().startsWith(testRepo.getHtmlUrl()));
-  }
-
-  @Test
-  public void openFolderOnGitHubTest() {
-    projectExplorer.waitAndSelectItem(PROJECT_NAME + PATH_TO_EXPAND);
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + PATH_TO_EXPAND);
-    projectExplorer.waitContextMenu();
-    projectExplorer.clickOnItemInContextMenu(
-        TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
-    seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    Assert.assertEquals(
-        seleniumWebDriver.getCurrentUrl(), testRepo.getHtmlUrl() + "/tree/master" + PATH_TO_EXPAND);
-  }
-
-  @Test
-  public void openFileOnGitHubTest() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/che/eclipse/sample/Aclass.java");
-    editor.selectLines(14, 8);
-    editor.openContextMenuInEditor();
-    editor.clickOnItemInContextMenu(OPEN_ON_GITHUB);
-    seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    Assert.assertEquals(
-        seleniumWebDriver.getCurrentUrl(),
-        testRepo.getHtmlUrl() + "/blob/master" + PATH_TO_EXPAND + "/Aclass.java#L14-L16");
   }
 
   @Test
@@ -156,5 +120,39 @@ public class OpenOnGitHubTest {
     // for closing context menu
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.COPY);
+  }
+
+  @Test(priority = 1)
+  public void openProjectOnGitHubTest() {
+    projectExplorer.waitAndSelectItem(PROJECT_NAME, 5);
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
+    projectExplorer.waitContextMenu();
+    projectExplorer.clickOnItemInContextMenu(
+        TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
+    seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
+    seleniumWebDriverHelper.waitUrlToBe(testRepo.getHtmlUrl() + "/tree/master/");
+  }
+
+  @Test(priority = 2)
+  public void openFolderOnGitHubTest() {
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + PATH_TO_EXPAND, 5);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + PATH_TO_EXPAND, 5);
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/" + PATH_TO_EXPAND);
+    projectExplorer.waitContextMenu();
+    projectExplorer.clickOnItemInContextMenu(
+        TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
+    seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
+    seleniumWebDriverHelper.waitUrlToBe(testRepo.getHtmlUrl() + "/tree/master/" + PATH_TO_EXPAND);
+  }
+
+  @Test(priority = 3)
+  public void openFileOnGitHubTest() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + PATH_TO_EXPAND + "/Aclass.java");
+    editor.selectLines(14, 1);
+    editor.openContextMenuInEditor();
+    editor.clickOnItemInContextMenu(OPEN_ON_GITHUB);
+    seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
+    seleniumWebDriverHelper.waitUrlToBe(
+        testRepo.getHtmlUrl() + "/blob/master/" + PATH_TO_EXPAND + "/Aclass.java#L15-L15");
   }
 }

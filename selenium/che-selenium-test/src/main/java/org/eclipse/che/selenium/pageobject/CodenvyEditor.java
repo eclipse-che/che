@@ -657,19 +657,20 @@ public class CodenvyEditor {
   }
 
   /**
-   * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
+   * Select text in defined interval
    *
-   * @param positionLine line's number where cursor should be placed
-   * @param positionChar char's number where cursor should be placed
+   * @param fromLine beginning of first line for selection
+   * @param numberOfLine end of first line for selection
    */
   public void selectLines(int fromLine, int numberOfLine) {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    Actions action = seleniumWebDriverHelper.getAction(seleniumWebDriver);
     setCursorToLine(fromLine);
     action.keyDown(SHIFT).perform();
     for (int i = 0; i < numberOfLine; i++) {
       typeTextIntoEditor(Keys.ARROW_DOWN.toString());
     }
     action.keyUp(SHIFT).perform();
+    action.sendKeys(Keys.END.toString()).keyUp(SHIFT).perform();
   }
 
   /**

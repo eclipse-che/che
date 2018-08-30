@@ -321,6 +321,7 @@ public class ContextMenuEditorTest {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
         PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+    editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FIND);
     editor.waitContextMenuIsNotPresent();
     findText.waitFindTextMainFormIsOpen();
