@@ -55,7 +55,7 @@ public class PluginMetaRetriever {
   private static final Logger LOG = LoggerFactory.getLogger(PluginMetaRetriever.class);
   private static final String CHE_PLUGIN_OBJECT_ERROR =
       "Che plugin '%s:%s' configuration is invalid. %s";
-  private static final String PLUGIN_REGISTRY_PROPERTY = "che.workspace.feature.api";
+  private static final String PLUGIN_REGISTRY_PROPERTY = "che.workspace.plugin_registry_url";
 
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 

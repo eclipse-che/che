@@ -267,7 +267,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
                 MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class);
                 bind(String.class)
-                    .annotatedWith(Names.named("che.workspace.feature.api"))
+                    .annotatedWith(Names.named("che.workspace.plugin_registry_url"))
                     .toInstance("");
                 MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
                 Multibinder.newSetBinder(binder(), ResourceType.class)
