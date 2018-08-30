@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc/jsonrpctest"
+	"github.com/eclipse/che-go-jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc/jsonrpctest"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 

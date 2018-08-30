@@ -17,7 +17,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 

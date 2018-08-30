@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc"
 )
 
 // ReqRecorder helps to catch/record jsonrpc.Tunnel incoming requests.

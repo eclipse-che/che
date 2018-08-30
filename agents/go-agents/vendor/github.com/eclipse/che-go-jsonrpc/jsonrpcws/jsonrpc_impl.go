@@ -36,8 +36,8 @@ package jsonrpcws
 import (
 	"net/http"
 
-	"github.com/eclipse/che-lib/websocket"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/gorilla/websocket"
+	"github.com/eclipse/che-go-jsonrpc"
 )
 
 var (
