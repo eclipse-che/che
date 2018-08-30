@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -212,7 +214,7 @@ public class JwtProxyProvisioner {
       KeyPair keyPair;
       try {
         keyPair = signatureKeyManager.getKeyPair(identity.getWorkspaceId());
-      } catch (ServerException e) {
+      } catch (ServerException| ConflictException e) {
         throw new InternalInfrastructureException(
             "Signature key pair for machine authentication cannot be retrieved. Reason: "
                 + e.getMessage());
