@@ -68,6 +68,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -655,14 +656,23 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void openContextMenuByPathSelectedItem(String path) {
-    waitItem(path);
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
+    for (int i = 1; ; i++) {
+      waitAndSelectItem(path);
 
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.moveToElement(waitAndGetItem(path)).contextClick().perform();
+      actionsFactory.createAction(seleniumWebDriver).contextClick().perform();
+      waitContextMenu();
 
-    waitContextMenu();
+      try {
+        waitItemIsSelected(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        return;
+      } catch (WebDriverException e) {
+        seleniumWebDriverHelper.hideContextMenu();
+        waitContextMenuPopUpClosed();
+        if (i == 2) {
+          throw e;
+        }
+      }
+    }
   }
 
   /** Waits on context menu body's visibility. */
@@ -1090,6 +1100,20 @@ public class ProjectExplorer {
                 "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
                 path)),
         ELEMENT_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits until item with specified {@code path} be selected
+   *
+   * @param path item's path in format: "Test/src/pom.xml".
+   */
+  public void waitItemIsSelected(String path, int timeout) {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(
+            format(
+                "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
+                path)),
+        timeout);
   }
 
   /**
