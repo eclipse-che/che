@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.editor.autocomplete;
 
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -78,8 +80,14 @@ public class QuickFixAndCodeAssistantFeaturesTest {
     editor.waitErrorPropositionPanelClosed();
 
     editor.launchPropositionAssistPanel();
-    editor.waitTextIntoFixErrorProposition("Convert local variable to field");
-    editor.waitTextIntoFixErrorProposition("Inline local variable");
+    try {
+      editor.waitTextIntoFixErrorProposition("Convert local variable to field");
+      editor.waitTextIntoFixErrorProposition("Inline local variable");
+    } catch (TimeoutException e) {
+      fail(
+          "Known issues: https://github.com/eclipse/eclipse.jdt.ls/issues/772, "
+              + "https://github.com/eclipse/eclipse.jdt.ls/issues/771");
+    }
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
     editor.waitErrorPropositionPanelClosed();
     loader.waitOnClosed();
