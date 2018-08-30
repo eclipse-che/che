@@ -14,8 +14,6 @@ package org.eclipse.che.selenium.core.utils;
 import static java.lang.Thread.sleep;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
-import java.util.Date;
-import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import org.openqa.selenium.TimeoutException;
@@ -62,13 +60,18 @@ public class WaitUtils {
    *
    * @param condition expression which should be performed
    * @param timeout waiting time
-   * @param delayBetweenAttemptsInMilliseconds delay between tries of {@code condition} execution in milliseconds
+   * @param delayBetweenAttemptsInMilliseconds delay between tries of {@code condition} execution in
+   *     milliseconds
    */
-  public static void waitSuccessCondition(BooleanSupplier condition, int timeout, int delayBetweenAttemptsInMilliseconds, TimeUnit timeUnit) {
+  public static void waitSuccessCondition(
+      BooleanSupplier condition,
+      int timeout,
+      int delayBetweenAttemptsInMilliseconds,
+      TimeUnit timeUnit) {
     final long waitingTime = timeUnit.toMillis(timeout);
     final long startingTime = System.currentTimeMillis();
 
-    while(isTimeAvailable(startingTime, waitingTime)){
+    while (isTimeAvailable(startingTime, waitingTime)) {
       if (condition.getAsBoolean()) {
         break;
       }
@@ -85,9 +88,10 @@ public class WaitUtils {
    * @param condition expression which should be performed
    * @param timeout waiting time
    */
-  public static void waitSuccessCondition(BooleanSupplier condition, int timeout, TimeUnit timeUnit){
+  public static void waitSuccessCondition(
+      BooleanSupplier condition, int timeout, TimeUnit timeUnit) {
     final int delayBetweenAttemptsInMilliseconds = 500;
-    waitSuccessCondition(condition, timeout,delayBetweenAttemptsInMilliseconds, timeUnit);
+    waitSuccessCondition(condition, timeout, delayBetweenAttemptsInMilliseconds, timeUnit);
   }
 
   /**
@@ -96,7 +100,7 @@ public class WaitUtils {
    * @param condition expression which should be performed
    * @param timeout waiting time in seconds
    */
-  public static void waitSuccessCondition(BooleanSupplier condition, int timeout){
+  public static void waitSuccessCondition(BooleanSupplier condition, int timeout) {
     waitSuccessCondition(condition, timeout, TimeUnit.SECONDS);
   }
 
@@ -110,7 +114,7 @@ public class WaitUtils {
     waitSuccessCondition(condition, defaultTimeout);
   }
 
-  private static boolean isTimeAvailable(final long startingTime, final long waitingTime){
+  private static boolean isTimeAvailable(final long startingTime, final long waitingTime) {
     return System.currentTimeMillis() < (startingTime + waitingTime);
   }
 }
