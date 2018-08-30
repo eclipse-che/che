@@ -38,6 +38,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_RENFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
@@ -93,6 +94,7 @@ import java.util.stream.Collectors;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
@@ -212,6 +214,7 @@ public class CodenvyEditor {
     String HOVER_POPUP_XPATH =
         "//div[@class='textviewTooltip' and contains(@style,'visibility: visible')]";
     String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
+    String LANGUAGE_SERVER_RENFACTORING_RENAME_FIELD_CSS = "input.orionCodenvy";
   }
 
   public enum TabActionLocator {
@@ -342,6 +345,9 @@ public class CodenvyEditor {
 
   @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
   private WebElement proposalDoc;
+
+  @FindBy(css = LANGUAGE_SERVER_RENFACTORING_RENAME_FIELD_CSS)
+  private WebElement languageServerRenameField;
 
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
@@ -2210,5 +2216,19 @@ public class CodenvyEditor {
         .sendKeys("/")
         .keyUp(CONTROL)
         .perform();
+  }
+
+  /**
+   * wait renaming field in the Editor (usuely it field is used by language servers) type new rename
+   * value and wait closing of the field
+   *
+   * @param renamevalue
+   */
+  public void doRenamingByLanguageServerField(String renamevalue) {
+    seleniumWebDriverHelper
+        .waitVisibility(languageServerRenameField, TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC)
+        .clear();
+    seleniumWebDriverHelper.waitAndSendKeysTo(
+        languageServerRenameField, renamevalue + Keys.ENTER.toString());
   }
 }

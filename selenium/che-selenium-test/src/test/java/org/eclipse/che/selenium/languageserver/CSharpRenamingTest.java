@@ -1,6 +1,12 @@
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.LS_RENAME;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.DOT_NET;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -20,12 +26,15 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class CSharpRenamingTest {
-  private final String PROJECT_NAME =
+  private static final String PROJECT_NAME =
       NameGenerator.generate(CSharpRenamingTest.class.getSimpleName(), 4);
+
+  private static final String PATH_TO_DOTNET_FILE = PROJECT_NAME + "/Hello.cs";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
@@ -48,10 +57,28 @@ public class CSharpRenamingTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, DOT_NET);
     ide.open(workspace);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.openItemByPath(PATH_TO_DOTNET_FILE);
+    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
   }
 
   @Test
   public void checkRenaming() {
+    String newClassName = "HelloWorld";
+    String textFragmentAfterRenaming = "public class HelloWorld";
     projectExplorer.openItemByPath(PROJECT_NAME);
+    consoles.selectProcessByTabName("dev-machine");
+    editor.goToCursorPositionVisible(7, 18);
+    menu.runCommand(ASSISTANT, REFACTORING, LS_RENAME);
+    editor.doRenamingByLanguageServerField(newClassName);
+
+    try {
+      editor.waitTextIntoEditor(textFragmentAfterRenaming);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10180", ex);
+    }
+
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 }
