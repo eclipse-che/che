@@ -60,5 +60,5 @@ public class GitHUbUrlUtilsTest {
                 + "/samples/petclinic/service/ClinicServiceJdbcTests.java",
             10,
             20);
-     Assert.assertEquals(blobUrl, BLOB_URL);  }
+     Assert.assertEquals(blobUrl, BLOB_URL + "#L10-L20");  }
 }
