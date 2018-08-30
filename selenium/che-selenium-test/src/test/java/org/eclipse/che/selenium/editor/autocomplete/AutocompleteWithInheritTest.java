@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.editor.autocomplete;
 
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.TASK_OVERVIEW;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -29,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -86,7 +88,12 @@ public class AutocompleteWithInheritTest {
     editor.waitMarkerInPosition(MarkerLocator.ERROR, 14);
     editor.setCursorToLine(14);
     editor.launchPropositionAssistPanel();
-    editor.waitTextIntoFixErrorProposition("Add constructor 'InheritClass(int,String)'");
+    try {
+      editor.waitTextIntoFixErrorProposition("Add constructor 'InheritClass(int,String)'");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/eclipse.jdt.ls/issues/767");
+    }
     editor.selectFirstItemIntoFixErrorPropByEnter();
     editor.waitTextIntoEditor(contentAfterFix);
     editor.waitMarkerInvisibility(ERROR, 14);

@@ -11,12 +11,15 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.testng.Assert.assertEquals;
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
+import static org.testng.Assert.assertFalse;
 
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -26,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -39,6 +43,8 @@ public class AutocompleteProposalJavaDocTest {
   private static final String PATH_FOR_EXPAND_APP_CLASS =
       PROJECT + "/app/src/main/java/multimodule";
   private static final String BOOK_IMPL_CLASS_NAME = "BookImpl";
+  private static final String PATH_TO_SLF4J_ARTIFACTS = "/home/user/.m2/repository/org/slf4j";
+  private static final String COMMAND_TO_REMOVE_SLF4J_ARTIFACTS = "removeSLF4J";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -47,6 +53,8 @@ public class AutocompleteProposalJavaDocTest {
   @Inject private CodenvyEditor editor;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
+  @Inject private CommandsPalette commandsPalette;
   @Inject private Consoles consoles;
 
   // no links are present in completion item javadoc due to
@@ -61,6 +69,11 @@ public class AutocompleteProposalJavaDocTest {
         Paths.get(resource.toURI()),
         PROJECT,
         ProjectTemplates.CONSOLE_JAVA_SIMPLE);
+    testCommandServiceClient.createCommand(
+        format("rm -r %s", PATH_TO_SLF4J_ARTIFACTS),
+        COMMAND_TO_REMOVE_SLF4J_ARTIFACTS,
+        CUSTOM,
+        workspace.getId());
     // open IDE
     ide.open(workspace);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
@@ -91,7 +104,7 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(31, 30);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal(
+    editor.selectCompositeAutocompleteProposal(
         "concat(String part1, String part2, char divider) : String App");
 
     // then
@@ -129,7 +142,7 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(32, 14);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("App() multimodule.App");
+    editor.selectCompositeAutocompleteProposal("App() multimodule.App");
 
     // then
     editor.waitProposalDocumentationHTML("<p>No documentation found.</p>\n");
@@ -142,7 +155,7 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(25, 20);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("isEquals(Object o) : boolean Book");
+    editor.selectCompositeAutocompleteProposal("isEquals(Object o) : boolean Book");
 
     // then
     editor.waitProposalDocumentationHTML(
@@ -177,6 +190,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitActive();
     loader.waitOnClosed();
     editor.selectTabByName(BOOK_IMPL_CLASS_NAME);
+    editor.typeTextIntoEditor(Keys.CONTROL.toString());
     editor.goToCursorPositionVisible(15, 4);
     editor.typeTextIntoEditor("UPDATE. ");
 
@@ -184,7 +198,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitActive();
     editor.goToCursorPositionVisible(22, 12);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("BookImpl - multimodule.model");
+    editor.selectCompositeAutocompleteProposal("BookImpl - multimodule.model");
 
     // then
     editor.waitProposalDocumentationHTML("UPDATE. Implementation of Book interface.");
@@ -197,7 +211,7 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(25, 20);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("hashCode() : int Object");
+    editor.selectCompositeAutocompleteProposal("hashCode() : int Object");
 
     // then
     editor.waitProposalDocumentationHTML(
@@ -206,41 +220,39 @@ public class AutocompleteProposalJavaDocTest {
   }
 
   @Test
-  public void shouldWorkAroundAbsentSourcesOfExternalLib() throws IOException {
-
-    // This test fails because jdt.ls does download source for the class being used here. Need to
-    // find or construct an artifact that has no source.
+  public void shouldNotShowJavaDocIfExternalLibDoesNotExist() throws IOException {
     // when
     editor.waitActive();
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(31, 23);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("info(String msg) : void Logger");
+    editor.selectCompositeAutocompleteProposal("info(String msg) : void Logger");
 
     // then
-    editor.waitProposalDocumentationHTML(".*No documentation found.*");
+    editor.waitProposalDocumentationHTML(
+        "<ul>\n"
+            + "<li><p><strong>Parameters:</strong></p>\n"
+            + "<ul>\n"
+            + "<li><strong>msg</strong> the message string to be logged</li>\n"
+            + "</ul>\n"
+            + "</li>\n"
+            + "</ul>");
 
     // when
     editor.closeAutocomplete();
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitActiveTabFileName(
-        "Logger"); // there should be class "Logger" opened in decompiled view with "Download
-    // sources" link at the top.
-    editor.clickOnDownloadSourcesLink(); // there should be "Download sources" link displayed in at
-    // the top of editor. Download they.
-
+    editor.waitActiveTabFileName("Logger.class");
     editor.selectTabByName(APP_CLASS_NAME);
+
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick(COMMAND_TO_REMOVE_SLF4J_ARTIFACTS);
+
     loader.waitOnClosed();
-    editor.goToCursorPositionVisible(31, 23);
-    editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("info(String msg) : void");
+    editor.waitActive();
+    editor.goToCursorPositionVisible(30, 20);
+    editor.openJavaDocPopUp();
 
     // then
-    assertEquals(
-        editor.getProposalDocumentationHTML(),
-        ".*Log a message at the .* level."
-            + "<dl><dt>Parameters:</dt>"
-            + "<dd><b>msg</b>"
-            + "  the message string to be logged</dd></dl>.*");
+    assertFalse(editor.isTooltipPopupVisible());
   }
 }
