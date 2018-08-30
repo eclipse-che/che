@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2018-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -25,7 +26,18 @@ export class Loader {
         }, 1);
 
         /** Add click handler to maximize output */
-        document.getElementById('workspace-console').onclick = () => this.onclick();
+        document.getElementById('workspace-console').onclick = () => this.onclickConsole();
+
+        document.getElementById('workspace-loader-reload').onclick = () => this.onclickReload();
+    }
+
+    hideLoader(): void {
+        document.getElementById('workspace-loader-label').style.display = 'none';
+        document.getElementById('workspace-loader-progress').style.display = 'none';
+    }
+
+    showReload(): void {
+        document.getElementById('workspace-loader-reload').style.display = 'block';
     }
 
     /**
@@ -58,7 +70,7 @@ export class Loader {
         element.className = "error";
     }
 
-    onclick(): void {
+    onclickConsole(): void {
         if (document.getElementById('workspace-loader').hasAttribute("max")) {
             document.getElementById('workspace-loader').removeAttribute("max");
             document.getElementById('workspace-console').removeAttribute("max");
@@ -66,6 +78,11 @@ export class Loader {
             document.getElementById('workspace-loader').setAttribute("max", "");
             document.getElementById('workspace-console').setAttribute("max", "");
         }
+    }
+
+    onclickReload(): boolean {
+        window.location.reload();
+        return false;
     }
 
 }

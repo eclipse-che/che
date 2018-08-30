@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -63,7 +64,6 @@ import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuCons
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -264,6 +264,7 @@ public class ProjectExplorer {
   public void waitProjectExplorer(int timeout) {
     try {
       seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
+      loader.waitOnClosed();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
@@ -1059,8 +1060,7 @@ public class ProjectExplorer {
   /** Invokes special javascript function for 'quick' expand project(s) tree */
   public void quickExpandWithJavaScript() {
     String jsScript = "IDE.ProjectExplorer.expandAll();";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 
@@ -1069,8 +1069,7 @@ public class ProjectExplorer {
    */
   public void quickCollapseJavaScript() {
     String jsScript = "IDE.ProjectExplorer.collapseAll()";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 
@@ -1082,8 +1081,7 @@ public class ProjectExplorer {
    */
   public void quickRevealToItemWithJavaScript(String absPathToResource) {
     String jsScript = "IDE.ProjectExplorer.reveal(\"" + absPathToResource.replace(".", "/") + "\")";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 

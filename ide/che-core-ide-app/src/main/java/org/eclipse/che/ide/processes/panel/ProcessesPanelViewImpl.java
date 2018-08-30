@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -37,7 +38,7 @@ import org.eclipse.che.ide.processes.ProcessDataAdapter;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeRenderer;
 import org.eclipse.che.ide.processes.StopProcessHandler;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.SplitterFancyUtil;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
@@ -104,7 +105,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     widget2TreeNodes = new HashMap<>();
 
     renderer.addAddTerminalClickHandler(
-        machineId -> delegate.onAddTerminal(machineId, TerminalOptionsJso.createDefault()));
+        machineId -> delegate.onAddTerminal(machineId, TerminalOptionsJso.create(), true));
     renderer.addPreviewSshClickHandler(machineId -> delegate.onPreviewSsh(machineId));
     renderer.addStopProcessHandler(
         new StopProcessHandler() {

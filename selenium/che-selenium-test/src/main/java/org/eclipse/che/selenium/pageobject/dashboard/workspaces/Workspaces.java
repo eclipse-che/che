@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -17,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.PROGRESS_BAR_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_RAM;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
 import static org.openqa.selenium.support.ui.ExpectedConditions.*;
@@ -89,6 +91,7 @@ public class Workspaces {
     String WORKSPACE_LIST_HEADER = "//md-item[@class='noselect']//span";
     String WORKSPACE_LIST_ITEM =
         "(//div[@class='workspace-name-clip']/parent::div/parent::div/parent::div)[%s]";
+    String PROGRESS_BAR_XPATH = "(//md-progress-linear[@role='progressbar'])[2]";
   }
 
   public interface Status {
@@ -109,6 +112,10 @@ public class Workspaces {
 
   @FindBy(xpath = Locators.SEARCH_WORKSPACE_FIELD)
   WebElement searchWorkspaceField;
+
+  public void waitProgressBarInvisibility() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(PROGRESS_BAR_XPATH));
+  }
 
   public String getWorkspaceStatus(String workspaceName) {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
@@ -295,6 +302,8 @@ public class Workspaces {
     waitWorkspaceActionTooltipDisappearance();
 
     seleniumWebDriverHelper.waitAndClick(By.xpath(buttonXpath));
+
+    waitProgressBarInvisibility();
   }
 
   public void waitWorkspaceActionTooltipDisappearance() {

@@ -2,10 +2,11 @@
 <!--
 
     Copyright (c) 2012-2018 Red Hat, Inc.
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
 
     Contributors:
       Red Hat, Inc. - initial API and implementation
@@ -16,7 +17,7 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.9.0-SNAPSHOT</version>
+        <version>6.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>postgresql-tck</artifactId>
     <packaging>jar</packaging>
@@ -47,11 +48,6 @@
         <dependency>
             <groupId>org.eclipse.che.infrastructure</groupId>
             <artifactId>infrastructure-kubernetes</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.infrastructure</groupId>
-            <artifactId>infrastructure-kubernetes</artifactId>
-            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
@@ -218,18 +214,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>analyze</id>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <excludes>
@@ -241,6 +225,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
                     <execution>
                         <goals>
                             <goal>unpack-dependencies</goal>

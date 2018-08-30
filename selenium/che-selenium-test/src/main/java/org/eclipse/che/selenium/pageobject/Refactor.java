@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -44,12 +45,14 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -65,14 +68,17 @@ public class Refactor {
   private final WebDriverWait redrawUiElementWait;
   private final WebDriverWait loadPageWait;
   private final WebDriverWait elementWait;
+  private final ProjectExplorer projectExplorer;
 
   @Inject
-  public Refactor(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public Refactor(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ProjectExplorer projectExplorer) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.redrawUiElementWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     this.elementWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
+    this.projectExplorer = projectExplorer;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -234,7 +240,12 @@ public class Refactor {
 
   /** wait the 'Rename Method' form is closed */
   public void waitRenameMethodFormIsClosed() {
-    elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
+    try {
+      elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
+    }
   }
 
   /** wait the 'Rename Field' form is open */
@@ -688,6 +699,12 @@ public class Refactor {
   private void waitExpectedText(WebElement element, String expectedText) {
     waitElementVisibility(element);
     loadPageWait.until(attributeToBe(element, "value", expectedText));
+  }
+
+  public void invokeRefactorWizardForProjectExplorerItem(String pathThToItem) {
+    projectExplorer.waitAndSelectItem(pathThToItem);
+    projectExplorer.launchRefactorByKeyboard();
+    waitRenameCompilationUnitFormIsOpen();
   }
 
   private void waitExpectedText(By locator, String expectedText) {

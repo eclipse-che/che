@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -93,10 +94,9 @@ public class SinglePortUrlRewriterTest {
   }
 
   @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Rewriting of host 'server.machine1.ws123.172.12.0.2.nip.io' in URL ':' failed. Error: .*"
-  )
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Rewriting of host 'server.machine1.ws123.172.12.0.2.nip.io' in URL ':' failed. Error: .*")
   public void shouldThrowExceptionWhenRewritingFails() throws Exception {
     Provider<SinglePortHostnameBuilder> provider =
         () -> new SinglePortHostnameBuilder("172.12.0.2", "127.0.0.1", null);

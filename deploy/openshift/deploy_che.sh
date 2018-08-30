@@ -1,9 +1,11 @@
 #!/bin/bash
+#
 # Copyright (c) 2018 Red Hat, Inc.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
 #
 # This script is meant for quick & easy install of Che on OpenShift via:
 #
@@ -55,9 +57,6 @@ ENV vars: this script automatically detect envs vars beginning with "CHE_" and p
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
 CHE_IMAGE_TAG - Set che-server image tag, defaults to "nightly"
 CHE_INFRA_OPENSHIFT_PROJECT - namespace for workspace objects (defaults to current namespace of Che pod (CHE_OPENSHIFT_PROJECT which defaults to eclipse-che)). It can be overriden with -p|--project param. A separate ws namespace can be used only if username/password or token is provided
-CHE_INFRA_KUBERNETES_USERNAME - OpenShift username to create workspace objects with. Not used by default (service account is used instead)
-CHE_INFRA_KUBERNETES_PASSWORD - OpenShift password
-CHE_INFRA_KUBERNETES_OAUTH__TOKEN - OpenShift token to create workspace objects with. Not used by default (service account is used instead)
 CHE_INFRA_KUBERNETES_PVC_STRATEGY - One PVC per workspace (unique) or one PVC shared by all workspaced (common). Defaults to unique
 CHE_INFRA_KUBERNETES_PVC_QUANTITY - PVC default claim. Set to 1Gi.
 CHE_KEYCLOAK_AUTH__SERVER__URL - URL of a Keycloak auth server. Defaults to route of a Keycloak deployment
@@ -133,8 +132,29 @@ export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 DEFAULT_CHE_IMAGE_TAG="nightly"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 
+DEFAULT_IMAGE_KEYCLOAK="eclipse/che-keycloak"
+export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-${DEFAULT_IMAGE_KEYCLOAK}}
+
+DEFAULT_KEYCLOAK_IMAGE_TAG="nightly"
+export KEYCLOAK_IMAGE_TAG=${KEYCLOAK_IMAGE_TAG:-${DEFAULT_KEYCLOAK_IMAGE_TAG}}
+
+KEYCLOAK_IMAGE_PULL_POLICY="Always"
+export ${KEYCLOAK_IMAGE_PULL_POLICY:-${DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY}}
+
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
+
+DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG="latest"
+export PLUGIN_REGISTRY_IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG}}
+
+DEFAULT_PLUGIN_REGISTRY_IMAGE="eclipse/che-plugin-registry"
+export PLUGIN_REGISTRY_IMAGE=${PLUGIN_REGISTRY_IMAGE:-${DEFAULT_PLUGIN_REGISTRY_IMAGE}}
+
+DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY="Always"
+export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY}}
+
+DEFAULT_PLUGIN_REGISTRY_URL="NULL"
+export PLUGIN_REGISTRY_URL=${PLUGIN_REGISTRY_URL:-${DEFAULT_PLUGIN_REGISTRY_URL}}
 
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
@@ -328,6 +348,19 @@ getRoutingSuffix() {
 fi
 }
 
+deployChePluginRegistry() {
+if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
+  echo "Deploying Che plugin registry..."
+  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-plugin-registry.yml \
+             -p IMAGE=${PLUGIN_REGISTRY_IMAGE} \
+             -p IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG} \
+             -p PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY}
+
+  PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+  echo "Che plugin registry deployment complete. $PLUGIN_REGISTRY_ROUTE"
+fi
+}
+
 
 deployChe() {
     CHE_VAR_ARRAY=$(env | grep "^CHE_.")
@@ -357,7 +390,7 @@ ${CHE_VAR_ARRAY}"
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
         # create secret with OpenShift certificate
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat /var/lib/origin/openshift.local.config/master/ca.crt)"
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat ${OKD_DIR}/openshift-apiserver/ca.crt)"
       fi
 
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml \
@@ -365,7 +398,10 @@ ${CHE_VAR_ARRAY}"
         -p PROTOCOL=${HTTP_PROTOCOL} \
         -p KEYCLOAK_USER=${KEYCLOAK_USER} \
         -p KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD} \
-        ${KEYCLOAK_PARAM}
+        -p IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK} \
+        -p KEYCLOAK_IMAGE_TAG=${KEYCLOAK_IMAGE_TAG} \
+        -p KEYCLOAK_IMAGE_PULL_POLICY=${KEYCLOAK_IMAGE_PULL_POLICY} \
+         ${KEYCLOAK_PARAM}
       wait_for_keycloak
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
@@ -399,6 +435,11 @@ ${CHE_VAR_ARRAY}"
       fi
     fi
 
+    if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
+        PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+        PLUGIN_REGISTRY_URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/plugins/"
+    fi
+
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
                          -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} \
                          -p IMAGE_CHE=${CHE_IMAGE_REPO} \
@@ -411,6 +452,7 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT} \
                          -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
+                         -p CHE_PLUGIN_REGISTRY_URL=${PLUGIN_REGISTRY_URL} \
                          ${ENV}
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
@@ -436,4 +478,5 @@ ${CHE_VAR_ARRAY}"
 isLoggedIn
 createNewProject
 getRoutingSuffix
+deployChePluginRegistry
 deployChe

@@ -1,10 +1,11 @@
 #!/bin/bash
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+# Copyright (c) 2012-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
 #
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
@@ -77,8 +78,6 @@ initVariables() {
     PRODUCT_PROTOCOL="http"
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
-
-    SUPPORTED_INFRASTRUCTURES=(docker openshift k8s osio)
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -461,7 +460,7 @@ printRunOptions() {
     echo "[TEST] Product Host        : ${PRODUCT_HOST}"
     echo "[TEST] Product Port        : ${PRODUCT_PORT}"
     echo "[TEST] Product Config      : $(getProductConfig)"
-    echo "[TEST] Tests               : ${TESTS_SCOPE}"
+    echo "[TEST] Tests scope         : ${TESTS_SCOPE}"
     echo "[TEST] Tests to exclude    : $(getExcludedGroups)"
     echo "[TEST] Threads             : ${THREADS}"
     echo "[TEST] Workspace pool size : ${WORKSPACE_POOL_SIZE}"
@@ -725,45 +724,9 @@ getProductConfig() {
 }
 
 # Prepare list of test groups to exclude.
-# It consists of "--exclude" parameter value + list of groups which don't comply with product config
 getExcludedGroups() {
     local excludeParamArray=(${EXCLUDE_PARAM//,/ })
-
-    local productConfig=$(getProductConfig)
-    local productConfigArray=(${productConfig//,/ })
-
-    local uncomplyingGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singleuser multiuser)
-
-    for productConfigGroup in ${productConfigArray[*]}; do
-        for i in ${!uncomplyingGroups[@]}; do
-            if [[ "${productConfigGroup}" == "${uncomplyingGroups[i]}" ]]; then
-                unset uncomplyingGroups[i]
-            fi
-        done
-    done
-
-    #if product based on "openshift" remove "k8s" from excluded groups
-    #added as workaround for issue #10430, after fix reason should be deleted
-    if [[ "${productConfigArray[@]}" =~ "openshift" ]]; then
-    for i in ${!uncomplyingGroups[@]}; do
-            if [[ "k8s" == "${uncomplyingGroups[i]}" ]]; then
-                unset uncomplyingGroups[i]
-            fi
-        done
-    fi
-
-    #if product based on "k8s" remove "openshift" from excluded groups
-    #added as workaround for issue #10430, after fix reason should be deleted
-    if [[ "${productConfigArray[@]}" =~ "k8s" ]]; then
-    for i in ${!uncomplyingGroups[@]}; do
-            if [[ "openshift" == "${uncomplyingGroups[i]}" ]]; then
-                unset uncomplyingGroups[i]
-            fi
-        done
-    fi
-
-    local excludedGroups=("${uncomplyingGroups[@]}" "${excludeParamArray[@]}")
-    echo $(IFS=$','; echo "${excludedGroups[*]}")
+    echo $(IFS=$','; echo "${excludeParamArray[*]}")
 }
 
 # Reruns failed tests

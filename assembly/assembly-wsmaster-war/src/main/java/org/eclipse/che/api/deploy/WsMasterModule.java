@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -93,7 +94,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxySecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
@@ -375,6 +378,8 @@ public class WsMasterModule extends AbstractModule {
   }
 
   private void configureJwtProxySecureProvisioner(String infrastructure) {
+    install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
+    install(new FactoryModuleBuilder().build(JwtProxyProvisionerFactory.class));
     if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(
           new FactoryModuleBuilder()

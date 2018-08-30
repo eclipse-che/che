@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -18,6 +19,7 @@ import org.eclipse.che.ide.api.mvp.View;
  * The interface defines methods to control displaying of terminal.
  *
  * @author Dmitry Shnurenko
+ * @author Oleksandr Andriienko
  */
 @ImplementedBy(TerminalViewImpl.class)
 interface TerminalView extends View<TerminalView.ActionDelegate> {
@@ -31,6 +33,9 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
      * @param y amount of terminal rows
      */
     void setTerminalSize(int x, int y);
+
+    /** Returns rendered text for test purpose. */
+    String[] getRenderedLines();
   }
 
   /**
@@ -45,7 +50,7 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
    *
    * @param terminal terminal which will be opened
    */
-  void openTerminal(@NotNull TerminalJso terminal);
+  void setTerminal(@NotNull TerminalJso terminal, boolean focusOnOpen);
 
   /**
    * Shows special error message when terminal is failed.
@@ -53,4 +58,7 @@ interface TerminalView extends View<TerminalView.ActionDelegate> {
    * @param message message which will be shown
    */
   void showErrorMessage(@NotNull String message);
+
+  /** Returns rendered text for test purpose. */
+  String[] getRenderedLines();
 }

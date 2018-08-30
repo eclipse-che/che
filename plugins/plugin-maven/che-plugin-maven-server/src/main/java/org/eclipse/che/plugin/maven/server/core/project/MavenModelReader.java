@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -20,6 +21,7 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_OUTPUT_DIRECTORY;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.UNKNOWN_VALUE;
 
 import java.io.File;
 import java.io.IOException;
@@ -385,9 +387,9 @@ public class MavenModelReader {
   }
 
   private void fillModelByDefaults(MavenModel model) {
-    model.setMavenKey(new MavenKey("unknown", "unknown", "unknown"));
+    model.setMavenKey(new MavenKey(UNKNOWN_VALUE, UNKNOWN_VALUE, UNKNOWN_VALUE));
 
-    final MavenKey parentKey = new MavenKey("unknown", "unknown", "unknown");
+    final MavenKey parentKey = new MavenKey(UNKNOWN_VALUE, UNKNOWN_VALUE, UNKNOWN_VALUE);
     model.setParent(new MavenParent(parentKey, "../pom.xml"));
 
     model.setPackaging("jar");

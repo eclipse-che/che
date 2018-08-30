@@ -1,9 +1,12 @@
-# Copyright (c) 2012-2018 Red Hat, Inc
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
 #
+# Copyright (c) 2012-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 ---
 kind: Template
 apiVersion: v1
@@ -73,6 +76,12 @@ objects:
                 fieldPath: metadata.namespace
           - name: CHE_MULTIUSER
             value: "${CHE_MULTIUSER}"
+          - name: CHE_WORKSPACE_HTTP__PROXY
+            value: "${CHE_WORKSPACE_HTTP__PROXY}"
+          - name: CHE_WORKSPACE_HTTPS__PROXY
+            value: "${CHE_WORKSPACE_HTTPS__PROXY}"
+          - name: CHE_WORKSPACE_NO__PROXY
+            value: "${CHE_WORKSPACE_NO__PROXY}"
           - name: CHE_HOST
             value: "che-${NAMESPACE}.${ROUTING_SUFFIX}"
           - name: CHE_PORT
@@ -91,12 +100,6 @@ objects:
             value: "5"
           - name: CHE_INFRA_KUBERNETES_MASTER__URL
             value: "${CHE_INFRA_KUBERNETES_MASTER__URL}"
-          - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
-            value: "${OPENSHIFT_TOKEN}"
-          - name: CHE_INFRA_KUBERNETES_USERNAME
-            value: "${OPENSHIFT_USERNAME}"
-          - name: CHE_INFRA_KUBERNETES_PASSWORD
-            value: "${OPENSHIFT_PASSWORD}"
           - name: CHE_INFRA_OPENSHIFT_PROJECT
             value: "${CHE_INFRA_OPENSHIFT_PROJECT}"
           - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
@@ -142,8 +145,8 @@ objects:
                 key: ca.crt
                 name: openshift-identity-provider
                 optional: true
-          - name: CHE_WORKSPACE_FEATURE_API
-            value: "http://marketplace:80"
+          - name: CHE_PLUGIN_REGISTRY_URL
+            value: "${CHE_PLUGIN_REGISTRY_URL}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -187,6 +190,18 @@ objects:
     - type: ConfigChange
 
 parameters:
+- name: CHE_WORKSPACE_HTTP__PROXY
+  displayName: http_proxy for workspace containers
+  description:
+  value: ''
+- name: CHE_WORKSPACE_HTTPS__PROXY
+  displayName: https_proxy for workspace containers
+  description:
+  value: ''
+- name: CHE_WORKSPACE_NO__PROXY
+  displayName: no_proxy for workspace containers
+  description:
+  value: ''
 - name: ROUTING_SUFFIX
   displayName: Routing suffix of your OpenShift cluster
   description: This is the suffix appended to routes in your OpenShift cluster <route>-<project>.<routing_suffix>
@@ -202,15 +217,6 @@ parameters:
   displayName: Che Multi-user flavor
   description: False i.e. single user by default
   value: 'false'
-- name: OPENSHIFT_USERNAME
-  displayName: OpenShift Username
-  description: OpenShift username that will be used to create workspace objects
-- name: OPENSHIFT_PASSWORD
-  displayName: OpenShift Password
-  description: OpenShift Password that will be used to create workspace objects
-- name: OPENSHIFT_TOKEN
-  displayName: OpenShift token
-  description: OpenShift token to be used to create workspace objects. Must be set if username/password are impossible to use. Do not set if username/pass are provided!
 - name: PROTOCOL
   displayName: HTTP protocol
   description: Protocol to be used in Che communications
@@ -271,6 +277,10 @@ parameters:
   displayName: GitHub Client Secret
   description: GitHub oAuth app client servet. Applicable to Che single user only!
   value: ''
+- name: CHE_PLUGIN_REGISTRY_URL
+  displayName: Eclipse Che plugin registry URL
+  description: Url that used to get meta information about Eclipse Che tooling
+  value: 'NULL'
 labels:
   app: che
   template: che

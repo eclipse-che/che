@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -93,9 +94,8 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
-  )
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE)
   public void shouldNotStartRunningRuntime() throws Exception {
     // given
     setRunningRuntime();
@@ -105,10 +105,9 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    timeOut = SECOND_IN_MILLISECONDS,
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
-  )
+      timeOut = SECOND_IN_MILLISECONDS,
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE)
   public void shouldNotStartStartingRuntime() throws Exception {
     // given
     setStartingRuntime();
@@ -118,10 +117,9 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    timeOut = SECOND_IN_MILLISECONDS,
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
-  )
+      timeOut = SECOND_IN_MILLISECONDS,
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE)
   public void shouldNotStartStoppingRuntime() throws Exception {
     // given
     setStoppingRuntime();
@@ -131,9 +129,8 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
-  )
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE)
   public void shouldNotStartStoppedRuntime() throws Exception {
     // given
     setRunningRuntime();
@@ -144,10 +141,9 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    dataProvider = "excProvider",
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
-  )
+      dataProvider = "excProvider",
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE)
   public void shouldNotStartRuntimeThatThrewExceptionOnPreviousStart(Exception e) throws Exception {
     // given
     setNewRuntime();
@@ -209,10 +205,9 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    timeOut = SECOND_IN_MILLISECONDS,
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = "The environment must be running or starting"
-  )
+      timeOut = SECOND_IN_MILLISECONDS,
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = "The environment must be running or starting")
   public void shouldNotStopStoppingRuntime() throws Exception {
     // given
     setStoppingRuntime();
@@ -222,9 +217,8 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
-  )
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE)
   public void shouldNotStartRuntimeAfterStopThatCaughtInfrastructureExceptionInInternalStop()
       throws Exception {
     // given
@@ -240,10 +234,9 @@ public class InternalRuntimeTest {
   }
 
   @Test(
-    dataProvider = "excProvider",
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE
-  )
+      dataProvider = "excProvider",
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = RUNTIME_STARTED_EXC_MESSAGE)
   public void shouldNotStartRuntimeAfterStopThatCaughtExceptionFromInternalStop(Exception e)
       throws Exception {
     // given

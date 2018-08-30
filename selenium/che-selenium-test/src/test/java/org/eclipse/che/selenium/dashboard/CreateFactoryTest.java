@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -201,7 +202,7 @@ public class CreateFactoryTest {
     // enter factory name with a less than 3 symbols
     createFactoryPage.typeFactoryName(generate("", 2));
     createFactoryPage.waitErrorMessage(TOO_SHORT_NAME_MESAAGE);
-    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
 
     // enter factory name with exactly 3 symbols
     createFactoryPage.typeFactoryName(MIN_FACTORY_NAME);
@@ -211,12 +212,12 @@ public class CreateFactoryTest {
     // enter factory name with special symbols
     createFactoryPage.typeFactoryName(SPECIAL_SYMBOLS_NAME);
     createFactoryPage.waitErrorMessage(SPECIAL_SYMBOLS_ERROR_MESSAGE);
-    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
 
     // enter factory name with more than 20 symbols
     createFactoryPage.typeFactoryName(generate("", 21));
     createFactoryPage.waitErrorMessage(TOO_LONG_NAME_MESSAGE);
-    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
 
     // enter factory name with exactly 20 symbols
     createFactoryPage.typeFactoryName(MAX_FACTORY_NAME);
@@ -227,9 +228,7 @@ public class CreateFactoryTest {
     createFactoryPage.typeFactoryName(FACTORY_NAME_EXIST);
     createFactoryPage.waitErrorMessage(EXIST_NAME_ERROR_MESSAGE);
 
-    assertFalse(
-        createFactoryPage.isCreateFactoryButtonEnabled(),
-        "Known issue https://github.com/eclipse/che/issues/10121");
+    assertFalse(createFactoryPage.isCreateFactoryButtonEnabled());
   }
 
   @Test

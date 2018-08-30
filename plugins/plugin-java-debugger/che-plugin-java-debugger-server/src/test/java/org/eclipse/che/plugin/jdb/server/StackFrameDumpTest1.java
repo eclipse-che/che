@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -56,7 +57,7 @@ public class StackFrameDumpTest1 {
 
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/StackFrameDumpTest1.java", 25, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/StackFrameDumpTest1.java", 26, false, -1, "/test", null, -1);
     debugger = startJavaDebugger(new BreakpointImpl(location), callback);
 
     ensureSuspendAtDesiredLocation(location, callback);
@@ -87,7 +88,7 @@ public class StackFrameDumpTest1 {
     StackFrameDumpDto stackFrame = asDto(debugger.getStackFrameDump(threadId, 0));
 
     LocationDto location = stackFrame.getLocation();
-    assertEquals(location.getLineNumber(), 25);
+    assertEquals(location.getLineNumber(), 26);
     assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
@@ -133,7 +134,7 @@ public class StackFrameDumpTest1 {
     StackFrameDumpDto stackFrame = asDto(debugger.getStackFrameDump(threadId, 1));
 
     LocationDto location = stackFrame.getLocation();
-    assertEquals(location.getLineNumber(), 21);
+    assertEquals(location.getLineNumber(), 22);
     assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();
@@ -187,7 +188,7 @@ public class StackFrameDumpTest1 {
     StackFrameDumpDto stackFrame = asDto(debugger.getStackFrameDump(threadId, 2));
 
     LocationDto location = stackFrame.getLocation();
-    assertEquals(location.getLineNumber(), 16);
+    assertEquals(location.getLineNumber(), 17);
     assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
 
     MethodDto method = location.getMethod();

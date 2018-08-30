@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -18,10 +19,10 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
 
 /**
  * Exposes secure servers with JWTProxy.
@@ -53,11 +54,10 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
   @Inject
   public JwtProxySecureServerExposer(
       @Assisted RuntimeIdentity identity,
-      SignatureKeyManager signatureKeyManager,
+      JwtProxyProvisionerFactory jwtProxyProvisionerFactory,
       ExternalServerExposerStrategy<T> exposerStrategy) {
     this.exposerStrategy = exposerStrategy;
-
-    proxyProvisioner = new JwtProxyProvisioner(identity, signatureKeyManager);
+    this.proxyProvisioner = jwtProxyProvisionerFactory.create(identity);
   }
 
   @Override

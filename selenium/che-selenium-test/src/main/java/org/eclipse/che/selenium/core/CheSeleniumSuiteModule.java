@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -11,7 +12,6 @@
 package org.eclipse.che.selenium.core;
 
 import static com.google.inject.name.Names.named;
-import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
@@ -78,8 +78,8 @@ public class CheSeleniumSuiteModule extends AbstractModule {
 
   public static final String AUXILIARY = "auxiliary";
 
-  private static final String CHE_MULTIUSER_VARIABLE = "CHE_MULTIUSER";
-  private static final String CHE_INFRASTRUCTURE_VARIABLE = "CHE_INFRASTRUCTURE";
+  private static final String CHE_MULTIUSER_VARIABLE = "che.multiuser";
+  private static final String CHE_INFRASTRUCTURE_VARIABLE = "che.infrastructure";
 
   @Override
   public void configure() {
@@ -120,19 +120,19 @@ public class CheSeleniumSuiteModule extends AbstractModule {
 
     bind(PageObjectsInjector.class).to(PageObjectsInjectorImpl.class);
 
-    if (parseBoolean(System.getenv(CHE_MULTIUSER_VARIABLE))) {
+    if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
       install(new CheSeleniumMultiUserModule());
     } else {
       install(new CheSeleniumSingleUserModule());
     }
 
-    configureInfrastructureRelatedDependencies();
+    configureInfrastructureRelatedDependencies(config);
     configureTestExecutionModeRelatedDependencies();
   }
 
-  private void configureInfrastructureRelatedDependencies() {
+  private void configureInfrastructureRelatedDependencies(TestConfiguration config) {
     final Infrastructure cheInfrastructure =
-        Infrastructure.valueOf(System.getenv(CHE_INFRASTRUCTURE_VARIABLE).toUpperCase());
+        Infrastructure.valueOf(config.getString(CHE_INFRASTRUCTURE_VARIABLE).toUpperCase());
     switch (cheInfrastructure) {
       case OPENSHIFT:
       case K8S:

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -76,6 +77,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNested
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -98,6 +100,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -206,7 +209,8 @@ public class CodenvyEditor {
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
-    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
+    String HOVER_POPUP_XPATH =
+        "//div[@class='textviewTooltip' and contains(@style,'visibility: visible')]";
     String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
   }
 
@@ -434,13 +438,23 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitTextContains(tooltipTitle, expectedText);
   }
 
+  /** Get text from hover popup */
+  public String getTextFromHoverPopup() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(hoverPopup);
+  }
+
   /**
    * wait text in hover pop-up (after hovering on text)
    *
    * @param expectedText the expected text into hover pop-up
    */
   public void waitTextInHoverPopup(String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    try {
+      seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   /**
@@ -694,16 +708,28 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits specified {@code expectedText} in autocomplete container.
+   * Waits specified {@code expectedProposal} in autocomplete container.
    *
-   * @param expectedText text which should be present in the container
+   * @param expectedProposal text which should be present in the container
    */
-  public void waitTextIntoAutocompleteContainer(final String expectedText) {
+  public void waitProposalIntoAutocompleteContainer(final String expectedProposal) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromAutocomplete().contains(expectedText));
+                webDriver -> getAllVisibleTextFromAutocomplete().contains(expectedProposal));
+  }
+
+  /**
+   * Waits specified {@code proposals} in autocomplete container.
+   *
+   * @param expectedProposals text which should be present in the container
+   */
+  public void waitProposalsIntoAutocompleteContainer(List<String> expectedProposals) {
+    expectedProposals.forEach(
+        proposal -> {
+          waitProposalIntoAutocompleteContainer(proposal);
+        });
   }
 
   /**

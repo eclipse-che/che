@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -68,10 +69,9 @@ public class PermissionsService extends Service {
   @GET
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get all supported domains or only requested if domain parameter specified",
-    response = DomainDto.class,
-    responseContainer = "List"
-  )
+      value = "Get all supported domains or only requested if domain parameter specified",
+      response = DomainDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The domains successfully fetched"),
     @ApiResponse(code = 404, message = "Requested domain is not supported"),
@@ -95,13 +95,11 @@ public class PermissionsService extends Service {
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 404, message = "Domain of permissions is not supported"),
     @ApiResponse(
-      code = 409,
-      message = "New permissions removes last 'setPermissions' of given instance"
-    ),
+        code = 409,
+        message = "New permissions removes last 'setPermissions' of given instance"),
     @ApiResponse(
-      code = 409,
-      message = "Given domain requires non nullable value for instance but it is null"
-    ),
+        code = 409,
+        message = "Given domain requires non nullable value for instance but it is null"),
     @ApiResponse(code = 500, message = "Internal server error occurred during permissions storing")
   })
   public void storePermissions(
@@ -120,21 +118,18 @@ public class PermissionsService extends Service {
   @Path("/{domain}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get permissions of current user which are related to specified domain and instance",
-    response = PermissionsDto.class
-  )
+      value = "Get permissions of current user which are related to specified domain and instance",
+      response = PermissionsDto.class)
   @ApiResponses({
     @ApiResponse(code = 200, message = "The permissions successfully fetched"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 404, message = "Specified domain is unsupported"),
     @ApiResponse(
-      code = 404,
-      message = "Permissions for current user with specified domain and instance was not found"
-    ),
+        code = 404,
+        message = "Permissions for current user with specified domain and instance was not found"),
     @ApiResponse(
-      code = 409,
-      message = "Given domain requires non nullable value for instance but it is null"
-    ),
+        code = 409,
+        message = "Given domain requires non nullable value for instance but it is null"),
     @ApiResponse(code = 500, message = "Internal server error occurred during permissions fetching")
   })
   public PermissionsDto getCurrentUsersPermissions(
@@ -153,18 +148,16 @@ public class PermissionsService extends Service {
   @Path("/{domain}/all")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get permissions which are related to specified domain and instance",
-    response = PermissionsDto.class,
-    responseContainer = "List"
-  )
+      value = "Get permissions which are related to specified domain and instance",
+      response = PermissionsDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The permissions successfully fetched"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 404, message = "Specified domain is unsupported"),
     @ApiResponse(
-      code = 409,
-      message = "Given domain requires non nullable value for instance but it is null"
-    ),
+        code = 409,
+        message = "Given domain requires non nullable value for instance but it is null"),
     @ApiResponse(code = 500, message = "Internal server error occurred during permissions fetching")
   })
   public Response getUsersPermissions(
@@ -196,9 +189,8 @@ public class PermissionsService extends Service {
     @ApiResponse(code = 404, message = "Specified domain is unsupported"),
     @ApiResponse(code = 409, message = "User has last 'setPermissions' of given instance"),
     @ApiResponse(
-      code = 409,
-      message = "Given domain requires non nullable value for instance but it is null"
-    ),
+        code = 409,
+        message = "Given domain requires non nullable value for instance but it is null"),
     @ApiResponse(code = 500, message = "Internal server error occurred during permissions removing")
   })
   public void removePermissions(

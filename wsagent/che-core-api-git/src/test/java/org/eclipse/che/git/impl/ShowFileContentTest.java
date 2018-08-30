@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -48,9 +49,8 @@ public class ShowFileContentTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testShowFileContentFromHead(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -66,9 +66,8 @@ public class ShowFileContentTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testShowFileContentFromBranch(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -85,11 +84,10 @@ public class ShowFileContentTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp = "fatal: Path 'dummyFile' does not exist in 'HEAD'\n"
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp = "fatal: Path 'dummyFile' does not exist in 'HEAD'\n")
   public void testShowContentOfNotExistFile(GitConnectionFactory connectionFactory)
       throws Exception {
     // given

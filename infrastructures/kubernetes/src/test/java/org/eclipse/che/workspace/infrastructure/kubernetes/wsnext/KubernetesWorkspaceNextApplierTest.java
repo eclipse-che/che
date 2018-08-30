@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -110,10 +111,9 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Workspace.Next configuration can be applied to a workspace with one pod only"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace.Next configuration can be applied to a workspace with one pod only")
   public void throwsExceptionWhenTheNumberOfPodsIsNot1() throws Exception {
     when(internalEnvironment.getPods()).thenReturn(of("pod1", pod, "pod2", pod));
 
@@ -337,12 +337,11 @@ public class KubernetesWorkspaceNextApplierTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Applying of sidecar tooling failed. Kubernetes service with name '"
-            + CHE_PLUGIN_ENDPOINT_NAME
-            + "' already exists in the workspace environment."
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Applying of sidecar tooling failed. Kubernetes service with name '"
+              + CHE_PLUGIN_ENDPOINT_NAME
+              + "' already exists in the workspace environment.")
   public void throwsExceptionOnAddingChePluginEndpointServiceIfServiceExists() throws Exception {
     // given
     ChePluginEndpoint endpoint1 =

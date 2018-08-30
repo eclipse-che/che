@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -37,26 +38,23 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
 @Entity(name = "OrganizationDistributedResources")
 @NamedQueries({
   @NamedQuery(
-    name = "OrganizationDistributedResources.get",
-    query =
-        "SELECT r "
-            + "FROM OrganizationDistributedResources r "
-            + "WHERE r.organizationId = :organizationId"
-  ),
+      name = "OrganizationDistributedResources.get",
+      query =
+          "SELECT r "
+              + "FROM OrganizationDistributedResources r "
+              + "WHERE r.organizationId = :organizationId"),
   @NamedQuery(
-    name = "OrganizationDistributedResources.getByParent",
-    query =
-        "SELECT r "
-            + "FROM OrganizationDistributedResources r "
-            + "WHERE r.organization.parent = :parent"
-  ),
+      name = "OrganizationDistributedResources.getByParent",
+      query =
+          "SELECT r "
+              + "FROM OrganizationDistributedResources r "
+              + "WHERE r.organization.parent = :parent"),
   @NamedQuery(
-    name = "OrganizationDistributedResources.getCountByParent",
-    query =
-        "SELECT COUNT(r) "
-            + "FROM OrganizationDistributedResources r "
-            + "WHERE r.organization.parent = :parent"
-  )
+      name = "OrganizationDistributedResources.getCountByParent",
+      query =
+          "SELECT COUNT(r) "
+              + "FROM OrganizationDistributedResources r "
+              + "WHERE r.organization.parent = :parent")
 })
 @Table(name = "che_organization_distributed_resources")
 public class OrganizationDistributedResourcesImpl implements OrganizationDistributedResources {
@@ -68,10 +66,9 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
-    name = "che_organization_distributed_resources_resource",
-    joinColumns = @JoinColumn(name = "organization_distributed_resources_id"),
-    inverseJoinColumns = @JoinColumn(name = "resource_id")
-  )
+      name = "che_organization_distributed_resources_resource",
+      joinColumns = @JoinColumn(name = "organization_distributed_resources_id"),
+      inverseJoinColumns = @JoinColumn(name = "resource_id"))
   private List<ResourceImpl> resourcesCap;
 
   public OrganizationDistributedResourcesImpl() {}

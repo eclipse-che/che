@@ -1,9 +1,11 @@
 #!/bin/bash
-# Copyright (c) 2012-2017 Red Hat, Inc
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+#
+# Copyright (c) 2012-2017 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
 #
 
 set -e
@@ -56,6 +58,17 @@ DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
 export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
 
+# OKD config local dir
+DEFAULT_OKD_DIR="${HOME}/.okd"
+export OKD_DIR=${OKD_DIR:-${DEFAULT_OKD_DIR}}
+mkdir -p ${OKD_DIR}
+
+# Docker image and tag for ansible-service-broker. Currently nightly, since latest does not work
+DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE="ansibleplaybookbundle/origin-ansible-service-broker"
+DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_TAG="nightly"
+export ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE=${ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE:-${DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_IMAGE}}
+export ORIGIN_ANSIBLE_SERVICE_BROKER_TAG=${ORIGIN_ANSIBLE_SERVICE_BROKER_TAG:-${DEFAULT_ORIGIN_ANSIBLE_SERVICE_BROKER_TAG}}
+
 DEFAULT_WAIT_FOR_CHE=true
 export WAIT_FOR_CHE=${WAIT_FOR_CHE:-${DEFAULT_WAIT_FOR_CHE}}
 
@@ -76,6 +89,7 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
+
 }
 
 test_dns_provider() {
@@ -162,10 +176,56 @@ wait_ocp() {
   done
 }
 
+add_user_as_admin() {
+    $OC_BINARY login -u system:admin >/dev/null
+    echo "[OCP] adding cluster-admin role to user developer..."
+    $OC_BINARY adm policy add-cluster-role-to-user cluster-admin developer
+}
+
+wait_for_automation_service_broker() {
+
+    if [ "${APB}" == "true" ]; then
+        $OC_BINARY login -u system:admin
+        echo "[OCP] updating automation-broker configMap with admin sandbox role..."
+        $OC_BINARY get cm/broker-config -n=openshift-automation-service-broker -o=json | sed 's/edit/admin/g' | oc apply -f -
+        echo "[OCP] re-deploying openshift-automation-service-broker..."
+        $OC_BINARY rollout cancel dc/openshift-automation-service-broker -n=openshift-automation-service-broker
+        sleep 5
+        $OC_BINARY rollout latest dc/openshift-automation-service-broker -n=openshift-automation-service-broker
+        available=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[0].status})
+        progressing=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[1].status})
+        DEPLOYMENT_TIMEOUT_SEC=1200
+        POLLING_INTERVAL_SEC=5
+        end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+        while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
+            available=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+            progressing=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+            timeout_in=$((end-SECONDS))
+            echo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
+            sleep ${POLLING_INTERVAL_SEC}
+        done
+        if [ "${progressing}" == "\"True\"" ]; then
+            echo "Ansible service catalog deployed successfully"
+        elif [ "${progressing}" == "False" ]; then
+            echo "Ansible service catalog deployment failed. Aborting."
+            exit 1
+        elif [ ${SECONDS} -ge ${end} ]; then
+            echo "Deployment timeout. Aborting."
+            exit 1
+        fi
+    fi
+}
+
 run_ocp() {
     test_dns_provider
-    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
+    if [ "${APB}" == "true" ]; then
+        export  ENABLE_COMPONENTS="--enable=service-catalog,router,registry,web-console,persistent-volumes,rhel-imagestreams,automation-service-broker"
+        echo "[OCP] start OKD with '${ENABLE_COMPONENTS}'"
+    fi
+    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" \
+                          --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
+    wait_for_automation_service_broker
 }
 
 deploy_che_to_ocp() {
@@ -177,6 +237,9 @@ deploy_che_to_ocp() {
 }
 
 destroy_ocp() {
+    if [ -d "${OKD_DIR}" ]; then
+      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*" > /dev/null || true
+    fi
     $OC_BINARY login -u system:admin
     $OC_BINARY delete pvc --all
     $OC_BINARY delete all --all
@@ -223,6 +286,8 @@ parse_args() {
     HELP="valid args:
     --help - this help menu
     --run-ocp - run ocp cluster
+    --enable-apb - enable ansible service broker (APBs)
+    --admin - add cluster-admin role to developer user
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --project | -p - OpenShift namespace to deploy Che (defaults to eclipse-che). Example: --project=myproject
@@ -233,6 +298,7 @@ parse_args() {
     --image-che - override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
     --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
+    --deploy-che-plugin-registry - deploy Che plugin registry
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
@@ -252,11 +318,22 @@ parse_args() {
       remove_che_from_ocp
     fi
 
+    if [[ "$@" == *"--enable-apb"* ]]; then
+       export APB="true"
+    fi
+
     for i in "${@}"
     do
         case $i in
            --run-ocp)
                run_ocp
+               shift
+           ;;
+           --enable-apb)
+               shift
+           ;;
+           --admin)
+               add_user_as_admin
                shift
            ;;
            --destroy)
@@ -305,6 +382,10 @@ parse_args() {
            --help)
                echo -e "$HELP"
                exit 1
+           ;;
+           --deploy-che-plugin-registry)
+               export DEPLOY_CHE_PLUGIN_REGISTRY=true
+               shift
            ;;
            *)
                echo "You've passed wrong arg '$i'."

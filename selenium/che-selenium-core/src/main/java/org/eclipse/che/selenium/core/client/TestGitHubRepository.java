@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -17,7 +18,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,18 +60,34 @@ public class TestGitHubRepository {
    * Creates repository with semi-random name on GitHub for certain {@code gitHubUsername}. Waits
    * until repository is really created.
    *
-   * @param gitHubUsername default github user name
-   * @param gitHubPassword default github user password
+   * @param gitHubUsername github user name
+   * @param gitHubPassword github user password
    * @throws IOException
-   * @throws InterruptedException
    */
   @Inject
   public TestGitHubRepository(
       @Named("github.username") String gitHubUsername,
       @Named("github.password") String gitHubPassword)
-      throws IOException, InterruptedException {
+      throws IOException {
     gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
     ghRepo = create();
+
+    this.gitHubUsername = gitHubUsername;
+    this.gitHubPassword = gitHubPassword;
+  }
+
+  /**
+   * Gets repository on GitHub with predefined name for certain {@code gitHubUsername}.
+   *
+   * @param gitHubUsername github user name
+   * @param gitHubPassword github user password
+   * @param repoName name of repo on GitHub
+   * @throws IOException
+   */
+  public TestGitHubRepository(String gitHubUsername, String gitHubPassword, String repoName)
+      throws IOException {
+    gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
+    ghRepo = gitHub.getRepository(gitHubUsername + "/" + repoName);
 
     this.gitHubUsername = gitHubUsername;
     this.gitHubPassword = gitHubPassword;
@@ -242,6 +258,28 @@ public class TestGitHubRepository {
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
   }
 
+  public static void deleteAllRepos(String repoPrefix, String gitHubUsername, String gitHubPassword)
+      throws IOException {
+    GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
+
+    gitHub
+        .getMyself()
+        .getAllRepositories()
+        .keySet()
+        .stream()
+        .filter(repoName -> repoName.startsWith(repoPrefix))
+        .forEach(
+            repoName -> {
+              String repoAddress = gitHubUsername + "/" + repoName;
+              LOG.info("Removing repo " + repoAddress + "...");
+              try {
+                gitHub.getRepository(repoAddress).delete();
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            });
+  }
+
   public String getHtmlUrl() {
     return ghRepo.getHtmlUrl().toString();
   }
@@ -254,7 +292,7 @@ public class TestGitHubRepository {
     return ghRepo.getSshUrl();
   }
 
-  private GHRepository create() throws IOException, InterruptedException {
+  private GHRepository create() throws IOException {
     GHRepository repo = gitHub.createRepository(repoName).create();
     ensureRepositoryCreated(repo, System.currentTimeMillis());
 
@@ -321,7 +359,7 @@ public class TestGitHubRepository {
   }
 
   public void addSubmodule(Path pathToRootContentDirectory, String submoduleName)
-      throws IOException, URISyntaxException, InterruptedException {
+      throws IOException {
 
     TestGitHubRepository submodule = new TestGitHubRepository(gitHubUsername, gitHubPassword);
     submodule.addContent(pathToRootContentDirectory);
@@ -330,8 +368,7 @@ public class TestGitHubRepository {
   }
 
   private void createSubmodule(
-      TestGitHubRepository pathToRootContentDirectory, String pathForSubmodule)
-      throws IOException, URISyntaxException {
+      TestGitHubRepository pathToRootContentDirectory, String pathForSubmodule) throws IOException {
     String submoduleSha = createTreeWithSubmodule(pathToRootContentDirectory, pathForSubmodule);
 
     GHCommit treeCommit =

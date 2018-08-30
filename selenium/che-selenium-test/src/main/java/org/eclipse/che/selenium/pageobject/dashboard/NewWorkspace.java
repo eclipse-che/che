@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -41,6 +42,7 @@ import static org.openqa.selenium.Keys.BACK_SPACE;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
@@ -178,6 +180,14 @@ public class NewWorkspace {
       this.id = id;
     }
 
+    public static Stack getById(String id) {
+      Optional<Stack> first =
+          asList(values()).stream().filter(stack -> stack.getId().equals(id)).findFirst();
+      first.orElseThrow(
+          () -> new RuntimeException(String.format("Stack with id '%s' not found.", id)));
+      return first.get();
+    }
+
     public String getId() {
       return this.id;
     }
@@ -231,6 +241,11 @@ public class NewWorkspace {
 
   public String getWorkspaceNameValue() {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(workspaceNameInput);
+  }
+
+  public void waitWorkspaceNameFieldValue(String expectedName) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        (driver) -> getWorkspaceNameValue().equals(expectedName));
   }
 
   public void waitErrorMessage(String message) {
@@ -688,11 +703,11 @@ public class NewWorkspace {
     waitPageLoad(DEFAULT_TIMEOUT);
   }
 
-  public List<String> getAvailableStacks() {
+  public List<Stack> getAvailableStacks() {
     return seleniumWebDriverHelper
         .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
         .stream()
-        .map(webElement -> webElement.getAttribute("data-stack-id"))
+        .map(webElement -> Stack.getById(webElement.getAttribute("data-stack-id")))
         .collect(toList());
   }
 
@@ -704,16 +719,16 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitVisibility(By.xpath(selectedStackXpath));
   }
 
-  public List<String> getVisibleStacks() {
+  public List<Stack> getVisibleStacks() {
     return seleniumWebDriverHelper
         .waitPresenceOfAllElements(By.xpath("//div[@data-stack-id]"))
         .stream()
         .filter(seleniumWebDriverHelper::isVisible)
-        .map(webElement -> webElement.getAttribute("data-stack-id"))
+        .map(webElement -> Stack.getById(webElement.getAttribute("data-stack-id")))
         .collect(Collectors.toList());
   }
 
-  public void waitVisibleStacks(List<String> expectedVisibleStacks) {
+  public void waitVisibleStacks(List<Stack> expectedVisibleStacks) {
     webDriverWaitFactory
         .get()
         .until(
@@ -738,17 +753,16 @@ public class NewWorkspace {
     return getAvailableStacks().size();
   }
 
-  public void waitStacksNotPresent(List<String> stacksIdForChecking) {
+  public void waitStacksNotPresent(List<Stack> stacksIdForChecking) {
     stacksIdForChecking.forEach(
-        stackId ->
+        stack ->
             webDriverWaitFactory
                 .get()
                 .until(
-                    (ExpectedCondition<Boolean>)
-                        driver -> !getAvailableStacks().contains(stackId)));
+                    (ExpectedCondition<Boolean>) driver -> !getAvailableStacks().contains(stack)));
   }
 
-  public void waitStacksOrder(List<String> expectedOrder) {
+  public void waitStacksOrder(List<Stack> expectedOrder) {
     webDriverWaitFactory
         .get()
         .until((ExpectedCondition<Boolean>) driver -> expectedOrder.equals(getAvailableStacks()));

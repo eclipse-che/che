@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -56,9 +57,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimplePush(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -84,9 +84,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testPushRemote(GitConnectionFactory connectionFactory)
       throws GitException, IOException, URISyntaxException, UnauthorizedException {
     // given
@@ -109,13 +108,12 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "No remote repository specified.  "
-            + "Please, specify either a URL or a remote name from which new revisions should be fetched in request."
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "No remote repository specified.  "
+              + "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
   public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory)
       throws Exception {
     // given
@@ -126,9 +124,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testPushWhenLocalRepositoryIsNotSynchronisedWithRemote(
       GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
@@ -155,9 +152,8 @@ public class PushTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testPushWhenLocalRepositoryIsUpToDate(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given

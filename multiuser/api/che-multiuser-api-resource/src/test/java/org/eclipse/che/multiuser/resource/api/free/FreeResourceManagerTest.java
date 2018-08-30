@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -70,9 +71,8 @@ public class FreeResourceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NullPointerException.class,
-    expectedExceptionsMessageRegExp = "Required non-null free resources limit"
-  )
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "Required non-null free resources limit")
   public void shouldThrowNpeOnStoringNullableFreeResourcesLimit() throws Exception {
     // when
     manager.store(null);
@@ -96,9 +96,8 @@ public class FreeResourceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NullPointerException.class,
-    expectedExceptionsMessageRegExp = "Required non-null account id"
-  )
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "Required non-null account id")
   public void shouldThrowNpeOnGettingFreeResourcesLimitByNullableAccountId() throws Exception {
     // when
     manager.get(null);
@@ -114,9 +113,8 @@ public class FreeResourceManagerTest {
   }
 
   @Test(
-    expectedExceptions = NullPointerException.class,
-    expectedExceptionsMessageRegExp = "Required non-null account id"
-  )
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "Required non-null account id")
   public void shouldThrowNpeOnRemovingFreeResourcesLimitByNullableAccountId() throws Exception {
     // when
     manager.remove(null);

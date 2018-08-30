@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -25,6 +26,7 @@ public final class Constants {
   public static final String LINK_REL_ENVIRONMENT_STATUS_CHANNEL = "environment/statusChannel";
 
   public static final String WORKSPACE_STOPPED_BY = "stopped_by";
+  public static final String WORKSPACE_STOP_REASON = "stop_reason";
 
   public static final String LINK_REL_CREATE_STACK = "create stack";
   public static final String LINK_REL_UPDATE_STACK = "update stack";

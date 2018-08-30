@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -121,8 +122,8 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG);
     consoles.waitExpectedTextIntoConsole(" Server startup in");
-    editor.setCursorToLine(34);
-    editor.setInactiveBreakpoint(34);
+    editor.setCursorToLine(35);
+    editor.setInactiveBreakpoint(35);
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
@@ -131,7 +132,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
-    editor.waitActiveBreakpoint(34);
+    editor.waitActiveBreakpoint(35);
     String appUrl =
         workspaceServiceClient
                 .getServerFromDevMachineBySymbolicName(ws.getId(), "tomcat8")
@@ -143,7 +144,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         debugUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
 
-    editor.waitActiveBreakpoint(34);
+    editor.waitActiveBreakpoint(35);
     debugPanel.waitDebugHighlightedText("result = \"Sorry, you failed. Try again later!\";");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("AdditonalClass.check();");
@@ -177,7 +178,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     }
   }
 
-  @Test(priority = 1)
+  // @Test(priority = 1)
   public void shouldOpenDebuggingFile() {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();

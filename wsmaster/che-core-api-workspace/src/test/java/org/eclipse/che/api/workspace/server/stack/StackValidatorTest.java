@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -51,25 +52,22 @@ public class StackValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null stack"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null stack")
   public void shouldNotValidateIfStackIsNull() throws Exception {
     validator.check(null);
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name")
   public void shouldNotValidateIfStackNameIsNull() throws Exception {
     validator.check(createStack().withName(null));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null and non-empty stack name")
   public void shouldNotValidateIfStackNameIsEmpty() throws Exception {
     validator.check(createStack().withName(""));
   }
@@ -85,25 +83,22 @@ public class StackValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'")
   public void shouldNotValidateIfStackScopeIsNull() throws Exception {
     validator.check(createStack().withScope(null));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Required non-null scope value: 'general' or 'advanced'")
   public void shouldNotValidateIfStackScopeIsNotGeneralOrAdvanced() throws Exception {
     validator.check(createStack().withScope("not-valid"));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Workspace config required"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Workspace config required")
   public void shouldValidateIfSourceIsStackSourceAndWorkspaceConfigIsNull() throws Exception {
     validator.check(createStack().withWorkspaceConfig(null));
   }

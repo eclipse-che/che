@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -235,11 +236,10 @@ public class LocalInstallerRegistryTest {
   }
 
   @Test(
-    expectedExceptions = InstallerException.class,
-    expectedExceptionsMessageRegExp =
-        "Installers circular dependency found between 'installer1:1.0.0'"
-            + " and 'installer3:1.0.0'"
-  )
+      expectedExceptions = InstallerException.class,
+      expectedExceptionsMessageRegExp =
+          "Installers circular dependency found between 'installer1:1.0.0'"
+              + " and 'installer3:1.0.0'")
   public void sortingShouldFailIfCircularDependenciesFound() throws Exception {
     when(installer1v1.getDependencies()).thenReturn(singletonList("installer2:1.0.0"));
     when(installer2v1.getDependencies()).thenReturn(singletonList("installer3:1.0.0"));
@@ -254,10 +254,9 @@ public class LocalInstallerRegistryTest {
   }
 
   @Test(
-    expectedExceptions = InstallerException.class,
-    expectedExceptionsMessageRegExp =
-        "Installers dependencies conflict. Several version '2.0.0' and '1.0.0' of the some id 'installer1"
-  )
+      expectedExceptions = InstallerException.class,
+      expectedExceptionsMessageRegExp =
+          "Installers dependencies conflict. Several version '2.0.0' and '1.0.0' of the some id 'installer1")
   public void shouldNotReturnOrderedSeveralInstallersDifferentVersions() throws Exception {
     when(installer2v1.getDependencies()).thenReturn(singletonList("installer1:1.0.0"));
     when(installer3v1.getDependencies()).thenReturn(singletonList("installer1:2.0.0"));

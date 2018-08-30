@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -81,10 +82,10 @@ public class ClangFileEditingTest {
     editor.selectTabByName(CPP_FILE_NAME);
 
     // check error marker message
-    editor.goToCursorPositionVisible(13, 1);
-    editor.waitMarkerInvisibility(ERROR, 13);
+    editor.goToCursorPositionVisible(14, 1);
+    editor.waitMarkerInvisibility(ERROR, 14);
     editor.typeTextIntoEditor("c");
-    editor.waitMarkerInPosition(ERROR, 13);
+    editor.waitMarkerInPosition(ERROR, 14);
 
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
@@ -94,12 +95,12 @@ public class ClangFileEditingTest {
     editor.selectTabByName(CPP_FILE_NAME);
 
     // check contents of autocomplete container
-    editor.goToPosition(15, 1);
+    editor.goToPosition(16, 1);
     editor.deleteCurrentLineAndInsertNew();
     editor.typeTextIntoEditor("std::cou");
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("cout ostream");
-    editor.waitTextIntoAutocompleteContainer("wcout wostream");
+    editor.waitProposalIntoAutocompleteContainer("cout ostream");
+    editor.waitProposalIntoAutocompleteContainer("wcout wostream");
     editor.closeAutocomplete();
   }
 
@@ -108,13 +109,13 @@ public class ClangFileEditingTest {
     editor.waitActive();
 
     // check Find Definition feature from Assistant menu
-    editor.goToPosition(20, 20);
+    editor.goToPosition(21, 20);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitTabIsPresent(H_FILE_NAME);
     editor.clickOnCloseFileIcon(H_FILE_NAME);
 
     // check Find Definition feature by pressing F4
-    editor.goToPosition(20, 20);
+    editor.goToPosition(21, 20);
     editor.typeTextIntoEditor(F4.toString());
     editor.waitTabIsPresent(H_FILE_NAME);
   }

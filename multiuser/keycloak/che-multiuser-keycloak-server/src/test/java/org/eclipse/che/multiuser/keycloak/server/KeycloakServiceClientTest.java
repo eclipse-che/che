@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -85,9 +86,8 @@ public class KeycloakServiceClientTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Invalid token."
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Invalid token.")
   public void shouldThrowBadRequestException() throws Exception {
     keycloakService =
         new KeycloakService(null, null, null, new BadRequestException("Invalid token."));
@@ -95,18 +95,16 @@ public class KeycloakServiceClientTest {
   }
 
   @Test(
-    expectedExceptions = ForbiddenException.class,
-    expectedExceptionsMessageRegExp = "Forbidden."
-  )
+      expectedExceptions = ForbiddenException.class,
+      expectedExceptionsMessageRegExp = "Forbidden.")
   public void shouldThrowForbiddenException() throws Exception {
     keycloakService = new KeycloakService(null, null, null, new ForbiddenException("Forbidden."));
     keycloakServiceClient.getIdentityProviderToken("github");
   }
 
   @Test(
-    expectedExceptions = UnauthorizedException.class,
-    expectedExceptionsMessageRegExp = "Unauthorized."
-  )
+      expectedExceptions = UnauthorizedException.class,
+      expectedExceptionsMessageRegExp = "Unauthorized.")
   public void shouldThrowUnauthorizedException() throws Exception {
     keycloakService =
         new KeycloakService(null, null, null, new UnauthorizedException("Unauthorized."));
@@ -114,9 +112,8 @@ public class KeycloakServiceClientTest {
   }
 
   @Test(
-    expectedExceptions = NotFoundException.class,
-    expectedExceptionsMessageRegExp = "Not found."
-  )
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Not found.")
   public void shouldThrowNotFoundException() throws Exception {
     keycloakService = new KeycloakService(null, null, null, new NotFoundException("Not found."));
     keycloakServiceClient.getIdentityProviderToken("github");
@@ -124,9 +121,8 @@ public class KeycloakServiceClientTest {
 
   // Special case
   @Test(
-    expectedExceptions = UnauthorizedException.class,
-    expectedExceptionsMessageRegExp = "User (.+) is not associated with identity provider (.+)."
-  )
+      expectedExceptions = UnauthorizedException.class,
+      expectedExceptionsMessageRegExp = "User (.+) is not associated with identity provider (.+).")
   public void shouldThrowUnauthorizedExceptionWhenNoProviderLink() throws Exception {
     keycloakService =
         new KeycloakService(

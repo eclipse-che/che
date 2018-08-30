@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -124,9 +125,8 @@ public class OrganizationResourcesDistributorTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp = "It is not allowed to cap resources for root organization."
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp = "It is not allowed to cap resources for root organization.")
   public void shouldThrowConflictExceptionOnCappingResourcesForRootOrganization() throws Exception {
     // when
     manager.capResources(PARENT_ORG_ID, Collections.emptyList());
@@ -211,9 +211,8 @@ public class OrganizationResourcesDistributorTest {
   }
 
   @Test(
-    expectedExceptions = ConflictException.class,
-    expectedExceptionsMessageRegExp = "Resources are currently in use. Denied."
-  )
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp = "Resources are currently in use. Denied.")
   public void shouldResourceAvailabilityCappingResourcesWhenResourceCapIsGreaterThanUsedOne()
       throws Exception {
     // given

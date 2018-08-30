@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -61,6 +62,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.IAnnotationTransformer2;
 import org.testng.IConfigurationListener;
 import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
@@ -73,6 +75,10 @@ import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 import org.testng.TestException;
+import org.testng.annotations.IConfigurationAnnotation;
+import org.testng.annotations.IDataProviderAnnotation;
+import org.testng.annotations.IFactoryAnnotation;
+import org.testng.annotations.ITestAnnotation;
 
 /**
  * Tests lifecycle handler.
@@ -84,7 +90,11 @@ import org.testng.TestException;
  * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener, ISuiteListener, IInvokedMethodListener, IExecutionListener {
+    implements ITestListener,
+        ISuiteListener,
+        IInvokedMethodListener,
+        IExecutionListener,
+        IAnnotationTransformer2 {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -127,6 +137,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
   @Inject private WebDriverLogsReaderFactory webDriverLogsReaderFactory;
+  @Inject private TestFilter testFilter;
 
   private final Injector injector;
 
@@ -203,8 +214,9 @@ public abstract class SeleniumTestHandler
   @Override
   public void onStart(ISuite suite) {
     suite.setParentInjector(injector);
-    LOG.info(
-        "Starting suite '{}' with {} test methods.", suite.getName(), suite.getAllMethods().size());
+    long numberOfEnabledTests =
+        suite.getAllMethods().parallelStream().filter(ITestNGMethod::getEnabled).count();
+    LOG.info("Starting suite '{}' with {} test methods.", suite.getName(), numberOfEnabledTests);
   }
 
   /** Check if webdriver session can be created without errors. */
@@ -266,6 +278,27 @@ public abstract class SeleniumTestHandler
   public void onExecutionFinish() {
     shutdown();
   }
+
+  @Override
+  public void transform(
+      ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
+    testFilter.excludeTestOfImproperGroup(annotation);
+  }
+
+  @Override
+  public void transform(
+      IConfigurationAnnotation annotation,
+      Class testClass,
+      Constructor testConstructor,
+      Method testMethod) {
+    testFilter.excludeTestOfImproperGroup(annotation);
+  }
+
+  @Override
+  public void transform(IDataProviderAnnotation annotation, Method method) {}
+
+  @Override
+  public void transform(IFactoryAnnotation annotation, Method method) {}
 
   /** Injects dependencies into the given test class using {@link Guice} and custom injectors. */
   private void injectDependencies(ITestContext testContext, Object testInstance) throws Exception {
@@ -332,7 +365,7 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      if (obj == null || !(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
+      if (!(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
         continue;
       }
 

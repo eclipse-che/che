@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -87,15 +88,14 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "In the property '"
-            + CONFIG_PREFIX
-            + "url' is missing '.'. "
-            + "Valid credential registry format is '"
-            + VALID_DOCKER_PROPERTY_NAME_EXAMPLE
-            + "'"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "In the property '"
+              + CONFIG_PREFIX
+              + "url' is missing '.'. "
+              + "Valid credential registry format is '"
+              + VALID_DOCKER_PROPERTY_NAME_EXAMPLE
+              + "'")
   public void shouldThrowExceptionWhenUserMissedPointInProperty() throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + "url", URL1_VALUE);
 
@@ -103,15 +103,14 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "Property '"
-            + CONFIG_PREFIX
-            + "my.registry.docker.url' contains redundant '.'. "
-            + "Valid credential registry format is '"
-            + VALID_DOCKER_PROPERTY_NAME_EXAMPLE
-            + "'"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Property '"
+              + CONFIG_PREFIX
+              + "my.registry.docker.url' contains redundant '.'. "
+              + "Valid credential registry format is '"
+              + VALID_DOCKER_PROPERTY_NAME_EXAMPLE
+              + "'")
   public void shouldThrowExceptionWhenUserSetRedundantPointInProperty()
       throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + "my.registry.docker.url", URL1_VALUE);
@@ -120,9 +119,8 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserMissedUrlProperty() throws IllegalArgumentException {
     properties.remove(CONFIG_PREFIX + URL1_KEY);
 
@@ -130,10 +128,9 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserMissedUserProperty() throws IllegalArgumentException {
     properties.remove(CONFIG_PREFIX + USER_NAME1_KEY);
 
@@ -141,9 +138,9 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserMissedPasswordProperty() throws IllegalArgumentException {
     properties.remove(CONFIG_PREFIX + PASSWORD1_KEY);
 
@@ -160,9 +157,8 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserSetEmptyUrlValue() throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + URL1_KEY, "");
 
@@ -170,9 +166,8 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserSetNullUrlValue() throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + URL1_KEY, null);
 
@@ -180,10 +175,9 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserSetEmptyUserNameValue() throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + USER_NAME1_KEY, "");
 
@@ -191,10 +185,9 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserSetNullUserNameValue() throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + USER_NAME1_KEY, null);
 
@@ -202,9 +195,9 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserSetEmptyPasswordValue() throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + PASSWORD1_KEY, "");
 
@@ -212,9 +205,9 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing."
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing.")
   public void shouldThrowExceptionIfUserSetNullPasswordValue() throws IllegalArgumentException {
     properties.put(CONFIG_PREFIX + PASSWORD1_KEY, null);
 
@@ -222,9 +215,8 @@ public class InitialAuthConfigTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Docker hub registry is configured more than one time"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Docker hub registry is configured more than one time")
   public void shouldThrowExceptionIfUserConfigureDockerHubMoreThanOneTime() {
     properties.put(CONFIG_PREFIX + "registry3.url", "docker.io");
     properties.put(CONFIG_PREFIX + "registry3.username", "inattentive");

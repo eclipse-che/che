@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -20,14 +21,11 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
@@ -52,9 +50,6 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private CommandsToolbar commandsToolbar;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private NotificationsPopupPanel notificationsPanel;
-  @Inject private CheTerminal terminal;
-  @Inject private TestProjectServiceClient projectService;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -82,17 +77,15 @@ public class CheckIntelligenceCommandFromToolbarTest {
   }
 
   @Test(
-    priority = 1,
-    groups = {TestGroup.DOCKER}
-  )
+      priority = 1,
+      groups = {TestGroup.DOCKER})
   public void checkButtonsOnToolbarOnDocker() {
     checkButtonsOnToolbar("This site can’t be reached");
   }
 
   @Test(
-    priority = 1,
-    groups = {TestGroup.OPENSHIFT, TestGroup.K8S}
-  )
+      priority = 1,
+      groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
   public void checkButtonsOnToolbarOnOpenshift() {
     checkButtonsOnToolbar("Application is not available");
   }

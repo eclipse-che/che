@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -49,19 +50,17 @@ public class ResourceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Specified resources type 'unsupported' is not supported"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Specified resources type 'unsupported' is not supported")
   public void shouldThrowBadRequestExceptionWhenResourceHasNonSupportedType() throws Exception {
     // when
     validator.validate(DtoFactory.newDto(ResourceDto.class).withType("unsupported").withUnit("mb"));
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp =
-        "Specified resources type 'test' support only following units: mb, gb"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "Specified resources type 'test' support only following units: mb, gb")
   public void shouldThrowBadRequestExceptionWhenResourceHasNonSupportedUnit() throws Exception {
     // when
     validator.validate(DtoFactory.newDto(ResourceDto.class).withType(RESOURCE_TYPE).withUnit("kb"));
@@ -81,9 +80,8 @@ public class ResourceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "Resources with type 'test' has negative amount"
-  )
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "Resources with type 'test' has negative amount")
   public void shouldThrowBadRequestExceptionWhenResourceHasNegativeAmount() throws Exception {
     // when
     validator.validate(

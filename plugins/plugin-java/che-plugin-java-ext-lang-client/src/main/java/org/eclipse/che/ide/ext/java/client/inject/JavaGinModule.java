@@ -1,15 +1,17 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.ide.ext.java.client.inject;
 
+import static org.eclipse.che.ide.ext.java.client.JavaResources.INSTANCE;
 import static org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction.JAVA_ORGANIZE_IMPORT_ID;
 
 import com.google.gwt.inject.client.AbstractGinModule;
@@ -22,6 +24,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
@@ -29,7 +32,6 @@ import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.ext.java.client.CurrentClassFQN_Macro;
-import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction;
 import org.eclipse.che.ide.ext.java.client.action.ProposalAction;
 import org.eclipse.che.ide.ext.java.client.command.JavaCommandType;
@@ -156,28 +158,28 @@ public class JavaGinModule extends AbstractGinModule {
   @Provides
   @Singleton
   @Named("JavaFileType")
-  protected FileType provideJavaFile() {
-    return new FileType(JavaResources.INSTANCE.javaFile(), "java");
+  protected FileType provideJavaFile(FileTypeProvider fileTypeProvider) {
+    return fileTypeProvider.getByExtension(INSTANCE.javaFile(), "java");
   }
 
   @Provides
   @Singleton
   @Named("JavaClassFileType")
-  protected FileType provideJavaClassFile() {
-    return new FileType(JavaResources.INSTANCE.javaFile(), "class");
+  protected FileType provideJavaClassFile(FileTypeProvider fileTypeProvider) {
+    return fileTypeProvider.getByExtension(INSTANCE.javaFile(), "class");
   }
 
   @Provides
   @Singleton
   @Named("JspFileType")
-  protected FileType provideJspFile() {
-    return new FileType(JavaResources.INSTANCE.jspFile(), "jsp");
+  protected FileType provideJspFile(FileTypeProvider fileTypeProvider) {
+    return fileTypeProvider.getByExtension(INSTANCE.jspFile(), "jsp");
   }
 
   @Provides
   @Singleton
   @Named("JsfFileType")
-  protected FileType provideJsfFile() {
-    return new FileType(JavaResources.INSTANCE.jsfFile(), "jsf");
+  protected FileType provideJsfFile(FileTypeProvider fileTypeProvider) {
+    return fileTypeProvider.getByExtension(INSTANCE.jsfFile(), "jsf");
   }
 }

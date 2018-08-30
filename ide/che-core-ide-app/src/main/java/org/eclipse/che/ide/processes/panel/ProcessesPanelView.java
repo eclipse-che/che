@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -16,7 +17,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -112,8 +113,10 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
      *
      * @param machineId id of machine in which the terminal will be added
      * @param options context creation terminal. @see {@link TerminalOptionsJso}
+     * @param focusOnOpen if true than set focus after terminal opening, otherwise open unfocused
+     *     terminal.
      */
-    void onAddTerminal(String machineId, TerminalOptionsJso options);
+    void onAddTerminal(String machineId, TerminalOptionsJso options, boolean focusOnOpen);
 
     /**
      * Will be called when user clicks 'Preview Ssh' button

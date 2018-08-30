@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -21,6 +22,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 
 @Singleton
 public class ServerSideRequestProcessor implements RequestProcessor {
@@ -54,6 +56,6 @@ public class ServerSideRequestProcessor implements RequestProcessor {
 
   @Override
   public void process(Runnable runnable) {
-    executorService.execute(runnable);
+    executorService.execute(ThreadLocalPropagateContext.wrap(runnable));
   }
 }

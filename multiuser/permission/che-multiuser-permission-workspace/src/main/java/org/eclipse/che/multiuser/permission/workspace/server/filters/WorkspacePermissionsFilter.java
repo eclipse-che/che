@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -17,7 +18,6 @@ import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDom
 import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.READ;
 import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.RUN;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.USE;
 
 import java.util.Map;
 import java.util.Set;
@@ -144,23 +144,6 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
       case "updateCommand":
         key = ((String) arguments[0]);
         action = CONFIGURE;
-        break;
-
-        // MachineService methods
-      case "startMachine":
-      case "stopMachine":
-        key = ((String) arguments[0]);
-        action = RUN;
-        break;
-
-      case "getMachineById":
-      case "getMachines":
-      case "executeCommandInMachine":
-      case "getProcesses":
-      case "stopProcess":
-      case "getProcessLogs":
-        key = ((String) arguments[0]);
-        action = USE;
         break;
 
       default:

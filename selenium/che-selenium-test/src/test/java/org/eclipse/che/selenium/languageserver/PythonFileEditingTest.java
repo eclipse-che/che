@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -79,17 +80,17 @@ public class PythonFileEditingTest {
     editor.selectTabByName(PYTHON_FILE_NAME);
 
     // check warning marker message
-    editor.goToPosition(18, 53);
+    editor.goToPosition(19, 53);
     editor.typeTextIntoEditor("\n");
     editor.waitMarkerInPosition(WARNING, editor.getPositionVisible());
     editor.moveToMarkerAndWaitAssistContent(WARNING);
     editor.waitTextIntoAnnotationAssist("W293 blank line contains whitespace");
 
     // check error marker message
-    editor.goToCursorPositionVisible(13, 1);
+    editor.goToCursorPositionVisible(14, 1);
     editor.waitAllMarkersInvisibility(ERROR);
     editor.typeTextIntoEditor("c");
-    editor.waitMarkerInPosition(ERROR, 13);
+    editor.waitMarkerInPosition(ERROR, 14);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
   }
@@ -99,13 +100,13 @@ public class PythonFileEditingTest {
     editor.selectTabByName(PYTHON_FILE_NAME);
 
     // check contents of autocomplete container
-    editor.goToPosition(19, 1);
+    editor.goToPosition(20, 1);
     editor.typeTextIntoEditor("\n\nobject = MyClass()\nprint(object.");
 
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("function");
-    editor.waitTextIntoAutocompleteContainer("var");
-    editor.waitTextIntoAutocompleteContainer("variable");
+    editor.waitProposalIntoAutocompleteContainer("function");
+    editor.waitProposalIntoAutocompleteContainer("var");
+    editor.waitProposalIntoAutocompleteContainer("variable");
 
     editor.enterAutocompleteProposal("function() ");
     editor.waitTextIntoEditor("print(object.function");
@@ -117,13 +118,13 @@ public class PythonFileEditingTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/calc.py");
     editor.selectTabByName("calc.py");
 
-    editor.goToPosition(15, 17);
+    editor.goToPosition(16, 17);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitTabIsPresent(PYTHON_MODULE_FILE_NAME);
     editor.closeFileByNameWithSaving(PYTHON_MODULE_FILE_NAME);
 
     // check Find Definition feature by pressing F4
-    editor.goToPosition(15, 17);
+    editor.goToPosition(16, 17);
     editor.typeTextIntoEditor(F4.toString());
     editor.waitTabIsPresent(PYTHON_MODULE_FILE_NAME);
   }

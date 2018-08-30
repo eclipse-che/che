@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -153,7 +154,7 @@ public class AutocompleteFeaturesInEditorTest {
     editor.waitActive();
     loader.waitOnClosed();
     reparseEditorCode();
-    editor.setCursorToLine(37);
+    editor.setCursorToLine(38);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.launchAutocompleteAndWaitContainer();
@@ -183,12 +184,12 @@ public class AutocompleteFeaturesInEditorTest {
 
   // need for check ready - state the ide editor
   private void reparseEditorCode() {
-    editor.setCursorToLine(36);
+    editor.setCursorToLine(37);
     editor.typeTextIntoEditor("a;");
-    editor.waitMarkerInPosition(ERROR, 36);
+    editor.waitMarkerInPosition(ERROR, 37);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-    editor.waitMarkerInvisibility(ERROR, 36);
+    editor.waitMarkerInvisibility(ERROR, 37);
   }
 }

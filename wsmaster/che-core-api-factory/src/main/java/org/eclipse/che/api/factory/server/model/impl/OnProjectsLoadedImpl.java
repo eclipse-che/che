@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -43,10 +44,9 @@ public class OnProjectsLoadedImpl implements OnProjectsLoaded {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
-    name = "che_factory_on_projects_loaded_action_value",
-    joinColumns = @JoinColumn(name = "on_projects_loaded_id"),
-    inverseJoinColumns = @JoinColumn(name = "action_entity_id")
-  )
+      name = "che_factory_on_projects_loaded_action_value",
+      joinColumns = @JoinColumn(name = "on_projects_loaded_id"),
+      inverseJoinColumns = @JoinColumn(name = "action_entity_id"))
   private List<ActionImpl> actions;
 
   public OnProjectsLoadedImpl() {}

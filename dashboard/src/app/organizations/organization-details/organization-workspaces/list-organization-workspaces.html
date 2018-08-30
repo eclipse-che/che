@@ -78,10 +78,11 @@
           <!-- Name -->
           <div flex-gt-xs="25"
                layout="row"
-               class="workspace-item-name">
+               class="workspace-item-name"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>Name</span>
             <div layout="row" flex>
-              <workspace-status-indicator flex="none" che-status="workspace.status"></workspace-status-indicator>
+              <workspace-status-indicator flex="none" che-status="listOrganizationWorkspacesController.getWorkspaceStatus(workspace.id)"></workspace-status-indicator>
               <div class="workspace-name-clip" id="ws-full-name-{{workspace.namespace}}/{{workspace.config.name}}">
             <span
               uib-tooltip="{{'RUNNING' === workspace.status ? 'Running' : 'Last modified: ' + (workspace.attributes.updated | amTimeAgo)}}"
@@ -94,19 +95,22 @@
           </div>
           <!-- RAM -->
           <div flex-gt-xs="15"
-               class="che-list-item-name workspace-item-ram">
+               class="che-list-item-name workspace-item-ram"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
             <span class="workspace-consumed-value" name="workspace-ram-value">{{listOrganizationWorkspacesController.getMemoryLimit(workspace)}}</span>
           </div>
           <!-- Projects -->
           <div flex-gt-xs="15"
-               class="che-list-item-name workspace-item-projects">
+               class="che-list-item-name workspace-item-projects"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>Projects</span>
             <span class="che-hover" name="workspace-projects-value">{{workspace.config.projects.length}}</span>
           </div>
           <!-- Stack ID -->
           <div flex-gt-xs="30"
-               class="che-list-item-name workspace-item-stack">
+               class="che-list-item-name workspace-item-stack"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>Stack</span>
             <span class="che-hover" name="workspace-stacks-name">{{workspace.attributes.stackId}}</span>
           </div>
@@ -116,6 +120,8 @@
             <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
             <div class="che-list-actions" ng-if="listOrganizationWorkspacesController.isOwnWorkspace(workspace.id)"
                  ng-if="listOrganizationWorkspacesController.isSupported(workspace) === true">
+              <che-workspace-status workspace-id="workspace.id"
+                                    name="workspace-stop-start-button"></che-workspace-status>
               <a href="#/workspace/{{workspace.namespace}}/{{workspace.config.name}}?tab=Config"
                  name="configure-workspace-button"
                  uib-tooltip="Configure workspace">

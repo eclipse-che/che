@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -35,26 +36,25 @@ import org.eclipse.che.multiuser.permission.workspace.server.model.Worker;
 @Entity(name = "Worker")
 @NamedQueries({
   @NamedQuery(
-    name = "Worker.getByWorkspaceId",
-    query = "SELECT worker " + "FROM Worker worker " + "WHERE worker.workspaceId = :workspaceId "
-  ),
+      name = "Worker.getByWorkspaceId",
+      query =
+          "SELECT worker " + "FROM Worker worker " + "WHERE worker.workspaceId = :workspaceId "),
   @NamedQuery(
-    name = "Worker.getCountByWorkspaceId",
-    query =
-        "SELECT COUNT(worker) " + "FROM Worker worker " + "WHERE worker.workspaceId = :workspaceId "
-  ),
+      name = "Worker.getCountByWorkspaceId",
+      query =
+          "SELECT COUNT(worker) "
+              + "FROM Worker worker "
+              + "WHERE worker.workspaceId = :workspaceId "),
   @NamedQuery(
-    name = "Worker.getByUserId",
-    query = "SELECT worker " + "FROM Worker worker " + "WHERE worker.userId = :userId "
-  ),
+      name = "Worker.getByUserId",
+      query = "SELECT worker " + "FROM Worker worker " + "WHERE worker.userId = :userId "),
   @NamedQuery(
-    name = "Worker.getByUserAndWorkspaceId",
-    query =
-        "SELECT worker "
-            + "FROM Worker worker "
-            + "WHERE worker.userId = :userId "
-            + "AND worker.workspaceId = :workspaceId "
-  )
+      name = "Worker.getByUserAndWorkspaceId",
+      query =
+          "SELECT worker "
+              + "FROM Worker worker "
+              + "WHERE worker.userId = :userId "
+              + "AND worker.workspaceId = :workspaceId ")
 })
 @Table(name = "che_worker")
 public class WorkerImpl extends AbstractPermissions implements Worker {

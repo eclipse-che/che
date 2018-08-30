@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -78,7 +79,8 @@ public class MachineLoginFilter implements Filter {
 
     // sets subject from session
     final Subject sessionSubject;
-    if (session != null && (sessionSubject = (Subject) session.getAttribute("principal")) != null) {
+    if (session != null
+        && (sessionSubject = (Subject) session.getAttribute("che_subject")) != null) {
       try {
         EnvironmentContext.getCurrent().setSubject(sessionSubject);
         chain.doFilter(request, response);
@@ -114,7 +116,7 @@ public class MachineLoginFilter implements Filter {
                 false);
         EnvironmentContext.getCurrent().setSubject(subject);
         final HttpSession httpSession = httpRequest.getSession(true);
-        httpSession.setAttribute("principal", subject);
+        httpSession.setAttribute("che_subject", subject);
         chain.doFilter(request, response);
       } finally {
         EnvironmentContext.reset();

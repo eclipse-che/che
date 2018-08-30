@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -43,19 +44,6 @@ public class WorkspaceDetails {
   private final Loader loader;
   private final Dashboard dashboard;
 
-  public interface TabNames {
-    String OVERVIEW = "Overview";
-    String PROJECTS = "Projects";
-    String MACHINES = "Machines";
-    String SERVERS = "Servers";
-    String INSTALLERS = "Installers";
-    String ENV_VARIABLES = "Env Variables";
-    String CONFIG = "Config";
-    String SSH = "SSH";
-    String SHARE = "Share";
-    String VOLUMES = "Volumes";
-  }
-
   private interface Locators {
     String WORKSPACE_STATE = "workspace-status";
     String RUN_WORKSPACE_BTN = "run-workspace-button";
@@ -74,6 +62,30 @@ public class WorkspaceDetails {
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
     String ORGANIZATION_NAME_ID = "namespace-name";
     String OPEN_ORGANIZATION_BUTTON_ID = "open-namespace-button";
+  }
+
+  public enum WorkspaceDetailsTab {
+    OVERVIEW("Overview"),
+    PROJECTS("Projects"),
+    MACHINES("Machines"),
+    INSTALLERS("Installers"),
+    SERVERS("Servers"),
+    ENV_VARIABLES("Env Variables"),
+    VOLUMES("Volumes"),
+    CONFIG("Config"),
+    SSH("SSH"),
+    TOOLS("Tools"),
+    SHARE("Share");
+
+    private final String tabTitle;
+
+    WorkspaceDetailsTab(String tabTitle) {
+      this.tabTitle = tabTitle;
+    }
+
+    public String getTabTitle() {
+      return this.tabTitle;
+    }
   }
 
   public enum StateWorkspace {
@@ -175,12 +187,14 @@ public class WorkspaceDetails {
   /**
    * Select tab into workspace menu
    *
-   * @param tabName is the tab name into workspace menu
+   * @param tab is the tab name into workspace menu
    */
-  public void selectTabInWorkspaceMenu(String tabName) {
+  public void selectTabInWorkspaceMenu(WorkspaceDetailsTab tab) {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.TAB_NAMES_IN_WS, tabName))))
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.TAB_NAMES_IN_WS, tab.getTabTitle()))))
         .click();
   }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -173,13 +174,13 @@ public class FailParametersTest {
   @DataProvider(name = "checkRefactoringDataWthConfirmBtnClick")
   private Object[][] refactorParameters() {
     return new Object[][] {
-      {new TestParams("testfail2", 14, 23, "i", "Duplicate parameter i", true)},
-      {new TestParams("testfail3", 14, 15, "9", "'9' is not a valid Java identifier", false)},
-      {new TestParams("testfail7", 17, 16, "j", "Name collision with name 'j'", true)},
-      {new TestParams("testfail11", 14, 16, "j", "Duplicate parameter j", true)},
-      {new TestParams("testfail14", 18, 15, "j", "Name collision with name 'j'", true)},
-      {new TestParams("testfail17", 14, 17, "j", "Duplicate parameter j", true)},
-      {new TestParams("testfail20", 17, 17, "j", "Name collision with name 'j'", true)}
+      {new TestParams("testfail2", 15, 23, "i", "Duplicate parameter i", true)},
+      {new TestParams("testfail3", 15, 15, "9", "'9' is not a valid Java identifier", false)},
+      {new TestParams("testfail7", 18, 16, "j", "Name collision with name 'j'", true)},
+      {new TestParams("testfail11", 15, 16, "j", "Duplicate parameter j", true)},
+      {new TestParams("testfail14", 19, 15, "j", "Name collision with name 'j'", true)},
+      {new TestParams("testfail17", 15, 17, "j", "Duplicate parameter j", true)},
+      {new TestParams("testfail20", 18, 17, "j", "Name collision with name 'j'", true)}
     };
   }
 }

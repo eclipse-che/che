@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -22,10 +23,8 @@ import java.util.List;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.plugin.maven.client.actions.GetEffectivePomAction;
 import org.eclipse.che.plugin.maven.client.actions.ReimportMavenDependenciesAction;
@@ -114,11 +113,7 @@ public class MavenExtension {
   }
 
   @Inject
-  private void registerFileType(
-      FileTypeRegistry fileTypeRegistry,
-      MavenResources mavenResources,
-      EditorRegistry editorRegistry) {
-    FileType pomFile = new FileType(mavenResources.maven(), null, ".*[/\\\\]?pom\\.xml$");
-    fileTypeRegistry.registerFileType(pomFile);
+  private void registerFileType(MavenResources mavenResources, FileTypeProvider fileTypeProvider) {
+    fileTypeProvider.getByNamePattern(mavenResources.maven(), ".*[/\\\\]?pom\\.xml$");
   }
 }

@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
@@ -93,7 +93,7 @@ public class TypeScriptEditingTest {
     String tooltipWithErrorMessage = "Cannot find name 'c'";
 
     editor.waitActive();
-    editor.goToPosition(13, 2);
+    editor.goToPosition(14, 2);
     editor.typeTextIntoEditor(SPACE.toString());
     final int actualValueErrorMarkers = editor.getMarkersQuantity(ERROR);
     assertEquals(
@@ -102,9 +102,9 @@ public class TypeScriptEditingTest {
         String.format(
             "The expected value of errors marker should be %d but actual %d",
             expectedAmountOfErrorMarkers, actualValueErrorMarkers));
-    editor.moveToMarker(ERROR_OVERVIEW, 13);
+    editor.moveToMarker(ERROR_OVERVIEW, 14);
     editor.waitTextInToolTipPopup(tooltipWithErrorMessage);
-    editor.goToPosition(13, 2);
+    editor.goToPosition(14, 2);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
   }
@@ -119,9 +119,9 @@ public class TypeScriptEditingTest {
     String methodToComplete = "greet";
 
     // check autocomplete form content after the ";"
-    editor.goToPosition(28, 36);
+    editor.goToPosition(29, 36);
     editor.launchAutocomplete();
-    editor.waitTextIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
+    editor.waitProposalIntoAutocompleteContainer(textFromWholeCodeAssistantScope);
 
     editor.closeAutocomplete();
 
@@ -130,16 +130,16 @@ public class TypeScriptEditingTest {
     editor.typeTextIntoEditor(nameOfGreeterClassRef);
 
     editor.launchAutocomplete();
-    editor.waitTextIntoAutocompleteContainer(textFromGreeterObject);
+    editor.waitProposalIntoAutocompleteContainer(textFromGreeterObject);
     editor.selectItemIntoAutocompleteAndPerformDoubleClick(methodToComplete);
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void checkGoToDefinition() {
     // set cursor to printVar.print place
-    editor.goToPosition(24, 20);
+    editor.goToPosition(25, 20);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitActiveTabFileName("testPrint.ts");
-    editor.waitCursorPosition(14, 6);
+    editor.waitCursorPosition(15, 6);
   }
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -57,10 +58,9 @@ public class DockerImageEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment of type '.*' doesn't support multiple machines, but contains machines: .*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
   public void shouldFailIfSeveralMachineConfigsArePresent() throws Exception {
     // given
     when(environment.getMachines())
@@ -89,9 +89,8 @@ public class DockerImageEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "The specified environment is not docker image environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "The specified environment is not docker image environment")
   public void shouldThrowExceptionInCaseEnvironmentHasWrongType() throws Exception {
     // when
     converter.convert(mock(InternalEnvironment.class));

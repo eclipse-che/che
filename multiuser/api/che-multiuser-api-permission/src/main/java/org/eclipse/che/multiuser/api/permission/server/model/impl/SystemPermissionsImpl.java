@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -31,20 +32,17 @@ import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
 @Entity(name = "SystemPermissions")
 @NamedQueries({
   @NamedQuery(
-    name = "SystemPermissions.getByUserId",
-    query =
-        "SELECT permissions "
-            + "FROM SystemPermissions permissions "
-            + "WHERE permissions.userId = :userId "
-  ),
+      name = "SystemPermissions.getByUserId",
+      query =
+          "SELECT permissions "
+              + "FROM SystemPermissions permissions "
+              + "WHERE permissions.userId = :userId "),
   @NamedQuery(
-    name = "SystemPermissions.getAll",
-    query = "SELECT permissions " + "FROM SystemPermissions permissions "
-  ),
+      name = "SystemPermissions.getAll",
+      query = "SELECT permissions " + "FROM SystemPermissions permissions "),
   @NamedQuery(
-    name = "SystemPermissions.getTotalCount",
-    query = "SELECT COUNT(permissions) " + "FROM SystemPermissions permissions "
-  )
+      name = "SystemPermissions.getTotalCount",
+      query = "SELECT COUNT(permissions) " + "FROM SystemPermissions permissions ")
 })
 @Table(name = "che_system_permissions")
 public class SystemPermissionsImpl extends AbstractPermissions {
@@ -65,9 +63,8 @@ public class SystemPermissionsImpl extends AbstractPermissions {
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
   @CollectionTable(
-    name = "che_system_permissions_actions",
-    joinColumns = @JoinColumn(name = "system_permissions_id")
-  )
+      name = "che_system_permissions_actions",
+      joinColumns = @JoinColumn(name = "system_permissions_id"))
   protected List<String> actions;
 
   @Override

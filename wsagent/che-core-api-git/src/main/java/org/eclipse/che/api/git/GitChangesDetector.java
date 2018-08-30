@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -183,16 +184,18 @@ public class GitChangesDetector {
           fileStatus = NOT_MODIFIED;
         }
 
+        FileChangedEventDto changedEventDto =
+            newDto(FileChangedEventDto.class)
+                .withPath(wsPath)
+                .withStatus(fileStatus)
+                .withEditedRegions(
+                    fileStatus == MODIFIED ? gitConnection.getEditedRegions(itemPath) : null);
+        eventService.publish(changedEventDto);
         transmitter
             .newRequest()
             .endpointId(endpointId)
             .methodName(EVENT_GIT_FILE_CHANGED)
-            .paramsAsDto(
-                newDto(FileChangedEventDto.class)
-                    .withPath(wsPath)
-                    .withStatus(fileStatus)
-                    .withEditedRegions(
-                        fileStatus == MODIFIED ? gitConnection.getEditedRegions(itemPath) : null))
+            .paramsAsDto(changedEventDto)
             .sendAndSkipResult();
       } catch (GitCommitInProgressException | GitInvalidRepositoryException e) {
         // Silent ignore

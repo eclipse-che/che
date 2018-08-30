@@ -1,14 +1,14 @@
 /**
  * Copyright (c) 2018-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-
 #workspace-loader {
     position: fixed;
     width: 300px;
@@ -31,6 +31,24 @@
     font-size: 14px;
     line-height: 30px;
     text-align: center;
+    color: #a0a9b7;
+}
+
+#workspace-loader-reload {
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 300px;
+    height: 30px;
+    font-family: sans-serif;
+    font-size: 14px;
+    line-height: 30px;
+    text-align: center;
+    color: #a0a9b7;
+}
+
+#workspace-loader-reload a {
     color: #a0a9b7;
 }
 

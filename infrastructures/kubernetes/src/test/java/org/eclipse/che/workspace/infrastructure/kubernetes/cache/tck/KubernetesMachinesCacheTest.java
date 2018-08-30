@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -131,9 +132,8 @@ public class KubernetesMachinesCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Machine is already in cache"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Machine is already in cache")
   public void shouldThrowExceptionIfMachineIsAlreadyInCacheOnTryToPutMachine() throws Exception {
     // given
     KubernetesMachineImpl machine =
@@ -179,9 +179,8 @@ public class KubernetesMachinesCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found")
   public void shouldThrowExceptionWhenServerWasNotFoundOnGetting() throws Exception {
     // given
     RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
@@ -206,9 +205,8 @@ public class KubernetesMachinesCacheTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found")
   public void shouldThrowExceptionWhenServerWasNotFoundOnStatusUpdating() throws Exception {
     // given
     RuntimeId runtimeId = runtimeStates[0].getRuntimeId();

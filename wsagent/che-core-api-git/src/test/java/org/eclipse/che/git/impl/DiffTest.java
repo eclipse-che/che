@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -55,9 +56,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameStatus(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -75,9 +75,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameStatusWithCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -106,9 +105,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameStatusWithFileFilterAndCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -137,9 +135,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnly(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -162,9 +159,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnlyWithCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -194,9 +190,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnlyCached(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -222,9 +217,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnlyCachedNoCommit(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -250,9 +244,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnlyWorkingTree(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -277,9 +270,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnlyWithFileFilter(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -302,9 +294,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnlyNotMatchingWithFileFilter(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -325,9 +316,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffNameOnlyWithFileFilterAndCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -356,9 +346,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffRaw(GitConnectionFactory connectionFactory) throws GitException, IOException {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -378,9 +367,8 @@ public class DiffTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testDiffRawWithCommits(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given

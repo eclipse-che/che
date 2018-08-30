@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -134,6 +135,53 @@ export class CheFactoryTemplates {
       'creator': {
         'name': 'Codenvy Factory',
         'email': 'factories@codenvy.com'
+      }
+    });
+  }
+
+  static get GIT(): string {
+    return JSON.stringify({
+      'v': '4.0',
+      'workspace': {
+        'commands': [],
+        'projects': [
+          {
+            'name': 'my-project',
+            'type': 'blank',
+            'source': {
+              'location': 'http://git-project',
+              'type': 'git'
+            },
+            'modules': [],
+            'path': '/my-project',
+            'mixins': [
+              'git'
+            ],
+            'problems': []
+          }
+        ],
+        'defaultEnv': 'wss',
+        'name': 'wss',
+        'environments': {
+          'wss': {
+            'machines': {
+              'dev-machine': {
+                'installers': [
+                  'org.eclipse.che.terminal',
+                  'org.eclipse.che.ws-agent'
+                ],
+                'servers': {},
+                'attributes': {
+                  'memoryLimitBytes': '2147483648'
+                }
+              }
+            },
+            'recipe': {
+              'content': 'eclipse/ubuntu_jdk8',
+              'type': 'dockerimage'
+            }
+          }
+        }
       }
     });
   }
