@@ -242,9 +242,11 @@ public class AutocompleteFeaturesInEditorTest {
     }
 
     editor.enterAutocompleteProposal("getBytes() : byte[] ");
+    editor.waitTextIntoEditor("result.getBytes()");
     editor.typeTextIntoEditor(".");
     editor.launchAutocompleteAndWaitContainer();
     editor.enterAutocompleteProposal("toString() : String ");
+    editor.waitTextIntoEditor("result.getBytes().toString()");
     editor.typeTextIntoEditor(";");
     consoles.closeProcessesArea();
     editor.waitTextIntoEditor(contentAfterEditing);
