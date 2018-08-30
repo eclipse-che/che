@@ -37,20 +37,20 @@ public class ShowHintsCommandTest {
       NameGenerator.generate(ShowHintsCommandTest.class.getSimpleName(), 4);
 
   private static final String TEXT_IN_POP_UP_1 =
-      "<no parameters>\n"
-          + "int arg\n"
-          + "boolean arg\n"
-          + "String arg\n"
-          + "int arg, String arg2\n"
-          + "int arg, String arg2, boolean arg3";
+      "runCommand() : void\n"
+          + "runCommand(String arg) : void\n"
+          + "runCommand(boolean arg) : String\n"
+          + "runCommand(int arg) : void\n"
+          + "runCommand(int arg, String arg2) : void\n"
+          + "runCommand(int arg, String arg2, boolean arg3) : void";
 
   private static final String CONSTRUCTOR = "HintTestClass hintTestClass = new HintTestClass(11);";
 
   private static final String TEXT_IN_POP_UP_2 =
-      "<no parameters>\n"
-          + "int arg\n"
-          + "int arg, String arg2\n"
-          + "int arg, String arg2, boolean arg3";
+      "HintTestClass()\n"
+          + "HintTestClass(int arg)\n"
+          + "HintTestClass(int arg, String arg2)\n"
+          + "HintTestClass(int arg, String arg2, boolean arg3)";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -91,7 +91,7 @@ public class ShowHintsCommandTest {
     editor.typeTextIntoEditor("runCommand();");
     editor.waitTextIntoEditor("runCommand();");
     editor.waitMarkerInPosition(MarkerLocator.ERROR, 34);
-    editor.goToCursorPositionVisible(33, 5);
+    editor.goToCursorPositionVisible(33, 16);
     editor.callShowHintsPopUp();
     editor.waitShowHintsPopUpOpened();
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_1);
@@ -105,7 +105,7 @@ public class ShowHintsCommandTest {
     editor.typeTextIntoEditor(Keys.TAB.toString());
     editor.typeTextIntoEditor(CONSTRUCTOR);
     editor.waitTextIntoEditor(CONSTRUCTOR);
-    editor.goToCursorPositionVisible(29, 41);
+    editor.goToCursorPositionVisible(29, 53);
     editor.callShowHintsPopUp();
     editor.waitShowHintsPopUpOpened();
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_2);

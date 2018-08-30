@@ -34,8 +34,6 @@ public class JavaDocPopupLinkTest {
 
   private static final String PATH_TO_FILES =
       PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples";
-  private static final String PATH_TO_OTHER_PACKAGE =
-      PROJECT_NAME + "/src/main/java/che/eclipse/sample";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -68,7 +66,7 @@ public class JavaDocPopupLinkTest {
     projectExplorer.waitItem(PATH_TO_FILES + "/AppController.java");
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
-    editor.goToCursorPositionVisible(25, 105);
+    editor.goToCursorPositionVisible(26, 105);
 
     editor.openJavaDocPopUp();
     editor.waitJavaDocPopUpOpened();
@@ -81,36 +79,36 @@ public class JavaDocPopupLinkTest {
     projectExplorer.openItemByVisibleNameInExplorer("Aclass.java");
     editor.waitActive();
     editor.typeTextIntoEditor(Keys.CONTROL.toString());
-    editor.setCursorToLine(14);
+    editor.goToCursorPositionVisible(14, 22);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
-    editor.setCursorToLine(14);
+    editor.setCursorToLine(15);
     editor.typeTextIntoEditor("/**");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("This {@link Aclass link} tests that the user is sent to line 13");
-    editor.setCursorToLine(17);
+    editor.setCursorToLine(18);
     editor.typeTextIntoEditor("public void testLinkInClass() {}");
-    editor.goToCursorPositionVisible(17, 24);
+    editor.goToCursorPositionVisible(18, 24);
     editor.openJavaDocPopUp();
     editor.waitJavaDocPopUpOpened();
     editor.typeTextIntoEditor(Keys.CONTROL.toString());
     editor.clickOnElementByXpath("//div[contains(@class, 'textviewTooltip')]");
     editor.clickOnElementByXpath("//div[contains(@class, 'textviewTooltip')]//a");
-    editor.expectedNumberOfActiveLine(13);
+    editor.expectedNumberOfActiveLine(14);
 
     // Reference to class in a different package but held locally
     editor.waitActive();
-    editor.setCursorToLine(18);
+    editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("/**");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("{@link org.eclipse.qa.examples.AppController#handleRequest}");
-    editor.setCursorToLine(22);
+    editor.setCursorToLine(23);
     editor.typeTextIntoEditor("public void testLinkInDifferentPackage() {}");
-    editor.goToCursorPositionVisible(22, 18);
+    editor.goToCursorPositionVisible(23, 18);
     editor.openJavaDocPopUp();
     editor.waitJavaDocPopUpOpened();
     editor.clickOnElementByXpath("//div[contains(@class, 'textviewTooltip')]//a");
