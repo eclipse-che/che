@@ -144,6 +144,18 @@ export ${KEYCLOAK_IMAGE_PULL_POLICY:-${DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY}}
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 
+DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG="latest"
+export PLUGIN_REGISTRY_IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG}}
+
+DEFAULT_PLUGIN_REGISTRY_IMAGE="eclipse/che-plugin-registry"
+export PLUGIN_REGISTRY_IMAGE=${PLUGIN_REGISTRY_IMAGE:-${DEFAULT_PLUGIN_REGISTRY_IMAGE}}
+
+DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY="Always"
+export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY}}
+
+DEFAULT_PLUGIN_REGISTRY_URL="NULL"
+export PLUGIN_REGISTRY_URL=${PLUGIN_REGISTRY_URL:-${DEFAULT_PLUGIN_REGISTRY_URL}}
+
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
     WS_PROTOCOL="wss"
@@ -336,6 +348,19 @@ getRoutingSuffix() {
 fi
 }
 
+deployChePluginRegistry() {
+if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
+  echo "Deploying Che plugin registry..."
+  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-plugin-registry.yml \
+             -p IMAGE=${PLUGIN_REGISTRY_IMAGE} \
+             -p IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG} \
+             -p PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY}
+
+  PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+  echo "Che plugin registry deployment complete. $PLUGIN_REGISTRY_ROUTE"
+fi
+}
+
 
 deployChe() {
     CHE_VAR_ARRAY=$(env | grep "^CHE_.")
@@ -410,6 +435,11 @@ ${CHE_VAR_ARRAY}"
       fi
     fi
 
+    if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
+        PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+        PLUGIN_REGISTRY_URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/plugins/"
+    fi
+
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
                          -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} \
                          -p IMAGE_CHE=${CHE_IMAGE_REPO} \
@@ -422,6 +452,7 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT} \
                          -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
+                         -p CHE_PLUGIN_REGISTRY_URL=${PLUGIN_REGISTRY_URL} \
                          ${ENV}
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
@@ -447,4 +478,5 @@ ${CHE_VAR_ARRAY}"
 isLoggedIn
 createNewProject
 getRoutingSuffix
+deployChePluginRegistry
 deployChe
