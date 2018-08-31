@@ -45,7 +45,7 @@ public class CSharpFileEditingTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
   private final String LANGUAGE_SERVER_INIT_MESSAGE =
-      "Finished language servers initialization, file path";
+      "Initialized language server 'org.eclipse.che.plugin.csharp.languageserver";
   private final String NAME_OF_EDITING_FILE = "Program.cs";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)

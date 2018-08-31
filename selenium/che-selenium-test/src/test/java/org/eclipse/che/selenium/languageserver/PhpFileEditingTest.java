@@ -79,11 +79,8 @@ public class PhpFileEditingTest {
 
   @Test
   public void checkMainFeaturesPhpLS() {
-    String intitPhpLanguageServerMessage =
-        String.format(
-            "Finished language servers initialization, file path '/%s'", PATH_TO_INDEX_PHP);
-
-    consoles.waitExpectedTextIntoConsole(intitPhpLanguageServerMessage);
+    consoles.waitExpectedTextIntoConsole(
+        "Initialized language server 'org.eclipse.che.plugin.php.languageserver");
 
     checkCodeValidation();
     checkAutocompletion();

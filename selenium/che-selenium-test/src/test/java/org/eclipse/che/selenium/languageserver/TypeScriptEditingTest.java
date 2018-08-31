@@ -76,11 +76,8 @@ public class TypeScriptEditingTest {
 
   @Test
   public void checkMainFeaturesTypeScriptLS() {
-    String intitTypeScriptLanguageServerMessage =
-        String.format(
-            "Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
-
-    consoles.waitExpectedTextIntoConsole(intitTypeScriptLanguageServerMessage);
+    consoles.waitExpectedTextIntoConsole(
+        "Initialized language server 'org.eclipse.che.plugin.web.typescript'");
     checkCodeValidation();
     checkCodeAssistant();
     checkGoToDefinition();
@@ -90,7 +87,7 @@ public class TypeScriptEditingTest {
 
     final int expectedAmountOfErrorMarkers = 9;
 
-    String tooltipWithErrorMessage = "Cannot find name 'c'";
+    String tooltipWithErrorMessage = "Cannot find name 'c'.";
 
     editor.waitActive();
     editor.goToPosition(14, 2);

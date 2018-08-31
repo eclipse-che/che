@@ -937,7 +937,7 @@ public class CodenvyEditor {
    */
   public void selectCompositeAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[.='%s']", item)));
+        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item)));
   }
 
   /**
