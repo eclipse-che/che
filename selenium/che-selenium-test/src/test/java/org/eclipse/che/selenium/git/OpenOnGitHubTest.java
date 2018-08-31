@@ -33,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -130,7 +131,8 @@ public class OpenOnGitHubTest {
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    seleniumWebDriverHelper.waitUrlToBe(testRepo.getHtmlUrl() + "/tree/master/");
+    seleniumWebDriverHelper.waitSuccessCondition(
+        ExpectedConditions.urlToBe(testRepo.getHtmlUrl() + "/tree/master/"));
   }
 
   @Test(priority = 2)
@@ -142,7 +144,8 @@ public class OpenOnGitHubTest {
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    seleniumWebDriverHelper.waitUrlToBe(testRepo.getHtmlUrl() + "/tree/master/" + PATH_TO_EXPAND);
+    seleniumWebDriverHelper.waitSuccessCondition(
+        ExpectedConditions.urlToBe(testRepo.getHtmlUrl() + "/tree/master/" + PATH_TO_EXPAND));
   }
 
   @Test(priority = 3)
@@ -152,7 +155,8 @@ public class OpenOnGitHubTest {
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    seleniumWebDriverHelper.waitUrlToBe(
-        testRepo.getHtmlUrl() + "/blob/master/" + PATH_TO_EXPAND + "/Aclass.java#L15-L15");
+    seleniumWebDriverHelper.waitSuccessCondition(
+        ExpectedConditions.urlToBe(
+            testRepo.getHtmlUrl() + "/blob/master/" + PATH_TO_EXPAND + "/Aclass.java#L15-L15"));
   }
 }
