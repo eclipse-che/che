@@ -24,7 +24,7 @@ export  interface IInitData {
   workspaceDetails: che.IWorkspace;
 }
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Tools'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Tools', 'Plugins'];
 
 /**
  * @ngdoc controller
@@ -66,6 +66,7 @@ export class WorkspaceDetailsController {
   private errorMessage: string = '';
   private tabsValidationTimeout: ng.IPromise<any>;
   private toolsFilter: Function;
+  private pluginRegistry: string;
   /**
    * There are unsaved changes to apply (with restart) when is't <code>true</code>.
    */
@@ -95,6 +96,7 @@ export class WorkspaceDetailsController {
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
     this.workspacesService = workspacesService;
+    this.pluginRegistry = cheWorkspace.getWorkspaceSettings() != null ? cheWorkspace.getWorkspaceSettings().cheWorkspacePluginRegistryUrl : null;
 
     if (!initData.workspaceDetails) {
       cheNotification.showError(`There is no workspace with name ${initData.workspaceName}`);
