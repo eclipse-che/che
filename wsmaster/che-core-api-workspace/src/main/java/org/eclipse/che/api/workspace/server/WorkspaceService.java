@@ -669,13 +669,21 @@ public class WorkspaceService extends Service {
   @ApiOperation(value = "Get workspace server configuration values")
   @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
   public Map<String, String> getSettings() {
-    return ImmutableMap.of(
-        Constants.SUPPORTED_RECIPE_TYPES,
-        Joiner.on(",").join(workspaceManager.getSupportedRecipes()),
-        CHE_WORKSPACE_AUTO_START,
-        Boolean.toString(cheWorkspaceAutoStart),
-        CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
-        pluginRegistryUrl);
+    if (pluginRegistryUrl == null) {
+      return ImmutableMap.of(
+          Constants.SUPPORTED_RECIPE_TYPES,
+          Joiner.on(",").join(workspaceManager.getSupportedRecipes()),
+          CHE_WORKSPACE_AUTO_START,
+          Boolean.toString(cheWorkspaceAutoStart));
+    } else {
+      return ImmutableMap.of(
+          Constants.SUPPORTED_RECIPE_TYPES,
+          Joiner.on(",").join(workspaceManager.getSupportedRecipes()),
+          CHE_WORKSPACE_AUTO_START,
+          Boolean.toString(cheWorkspaceAutoStart),
+          CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
+          pluginRegistryUrl);
+    }
   }
 
   private static Map<String, String> parseAttrs(List<String> attributes)

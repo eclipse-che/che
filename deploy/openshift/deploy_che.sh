@@ -452,7 +452,7 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT} \
                          -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
-                         -p CHE_PLUGIN_REGISTRY_URL=${PLUGIN_REGISTRY_URL} \
+                         -p CHE_PLUGIN__REGISTRY__URL=${PLUGIN_REGISTRY_URL} \
                          ${ENV}
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
