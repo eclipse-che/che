@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -81,6 +82,7 @@ public class NavigateToFileTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME_2);
+    WaitUtils.sleepQuietly(5);//need this timeout to be sure new files added to index
   }
 
   @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
