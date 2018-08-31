@@ -119,7 +119,7 @@ public class Menu {
 
     } catch (WebDriverException ex) {
       LOG.warn(ex.getLocalizedMessage());
-      WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.MILLISECONDS);
+      WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.SECONDS);
       redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idTopMenuCommand))).click();
     }
     try {

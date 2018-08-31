@@ -182,6 +182,7 @@ public class CommitFilesByMultiSelectTest {
     projectExplorer.selectMultiFilesByCtrlKeys(
         PROJECT_NAME + "/my-webapp/src/main/java/helloworld/AppController.java");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
+    git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE_1);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
