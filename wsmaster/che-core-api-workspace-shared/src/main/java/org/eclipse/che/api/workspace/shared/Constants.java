@@ -42,6 +42,8 @@ public final class Constants {
   public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
+  public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR =
+      "che.workspace.plugin_registry_url";
 
   /** Name for environment variable of machine name */
   public static final String CHE_MACHINE_NAME_ENV_VAR = "CHE_MACHINE_NAME";
