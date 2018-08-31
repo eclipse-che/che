@@ -1153,7 +1153,7 @@ public class WorkspaceServiceTest {
 
   private static <T> T unwrapDto(Response response, Class<T> dtoClass) {
     return DtoFactory.getInstance().createDtoFromJson(response.body().print(), dtoClass);
-  }q
+  }
 
   private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
     return DtoFactory.getInstance().createListDtoFromJson(response.body().print(), dtoClass);
