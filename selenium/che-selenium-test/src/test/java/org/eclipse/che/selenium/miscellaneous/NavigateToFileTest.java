@@ -82,7 +82,7 @@ public class NavigateToFileTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME_2);
-    WaitUtils.sleepQuietly(5);//need this timeout to be sure new files added to index
+    WaitUtils.sleepQuietly(5); // need this timeout to be sure new files added to index
   }
 
   @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
