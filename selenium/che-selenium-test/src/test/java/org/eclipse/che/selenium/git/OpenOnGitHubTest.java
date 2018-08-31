@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.git;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.OPEN_ON_GITHUB;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
+import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -33,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -109,7 +109,7 @@ public class OpenOnGitHubTest {
   @AfterMethod
   public void returnToMainWindow() {
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
-      seleniumWebDriverHelper.closeCurrentWinAndReturnToPreviewsOne(mainBrowserTabHandle);
+      seleniumWebDriverHelper.closeCurrentWindowAndSwitchToAnother(mainBrowserTabHandle);
     }
   }
 
@@ -131,8 +131,7 @@ public class OpenOnGitHubTest {
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
-    seleniumWebDriverHelper.waitSuccessCondition(
-        ExpectedConditions.urlToBe(testRepo.getHtmlUrl() + "/tree/master/"));
+    seleniumWebDriverHelper.waitSuccessCondition(urlToBe(testRepo.getHtmlUrl() + "/tree/master/"));
   }
 
   @Test(priority = 2)
@@ -145,7 +144,7 @@ public class OpenOnGitHubTest {
         TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
     seleniumWebDriverHelper.waitSuccessCondition(
-        ExpectedConditions.urlToBe(testRepo.getHtmlUrl() + "/tree/master/" + PATH_TO_EXPAND));
+        urlToBe(testRepo.getHtmlUrl() + "/tree/master/" + PATH_TO_EXPAND));
   }
 
   @Test(priority = 3)
@@ -156,7 +155,6 @@ public class OpenOnGitHubTest {
     editor.clickOnItemInContextMenu(OPEN_ON_GITHUB);
     seleniumWebDriverHelper.switchToNextWindow(seleniumWebDriver.getWindowHandle());
     seleniumWebDriverHelper.waitSuccessCondition(
-        ExpectedConditions.urlToBe(
-            testRepo.getHtmlUrl() + "/blob/master/" + PATH_TO_EXPAND + "/Aclass.java#L15-L15"));
+        urlToBe(testRepo.getHtmlUrl() + "/blob/master/" + PATH_TO_EXPAND + "/Aclass.java#L15-L15"));
   }
 }

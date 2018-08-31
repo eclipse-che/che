@@ -1394,7 +1394,7 @@ public class SeleniumWebDriverHelper {
     waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
 
-  public void closeCurrentWinAndReturnToPreviewsOne(String windowToSwitch) {
+  public void closeCurrentWindowAndSwitchToAnother(String windowToSwitch) {
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(windowToSwitch);
   }
