@@ -128,7 +128,6 @@ get_tools() {
        echo "Found oc ${OC_VERSION} in PATH. Using it"
        export OC_BINARY="oc"
      elif [[ ! -f $OC_BINARY ]]; then
-         echo two
           download_oc
        else
           # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
