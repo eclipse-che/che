@@ -19,6 +19,7 @@
 # --------------
 # Print Che logo
 # --------------
+export TERM=xterm
 
 echo
 cat <<EOF
@@ -191,7 +192,6 @@ printError() {
 # Check pre-requisites
 # --------------------------------------------------------
 command -v oc >/dev/null 2>&1 || { printError "Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
-command -v jq >/dev/null 2>&1 || { printError "Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }
 
 # check if oc client has an active session
 isLoggedIn() {
@@ -207,22 +207,36 @@ isLoggedIn() {
   fi
 }
 
+getTemplates(){
+  if [ ! -d "${BASE_DIR}/templates" ]; then
+  printInfo "Local templates directory not found. Downloading templates..."
+  curl -s https://codeload.github.com/eclipse/che/tar.gz/master | tar -xz --strip=3 che-master/deploy/openshift/templates -C ${BASE_DIR}
+  OUT=$?
+  if [ ${OUT} -eq 1 ]; then
+    printError "Failed to curl and untar Eclipse Che repo because of an error"
+    printInfo "You may need to manually clone or download content of https://github.com/eclipse/che/tree/master/deploy/openshift and re-run the script"
+    exit ${OUT}
+  else
+    printInfo "Templates have been successfully saved to ${BASE_DIR}/templates"
+  fi
+  else printInfo "Templates directory found at ${BASE_DIR}/templates. Applying templates from this directory. Delete it to get the latest templates if necessary"
+fi
+}
+
 wait_for_postgres() {
-    available=$(${OC_BINARY} get dc postgres -o=jsonpath={.status.conditions[0].status})
-    progressing=$(${OC_BINARY} get dc postgres -o=jsonpath={.status.conditions[1].status})
-    DEPLOYMENT_TIMEOUT_SEC=1200
+    DESIRED_REPLICA_COUNT=1
+    CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/postgres -o=jsonpath='{.status.availableReplicas}')
+    DEPLOYMENT_TIMEOUT_SEC=300
     POLLING_INTERVAL_SEC=5
     end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
-      available=$(${OC_BINARY} get dc postgres -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
-      progressing=$(${OC_BINARY} get dc postgres -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
+    while [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}" ] && [ ${SECONDS} -lt ${end} ]; do
+      CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/postgres -o=jsonpath='{.status.availableReplicas}')
       timeout_in=$((end-SECONDS))
-      printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
+      printInfo "Deployment is in progress...(Current replica count=${CURRENT_REPLICA_COUNT}, ${timeout_in} seconds remain)"
       sleep ${POLLING_INTERVAL_SEC}
     done
-    if [ "${progressing}" == "\"True\"" ]; then
-      printInfo "Postgres deployed successfully"
-    elif [ "${progressing}" == "False" ]; then
+
+    if [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}"  ]; then
       printError "Postgres deployment failed. Aborting. Run command 'oc rollout status postgres' to get more details."
       exit 1
     elif [ ${SECONDS} -ge ${end} ]; then
@@ -232,58 +246,48 @@ wait_for_postgres() {
 }
 
 wait_for_keycloak() {
-    printInfo "Wait for Keycloak pod booting..."
-    available=$(${OC_BINARY} get dc keycloak -o=jsonpath={.status.conditions[0].status})
-    progressing=$(${OC_BINARY} get dc keycloak -o=jsonpath={.status.conditions[1].status})
-    DEPLOYMENT_TIMEOUT_SEC=1200
+    DESIRED_REPLICA_COUNT=1
+    CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/keycloak -o=jsonpath='{.status.availableReplicas}')
+    DEPLOYMENT_TIMEOUT_SEC=300
     POLLING_INTERVAL_SEC=5
     end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
-        available=$(${OC_BINARY} get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
-        progressing=$(${OC_BINARY} get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
-        timeout_in=$((end-SECONDS))
-        printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
-        sleep ${POLLING_INTERVAL_SEC}
+    while [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}" ] && [ ${SECONDS} -lt ${end} ]; do
+      CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/keycloak -o=jsonpath='{.status.availableReplicas}')
+      timeout_in=$((end-SECONDS))
+      printInfo "Deployment is in progress...(Current replica count=${CURRENT_REPLICA_COUNT}, ${timeout_in} seconds remain)"
+      sleep ${POLLING_INTERVAL_SEC}
     done
-    if [ "${progressing}" == "\"True\"" ]; then
-        printInfo "Keycloak deployed successfully"
-    elif [ "${progressing}" == "False" ]; then
-        printError "Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
+
+    if [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}"  ]; then
+      printError "Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
+      exit 1
     elif [ ${SECONDS} -ge ${end} ]; then
-        printError "Deployment timeout. Aborting."
-        exit 1
+      printError "Deployment timeout. Aborting."
+      exit 1
     fi
 }
 
 wait_for_che() {
     CHE_ROUTE=$(oc get route/che -o=jsonpath='{.spec.host}')
-    available=$(${OC_BINARY} get dc/che -o=jsonpath={.status.conditions[0].status})
-    progressing=$(${OC_BINARY} get dc/che -o=jsonpath={.status.conditions[1].status})
+    DESIRED_REPLICA_COUNT=1
+    CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/che -o=jsonpath='{.status.availableReplicas}')
     DEPLOYMENT_TIMEOUT_SEC=300
     POLLING_INTERVAL_SEC=5
     end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-
-    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
-      available=$(${OC_BINARY} get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
-      progressing=$(${OC_BINARY} get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
+    while [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}" ] && [ ${SECONDS} -lt ${end} ]; do
+      CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/che -o=jsonpath='{.status.availableReplicas}')
       timeout_in=$((end-SECONDS))
-      printInfo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
+      printInfo "Deployment is in progress...(Current replica count=${CURRENT_REPLICA_COUNT}, ${timeout_in} seconds remain)"
       sleep ${POLLING_INTERVAL_SEC}
     done
 
-    if [ "${progressing}" != "\"True\""  ]; then
+    if [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}"  ]; then
       printError "Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
       exit 1
-
-    elif [ "${available}" != "\"True\""  ]; then
-      printError "Che successfully deployed but it is not available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
-      exit 1
-
     elif [ ${SECONDS} -ge ${end} ]; then
       printError "Deployment timeout. Aborting."
       exit 1
     fi
-
     printInfo "Che successfully deployed and is available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
 }
 
@@ -474,7 +478,7 @@ ${CHE_VAR_ARRAY}"
       printInfo "Che successfully deployed and will be soon available at ${HTTP_PROTOCOL}://${CHE_ROUTE}"
     fi
 }
-
+getTemplates
 isLoggedIn
 createNewProject
 getRoutingSuffix
