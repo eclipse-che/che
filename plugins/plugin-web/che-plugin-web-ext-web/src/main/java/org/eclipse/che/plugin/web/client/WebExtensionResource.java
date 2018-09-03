@@ -37,4 +37,10 @@ public interface WebExtensionResource extends ClientBundle {
 
   @Source("ts.svg")
   SVGResource tsFile();
+
+  @Source("jsx.svg")
+  SVGResource jsxFile();
+
+  @Source("es6.svg")
+  SVGResource es6File();
 }
