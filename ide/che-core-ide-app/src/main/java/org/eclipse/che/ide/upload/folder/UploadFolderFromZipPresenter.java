@@ -59,10 +59,6 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
   public void showDialog(Container container) {
     this.container = container;
     view.showDialog();
-    view.setAction(
-        appContext.getWsAgentServerApiEndpoint()
-            + "/project/upload/zipfolder"
-            + container.getLocation());
   }
 
   /** {@inheritDoc} */
@@ -102,6 +98,15 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
   /** {@inheritDoc} */
   @Override
   public void onUploadClicked() {
+
+    view.setAction(
+        appContext.getWsAgentServerApiEndpoint()
+            + "/project/upload/zipfolder"
+            + container.getLocation()
+            + "?skipFirstLevel="
+            + view.isSkipRootFolderSelected()
+            + "&force="
+            + view.isOverwriteFileSelected());
     view.setLoaderVisibility(true);
     view.submit();
   }

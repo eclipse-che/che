@@ -153,8 +153,8 @@ export PLUGIN_REGISTRY_IMAGE=${PLUGIN_REGISTRY_IMAGE:-${DEFAULT_PLUGIN_REGISTRY_
 DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY="Always"
 export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY}}
 
-DEFAULT_PLUGIN_REGISTRY_URL="NULL"
-export PLUGIN_REGISTRY_URL=${PLUGIN_REGISTRY_URL:-${DEFAULT_PLUGIN_REGISTRY_URL}}
+DEFAULT_CHE_WORKSPACE_PLUGIN__REGISTRY__URL="NULL"
+export CHE_WORKSPACE_PLUGIN__REGISTRY__URL=${CHE_WORKSPACE_PLUGIN__REGISTRY__URL:-${DEFAULT_CHE_WORKSPACE_PLUGIN__REGISTRY__URL}}
 
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
@@ -390,7 +390,7 @@ ${CHE_VAR_ARRAY}"
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
         # create secret with OpenShift certificate
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat ${OKD_DIR}/openshift-apiserver/ca.crt)"
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat /var/lib/origin/openshift.local.config/master/ca.crt)"
       fi
 
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml \
@@ -437,7 +437,7 @@ ${CHE_VAR_ARRAY}"
 
     if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
         PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
-        PLUGIN_REGISTRY_URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/plugins/"
+        CHE_WORKSPACE_PLUGIN__REGISTRY__URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/"
     fi
 
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
@@ -452,7 +452,7 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT} \
                          -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
-                         -p CHE_PLUGIN_REGISTRY_URL=${PLUGIN_REGISTRY_URL} \
+                         -p CHE_WORKSPACE_PLUGIN__REGISTRY__URL=${CHE_WORKSPACE_PLUGIN__REGISTRY__URL} \
                          ${ENV}
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then

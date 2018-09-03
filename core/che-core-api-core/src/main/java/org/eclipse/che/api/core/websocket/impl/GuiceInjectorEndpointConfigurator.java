@@ -34,9 +34,11 @@ public class GuiceInjectorEndpointConfigurator extends ServerEndpointConfig.Conf
   public void modifyHandshake(
       ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
     HttpSession httpSession = (HttpSession) request.getHttpSession();
-    Object sessionSubject = httpSession.getAttribute("che_subject");
-    if (sessionSubject != null) {
-      sec.getUserProperties().put("che_subject", sessionSubject);
+    if (httpSession != null) {
+      Object sessionSubject = httpSession.getAttribute("che_subject");
+      if (sessionSubject != null) {
+        sec.getUserProperties().put("che_subject", sessionSubject);
+      }
     }
   }
 }
