@@ -8,28 +8,23 @@ import (
 )
 
 func open() (pty, tty *os.File, err error) {
-	pFD, err := syscall.Open("/dev/ptmx", syscall.O_RDWR|syscall.O_CLOEXEC, 0)
+	p, err := os.OpenFile("/dev/ptmx", os.O_RDWR, 0)
 	if err != nil {
 		return nil, nil, err
 	}
-	p := os.NewFile(uintptr(pFD), "/dev/ptmx")
-	// In case of error after this point, make sure we close the ptmx fd.
-	defer func() {
-		if err != nil {
-			_ = p.Close() // Best effort.
-		}
-	}()
 
 	sname, err := ptsname(p)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if err := grantpt(p); err != nil {
+	err = grantpt(p)
+	if err != nil {
 		return nil, nil, err
 	}
 
-	if err := unlockpt(p); err != nil {
+	err = unlockpt(p)
+	if err != nil {
 		return nil, nil, err
 	}
 

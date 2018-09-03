@@ -1,5 +1,3 @@
-// +build !windows
-
 package pty
 
 import (
@@ -20,11 +18,7 @@ func Start(c *exec.Cmd) (pty *os.File, err error) {
 	c.Stdout = tty
 	c.Stdin = tty
 	c.Stderr = tty
-	if c.SysProcAttr == nil {
-		c.SysProcAttr = &syscall.SysProcAttr{}
-	}
-	c.SysProcAttr.Setctty = true
-	c.SysProcAttr.Setsid = true
+	c.SysProcAttr = &syscall.SysProcAttr{Setctty: true, Setsid: true}
 	err = c.Start()
 	if err != nil {
 		pty.Close()
