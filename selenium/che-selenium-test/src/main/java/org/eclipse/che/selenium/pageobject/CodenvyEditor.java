@@ -35,8 +35,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HOVER_P
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
@@ -94,6 +92,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -108,7 +107,8 @@ import org.slf4j.Logger;
 @Singleton
 public class CodenvyEditor {
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
-  public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
+  public static final String VCS_RULER =
+      "//div[@class='ruler vcs']/div[not(contains(@style,'visibility: hidden'))]";
   public static final Logger LOG = getLogger(CodenvyEditor.class);
 
   protected final SeleniumWebDriver seleniumWebDriver;
@@ -842,16 +842,22 @@ public class CodenvyEditor {
   }
 
   /**
-   * get the list of git markers web-elements in the editor
+   * Gets the list of git markers web-elements in the editor. Since operation is not atomic the
+   * {@link StaleElementReferenceException} might occur. That's why it is necessary to give one more
+   * try until throwing an exception.
    *
    * @return the list of git markers web-elements
    */
   private List<WebElement> getListGitMarkers() {
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriverHelper.waitPresenceOfAllElements(By.xpath(VCS_RULER));
-    List<WebElement> subList = rulerVcsElements.subList(1, rulerVcsElements.size() - 1);
-    webDriverWaitFactory.get().until(visibilityOfAllElements(subList));
-    return rulerVcsElements;
+    for (int i = 0; ; i++) {
+      try {
+        return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(VCS_RULER));
+      } catch (StaleElementReferenceException e) {
+        if (i == 2) {
+          throw e;
+        }
+      }
+    }
   }
 
   /**

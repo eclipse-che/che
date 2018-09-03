@@ -120,7 +120,7 @@ public class GitChangeMarkersTest {
     editor.setCursorToLine(21);
     editor.deleteCurrentLine();
 
-    editor.waitGitDeletionMarkerInPosition(20);
+    editor.waitGitDeletionMarkerInPosition(19);
   }
 
   @Test(priority = 3)
