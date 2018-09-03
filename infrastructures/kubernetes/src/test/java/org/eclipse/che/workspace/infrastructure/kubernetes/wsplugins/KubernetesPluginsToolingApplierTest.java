@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.wsnext;
+package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
@@ -48,12 +48,12 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheContainer;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheContainerPort;
-import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
-import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginEndpoint;
-import org.eclipse.che.api.workspace.server.wsnext.model.EnvVar;
-import org.eclipse.che.api.workspace.server.wsnext.model.Volume;
+import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
+import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainerPort;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
+import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -63,7 +63,7 @@ import org.testng.annotations.Test;
 
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
-public class KubernetesWorkspaceNextApplierTest {
+public class KubernetesPluginsToolingApplierTest {
   private static final String TEST_IMAGE = "testImage/test:test";
   private static final String ENV_VAR = "PLUGINS_ENV_VAR";
   private static final String ENV_VAR_VALUE = "PLUGINS_ENV_VAR_VALUE";
@@ -81,11 +81,11 @@ public class KubernetesWorkspaceNextApplierTest {
   @Mock Container userContainer;
   @Mock InternalMachineConfig userMachineConfig;
 
-  KubernetesWorkspaceNextApplier applier;
+  KubernetesPluginsToolingApplier applier;
 
   @BeforeMethod
   public void setUp() {
-    applier = new KubernetesWorkspaceNextApplier(MEMORY_LIMIT_MB);
+    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Container> containers = new ArrayList<>();
@@ -113,7 +113,7 @@ public class KubernetesWorkspaceNextApplierTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Workspace.Next configuration can be applied to a workspace with one pod only")
+          "Che plugins tooling configuration can be applied to a workspace with one pod only")
   public void throwsExceptionWhenTheNumberOfPodsIsNot1() throws Exception {
     when(internalEnvironment.getPods()).thenReturn(of("pod1", pod, "pod2", pod));
 
