@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.NODEJS_WITH_JSON_LS;
@@ -40,7 +39,7 @@ public class JsonFileEditingTest {
   private static final String PATH_TO_JSON_FILE = PROJECT_NAME + "/" + JSON_FILE_NAME;
   private static final String NEW_OBJECT = "\"newObj\":[1,2,3],";
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_JSON_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.json.languageserver";
 
   @InjectTestWorkspace(template = NODEJS_WITH_JSON_LS)
   private TestWorkspace workspace;
