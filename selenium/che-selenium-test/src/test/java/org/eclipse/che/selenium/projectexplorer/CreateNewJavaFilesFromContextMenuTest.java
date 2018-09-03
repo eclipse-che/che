@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -56,6 +57,7 @@ public class CreateNewJavaFilesFromContextMenuTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -71,6 +73,7 @@ public class CreateNewJavaFilesFromContextMenuTest {
   @Test
   public void createNewFileFromContextMenuTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
     // go to folder for creation files
