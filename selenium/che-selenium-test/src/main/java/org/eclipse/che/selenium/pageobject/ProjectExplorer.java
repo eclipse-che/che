@@ -639,7 +639,8 @@ public class ProjectExplorer {
         By.xpath(
             format(
                 "//div[@path='/%s']/div/*[local-name() = 'svg' and @id='%s']",
-                path, folderType.get())));
+                path, folderType.get())),
+        ELEMENT_TIMEOUT_SEC);
   }
 
   /**
