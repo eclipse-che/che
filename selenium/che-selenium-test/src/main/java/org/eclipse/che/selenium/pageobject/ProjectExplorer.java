@@ -653,19 +653,31 @@ public class ProjectExplorer {
   }
 
   /**
-   * Opens context menu on item with specified {@code path}
+   * Opens context menu on item with specified {@code path} Selecting item and invoking context menu
+   * are two separate operations. If some item retakes focus then context menu will be invoked at
+   * wrong item. It might happen because project explorer is updated asynchronously and new appeared
+   * items retake focus. So, there are several tries to invoke context menu at correct item.
    *
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void openContextMenuByPathSelectedItem(String path) {
-    waitItem(path);
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
+    for (int i = 1; ; i++) {
+      waitAndSelectItem(path);
 
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.moveToElement(waitAndGetItem(path)).contextClick().perform();
+      actionsFactory.createAction(seleniumWebDriver).contextClick().perform();
+      waitContextMenu();
 
-    waitContextMenu();
+      try {
+        waitItemIsSelected(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        return;
+      } catch (TimeoutException e) {
+        seleniumWebDriverHelper.hideContextMenu();
+        waitContextMenuPopUpClosed();
+        if (i == 2) {
+          throw e;
+        }
+      }
+    }
   }
 
   /** Waits on context menu body's visibility. */
@@ -1094,12 +1106,21 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void waitItemIsSelected(String path) {
+    waitItemIsSelected(path, ELEMENT_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits until item with specified {@code path} be selected
+   *
+   * @param path item's path in format: "Test/src/pom.xml".
+   */
+  public void waitItemIsSelected(String path, int timeout) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(
             format(
                 "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
                 path)),
-        ELEMENT_TIMEOUT_SEC);
+        timeout);
   }
 
   public void waitItemSelectedByName(String visibleName) {
