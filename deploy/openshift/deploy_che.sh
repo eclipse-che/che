@@ -211,8 +211,9 @@ getTemplates(){
   if [ ! -d "${BASE_DIR}/templates" ]; then
     printInfo "Local templates directory not found. Downloading templates..."
     curl -s https://codeload.github.com/eclipse/che/tar.gz/master | tar -xz --strip=3 che-master/deploy/openshift/templates -C ${BASE_DIR}
+    echo ${BASE_DIR}
     OUT=$?
-    if [ ${OUT} -eq 1 ]; then
+    if [ ${OUT} -ne 0 ]; then
       printError "Failed to curl and untar Eclipse Che repo because of an error"
       printInfo "You may need to manually clone or download content of https://github.com/eclipse/che/tree/master/deploy/openshift and re-run the script"
       exit ${OUT}
