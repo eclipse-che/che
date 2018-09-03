@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.stack;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
@@ -47,9 +46,7 @@ public class CreateWorkspaceFromPythonStackTest {
   private static final String PROJECT_NAME = "console-python3-simple";
   private static final String PYTHON_FILE_NAME = "main.py";
   private static final String LS_INIT_MESSAGE =
-      format(
-          "Finished language servers initialization, file path '/%s/%s'",
-          PROJECT_NAME, PYTHON_FILE_NAME);
+      "Initialized language server 'org.eclipse.che.plugin.python.languageserver";
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
