@@ -115,6 +115,7 @@ public class SignatureKeyManager {
       return cachedPair.get(workspaceId);
     } catch (ExecutionException e) {
       if (e.getCause() != null && e.getCause() instanceof ConflictException) {
+        LOG.error(e.getMessage(), e);
         throw ((ConflictException) e.getCause());
       }
 
