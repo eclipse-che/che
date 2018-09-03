@@ -217,10 +217,10 @@ getTemplates(){
       printInfo "You may need to manually clone or download content of https://github.com/eclipse/che/tree/master/deploy/openshift and re-run the script"
       exit ${OUT}
     else
-    printInfo "Templates have been successfully saved to ${BASE_DIR}/templates"
-  fi
+      printInfo "Templates have been successfully saved to ${BASE_DIR}/templates"
+    fi
   else printInfo "Templates directory found at ${BASE_DIR}/templates. Applying templates from this directory. Delete it to get the latest templates if necessary"
-fi
+  fi
 }
 
 wait_for_postgres() {
