@@ -94,7 +94,7 @@ public class WebModule extends AbstractGinModule {
   @Named("TypeScript")
   protected FileType provideTypeScriptFile(
       WebExtensionResource res, FileTypeProvider fileTypeProvider) {
-    return fileTypeProvider.getByExtension(res.jsFile(), "ts");
+    return fileTypeProvider.getByExtension(res.tsFile(), "ts");
   }
 
   @Provides
