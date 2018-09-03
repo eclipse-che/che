@@ -40,6 +40,8 @@ import org.testng.annotations.Test;
 public class PhpFileEditingTest {
   private static final String PROJECT = "php-tests";
   private static final String PATH_TO_INDEX_PHP = PROJECT + "/index.php";
+  private static final String INITIALIZE_LANG_SERVER_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.php.languageserver";
   private static final URL RESOURCE =
       PhpFileEditingTest.class.getResource("/projects/plugins/DebuggerPlugin/php-tests");
 
@@ -79,11 +81,7 @@ public class PhpFileEditingTest {
 
   @Test
   public void checkMainFeaturesPhpLS() {
-    String intitPhpLanguageServerMessage =
-        String.format(
-            "Finished language servers initialization, file path '/%s'", PATH_TO_INDEX_PHP);
-
-    consoles.waitExpectedTextIntoConsole(intitPhpLanguageServerMessage);
+    consoles.waitExpectedTextIntoConsole(INITIALIZE_LANG_SERVER_MESSAGE);
 
     checkCodeValidation();
     checkAutocompletion();
