@@ -141,8 +141,7 @@ public class WebDriverLogsReader {
 
   private boolean isUrlFromCheTraffic(String url) {
     return url != null
-        && (url.matches(format("https?://%s[:\\d]*/api/.*", cheHost))
-            || url.matches(format("wss?://%s[:\\d]*/(api|connect|wsagent).*", cheHost)));
+        && (url.matches(format("https?://%s[:\\d]*/api/.*", cheHost)) || url.matches("wss?://.*"));
   }
 
   private String formatTime(long timestamp) {

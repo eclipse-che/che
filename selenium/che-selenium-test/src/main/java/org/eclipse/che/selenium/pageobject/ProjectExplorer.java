@@ -681,6 +681,13 @@ public class ProjectExplorer {
         By.id(ContextMenuFirstLevelItems.NEW.get()), WIDGET_TIMEOUT_SEC);
   }
 
+  /** Waits on context menu item is not visible */
+  public void waitContexMenuItemIsNotVisible(ContextMenuItems item) {
+    waitContextMenu();
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item.get())));
+  }
+
   /**
    * Clicks on element from context menu by specified {@code itemId}
    *
