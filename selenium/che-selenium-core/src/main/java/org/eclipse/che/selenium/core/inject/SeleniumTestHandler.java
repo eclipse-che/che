@@ -44,7 +44,6 @@ import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.commons.json.JsonParseException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -147,7 +146,7 @@ public abstract class SeleniumTestHandler
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
 
   // this is the map {test class FQN} -> {failed test method}
-  private final Map<String, ITestNGMethod> testsWithFailure = new ConcurrentHashMap<>();
+  private final Map<String, ITestResult> testsWithFailure = new ConcurrentHashMap<>();
 
   public SeleniumTestHandler() {
     injector = createInjector(getParentModules());
@@ -317,6 +316,19 @@ public abstract class SeleniumTestHandler
 
   /** Is invoked when test or configuration is finished. */
   private void onTestFinish(ITestResult result) {
+    // do not treat SeleniumTestHandler error as test failure
+    if (testsWithFailure.containsKey(result.getTestClass().getRealClass().getName())
+        && testsWithFailure
+            .get(result.getTestClass().getRealClass().getName())
+            .getMethod()
+            .equals(result.getMethod())
+        && result.getMethod().getCurrentInvocationCount() == 1) {
+      // restore initial test exception
+      result.setThrowable(
+          testsWithFailure.get(result.getTestClass().getRealClass().getName()).getThrowable());
+      return;
+    }
+
     if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
       switch (result.getStatus()) {
         case ITestResult.FAILURE:
@@ -328,7 +340,7 @@ public abstract class SeleniumTestHandler
           LOG.error("Test {} failed.{}", getCompletedTestLabel(result.getMethod()), errorDetails);
           LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
 
-          testsWithFailure.put(result.getTestClass().getRealClass().getName(), result.getMethod());
+          testsWithFailure.put(result.getTestClass().getRealClass().getName(), result);
 
           break;
 
@@ -375,7 +387,11 @@ public abstract class SeleniumTestHandler
       Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, testReference);
       testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
       Path pathToZipWithWorkspaceLogs =
-          pathToStoreWorkspaceLogs.getParent().resolve(testReference + ".zip");
+          pathToStoreWorkspaceLogs.getParent().resolve(getTestResultFilename(testReference, "zip"));
+
+      if (!Files.exists(pathToStoreWorkspaceLogs)) {
+        return;
+      }
 
       try {
         ZipUtils.zipDir(
@@ -384,7 +400,7 @@ public abstract class SeleniumTestHandler
             pathToZipWithWorkspaceLogs.toFile(),
             null);
         FileUtils.deleteQuietly(pathToStoreWorkspaceLogs.toFile());
-      } catch (IOException e) {
+      } catch (IOException | IllegalArgumentException e) {
         LOG.warn("Error of creation zip-file with workspace logs.", e);
       }
     }
@@ -499,7 +515,7 @@ public abstract class SeleniumTestHandler
 
   private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
-    String filename = NameGenerator.generate(testReference + "_", 8) + ".png";
+    String filename = getTestResultFilename(testReference, "png");
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
       Path screenshot = Paths.get(screenshotsDir, filename);
@@ -510,8 +526,12 @@ public abstract class SeleniumTestHandler
     }
   }
 
+  private String getTestResultFilename(String testReference, String fileExtension) {
+    return format("%s_%s.%s", testReference, System.nanoTime(), fileExtension);
+  }
+
   private String getTestReference(ITestResult result) {
-    return result.getTestClass().getName() + "." + result.getMethod().getMethodName();
+    return format("%s.%s", result.getTestClass().getName(), result.getMethod().getMethodName());
   }
 
   private void captureScreenshotsFromOpenedWindows(
@@ -536,7 +556,7 @@ public abstract class SeleniumTestHandler
     String testReference = getTestReference(result);
 
     try {
-      String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
+      String filename = getTestResultFilename(testReference, "log");
       Path webDriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
       Files.createDirectories(webDriverLogsDirectory.getParent());
       Files.write(
@@ -553,7 +573,7 @@ public abstract class SeleniumTestHandler
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
-    String filename = NameGenerator.generate(testReference + "_", 8) + ".html";
+    String filename = getTestResultFilename(testReference, "html");
     try {
       String pageSource = webDriver.getPageSource();
       Path dumpDirectory = Paths.get(htmldumpsDir, filename);
@@ -601,16 +621,17 @@ public abstract class SeleniumTestHandler
    */
   private void skipTestIfNeeded(ITestResult result) {
     ITestNGMethod testMethodToSkip = result.getMethod();
-    ITestNGMethod failedTestMethod =
+    ITestResult failedTestResult =
         testsWithFailure.get(testMethodToSkip.getInstance().getClass().getName());
 
     // Test with lower priority value is started firstly by TestNG.
-    if (failedTestMethod != null
-        && testMethodToSkip.getPriority() > failedTestMethod.getPriority()) {
+    if (failedTestResult != null
+        && testMethodToSkip.getPriority() > failedTestResult.getMethod().getPriority()) {
       throw new SkipException(
           format(
               "Skipping test %s because it depends on test %s which has failed earlier.",
-              getStartingTestLabel(testMethodToSkip), getCompletedTestLabel(failedTestMethod)));
+              getStartingTestLabel(testMethodToSkip),
+              getCompletedTestLabel(failedTestResult.getMethod())));
     }
   }
 
