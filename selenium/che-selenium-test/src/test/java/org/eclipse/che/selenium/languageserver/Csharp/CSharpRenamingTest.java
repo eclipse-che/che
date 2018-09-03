@@ -77,7 +77,6 @@ public class CSharpRenamingTest {
   public void checkRenaming() {
     String newClassName = "HelloWorld";
     String textFragmentAfterRenaming = "public class HelloWorld";
-    projectExplorer.openItemByPath(PROJECT_NAME);
     consoles.selectProcessByTabName("dev-machine");
     editor.goToCursorPositionVisible(18, 18);
     menu.runCommand(ASSISTANT, REFACTORING, LS_RENAME);
