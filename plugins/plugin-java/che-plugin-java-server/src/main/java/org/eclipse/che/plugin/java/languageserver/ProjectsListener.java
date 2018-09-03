@@ -94,7 +94,7 @@ public class ProjectsListener {
   private boolean isJavaProject(String path) {
     Optional<RegisteredProject> project = projectManager.get(path);
     return (project.isPresent()
-        && (project.get().getType().equals(MavenAttributes.MAVEN_ID)
-            || project.get().getType().equals(Constants.JAVAC)));
+        && (MavenAttributes.MAVEN_ID.equals(project.get().getType())
+            || Constants.JAVAC.equals(project.get().getType())));
   }
 }
