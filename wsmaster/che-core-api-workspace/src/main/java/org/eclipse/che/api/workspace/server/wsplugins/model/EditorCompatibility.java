@@ -9,27 +9,27 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.wsnext.model;
+package org.eclipse.che.api.workspace.server.wsplugins.model;
 
 import java.util.List;
 import java.util.Objects;
 
 /** Specifies compatibility with a specific Che editor and plugins needed for the compatibility. */
 public class EditorCompatibility {
-  private String name;
+  private String id;
   private List<String> plugins;
 
-  public String getName() {
-    return name;
+  public String getId() {
+    return id;
   }
 
-  public EditorCompatibility name(String name) {
-    this.name = name;
+  public EditorCompatibility id(String id) {
+    this.id = id;
     return this;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public EditorCompatibility plugins(List<String> plugins) {
@@ -54,17 +54,16 @@ public class EditorCompatibility {
       return false;
     }
     EditorCompatibility that = (EditorCompatibility) o;
-    return Objects.equals(getName(), that.getName())
-        && Objects.equals(getPlugins(), that.getPlugins());
+    return Objects.equals(getId(), that.getId()) && Objects.equals(getPlugins(), that.getPlugins());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getPlugins());
+    return Objects.hash(getId(), getPlugins());
   }
 
   @Override
   public String toString() {
-    return "EditorCompatibility{" + "name='" + name + '\'' + ", plugins=" + plugins + '}';
+    return "EditorCompatibility{" + "id='" + id + '\'' + ", plugins=" + plugins + '}';
   }
 }

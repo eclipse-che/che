@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.wsnext;
+package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -41,29 +41,29 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheContainer;
-import org.eclipse.che.api.workspace.server.wsnext.model.CheContainerPort;
-import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
-import org.eclipse.che.api.workspace.server.wsnext.model.ChePluginEndpoint;
-import org.eclipse.che.api.workspace.server.wsnext.model.EnvVar;
-import org.eclipse.che.api.workspace.server.wsnext.model.Volume;
+import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
+import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
+import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainerPort;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
+import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
- * Applies Workspace.Next configuration to a kubernetes internal runtime object.
+ * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
  *
  * @author Oleksander Garagatyi
  */
 @Beta
-public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
+public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
   private final String defaultMachineMemorySizeAttribute;
 
   @Inject
-  public KubernetesWorkspaceNextApplier(
+  public KubernetesPluginsToolingApplier(
       @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
     this.defaultMachineMemorySizeAttribute =
         String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
@@ -81,11 +81,14 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
     Map<String, Pod> pods = kubernetesEnvironment.getPods();
     if (pods.size() != 1) {
       throw new InfrastructureException(
-          "Workspace.Next configuration can be applied to a workspace with one pod only");
+          "Che plugins tooling configuration can be applied to a workspace with one pod only");
     }
     Pod pod = pods.values().iterator().next();
 
     for (ChePlugin chePlugin : chePlugins) {
+      if (chePlugin.getContainers() == null) {
+        continue;
+      }
       for (CheContainer container : chePlugin.getContainers()) {
         addMachine(pod, container, chePlugin, kubernetesEnvironment);
       }
@@ -265,9 +268,11 @@ public class KubernetesWorkspaceNextApplier implements WorkspaceNextApplier {
   private List<io.fabric8.kubernetes.api.model.EnvVar> toK8sEnv(List<EnvVar> env) {
     List<io.fabric8.kubernetes.api.model.EnvVar> result = new ArrayList<>();
 
-    for (EnvVar envVar : env) {
-      result.add(
-          new io.fabric8.kubernetes.api.model.EnvVar(envVar.getName(), envVar.getValue(), null));
+    if (env != null) {
+      for (EnvVar envVar : env) {
+        result.add(
+            new io.fabric8.kubernetes.api.model.EnvVar(envVar.getName(), envVar.getValue(), null));
+      }
     }
 
     return result;

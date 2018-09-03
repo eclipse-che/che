@@ -9,20 +9,18 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.wsnext.model;
+package org.eclipse.che.api.workspace.server.wsplugins.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-public class Command {
+/** EnvVar represents an environment variable present in a Container. */
+public class EnvVar {
 
   private String name = null;
-  private String workingDir = null;
-  private List<String> command = new ArrayList<String>();
+  private String value = null;
 
-  /** */
-  public Command name(String name) {
+  /** Name of the environment variable. Must be a C_IDENTIFIER. */
+  public EnvVar name(String name) {
     this.name = name;
     return this;
   }
@@ -35,32 +33,24 @@ public class Command {
     this.name = name;
   }
 
-  /** */
-  public Command workingDir(String workingDir) {
-    this.workingDir = workingDir;
+  /**
+   * Variable references $(VAR_NAME) are expanded using the previous defined environment variables
+   * in the container and any service environment variables. If a variable cannot be resolved, the
+   * reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a
+   * double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether
+   * the variable exists or not. Defaults to \&quot;\&quot;.
+   */
+  public EnvVar value(String value) {
+    this.value = value;
     return this;
   }
 
-  public String getWorkingDir() {
-    return workingDir;
+  public String getValue() {
+    return value;
   }
 
-  public void setWorkingDir(String workingDir) {
-    this.workingDir = workingDir;
-  }
-
-  /** */
-  public Command command(List<String> command) {
-    this.command = command;
-    return this;
-  }
-
-  public List<String> getCommand() {
-    return command;
-  }
-
-  public void setCommand(List<String> command) {
-    this.command = command;
+  public void setValue(String value) {
+    this.value = value;
   }
 
   @Override
@@ -71,25 +61,22 @@ public class Command {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Command command = (Command) o;
-    return Objects.equals(name, command.name)
-        && Objects.equals(workingDir, command.workingDir)
-        && Objects.equals(command, command.command);
+    EnvVar envVar = (EnvVar) o;
+    return Objects.equals(name, envVar.name) && Objects.equals(value, envVar.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, workingDir, command);
+    return Objects.hash(name, value);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Command {\n");
+    sb.append("class EnvVar {\n");
 
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    workingDir: ").append(toIndentedString(workingDir)).append("\n");
-    sb.append("    command: ").append(toIndentedString(command)).append("\n");
+    sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("}");
     return sb.toString();
   }

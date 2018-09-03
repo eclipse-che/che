@@ -9,20 +9,24 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.wsnext.model;
+package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ChePluginReference {
+public class Command {
 
   private String name = null;
-  private String version = null;
-  private List<ChePluginParameter> parameters = new ArrayList<ChePluginParameter>();
+
+  @JsonProperty("working-dir")
+  private String workingDir = null;
+
+  private List<String> command = new ArrayList<String>();
 
   /** */
-  public ChePluginReference name(String name) {
+  public Command name(String name) {
     this.name = name;
     return this;
   }
@@ -36,31 +40,31 @@ public class ChePluginReference {
   }
 
   /** */
-  public ChePluginReference version(String version) {
-    this.version = version;
+  public Command workingDir(String workingDir) {
+    this.workingDir = workingDir;
     return this;
   }
 
-  public String getVersion() {
-    return version;
+  public String getWorkingDir() {
+    return workingDir;
   }
 
-  public void setVersion(String version) {
-    this.version = version;
+  public void setWorkingDir(String workingDir) {
+    this.workingDir = workingDir;
   }
 
   /** */
-  public ChePluginReference parameters(List<ChePluginParameter> parameters) {
-    this.parameters = parameters;
+  public Command command(List<String> command) {
+    this.command = command;
     return this;
   }
 
-  public List<ChePluginParameter> getParameters() {
-    return parameters;
+  public List<String> getCommand() {
+    return command;
   }
 
-  public void setParameters(List<ChePluginParameter> parameters) {
-    this.parameters = parameters;
+  public void setCommand(List<String> command) {
+    this.command = command;
   }
 
   @Override
@@ -71,25 +75,25 @@ public class ChePluginReference {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ChePluginReference chePluginReference = (ChePluginReference) o;
-    return Objects.equals(name, chePluginReference.name)
-        && Objects.equals(version, chePluginReference.version)
-        && Objects.equals(parameters, chePluginReference.parameters);
+    Command command = (Command) o;
+    return Objects.equals(name, command.name)
+        && Objects.equals(workingDir, command.workingDir)
+        && Objects.equals(command, command.command);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, parameters);
+    return Objects.hash(name, workingDir, command);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ChePluginReference {\n");
+    sb.append("class Command {\n");
 
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    version: ").append(toIndentedString(version)).append("\n");
-    sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
+    sb.append("    workingDir: ").append(toIndentedString(workingDir)).append("\n");
+    sb.append("    command: ").append(toIndentedString(command)).append("\n");
     sb.append("}");
     return sb.toString();
   }
