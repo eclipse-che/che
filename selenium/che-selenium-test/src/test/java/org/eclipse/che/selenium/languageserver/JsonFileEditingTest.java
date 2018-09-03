@@ -47,7 +47,7 @@ public class JsonFileEditingTest {
   private static final String PATH_TO_JSON_FILE = PROJECT_NAME + "/" + JSON_FILE_NAME;
   private static final String NEW_OBJECT = "\"newObj\":[1,2,3],";
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_JSON_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.json.languageserver";
 
   private String[] symbols = {
     "namesymbols (12)",

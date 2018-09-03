@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver.python;
 
-import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.PYTHON;
@@ -43,7 +42,7 @@ public class PythonFileEditingTest {
   private static final String PYTHON_MODULE_FILE_NAME = "module.py";
   private static final String PATH_TO_PYTHON_FILE = PROJECT_NAME + "/" + PYTHON_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_PYTHON_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.python.languageserver";
 
   @InjectTestWorkspace(template = PYTHON)
   private TestWorkspace workspace;

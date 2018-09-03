@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -203,7 +202,7 @@ public class YamlFileEditingTest {
     editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
-    editor.moveCursorToText("apiVersion:");
+    editor.moveCursorToText("apiVersion");
     editor.waitTextInHoverPopup(
         "APIVersion defines the versioned schema of this representation of an object.");
   }
