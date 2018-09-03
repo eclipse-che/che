@@ -60,7 +60,7 @@ class LanguageServerConfigInitializer {
   }
 
   void initialize() {
-    LOG.info("Language server config processing: started");
+    LOG.debug("Language server config processing: started");
     for (LanguageServerConfigProvider provider : providers) {
       Map<String, LanguageServerConfig> configs = provider.getAll();
       for (Entry<String, LanguageServerConfig> entry : configs.entrySet()) {
