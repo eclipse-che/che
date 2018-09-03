@@ -2219,8 +2219,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait renaming field in the Editor (usually it field is used by language servers) type new rename
-   * value and wait closing of the field
+   * wait renaming field in the Editor (usually it field is used by language servers) type new
+   * rename value and wait closing of the field
    *
    * @param renamevalue
    */
