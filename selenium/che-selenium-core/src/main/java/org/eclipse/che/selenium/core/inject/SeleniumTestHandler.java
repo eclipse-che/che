@@ -95,7 +95,8 @@ public abstract class SeleniumTestHandler
         ISuiteListener,
         IInvokedMethodListener,
         IExecutionListener,
-        IAnnotationTransformer2 {
+        IAnnotationTransformer2,
+        IConfigurationListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -301,6 +302,19 @@ public abstract class SeleniumTestHandler
   @Override
   public void transform(IFactoryAnnotation annotation, Method method) {}
 
+  @Override
+  public void onConfigurationSuccess(ITestResult result) {}
+
+  @Override
+  public void onConfigurationFailure(ITestResult result) {
+    onTestFinish(result);
+  }
+
+  @Override
+  public void onConfigurationSkip(ITestResult result) {
+    onTestFinish(result);
+  }
+
   /** Injects dependencies into the given test class using {@link Guice} and custom injectors. */
   private void injectDependencies(ITestContext testContext, Object testInstance) throws Exception {
     Injector injector = testContext.getSuite().getParentInjector();
@@ -332,20 +346,29 @@ public abstract class SeleniumTestHandler
     if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
       switch (result.getStatus()) {
         case ITestResult.FAILURE:
-          String errorDetails =
-              result.getThrowable() != null
-                  ? " Error: " + result.getThrowable().getLocalizedMessage()
-                  : "";
+          if (result.getMethod().isTest()) {
+            String errorDetails =
+                result.getThrowable() != null
+                    ? " Error: " + result.getThrowable().getLocalizedMessage()
+                    : "";
 
-          LOG.error("Test {} failed.{}", getCompletedTestLabel(result.getMethod()), errorDetails);
-          LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
+            LOG.error("Test {} failed.{}", getCompletedTestLabel(result.getMethod()), errorDetails);
+            LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
 
-          testsWithFailure.put(result.getTestClass().getRealClass().getName(), result);
+            testsWithFailure.put(result.getTestClass().getRealClass().getName(), result);
+          }
+
+          captureScreenshot(result);
+          captureHtmlSource(result);
+          captureTestWorkspaceLogs(result);
+          storeWebDriverLogs(result);
 
           break;
 
         case ITestResult.SKIP:
-          LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
+          if (result.getMethod().isTest()) {
+            LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
+          }
 
           // don't capture test data if test is skipped because of previous test with higher
           // priority failed
@@ -357,11 +380,6 @@ public abstract class SeleniumTestHandler
 
         default:
       }
-
-      captureScreenshot(result);
-      captureHtmlSource(result);
-      captureTestWorkspaceLogs(result);
-      storeWebDriverLogs(result);
     }
   }
 
