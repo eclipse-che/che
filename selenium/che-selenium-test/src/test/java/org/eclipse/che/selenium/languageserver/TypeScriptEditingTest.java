@@ -64,6 +64,8 @@ public class TypeScriptEditingTest {
       NameGenerator.generate(TypeScriptEditingTest.class.getSimpleName(), 4);
   private static final String PATH_TO_GREETER_FILE = PROJECT_NAME + "/Greeter.ts";
   private static final String PATH_TO_PRINT_TEST_FILE = PROJECT_NAME + "/printTest.ts";
+  public static final String INITIALIZE_LANG_SERVER_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.web.typescript'";
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS)
   private TestWorkspace workspace;
@@ -202,7 +204,7 @@ public class TypeScriptEditingTest {
 
     final int expectedAmountOfErrorMarkers = 9;
 
-    String tooltipWithErrorMessage = "Cannot find name 'c'";
+    String tooltipWithErrorMessage = "Cannot find name 'c'.";
 
     editor.waitActive();
     editor.goToPosition(14, 2);
