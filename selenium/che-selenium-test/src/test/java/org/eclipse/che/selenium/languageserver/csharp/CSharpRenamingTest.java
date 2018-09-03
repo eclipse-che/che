@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.languageserver.Csharp;
+package org.eclipse.che.selenium.languageserver.csharp;
 
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
@@ -64,7 +64,7 @@ public class CSharpRenamingTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = getClass().getResource("/projects/CsharpHelloWorld");
+    URL resource = getClass().getResource("/projects/CSharpHelloWorld");
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, DOT_NET);
     ide.open(workspace);
