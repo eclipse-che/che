@@ -63,8 +63,7 @@ public class WsMasterServletModule extends ServletModule {
   }
 
   private void configureMultiUserMode() {
-    // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
-    filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
+    filterRegex(".*").through(MachineLoginFilter.class);
     install(new KeycloakServletModule());
   }
 }

@@ -89,6 +89,7 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
+
 }
 
 test_dns_provider() {
@@ -237,8 +238,9 @@ deploy_che_to_ocp() {
 
 destroy_ocp() {
     if [ -d "${OKD_DIR}" ]; then
-      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*" > /dev/null || true
+      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/* > /dev/null 2>&1" || true
     fi
+    docker run --rm -v /var/lib/origin:/to_remove alpine sh -c "rm -rf /to_remove/* > /dev/null 2>&1" || true
     $OC_BINARY login -u system:admin
     $OC_BINARY delete pvc --all
     $OC_BINARY delete all --all
@@ -297,6 +299,7 @@ parse_args() {
     --image-che - override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
     --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
+    --deploy-che-plugin-registry - deploy Che plugin registry
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
@@ -380,6 +383,10 @@ parse_args() {
            --help)
                echo -e "$HELP"
                exit 1
+           ;;
+           --deploy-che-plugin-registry)
+               export DEPLOY_CHE_PLUGIN_REGISTRY=true
+               shift
            ;;
            *)
                echo "You've passed wrong arg '$i'."

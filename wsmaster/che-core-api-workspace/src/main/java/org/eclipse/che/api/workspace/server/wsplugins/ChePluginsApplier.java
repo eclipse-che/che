@@ -9,30 +9,30 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.wsnext;
+package org.eclipse.che.api.workspace.server.wsplugins;
 
 import com.google.common.annotations.Beta;
 import java.util.Collection;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 
 /**
- * Applies Workspace.Next configuration to an internal runtime object that represents workspace
+ * Applies Che plugins tooling configuration to an internal runtime object that represents workspace
  * runtime configuration on an infrastructure level.
  *
  * @author Oleksander Garagatyi
  */
 @Beta
-public interface WorkspaceNextApplier {
+public interface ChePluginsApplier {
 
   /**
-   * Applies Workspace.Next configuration to internal environment.
+   * Applies Che plugins tooling configuration to internal environment.
    *
    * @param internalEnvironment infrastructure specific representation of workspace runtime
    *     environment
-   * @param chePlugins Workspace.Next configuration to apply to {@code internalEnvironment}
-   * @throws InfrastructureException when applying Workspace.Next objects fails
+   * @param chePlugins Che plugins tooling configuration to apply to {@code internalEnvironment}
+   * @throws InfrastructureException when applying Che plugins tooling fails
    */
   void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> chePlugins)
       throws InfrastructureException;
