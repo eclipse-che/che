@@ -22,6 +22,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGI
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -669,21 +670,18 @@ public class WorkspaceService extends Service {
   @ApiOperation(value = "Get workspace server configuration values")
   @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
   public Map<String, String> getSettings() {
-    if (pluginRegistryUrl == null) {
-      return ImmutableMap.of(
-          Constants.SUPPORTED_RECIPE_TYPES,
-          Joiner.on(",").join(workspaceManager.getSupportedRecipes()),
-          CHE_WORKSPACE_AUTO_START,
-          Boolean.toString(cheWorkspaceAutoStart));
-    } else {
-      return ImmutableMap.of(
-          Constants.SUPPORTED_RECIPE_TYPES,
-          Joiner.on(",").join(workspaceManager.getSupportedRecipes()),
-          CHE_WORKSPACE_AUTO_START,
-          Boolean.toString(cheWorkspaceAutoStart),
-          CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
-          pluginRegistryUrl);
+    Builder<String, String> settings = ImmutableMap.builder();
+
+    settings.put(
+        Constants.SUPPORTED_RECIPE_TYPES,
+        Joiner.on(",").join(workspaceManager.getSupportedRecipes()));
+    settings.put(CHE_WORKSPACE_AUTO_START, Boolean.toString(cheWorkspaceAutoStart));
+
+    if (pluginRegistryUrl != null) {
+      settings.put(CHE_WORKSPACE_PLUGIN_REGISTRY_ULR, pluginRegistryUrl);
     }
+
+    return settings.build();
   }
 
   private static Map<String, String> parseAttrs(List<String> attributes)

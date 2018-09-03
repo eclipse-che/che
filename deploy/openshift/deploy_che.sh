@@ -437,7 +437,7 @@ ${CHE_VAR_ARRAY}"
 
     if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
         PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
-        PLUGIN__REGISTRY__URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/"
+        PLUGIN__REGISTRY__URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/plugins"
     fi
 
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \

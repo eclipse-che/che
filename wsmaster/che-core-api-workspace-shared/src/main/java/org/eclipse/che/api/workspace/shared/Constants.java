@@ -43,6 +43,10 @@ public final class Constants {
   public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
+
+  /**
+   * Property name for Che plugin registry url. Key name of api workspace/settings method results.
+   */
   public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR =
       "che.workspace.plugin_registry_url";
 
