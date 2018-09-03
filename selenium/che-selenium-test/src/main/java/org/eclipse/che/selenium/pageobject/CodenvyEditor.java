@@ -269,6 +269,7 @@ public class CodenvyEditor {
     OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
     NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
     FIND(By.id("contextMenu/Find")),
+    OPEN_ON_GITHUB(By.id("contextMenu/Open on GitHub")),
     CLOSE(By.id("contextMenu/Close"));
 
     @SuppressWarnings("ImmutableEnumChecker")
@@ -653,6 +654,23 @@ public class CodenvyEditor {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
     waitActive();
     waitCursorPosition(positionLine, positionChar);
+  }
+
+  /**
+   * Select text in defined interval
+   *
+   * @param fromLine beginning of first line for selection
+   * @param numberOfLine end of first line for selection
+   */
+  public void selectLines(int fromLine, int numberOfLine) {
+    Actions action = seleniumWebDriverHelper.getAction(seleniumWebDriver);
+    setCursorToLine(fromLine);
+    action.keyDown(SHIFT).perform();
+    for (int i = 0; i < numberOfLine; i++) {
+      typeTextIntoEditor(Keys.ARROW_DOWN.toString());
+    }
+    action.keyUp(SHIFT).perform();
+    action.sendKeys(Keys.END.toString()).keyUp(SHIFT).perform();
   }
 
   /**
