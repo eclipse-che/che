@@ -209,14 +209,14 @@ isLoggedIn() {
 
 getTemplates(){
   if [ ! -d "${BASE_DIR}/templates" ]; then
-  printInfo "Local templates directory not found. Downloading templates..."
-  curl -s https://codeload.github.com/eclipse/che/tar.gz/master | tar -xz --strip=3 che-master/deploy/openshift/templates -C ${BASE_DIR}
-  OUT=$?
-  if [ ${OUT} -eq 1 ]; then
-    printError "Failed to curl and untar Eclipse Che repo because of an error"
-    printInfo "You may need to manually clone or download content of https://github.com/eclipse/che/tree/master/deploy/openshift and re-run the script"
-    exit ${OUT}
-  else
+    printInfo "Local templates directory not found. Downloading templates..."
+    curl -s https://codeload.github.com/eclipse/che/tar.gz/master | tar -xz --strip=3 che-master/deploy/openshift/templates -C ${BASE_DIR}
+    OUT=$?
+    if [ ${OUT} -eq 1 ]; then
+      printError "Failed to curl and untar Eclipse Che repo because of an error"
+      printInfo "You may need to manually clone or download content of https://github.com/eclipse/che/tree/master/deploy/openshift and re-run the script"
+      exit ${OUT}
+    else
     printInfo "Templates have been successfully saved to ${BASE_DIR}/templates"
   fi
   else printInfo "Templates directory found at ${BASE_DIR}/templates. Applying templates from this directory. Delete it to get the latest templates if necessary"

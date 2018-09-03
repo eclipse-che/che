@@ -125,18 +125,18 @@ get_tools() {
     }
 
     if [[ $(oc version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) == *"$OC_VERSION"* ]]; then
-       echo "Found oc ${OC_VERSION} in PATH. Using it"
-       export OC_BINARY="oc"
-     elif [[ ! -f $OC_BINARY ]]; then
-          download_oc
-       else
-          # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
-           if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
-               rm -f "$OC_BINARY" "$OCP_TOOLS_DIR"/README.md "$OCP_TOOLS_DIR"/LICENSE
-               download_oc
-           fi
+      echo "Found oc ${OC_VERSION} in PATH. Using it"
+      export OC_BINARY="oc"
+    elif [[ ! -f $OC_BINARY ]]; then
+      download_oc
+    else
+      # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
+      if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
+        rm -f "$OC_BINARY" "$OCP_TOOLS_DIR"/README.md "$OCP_TOOLS_DIR"/LICENSE
+        download_oc
+      fi
     fi
-   export PATH=${PATH}:${OCP_TOOLS_DIR}
+    export PATH=${PATH}:${OCP_TOOLS_DIR}
 }
 
 add_user_as_admin() {
