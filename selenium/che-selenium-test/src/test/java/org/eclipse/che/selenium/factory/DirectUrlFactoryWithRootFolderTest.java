@@ -52,7 +52,7 @@ public class DirectUrlFactoryWithRootFolderTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    // preconditions - create test the repository
+    // preconditions - add the project to the test repository
     Path entryPath = Paths.get(getClass().getResource("/projects/quickstart").getPath());
     testRepo.addContent(entryPath);
     String repositoryUrl = testRepo.getHtmlUrl();

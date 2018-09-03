@@ -52,7 +52,7 @@ public class CheckFactoryWithMultiModuleTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    // preconditions - create the test repository
+    // preconditions - add the project to the test repository
     Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
     testRepo.addContent(entryPath);
     String repositoryUrl = testRepo.getHttpsTransportUrl();

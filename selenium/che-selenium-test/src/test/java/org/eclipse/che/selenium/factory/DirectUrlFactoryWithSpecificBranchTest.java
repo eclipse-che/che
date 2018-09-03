@@ -61,7 +61,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    // preconditions - create test the repository
+    // preconditions - add the project to the test repository
     Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
     testRepo.addContent(entryPath);
     String repositoryUrl = testRepo.getHtmlUrl();
@@ -101,14 +101,9 @@ public class DirectUrlFactoryWithSpecificBranchTest {
         "Successfully configured and cloned source code of " + repositoryName,
         UPDATING_PROJECT_TIMEOUT_SEC);
     events.waitExpectedMessage(
-        "Project: "
-            + repositoryName
-            + " | cloned from: "
-            + repositoryName
-            + " | remote branch: refs/remotes/origin/"
-            + SECOND_BRANCH_NAME
-            + " | local branch: "
-            + SECOND_BRANCH_NAME,
+        String.format(
+            "Project: %s | cloned from: %s | remote branch: refs/remotes/origin/%s | local branch: %s",
+            repositoryName, repositoryName, SECOND_BRANCH_NAME, SECOND_BRANCH_NAME),
         UPDATING_PROJECT_TIMEOUT_SEC);
 
     projectExplorer.waitAndSelectItem(repositoryName);
