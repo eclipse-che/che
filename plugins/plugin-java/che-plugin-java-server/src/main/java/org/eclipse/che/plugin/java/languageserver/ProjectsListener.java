@@ -16,6 +16,7 @@ import static java.util.Collections.singletonList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -23,7 +24,10 @@ import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
+import org.eclipse.che.api.project.shared.RegisteredProject;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 /**
  * Monitors projects activity and updates jdt.ls workspace.
@@ -66,7 +70,7 @@ public class ProjectsListener {
   }
 
   private void onProjectCreated(ProjectCreatedEvent event) {
-    if (!isProjectRegistered(event.getProjectPath())) {
+    if (!isJavaProject(event.getProjectPath())) {
       return;
     }
 
@@ -77,7 +81,7 @@ public class ProjectsListener {
   }
 
   private void onPreProjectDeleted(PreProjectDeletedEvent event) {
-    if (!isProjectRegistered(event.getProjectPath())) {
+    if (!isJavaProject(event.getProjectPath())) {
       return;
     }
 
@@ -87,7 +91,10 @@ public class ProjectsListener {
     workspaceSynchronizer.syncronizerWorkspaceAsync(params);
   }
 
-  private boolean isProjectRegistered(String path) {
-    return projectManager.isRegistered(path);
+  private boolean isJavaProject(String path) {
+    Optional<RegisteredProject> project = projectManager.get(path);
+    return (project.isPresent()
+        && (MavenAttributes.MAVEN_ID.equals(project.get().getType())
+            || Constants.JAVAC.equals(project.get().getType())));
   }
 }
