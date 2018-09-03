@@ -1448,6 +1448,12 @@ public class SeleniumWebDriverHelper {
     waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
 
+    /** Hides context menu. */
+    public void hideContextMenu() {
+        actionsFactory.createAction(seleniumWebDriver).moveByOffset(-1, -1).click().build().perform();
+    }
+
+
   public void closeCurrentWindowAndSwitchToAnother(String windowToSwitch) {
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(windowToSwitch);
