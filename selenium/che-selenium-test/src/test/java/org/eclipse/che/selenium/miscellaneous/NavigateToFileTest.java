@@ -80,8 +80,8 @@ public class NavigateToFileTest {
         CUSTOM,
         workspace.getId());
     ide.open(workspace);
+    consoles.waitJDTLSStartedMessage();
     ide.waitOpenedWorkspaceIsReadyToUse();
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME_2);
   }
