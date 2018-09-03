@@ -38,7 +38,7 @@
         {
             "name": "@eclipse-che/che-theia-hosted-plugin-manager-extension",
             "source": "https://github.com/eclipse/che-theia-hosted-plugin-manager-extension.git",
-            "checkoutTo": "latest-deps",
+            "checkoutTo": "master",
             "type": "git"
         },
         {
