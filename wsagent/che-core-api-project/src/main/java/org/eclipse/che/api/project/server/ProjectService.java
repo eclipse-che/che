@@ -385,10 +385,12 @@ public class ProjectService {
   })
   public Response uploadFolderFromZip(
       @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
-      Iterator<FileItem> formData)
+      Iterator<FileItem> formData,
+      @DefaultValue("false") @QueryParam("skipFirstLevel") boolean skipFirstLevel,
+      @DefaultValue("false") @QueryParam("force") boolean force)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException {
 
-    return getProjectServiceApi().uploadFolderFromZip(wsPath, formData);
+    return getProjectServiceApi().uploadFolderFromZip(wsPath, formData, force, skipFirstLevel);
   }
 
   @ApiOperation(value = "Get file content", notes = "Get file content by its name")

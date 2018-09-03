@@ -9,41 +9,41 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.wsnext.model;
+package org.eclipse.che.api.workspace.server.wsplugins.model;
 
 import java.util.Objects;
 
-public class CheFeature extends TypeMeta {
+public class Volume {
 
-  private ObjectMeta metadata = null;
-  private CheFeatureSpec spec = null;
+  private String name = null;
+  private String mountPath = null;
 
   /** */
-  public CheFeature metadata(ObjectMeta metadata) {
-    this.metadata = metadata;
+  public Volume name(String name) {
+    this.name = name;
     return this;
   }
 
-  public ObjectMeta getMetadata() {
-    return metadata;
+  public String getName() {
+    return name;
   }
 
-  public void setMetadata(ObjectMeta metadata) {
-    this.metadata = metadata;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  /** */
-  public CheFeature spec(CheFeatureSpec spec) {
-    this.spec = spec;
+  /** mountPath of the volume in running container */
+  public Volume mountPath(String path) {
+    this.mountPath = path;
     return this;
   }
 
-  public CheFeatureSpec getSpec() {
-    return spec;
+  public String getMountPath() {
+    return mountPath;
   }
 
-  public void setSpec(CheFeatureSpec spec) {
-    this.spec = spec;
+  public void setMountPath(String mountPath) {
+    this.mountPath = mountPath;
   }
 
   @Override
@@ -54,22 +54,22 @@ public class CheFeature extends TypeMeta {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CheFeature cheFeature = (CheFeature) o;
-    return Objects.equals(metadata, cheFeature.metadata) && Objects.equals(spec, cheFeature.spec);
+    Volume volume = (Volume) o;
+    return Objects.equals(name, volume.name) && Objects.equals(mountPath, volume.mountPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(metadata, spec);
+    return Objects.hash(name, mountPath);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CheFeature {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("    metadata: ").append(toIndentedString(metadata)).append("\n");
-    sb.append("    spec: ").append(toIndentedString(spec)).append("\n");
+    sb.append("class Volume {\n");
+
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    mountPath: ").append(toIndentedString(mountPath)).append("\n");
     sb.append("}");
     return sb.toString();
   }
