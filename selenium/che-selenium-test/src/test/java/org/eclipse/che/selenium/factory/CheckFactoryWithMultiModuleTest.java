@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -27,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -75,8 +77,15 @@ public class CheckFactoryWithMultiModuleTest {
     testFactory.open(seleniumWebDriver);
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
-    notifications.waitExpectedMessageOnProgressPanelAndClosed(
-        "Project " + PROJECT_NAME + " imported");
+
+    try {
+      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+          "Project " + PROJECT_NAME + " imported");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
+
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);

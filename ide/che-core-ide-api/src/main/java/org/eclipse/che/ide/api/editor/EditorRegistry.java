@@ -40,6 +40,14 @@ public interface EditorRegistry {
   void registerDefaultEditor(@NotNull FileType fileType, @NotNull EditorProvider provider);
 
   /**
+   * Remove Editor Provider from registry for given file type.
+   *
+   * @param fileType the file type
+   * @param provider the provider to removing
+   */
+  void unRegister(FileType fileType, EditorProvider provider);
+
+  /**
    * Get editor provide assigned for file type;
    *
    * @param fileType resource file type

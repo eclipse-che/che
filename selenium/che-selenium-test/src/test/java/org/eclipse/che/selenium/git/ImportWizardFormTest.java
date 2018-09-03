@@ -131,7 +131,7 @@ public class ImportWizardFormTest {
   private void deletePrivateSshKey() throws Exception {
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
 
     openPreferencesVcsForm();
 

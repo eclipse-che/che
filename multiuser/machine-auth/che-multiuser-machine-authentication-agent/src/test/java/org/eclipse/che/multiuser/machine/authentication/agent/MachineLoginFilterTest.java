@@ -59,7 +59,7 @@ public class MachineLoginFilterTest {
 
   private static final String SIGNATURE_ALGORITHM = "RSA";
   private static final String WORKSPACE_ID = "workspace31";
-  private static final String PRINCIPAL = "principal";
+  private static final String SUBJECT = "che_subject";
   private static final String USER_ID = "test_user31";
   private static final String USER_NAME = "test_user";
 
@@ -105,11 +105,11 @@ public class MachineLoginFilterTest {
 
   @Test
   public void testProcessRequestWithSubjectFromSession() throws Exception {
-    when(sessionMock.getAttribute(PRINCIPAL)).thenReturn(subject);
+    when(sessionMock.getAttribute(SUBJECT)).thenReturn(subject);
 
     machineLoginFilter.doFilter(getRequestMock(sessionMock, machineToken), responseMock, chainMock);
 
-    verify(sessionMock).getAttribute(PRINCIPAL);
+    verify(sessionMock).getAttribute(SUBJECT);
     verifyZeroInteractions(tokenExtractorMock);
   }
 
@@ -129,7 +129,7 @@ public class MachineLoginFilterTest {
     machineLoginFilter.doFilter(getRequestMock(null, machineToken), responseMock, chainMock);
 
     verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
-    verify(sessionMock).setAttribute(PRINCIPAL, subject);
+    verify(sessionMock).setAttribute(SUBJECT, subject);
     verifyZeroInteractions(responseMock);
   }
 

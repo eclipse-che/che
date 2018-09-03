@@ -26,8 +26,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Loca
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.GITHUG_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.GIT_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.PROJECT_TAB_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.SAMPLES_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.TOOLTIP_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.ZIP_BUTTON_ID;
 
 import com.google.inject.Inject;
@@ -88,6 +88,8 @@ public class AddOrImportForm {
     String BLANK_FORM_DESCRIPTION_FIELD_XPATH = "//input[@name='description']";
     String BLANK_FORM_NAME_ERROR_MESSAGE_XPATH =
         "//div[@id='project-source-selector']//div[@id='new-workspace-error-message']/div";
+
+    String TOOLTIP_XPATH_TEMPLATE = "//*[contains(@class, 'tooltip') and @content='%s']";
   }
 
   public WebElement waitAddOrImportProjectButton(int timeout) {
@@ -251,13 +253,12 @@ public class AddOrImportForm {
 
   private void waitTextInTooltip(String expectedText) {
     seleniumWebDriverHelper.waitTextEqualsTo(
-        By.xpath("//*[contains(@class, 'tooltip')]"), expectedText);
+        By.xpath(format(TOOLTIP_XPATH_TEMPLATE, expectedText)), expectedText);
   }
 
   public void clickOnProjectTab(String tabName) {
     waitProjectTabAppearance(tabName);
-    String locator = format(PROJECT_TAB_XPATH_TEMPLATE, tabName);
-    seleniumWebDriverHelper.moveCursorTo(By.xpath(locator));
+    seleniumWebDriverHelper.moveCursorTo(By.id(tabName));
 
     try {
       waitTextInTooltip(tabName);
@@ -265,7 +266,7 @@ public class AddOrImportForm {
       // sometimes the tooltip does not display on the CI
     }
 
-    seleniumWebDriverHelper.waitAndClick(By.xpath(locator));
+    seleniumWebDriverHelper.waitAndClick(By.id(tabName));
   }
 
   private List<WebElement> getSamples() {

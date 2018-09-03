@@ -14,8 +14,11 @@ package org.eclipse.che.plugin.languageserver.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
+import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
+import org.eclipse.che.ide.filetypes.FileTypeProviderImpl;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerAnnotationModelFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerCodeassistProcessorFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfigurationFactory;
@@ -48,5 +51,7 @@ public class LanguageServerGinModule extends AbstractGinModule {
     bind(ShowMessageJsonRpcReceiver.class).asEagerSingleton();
 
     GinMultibinder.newSetBinder(binder(), LanguageDescription.class);
+
+    bind(FileTypeProvider.class).to(FileTypeProviderImpl.class).in(Singleton.class);
   }
 }

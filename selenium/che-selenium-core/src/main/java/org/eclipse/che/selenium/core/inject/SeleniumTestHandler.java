@@ -42,8 +42,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
@@ -62,6 +64,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.IAnnotationTransformer2;
 import org.testng.IConfigurationListener;
 import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
@@ -74,6 +77,10 @@ import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 import org.testng.TestException;
+import org.testng.annotations.IConfigurationAnnotation;
+import org.testng.annotations.IDataProviderAnnotation;
+import org.testng.annotations.IFactoryAnnotation;
+import org.testng.annotations.ITestAnnotation;
 
 /**
  * Tests lifecycle handler.
@@ -85,7 +92,11 @@ import org.testng.TestException;
  * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener, ISuiteListener, IInvokedMethodListener, IExecutionListener {
+    implements ITestListener,
+        ISuiteListener,
+        IInvokedMethodListener,
+        IExecutionListener,
+        IAnnotationTransformer2 {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -128,6 +139,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
   @Inject private WebDriverLogsReaderFactory webDriverLogsReaderFactory;
+  @Inject private TestFilter testFilter;
 
   private final Injector injector;
 
@@ -204,8 +216,9 @@ public abstract class SeleniumTestHandler
   @Override
   public void onStart(ISuite suite) {
     suite.setParentInjector(injector);
-    LOG.info(
-        "Starting suite '{}' with {} test methods.", suite.getName(), suite.getAllMethods().size());
+    long numberOfEnabledTests =
+        suite.getAllMethods().parallelStream().filter(ITestNGMethod::getEnabled).count();
+    LOG.info("Starting suite '{}' with {} test methods.", suite.getName(), numberOfEnabledTests);
   }
 
   /** Check if webdriver session can be created without errors. */
@@ -267,6 +280,27 @@ public abstract class SeleniumTestHandler
   public void onExecutionFinish() {
     shutdown();
   }
+
+  @Override
+  public void transform(
+      ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
+    testFilter.excludeTestOfImproperGroup(annotation);
+  }
+
+  @Override
+  public void transform(
+      IConfigurationAnnotation annotation,
+      Class testClass,
+      Constructor testConstructor,
+      Method testMethod) {
+    testFilter.excludeTestOfImproperGroup(annotation);
+  }
+
+  @Override
+  public void transform(IDataProviderAnnotation annotation, Method method) {}
+
+  @Override
+  public void transform(IFactoryAnnotation annotation, Method method) {}
 
   /** Injects dependencies into the given test class using {@link Guice} and custom injectors. */
   private void injectDependencies(ITestContext testContext, Object testInstance) throws Exception {
@@ -333,12 +367,26 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      if (obj == null || !(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
+      if (!(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
         continue;
       }
 
-      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestReference(result));
+      String testReference = getTestReference(result);
+      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, testReference);
       testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
+      Path pathToZipWithWorkspaceLogs =
+          pathToStoreWorkspaceLogs.getParent().resolve(testReference + ".zip");
+
+      try {
+        ZipUtils.zipDir(
+            pathToStoreWorkspaceLogs.toFile().getAbsolutePath(),
+            pathToStoreWorkspaceLogs.toFile(),
+            pathToZipWithWorkspaceLogs.toFile(),
+            null);
+        FileUtils.deleteQuietly(pathToStoreWorkspaceLogs.toFile());
+      } catch (IOException e) {
+        LOG.warn("Error of creation zip-file with workspace logs.", e);
+      }
     }
   }
 

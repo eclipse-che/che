@@ -77,6 +77,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNested
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -99,6 +100,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -207,7 +209,8 @@ public class CodenvyEditor {
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
-    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
+    String HOVER_POPUP_XPATH =
+        "//div[@class='textviewTooltip' and contains(@style,'visibility: visible')]";
     String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
   }
 
@@ -266,6 +269,7 @@ public class CodenvyEditor {
     OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
     NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
     FIND(By.id("contextMenu/Find")),
+    OPEN_ON_GITHUB(By.id("contextMenu/Open on GitHub")),
     CLOSE(By.id("contextMenu/Close"));
 
     @SuppressWarnings("ImmutableEnumChecker")
@@ -446,7 +450,12 @@ public class CodenvyEditor {
    * @param expectedText the expected text into hover pop-up
    */
   public void waitTextInHoverPopup(String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    try {
+      seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   /**
@@ -645,6 +654,23 @@ public class CodenvyEditor {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
     waitActive();
     waitCursorPosition(positionLine, positionChar);
+  }
+
+  /**
+   * Select text in defined interval
+   *
+   * @param fromLine beginning of first line for selection
+   * @param numberOfLine end of first line for selection
+   */
+  public void selectLines(int fromLine, int numberOfLine) {
+    Actions action = seleniumWebDriverHelper.getAction(seleniumWebDriver);
+    setCursorToLine(fromLine);
+    action.keyDown(SHIFT).perform();
+    for (int i = 0; i < numberOfLine; i++) {
+      typeTextIntoEditor(Keys.ARROW_DOWN.toString());
+    }
+    action.keyUp(SHIFT).perform();
+    action.sendKeys(Keys.END.toString()).keyUp(SHIFT).perform();
   }
 
   /**

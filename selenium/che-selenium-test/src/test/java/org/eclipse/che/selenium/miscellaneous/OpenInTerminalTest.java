@@ -101,8 +101,8 @@ public class OpenInTerminalTest {
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
-    terminal.waitNumberTerminalTab(2);
-    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + "$");
+    terminal.waitTerminalTab(2);
+    terminal.waitTextInTerminal(2, PROJECT_NAME);
   }
 
   /**
@@ -135,15 +135,15 @@ public class OpenInTerminalTest {
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
-    terminal.waitNumberTerminalTab(2);
-    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + PATH_TO_EXPAND + "$");
+    terminal.waitTerminalTab(2);
+    terminal.waitTextInTerminal(2, PROJECT_NAME + PATH_TO_EXPAND);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME + FILE);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + FILE);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
-    terminal.waitNumberTerminalTab(3);
-    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + "$");
+    terminal.waitTerminalTab(3);
+    terminal.waitTextInTerminal(3, PROJECT_NAME);
   }
 
   /**
@@ -163,7 +163,7 @@ public class OpenInTerminalTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     seleniumWebDriverHelper.sendKeys(Keys.chord(ALT, SHIFT, F12));
-    terminal.waitNumberTerminalTab(2);
-    terminal.waitExpectedTextIntoTerminal(PROJECT_NAME + "$");
+    terminal.waitTerminalTab(2);
+    terminal.waitTextInTerminal(2, PROJECT_NAME);
   }
 }

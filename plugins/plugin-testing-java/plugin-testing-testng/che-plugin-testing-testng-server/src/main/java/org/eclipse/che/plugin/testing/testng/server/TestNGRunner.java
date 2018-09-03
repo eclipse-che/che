@@ -214,7 +214,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
       SAXParser parser = factory.newSAXParser();
       parser.parse(file.getContents(), suiteParser);
     } catch (ParserConfigurationException | SAXException | IOException e) {
-      LOG.error("It is not possible to parse file " + fileLocation, e);
+      LOG.debug("It is not possible to parse file " + fileLocation);
     } catch (CoreException e) {
       LOG.error("It is not possible to read file " + fileLocation, e);
     }

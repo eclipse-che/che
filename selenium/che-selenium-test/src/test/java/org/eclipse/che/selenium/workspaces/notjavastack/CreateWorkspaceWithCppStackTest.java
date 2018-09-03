@@ -67,6 +67,6 @@ public class CreateWorkspaceWithCppStackTest {
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(60);
+    terminal.waitFirstTerminalTab(60);
   }
 }

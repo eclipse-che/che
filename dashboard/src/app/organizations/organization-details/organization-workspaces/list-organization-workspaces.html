@@ -95,19 +95,22 @@
           </div>
           <!-- RAM -->
           <div flex-gt-xs="15"
-               class="che-list-item-name workspace-item-ram">
+               class="che-list-item-name workspace-item-ram"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
             <span class="workspace-consumed-value" name="workspace-ram-value">{{listOrganizationWorkspacesController.getMemoryLimit(workspace)}}</span>
           </div>
           <!-- Projects -->
           <div flex-gt-xs="15"
-               class="che-list-item-name workspace-item-projects">
+               class="che-list-item-name workspace-item-projects"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>Projects</span>
             <span class="che-hover" name="workspace-projects-value">{{workspace.config.projects.length}}</span>
           </div>
           <!-- Stack ID -->
           <div flex-gt-xs="30"
-               class="che-list-item-name workspace-item-stack">
+               class="che-list-item-name workspace-item-stack"
+               ng-click="listOrganizationWorkspacesController.redirectToWorkspaceDetails(workspace, 'Overview')">
             <span class="che-xs-header noselect" hide-gt-xs>Stack</span>
             <span class="che-hover" name="workspace-stacks-name">{{workspace.attributes.stackId}}</span>
           </div>
