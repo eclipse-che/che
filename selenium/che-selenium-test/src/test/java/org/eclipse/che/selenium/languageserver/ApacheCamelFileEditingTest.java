@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_CAMEL;
 
@@ -35,7 +34,7 @@ public class ApacheCamelFileEditingTest {
   private static final String CAMEL_FILE_NAME = "camel.xml";
   private static final String PATH_TO_CAMEL_FILE = PROJECT_NAME + "/" + CAMEL_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_CAMEL_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.camel.server.languageserver";
 
   @InjectTestWorkspace(template = UBUNTU_CAMEL)
   private TestWorkspace workspace;
