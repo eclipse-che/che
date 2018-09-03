@@ -70,10 +70,11 @@ public class WaitUtils {
       TimeUnit timeUnit) {
     final long waitingTime = timeUnit.toMillis(timeout);
     final long startingTime = System.currentTimeMillis();
+    final long finishTime = startingTime + waitingTime;
 
-    while (isTimeAvailable(startingTime, waitingTime)) {
+    while (System.currentTimeMillis() < finishTime) {
       if (condition.getAsBoolean()) {
-        break;
+        return;
       }
 
       sleepQuietly(delayBetweenAttemptsInMilliseconds, TimeUnit.MILLISECONDS);
