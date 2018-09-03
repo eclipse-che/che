@@ -73,7 +73,6 @@ import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.fail;
 
@@ -90,6 +89,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -104,7 +104,8 @@ import org.slf4j.Logger;
 @Singleton
 public class CodenvyEditor {
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
-  public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
+  public static final String VCS_RULER =
+      "//div[@class='ruler vcs']/div[not(contains(@style,'visibility: hidden'))]";
   public static final Logger LOG = getLogger(CodenvyEditor.class);
 
   protected final SeleniumWebDriver seleniumWebDriver;
@@ -813,16 +814,22 @@ public class CodenvyEditor {
   }
 
   /**
-   * get the list of git markers web-elements in the editor
+   * Gets the list of git markers web-elements in the editor. Since operation is not atomic the
+   * {@link StaleElementReferenceException} might occur. That's why it is necessary to give one more
+   * try until throwing an exception.
    *
    * @return the list of git markers web-elements
    */
   private List<WebElement> getListGitMarkers() {
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriverHelper.waitPresenceOfAllElements(By.xpath(VCS_RULER));
-    List<WebElement> subList = rulerVcsElements.subList(1, rulerVcsElements.size() - 1);
-    webDriverWaitFactory.get().until(visibilityOfAllElements(subList));
-    return rulerVcsElements;
+    for (int i = 0; ; i++) {
+      try {
+        return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(VCS_RULER));
+      } catch (StaleElementReferenceException e) {
+        if (i == 2) {
+          throw e;
+        }
+      }
+    }
   }
 
   /**
