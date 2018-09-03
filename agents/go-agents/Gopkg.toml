@@ -8,7 +8,7 @@
 
 [[constraint]]
  name = "github.com/kr/pty"
- revision = "5cf931ef8f76dccd0910001d74a58a7fca84a83d"
+  version = "1.1.2"
 
 
 [[constraint]]

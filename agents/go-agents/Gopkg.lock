@@ -37,11 +37,12 @@
   revision = "4563b0ba73e4db6c6423b60a26f3cadd2e9a1ec9"
 
 [[projects]]
-  digest = "1:5b1c18041a38d54fbcad42875d1279778712b4c849d3c23718513c5e3d740ef9"
+  digest = "1:094e04c4742b596bce4455eb535d4e4365016b44016db76f8593211406d77299"
   name = "github.com/kr/pty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5cf931ef8f76dccd0910001d74a58a7fca84a83d"
+  revision = "fa756f09eeb418bf1cc6268c66ceaad9bb98f598"
+  version = "v1.1.2"
 
 [solve-meta]
   analyzer-name = "dep"
