@@ -88,6 +88,8 @@ public class CreateWorkspaceFromJavaStackTest {
 
     projectExplorer.waitProjectInitialization(CONSOLE_JAVA_PROJECT);
     projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING_PROJECT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(CONSOLE_JAVA_PROJECT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(WEB_JAVA_SPRING_PROJECT);
   }
 
   @Test(priority = 1)
@@ -108,7 +110,7 @@ public class CreateWorkspaceFromJavaStackTest {
         "Hello World Che!");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 2)
   public void checkWebJavaSpringProjectCommands() {
     String tomcatIsRunning = "/bin/bash -c $TOMCAT_HOME/bin/catalina.sh";
 
