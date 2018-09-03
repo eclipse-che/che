@@ -200,6 +200,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check the found items in the editor
     findUsages.selectHighlightedItemInFindUsagesByDoubleClick(30);
+    editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(30);
     editor.waitTextElementsActiveLine("numGuessByUser");
@@ -210,6 +211,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
+    editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(34);
     editor.waitTextElementsActiveLine("numGuessByUser");
