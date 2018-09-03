@@ -811,7 +811,7 @@ generateFailSafeReport () {
     done
 
     # attach screenshots
-    for file in target/site/screenshots/*
+    for file in $(ls target/site/screenshots/* | sort -r)
     do
         local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
         local divTag="<div id=\""${test}"error\" style=\"display:none;\">"
@@ -819,15 +819,15 @@ generateFailSafeReport () {
         sed -i "s/${divTag}/${divTag}${imgTag}/" ${FAILSAFE_REPORT}
     done
 
+    attachLinkToTestReport workspace-logs
+    attachLinkToTestReport webdriver-logs
+    attachLinkToTestReport htmldumps
+
     echo "[TEST]"
     echo "[TEST] Failsafe report"
     echo -e "[TEST] \t${BLUE}file://${CUR_DIR}/${FAILSAFE_REPORT}${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST]"
-
-    attachLinkToTestReport workspace-logs
-    attachLinkToTestReport webdriver-logs
-    attachLinkToTestReport htmldumps
 }
 
 # first argument - relative path to directory inside target/site
@@ -835,7 +835,7 @@ attachLinkToTestReport() {
     # attach links to resource related to failed test
     local relativePathToResource=$1
     local dirWithResources="target/site/$relativePathToResource/*"
-    for file in $dirWithResources
+    for file in $(ls ${dirWithResources} | sort -r)
     do
         local test=$(basename ${file} | sed 's/\(.*\)\.zip/\1/' | sed 's/\(.*\)_.*/\1/')
         local divTag="<div id=\""${test}"error\" style=\"display:none;\">"
