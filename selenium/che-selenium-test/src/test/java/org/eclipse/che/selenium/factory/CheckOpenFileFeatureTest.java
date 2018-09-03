@@ -97,7 +97,7 @@ public class CheckOpenFileFeatureTest {
       editor.waitTabIsPresent("web-java-spring", WIDGET_TIMEOUT_SEC);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/11001");
+      fail("Known random issue https://github.com/eclipse/che/issues/11001");
     }
   }
 
