@@ -45,7 +45,7 @@ public class ClangFileEditingTest {
   private static final String H_FILE_NAME = "iseven.h";
   private static final String PATH_TO_CPP_FILE = PROJECT_NAME + "/" + CPP_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      "Finished language servers initialization, file path '/console-cpp-simple/hello.cc";
+      "Initialized language server 'org.eclipse.che.plugin.clangd.languageserver'";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.ECLIPSE_CPP_GCC)
   private TestWorkspace workspace;

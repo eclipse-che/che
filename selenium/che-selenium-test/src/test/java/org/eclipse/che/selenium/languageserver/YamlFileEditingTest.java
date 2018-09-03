@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
@@ -46,7 +45,7 @@ public class YamlFileEditingTest {
   private static final String YAML_FILE_NAME = "openshift.yaml";
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_YAML_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.yaml.server.languageserver";
 
   private static final String COMMENTED_CODE =
       "#  generation: 4\n"
@@ -166,7 +165,7 @@ public class YamlFileEditingTest {
     editor.waitTextInHoverPopup(
         "Kind is a string value representing the REST resource this object represents.");
 
-    editor.moveCursorToText("apiVersion:");
+    editor.moveCursorToText("apiVersion");
     editor.waitTextInHoverPopup(
         "APIVersion defines the versioned schema of this representation of an object.");
   }
@@ -184,7 +183,7 @@ public class YamlFileEditingTest {
     editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
-    editor.moveCursorToText("apiVersion:");
+    editor.moveCursorToText("apiVersion");
     editor.waitTextInHoverPopup(
         "APIVersion defines the versioned schema of this representation of an object.");
   }
