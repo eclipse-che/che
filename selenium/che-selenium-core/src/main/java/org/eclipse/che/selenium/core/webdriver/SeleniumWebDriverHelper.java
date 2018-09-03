@@ -1401,4 +1401,9 @@ public class SeleniumWebDriverHelper {
   public void waitSuccessCondition(ExpectedCondition<Boolean> expression) {
     waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
+
+  /** Hides context menu. */
+  public void hideContextMenu() {
+    actionsFactory.createAction(seleniumWebDriver).moveByOffset(-1, -1).click().build().perform();
+  }
 }

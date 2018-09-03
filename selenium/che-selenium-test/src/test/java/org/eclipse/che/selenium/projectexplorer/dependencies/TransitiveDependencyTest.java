@@ -66,12 +66,12 @@ public class TransitiveDependencyTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorer(
         PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
