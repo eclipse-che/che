@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>6.10.0-SNAPSHOT</version>
+        <version>6.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
@@ -184,6 +184,13 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
@@ -299,7 +306,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-depedency</id>
+                        <id>unpack-dependency</id>
                         <phase>process-test-resources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>

@@ -30,7 +30,7 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.Test;
 
 public class WorkspaceDetailsOverviewTest {
-  private static final String WORKSPACE_NAME = "test-workspace";
+  private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
   private static final String CHANGED_WORKSPACE_NAME = NameGenerator.generate(WORKSPACE_NAME, 4);
   private static final String MACHINE_NAME = "dev-machine";
   private static final String SAMPLE_NAME = "web-java-spring";

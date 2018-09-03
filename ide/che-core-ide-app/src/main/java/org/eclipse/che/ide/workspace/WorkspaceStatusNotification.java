@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -98,6 +99,14 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
     eventBus.addHandler(
         WorkspaceStoppingEvent.TYPE,
         e -> {
+          if (e.getReason() != null) {
+            notificationManagerProvider
+                .get()
+                .notify(
+                    e.getReason(),
+                    StatusNotification.Status.WARNING,
+                    StatusNotification.DisplayMode.EMERGE_MODE);
+          }
           setSuccess(STARTING_WORKSPACE_RUNTIME);
           show(STOPPING_WORKSPACE);
         });

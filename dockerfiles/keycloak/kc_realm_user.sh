@@ -1,9 +1,12 @@
 #!/bin/bash
+#
 # Copyright (c) 2018 Red Hat, Inc.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
 
 echo "Configuring Keycloak by modifying realm and user templates..."
 
@@ -17,8 +20,11 @@ if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
     sed -i -e "s#\"UPDATE_PASSWORD\"##" /scripts/che-users-0.json
 fi
 
+DEFAULT_CHE_HOST="che-${NAMESPACE}.${ROUTING_SUFFIX}"
+CHE_HOST=${CHE_HOST:-${DEFAULT_CHE_HOST}}
+
 cat /scripts/che-realm.json.erb | \
-                                sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}@" \
+                                sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://${CHE_HOST}@" \
                                 > /scripts/che-realm.json
 
 echo "Creating Admin user..."

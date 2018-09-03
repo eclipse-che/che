@@ -40,7 +40,13 @@ public class TestObjects {
         generate("wsId", 8),
         createAccount(),
         new WorkspaceConfigImpl(
-            generate("wsName", 8), "description", "defEnv", emptyList(), emptyList(), emptyMap()));
+            generate("wsName", 8),
+            "description",
+            "defEnv",
+            emptyList(),
+            emptyList(),
+            emptyMap(),
+            emptyMap()));
   }
 
   public static KubernetesRuntimeState createRuntimeState(WorkspaceImpl workspace) {

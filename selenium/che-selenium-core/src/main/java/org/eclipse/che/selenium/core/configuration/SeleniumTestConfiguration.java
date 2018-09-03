@@ -128,12 +128,6 @@ public class SeleniumTestConfiguration extends InMemoryTestConfiguration {
       name = name.replace('_', '.');
       name = name.replace("=", "_");
 
-      // convert value of CHE_INFRASTRUCTURE to upper case to comply with Infrastructure
-      // enumeration;
-      if (name.equals("che.infrastructure")) {
-        return new AbstractMap.SimpleEntry<>(name, entry.getValue().toUpperCase());
-      }
-
       return new AbstractMap.SimpleEntry<>(name, entry.getValue());
     }
   }

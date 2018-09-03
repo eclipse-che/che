@@ -186,12 +186,15 @@ public class WorkspaceProjects {
    * @param projectName name of project
    */
   public void openSettingsForProjectByName(String projectName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))))
-        .click();
-    waitProjectDetailsPage();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName)));
+
+    try {
+      seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.DELETE_PROJECT));
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8931");
+    }
   }
 
   /** click on 'DELETE' button in settings of project */
@@ -237,13 +240,8 @@ public class WorkspaceProjects {
   }
 
   public void waitProjectDetailsPage() {
-    try {
-      waitSearchField();
-      waitAddNewProjectButton();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8931");
-    }
+    waitSearchField();
+    waitAddNewProjectButton();
   }
 
   public boolean isCheckboxEnabled(String projectName) {

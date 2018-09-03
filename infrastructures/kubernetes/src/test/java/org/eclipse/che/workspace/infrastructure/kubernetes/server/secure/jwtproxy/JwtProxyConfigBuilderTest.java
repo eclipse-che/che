@@ -44,10 +44,12 @@ public class JwtProxyConfigBuilderTest {
   public void shouldBuildJwtProxyConfigInYamlFormat() throws Exception {
     // given
     Set<String> excludes = new HashSet<>();
-    jwtProxyConfigBuilder.addVerifierProxy(8080, "http://tomcat:8080", new HashSet<>(excludes));
+    jwtProxyConfigBuilder.addVerifierProxy(
+        8080, "http://tomcat:8080", new HashSet<>(excludes), false);
     excludes.add("/api/liveness");
     excludes.add("/other/exclude");
-    jwtProxyConfigBuilder.addVerifierProxy(4101, "ws://terminal:4101", new HashSet<>(excludes));
+    jwtProxyConfigBuilder.addVerifierProxy(
+        4101, "ws://terminal:4101", new HashSet<>(excludes), true);
 
     // when
     String jwtProxyConfigYaml = jwtProxyConfigBuilder.build();

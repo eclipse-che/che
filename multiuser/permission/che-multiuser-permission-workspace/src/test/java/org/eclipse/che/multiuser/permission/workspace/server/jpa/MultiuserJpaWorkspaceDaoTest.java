@@ -64,11 +64,15 @@ public class MultiuserJpaWorkspaceDaoTest {
     workspaces =
         new WorkspaceImpl[] {
           new WorkspaceImpl(
-              "ws1", account, new WorkspaceConfigImpl("wrksp1", "", "cfg1", null, null, null)),
+              "ws1",
+              account,
+              new WorkspaceConfigImpl("wrksp1", "", "cfg1", null, null, null, null)),
           new WorkspaceImpl(
-              "ws2", account, new WorkspaceConfigImpl("wrksp2", "", "cfg2", null, null, null)),
+              "ws2",
+              account,
+              new WorkspaceConfigImpl("wrksp2", "", "cfg2", null, null, null, null)),
           new WorkspaceImpl(
-              "ws3", account, new WorkspaceConfigImpl("wrksp3", "", "cfg3", null, null, null))
+              "ws3", account, new WorkspaceConfigImpl("wrksp3", "", "cfg3", null, null, null, null))
         };
     Injector injector = Guice.createInjector(new WorkspaceTckModule());
     manager = injector.getInstance(EntityManager.class);

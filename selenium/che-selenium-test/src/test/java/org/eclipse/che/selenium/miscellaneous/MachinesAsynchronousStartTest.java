@@ -52,7 +52,7 @@ public class MachinesAsynchronousStartTest {
 
   @AfterClass
   public void cleanUp() throws Exception {
-    testWorkspaceServiceClient.delete(brokenWorkspace.getName(), defaultTestUser.getName());
+    brokenWorkspace.delete();
   }
 
   @Test

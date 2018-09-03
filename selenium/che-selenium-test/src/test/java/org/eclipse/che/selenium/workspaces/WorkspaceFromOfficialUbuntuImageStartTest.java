@@ -36,6 +36,6 @@ public class WorkspaceFromOfficialUbuntuImageStartTest {
   public void ensureWorkspaceStartsFromOfficialUbuntuImage() throws Exception {
     ide.open(testWorkspace);
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab();
+    terminal.waitFirstTerminalTab();
   }
 }

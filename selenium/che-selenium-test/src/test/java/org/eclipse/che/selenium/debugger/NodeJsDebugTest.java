@@ -83,7 +83,14 @@ public class NodeJsDebugTest {
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         TestMenuCommandsConstants.Run.DEBUG + "/" + nameOfDebugCommand);
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+
+    try {
+      notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
+
     editorPageObj.waitTabFileWithSavedStatus(APP_FILE);
     editorPageObj.waitActive();
     debugPanel.waitDebugHighlightedText("/*");

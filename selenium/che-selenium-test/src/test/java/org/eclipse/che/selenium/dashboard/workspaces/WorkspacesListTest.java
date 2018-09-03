@@ -73,6 +73,9 @@ public class WorkspacesListTest {
   @InjectTestWorkspace(memoryGb = 2, startAfterCreation = false)
   private TestWorkspace blankWorkspace;
 
+  @InjectTestWorkspace(memoryGb = 2, startAfterCreation = false)
+  private TestWorkspace workspaceToDelete;
+
   @InjectTestWorkspace(template = UBUNTU_JDK8, memoryGb = 3)
   private TestWorkspace javaWorkspace;
 
@@ -351,22 +354,15 @@ public class WorkspacesListTest {
     assertTrue(newestCreatedWorkspaceItem.equals(expectedNewestWorkspaceItem));
   }
 
-  @Test(priority = 1)
-  public void deleteWorkspacesByCheckboxes() {
+  @Test
+  public void deleteWorkspacesByCheckboxes() throws Exception {
     workspaces.waitPageLoading();
 
-    workspaces.selectWorkspaceByCheckbox(expectedNewestWorkspaceItem.getWorkspaceName());
+    workspaces.selectWorkspaceByCheckbox(workspaceToDelete.getName());
     workspaces.clickOnDeleteWorkspacesBtn();
     workspaces.clickOnDeleteButtonInDialogWindow();
 
-    workspaces.waitWorkspaceIsNotPresent(expectedNewestWorkspaceItem.getWorkspaceName());
-
-    workspaces.selectAllWorkspacesByBulk();
-    workspaces.clickOnDeleteWorkspacesBtn();
-    workspaces.clickOnDeleteButtonInDialogWindow();
-
-    workspaces.waitWorkspaceIsNotPresent(expectedBlankItem.getWorkspaceName());
-    workspaces.waitWorkspaceIsNotPresent(expectedJavaItem.getWorkspaceName());
+    workspaces.waitWorkspaceIsNotPresent(workspaceToDelete.getName());
   }
 
   private void checkExpectedBlankWorkspaceDisplaying() {

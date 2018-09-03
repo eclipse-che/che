@@ -29,7 +29,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
+import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
@@ -55,7 +55,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Singl
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerService;
 
 /** @author Sergii Leshchenko */
 public class KubernetesInfraModule extends AbstractModule {
@@ -121,9 +122,11 @@ public class KubernetesInfraModule extends AbstractModule {
 
     install(new JpaKubernetesRuntimeCacheModule());
 
-    MapBinder<String, WorkspaceNextApplier> wsNext =
-        MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
-    wsNext.addBinding(KubernetesEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
+    MapBinder<String, ChePluginsApplier> chePluginsAppliers =
+        MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
+    chePluginsAppliers
+        .addBinding(KubernetesEnvironment.TYPE)
+        .to(KubernetesPluginsToolingApplier.class);
 
     bind(new TypeLiteral<SecureServerExposerFactory<KubernetesEnvironment>>() {})
         .toProvider(
@@ -139,5 +142,7 @@ public class KubernetesInfraModule extends AbstractModule {
     secureServerExposerFactories
         .addBinding("default")
         .to(new TypeLiteral<DefaultSecureServersFactory<KubernetesEnvironment>>() {});
+
+    bind(BrokerService.class);
   }
 }

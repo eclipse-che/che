@@ -91,4 +91,7 @@ public interface UploadFolderFromZipView extends IsWidget {
 
   /** Performs when user select 'overwrite if file exists'. */
   boolean isOverwriteFileSelected();
+
+  /** Performs when user select 'Skip the root folder of the archive'. */
+  boolean isSkipRootFolderSelected();
 }

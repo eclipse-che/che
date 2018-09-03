@@ -314,7 +314,7 @@ public class GitPanelTest {
     assertEquals(gitPanel.countRepositories(), 2);
     gitPanel.waitRepositoryToHaveChanges(RENAMED_JAVA_SPRING_GIT_PROJECT_NAME, 2);
 
-    terminal.selectTerminalTab();
+    terminal.selectFirstTerminalTab();
     terminal.sendCommandIntoTerminal("cd /projects/" + RENAMED_JAVA_SPRING_GIT_PROJECT_NAME);
     terminal.sendCommandIntoTerminal("git checkout -f HEAD");
 

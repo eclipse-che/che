@@ -2,6 +2,16 @@
 set -e
 set -u
 
+for f in "/etc/passwd" "/etc/group"; do
+    chgrp -R 0 ${f}
+    chmod -R g+rwX ${f};
+done
+# Generate passwd.template
+cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template
+# Generate group.template
+cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template
+
+
 # Install basic software used for checking github API rate limit
 yum install -y epel-release
 yum -y install curl jq expect
@@ -28,7 +38,7 @@ fi
 curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
 # Install nodejs/npm/yarn
 curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
-yum install -y nodejs yarn
+yum install -y nodejs yarn patch
 
 echo "npm version:"
 npm --version

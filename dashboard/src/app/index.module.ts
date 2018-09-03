@@ -64,10 +64,10 @@ function buildKeycloakConfig(keycloakSettings: any): any {
   }
 }
 interface IResolveFn<T> {
-  (value: T | PromiseLike<T>): Promise<T>;
+  (value?: T | PromiseLike<T>): void;
 }
 interface IRejectFn<T> {
-  (reason: any): Promise<T>;
+  (reason?: any): void;
 }
 function keycloakLoad(keycloakSettings: any) {
   return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
@@ -91,6 +91,46 @@ function keycloakInit(keycloakConfig: any, theUseNonce: boolean) {
       reject(error);
     });
   });
+}
+function setAuthorizationHeader(xhr: XMLHttpRequest, keycloak: any): Promise<any> {
+  return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
+    if (keycloak && keycloak.token) {
+      keycloak.updateToken(5).success(() => {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + keycloak.token);
+        resolve(xhr);
+      }).error(() => {
+        console.log('Failed to refresh token');
+        keycloak.login();
+        reject('Authorization is needed.');
+      });
+      return;
+    }
+
+    resolve(xhr);
+  });
+}
+function getApis(keycloak: any): Promise<void> {
+  const request = new XMLHttpRequest();
+  request.open('GET', '/api');
+  return setAuthorizationHeader(request, keycloak).then((xhr: XMLHttpRequest) => {
+    return new Promise<void>((resolve: IResolveFn<void>, reject: IRejectFn<void>) => {
+      xhr.send();
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState !== 4) { return; }
+        if (xhr.status === 200) {
+          resolve();
+        } else {
+          reject(xhr.responseText ? xhr.responseText : 'Unknown error');
+        }
+      };
+    });
+  });
+}
+function showErrorMessage(errorMessage: string) {
+  const div = document.createElement('p');
+  div.className = 'authorization-error';
+  div.innerHTML = errorMessage + '<br/>Click <a href="/">here</a> to reload page.';
+  document.querySelector('.main-page-loader').appendChild(div);
 }
 
 const keycloakAuth = {
@@ -125,7 +165,15 @@ angular.element(document).ready(() => {
   }).catch((error: any) => {
     console.error('Keycloak initialization failed with error: ', error);
   }).then(() => {
+    const keycloak = (window as any)._keycloak;
+    // try to reach the API
+    // to check if user is authorized to do that
+    return getApis(keycloak);
+  }).then(() => {
     (angular as any).resumeBootstrap();
+  }).catch((error: string) => {
+    console.error(`Can't GET "/api". ${error ? 'Error: ' : ''}`, error);
+    showErrorMessage(error);
   });
 });
 
