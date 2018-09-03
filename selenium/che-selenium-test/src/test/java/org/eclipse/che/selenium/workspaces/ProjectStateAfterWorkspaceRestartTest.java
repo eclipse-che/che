@@ -101,7 +101,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
       projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random issue https://github.com/eclipse/che/issues/11000");
+      fail("Known random failure https://github.com/eclipse/che/issues/11000");
     }
 
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");

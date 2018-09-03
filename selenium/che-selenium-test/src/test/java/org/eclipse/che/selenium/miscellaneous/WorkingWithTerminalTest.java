@@ -179,7 +179,7 @@ public class WorkingWithTerminalTest {
       terminal.waitNoTextInFirstTerminal(".dockerenv");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random issue https://github.com/eclipse/che/issues/10854", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10854", ex);
     }
 
     consoles.clickOnMaximizePanelIcon();
@@ -193,7 +193,7 @@ public class WorkingWithTerminalTest {
       terminal.waitTextInFirstTerminal(".dockerenv");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random issue https://github.com/eclipse/che/issues/10854", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10854", ex);
     }
 
     consoles.clickOnMaximizePanelIcon();
@@ -206,7 +206,7 @@ public class WorkingWithTerminalTest {
       terminal.waitNoTextInFirstTerminal(".dockerenv");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random issue https://github.com/eclipse/che/issues/10854", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10854", ex);
     }
   }
 
