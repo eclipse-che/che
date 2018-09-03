@@ -133,8 +133,8 @@ spec:
                   key: ca.crt
                   name: openshift-identity-provider
                   optional: true
-            - name: CHE_WORKSPACE_FEATURE_API
-              value: 'http://marketplace:80'
+            - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
+              value: 'NULL'
           image: 'eclipse/che-server:latest'
           imagePullPolicy: Always
           livenessProbe:
