@@ -94,7 +94,6 @@ import java.util.stream.Collectors;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
@@ -2219,16 +2218,13 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait renaming field in the Editor (usually it field is used by language servers) type new
+   * wait renaming field in the Editor (usually it field is used by language servers), type new
    * rename value and wait closing of the field
    *
-   * @param renamevalue
+   * @param renameValue
    */
-  public void doRenamingByLanguageServerField(String renamevalue) {
-    seleniumWebDriverHelper
-        .waitVisibility(languageServerRenameField, TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC)
-        .clear();
-    seleniumWebDriverHelper.waitAndSendKeysTo(
-        languageServerRenameField, renamevalue + Keys.ENTER.toString());
+  public void doRenamingByLanguageServerField(String renameValue) {
+    seleniumWebDriverHelper.setText(languageServerRenameField, renameValue);
+    seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
   }
 }
