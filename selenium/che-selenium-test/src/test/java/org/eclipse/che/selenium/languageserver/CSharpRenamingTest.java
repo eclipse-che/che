@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
@@ -68,7 +79,7 @@ public class CSharpRenamingTest {
     String textFragmentAfterRenaming = "public class HelloWorld";
     projectExplorer.openItemByPath(PROJECT_NAME);
     consoles.selectProcessByTabName("dev-machine");
-    editor.goToCursorPositionVisible(7, 18);
+    editor.goToCursorPositionVisible(18, 18);
     menu.runCommand(ASSISTANT, REFACTORING, LS_RENAME);
     editor.doRenamingByLanguageServerField(newClassName);
 
