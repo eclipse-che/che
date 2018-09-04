@@ -33,11 +33,13 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.UnaryOperator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -1405,5 +1407,26 @@ public class SeleniumWebDriverHelper {
   /** Hides context menu. */
   public void hideContextMenu() {
     actionsFactory.createAction(seleniumWebDriver).moveByOffset(-1, -1).click().build().perform();
+  }
+
+  /**
+   * Performs and verifies action.
+   *
+   * @param perform perform action
+   * @param verify verification action
+   * @param rollback rollback action
+   */
+  public void performAndVerify(
+      UnaryOperator<Void> perform, UnaryOperator<Void> verify, UnaryOperator<Void> rollback) {
+    for (; ; ) {
+      perform.apply(null);
+
+      try {
+        verify.apply(null);
+        break;
+      } catch (TimeoutException e) {
+        rollback.apply(null);
+      }
+    }
   }
 }
