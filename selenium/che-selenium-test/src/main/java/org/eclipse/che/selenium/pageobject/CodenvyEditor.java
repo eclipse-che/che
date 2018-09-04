@@ -38,7 +38,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_RENFACTORING_RENAME_FIELD_CSS;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
@@ -204,16 +204,16 @@ public class CodenvyEditor {
         "//div[@class='breakpoint %s condition' and text()='%d']";
     String DEBUGGER_BREAKPOINT_DISABLED = "//div[@class='breakpoint disabled' and text()='%d']";
     String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
-    String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
+    String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP         =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
-    String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
-    String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
-    String TEXT_TO_MOVE_CURSOR_XPATH =
+    String HIGHLIGHT_ITEM_PATTERN                       = "//li[@selected='true']//span[text()='%s']";
+    String TOOLTIP_TITLE_CSS                            = "span.tooltipTitle";
+    String TEXT_TO_MOVE_CURSOR_XPATH                    =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
-    String HOVER_POPUP_XPATH =
+    String HOVER_POPUP_XPATH                            =
         "//div[@class='textviewTooltip' and contains(@style,'visibility: visible')]";
-    String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
-    String LANGUAGE_SERVER_RENFACTORING_RENAME_FIELD_CSS = "input.orionCodenvy";
+    String AUTOCOMPLETE_PROPOSAL_DOC_ID                 = "gwt-debug-content-assistant-doc-popup";
+    String LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS = "input.orionCodenvy";
   }
 
   public enum TabActionLocator {
@@ -345,7 +345,7 @@ public class CodenvyEditor {
   @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
   private WebElement proposalDoc;
 
-  @FindBy(css = LANGUAGE_SERVER_RENFACTORING_RENAME_FIELD_CSS)
+  @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
   private WebElement languageServerRenameField;
 
   /**
@@ -2219,7 +2219,7 @@ public class CodenvyEditor {
 
   /**
    * wait renaming field in the Editor (usually it field is used by language servers), type new
-   * rename value and wait closing of the field
+   * value and wait closing of the field
    *
    * @param renameValue
    */
