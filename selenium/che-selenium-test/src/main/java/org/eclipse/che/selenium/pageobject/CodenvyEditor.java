@@ -685,13 +685,10 @@ public class CodenvyEditor {
    * @param positionChar char's number where cursor should be placed
    */
   private void openGoToLineFormAndSetCursorToPosition(int positionLine, int positionChar) {
-    loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
     askForValueDialog.waitFormToOpen();
-    loader.waitOnClosed();
     askForValueDialog.typeAndWaitText(
         String.valueOf(positionLine) + ":" + String.valueOf(positionChar));
-    loader.waitOnClosed();
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
   }
