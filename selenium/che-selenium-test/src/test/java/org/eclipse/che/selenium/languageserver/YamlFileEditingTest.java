@@ -171,7 +171,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void checkCodeValidation() {
     editor.selectTabByName("deployment.yaml");
     editor.waitAllMarkersInvisibility(ERROR);
@@ -190,7 +190,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void checkCommentCodeFeature() {
     editor.selectTabByName("deployment.yaml");
 
