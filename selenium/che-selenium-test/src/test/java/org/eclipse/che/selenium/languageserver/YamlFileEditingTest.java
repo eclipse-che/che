@@ -132,6 +132,7 @@ public class YamlFileEditingTest {
 
     // select proposal and check expected text in the Editor
     editor.enterAutocompleteProposal("kind");
+    editor.waitTextIntoEditor("kind:");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("PersistentVolume");
     editor.enterAutocompleteProposal("PersistentVolume");
@@ -196,6 +197,7 @@ public class YamlFileEditingTest {
 
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor("a");
+    editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
     editor.waitTextInHoverPopup("Unexpected property aapiVersion");
 

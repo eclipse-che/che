@@ -32,8 +32,10 @@ import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -70,6 +72,8 @@ public class JsonFileEditingTest {
   @Inject private Wizard wizard;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
+  @Inject private PullRequestPanel pullRequestPanel;
+  @Inject private Loader loader;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private AssistantFindPanel assistantFindPanel;
@@ -79,11 +83,13 @@ public class JsonFileEditingTest {
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
     createProjectFromWizard();
+    loader.waitOnClosed();
   }
 
   @Test
   public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_JSON_FILE);
     editor.waitTabIsPresent(JSON_FILE_NAME);
