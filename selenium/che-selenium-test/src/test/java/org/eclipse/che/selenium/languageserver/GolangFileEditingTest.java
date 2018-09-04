@@ -22,7 +22,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.F4;
 import static org.testng.Assert.fail;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
