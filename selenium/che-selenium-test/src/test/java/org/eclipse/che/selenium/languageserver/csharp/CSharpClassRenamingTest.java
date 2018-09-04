@@ -41,9 +41,9 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class CSharpRenamingTest {
+public class CSharpClassRenamingTest {
   private static final String PROJECT_NAME =
-      NameGenerator.generate(CSharpRenamingTest.class.getSimpleName(), 4);
+      NameGenerator.generate(CSharpClassRenamingTest.class.getSimpleName(), 4);
 
   private static final String PATH_TO_DOTNET_FILE = PROJECT_NAME + "/Hello.cs";
 
