@@ -536,7 +536,7 @@ public abstract class SeleniumTestHandler
   }
 
   private String getTestResultFilename(String testReference, String fileExtension) {
-    return format("%s_%s.%s", testReference, System.nanoTime(), fileExtension);
+    return format("%s_time-%s-millis.%s", testReference, System.currentTimeMillis(), fileExtension);
   }
 
   private String getTestReference(ITestResult result) {

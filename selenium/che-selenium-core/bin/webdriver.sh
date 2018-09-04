@@ -845,7 +845,7 @@ attachLinkToTestReport() {
     local dirWithResources="target/site/$relativePathToResource/*"
     for file in $(ls ${dirWithResources} | sort -r)
     do
-        local test=$(basename ${file} | sed 's/\(.*\)\.zip/\1/' | sed 's/\(.*\)_.*/\1/')
+        local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
         local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
         local filename=$(basename ${file})
         local linkTag="<p><li><a href=\"$relativePathToResource\/$filename\" target=\"_blank\"><b>$titleOfLink<\/b>: $filename<\/a><\/li><\/p>"
