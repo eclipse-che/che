@@ -38,6 +38,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
@@ -213,6 +214,7 @@ public class CodenvyEditor {
     String HOVER_POPUP_XPATH =
         "//div[@class='textviewTooltip' and contains(@style,'visibility: visible')]";
     String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
+    String LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS = "input.orionCodenvy";
   }
 
   public enum TabActionLocator {
@@ -270,6 +272,7 @@ public class CodenvyEditor {
     OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
     NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
     FIND(By.id("contextMenu/Find")),
+    OPEN_ON_GITHUB(By.id("contextMenu/Open on GitHub")),
     CLOSE(By.id("contextMenu/Close"));
 
     @SuppressWarnings("ImmutableEnumChecker")
@@ -343,6 +346,9 @@ public class CodenvyEditor {
 
   @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
   private WebElement proposalDoc;
+
+  @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
+  private WebElement languageServerRenameField;
 
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
@@ -654,6 +660,23 @@ public class CodenvyEditor {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
     waitActive();
     waitCursorPosition(positionLine, positionChar);
+  }
+
+  /**
+   * Select text in defined interval
+   *
+   * @param fromLine beginning of first line for selection
+   * @param numberOfLine end of first line for selection
+   */
+  public void selectLines(int fromLine, int numberOfLine) {
+    Actions action = seleniumWebDriverHelper.getAction(seleniumWebDriver);
+    setCursorToLine(fromLine);
+    action.keyDown(SHIFT).perform();
+    for (int i = 0; i < numberOfLine; i++) {
+      typeTextIntoEditor(Keys.ARROW_DOWN.toString());
+    }
+    action.keyUp(SHIFT).perform();
+    action.sendKeys(Keys.END.toString()).keyUp(SHIFT).perform();
   }
 
   /**
@@ -2213,5 +2236,16 @@ public class CodenvyEditor {
         .sendKeys("/")
         .keyUp(CONTROL)
         .perform();
+  }
+
+  /**
+   * wait renaming field in the Editor (usually it field is used by language servers), type new
+   * value and wait closing of the field
+   *
+   * @param renameValue
+   */
+  public void doRenamingByLanguageServerField(String renameValue) {
+    seleniumWebDriverHelper.setText(languageServerRenameField, renameValue);
+    seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
   }
 }

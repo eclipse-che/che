@@ -108,6 +108,7 @@ public class WorkspaceServiceTest {
   private static final String NAMESPACE = "user";
   private static final String USER_ID = "user123";
   private static final String API_ENDPOINT = "http://localhost:8080/api";
+  private static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR = "http://localhost:9898/plugins/";
   private static final Account TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
 
   @SuppressWarnings("unused")
@@ -122,7 +123,13 @@ public class WorkspaceServiceTest {
   @BeforeMethod
   public void setup() {
     service =
-        new WorkspaceService(API_ENDPOINT, true, wsManager, machineTokenProvider, linksGenerator);
+        new WorkspaceService(
+            API_ENDPOINT,
+            true,
+            wsManager,
+            machineTokenProvider,
+            linksGenerator,
+            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR);
   }
 
   @Test
@@ -1132,8 +1139,12 @@ public class WorkspaceServiceTest {
     assertEquals(
         settings,
         ImmutableMap.of(
-            Constants.SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile",
-            Constants.CHE_WORKSPACE_AUTO_START, "true"));
+            Constants.SUPPORTED_RECIPE_TYPES,
+            "dockerimage,dockerfile",
+            Constants.CHE_WORKSPACE_AUTO_START,
+            "true",
+            Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
+            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR));
   }
 
   private static String unwrapError(Response response) {

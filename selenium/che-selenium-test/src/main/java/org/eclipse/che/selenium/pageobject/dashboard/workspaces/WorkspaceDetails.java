@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
@@ -25,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
@@ -41,6 +43,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class WorkspaceDetails {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
   private final Dashboard dashboard;
 
@@ -105,9 +108,30 @@ public class WorkspaceDetails {
     }
   }
 
+  public enum ActionButton {
+    SAVE_BUTTON(By.name("save-button")),
+    APPLY_BUTTON(By.name("apply-button")),
+    CANCEL_BUTTON(By.name("cancel-button"));
+
+    private final By buttonLocator;
+
+    ActionButton(By buttonLocator) {
+      this.buttonLocator = buttonLocator;
+    }
+
+    public By getLocator() {
+      return this.buttonLocator;
+    }
+  }
+
   @Inject
-  public WorkspaceDetails(SeleniumWebDriver seleniumWebDriver, Loader loader, Dashboard dashboard) {
+  public WorkspaceDetails(
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      Loader loader,
+      Dashboard dashboard) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     this.dashboard = dashboard;
     PageFactory.initElements(seleniumWebDriver, this);
@@ -139,6 +163,38 @@ public class WorkspaceDetails {
 
   @FindBy(xpath = Locators.CLOSE_DIALOG_BUTTON)
   WebElement closeBtn;
+
+  public WebElement wait(ActionButton actionButton) {
+    return seleniumWebDriverHelper.waitVisibility(actionButton.getLocator());
+  }
+
+  public void waitAllInvisibility(ActionButton... actionButtons) {
+    asList(actionButtons)
+        .forEach(
+            actionButton -> seleniumWebDriverHelper.waitInvisibility(actionButton.getLocator()));
+  }
+
+  public void waitAndClickOn(ActionButton actionButton) {
+    wait(actionButton).click();
+  }
+
+  private void waitState(ActionButton actionButton, boolean enabled) {
+    waitState(actionButton.getLocator(), enabled);
+  }
+
+  private void waitState(By locator, boolean enabled) {
+    final String buttonStateAttribute = "aria-disabled";
+    seleniumWebDriverHelper.waitAttributeEqualsTo(
+        locator, buttonStateAttribute, Boolean.toString(!enabled));
+  }
+
+  public void waitAllDisabled(ActionButton... actionButtons) {
+    asList(actionButtons).forEach(actionButton -> waitState(actionButton, false));
+  }
+
+  public void waitAllEnabled(ActionButton... actionButtons) {
+    asList(actionButtons).forEach(actionButton -> waitState(actionButton, true));
+  }
 
   /**
    * Check state of workspace in 'Workspace Information'

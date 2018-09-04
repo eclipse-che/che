@@ -20,12 +20,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-mac.zip"
-    DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz"
-    DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
 export OC_PUBLIC_HOSTNAME=${OC_PUBLIC_HOSTNAME:-${DEFAULT_OC_PUBLIC_HOSTNAME}}
@@ -35,8 +33,6 @@ DEFAULT_OCP_TOOLS_DIR="/tmp"
 export OCP_TOOLS_DIR=${OCP_TOOLS_DIR:-${DEFAULT_OCP_TOOLS_DIR}}
 
 export OC_BINARY_DOWNLOAD_URL=${OC_BINARY_DOWNLOAD_URL:-${DEFAULT_OC_BINARY_DOWNLOAD_URL}}
-export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWNLOAD_URL}}
-
 
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
@@ -89,6 +85,7 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
+
 }
 
 test_dns_provider() {
@@ -108,7 +105,6 @@ test_dns_provider() {
 
 get_tools() {
     OC_BINARY="$OCP_TOOLS_DIR/oc"
-    JQ_BINARY="$OCP_TOOLS_DIR/jq"
     OC_VERSION=$(echo $OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
     #OS specific extract archives
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -128,51 +124,19 @@ get_tools() {
         rm -f "$OCP_TOOLS_DIR"/README.md "$OCP_TOOLS_DIR"/LICENSE "${OCP_TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
     }
 
-    if [[ ! -f $OC_BINARY ]]; then
-        download_oc
+    if [[ $(oc version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) == *"$OC_VERSION"* ]]; then
+      echo "Found oc ${OC_VERSION} in PATH. Using it"
+      export OC_BINARY="oc"
+    elif [[ ! -f $OC_BINARY ]]; then
+      download_oc
     else
-        # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
-        if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
-            rm -f "$OC_BINARY" "$OCP_TOOLS_DIR"/README.md "$OCP_TOOLS_DIR"/LICENSE
-            download_oc
-        fi
-    fi
-
-    if [ ! -f $JQ_BINARY ]; then
-        echo "download jq..."
-        wget -O $JQ_BINARY $JQ_BINARY_DOWNLOAD_URL
-        chmod +x $JQ_BINARY
+      # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
+      if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
+        rm -f "$OC_BINARY" "$OCP_TOOLS_DIR"/README.md "$OCP_TOOLS_DIR"/LICENSE
+        download_oc
+      fi
     fi
     export PATH=${PATH}:${OCP_TOOLS_DIR}
-}
-
-ocp_is_booted() {
-    # we have to wait before docker registry will be started as it is staring as last container and it should be running before we perform che deploy.
-    ocp_registry_container_id=$(docker ps | grep k8s_registry_docker-registry | cut -d ' ' -f1)
-    if [ ! -z "$ocp_registry_container_id" ];then
-        ocp_registry_container_status=$(docker inspect "$ocp_registry_container_id" | $JQ_BINARY .[0] | $JQ_BINARY -r '.State.Status')
-    else
-        return 1
-    fi
-    if [[ "${ocp_registry_container_status}" == "running" ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-wait_ocp() {
-  OCP_BOOT_TIMEOUT=120
-  echo "[OCP] wait for ocp full boot..."
-  ELAPSED=0
-  until ocp_is_booted; do
-    if [ ${ELAPSED} -eq "${OCP_BOOT_TIMEOUT}" ];then
-        echo "OCP didn't started in $OCP_BOOT_TIMEOUT secs, exit"
-        exit 1
-    fi
-    sleep 2
-    ELAPSED=$((ELAPSED+1))
-  done
 }
 
 add_user_as_admin() {
@@ -191,26 +155,24 @@ wait_for_automation_service_broker() {
         $OC_BINARY rollout cancel dc/openshift-automation-service-broker -n=openshift-automation-service-broker
         sleep 5
         $OC_BINARY rollout latest dc/openshift-automation-service-broker -n=openshift-automation-service-broker
-        available=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[0].status})
-        progressing=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath={.status.conditions[1].status})
-        DEPLOYMENT_TIMEOUT_SEC=1200
+        DESIRED_REPLICA_COUNT=1
+        CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath='{.status.availableReplicas}')
+        DEPLOYMENT_TIMEOUT_SEC=300
         POLLING_INTERVAL_SEC=5
         end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-        while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
-            available=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
-            progressing=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
-            timeout_in=$((end-SECONDS))
-            echo "Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, ${timeout_in} seconds remain)"
-            sleep ${POLLING_INTERVAL_SEC}
+        while [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}" ] && [ ${SECONDS} -lt ${end} ]; do
+          CURRENT_REPLICA_COUNT=$(${OC_BINARY} get dc/openshift-automation-service-broker -n=openshift-automation-service-broker -o=jsonpath='{.status.availableReplicas}')
+          timeout_in=$((end-SECONDS))
+          echo "Deployment is in progress...(Current replica count=${CURRENT_REPLICA_COUNT}, ${timeout_in} seconds remain)"
+          sleep ${POLLING_INTERVAL_SEC}
         done
-        if [ "${progressing}" == "\"True\"" ]; then
-            echo "Ansible service catalog deployed successfully"
-        elif [ "${progressing}" == "False" ]; then
-            echo "Ansible service catalog deployment failed. Aborting."
-            exit 1
+
+        if [ "${CURRENT_REPLICA_COUNT}" -ne "${DESIRED_REPLICA_COUNT}"  ]; then
+          printError "Automation Service Broker deployment failed. Aborting"
+          exit 1
         elif [ ${SECONDS} -ge ${end} ]; then
-            echo "Deployment timeout. Aborting."
-            exit 1
+          printError "Deployment timeout. Aborting."
+          exit 1
         fi
     fi
 }
@@ -223,7 +185,6 @@ run_ocp() {
     fi
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" \
                           --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
-    wait_ocp
     wait_for_automation_service_broker
 }
 
@@ -237,8 +198,9 @@ deploy_che_to_ocp() {
 
 destroy_ocp() {
     if [ -d "${OKD_DIR}" ]; then
-      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/*" > /dev/null || true
+      docker run --rm -v ${OKD_DIR}:/to_remove alpine sh -c "rm -rf /to_remove/* > /dev/null 2>&1" || true
     fi
+    docker run --rm -v /var/lib/origin:/to_remove alpine sh -c "rm -rf /to_remove/* > /dev/null 2>&1" || true
     $OC_BINARY login -u system:admin
     $OC_BINARY delete pvc --all
     $OC_BINARY delete all --all
@@ -297,6 +259,7 @@ parse_args() {
     --image-che - override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
     --remove-che - remove existing che project
     --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
+    --deploy-che-plugin-registry - deploy Che plugin registry
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
@@ -380,6 +343,10 @@ parse_args() {
            --help)
                echo -e "$HELP"
                exit 1
+           ;;
+           --deploy-che-plugin-registry)
+               export DEPLOY_CHE_PLUGIN_REGISTRY=true
+               shift
            ;;
            *)
                echo "You've passed wrong arg '$i'."
