@@ -49,7 +49,7 @@ public class MachineSigningKeyResolver extends SigningKeyResolverAdapter {
     try {
       return keyManager.getKeyPair(wsId).getPublic();
     } catch (ServerException | ConflictException e) {
-      throw new JwtException("Unable to fetch signature key pair:" + e.getMessage());
+      throw new JwtException("Unable to fetch signature key pair:" + e.getMessage(), e);
     }
   }
 }
