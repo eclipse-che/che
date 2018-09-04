@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -71,6 +72,7 @@ public class CommitFilesTest {
   @Named("github.username")
   private String gitHubUsername;
 
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private AskDialog askDialog;
@@ -172,10 +174,22 @@ public class CommitFilesTest {
     refactor.typeAndWaitNewName(NEW_NAME_PACKAGE);
     refactor.clickOkButtonRefactorForm();
 
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/dev/examples");
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
-    git.waitCommitMainFormIsOpened();
+    seleniumWebDriverHelper.performAndVerify(
+        aVoid -> {
+          projectExplorer.waitAndSelectItem(PROJECT_NAME);
+          menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+          git.waitCommitMainFormIsOpened();
+          return null;
+        },
+        aVoid -> {
+          projectExplorer.waitItemIsSelected(PROJECT_NAME);
+          return null;
+        },
+        aVoid -> {
+          git.clickOnCancelBtnCommitForm();
+          git.waitCommitFormClosed();
+          return null;
+        });
 
     git.waitItemCheckBoxToBeSelectedInCommitWindow(
         "src/main",
