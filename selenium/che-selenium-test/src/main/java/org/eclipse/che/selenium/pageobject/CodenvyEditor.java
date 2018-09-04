@@ -13,8 +13,6 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
@@ -78,17 +76,11 @@ import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 import org.eclipse.che.commons.lang.Pair;
@@ -865,14 +857,7 @@ public class CodenvyEditor {
 
   /** Waits for "no Git change" markers in the opened editor. */
   public void waitNoGitChangeMarkers() {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver ->
-                    getListGitMarkers()
-                        .stream()
-                        .allMatch(element -> "".equals(element.getAttribute("class"))));
+    waitGitMarkerInPosition("", 0, Integer.MAX_VALUE);
   }
 
   /**
@@ -882,19 +867,7 @@ public class CodenvyEditor {
    * @param endLine line number of the markers end
    */
   public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> {
-                  for (int i = startLine; i <= endLine; i++) {
-                    if (!"git-change-marker insertion"
-                        .equals(getListGitMarkers().get(i).getAttribute("class"))) {
-                      return false;
-                    }
-                  }
-                  return true;
-                });
+    waitGitMarkerInPosition("git-change-marker insertion", startLine, endLine);
   }
 
   /**
@@ -905,21 +878,7 @@ public class CodenvyEditor {
    * @param endLine line number of the markers end
    */
   public void waitGitModificationMarkerInPosition(int startLine, int endLine) {
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> {
-                  for (int i = startLine; i <= endLine; i++) {
-                    WebElement webElement = getListGitMarkers().get(i);
-                    webDriverWaitFactory.get().until(visibilityOf(webElement));
-                    if (!"git-change-marker modification"
-                        .equals(webElement.getAttribute("class"))) {
-                      return false;
-                    }
-                  }
-                  return true;
-                });
+    waitGitMarkerInPosition("git-change-marker modification", startLine, endLine);
   }
 
   /**
@@ -928,33 +887,61 @@ public class CodenvyEditor {
    * @param line line's number where the marker should be displayed
    */
   public void waitGitDeletionMarkerInPosition(int line) {
+    waitGitMarkerInPosition("git-change-marker deletion", line, line);
+  }
+
+  /**
+   * Wait specific git marker at giving positions. Since operation is not atomic the {@link
+   * StaleElementReferenceException} might occur. That's why it is necessary to give one more try
+   * until throwing an exception.
+   *
+   * @param marker the marker to wait
+   * @param startLine the first line of git marker
+   * @param endLine the last line of git marker
+   */
+  public void waitGitMarkerInPosition(String marker, int startLine, int endLine) {
     seleniumWebDriverHelper.waitNoExceptions(
         () ->
             seleniumWebDriverHelper.waitSuccessCondition(
-                webDriver ->
-                    "git-change-marker deletion"
-                        .equals(getListGitMarkers().get(line).getAttribute("class")),
+                webDriver -> {
+                  List<String> classAttrs;
+
+                  for (int i = 0; ; i++) {
+                    try {
+                      classAttrs =
+                          getListGitMarkers()
+                              .stream()
+                              .map(webElement -> webElement.getAttribute("class"))
+                              .collect(toList());
+                      break;
+                    } catch (StaleElementReferenceException e) {
+                      if (i == 2) {
+                        throw e;
+                      }
+                    }
+                  }
+
+                  for (int i = 0; i < classAttrs.size(); i++) {
+                    if (startLine - 1 <= i && i <= endLine - 1) {
+                      if (!marker.equals(classAttrs.get(i))) {
+                        return false;
+                      }
+                    }
+                  }
+
+                  return true;
+                },
                 REDRAW_UI_ELEMENTS_TIMEOUT_SEC),
         StaleElementReferenceException.class);
   }
 
   /**
-   * Gets the list of git markers web-elements in the editor. Since operation is not atomic the
-   * {@link StaleElementReferenceException} might occur. That's why it is necessary to give one more
-   * try until throwing an exception.
+   * Gets the list of git markers web-elements in the editor.
    *
    * @return the list of git markers web-elements
    */
   private List<WebElement> getListGitMarkers() {
-    for (int i = 0; ; i++) {
-      try {
-        return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(VCS_RULER));
-      } catch (StaleElementReferenceException e) {
-        if (i == 2) {
-          throw e;
-        }
-      }
-    }
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(VCS_RULER));
   }
 
   /**
@@ -2349,13 +2336,6 @@ public class CodenvyEditor {
   /** press the key 'Enter' */
   public void pressEnter() {
     seleniumWebDriverHelper.pressEnter();
-  }
-
-  public String getProposalDocumentationHTML() {
-    return seleniumWebDriverHelper
-        .waitVisibility(proposalDoc)
-        .findElement(By.tagName("div"))
-        .getAttribute("innerHTML");
   }
 
   /** Type the comment line in the file by keyboard */
