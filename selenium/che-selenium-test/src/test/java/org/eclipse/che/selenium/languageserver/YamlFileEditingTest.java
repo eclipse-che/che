@@ -116,6 +116,7 @@ public class YamlFileEditingTest {
 
     // select proposal and check expected text in the Editor
     editor.enterAutocompleteProposal("kind");
+    editor.waitTextIntoEditor("kind:");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("PersistentVolume");
     editor.enterAutocompleteProposal("PersistentVolume");
@@ -170,13 +171,14 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 2)
   public void checkCodeValidation() {
     editor.selectTabByName("deployment.yaml");
     editor.waitAllMarkersInvisibility(ERROR);
 
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor("a");
+    editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
     editor.waitTextInHoverPopup("Unexpected property aapiVersion");
 
@@ -188,7 +190,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 2)
   public void checkCommentCodeFeature() {
     editor.selectTabByName("deployment.yaml");
 
