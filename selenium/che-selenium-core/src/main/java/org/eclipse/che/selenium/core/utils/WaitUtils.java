@@ -45,7 +45,7 @@ public class WaitUtils {
    * @param timeout time to wait
    * @param timeUnit time unit of the timeout parameter
    */
-  public static void sleepQuietly(int timeout, TimeUnit timeUnit) {
+  public static void sleepQuietly(long timeout, TimeUnit timeUnit) {
     long millisecondToWait = timeUnit.toMillis(timeout);
     try {
       sleep(millisecondToWait);
@@ -71,11 +71,11 @@ public class WaitUtils {
    */
   public static void waitSuccessCondition(
       BooleanSupplier condition,
-      int timeout,
-      int delayBetweenAttemptsInMilliseconds,
-      TimeUnit timeUnit)
+      long timeout,
+      long delayBetweenAttemptsInMilliseconds,
+      TimeUnit timeoutTimeUnit)
       throws InterruptedException, ExecutionException {
-    final long waitingTime = timeUnit.toMillis(timeout);
+    final long waitingTime = timeoutTimeUnit.toMillis(timeout);
     final long startingTime = System.currentTimeMillis();
     final long finishTime = startingTime + waitingTime;
 
@@ -95,7 +95,7 @@ public class WaitUtils {
 
     List<Future<Boolean>> result =
         Executors.newSingleThreadScheduledExecutor()
-            .invokeAll(asList(waitTrueState), timeout, timeUnit);
+            .invokeAll(asList(waitTrueState), timeout, timeoutTimeUnit);
 
     if (result.get(0).isCancelled()) {
       throw new TimeoutException("The condition has not being in \"true\" state during timeout");
