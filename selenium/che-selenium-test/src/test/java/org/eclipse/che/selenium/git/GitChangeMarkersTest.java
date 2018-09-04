@@ -104,7 +104,7 @@ public class GitChangeMarkersTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
-    editor.waitGitModificationMarkerInPosition(12, 13);
+    editor.waitGitModificationMarkerInPosition(12, 14);
   }
 
   @Test(priority = 1)
@@ -112,7 +112,7 @@ public class GitChangeMarkersTest {
     editor.setCursorToLine(17);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitGitInsertionMarkerInPosition(18, 18);
+    editor.waitGitInsertionMarkerInPosition(18, 19);
   }
 
   @Test(priority = 2)
@@ -120,7 +120,7 @@ public class GitChangeMarkersTest {
     editor.setCursorToLine(21);
     editor.deleteCurrentLine();
 
-    editor.waitGitDeletionMarkerInPosition(19);
+    editor.waitGitDeletionMarkerInPosition(20);
   }
 
   @Test(priority = 3)
@@ -139,7 +139,7 @@ public class GitChangeMarkersTest {
     // Make a change
     editor.selectTabByName("Main");
     editor.typeTextIntoEditor("//", 13);
-    editor.waitGitModificationMarkerInPosition(13, 12);
+    editor.waitGitModificationMarkerInPosition(13, 13);
 
     terminal.selectFirstTerminalTab();
     terminal.typeIntoActiveTerminal("cd " + PROJECT_NAME + Keys.ENTER);
@@ -157,7 +157,7 @@ public class GitChangeMarkersTest {
     // Make a change
     editor.selectTabByName("Main");
     editor.typeTextIntoEditor("//", 14);
-    editor.waitGitModificationMarkerInPosition(14, 13);
+    editor.waitGitModificationMarkerInPosition(14, 14);
 
     // Remove file from index
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/com/company/Main.java");
@@ -174,7 +174,7 @@ public class GitChangeMarkersTest {
     // Add file to index
     terminal.selectFirstTerminalTab();
     terminal.typeIntoActiveTerminal("git add src/com/company/Main.java" + Keys.ENTER);
-    editor.waitGitModificationMarkerInPosition(14, 13);
+    editor.waitGitModificationMarkerInPosition(14, 14);
 
     // Remove file from index
     terminal.typeIntoActiveTerminal("git rm --cached src/com/company/Main.java" + Keys.ENTER);
