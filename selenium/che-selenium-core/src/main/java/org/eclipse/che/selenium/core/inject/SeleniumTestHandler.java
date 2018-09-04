@@ -358,10 +358,8 @@ public abstract class SeleniumTestHandler
             testsWithFailure.put(result.getTestClass().getRealClass().getName(), result);
           }
 
-          captureScreenshot(result);
-          captureHtmlSource(result);
+          captureWebDriver(result);
           captureTestWorkspaceLogs(result);
-          storeWebDriverLogs(result);
 
           break;
 
@@ -474,19 +472,12 @@ public abstract class SeleniumTestHandler
         || f.isAnnotationPresent(InjectPageObject.class);
   }
 
-  private void captureScreenshot(ITestResult result) {
+  private void captureWebDriver(ITestResult result) {
     Set<SeleniumWebDriver> webDrivers = new HashSet<>();
     Object testInstance = result.getInstance();
 
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> captureScreenshotsFromOpenedWindows(result, webDriver));
-  }
-
-  private void captureHtmlSource(ITestResult result) {
-    Set<SeleniumWebDriver> webDrivers = new HashSet<>();
-    Object testInstance = result.getInstance();
-    collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> dumpHtmlCodeFromTheCurrentPage(result, webDriver));
+    webDrivers.forEach(webDriver -> captureWebDriver(result, webDriver));
   }
 
   /**
@@ -531,7 +522,7 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureScreenshotFromCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
     String filename = getTestResultFilename(testReference, "png");
     try {
@@ -552,25 +543,19 @@ public abstract class SeleniumTestHandler
     return format("%s.%s", result.getTestClass().getName(), result.getMethod().getMethodName());
   }
 
-  private void captureScreenshotsFromOpenedWindows(
-      ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureWebDriver(ITestResult result, SeleniumWebDriver webDriver) {
     webDriver
         .getWindowHandles()
         .forEach(
             currentWin -> {
               webDriver.switchTo().window(currentWin);
-              captureScreenshotFromWindow(result, webDriver);
+              captureScreenshotFromCurrentWindow(result, webDriver);
+              captureHtmlDumpFromCurrentWindow(result, webDriver);
+              storeLogsFromCurrentWindow(result, webDriver);
             });
   }
 
-  private void storeWebDriverLogs(ITestResult result) {
-    Set<SeleniumWebDriver> webDrivers = new HashSet<>();
-    Object testInstance = result.getInstance();
-    collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> storeWebDriverLogs(result, webDriver));
-  }
-
-  private void storeWebDriverLogs(ITestResult result, SeleniumWebDriver webDriver) {
+  private void storeLogsFromCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
 
     try {
@@ -589,7 +574,7 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureHtmlDumpFromCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
     String filename = getTestResultFilename(testReference, "html");
     try {
