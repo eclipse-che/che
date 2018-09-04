@@ -12,8 +12,14 @@
 package org.eclipse.che.selenium.core.utils;
 
 import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import org.openqa.selenium.TimeoutException;
@@ -67,20 +73,33 @@ public class WaitUtils {
       BooleanSupplier condition,
       int timeout,
       int delayBetweenAttemptsInMilliseconds,
-      TimeUnit timeUnit) {
+      TimeUnit timeUnit)
+      throws InterruptedException, ExecutionException {
     final long waitingTime = timeUnit.toMillis(timeout);
     final long startingTime = System.currentTimeMillis();
     final long finishTime = startingTime + waitingTime;
 
-    while (System.currentTimeMillis() < finishTime) {
-      if (condition.getAsBoolean()) {
-        return;
-      }
+    Callable<Boolean> waitTrueState =
+        () -> {
+          while (System.currentTimeMillis() <= finishTime) {
+            if (condition.getAsBoolean()) {
+              return true;
+            }
 
-      sleepQuietly(delayBetweenAttemptsInMilliseconds, TimeUnit.MILLISECONDS);
+            sleepQuietly(delayBetweenAttemptsInMilliseconds, TimeUnit.MILLISECONDS);
+          }
+
+          throw new TimeoutException(
+              "The condition has not being in \"true\" state during timeout");
+        };
+
+    List<Future<Boolean>> result =
+        Executors.newSingleThreadScheduledExecutor()
+            .invokeAll(asList(waitTrueState), timeout, timeUnit);
+
+    if (result.get(0).isCancelled()) {
+      throw new TimeoutException("The condition has not being in \"true\" state during timeout");
     }
-
-    throw new TimeoutException("The condition has not being in \"true\" state during timeout");
   }
 
   /**
@@ -89,8 +108,8 @@ public class WaitUtils {
    * @param condition expression which should be performed
    * @param timeout waiting time
    */
-  public static void waitSuccessCondition(
-      BooleanSupplier condition, int timeout, TimeUnit timeUnit) {
+  public static void waitSuccessCondition(BooleanSupplier condition, int timeout, TimeUnit timeUnit)
+      throws InterruptedException, ExecutionException {
     final int delayBetweenAttemptsInMilliseconds = 500;
     waitSuccessCondition(condition, timeout, delayBetweenAttemptsInMilliseconds, timeUnit);
   }
@@ -101,7 +120,8 @@ public class WaitUtils {
    * @param condition expression which should be performed
    * @param timeout waiting time in seconds
    */
-  public static void waitSuccessCondition(BooleanSupplier condition, int timeout) {
+  public static void waitSuccessCondition(BooleanSupplier condition, int timeout)
+      throws InterruptedException, ExecutionException {
     waitSuccessCondition(condition, timeout, TimeUnit.SECONDS);
   }
 
@@ -110,12 +130,9 @@ public class WaitUtils {
    *
    * @param condition expression which should be performed
    */
-  public static void waitSuccessCondition(BooleanSupplier condition) {
+  public static void waitSuccessCondition(BooleanSupplier condition)
+      throws InterruptedException, ExecutionException {
     final int defaultTimeout = LOAD_PAGE_TIMEOUT_SEC;
     waitSuccessCondition(condition, defaultTimeout);
-  }
-
-  private static boolean isTimeAvailable(final long startingTime, final long waitingTime) {
-    return System.currentTimeMillis() < (startingTime + waitingTime);
   }
 }
