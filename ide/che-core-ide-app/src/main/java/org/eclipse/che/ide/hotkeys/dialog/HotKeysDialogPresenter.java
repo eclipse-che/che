@@ -191,7 +191,8 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
     return containerDiv;
   }
 
-  private static native void openWindowForPrinting(String htmlTemplate, JsoArray<Node> nodes) /*-{
+  private static native void openWindowForPrinting(
+      String htmlTemplate, JsoArray<Node> nodes) /*-{
         var printWindow = window.open("about:blank", "", "width=650,height=800");
         printWindow.document.write(htmlTemplate);
         var container = printWindow.document.getElementById("key-bindings-container");

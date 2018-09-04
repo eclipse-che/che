@@ -309,7 +309,11 @@ public class JavaRefactoringRename implements FileEventHandler {
                                   .handleMovingFiles(changes)
                                   .then(clientServerEventService.sendFileTrackingResumeEvent());
                             });
-
+                    JavaRenameRecommend javaRenameRecommend = new JavaRenameRecommend();
+                    javaRenameRecommend.setNotificationManager(notificationManager);
+                    javaRenameRecommend.setRefactoringServiceClient(refactoringServiceClient);
+                    javaRenameRecommend.setTextEditor(textEditor);
+                    javaRenameRecommend.recommend();
                     break;
                   case WARNING:
                   case ERROR:
@@ -352,6 +356,12 @@ public class JavaRefactoringRename implements FileEventHandler {
                     locale.failedToRename(), arg.getMessage(), FAIL, FLOAT_MODE);
               }
             });
+  }
+
+  private int StringtoInt(String num) {
+    int ans = 0;
+    for (int i = 0; i < num.length(); i++) ans = ans * 10 + num.charAt(i) - '0';
+    return ans;
   }
 
   private void enableAutoSave() {

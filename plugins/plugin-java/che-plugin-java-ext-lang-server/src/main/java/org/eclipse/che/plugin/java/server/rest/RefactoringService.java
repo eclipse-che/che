@@ -261,6 +261,8 @@ public class RefactoringService {
       throw new RefactoringException("Can't find java element to rename.");
     }
 
+    JavaRenameRecommend.javaElement = elementToRename;
+
     return manager.createRenameRefactoring(
         elementToRename, cu, settings.getOffset(), settings.isRefactorLightweight());
   }
@@ -279,7 +281,34 @@ public class RefactoringService {
   @Produces("application/json")
   public RefactoringResult applyLinkedModeRename(LinkedRenameRefactoringApply refactoringApply)
       throws RefactoringException, CoreException {
-    return manager.applyLinkedRename(refactoringApply);
+
+    RefactoringResult refactoringResult = manager.applyLinkedRename(refactoringApply);
+    JavaRenameRecommend javaRenameRecommend = new JavaRenameRecommend();
+
+    javaRenameRecommend.recommend(refactoringApply);
+    return refactoringResult;
+  }
+
+  @POST
+  @Path("rename/linked/extension/recommendation")
+  @Produces("text/plain")
+  public String getRecommendation() {
+    if (JavaRenameRecommend.result.getRecommendOriginalName().equals("")) return "";
+    return JavaRenameRecommend.result.getRecommendRefactorType()
+        + " "
+        + JavaRenameRecommend.result.getRecommendOriginalName()
+        + " to "
+        + JavaRenameRecommend.result.getRecommendSubsequentName();
+  }
+
+  @POST
+  @Path("rename/linked/extension/position")
+  @Produces("text/plain")
+  public String getRecommendationPosition() {
+    return ""
+        + JavaRenameRecommend.result.getRecommendStartPosition()
+        + ","
+        + JavaRenameRecommend.result.getRecommendOriginalName().length();
   }
 
   /**

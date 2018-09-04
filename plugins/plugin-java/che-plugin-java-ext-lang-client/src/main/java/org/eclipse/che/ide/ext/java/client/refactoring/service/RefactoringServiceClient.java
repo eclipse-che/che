@@ -39,6 +39,10 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ValidateNewName;
 @ImplementedBy(RefactoringServiceClientImpl.class)
 public interface RefactoringServiceClient {
 
+  Promise<String> getRecommendationPosition();
+
+  Promise<String> getRecommendation();
+
   /**
    * Creates move refactoring and returns special refactoring session id which will be need to
    * continue setup refactoring steps.
@@ -50,15 +54,15 @@ public interface RefactoringServiceClient {
   Promise<String> createMoveRefactoring(CreateMoveRefactoring moveRefactoring);
 
   /**
-   * Creates rename refactoring session.
+   * Creates recommend refactoring session.
    *
-   * @param settings rename settings
+   * @param settings recommend settings
    * @return an instance of refactoring session id
    */
   Promise<RenameRefactoringSession> createRenameRefactoring(CreateRenameRefactoring settings);
 
   /**
-   * Apply linked mode rename refactoring.
+   * Apply linked mode recommend refactoring.
    *
    * @param refactoringApply linked mode setting and refactoring session id
    * @return an instance of refactoring result
@@ -123,7 +127,7 @@ public interface RefactoringServiceClient {
   Promise<ChangePreview> getChangePreview(RefactoringChange change);
 
   /**
-   * Validates new name for the rename operation.
+   * Validates new name for the recommend operation.
    *
    * @param newName new name that should be validated
    * @return the status for the name validated
@@ -131,9 +135,9 @@ public interface RefactoringServiceClient {
   Promise<RefactoringStatus> validateNewName(ValidateNewName newName);
 
   /**
-   * Set rename refactoring wizard setting.
+   * Set recommend refactoring wizard setting.
    *
-   * @param settings the rename settings
+   * @param settings the recommend settings
    * @return empty promise result
    */
   Promise<Void> setRenameSettings(RenameSettings settings);
