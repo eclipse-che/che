@@ -33,14 +33,14 @@ public class NotificationsPopupPanel {
 
   @Inject
   public NotificationsPopupPanel(
-          SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private static final String PROGRESS_POPUP_PANEL_ID = "gwt-debug-popup-container";
   private static final String CLOSE_POPUP_IMG_XPATH =
-          "//div[@id='gwt-debug-popup-container']/descendant::*[local-name()='svg'][2]";
+      "//div[@id='gwt-debug-popup-container']/descendant::*[local-name()='svg'][2]";
 
   @FindBy(id = PROGRESS_POPUP_PANEL_ID)
   private WebElement progressPopupPanel;
