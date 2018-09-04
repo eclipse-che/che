@@ -66,6 +66,11 @@ public abstract class TestWorkspaceLogsReader {
       return;
     }
 
+    // check if workspace exists
+    if (workspaceId == null) {
+      return;
+    }
+
     // check if workspace is running
     try {
       WorkspaceStatus status = workspaceServiceClient.getStatus(workspaceId);

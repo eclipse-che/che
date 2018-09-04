@@ -24,6 +24,7 @@ import org.eclipse.che.multiuser.organization.api.listener.RemoveOrganizationOnL
 import org.eclipse.che.multiuser.organization.api.notification.OrganizationNotificationEmailSender;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationDomain;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationPermissionsFilter;
+import org.eclipse.che.multiuser.organization.api.permissions.OrganizationRemoteSubscriptionPermissionsChecks;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationResourceDistributionServicePermissionsFilter;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationalAccountPermissionsChecker;
 import org.eclipse.che.multiuser.organization.api.resource.DefaultOrganizationResourcesProvider;
@@ -43,6 +44,7 @@ public class OrganizationApiModule extends AbstractModule {
   protected void configure() {
     bind(OrganizationService.class);
     bind(OrganizationPermissionsFilter.class);
+    bind(OrganizationRemoteSubscriptionPermissionsChecks.class);
     bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
 
     Multibinder.newSetBinder(binder(), DefaultResourcesProvider.class)
