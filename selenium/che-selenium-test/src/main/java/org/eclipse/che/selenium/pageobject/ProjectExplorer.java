@@ -639,7 +639,8 @@ public class ProjectExplorer {
         By.xpath(
             format(
                 "//div[@path='/%s']/div/*[local-name() = 'svg' and @id='%s']",
-                path, folderType.get())));
+                path, folderType.get())),
+        ELEMENT_TIMEOUT_SEC);
   }
 
   /**
@@ -679,6 +680,13 @@ public class ProjectExplorer {
 
     seleniumWebDriverHelper.waitVisibility(
         By.id(ContextMenuFirstLevelItems.NEW.get()), WIDGET_TIMEOUT_SEC);
+  }
+
+  /** Waits on context menu item is not visible */
+  public void waitContexMenuItemIsNotVisible(ContextMenuItems item) {
+    waitContextMenu();
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item.get())));
   }
 
   /**

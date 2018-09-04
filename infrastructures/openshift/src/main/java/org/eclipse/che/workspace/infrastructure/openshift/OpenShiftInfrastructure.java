@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
@@ -29,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /** @author Sergii Leshchenko */
@@ -41,6 +43,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   private final OpenShiftRuntimeContextFactory runtimeContextFactory;
   private final OpenShiftEnvironmentProvisioner osEnvProvisioner;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
+  private final SidecarToolingProvisioner toolingProvisioner;
 
   @Inject
   public OpenShiftInfrastructure(
@@ -49,7 +52,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       OpenShiftEnvironmentProvisioner osEnvProvisioner,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
-      KubernetesRuntimeStateCache runtimeStatusesCache) {
+      KubernetesRuntimeStateCache runtimeStatusesCache,
+      SidecarToolingProvisioner toolingProvisioner) {
     super(
         NAME,
         ImmutableSet.of(
@@ -60,11 +64,26 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     this.osEnvProvisioner = osEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
+    this.toolingProvisioner = toolingProvisioner;
   }
 
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
     return runtimeStatusesCache.getIdentities();
+  }
+
+  @Override
+  public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+      throws ValidationException, InfrastructureException {
+
+    // Sidecar-based tooling for now supports k8s/OS env only
+    // Convert other env types to a OS type to use this tooling with other env types
+    final OpenShiftEnvironment openShiftEnvironment = asOpenShiftEnv(environment);
+    // We need to provision development tooling here because there is environment variables
+    // provisioning in the superclass which might be important
+    toolingProvisioner.provision(id, openShiftEnvironment);
+
+    return super.prepare(id, openShiftEnvironment);
   }
 
   @Override

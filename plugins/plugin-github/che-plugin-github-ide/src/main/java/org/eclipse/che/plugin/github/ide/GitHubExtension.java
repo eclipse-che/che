@@ -11,9 +11,15 @@
  */
 package org.eclipse.che.plugin.github.ide;
 
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_CONTEXT_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.plugin.github.ide.action.OpenOnGitHubAction;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 
 /**
@@ -29,7 +35,18 @@ public class GitHubExtension {
 
   @Inject
   public GitHubExtension(
-      SshKeyUploaderRegistry registry, GitHubSshKeyUploader gitHubSshKeyProvider) {
+      SshKeyUploaderRegistry registry,
+      GitHubSshKeyUploader gitHubSshKeyProvider,
+      ActionManager actionManager,
+      OpenOnGitHubAction openOnGitHubAction) {
+
     registry.registerUploader(GITHUB_HOST, gitHubSshKeyProvider);
+    actionManager.registerAction("openOnGitHub", openOnGitHubAction);
+    DefaultActionGroup mainContextMenuGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
+    mainContextMenuGroup.add(openOnGitHubAction);
+    DefaultActionGroup editorContextMenuGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_EDITOR_CONTEXT_MENU);
+    editorContextMenuGroup.add(openOnGitHubAction);
   }
 }
