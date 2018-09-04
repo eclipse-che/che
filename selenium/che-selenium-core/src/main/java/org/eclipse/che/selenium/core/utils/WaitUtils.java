@@ -74,7 +74,7 @@ public class WaitUtils {
       long timeout,
       long delayBetweenAttemptsInMilliseconds,
       TimeUnit timeoutTimeUnit)
-      throws InterruptedException, ExecutionException {
+      throws InterruptedException {
     final long waitingTime = timeoutTimeUnit.toMillis(timeout);
     final long startingTime = System.currentTimeMillis();
     final long finishTime = startingTime + waitingTime;
