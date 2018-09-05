@@ -15,11 +15,13 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
@@ -28,7 +30,6 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -37,12 +38,6 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 @Test(groups = TestGroup.GITHUB)
 public class DirectUrlFactoryWithRootFolderTest {
-  private static final String EXPECTED_PROJECT = "quickstart";
-
-  @Inject
-  @Named("github.username")
-  private String gitHubUsername;
-
   @Inject private ProjectExplorer projectExplorer;
   @Inject private DefaultTestUser testUser;
   @Inject private TestFactoryInitializer testFactoryInitializer;
@@ -51,14 +46,18 @@ public class DirectUrlFactoryWithRootFolderTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient projectServiceClient;
-  @Inject private Dashboard dashboard;
+  @Inject private TestGitHubRepository testRepo;
 
   private TestFactory testFactoryWithRootFolder;
 
   @BeforeClass
   public void setUp() throws Exception {
-    testFactoryWithRootFolder =
-        testFactoryInitializer.fromUrl("https://github.com/" + gitHubUsername + "/quickstart");
+    // preconditions - add the project to the test repository
+    Path entryPath = Paths.get(getClass().getResource("/projects/quickstart").getPath());
+    testRepo.addContent(entryPath);
+    String repositoryUrl = testRepo.getHtmlUrl();
+
+    testFactoryWithRootFolder = testFactoryInitializer.fromUrl(repositoryUrl);
   }
 
   @AfterClass
@@ -68,12 +67,13 @@ public class DirectUrlFactoryWithRootFolderTest {
 
   @Test
   public void factoryWithDirectUrlWithRootFolder() throws Exception {
-    String expectedMessInTheEventsPanel = "Project " + EXPECTED_PROJECT + " imported";
+    String projectName = testRepo.getName();
+    String expectedMessInTheEventsPanel = "Project " + projectName + " imported";
     List<String> expectedItemsAfterCloning =
         Arrays.asList(
             "CHANGELOG.md",
             "Dockerfile",
-            "LICENSE",
+            "LICENSE.txt",
             "README.md",
             "favicon.ico",
             "index.html",
@@ -91,7 +91,7 @@ public class DirectUrlFactoryWithRootFolderTest {
     testFactoryWithRootFolder.authenticateAndOpen();
 
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(EXPECTED_PROJECT);
+    projectExplorer.waitItem(projectName);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
 
@@ -101,7 +101,7 @@ public class DirectUrlFactoryWithRootFolderTest {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/6440");
     }
-    projectExplorer.openItemByPath(EXPECTED_PROJECT);
+    projectExplorer.openItemByPath(projectName);
 
     String currentWsId =
         workspaceServiceClient
