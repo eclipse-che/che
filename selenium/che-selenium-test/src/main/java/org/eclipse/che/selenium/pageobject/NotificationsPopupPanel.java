@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -98,8 +99,14 @@ public class NotificationsPopupPanel {
         .findElements(By.xpath(CLOSE_POPUP_IMG_XPATH))
         .forEach(
             webElement -> {
-              webElement.click();
-              seleniumWebDriverHelper.waitInvisibility(webElement, timeout);
+              if (webElement.isDisplayed()) {
+                try {
+                  webElement.click();
+                  seleniumWebDriverHelper.waitInvisibility(webElement, timeout);
+                } catch (WebDriverException e) {
+                  // ignore exception if notification has been closed by timeout
+                }
+              }
             });
   }
 
