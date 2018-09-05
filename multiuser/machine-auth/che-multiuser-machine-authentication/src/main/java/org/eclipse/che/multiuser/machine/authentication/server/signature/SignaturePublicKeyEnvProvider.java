@@ -15,8 +15,6 @@ import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.
 
 import java.util.Base64;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
@@ -48,7 +46,7 @@ public class SignaturePublicKeyEnvProvider implements EnvVarProvider {
                           .getKeyPair(runtimeIdentity.getWorkspaceId())
                           .getPublic()
                           .getEncoded())));
-    } catch (ServerException | ConflictException e) {
+    } catch (SignatureKeyManagerException e) {
       throw new InfrastructureException(
           "Signature key pair for machine authentication cannot be retrieved. Reason: "
               + e.getMessage());

@@ -29,13 +29,13 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
 import org.eclipse.che.multiuser.machine.authentication.shared.Constants;
 
 /**
@@ -79,41 +79,42 @@ public class MachineTokenRegistry {
         token = createToken(userId, workspaceId);
       }
       return token;
-    } catch (NotFoundException | ServerException | ConflictException ex) {
-      throw new MachineTokenException(
-          format(
-              "Failed to generate machine token for user '%s' and workspace '%s'. Cause: '%s'",
-              userId, workspaceId, ex.getMessage()),
-          ex);
     } finally {
       lock.writeLock().unlock();
     }
   }
 
   /** Creates new token with given data. */
-  private String createToken(String userId, String workspaceId)
-      throws NotFoundException, ServerException, ConflictException {
-    final PrivateKey privateKey = signatureKeyManager.getKeyPair(workspaceId).getPrivate();
-    final User user = userManager.getById(userId);
-    final Map<String, Object> header = new HashMap<>(2);
-    header.put("kind", MACHINE_TOKEN_KIND);
-    header.put("kid", workspaceId);
-    final Map<String, Object> claims = new HashMap<>();
-    // to ensure that each token is unique
-    claims.put(Claims.ID, UUID.randomUUID().toString());
-    claims.put(Constants.USER_ID_CLAIM, userId);
-    claims.put(Constants.USER_NAME_CLAIM, user.getName());
-    claims.put(Constants.WORKSPACE_ID_CLAIM, workspaceId);
-    // jwtproxy required claims
-    claims.put(Claims.ISSUER, "wsmaster");
-    claims.put(Claims.AUDIENCE, workspaceId);
-    claims.put(Claims.EXPIRATION, Instant.now().plus(365, DAYS).getEpochSecond());
-    claims.put(Claims.NOT_BEFORE, -1); // always
-    claims.put(Claims.ISSUED_AT, Instant.now().getEpochSecond());
-    final String token =
-        Jwts.builder().setClaims(claims).setHeader(header).signWith(RS256, privateKey).compact();
-    tokens.put(workspaceId, userId, token);
-    return token;
+  private String createToken(String userId, String workspaceId) throws MachineTokenException {
+    try {
+      final PrivateKey privateKey = signatureKeyManager.getKeyPair(workspaceId).getPrivate();
+      final User user = userManager.getById(userId);
+      final Map<String, Object> header = new HashMap<>(2);
+      header.put("kind", MACHINE_TOKEN_KIND);
+      header.put("kid", workspaceId);
+      final Map<String, Object> claims = new HashMap<>();
+      // to ensure that each token is unique
+      claims.put(Claims.ID, UUID.randomUUID().toString());
+      claims.put(Constants.USER_ID_CLAIM, userId);
+      claims.put(Constants.USER_NAME_CLAIM, user.getName());
+      claims.put(Constants.WORKSPACE_ID_CLAIM, workspaceId);
+      // jwtproxy required claims
+      claims.put(Claims.ISSUER, "wsmaster");
+      claims.put(Claims.AUDIENCE, workspaceId);
+      claims.put(Claims.EXPIRATION, Instant.now().plus(365, DAYS).getEpochSecond());
+      claims.put(Claims.NOT_BEFORE, -1); // always
+      claims.put(Claims.ISSUED_AT, Instant.now().getEpochSecond());
+      final String token =
+          Jwts.builder().setClaims(claims).setHeader(header).signWith(RS256, privateKey).compact();
+      tokens.put(workspaceId, userId, token);
+      return token;
+    } catch (SignatureKeyManagerException | NotFoundException | ServerException ex) {
+      throw new MachineTokenException(
+          format(
+              "Failed to generate machine token for user '%s' and workspace '%s'. Cause: '%s'",
+              userId, workspaceId, ex.getMessage()),
+          ex);
+    }
   }
 
   /**
