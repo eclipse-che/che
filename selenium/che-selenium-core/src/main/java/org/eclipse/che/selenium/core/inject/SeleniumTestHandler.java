@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
+import java.util.zip.ZipOutputStream;
 import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.io.FileUtils;
@@ -415,11 +416,11 @@ public abstract class SeleniumTestHandler
       }
 
       try {
-        ZipUtils.zipDir(
-            pathToStoreWorkspaceLogs.toFile().getAbsolutePath(),
-            pathToStoreWorkspaceLogs.toFile(),
-            pathToZipWithWorkspaceLogs.toFile(),
-            null);
+        Path zip = Files.createFile(pathToZipWithWorkspaceLogs);
+        try (ZipOutputStream out = ZipUtils.stream(zip)) {
+          ZipUtils.add(out, pathToStoreWorkspaceLogs);
+        }
+
         FileUtils.deleteQuietly(pathToStoreWorkspaceLogs.toFile());
       } catch (IOException | IllegalArgumentException e) {
         LOG.warn("Error of creation zip-file with workspace logs.", e);
