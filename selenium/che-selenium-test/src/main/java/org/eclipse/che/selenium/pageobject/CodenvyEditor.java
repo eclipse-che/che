@@ -336,9 +336,8 @@ public class CodenvyEditor {
   @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
   private WebElement proposalDoc;
 
-    @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
-    private WebElement languageServerRenameField;
-
+  @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
+  private WebElement languageServerRenameField;
 
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
@@ -2166,14 +2165,14 @@ public class CodenvyEditor {
         .perform();
   }
 
-    /**
-     * wait renaming field in the Editor (usually it field is used by language servers), type new
-     * value and wait closing of the field
-     *
-     * @param renameValue
-     */
-    public void doRenamingByLanguageServerField(String renameValue) {
-        seleniumWebDriverHelper.setText(languageServerRenameField, renameValue);
-        seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
-    }
+  /**
+   * wait renaming field in the Editor (usually it field is used by language servers), type new
+   * value and wait closing of the field
+   *
+   * @param renameValue
+   */
+  public void doRenamingByLanguageServerField(String renameValue) {
+    seleniumWebDriverHelper.setText(languageServerRenameField, renameValue);
+    seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
+  }
 }
