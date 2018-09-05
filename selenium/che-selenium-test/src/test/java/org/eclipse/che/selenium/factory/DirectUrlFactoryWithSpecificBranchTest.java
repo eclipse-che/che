@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -43,8 +44,12 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   private static final String SECOND_BRANCH_NAME = "contrib";
 
   @Inject
-  @Named("github.username")
-  private String gitHubUsername;
+  @Named(AUXILIARY)
+  private TestGitHubRepository testAuxiliaryRepo;
+
+  @Inject
+  @Named("github.auxiliary.username")
+  private String gitHubAuxiliaryUserName;
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private DefaultTestUser testUser;
@@ -55,7 +60,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
-  @Inject private TestGitHubRepository testRepo;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -63,11 +67,11 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   public void setUp() throws Exception {
     // preconditions - add the project to the test repository
     Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
-    testRepo.addContent(entryPath);
-    String repositoryUrl = testRepo.getHtmlUrl();
+    testAuxiliaryRepo.addContent(entryPath);
+    String repositoryUrl = testAuxiliaryRepo.getHtmlUrl();
 
     // create another branch in the test repo
-    testRepo.createBranch(SECOND_BRANCH_NAME);
+    testAuxiliaryRepo.createBranch(SECOND_BRANCH_NAME);
 
     testFactoryWithSpecificBranch =
         testFactoryInitializer.fromUrl(repositoryUrl + "/tree/" + SECOND_BRANCH_NAME);
@@ -75,14 +79,14 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (workspaceServiceClient.exists(gitHubUsername, testUser.getName())) {
+    if (workspaceServiceClient.exists(gitHubAuxiliaryUserName, testUser.getName())) {
       testFactoryWithSpecificBranch.delete();
     }
   }
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
-    String repositoryName = testRepo.getName();
+    String repositoryName = testAuxiliaryRepo.getName();
 
     try {
       testFactoryWithSpecificBranch.authenticateAndOpen();
