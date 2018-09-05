@@ -39,6 +39,14 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
@@ -85,6 +93,10 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
