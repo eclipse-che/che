@@ -32,5 +32,6 @@ public class PlainJavaProjectModule extends AbstractModule {
     newSetBinder(binder(), ProjectHandler.class).addBinding().to(PlainJavaInitHandler.class);
 
     bind(ClasspathUpdaterService.class);
+    bind(PlainJavaProjectSourceFolderWatcher.class).asEagerSingleton();
   }
 }
