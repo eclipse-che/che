@@ -176,38 +176,37 @@ public class WorkingWithTerminalTest {
       for (String partOfContent : CHECK_MC_OPENING) {
         terminal.waitTextInFirstTerminal(partOfContent);
       }
+      terminal.waitNoTextInFirstTerminal(".dockerenv");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10854", ex);
     }
 
-    terminal.waitNoTextInFirstTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
 
     // check resize of the terminal
-    for (String partOfContent : CHECK_MC_OPENING) {
-      try {
+    try {
+      for (String partOfContent : CHECK_MC_OPENING) {
         terminal.waitTextInFirstTerminal(partOfContent);
-      } catch (TimeoutException ex) {
-        // remove try-catch block after issue has been resolved
-        fail("Known issue https://github.com/eclipse/che/issues/10854");
       }
+      terminal.waitTextInFirstTerminal(".dockerenv");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10854", ex);
     }
 
-    terminal.waitTextInFirstTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
 
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitTextInFirstTerminal(partOfContent);
-    }
-
     try {
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitTextInFirstTerminal(partOfContent);
+      }
       terminal.waitNoTextInFirstTerminal(".dockerenv");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10854", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10854", ex);
     }
   }
 

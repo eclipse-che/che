@@ -338,6 +338,8 @@ public class WsMasterModule extends AbstractModule {
 
     // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
+    bind(
+        org.eclipse.che.multiuser.permission.system.SystemEventsSubscriptionPermissionsCheck.class);
 
     Multibinder<String> binder =
         Multibinder.newSetBinder(binder(), String.class, Names.named(SYSTEM_DOMAIN_ACTIONS));

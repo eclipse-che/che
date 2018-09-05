@@ -99,6 +99,7 @@ public interface TestMenuCommandsConstants {
       String REFACTORING = ASSISTANT_MENU_PREFIX + "assistantRefactoringGroup";
       String MOVE = ASSISTANT_MENU_PREFIX + "Refactoring/javaMoveRefactoring";
       String RENAME = ASSISTANT_MENU_PREFIX + "Refactoring/javaRenameRefactoring";
+      String LS_RENAME = ASSISTANT_MENU_PREFIX + "Refactoring/LS.rename";
     }
   }
 

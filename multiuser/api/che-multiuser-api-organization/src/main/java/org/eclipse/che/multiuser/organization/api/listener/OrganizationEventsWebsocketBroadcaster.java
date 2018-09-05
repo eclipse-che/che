@@ -33,9 +33,8 @@ public class OrganizationEventsWebsocketBroadcaster {
 
   private final RemoteSubscriptionManager remoteSubscriptionManager;
 
-  private static final String ORGANIZATION_MEMBERSHIP_METHOD_NAME =
-      "organization/membershipChanged";
-  private static final String ORGANIZATION_CHANGED_METHOD_NAME = "organization/statusChanged";
+  public static final String ORGANIZATION_MEMBERSHIP_METHOD_NAME = "organization/membershipChanged";
+  public static final String ORGANIZATION_CHANGED_METHOD_NAME = "organization/statusChanged";
 
   @Inject
   public OrganizationEventsWebsocketBroadcaster(

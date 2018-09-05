@@ -21,6 +21,7 @@ import org.eclipse.che.multiuser.api.permission.server.filter.RemovePermissionsF
 import org.eclipse.che.multiuser.api.permission.server.filter.SetPermissionsFilter;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.RemovePermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.SetPermissionsChecker;
+import org.eclipse.che.multiuser.api.permission.server.jsonrpc.RemoteSubscriptionPermissionManager;
 
 /** @author Sergii Leschenko */
 public class PermissionsModule extends AbstractModule {
@@ -30,6 +31,7 @@ public class PermissionsModule extends AbstractModule {
     bind(SetPermissionsFilter.class);
     bind(RemovePermissionsFilter.class);
     bind(GetPermissionsFilter.class);
+    bind(RemoteSubscriptionPermissionManager.class).asEagerSingleton();
 
     // Creates empty multibinder to avoid error during container starting
     Multibinder.newSetBinder(
