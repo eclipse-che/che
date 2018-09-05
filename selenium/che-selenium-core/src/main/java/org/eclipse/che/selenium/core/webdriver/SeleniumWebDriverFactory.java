@@ -35,12 +35,16 @@ public class SeleniumWebDriverFactory {
   @Named("sys.grid.mode")
   private boolean gridMode;
 
+  @Inject
+  @Named("tests.tmp_dir")
+  private String downloadDir;
+
   @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
 
   @Inject private DockerUtil dockerUtil;
 
   public SeleniumWebDriver create() {
     return new SeleniumWebDriver(
-        browser, webDriverPort, gridMode, httpJsonRequestFactory, dockerUtil);
+        browser, webDriverPort, gridMode, httpJsonRequestFactory, dockerUtil, downloadDir);
   }
 }
