@@ -1,17 +1,14 @@
-#!/bin/sh
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2012-2018 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
 #
 # SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#   Red Hat, Inc. - initial API and implementation
+#
 
-base_dir=$(cd "$(dirname "$0")"; pwd)
-. "${base_dir}"/../build.include
+FROM openjdk:8u131-jre-alpine
 
-init --name:theia "$@"
-build
-if ! skip_tests; then
-  sh "${base_dir}"/e2e/build.sh "$@"
-fi
