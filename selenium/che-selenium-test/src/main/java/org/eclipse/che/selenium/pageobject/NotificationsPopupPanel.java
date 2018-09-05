@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -30,11 +31,13 @@ public class NotificationsPopupPanel {
   private static final Logger LOG = LoggerFactory.getLogger(NotificationsPopupPanel.class);
 
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
   public NotificationsPopupPanel(
       SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -87,9 +90,17 @@ public class NotificationsPopupPanel {
     seleniumWebDriverHelper.waitTextContains(progressPopupPanel, message, timeout);
 
     // close popup panel
-    seleniumWebDriverHelper.waitAndClick(closePopupButton);
+    closeAllMessages(timeout);
+  }
 
-    waitProgressPopupPanelClose(timeout);
+  public void closeAllMessages(final int timeout) {
+    seleniumWebDriver
+        .findElements(By.xpath(CLOSE_POPUP_IMG_XPATH))
+        .forEach(
+            webElement -> {
+              webElement.click();
+              seleniumWebDriverHelper.waitInvisibility(webElement, timeout);
+            });
   }
 
   /** wait disappearance of notification popups */
