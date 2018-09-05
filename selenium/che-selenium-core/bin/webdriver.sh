@@ -812,8 +812,7 @@ generateFailSafeReport () {
 
     # add link the che server logs archive into the 'Summary' section of failsafe report
     local summaryTag="Summary<\/h2><a name=\"Summary\"><\/a>"
-    local cheServerLogsFile="target\/site\/che_server_logs.zip"
-    local linkToCheServerLogsTag="<p>\[<a href=\"$cheServerLogsFile\" target=\"_blank\">Eclipse Che Server logs<\/a>\]<\/p>"
+    local linkToCheServerLogsTag="<p>\[<a href=\"che_server_logs.zip\" target=\"_blank\">Eclipse Che Server logs<\/a>\]<\/p>"
     sed -i "s/${summaryTag}/${summaryTag}${linkToCheServerLogsTag}/" ${FAILSAFE_REPORT}
 
     # attach screenshots
