@@ -42,7 +42,6 @@ useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia
 usermod -p "*" theia
 echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-
 for f in "/etc/passwd" "/etc/group"; do
     chgrp -R 0 ${f}
     chmod -R g+rwX ${f};
@@ -51,7 +50,6 @@ done
 cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template
 # Generate group.template
 cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template
-
 
 # Add yarn repo
 curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
