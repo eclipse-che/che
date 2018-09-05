@@ -9,8 +9,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.languageserver;
+package org.eclipse.che.selenium.languageserver.csharp;
 
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -44,8 +45,6 @@ import org.testng.annotations.Test;
 public class CSharpFileEditingTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
-  private final String LANGUAGE_SERVER_INIT_MESSAGE =
-      "Finished language servers initialization, file path";
   private final String NAME_OF_EDITING_FILE = "Program.cs";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
@@ -117,7 +116,7 @@ public class CSharpFileEditingTest {
     projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
     consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole(LANGUAGE_SERVER_INIT_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
     editor.selectTabByName(NAME_OF_EDITING_FILE);
   }
 
