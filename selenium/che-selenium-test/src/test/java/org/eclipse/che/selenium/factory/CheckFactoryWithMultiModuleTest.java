@@ -46,9 +46,8 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
 
-@Inject private Consoles consoles;  @Inject
-
-  private TestGitHubRepository testRepo;
+  @Inject private Consoles consoles;
+  @Inject private TestGitHubRepository testRepo;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
