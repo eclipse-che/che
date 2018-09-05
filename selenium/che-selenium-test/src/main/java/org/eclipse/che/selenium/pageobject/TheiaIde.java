@@ -25,12 +25,11 @@ import org.openqa.selenium.support.PageFactory;
 
 @Singleton
 public class TheiaIde {
-  private final SeleniumWebDriver seleniumWebDriver;
+
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   TheiaIde(SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -39,13 +38,12 @@ public class TheiaIde {
     String THEIA_IDE_ID = "theia-app-shell";
     String THEIA_IDE_TOP_PANEL_ID = "theia-top-panel";
     String LOADER_XPATH = "//div[@class='theia-preload theia-hidden']";
-    String MAIN_MENU_ITEM_XPATH = "//div[@id='theia:menubar']//li/div[text()='%s']";
-    String SUBMENU_ITEM_XPATH = "//li[@class='p-Menu-item']/div[text()='%s']";
-
-    String DIALOG_ABOUT_XPATH = "//div[@class='dialogBlock']";
-    String DIALOG_ABOUT_TITLE_XPATH = DIALOG_ABOUT_XPATH + "//div[@class='dialogTitle']";
-    String DIALOG_ABOUT_CONTENT_XPATH = DIALOG_ABOUT_XPATH + "//div[@class='dialogContent']";
-    String CLOSE_DIALOG_ABOUT_BUTTON_XPATH = DIALOG_ABOUT_XPATH + "//button";
+    String MAIN_MENU_ITEM_XPATH_PATTERN = "//div[@id='theia:menubar']//li/div[text()='%s']";
+    String SUBMENU_ITEM_XPATH_PATTERN = "//li[@class='p-Menu-item']/div[text()='%s']";
+    String ABOUT_DIALOG_XPATH = "//div[@class='dialogBlock']";
+    String ABOUT_DIALOG_TITLE_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogTitle']";
+    String ABOUT_DIALOG_CONTENT_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogContent']";
+    String ABOUT_DIALOG_OK_BUTTON_XPATH = ABOUT_DIALOG_XPATH + "//button";
   }
 
   @FindBy(id = Locators.THEIA_IDE_ID)
@@ -57,17 +55,17 @@ public class TheiaIde {
   @FindBy(xpath = Locators.LOADER_XPATH)
   WebElement loader;
 
-  @FindBy(xpath = Locators.DIALOG_ABOUT_XPATH)
-  WebElement dialogAbout;
+  @FindBy(xpath = Locators.ABOUT_DIALOG_XPATH)
+  WebElement aboutDialog;
 
-  @FindBy(xpath = Locators.DIALOG_ABOUT_TITLE_XPATH)
-  WebElement dialogAboutTitle;
+  @FindBy(xpath = Locators.ABOUT_DIALOG_TITLE_XPATH)
+  WebElement aboutDialogTitle;
 
-  @FindBy(xpath = Locators.DIALOG_ABOUT_CONTENT_XPATH)
-  WebElement dialogAboutContent;
+  @FindBy(xpath = Locators.ABOUT_DIALOG_CONTENT_XPATH)
+  WebElement aboutDialogContent;
 
-  @FindBy(xpath = Locators.CLOSE_DIALOG_ABOUT_BUTTON_XPATH)
-  WebElement dialogAboutOkButton;
+  @FindBy(xpath = Locators.ABOUT_DIALOG_OK_BUTTON_XPATH)
+  WebElement aboutDialogOkButton;
 
   public void waitTheiaIde() {
     seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
@@ -81,31 +79,42 @@ public class TheiaIde {
     seleniumWebDriverHelper.waitInvisibility(loader);
   }
 
-  public void clickOnItemInMainMenu(String itemName) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(Locators.MAIN_MENU_ITEM_XPATH, itemName)));
+  public void clickOnMenuItemInMainMenu(String itemName) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.MAIN_MENU_ITEM_XPATH_PATTERN, itemName)));
   }
 
   public void clickOnSubmenuItem(String itemName) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(Locators.SUBMENU_ITEM_XPATH, itemName)));
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.SUBMENU_ITEM_XPATH_PATTERN, itemName)));
   }
 
-  public void waitDialogAboutForm() {
-    seleniumWebDriverHelper.waitVisibility(dialogAbout, PREPARING_WS_TIMEOUT_SEC);
+  /**
+   * Run command from sub menu.
+   *
+   * @param topMenuCommand
+   * @param commandName
+   */
+  public void runCommand(String topMenuCommand, String commandName) {
+    clickOnMenuItemInMainMenu(topMenuCommand);
+    clickOnSubmenuItem(commandName);
   }
 
-  public void waitDialogAboutFormClosed() {
-    seleniumWebDriverHelper.waitInvisibility(dialogAbout);
+  /** wait 'About' dialog is open */
+  public void waitAboutDialogIsOpen() {
+    seleniumWebDriverHelper.waitVisibility(aboutDialog, PREPARING_WS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitTextContains(aboutDialogTitle, "Theia");
   }
 
-  public void closeDialogAboutForm() {
-    seleniumWebDriverHelper.waitAndClick(dialogAboutOkButton);
+  public void waitAboutDialogIsClosed() {
+    seleniumWebDriverHelper.waitInvisibility(aboutDialog);
   }
 
-  public String getDialogAboutTitle() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetText(dialogAboutTitle);
+  public void closeAboutDialog() {
+    seleniumWebDriverHelper.waitAndClick(aboutDialogOkButton);
   }
 
-  public void waitDialogAboutFormContains(String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(dialogAboutContent, expectedText);
+  public void waitAboutDialogContentContains(String expectedText) {
+    seleniumWebDriverHelper.waitTextContains(aboutDialogContent, expectedText);
   }
 }

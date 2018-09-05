@@ -23,7 +23,6 @@ import org.eclipse.che.selenium.pageobject.TheiaIde;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -56,18 +55,18 @@ public class CreateWorkspaceFromJavaTheiaDockerStackTest {
     seleniumWebDriverHelper.waitAndSwitchToFrame(
         By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
 
+    // wait Theia is ready to use
     theiaIde.waitTheiaIde();
     theiaIde.waitTheiaIdeTopPanel();
     theiaIde.waitLoaderInvisibility();
 
-    theiaIde.clickOnItemInMainMenu("Help");
-    theiaIde.clickOnSubmenuItem("About");
+    // run 'About' command from 'Help' menu
+    theiaIde.runCommand("Help", "About");
 
-    theiaIde.waitDialogAboutForm();
-    Assert.assertEquals(theiaIde.getDialogAboutTitle(), "Theia");
-    theiaIde.waitDialogAboutFormContains("List of extensions");
-
-    theiaIde.closeDialogAboutForm();
-    theiaIde.waitDialogAboutFormClosed();
+    // wait 'About' dialog, check its content and close
+    theiaIde.waitAboutDialogIsOpen();
+    theiaIde.waitAboutDialogContentContains("List of extensions");
+    theiaIde.closeAboutDialog();
+    theiaIde.waitAboutDialogIsClosed();
   }
 }
