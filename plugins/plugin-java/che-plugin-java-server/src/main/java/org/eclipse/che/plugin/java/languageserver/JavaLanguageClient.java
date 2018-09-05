@@ -35,6 +35,11 @@ public interface JavaLanguageClient {
   @JsonNotification("language/progressReport")
   void sendProgressReport(ProgressReport report);
 
+  /** Execute custom command requests sent by jdt.ls */
   @JsonRequest("workspace/executeClientCommand")
   CompletableFuture<Object> executeClientCommand(ExecuteCommandParams params);
+
+  /** Handles custom notification sent by jdt.ls */
+  @JsonNotification("workspace/notify")
+  void sendNotification(ExecuteCommandParams params);
 }
