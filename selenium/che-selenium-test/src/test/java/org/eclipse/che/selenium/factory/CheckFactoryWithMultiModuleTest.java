@@ -16,10 +16,12 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -42,11 +44,7 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
-
-  @Inject
-  @Named("github.username")
-  private String gitHubUsername;
-
+  @Inject private TestGitHubRepository testRepo;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
@@ -54,15 +52,18 @@ public class CheckFactoryWithMultiModuleTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    // preconditions - add the project to the test repository
+    Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+    testRepo.addContent(entryPath);
+    String repositoryUrl = testRepo.getHttpsTransportUrl();
+
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
     ProjectConfigDto projectConfigDto = factoryBuilder.getWorkspace().getProjects().get(0);
     projectConfigDto.setName(PROJECT_NAME);
     projectConfigDto.setPath("/" + PROJECT_NAME);
     projectConfigDto.getSource().setParameters(ImmutableMap.of("branch", "master"));
-    projectConfigDto
-        .getSource()
-        .setLocation("https://github.com/" + gitHubUsername + "/gitPullTest.git");
+    projectConfigDto.getSource().setLocation(repositoryUrl);
     testFactory = factoryBuilder.build();
   }
 
@@ -72,7 +73,7 @@ public class CheckFactoryWithMultiModuleTest {
   }
 
   @Test
-  public void checkFactoryProcessing() throws Exception {
+  public void checkFactoryProcessing() {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
