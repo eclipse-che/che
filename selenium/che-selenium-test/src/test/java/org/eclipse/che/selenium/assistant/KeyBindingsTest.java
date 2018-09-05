@@ -72,6 +72,7 @@ public class KeyBindingsTest {
   public void enterKeyCombinationTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
     keyBindings.enterKeyCombination(Keys.CONTROL, Keys.ALT, Keys.getKeyFromUnicode('n'));
