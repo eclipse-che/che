@@ -115,7 +115,7 @@ public class CppProjectDebuggingTest {
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
 
-    notifications.waitExpectedMessageOnProgressPanelAndClosed(
+    notifications.waitExpectedMessageOnProgressPanelAndClose(
         String.format("Remote debugger connected\nConnected to: localhost:%s.", DEBUG_PORT));
 
     // then

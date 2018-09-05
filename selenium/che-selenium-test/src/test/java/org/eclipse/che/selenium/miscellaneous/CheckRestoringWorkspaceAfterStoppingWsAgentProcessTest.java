@@ -96,7 +96,7 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest {
         COMMON_GOAL, PROJECT_NAME, nameCommandForKillWsAgent);
 
     // check that ws agent has stopped and current editor tab is displayed
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose(
         EXPECTED_POPUP_MESSAGE, WAITING_NOTIFICATION_TIMEOUT_IN_SEC);
     toastLoader.waitToastLoaderIsOpen();
     toastLoader.waitExpectedTextInToastLoader("Workspace agent is not running");

@@ -114,7 +114,7 @@ public class InnerClassAndLambdaDebuggingTest {
             TestMenuCommandsConstants.Run.DEBUG, PROJECT));
 
     try {
-      notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+      notificationPopup.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/10728");

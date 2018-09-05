@@ -812,18 +812,19 @@ generateFailSafeReport () {
 
     # add link the che server logs archive into the 'Summary' section of failsafe report
     local summaryTag="Summary<\/h2><a name=\"Summary\"><\/a>"
-    local cheServerLogsFile="target\/site\/che_server_logs.zip"
-    local linkToCheServerLogsTag="<p>\[<a href=\"$cheServerLogsFile\" target=\"_blank\">Eclipse Che Server logs<\/a>\]<\/p>"
+    local linkToCheServerLogsTag="<p>\[<a href=\"che_server_logs.zip\" target=\"_blank\">Eclipse Che Server logs<\/a>\]<\/p>"
     sed -i "s/${summaryTag}/${summaryTag}${linkToCheServerLogsTag}/" ${FAILSAFE_REPORT}
 
     # attach screenshots
-    for file in $(ls target/site/screenshots/* | sort -r)
-    do
-        local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
-        local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
-        local screenshotTag="<p><img src=\"screenshots\/"$(basename ${file})"\"><p>"
-        sed -i "s/${testDetailTag}/${testDetailTag}${screenshotTag}/" ${FAILSAFE_REPORT}
-    done
+    if [[ -d "target/site/screenshots" ]]; then
+        for file in $(ls target/site/screenshots/* | sort -r)
+        do
+            local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
+            local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
+            local screenshotTag="<p><img src=\"screenshots\/"$(basename ${file})"\"><p>"
+            sed -i "s/${testDetailTag}/${testDetailTag}${screenshotTag}/" ${FAILSAFE_REPORT}
+        done
+    fi
 
     attachLinkToTestReport workspace-logs "Workspace logs"
     attachLinkToTestReport webdriver-logs "Browser logs"
@@ -842,8 +843,11 @@ attachLinkToTestReport() {
     # attach links to resource related to failed test
     local relativePathToResource=$1
     local titleOfLink=$2
-    local dirWithResources="target/site/$relativePathToResource/*"
-    for file in $(ls ${dirWithResources} | sort -r)
+    local dirWithResources="target/site/$relativePathToResource"
+
+    [[ ! -d ${dirWithResources} ]] && return
+
+    for file in $(ls ${dirWithResources}/* | sort -r)
     do
         local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
         local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
