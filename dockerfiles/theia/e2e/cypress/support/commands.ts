@@ -28,10 +28,15 @@ Cypress.Commands.add('theiaCleanup', (text: string) => {
   });
 
 
-Cypress.Commands.add('theiaCommandPaletteClick', (text: string) => {
+Cypress.Commands.add('theiaCommandPaletteClick', (text: string, keyActions?: string) => {
+  if (!keyActions) {
+    keyActions = '';
+  }
   cy.get('body').type('{ctrl}{cmd}{shift}p').then(() => {
-    cy.get('.monaco-inputbox>.wrapper>.input').type(text + '{enter}').then(() => {
-      return true;
+    cy.get('.monaco-inputbox>.wrapper>.input').type(text).then(() => {
+          cy.get('.monaco-inputbox>.wrapper>.input').type(keyActions + '{enter}').then(() => {
+        return true;
+      });
     });
   });
 });
@@ -95,7 +100,7 @@ Cypress.Commands.add('theiaExtensionsListFromPanel', () => {
 declare namespace Cypress {
   // tslint:disable-next-line interface-name
   interface Chainable {
-    theiaCommandPaletteClick: (value: string) => Cypress.Chainable<boolean>
+    theiaCommandPaletteClick: (value: string, keyActions?: string) => Cypress.Chainable<boolean>
     theiaCommandPaletteItems: (value: string) => Cypress.Chainable<string[]>,
     theiaExtensionsList: () => Cypress.Chainable<string[]>,
     theiaCleanup : () => void

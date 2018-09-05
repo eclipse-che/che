@@ -163,4 +163,4 @@ rm add-extensions.js resolutions-provider.js versions.sh setup.sh
 rm extensions.json
 
 # use typescript globally (to have tsc/typescript working)
-npm install -g typescript@2.8.4
+npm install -g typescript@2.9.2
