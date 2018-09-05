@@ -95,12 +95,11 @@ public class TheiaIde {
    * @param topMenuCommand
    * @param commandName
    */
-  public void runCommand(String topMenuCommand, String commandName) {
+  public void runMenuCommand(String topMenuCommand, String commandName) {
     clickOnMenuItemInMainMenu(topMenuCommand);
     clickOnSubmenuItem(commandName);
   }
 
-  /** wait 'About' dialog is open */
   public void waitAboutDialogIsOpen() {
     seleniumWebDriverHelper.waitVisibility(aboutDialog, PREPARING_WS_TIMEOUT_SEC);
     seleniumWebDriverHelper.waitTextContains(aboutDialogTitle, "Theia");
@@ -114,7 +113,7 @@ public class TheiaIde {
     seleniumWebDriverHelper.waitAndClick(aboutDialogOkButton);
   }
 
-  public void waitAboutDialogContentContains(String expectedText) {
+  public void waitAboutDialogContains(String expectedText) {
     seleniumWebDriverHelper.waitTextContains(aboutDialogContent, expectedText);
   }
 }

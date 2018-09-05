@@ -64,11 +64,11 @@ public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
     theiaIde.waitLoaderInvisibility();
 
     // run 'About' command from 'Help' menu
-    theiaIde.runCommand("Help", "About");
+    theiaIde.runMenuCommand("Help", "About");
 
     // wait 'About' dialog, check its content and close
     theiaIde.waitAboutDialogIsOpen();
-    theiaIde.waitAboutDialogContentContains("List of extensions");
+    theiaIde.waitAboutDialogContains("List of extensions");
     theiaIde.closeAboutDialog();
     theiaIde.waitAboutDialogIsClosed();
   }
