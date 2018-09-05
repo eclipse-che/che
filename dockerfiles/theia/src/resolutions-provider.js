@@ -41,7 +41,7 @@ try {
     spawnSync('curl',[`${NPM_API_URL}/search?q=${keyWords}&size=${resultSize}`, '-o', SEARCH_JSON_PATH]);
 } catch(error) {
     console.error("Failed to get Theia depedencies. Cause: ", error);
-    process.exit(2);
+    process.exit(1);
 }
 
 const packageScopeRegexp = '^@theia/.*$';
