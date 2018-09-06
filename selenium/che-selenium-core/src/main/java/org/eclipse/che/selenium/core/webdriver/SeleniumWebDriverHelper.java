@@ -39,6 +39,7 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -129,9 +130,9 @@ public class SeleniumWebDriverHelper {
    */
   public void setText(WebElement webElement, String value) {
     waitVisibility(webElement).clear();
-    waitTextEqualsTo(webElement, "");
+    waitTextEqualsTo(webElement, "", element -> element.getAttribute("value"), DEFAULT_TIMEOUT);
     waitAndSendKeysTo(webElement, value);
-    waitTextEqualsTo(webElement, value);
+    waitTextEqualsTo(webElement, value, element -> element.getAttribute("value"), DEFAULT_TIMEOUT);
   }
 
   /**
@@ -593,7 +594,20 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(WebElement webElement, int timeout) {
-    return waitVisibility(webElement, timeout).getText();
+    return waitVisibilityAndGetText(webElement, WebElement::getText, timeout);
+  }
+
+  /**
+   * Waits during {@code timeout} visibility of provided {@code webElement} and gets text.
+   *
+   * @param webElement element from which text should be got
+   * @param timeout waiting time in seconds
+   * @return element text by {@link WebElement#getText()}
+   */
+  public String waitVisibilityAndGetText(
+      WebElement webElement, Function<WebElement, String> textProvider, int timeout) {
+    waitVisibility(webElement, timeout);
+    return textProvider.apply(webElement);
   }
 
   /**
@@ -771,6 +785,28 @@ public class SeleniumWebDriverHelper {
                   actual[0] = waitVisibilityAndGetText(element, timeout);
                   return actual[0].equals(expected);
                 });
+  }
+
+  /**
+   * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
+   * WebElement#getText()} equals to provided {@code expectedText}.
+   *
+   * @param webElement element in which text should be checked
+   * @param expectedText expected text which should be present in the element
+   * @param timeout waiting time in seconds
+   */
+  public void waitTextEqualsTo(
+      WebElement webElement,
+      String expectedText,
+      Function<WebElement, String> textProvider,
+      int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    waitVisibilityAndGetText(webElement, textProvider, timeout)
+                        .equals(expectedText));
   }
 
   /**
