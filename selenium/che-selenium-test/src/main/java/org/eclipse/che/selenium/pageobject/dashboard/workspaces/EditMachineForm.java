@@ -231,7 +231,7 @@ public class EditMachineForm {
 
   public String getRecipeText() {
     return seleniumWebDriverHelper
-        .waitVisibilityOfAllElements(By.xpath(RECIPE_EDITOR_TEXT_XPATH))
+        .waitPresenceOfAllElements(By.xpath(RECIPE_EDITOR_TEXT_XPATH))
         .stream()
         .map(element -> element.getText())
         .collect(Collectors.joining("\n"));
