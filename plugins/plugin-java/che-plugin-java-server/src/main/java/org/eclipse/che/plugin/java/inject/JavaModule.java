@@ -19,6 +19,7 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerJsonRpcMessenger;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerLauncher;
+import org.eclipse.che.plugin.java.languageserver.NotifyJsonRpcTransmitter;
 import org.eclipse.che.plugin.java.languageserver.ProjectsListener;
 
 /** @author Anatolii Bazko */
@@ -34,6 +35,7 @@ public class JavaModule extends AbstractModule {
         .to(JavaLanguageServerLauncher.class)
         .asEagerSingleton();
 
+    bind(NotifyJsonRpcTransmitter.class).asEagerSingleton();
     bind(JavaLanguageServerJsonRpcMessenger.class).asEagerSingleton();
     bind(JavaLanguageServerExtensionService.class).asEagerSingleton();
     bind(ProjectsListener.class).asEagerSingleton();
