@@ -110,7 +110,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitName(MACHINE_NAME);
     editMachineForm.waitSliderRamValue(EXPECTED_RAM_VALUE + " GB");
     editMachineForm.waitRamFieldText(EXPECTED_RAM_VALUE);
-    editMachineForm.waitRecipeText(IMAGE_NAME);
+    editMachineForm.waitRecipeText("FROM " + IMAGE_NAME + "\n");
 
     // name empty field
     editMachineForm.typeName("");
