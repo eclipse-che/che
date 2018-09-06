@@ -21,7 +21,6 @@ import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.FindServer;
 import org.eclipse.che.api.languageserver.LanguageServerInitializer;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.plugin.java.languageserver.ExecuteClientCommandJsonRpcTransmitter;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.mockito.Mockito;
 
@@ -39,10 +38,7 @@ public class JavaLanguageServerExtensionStub extends JavaLanguageServerExtension
             RequestHandlerConfigurator.class,
             Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)),
         mock(ProjectManager.class, Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)),
-        mock(EventService.class, Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)),
-        mock(
-            ExecuteClientCommandJsonRpcTransmitter.class,
-            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
+        mock(EventService.class, Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
   }
 
   @Override

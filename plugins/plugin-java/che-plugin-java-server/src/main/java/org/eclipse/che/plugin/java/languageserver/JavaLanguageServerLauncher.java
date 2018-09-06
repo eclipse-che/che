@@ -14,11 +14,6 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_MAVEN_MODULE;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECTS_CLASSPATH;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_PROJECT_CONFIG;
 import static org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.UpdateMavenModulesInfoDto.fromJson;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
@@ -50,6 +45,7 @@ import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
+import org.eclipse.che.jdt.ls.extension.api.Notifications;
 import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 import org.eclipse.che.jdt.ls.extension.api.dto.StatusReport;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateMavenModulesInfo;
@@ -72,6 +68,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private final Path launchScript;
   private final ProcessorJsonRpcCommunication processorJsonRpcCommunication;
   private final ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter;
+  private final NotifyJsonRpcTransmitter notifyTransmitter;
   private final EventService eventService;
   private final ProjectManager projectManager;
 
@@ -79,10 +76,12 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   public JavaLanguageServerLauncher(
       ProcessorJsonRpcCommunication processorJsonRpcCommunication,
       ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter,
+      NotifyJsonRpcTransmitter notifyTransmitter,
       EventService eventService,
       ProjectManager projectManager) {
     this.processorJsonRpcCommunication = processorJsonRpcCommunication;
     this.executeCliendCommandTransmitter = executeCliendCommandTransmitter;
+    this.notifyTransmitter = notifyTransmitter;
     this.eventService = eventService;
     this.projectManager = projectManager;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
@@ -134,25 +133,29 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     return executeCliendCommandTransmitter.executeClientCommand(analyzeParams(params));
   }
 
+  public void sendNotification(ExecuteCommandParams params) {
+    notifyTransmitter.sendNotification(analyzeParams(params));
+  }
+
   private ExecuteCommandParams analyzeParams(ExecuteCommandParams params) {
     String command = params.getCommand();
     List<Object> arguments = params.getArguments();
     switch (command) {
-      case CLIENT_UPDATE_PROJECTS_CLASSPATH:
-      case CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
+      case Notifications.UPDATE_PROJECTS_CLASSPATH:
+      case Notifications.UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
         List<Object> fixedPathList = new ArrayList<>(arguments.size());
         for (Object uri : arguments) {
           fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
         }
         params.setArguments(fixedPathList);
         break;
-      case CLIENT_UPDATE_PROJECT:
-      case CLIENT_UPDATE_PROJECT_CONFIG:
+      case Notifications.UPDATE_PROJECT:
+      case Notifications.UPDATE_PROJECT_CONFIG:
         Object projectUri = arguments.get(0);
         params.setArguments(
             singletonList(removePrefixUri(convertToJson(projectUri).getAsString())));
         break;
-      case CLIENT_UPDATE_MAVEN_MODULE:
+      case Notifications.UPDATE_MAVEN_MODULE:
         updateMavenModules(params, arguments);
         break;
       default:
@@ -171,7 +174,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     for (String uri : updateModulesInfo.getRemoved()) {
       removeMavenProjectType(Paths.get(projectUri, uri).toString(), newParameters);
     }
-    params.setCommand(CLIENT_UPDATE_PROJECT);
+    params.setCommand(Notifications.UPDATE_PROJECT);
     params.setArguments(newParameters);
   }
 
