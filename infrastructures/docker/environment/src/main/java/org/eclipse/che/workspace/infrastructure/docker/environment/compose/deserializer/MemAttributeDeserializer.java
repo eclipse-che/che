@@ -26,22 +26,22 @@ import org.eclipse.che.commons.lang.Size;
  *
  * @author Mykhailo Kuznietsov
  */
-public class MemLimitDeserializer extends JsonDeserializer<Long> {
+public class MemAttributeDeserializer extends JsonDeserializer<Long> {
   private static final String UNSUPPORTED_VALUE_MESSAGE = "Unsupported value '%s'.";
 
   @Override
   public Long deserialize(JsonParser jsonParser, DeserializationContext ctxt)
       throws IOException, JsonProcessingException {
-    Object memLimit = jsonParser.readValueAs(Object.class);
-    if (memLimit instanceof Long) {
-      return (Long) memLimit;
+    Object memAttribute = jsonParser.readValueAs(Object.class);
+    if (memAttribute instanceof Long) {
+      return (Long) memAttribute;
     }
-    if (memLimit instanceof Integer) {
-      return ((Integer) memLimit).longValue();
+    if (memAttribute instanceof Integer) {
+      return ((Integer) memAttribute).longValue();
     }
-    if (memLimit instanceof String) {
-      return Size.parseSize((String) memLimit);
+    if (memAttribute instanceof String) {
+      return Size.parseSize((String) memAttribute);
     }
-    throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, memLimit));
+    throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, memAttribute));
   }
 }

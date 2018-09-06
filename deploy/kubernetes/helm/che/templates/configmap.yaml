@@ -76,3 +76,9 @@ data:
   CHE_WORKSPACE_HTTPS__PROXY: {{ .Values.cheWorkspaceHttpsProxy }}
   CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy }}
   CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: '{{ .Values.global.workspaceIdleTimeout }}'
+{{- if .Values.workspaceDefaultRamRequest }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest }}
+{{- end }}
+{{- if .Values.workspaceDefaultRamRequest }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamRequest }}
+{{- end }}
