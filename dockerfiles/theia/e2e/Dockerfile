@@ -8,6 +8,8 @@
 # Use upstream image
 FROM ${BUILD_ORGANIZATION}/${BUILD_PREFIX}-theia:${BUILD_TAG}
 
+USER root
+
 # Install packages used by Cypress
 RUN yum install -y gtk2-2.24.31-1.el7.x86_64 \
                    libnotify-0.7.7-1.el7.x86_64 \

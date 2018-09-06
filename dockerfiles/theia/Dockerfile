@@ -26,4 +26,5 @@ ADD supervisord.conf /etc/
 
 RUN ${HOME}/setup.sh
 
+USER theia
 ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
