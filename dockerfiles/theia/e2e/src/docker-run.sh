@@ -8,5 +8,10 @@
 
 cd /home/theia/ && bash start.sh&
 sleep 10s
+
+# Cleanup previous videos
+rm -rf /home/cypress/cypress/videos
+
+# Run tests
 cd /home/cypress && ./node_modules/.bin/cypress run
  
