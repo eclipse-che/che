@@ -28,7 +28,7 @@
         }
       },
       "recipe": {
-        "content": "FROM codenvy/ubuntu_jdk8",
+        "content": "FROM eclipse/ubuntu_jdk8",
         "contentType": "text/x-dockerfile",
         "type": "dockerfile"
       }

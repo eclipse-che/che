@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.ide.ui.dialogs.choice;
 
+import static com.google.gwt.safehtml.shared.SimpleHtmlSanitizer.sanitizeHtml;
+
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
@@ -51,7 +53,7 @@ public class ChoiceDialogPresenter implements ChoiceDialog, ChoiceDialogView.Act
     this(
         view,
         title,
-        new InlineHTML(message),
+        new InlineHTML(sanitizeHtml(message)),
         firstChoiceLabel,
         secondChoiceLabel,
         "",
@@ -95,7 +97,7 @@ public class ChoiceDialogPresenter implements ChoiceDialog, ChoiceDialogView.Act
     this(
         view,
         title,
-        new InlineHTML(message),
+        new InlineHTML(sanitizeHtml(message)),
         firstChoiceLabel,
         secondChoiceLabel,
         thirdChoiceLabel,

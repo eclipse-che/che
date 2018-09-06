@@ -38,6 +38,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
@@ -75,6 +76,7 @@ import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.fail;
@@ -212,6 +214,7 @@ public class CodenvyEditor {
     String HOVER_POPUP_XPATH =
         "//div[@class='textviewTooltip' and contains(@style,'visibility: visible')]";
     String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
+    String LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS = "input.orionCodenvy";
   }
 
   public enum TabActionLocator {
@@ -343,6 +346,9 @@ public class CodenvyEditor {
 
   @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
   private WebElement proposalDoc;
+
+  @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
+  private WebElement languageServerRenameField;
 
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
@@ -811,8 +817,10 @@ public class CodenvyEditor {
             (ExpectedCondition<Boolean>)
                 webDriver -> {
                   for (int i = startLine; i <= endLine; i++) {
+                    WebElement webElement = getListGitMarkers().get(i);
+                    webDriverWaitFactory.get().until(visibilityOf(webElement));
                     if (!"git-change-marker modification"
-                        .equals(getListGitMarkers().get(i).getAttribute("class"))) {
+                        .equals(webElement.getAttribute("class"))) {
                       return false;
                     }
                   }
@@ -2228,5 +2236,16 @@ public class CodenvyEditor {
         .sendKeys("/")
         .keyUp(CONTROL)
         .perform();
+  }
+
+  /**
+   * wait renaming field in the Editor (usually it field is used by language servers), type new
+   * value and wait closing of the field
+   *
+   * @param renameValue
+   */
+  public void doRenamingByLanguageServerField(String renameValue) {
+    seleniumWebDriverHelper.setText(languageServerRenameField, renameValue);
+    seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
   }
 }

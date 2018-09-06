@@ -115,7 +115,7 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
         TestMenuCommandsConstants.JUNIT_TEST_DROP_DAWN_ITEM);
 
     // then
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Test runner executed successfully.");
     pluginConsole.waitFqnOfTesClassInResultTree("org.eclipse.che.tests.AppAnotherTest");
     assertTrue(pluginConsole.getTextFromResultTree().equals(expectedResultAfterFirstLaunch));
     pluginConsole.waitFqnOfTesClassInResultTree("org.eclipse.che.tests.AppOneTest");

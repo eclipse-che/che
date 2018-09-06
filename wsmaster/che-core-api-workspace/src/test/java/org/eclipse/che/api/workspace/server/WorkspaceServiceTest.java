@@ -1143,7 +1143,7 @@ public class WorkspaceServiceTest {
             "dockerimage,dockerfile",
             Constants.CHE_WORKSPACE_AUTO_START,
             "true",
-            Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
+            "cheWorkspacePluginRegistryUrl",
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR));
   }
 

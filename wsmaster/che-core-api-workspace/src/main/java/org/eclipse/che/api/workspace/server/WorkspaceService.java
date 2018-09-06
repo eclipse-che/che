@@ -678,7 +678,7 @@ public class WorkspaceService extends Service {
     settings.put(CHE_WORKSPACE_AUTO_START, Boolean.toString(cheWorkspaceAutoStart));
 
     if (pluginRegistryUrl != null) {
-      settings.put(CHE_WORKSPACE_PLUGIN_REGISTRY_ULR, pluginRegistryUrl);
+      settings.put("cheWorkspacePluginRegistryUrl", pluginRegistryUrl);
     }
 
     return settings.build();
