@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
@@ -38,6 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
@@ -46,7 +48,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
  * @author Sergii Leshchenko
  * @author Anton Korneta
  */
-public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftRuntimeContext> {
+public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftEnvironment> {
 
   private final OpenShiftProject project;
   private final Set<String> unrecoverableEvents;
@@ -67,6 +69,9 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       KubernetesRuntimeStateCache runtimesStatusesCache,
       KubernetesMachineCache machinesCache,
       StartSynchronizerFactory startSynchronizerFactory,
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
+      OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
+      SidecarToolingProvisioner toolingProvisioner,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -85,6 +90,9 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         runtimesStatusesCache,
         machinesCache,
         startSynchronizerFactory,
+        internalEnvironmentProvisioners,
+        kubernetesEnvironmentProvisioner,
+        toolingProvisioner,
         context,
         project,
         warnings);

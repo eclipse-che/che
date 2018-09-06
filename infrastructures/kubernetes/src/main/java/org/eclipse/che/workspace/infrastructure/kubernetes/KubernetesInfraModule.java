@@ -70,9 +70,14 @@ public class KubernetesInfraModule extends AbstractModule {
 
     bind(RuntimeInfrastructure.class).to(KubernetesInfrastructure.class);
 
+    bind(new TypeLiteral<KubernetesEnvironmentProvisioner<KubernetesEnvironment>>() {})
+        .to(KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl.class);
+
     install(new FactoryModuleBuilder().build(KubernetesRuntimeContextFactory.class));
 
-    install(new FactoryModuleBuilder().build(KubernetesRuntimeFactory.class));
+    install(
+        new FactoryModuleBuilder()
+            .build(new TypeLiteral<KubernetesRuntimeFactory<KubernetesEnvironment>>() {}));
     install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
     install(new FactoryModuleBuilder().build(StartSynchronizerFactory.class));
 
