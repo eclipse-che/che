@@ -15,7 +15,6 @@ import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -37,8 +36,11 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.NewProjectConfigImpl;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.RegisteredProject;
+import org.eclipse.che.jdt.ls.extension.api.Notifications;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
+import org.eclipse.che.plugin.java.languageserver.NotifyJsonRpcTransmitter;
+import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +54,17 @@ public class ClasspathUpdaterService {
   private static final Logger LOG = LoggerFactory.getLogger(ClasspathUpdaterService.class);
 
   private final ProjectManager projectManager;
-  private JavaLanguageServerExtensionService extensionService;
+  private final JavaLanguageServerExtensionService extensionService;
+  private final NotifyJsonRpcTransmitter notifyTransmitter;
 
   @Inject
   public ClasspathUpdaterService(
-      ProjectManager projectManager, JavaLanguageServerExtensionService extensionService) {
+      ProjectManager projectManager,
+      JavaLanguageServerExtensionService extensionService,
+      NotifyJsonRpcTransmitter notifyTransmitter) {
     this.projectManager = projectManager;
     this.extensionService = extensionService;
+    this.notifyTransmitter = notifyTransmitter;
   }
 
   /**
@@ -106,6 +112,7 @@ public class ClasspathUpdaterService {
   private void notifyClientOnProjectUpdate(String projectPath) {
     List<Object> parameters = new ArrayList<>();
     parameters.add(removePrefixUri(convertToJson(projectPath).getAsString()));
-    extensionService.executeClientCommand(CLIENT_UPDATE_ON_PROJECT_CLASSPATH_CHANGED, parameters);
+    notifyTransmitter.sendNotification(
+        new ExecuteCommandParams(Notifications.UPDATE_ON_PROJECT_CLASSPATH_CHANGED, parameters));
   }
 }
