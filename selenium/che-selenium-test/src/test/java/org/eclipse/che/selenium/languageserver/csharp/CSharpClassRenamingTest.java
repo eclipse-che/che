@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.LS_RENAME;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
@@ -44,6 +43,8 @@ import org.testng.annotations.Test;
 public class CSharpClassRenamingTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CSharpClassRenamingTest.class.getSimpleName(), 4);
+  private final String LANGUAGE_SERVER_INIT_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.csharp.languageserver";
 
   private static final String PATH_TO_DOTNET_FILE = PROJECT_NAME + "/Hello.cs";
 
@@ -70,7 +71,7 @@ public class CSharpClassRenamingTest {
     ide.open(workspace);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_DOTNET_FILE);
-    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(LANGUAGE_SERVER_INIT_MESSAGE);
   }
 
   @Test
