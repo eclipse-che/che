@@ -163,7 +163,6 @@ public class JavaLanguageServerExtensionService {
   private final ProjectManager projectManager;
   private final EventService eventService;
   private final LanguageServerInitializer initializer;
-  private final ExecuteClientCommandJsonRpcTransmitter clientCommandTransmitter;
 
   @Inject
   public JavaLanguageServerExtensionService(
@@ -171,14 +170,12 @@ public class JavaLanguageServerExtensionService {
       LanguageServerInitializer languageServerInitializer,
       RequestHandlerConfigurator requestHandler,
       ProjectManager projectManager,
-      EventService eventService,
-      ExecuteClientCommandJsonRpcTransmitter clientCommandTransmitter) {
+      EventService eventService) {
     this.registry = registry;
     this.initializer = languageServerInitializer;
     this.requestHandler = requestHandler;
     this.projectManager = projectManager;
     this.eventService = eventService;
-    this.clientCommandTransmitter = clientCommandTransmitter;
     this.gson =
         new GsonBuilder()
             .registerTypeAdapterFactory(new CollectionTypeAdapterFactory())
@@ -1070,10 +1067,5 @@ public class JavaLanguageServerExtensionService {
     for (T child : childrenAccessor.apply(root)) {
       iterate(child, childrenAccessor, elementHandler);
     }
-  }
-
-  public CompletableFuture<Object> executeClientCommand(String commandId, List<Object> parameters) {
-    ExecuteCommandParams params = new ExecuteCommandParams(commandId, parameters);
-    return clientCommandTransmitter.executeClientCommand(params);
   }
 }
