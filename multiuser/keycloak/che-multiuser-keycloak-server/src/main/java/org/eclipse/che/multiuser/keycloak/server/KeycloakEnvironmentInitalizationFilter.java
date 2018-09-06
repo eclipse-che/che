@@ -92,11 +92,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         }
         String email = claims.get("email", String.class);
         if (isNullOrEmpty(email)) {
-          sendError(
-              response,
-              400,
-              "Unable to authenticate user because email address is not set in keycloak profile");
-          return;
+          email = username + "@" + username;
         }
         User user = userManager.getOrCreateUser(claims.getSubject(), email, username);
         subject =

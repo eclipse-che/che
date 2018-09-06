@@ -29,13 +29,13 @@ public class KeycloakHttpJsonRequestFactory extends DefaultHttpJsonRequestFactor
   public HttpJsonRequest fromUrl(@NotNull String url) {
     return super.fromUrl(url)
         .setAuthorizationHeader(
-            "bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
+            "Bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
   }
 
   @Override
   public HttpJsonRequest fromLink(@NotNull Link link) {
     return super.fromLink(link)
         .setAuthorizationHeader(
-            "bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
+            "Bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
   }
 }

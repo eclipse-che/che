@@ -11,6 +11,15 @@
  */
 'use strict';
 
+function storeRedirectUri(encodeHash) {
+    var redirectUri = location.href;
+    if (location.hash && encodeHash) {
+        redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
+        redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
+    }
+    window.sessionStorage.setItem('oidcIdeRedirectUrl', redirectUri);
+}
+
 export type keycloakUserInfo = {
   email: string;
   family_name: string;
@@ -67,7 +76,8 @@ export class CheKeycloak {
   }
 
   logout(): void {
-    this.keycloak.logout();
+    storeRedirectUri(false);
+    this.keycloak.logout({});
   }
 
 }

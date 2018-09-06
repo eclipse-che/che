@@ -39,6 +39,15 @@ public final class Keycloak extends JavaScriptObject {
     });
   }-*/;
 
+  public static native void storeRedirectUri(boolean encodeHash) /*-{
+      var redirectUri = location.href;
+      if (location.hash && encodeHash) {
+          redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
+          redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
+      }
+      window.sessionStorage.setItem('oidcIdeRedirectUrl', redirectUri);
+  }-*/;
+
   public static native Promise<Keycloak> init(
       String theUrl,
       String theRealm,
@@ -63,7 +72,14 @@ public final class Keycloak extends JavaScriptObject {
         }
         var keycloak = $wnd.Keycloak(config);
         $wnd['_keycloak'] = keycloak;
-        keycloak.init({onLoad: 'login-required', checkLoginIframe: false, useNonce: theUseNonce})
+        storeRedirectUri(true);
+        keycloak.init({
+          onLoad: 'login-required',
+          checkLoginIframe: false,
+          useNonce: theUseNonce,
+          scope: 'email profile',
+          redirectUri: window.location.protocol + '//' + window.location.host + '/api/keycloak/oidcCallbackIde.html'
+          })
             .success(function (authenticated) {
               resolve(keycloak);
             })
@@ -90,7 +106,10 @@ public final class Keycloak extends JavaScriptObject {
             .error(function () {
               console.log('[Keycloak] Failed updating Keycloak token');
               reject();
-              theKeycloak.login();
+              storeRedirectUri(true);
+              theKeycloak.login({
+                  scope: 'email profile'
+              });
             });
       } catch (ex) {
         console.log('[Keycloak] Failed updating Keycloak token with exception: ', ex);

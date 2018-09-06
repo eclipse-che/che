@@ -100,6 +100,14 @@
                 if (initOptions.timeSkew != null) {
                     kc.timeSkew = initOptions.timeSkew;
                 }
+                
+                if(initOptions.redirectUri) {
+                    kc.redirectUri = initOptions.redirectUri;
+                }                
+                
+                if(initOptions.scope) {
+                    kc.scope = initOptions.scope;
+                }                
             }
 
             if (!kc.responseMode) {
@@ -239,7 +247,9 @@
                 baseUrl = kc.endpoints.authorize();
             }
 
-            var scope = (options && options.scope) ? "openid " + options.scope : "openid";
+            var scope = (options && options.scope) ? 
+                "openid " + options.scope :
+                    (kc.scope) ? "openid " + kc.scope : "openid";
 
             var url = baseUrl
                 + '?client_id=' + encodeURIComponent(kc.clientId)

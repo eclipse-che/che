@@ -15,6 +15,15 @@ import {HttpInterceptorBase} from './interceptor-base';
 
 const GITHUB_API = 'api.github.com';
 
+function storeRedirectUri(encodeHash) {
+    var redirectUri = location.href;
+    if (location.hash && encodeHash) {
+        redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
+        redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
+    }
+    window.sessionStorage.setItem('oidcDashboardRedirectUrl', redirectUri);
+}
+
 /**
  * @author Oleksii Kurinnyi
  */
@@ -53,6 +62,7 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
       return config;
     }
 
+    
     if (this.keycloak && this.keycloak.token) {
       let deferred = this.$q.defer();
       this.keycloak.updateToken(5).success(() => {
@@ -62,7 +72,10 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
       }).error(() => {
         this.$log.log('token refresh failed :' + config.url);
         deferred.reject('Failed to refresh token');
-        this.keycloak.login();
+        storeRedirectUri(true);
+        this.keycloak.login({
+          scope: 'email profile'
+        });
       });
       return deferred.promise;
     }

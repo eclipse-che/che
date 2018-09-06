@@ -19,6 +19,15 @@ import { Loader } from './loader/loader'
 
 const WEBSOCKET_CONTEXT = '/api/websocket';
 
+function storeRedirectUri(encodeHash) {
+    var redirectUri = location.href;
+    if (location.hash && encodeHash) {
+        redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
+        redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
+    }
+    window.sessionStorage.setItem('oidcIdeRedirectUrl', redirectUri);
+}
+
 declare const Keycloak: Function;
 export class KeycloakLoader {
     /**
@@ -103,8 +112,15 @@ export class KeycloakLoader {
             if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
             	useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
             }
+            storeRedirectUri(true);
             keycloak
-                .init({onLoad: 'login-required', checkLoginIframe: false, useNonce: useNonce})
+                .init({
+                    onLoad: 'login-required',
+                    checkLoginIframe: false,
+                    useNonce: useNonce,
+                    scope: 'email profile',
+                    redirectUri: window.location.protocol + '//' + window.location.host + '/api/keycloak/oidcCallbackIde.html'
+                })
                 .success(() => {
                     resolve(keycloak);
                 })
@@ -370,7 +386,10 @@ export class WorkspaceLoader {
                     resolve(xhr);
                 }).error(() => {
                     console.log('Failed to refresh token');
-                    this.keycloak.login();
+                    storeRedirectUri(true);
+                    this.keycloak.login({
+                      scope: 'email profile'
+                    });
                     reject();
                 });
             }

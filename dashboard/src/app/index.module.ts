@@ -80,11 +80,26 @@ function keycloakLoad(keycloakSettings: any) {
     document.head.appendChild(script);
   });
 }
+
+function storeRedirectUri(encodeHash) {
+    var redirectUri = location.href;
+    if (location.hash && encodeHash) {
+        redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
+        redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
+    }
+    window.sessionStorage.setItem('oidcDashboardRedirectUrl', redirectUri);
+}
+
 function keycloakInit(keycloakConfig: any, theUseNonce: boolean) {
   return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
     const keycloak = Keycloak(keycloakConfig);
+    storeRedirectUri(true);
     keycloak.init({
-      onLoad: 'login-required', checkLoginIframe: false, useNonce: theUseNonce
+      onLoad: 'login-required',
+      checkLoginIframe: false,
+      useNonce: theUseNonce,
+      scope: 'email profile',
+      redirectUri: window.location.protocol + '//' + window.location.host + '/api/keycloak/oidcCallbackDashboard.html'
     }).success(() => {
       resolve(keycloak);
     }).error((error: any) => {
@@ -100,7 +115,11 @@ function setAuthorizationHeader(xhr: XMLHttpRequest, keycloak: any): Promise<any
         resolve(xhr);
       }).error(() => {
         console.log('Failed to refresh token');
-        keycloak.login();
+        storeRedirectUri(true);
+        keycloak.login({
+          redirectUri: '/support-fixed-redirects/oidcCallback.html',
+          scope: 'email profile'
+        });
         reject('Authorization is needed.');
       });
       return;
