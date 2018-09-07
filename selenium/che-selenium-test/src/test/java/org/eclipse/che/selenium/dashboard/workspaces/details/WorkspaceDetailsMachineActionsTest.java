@@ -12,7 +12,9 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static org.eclipse.che.selenium.core.TestGroup.DOCKER;
+import static org.eclipse.che.selenium.core.TestGroup.K8S;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.selenium.core.TestGroup.OSIO;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.APPLY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.CANCEL_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.SAVE_BUTTON;
@@ -104,7 +106,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitFormInvisibility();
   }
 
-  @Test(groups = OPENSHIFT)
+  @Test(groups = {OPENSHIFT, K8S, OSIO})
   public void checkEditMachineNameOpenshift() {
     checkEditOfMachineName(IMAGE_NAME);
   }
