@@ -32,9 +32,20 @@ WHERE (
       OR kp1.private_key = kp2.public_key
       ) > 1;
 
+--remove keys which have no more key pair references to it
+DELETE FROM che_sign_key k
+WHERE NOT EXISTS (
+      SELECT * FROM che_sign_key_pair kp
+      WHERE kp.private_key = k.id
+      OR kp.public_key = k.id
+      );
 
 -- add pair uniqueness constraint
 CREATE UNIQUE INDEX index_sign_public_private_key_id ON che_sign_key_pair (public_key, private_key);
+
+-- add foreign key indexes
+CREATE INDEX index_sign_public_key_id ON che_sign_key_pair (public_key);
+CREATE INDEX index_sign_private_key_id ON che_sign_key_pair (private_key);
 
 -- add keys table constraints
 ALTER TABLE che_sign_key_pair ADD CONSTRAINT fk_sign_public_key_id FOREIGN KEY (public_key) REFERENCES che_sign_key (id);
