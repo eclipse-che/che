@@ -28,7 +28,7 @@ OR NOT EXISTS (
 DELETE FROM che_sign_key_pair kp1
 WHERE (
       SELECT count(*) FROM che_sign_key_pair kp2
-      WHERE kp1.private_key  = kp2.private_key
+      WHERE kp1.private_key = kp2.private_key
       OR kp1.private_key = kp2.public_key
       ) > 1;
 
