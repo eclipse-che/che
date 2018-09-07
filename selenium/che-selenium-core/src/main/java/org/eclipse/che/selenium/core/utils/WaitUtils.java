@@ -11,10 +11,24 @@
  */
 package org.eclipse.che.selenium.core.utils;
 
-import java.util.concurrent.TimeUnit;
+import static java.lang.Thread.sleep;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
-/** @author Mykola Morhun */
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.BooleanSupplier;
+
+/**
+ * @author Mykola Morhun
+ * @author Ihor Okhrimenko
+ * @author Dmytro Nochevnov
+ */
 public class WaitUtils {
+
+  public static final int DEFAULT_TIMEOUT_IN_SEC = LOAD_PAGE_TIMEOUT_SEC;
+  public static final int DEFAULT_DELAY_BETWEEN_ATTEMPTS_IN_MILLISECONDS = 500;
 
   /**
    * Waits given time. When thread catch interrupt signal, than it immediately ends.
@@ -31,10 +45,10 @@ public class WaitUtils {
    * @param timeout time to wait
    * @param timeUnit time unit of the timeout parameter
    */
-  public static void sleepQuietly(int timeout, TimeUnit timeUnit) {
+  public static void sleepQuietly(long timeout, TimeUnit timeUnit) {
     long millisecondToWait = timeUnit.toMillis(timeout);
     try {
-      Thread.sleep(millisecondToWait);
+      sleep(millisecondToWait);
     } catch (InterruptedException e) {
       // Taking into account, that tests newer interrupts each other,
       // we can say, that this interrupt signal is external
@@ -45,5 +59,71 @@ public class WaitUtils {
       // Considering the above, we must stop this thread here immediately.
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Waits during {@code timeout} until {@code condition} has a "true" state.
+   *
+   * @param condition expression which should be performed
+   * @param timeout waiting time
+   * @param delayBetweenAttemptsInMilliseconds delay between tries of {@code condition} execution in
+   *     milliseconds
+   */
+  @SuppressWarnings("FutureReturnValueIgnored")
+  public static void waitSuccessCondition(
+      BooleanSupplier condition,
+      long timeout,
+      long delayBetweenAttemptsInMilliseconds,
+      TimeUnit timeoutTimeUnit)
+      throws InterruptedException, TimeoutException {
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    executor.submit(
+        () -> {
+          while (!condition.getAsBoolean()) {
+            sleepQuietly(delayBetweenAttemptsInMilliseconds, TimeUnit.MILLISECONDS);
+          }
+        });
+
+    executor.shutdown();
+    if (!executor.awaitTermination(timeout, timeoutTimeUnit)) {
+      throw new TimeoutException(
+          String.format(
+              "Expected condition failed: waiting for %s %s with %s MILLISECONDS interval",
+              timeout, timeoutTimeUnit, delayBetweenAttemptsInMilliseconds));
+    }
+  }
+
+  /**
+   * Waits during {@code timeout} until {@code condition} has a "true" state.
+   *
+   * @param condition expression which should be performed
+   * @param timeout waiting time
+   */
+  public static void waitSuccessCondition(
+      BooleanSupplier condition, long timeout, TimeUnit timeUnit)
+      throws InterruptedException, TimeoutException {
+    waitSuccessCondition(
+        condition, timeout, DEFAULT_DELAY_BETWEEN_ATTEMPTS_IN_MILLISECONDS, timeUnit);
+  }
+
+  /**
+   * Waits during {@code timeoutInSec} until {@code condition} has a "true" state.
+   *
+   * @param condition expression which should be performed
+   * @param timeoutInSec waiting time in seconds
+   */
+  public static void waitSuccessCondition(BooleanSupplier condition, long timeoutInSec)
+      throws InterruptedException, TimeoutException {
+    waitSuccessCondition(condition, timeoutInSec, TimeUnit.SECONDS);
+  }
+
+  /**
+   * Waits until {@code condition} has a "true" state.
+   *
+   * @param condition expression which should be performed
+   */
+  public static void waitSuccessCondition(BooleanSupplier condition)
+      throws InterruptedException, TimeoutException {
+    waitSuccessCondition(condition, DEFAULT_TIMEOUT_IN_SEC);
   }
 }

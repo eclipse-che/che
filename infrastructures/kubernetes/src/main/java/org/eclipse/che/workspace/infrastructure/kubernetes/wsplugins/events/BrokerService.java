@@ -42,6 +42,9 @@ public class BrokerService {
 
   private static final Logger LOG = getLogger(BrokerService.class);
 
+  public static final String BROKER_RESULT_METHOD = "broker/result";
+  public static final String BROKER_STATUS_CHANGED_METHOD = "broker/statusChanged";
+
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final EventService eventService;
 
@@ -54,14 +57,14 @@ public class BrokerService {
   public void configureMethods(RequestHandlerConfigurator requestHandler) {
     requestHandler
         .newConfiguration()
-        .methodName("broker/statusChanged")
+        .methodName(BROKER_STATUS_CHANGED_METHOD)
         .paramsAsDto(BrokerResultEvent.class)
         .noResult()
         .withConsumer(this::handle);
 
     requestHandler
         .newConfiguration()
-        .methodName("broker/result")
+        .methodName(BROKER_RESULT_METHOD)
         .paramsAsDto(BrokerResultEvent.class)
         .noResult()
         .withConsumer(this::handle);
