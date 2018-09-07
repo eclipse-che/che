@@ -32,7 +32,7 @@ WHERE (
       OR kp1.private_key = kp2.public_key
       ) > 1;
 
---remove keys which have no more key pair references to it
+-- remove keys which have no more key pair references to it
 DELETE FROM che_sign_key k
 WHERE NOT EXISTS (
       SELECT * FROM che_sign_key_pair kp
