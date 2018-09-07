@@ -175,8 +175,8 @@ public class PlainJavaProjectConfigureClasspathTest {
     configureClasspath.openItemInSelectPathForm(LIB_PROJECT);
     configureClasspath.selectItemInSelectPathForm("log4j-1.2.17.jar");
     configureClasspath.clickOkBtnSelectPathForm();
-    configureClasspath.waitExpectedTextJarsAndFolderArea("log4j-1.2.17.jar - /projects/lib");
-    configureClasspath.deleteJarOrFolderFromBuildPath("log4j-1.2.17.jar - /projects/lib");
+    configureClasspath.waitExpectedTextJarsAndFolderArea("log4j-1.2.17.jar - /lib");
+    configureClasspath.deleteJarOrFolderFromBuildPath("log4j-1.2.17.jar - /lib");
     configureClasspath.waitExpectedTextIsNotPresentInJarsAndFolderArea(
         "log4j-1.2.17.jar - /projects/lib");
     configureClasspath.addJarOrFolderToBuildPath(ConfigureClasspath.ADD_JAR);
@@ -184,7 +184,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     configureClasspath.openItemInSelectPathForm(LIB_PROJECT);
     configureClasspath.selectItemInSelectPathForm("mockito-core-2.21.0.jar");
     configureClasspath.clickOkBtnSelectPathForm();
-    configureClasspath.waitExpectedTextJarsAndFolderArea("mockito-core-2.21.0.jar - /projects/lib");
+    configureClasspath.waitExpectedTextJarsAndFolderArea("mockito-core-2.10.0.jar - /lib");
     configureClasspath.clickOnDoneBtnConfigureClasspath();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company");
