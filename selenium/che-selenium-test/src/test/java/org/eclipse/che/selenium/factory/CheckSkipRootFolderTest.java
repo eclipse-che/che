@@ -26,10 +26,7 @@ import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.PullRequestPanel;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,9 +35,6 @@ public class CheckSkipRootFolderTest {
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private NotificationsPopupPanel notifications;
-  @Inject private Dashboard dashboard;
-  @Inject private PullRequestPanel pullRequestPanel;
   @Inject private TestGitHubRepository testRepo;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
