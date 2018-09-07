@@ -25,11 +25,11 @@ OR NOT EXISTS (
    );
 
 -- remove duplicated keys id if any
-DELETE FROM che_sign_key_pair t1
+DELETE FROM che_sign_key_pair kp1
 WHERE (
-      SELECT count(*) FROM che_sign_key_pair t2
-      WHERE t1.private_key  = t2.private_key
-      OR t1.private_key = t2.public_key
+      SELECT count(*) FROM che_sign_key_pair kp2
+      WHERE kp1.private_key  = kp2.private_key
+      OR kp1.private_key = kp2.public_key
       ) > 1;
 
 
