@@ -11,20 +11,17 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
-import static java.util.Arrays.fill;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertTrue;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
+import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.Mock;
@@ -41,7 +38,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class ComposeEnvironmentFactoryTest {
 
-  private static final long DEFAULT_RAM_LIMIT_MB = 2048;
   private static final long BYTES_IN_MB = 1024 * 1024;
   private static final String MACHINE_NAME_1 = "machine1";
   private static final String MACHINE_NAME_2 = "machine2";
@@ -51,6 +47,7 @@ public class ComposeEnvironmentFactoryTest {
   @Mock private MachineConfigsValidator machinesValidator;
   @Mock private ComposeEnvironmentValidator composeValidator;
   @Mock private ComposeServicesStartStrategy startStrategy;
+  @Mock private MemoryAttributeProvisioner memoryProvisioner;
 
   private ComposeEnvironmentFactory composeEnvironmentFactory;
 
@@ -63,80 +60,32 @@ public class ComposeEnvironmentFactoryTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            DEFAULT_RAM_LIMIT_MB);
+            memoryProvisioner);
   }
 
   @Test
-  public void testSetsRamLimitAttributeFromComposeService() throws Exception {
-    final long firstMachineLimit = 3072 * BYTES_IN_MB;
-    final long secondMachineLimit = 1028 * BYTES_IN_MB;
-    final Map<String, InternalMachineConfig> machines =
-        ImmutableMap.of(
-            MACHINE_NAME_1,
-            mockInternalMachineConfig(new HashMap<>()),
-            MACHINE_NAME_2,
-            mockInternalMachineConfig(new HashMap<>()));
-    final Map<String, ComposeService> services =
-        ImmutableMap.of(
-            MACHINE_NAME_1,
-            mockComposeService(firstMachineLimit),
-            MACHINE_NAME_2,
-            mockComposeService(secondMachineLimit));
-
-    composeEnvironmentFactory.addRamLimitAttribute(machines, services);
-
-    final long[] actual = machinesRam(machines.values());
-    long[] expected = new long[] {firstMachineLimit, secondMachineLimit};
-    assertTrue(Arrays.equals(actual, expected));
-  }
-
-  @Test
-  public void testDoNotOverrideRamLimitAttributeWhenItAlreadyPresent() throws Exception {
+  public void testRamProvisionerIsEnvokedForEachMachine() throws Exception {
     final long customRamLimit = 3072 * BYTES_IN_MB;
+    final long customRamRequest = 1536 * BYTES_IN_MB;
     final Map<String, String> attributes =
-        ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(customRamLimit));
-    final Map<String, InternalMachineConfig> machines =
-        ImmutableMap.of(MACHINE_NAME_1, mockInternalMachineConfig(attributes));
-    final Map<String, ComposeService> services =
-        ImmutableMap.of(MACHINE_NAME_1, mockComposeService(0));
-
-    composeEnvironmentFactory.addRamLimitAttribute(machines, services);
-
-    final long[] actual = machinesRam(machines.values());
-    final long[] expected = new long[actual.length];
-    fill(expected, customRamLimit);
-    assertTrue(Arrays.equals(actual, expected));
-  }
-
-  @Test
-  public void testAddsMachineConfIntoEnvAndSetsRamLimAttributeWhenMachinePresentOnlyInRecipe()
-      throws Exception {
-    final long customRamLimit = 3072 * BYTES_IN_MB;
+        ImmutableMap.of(
+            MEMORY_LIMIT_ATTRIBUTE,
+            String.valueOf(customRamLimit),
+            MEMORY_REQUEST_ATTRIBUTE,
+            String.valueOf(customRamRequest));
     final Map<String, InternalMachineConfig> machines = new HashMap<>();
+    machines.put(MACHINE_NAME_1, mockInternalMachineConfig(attributes));
     final Map<String, ComposeService> services =
-        ImmutableMap.of(MACHINE_NAME_1, mockComposeService(customRamLimit));
+        ImmutableMap.of(
+            MACHINE_NAME_1,
+            mockComposeService(0L, 0L),
+            MACHINE_NAME_2,
+            mockComposeService(4608L, 2048L));
 
-    composeEnvironmentFactory.addRamLimitAttribute(machines, services);
+    composeEnvironmentFactory.addRamAttributes(machines, services);
 
-    final long[] actual = machinesRam(machines.values());
-    final long[] expected = new long[actual.length];
-    fill(expected, customRamLimit);
-    assertTrue(Arrays.equals(actual, expected));
-  }
-
-  @Test
-  public void testSetRamLimitAttributeWhenRamLimitIsMissingInRecipeAndConfig() throws Exception {
-    final Map<String, InternalMachineConfig> machines =
-        ImmutableMap.of(MACHINE_NAME_1, mockInternalMachineConfig(new HashMap<>()));
-    final Map<String, ComposeService> services =
-        ImmutableMap.of(MACHINE_NAME_1, mockComposeService(0));
-
-    composeEnvironmentFactory.addRamLimitAttribute(machines, services);
-
-    final long[] actual = machinesRam(machines.values());
-    final long[] expected = new long[actual.length];
-    fill(expected, DEFAULT_RAM_LIMIT_MB * BYTES_IN_MB);
-    assertTrue(Arrays.equals(actual, expected));
+    verify(memoryProvisioner).provision(any(), eq(0L), eq(0L));
+    verify(memoryProvisioner).provision(any(), eq(4608L), eq(2048L));
   }
 
   private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
@@ -145,16 +94,10 @@ public class ComposeEnvironmentFactoryTest {
     return machineConfigMock;
   }
 
-  private static ComposeService mockComposeService(long ramLimit) {
+  private static ComposeService mockComposeService(long ramLimit, long ramRequest) {
     final ComposeService composeServiceMock = mock(ComposeService.class);
     when(composeServiceMock.getMemLimit()).thenReturn(ramLimit);
+    when(composeServiceMock.getMemRequest()).thenReturn(ramRequest);
     return composeServiceMock;
-  }
-
-  private static long[] machinesRam(Collection<InternalMachineConfig> configs) {
-    return configs
-        .stream()
-        .mapToLong(m -> Long.parseLong(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
-        .toArray();
   }
 }

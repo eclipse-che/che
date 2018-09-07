@@ -193,7 +193,7 @@ public class ContributeTabTest {
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     pullRequestPanel.closePanelByHideButton();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(NOTIFICATION_MESSAGE);
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose(NOTIFICATION_MESSAGE);
 
     openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();
@@ -205,7 +205,7 @@ public class ContributeTabTest {
     pullRequestPanel.waitOpenPanel();
     pullRequestPanel.openOptionsMenu();
     pullRequestPanel.closePanelFromContextMenu();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(NOTIFICATION_MESSAGE);
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose(NOTIFICATION_MESSAGE);
 
     openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();

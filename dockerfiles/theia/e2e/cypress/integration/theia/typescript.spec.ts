@@ -40,7 +40,7 @@ context('TypeScript', () => {
             // open /tmp
             cy.get('#theia-top-panel').should('exist').then(() => {
 
-                cy.theiaCommandPaletteClick('Open...').then(() => {
+                cy.theiaCommandPaletteClick('Open Workspace...', '{downarrow}').then(() => {
                     cy.get('.theia-LocationList').should('exist');
                     cy.get('.theia-LocationList').select('file:///');
                     cy.wait(2000);

@@ -16,6 +16,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
@@ -39,7 +40,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProv
  * @author Alexander Garagatyi
  */
 @Singleton
-public class OpenShiftEnvironmentProvisioner {
+public class OpenShiftEnvironmentProvisioner
+    implements KubernetesEnvironmentProvisioner<OpenShiftEnvironment> {
 
   private final boolean pvcEnabled;
   private final WorkspaceVolumesStrategy volumesStrategy;
@@ -85,6 +87,7 @@ public class OpenShiftEnvironmentProvisioner {
     this.proxySettingsProvisioner = proxySettingsProvisioner;
   }
 
+  @Override
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     // 1 stage - update environment according Infrastructure specific

@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.common.collect.ImmutableMap;
@@ -22,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -185,12 +185,27 @@ public class WorkspaceValidatorTest {
       expectedExceptionsMessageRegExp =
           "Value '.*' of attribute '" + MEMORY_LIMIT_ATTRIBUTE + "' in machine '.*' is illegal",
       dataProvider = "illegalMemoryAttributeValueProvider")
-  public void shouldFailValidationIfMemoryMachineAttributeHasIllegalValue(String attributeValue)
-      throws Exception {
+  public void shouldFailValidationIfMemoryLimitMachineAttributeHasIllegalValue(
+      String attributeValue) throws Exception {
     final WorkspaceConfigDto config = createConfig();
     EnvironmentDto env = config.getEnvironments().values().iterator().next();
     MachineConfigDto machine = env.getMachines().values().iterator().next();
-    machine.getAttributes().put(MachineConfig.MEMORY_LIMIT_ATTRIBUTE, attributeValue);
+    machine.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, attributeValue);
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Value '.*' of attribute '" + MEMORY_REQUEST_ATTRIBUTE + "' in machine '.*' is illegal",
+      dataProvider = "illegalMemoryAttributeValueProvider")
+  public void shouldFailValidationIfMemoryRequestMachineAttributeHasIllegalValue(
+      String attributeValue) throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getAttributes().put(MEMORY_REQUEST_ATTRIBUTE, attributeValue);
 
     wsValidator.validateConfig(config);
   }

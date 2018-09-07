@@ -67,8 +67,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     projectExplorer.waitProjectExplorer();
 
     try {
-      notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-          "Project Spring imported");
+      notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose("Project Spring imported");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/10728");

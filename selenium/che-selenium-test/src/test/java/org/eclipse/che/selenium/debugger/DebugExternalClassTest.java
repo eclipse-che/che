@@ -131,7 +131,7 @@ public class DebugExternalClassTest {
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
     editor.waitActiveBreakpoint(24);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
@@ -171,7 +171,7 @@ public class DebugExternalClassTest {
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
     editor.waitActiveBreakpoint(28);
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
 
@@ -181,7 +181,7 @@ public class DebugExternalClassTest {
     // sources" link at the top
     editor.clickOnDownloadSourcesLink(); // there should be "Download sources" link displayed in at
     // the top of editor. Download they.
-    notifications.waitExpectedMessageOnProgressPanelAndClosed(
+    notifications.waitExpectedMessageOnProgressPanelAndClose(
         "Download sources for 'org.apache.log4j.Category' failed"); // there should an error of
     // downloading the sources
     editor.waitActiveTabFileName("Category"); // there should be class "Category" opened
