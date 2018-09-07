@@ -25,12 +25,12 @@ infrastructures/** @garagatyi @sleshchenko
 
 # multiuser che
 multiuser/api/**  @sleshchenko
-multiuser/integration-tests/**  @mshaposhnik
+multiuser/integration-tests/**  @mshaposhnik @sleshchenko
 multiuser/keycloak/**  @mshaposhnik
 multiuser/machine-auth/**  @mshaposhnik
 multiuser/permission/**  @sleshchenko
 multiuser/personal-account/**  @sleshchenko
-multiuser/sql-schema/**  @mshaposhnik
+multiuser/sql-schema/**  @mshaposhnik @sleshchenko
 
 # plugins
 plugins/plugin*debugger/** @tolusha
