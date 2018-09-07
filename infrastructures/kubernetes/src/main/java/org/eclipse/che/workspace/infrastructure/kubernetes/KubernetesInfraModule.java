@@ -56,6 +56,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.Default
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.KBrokerEnvironmentConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerService;
 
 /** @author Sergii Leshchenko */
@@ -149,5 +153,14 @@ public class KubernetesInfraModule extends AbstractModule {
         .to(new TypeLiteral<DefaultSecureServersFactory<KubernetesEnvironment>>() {});
 
     bind(BrokerService.class);
+
+    bind(new TypeLiteral<BrokerEnvironmentConfig<KubernetesEnvironment>>() {})
+        .to(KBrokerEnvironmentConfig.class);
+
+    bind(PluginBrokerManager.class)
+        .to(new TypeLiteral<PluginBrokerManager<KubernetesEnvironment>>() {});
+
+    bind(SidecarToolingProvisioner.class)
+        .to(new TypeLiteral<SidecarToolingProvisioner<KubernetesEnvironment>>() {});
   }
 }

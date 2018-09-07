@@ -31,25 +31,24 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class SidecarToolingProvisioner {
+public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
 
   private final Map<String, ChePluginsApplier> workspaceNextAppliers;
   private final PluginMetaRetriever pluginMetaRetriever;
-  private final PluginBrokerManager pluginBrokerManager;
+  private final PluginBrokerManager<E> pluginBrokerManager;
 
   @Inject
   public SidecarToolingProvisioner(
       Map<String, ChePluginsApplier> workspaceNextAppliers,
       PluginMetaRetriever pluginMetaRetriever,
-      PluginBrokerManager pluginBrokerManager) {
+      PluginBrokerManager<E> pluginBrokerManager) {
     this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
     this.pluginMetaRetriever = pluginMetaRetriever;
     this.pluginBrokerManager = pluginBrokerManager;
   }
 
   @Beta
-  public void provision(RuntimeIdentity id, KubernetesEnvironment environment)
-      throws InfrastructureException {
+  public void provision(RuntimeIdentity id, E environment) throws InfrastructureException {
 
     Collection<PluginMeta> pluginsMeta = pluginMetaRetriever.get(environment.getAttributes());
     if (pluginsMeta.isEmpty()) {
@@ -63,7 +62,7 @@ public class SidecarToolingProvisioner {
           "Sidecar tooling configuration is not supported with recipe type " + recipeType);
     }
 
-    List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta, environment);
+    List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta);
 
     pluginsApplier.apply(environment, chePlugins);
   }
