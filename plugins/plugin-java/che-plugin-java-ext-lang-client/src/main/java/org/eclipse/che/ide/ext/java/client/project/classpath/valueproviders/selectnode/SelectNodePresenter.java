@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.ClasspathNodeInterceptor;
-import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.JarNodeInterceptor;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
@@ -32,8 +31,6 @@ import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
  */
 @Singleton
 public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
-  private static final String WORKSPACE_PATH = "/projects";
-
   private final SelectNodeView view;
   private final ResourceNode.NodeFactory nodeFactory;
   private final SettingsProvider settingsProvider;
@@ -90,9 +87,6 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
   /** {@inheritDoc} */
   @Override
   public void setSelectedNode(String path) {
-    if (interceptor instanceof JarNodeInterceptor) {
-      path = WORKSPACE_PATH + path;
-    }
     classpathPagePresenter.addNode(path, interceptor.getKind());
   }
 }
