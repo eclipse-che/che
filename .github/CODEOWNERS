@@ -24,7 +24,23 @@ core/** @skabashnyuk
 infrastructures/** @garagatyi @sleshchenko
 
 # multiuser che
-multiuser/** @skabashnyuk
+
+wsmaster/che-core-api-factory/** @mshaposhnik
+wsmaster/che-core-api-factory-shared/**   @mshaposhnik
+wsmaster/che-core-api-workspace-activity/**   @mshaposhnik
+multiuser/keycloak/**  @mshaposhnik
+multiuser/machine-auth/**  @mshaposhnik
+multiuser/keycloak/**  @mshaposhnik
+multiuser/machine-auth/**  @mshaposhnik
+multiuser/keycloak/**  @mshaposhnik
+multiuser/sql-schema/**  @mshaposhnik
+multiuser/integration-tests/**  @mshaposhnik
+multiuser/sql-schema/**  @mshaposhnik
+multiuser/integration-tests/**  @mshaposhnik
+multiuser/api/**  @sleshchenko
+multiuser/permission/**  @sleshchenko
+multiuser/personal-account/**  @sleshchenko
+
 
 # plugins
 plugins/plugin*debugger/** @tolusha
