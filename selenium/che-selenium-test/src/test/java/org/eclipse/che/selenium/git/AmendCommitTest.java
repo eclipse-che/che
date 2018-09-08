@@ -88,6 +88,9 @@ public class AmendCommitTest {
 
   @Test
   public void checkAmendPreviousCommit() {
+    String pathToFileItem = PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples";
+    String javaFileName = "AppController.java";
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -106,10 +109,9 @@ public class AmendCommitTest {
 
     // edit java file and commit the change
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PATH_TO_FILE);
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(pathToFileItem, javaFileName);
     editor.waitActive();
-    editor.setCursorToLine(12);
+    editor.setCursorToLine(15);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
     menu.runCommand(GIT, COMMIT);

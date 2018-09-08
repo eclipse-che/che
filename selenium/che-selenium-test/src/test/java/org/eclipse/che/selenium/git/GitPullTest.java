@@ -29,6 +29,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -52,6 +53,7 @@ public class GitPullTest {
   @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
   @Inject private CodenvyEditor editor;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -95,6 +97,8 @@ public class GitPullTest {
     testRepo.deleteFolder(Paths.get(folderWithPlainFilesPath), "remove file");
 
     performPull();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
+
     checkPullAfterRemovingContent(
         readmeTxtFileName,
         String.format("/%s/%s/%s", PROJECT_NAME, folderWithPlainFilesPath, readmeTxtFileName));
