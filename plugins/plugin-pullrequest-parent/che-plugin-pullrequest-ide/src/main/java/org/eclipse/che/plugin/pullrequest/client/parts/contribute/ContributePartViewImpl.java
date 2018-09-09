@@ -142,6 +142,7 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
         .getStyle()
         .setProperty("fill", "#dbdbdb");
 
+    this.refreshContributionBranchNameListButton.ensureDebugId("refreshContributionBranchButton");
     this.statusSection.setVisible(false);
     this.newContributionSection.setVisible(false);
     this.contributionTitle
