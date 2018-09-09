@@ -29,7 +29,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
@@ -53,7 +52,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class RunPlainJavaProjectTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("RunningPlainJavaProject", 4);
+  private static final String PROJECT_NAME = "run-plain-java-project";
   private static final String NEW_PACKAGE = "base.test";
   private static final String NAME_COMMAND = "startApp";
   private static final String COMMAND =
@@ -94,6 +93,7 @@ public class RunPlainJavaProjectTest {
     testRepo.addContent(entryPath);
 
     ide.open(ws);
+    consoles.waitJDTLSStartedMessage();
   }
 
   @Test
@@ -110,7 +110,7 @@ public class RunPlainJavaProjectTest {
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.waitExpectedTextJarsAndFolderArea(
-        "testLibrary.jar - /projects/" + PROJECT_NAME + "/store");
+        "testLibrary.jar - /" + PROJECT_NAME + "/store");
     configureClasspath.closeConfigureClasspathFormByIcon();
 
     // create the instance of the library
