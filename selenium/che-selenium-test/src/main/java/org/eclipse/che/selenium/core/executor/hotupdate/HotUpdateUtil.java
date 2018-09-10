@@ -16,11 +16,12 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
-import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 
 /**
  * This is a set of methods which make easier to do updating of the che pod and wait of the updating
@@ -31,7 +32,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Singleton
 public class HotUpdateUtil {
   private static final int TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS = 600;
-  private static final int DELAY_BETWEEN_ATTEMPTS_IN_SECONDS = 5;
+  private static final int DELAY_BETWEEN_ATTEMPTS_IN_MILLISECS = 5000;
   private static final String PODS_LIST_COMMAND = "get pods | awk 'NR > 1 {print $1}'";
   private static final String COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT =
       "get dc | grep che | awk '{print $2}'";
@@ -40,35 +41,33 @@ public class HotUpdateUtil {
   private static final String UPDATE_COMMAND_TEMPLATE = "rollout latest %s";
 
   private final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
-  private final WebDriverWaitFactory webDriverWaitFactory;
   private final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @Inject
   HotUpdateUtil(
       OpenShiftCliCommandExecutor openShiftCliCommandExecutor,
-      WebDriverWaitFactory webDriverWaitFactory,
       TestUserPreferencesServiceClient testUserPreferencesServiceClient) {
 
     this.openShiftCliCommandExecutor = openShiftCliCommandExecutor;
-    this.webDriverWaitFactory = webDriverWaitFactory;
     this.testUserPreferencesServiceClient = testUserPreferencesServiceClient;
   }
 
   /**
-   * Waits during {@code timeout} until update is finished by checking that only single master pod
-   * is present and it has incremented {@code masterVersionBeforeUpdate} number in name.
+   * Waits during {@code timeoutInSec} until update is finished by checking that only single master
+   * pod is present and it has incremented {@code masterVersionBeforeUpdate} number in name.
    *
    * @param masterRevisionBeforeUpdate - revision of the master pod before updating.
-   * @param timeout - waiting time in seconds.
+   * @param timeoutInSec - waiting time in seconds.
    */
-  public void waitFullMasterPodUpdate(int masterRevisionBeforeUpdate, int timeout) {
+  public void waitFullMasterPodUpdate(int masterRevisionBeforeUpdate, int timeoutInSec)
+      throws TimeoutException, InterruptedException {
     final int numberOfUpdatedVersion = masterRevisionBeforeUpdate + 1;
     final String beforeUpdatePodNamePattern = "che-" + masterRevisionBeforeUpdate;
     final String updatedPodNamePattern = "che-" + numberOfUpdatedVersion;
 
-    waitPodNameDisappearance(beforeUpdatePodNamePattern, timeout);
+    waitPodNameDisappearance(beforeUpdatePodNamePattern, timeoutInSec);
 
-    waitPodNamePatternHasSingleOccurrence(updatedPodNamePattern, timeout);
+    waitPodNamePatternHasSingleOccurrence(updatedPodNamePattern, timeoutInSec);
   }
 
   /**
@@ -83,15 +82,14 @@ public class HotUpdateUtil {
   }
 
   /**
-   * Waits during {@code timeout} until master pod has a specified {@code expectedRevision}.
+   * Waits during {@code timeoutInSec} until master pod has a specified {@code expectedRevision}.
    *
    * @param expectedRevision revision of the master pod.
-   * @param timeout - waiting time in seconds.
+   * @param timeoutInSec - waiting time in seconds.
    */
-  public void waitMasterPodRevision(int expectedRevision, int timeout) {
-    webDriverWaitFactory
-        .get(timeout)
-        .until((ExpectedCondition<Boolean>) driver -> expectedRevision == getMasterPodRevision());
+  public void waitMasterPodRevision(int expectedRevision, int timeoutInSec)
+      throws TimeoutException, InterruptedException {
+    WaitUtils.waitSuccessCondition(() -> expectedRevision == getMasterPodRevision(), timeoutInSec);
   }
 
   /**
@@ -99,7 +97,8 @@ public class HotUpdateUtil {
    *
    * @param expectedRevision master pod revision.
    */
-  public void waitMasterPodRevision(int expectedRevision) {
+  public void waitMasterPodRevision(int expectedRevision)
+      throws TimeoutException, InterruptedException {
     waitMasterPodRevision(expectedRevision, TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS);
   }
 
@@ -164,35 +163,37 @@ public class HotUpdateUtil {
         .collect(Collectors.toList());
   }
 
-  private void waitPodNameDisappearance(String podName, int timeout) {
-    webDriverWaitFactory
-        .get(timeout, DELAY_BETWEEN_ATTEMPTS_IN_SECONDS)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  try {
-                    return !isAnyPodNameHasPatternOccurrence(podName);
-                  } catch (Exception ex) {
-                    throw new RuntimeException(ex.getLocalizedMessage(), ex);
-                  }
-                });
+  private void waitPodNameDisappearance(String podName, int timeout)
+      throws TimeoutException, InterruptedException {
+    WaitUtils.waitSuccessCondition(
+        () -> {
+          try {
+            return !isAnyPodNameHasPatternOccurrence(podName);
+          } catch (Exception ex) {
+            throw new RuntimeException(ex.getLocalizedMessage(), ex);
+          }
+        },
+        timeout,
+        DELAY_BETWEEN_ATTEMPTS_IN_MILLISECS,
+        TimeUnit.SECONDS);
   }
 
   private boolean isPodNamePatternHasSingleOccurrence(String podNamePattern) throws Exception {
     return 1 == getPodsNamesWithPatternOccurrence(podNamePattern).size();
   }
 
-  private void waitPodNamePatternHasSingleOccurrence(String podName, int timeout) {
-    webDriverWaitFactory
-        .get(timeout, DELAY_BETWEEN_ATTEMPTS_IN_SECONDS)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  try {
-                    return isPodNamePatternHasSingleOccurrence(podName);
-                  } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                  }
-                });
+  private void waitPodNamePatternHasSingleOccurrence(String podName, int timeout)
+      throws TimeoutException, InterruptedException {
+    WaitUtils.waitSuccessCondition(
+        () -> {
+          try {
+            return isPodNamePatternHasSingleOccurrence(podName);
+          } catch (Exception ex) {
+            throw new RuntimeException(ex);
+          }
+        },
+        timeout,
+        DELAY_BETWEEN_ATTEMPTS_IN_MILLISECS,
+        TimeUnit.SECONDS);
   }
 }
