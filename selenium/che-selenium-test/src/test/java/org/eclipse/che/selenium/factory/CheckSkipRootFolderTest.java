@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,6 +41,7 @@ public class CheckSkipRootFolderTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private DefaultTestUser productUser;
+  @Inject private Dashboard dashboard;
 
   @Inject
   @Named("github.username")
@@ -52,7 +54,6 @@ public class CheckSkipRootFolderTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
     Path entryPath =
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
     testRepo.addContent(entryPath);
@@ -78,6 +79,7 @@ public class CheckSkipRootFolderTest {
 
   @Test
   public void checkSkipRootDirectory() {
+    dashboard.open();
     testFactory.open(seleniumWebDriver);
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     checkProjectStructure();
