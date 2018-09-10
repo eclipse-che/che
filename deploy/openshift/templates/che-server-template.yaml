@@ -211,8 +211,8 @@ parameters:
   value: nightly
 - name: IMAGE_CHE
   displayName: Eclipse Che server image
-  description: Che server Docker image. Defaults to docker.io/eclipse/che-server
-  value: docker.io/eclipse/che-server
+  description: Che server Docker image. Defaults to eclipse/che-server
+  value: eclipse/che-server
 - name: CHE_MULTIUSER
   displayName: Che Multi-user flavor
   description: False i.e. single user by default

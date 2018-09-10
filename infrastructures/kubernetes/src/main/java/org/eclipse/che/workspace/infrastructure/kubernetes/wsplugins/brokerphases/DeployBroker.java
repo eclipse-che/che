@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -19,6 +20,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -27,6 +30,7 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.slf4j.Logger;
@@ -53,6 +57,7 @@ public class DeployBroker extends BrokerPhase {
   private final String configMapName;
   private final String pluginBrokerImage;
   private final KubernetesNamespace kubernetesNamespace;
+  private final List<EnvVar> envVars;
 
   public DeployBroker(
       KubernetesNamespace kubernetesNamespace,
@@ -63,7 +68,8 @@ public class DeployBroker extends BrokerPhase {
       String pvcClaimProjects,
       String brokerVolume,
       String configMapName,
-      String pluginBrokerImage) {
+      String pluginBrokerImage,
+      List<Pair<String, String>> envVars) {
     this.kubernetesNamespace = kubernetesNamespace;
     this.workspaceId = workspaceId;
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
@@ -73,6 +79,7 @@ public class DeployBroker extends BrokerPhase {
     this.brokerVolume = brokerVolume;
     this.configMapName = configMapName;
     this.pluginBrokerImage = pluginBrokerImage;
+    this.envVars = envVars.stream().map(this::asEnvVar).collect(toList());
   }
 
   @Override
@@ -109,6 +116,7 @@ public class DeployBroker extends BrokerPhase {
             .withVolumeMounts(
                 newVolumeMount(pvcClaimProjects, "/plugins", workspaceId + "/plugins"),
                 new VolumeMount(confFolder + "/", brokerVolume, true, null))
+            .withEnv(envVars)
             .withNewResources()
             .withLimits(singletonMap("memory", new Quantity("250Mi")))
             .endResources()
@@ -130,5 +138,9 @@ public class DeployBroker extends BrokerPhase {
         .withRestartPolicy("Never")
         .endSpec()
         .build();
+  }
+
+  private EnvVar asEnvVar(Pair<String, String> envVar) {
+    return new EnvVarBuilder().withName(envVar.first).withValue(envVar.second).build();
   }
 }

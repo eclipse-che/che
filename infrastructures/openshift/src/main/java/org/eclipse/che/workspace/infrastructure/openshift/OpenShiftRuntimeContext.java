@@ -44,7 +44,7 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
     super(
         cheWebsocketEndpoint,
         projectFactory,
-        runtimeFactory,
+        null, // should not be used by super class since getRuntime method is overridden
         runtimeStatuses,
         openShiftEnvironment,
         identity,
