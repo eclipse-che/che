@@ -19,7 +19,7 @@ public final class TestTimeoutsConstants {
   public static final int UPDATING_PROJECT_TIMEOUT_SEC = 180 * MULTIPLE;
   public static final int EXPECTED_MESS_IN_CONSOLE_SEC = 120 * MULTIPLE;
   public static final int LOADER_TIMEOUT_SEC = 60 * MULTIPLE;
-  public static final int WIDGET_TIMEOUT_SEC = 60 * MULTIPLE;
+  public static final int WIDGET_TIMEOUT_SEC = 40 * MULTIPLE;
   public static final int ELEMENT_TIMEOUT_SEC = 20 * MULTIPLE;
   public static final int LOAD_PAGE_TIMEOUT_SEC = 10 * MULTIPLE;
   public static final int REDRAW_UI_ELEMENTS_TIMEOUT_SEC = 5 * MULTIPLE;
