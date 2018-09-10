@@ -121,6 +121,12 @@ public class SignatureKeyDaoTest {
     dao.create(signKeyPair);
   }
 
+  @Test(expectedExceptions = ConflictException.class)
+  public void throwsConflictExceptionWhenCreatingKeyPairNotExistedWs() throws Exception {
+
+    dao.create(newKeyPair("wron_ws"));
+  }
+
   @Test(expectedExceptions = NotFoundException.class)
   public void throwsNoResultExceptionWhenSearchingWrongWorkspace() throws Exception {
     dao.get("unknown");
