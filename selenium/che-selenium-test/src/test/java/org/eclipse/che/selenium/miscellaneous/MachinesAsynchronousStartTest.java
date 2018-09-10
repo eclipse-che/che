@@ -12,11 +12,13 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.SAVE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.MACHINES;
 
 import com.google.inject.Inject;
+import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -46,8 +48,7 @@ public class MachinesAsynchronousStartTest {
   private static final String NOT_EXISTED_IMAGE_NAME = IMAGE_NAME + IMAGE_NAME_SUFFIX;
   private static final String SUCCESS_NOTIFICATION_TEST = "Workspace updated.";
   private static final String GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE =
-      // "get event --no-headers=true | grep %s | awk '{print $7 \" \" $8}'";
-      "get event --no-headers=true | grep %s ";
+      "get event --no-headers=true | grep %s | awk '{print $7 \" \" $8}'";
   private static final String EXPECTED_ERROR_NOTIFICATION_TEXT =
       format(
           "Unrecoverable event occurred: 'Failed', 'Failed to pull image \"%s\": "
@@ -77,13 +78,18 @@ public class MachinesAsynchronousStartTest {
 
   @BeforeClass
   public void setUp() {
+    // open "New Workspace" page
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitPageLoad();
+
+    // create new workspace
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
+
+    // change workspace based image to non existed
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(MACHINES);
     workspaceDetailsMachines.waitMachineListItem(MACHINE_NAME);
@@ -96,10 +102,14 @@ public class MachinesAsynchronousStartTest {
     editMachineForm.waitSaveButtonEnabling();
     editMachineForm.clickOnSaveButton();
     editMachineForm.waitFormInvisibility();
+
+    // save changes
     workspaceDetailsMachines.waitImageNameInMachineListItem(MACHINE_NAME, NOT_EXISTED_IMAGE_NAME);
     workspaceDetails.waitAllEnabled(SAVE_BUTTON);
     workspaceDetails.clickOnSaveChangesBtn();
     workspaceDetailsMachines.waitNotificationMessage(SUCCESS_NOTIFICATION_TEST);
+
+    // open "Workspaces" page
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitPageLoading();
     workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
@@ -116,14 +126,13 @@ public class MachinesAsynchronousStartTest {
     waitEvent("BackOff");
   }
 
-  private String getPodRelatedEvents() throws Exception {
+  private List<String> getPodRelatedEvents() throws Exception {
     final Workspace brokenWorkspace =
         testWorkspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
     final String command = format(GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE, brokenWorkspace.getId());
-    // final String events =
-    return openShiftCliCommandExecutor.execute(command);
+    final String events = openShiftCliCommandExecutor.execute(command);
 
-    // return asList(events.split("[\\ \\n]"));
+    return asList(events.split("[\\ \\n]"));
   }
 
   private boolean eventIsPresent(String event) {
