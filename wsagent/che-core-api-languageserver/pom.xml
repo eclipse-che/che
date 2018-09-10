@@ -160,6 +160,8 @@
                     <excludes>
                         <exclude>org.eclipse.lsp4j.WatchKind</exclude>
                         <exclude>org.eclipse.lsp4j.MarkupKind</exclude>
+                        <exclude>org.eclipse.lsp4j.CodeActionKind</exclude>
+                        <exclude>org.eclipse.lsp4j.FoldingRangeKind</exclude>
                     </excludes>
                     <dtoPackages>
                         <package>org.eclipse.lsp4j</package>
