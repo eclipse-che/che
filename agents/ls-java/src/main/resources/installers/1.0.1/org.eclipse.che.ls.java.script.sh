@@ -34,6 +34,10 @@ LS_DIR=${CHE_DIR}/ls-java
 LS_LAUNCHER=${LS_DIR}/launch.sh
 LS_DATA_DIR=$HOME/jdtls/data
 
+if [ ! "$CHE_WORKSPACE_JDT_LS_HEAP_OPTIONS" ]; then
+    CHE_WORKSPACE_JDT_LS_HEAP_OPTIONS="-Xmx1024M"
+fi
+
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"
     LINUX_TYPE=$(cat $FILE | awk '{print $1}')
@@ -140,4 +144,4 @@ echo writing start script to ${LS_LAUNCHER}
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
 EQUINOX_LAUNCHER=$(ls ${LS_DIR}/plugins/org.eclipse.equinox.launcher_*.jar)
-echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4  -Declipse.product=org.eclipse.jdt.ls.core.product -noverify -Xmx1G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4410 -jar ${EQUINOX_LAUNCHER} -configuration ./config_linux -data ${LS_DATA_DIR}" > ${LS_LAUNCHER}
+echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4  -Declipse.product=org.eclipse.jdt.ls.core.product -noverify ${CHE_WORKSPACE_JDT_LS_HEAP_OPTIONS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4410 -jar ${EQUINOX_LAUNCHER} -configuration ./config_linux -data ${LS_DATA_DIR}" > ${LS_LAUNCHER}
