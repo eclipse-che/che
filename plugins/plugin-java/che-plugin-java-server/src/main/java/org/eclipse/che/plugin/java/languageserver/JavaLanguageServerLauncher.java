@@ -100,7 +100,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     }
   }
 
-  /** @return {@code true} if jd.ls is started, otherwise {@code false}. */
+  /** @return {@code true} if jd.ls has started, otherwise {@code false}. */
   public boolean isStarted() {
     return isStarted.get();
   }
