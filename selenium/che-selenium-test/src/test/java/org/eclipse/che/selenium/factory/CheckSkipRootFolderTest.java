@@ -54,13 +54,18 @@ public class CheckSkipRootFolderTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    // add test repository
     Path entryPath =
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
     testRepo.addContent(entryPath);
+
+    // create download URL for current repo (this will be used in the factory as resource URL)
     projectName = testRepo.getName();
-    String subPathToGithubArchive = "/archive/master.zip";
-    String pathToGithubArchive =
-        String.format("%s%s", testRepo.getHtmlUrl(), subPathToGithubArchive);
+    String urlToDownloadZippedRepoFromGitHub =
+        String.format("%s%s", testRepo.getHtmlUrl(), "/archive/master.zip");
+
+    // create test factory based on minimal template, set necessary path and name to imported
+    // project, type, skipFirstLevel value
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
     ProjectConfigDto projectConfigDto = factoryBuilder.getWorkspace().getProjects().get(0);
@@ -68,7 +73,7 @@ public class CheckSkipRootFolderTest {
     projectConfigDto.setPath("/" + projectName);
     projectConfigDto.getSource().setParameters(ImmutableMap.of("skipFirstLevel", "true"));
     projectConfigDto.getSource().setType("zip");
-    projectConfigDto.getSource().setLocation(pathToGithubArchive);
+    projectConfigDto.getSource().setLocation(urlToDownloadZippedRepoFromGitHub);
     testFactory = factoryBuilder.build();
   }
 
