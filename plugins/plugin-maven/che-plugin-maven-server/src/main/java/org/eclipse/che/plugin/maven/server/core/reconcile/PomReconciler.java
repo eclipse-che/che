@@ -110,8 +110,14 @@ public class PomReconciler {
     List<Problem> result = new ArrayList<>();
 
     if (isNullOrEmpty(pomContent)) {
-      throw new ServerException(
-          format("Couldn't reconcile pom file '%s' because its content is empty", pomPath));
+      Problem problem =
+          DtoFactory.newDto(Problem.class)
+              .withError(true)
+              .withMessage("Content of pom file is empty")
+              .withSourceStart(1)
+              .withSourceEnd(1);
+      result.add(problem);
+      return result;
     }
 
     try {
@@ -186,15 +192,11 @@ public class PomReconciler {
       return;
     }
 
-    String newPomContent = workingCopy.getContentAsString();
-    if (isNullOrEmpty(newPomContent)) {
-      return;
-    }
-
-    List<Problem> problems;
     try {
-      problems = reconcile(fileLocation, projectPath, newPomContent);
+      String newPomContent = workingCopy.getContentAsString();
+      List<Problem> problems = reconcile(fileLocation, projectPath, newPomContent);
       List<Diagnostic> diagnostics = convertProblems(newPomContent, problems);
+
       client.publishDiagnostics(
           new PublishDiagnosticsParams(LanguageServiceUtils.prefixURI(fileLocation), diagnostics));
     } catch (ServerException | NotFoundException e) {

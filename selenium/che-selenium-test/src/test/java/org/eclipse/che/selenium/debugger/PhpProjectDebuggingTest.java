@@ -121,7 +121,7 @@ public class PhpProjectDebuggingTest {
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
 
-    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
     editor.setBreakpoint(14);
@@ -168,7 +168,7 @@ public class PhpProjectDebuggingTest {
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
 
-    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClose(
         String.format(
             "Remote debugger connected\nConnected to: Zend Debugger, port: %s.",
             NON_DEFAULT_DEBUG_PORT));

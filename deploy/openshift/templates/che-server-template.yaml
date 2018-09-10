@@ -145,8 +145,8 @@ objects:
                 key: ca.crt
                 name: openshift-identity-provider
                 optional: true
-          - name: CHE_WORKSPACE_FEATURE_API
-            value: "http://che-plugin-registry:80"
+          - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
+            value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -211,8 +211,8 @@ parameters:
   value: nightly
 - name: IMAGE_CHE
   displayName: Eclipse Che server image
-  description: Che server Docker image. Defaults to docker.io/eclipse/che-server
-  value: docker.io/eclipse/che-server
+  description: Che server Docker image. Defaults to eclipse/che-server
+  value: eclipse/che-server
 - name: CHE_MULTIUSER
   displayName: Che Multi-user flavor
   description: False i.e. single user by default
@@ -277,6 +277,10 @@ parameters:
   displayName: GitHub Client Secret
   description: GitHub oAuth app client servet. Applicable to Che single user only!
   value: ''
+- name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
+  displayName: Eclipse Che plugin registry URL
+  description: Url that used to get meta information about Eclipse Che tooling
+  value: 'NULL'
 labels:
   app: che
   template: che

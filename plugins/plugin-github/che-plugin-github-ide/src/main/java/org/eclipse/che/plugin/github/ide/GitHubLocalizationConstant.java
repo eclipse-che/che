@@ -101,4 +101,8 @@ public interface GitHubLocalizationConstant extends Messages {
 
   @Key("view.import.githubImporterPage.branch")
   String githubImporterPageBranch();
+
+  @Key("open.on.github.action")
+  @DefaultMessage("Open on GitHub")
+  String openOnGitHubAction();
 }

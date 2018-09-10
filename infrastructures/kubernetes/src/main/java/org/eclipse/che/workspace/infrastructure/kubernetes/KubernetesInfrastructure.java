@@ -37,14 +37,12 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
-  private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
 
   @Inject
   public KubernetesInfrastructure(
       EventService eventService,
       KubernetesRuntimeContextFactory runtimeContextFactory,
-      KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
       KubernetesRuntimeStateCache runtimeStatusesCache) {
@@ -54,7 +52,6 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
         eventService,
         internalEnvProvisioners);
     this.runtimeContextFactory = runtimeContextFactory;
-    this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
   }
@@ -67,11 +64,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   @Override
   protected KubernetesRuntimeContext internalPrepare(
       RuntimeIdentity id, InternalEnvironment environment) throws InfrastructureException {
-    final KubernetesEnvironment kubernetesEnvironment = asKubernetesEnv(environment);
-
-    k8sEnvProvisioner.provision(kubernetesEnvironment, id);
-
-    return runtimeContextFactory.create(kubernetesEnvironment, id, this);
+    return runtimeContextFactory.create(asKubernetesEnv(environment), id, this);
   }
 
   private KubernetesEnvironment asKubernetesEnv(InternalEnvironment source)

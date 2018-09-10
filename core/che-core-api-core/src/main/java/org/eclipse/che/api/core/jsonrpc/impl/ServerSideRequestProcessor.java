@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 
 @Singleton
 public class ServerSideRequestProcessor implements RequestProcessor {
@@ -55,6 +56,6 @@ public class ServerSideRequestProcessor implements RequestProcessor {
 
   @Override
   public void process(Runnable runnable) {
-    executorService.execute(runnable);
+    executorService.execute(ThreadLocalPropagateContext.wrap(runnable));
   }
 }

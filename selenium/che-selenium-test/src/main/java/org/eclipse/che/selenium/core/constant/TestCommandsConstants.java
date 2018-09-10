@@ -28,4 +28,6 @@ public interface TestCommandsConstants {
   String START_APACHE_COMMAND = "start apache";
   String STOP_APACHE_COMMAND = "stop apache";
   String RESTART_APACHE_COMMAND = "restart apache";
+  String FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE =
+      "Finished language servers initialization, file path";
 }

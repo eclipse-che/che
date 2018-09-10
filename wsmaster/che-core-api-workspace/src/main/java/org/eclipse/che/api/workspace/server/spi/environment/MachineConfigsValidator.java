@@ -12,6 +12,8 @@
 package org.eclipse.che.api.workspace.server.spi.environment;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -70,6 +72,19 @@ public class MachineConfigsValidator {
             machineName,
             serverName,
             server.getProtocol());
+      }
+    }
+
+    if (machineConfig.getAttributes() != null) {
+      String memoryLimit = machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE);
+      String memoryRequest = machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE);
+      if (memoryLimit != null && memoryRequest != null) {
+        checkArgument(
+            Long.parseLong(memoryLimit) >= Long.parseLong(memoryRequest),
+            "Machine '%s' in environment contains inconsistent memory attributes: Memory limit: '%s', Memory request: '%s'",
+            machineName,
+            Long.parseLong(memoryLimit),
+            Long.parseLong(memoryRequest));
       }
     }
   }

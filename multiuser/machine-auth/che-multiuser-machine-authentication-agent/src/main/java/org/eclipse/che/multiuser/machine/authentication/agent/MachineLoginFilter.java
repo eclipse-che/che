@@ -79,7 +79,8 @@ public class MachineLoginFilter implements Filter {
 
     // sets subject from session
     final Subject sessionSubject;
-    if (session != null && (sessionSubject = (Subject) session.getAttribute("principal")) != null) {
+    if (session != null
+        && (sessionSubject = (Subject) session.getAttribute("che_subject")) != null) {
       try {
         EnvironmentContext.getCurrent().setSubject(sessionSubject);
         chain.doFilter(request, response);
@@ -115,7 +116,7 @@ public class MachineLoginFilter implements Filter {
                 false);
         EnvironmentContext.getCurrent().setSubject(subject);
         final HttpSession httpSession = httpRequest.getSession(true);
-        httpSession.setAttribute("principal", subject);
+        httpSession.setAttribute("che_subject", subject);
         chain.doFilter(request, response);
       } finally {
         EnvironmentContext.reset();

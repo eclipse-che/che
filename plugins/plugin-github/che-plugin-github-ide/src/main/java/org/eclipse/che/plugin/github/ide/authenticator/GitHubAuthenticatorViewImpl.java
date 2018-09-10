@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.plugin.github.ide.authenticator;
 
+import static com.google.gwt.safehtml.shared.SimpleHtmlSanitizer.sanitizeHtml;
+
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -46,7 +48,9 @@ public class GitHubAuthenticatorViewImpl implements GitHubAuthenticatorView {
 
     contentPanel = new DockLayoutPanel(Style.Unit.PX);
     contentPanel.addNorth(
-        new InlineHTML(locale.authorizationDialogText(productInfoDataProvider.getName())), 20);
+        new InlineHTML(
+            sanitizeHtml(locale.authorizationDialogText(productInfoDataProvider.getName()))),
+        20);
     contentPanel.addNorth(isGenerateKeys, 20);
   }
 

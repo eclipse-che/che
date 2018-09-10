@@ -40,6 +40,7 @@
         <module>workspace-loader</module>
         <module>assembly</module>
         <module>selenium</module>
+        <module>dockerfiles</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
@@ -1019,6 +1020,11 @@
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-permission-factory</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-infra-kubernetes</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

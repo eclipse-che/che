@@ -22,6 +22,8 @@ cheKeycloakRealm: "che"
 cheKeycloakClientId: "che-public"
 #customOidcUsernameClaim: ""
 #customOidcProvider: ""
+#workspaceDefaultRamRequest: ""
+#workspaceDefaultRamLimit: ""
 
 global:
   cheNamespace: ""
@@ -44,3 +46,6 @@ global:
   pvcClaim: "1Gi"
   cheWorkspacesNamespace: ""
   workspaceIdleTimeout: "-1"
+  log:
+    loggerConfig: ""
+    appenderName: "plaintext"

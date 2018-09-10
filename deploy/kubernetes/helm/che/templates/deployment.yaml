@@ -245,6 +245,11 @@ spec:
             configMapKeyRef:
               key: CHE_LOGS_APPENDERS_IMPL
               name: che
+        - name: CHE_LOGGER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_LOGGER_CONFIG
+              name: che
         - name: CHE_WORKSPACE_HTTP__PROXY
           valueFrom:
             configMapKeyRef:
@@ -260,6 +265,20 @@ spec:
             configMapKeyRef:
               key: CHE_WORKSPACE_NO__PROXY
               name: che
+{{- if .Values.workspaceDefaultRamRequest }}
+        - name: CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB
+              name: che
+{{- end }}
+{{- if .Values.workspaceDefaultRamLimit }}
+        - name: CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB
+              name: che
+{{- end }}
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         livenessProbe:

@@ -42,6 +42,7 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -97,6 +98,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
@@ -123,6 +125,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -137,6 +140,7 @@ import org.testng.annotations.Test;
  * @author Anton Korneta
  */
 public class KubernetesInternalRuntimeTest {
+
   private static final int EXPOSED_PORT_1 = 4401;
   private static final int EXPOSED_PORT_2 = 8081;
   private static final int INTERNAL_PORT = 4411;
@@ -150,7 +154,8 @@ public class KubernetesInternalRuntimeTest {
   private static final String CONTAINER_NAME_2 = "test2";
   private static final String EVENT_CREATION_TIMESTAMP = "2018-05-15T16:17:54Z";
   private static final String EVENT_LAST_TIMESTAMP_IN_PAST = "2018-05-15T16:18:54Z";
-  /* Pods created by a deployment are created with a random suffix, so Pod names won't match exactly. */
+  /* Pods created by a deployment are created with a random suffix, so Pod names won't match
+  exactly. */
   private static final String POD_NAME_RANDOM_SUFFIX = "-12345";
 
   private static final String INGRESS_HOST = "localhost";
@@ -185,15 +190,20 @@ public class KubernetesInternalRuntimeTest {
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
+  @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
+
+  @Mock
+  private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
+
+  @Mock private SidecarToolingProvisioner toolingProvisioner;
   private KubernetesRuntimeStateCache runtimeStatesCache;
   private KubernetesMachineCache machinesCache;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
-  private KubernetesInternalRuntime<KubernetesRuntimeContext<KubernetesEnvironment>>
-      internalRuntime;
+  private KubernetesInternalRuntime<KubernetesEnvironment> internalRuntime;
 
-  private KubernetesInternalRuntime<KubernetesRuntimeContext<KubernetesEnvironment>>
+  private KubernetesInternalRuntime<KubernetesEnvironment>
       internalRuntimeWithoutUnrecoverableHandler;
 
   private final ImmutableMap<String, Pod> podsMap =
@@ -230,6 +240,9 @@ public class KubernetesInternalRuntimeTest {
             runtimeStatesCache,
             machinesCache,
             startSynchronizerFactory,
+            ImmutableSet.of(internalEnvironmentProvisioner),
+            kubernetesEnvironmentProvisioner,
+            toolingProvisioner,
             context,
             namespace,
             emptyList());
@@ -250,6 +263,9 @@ public class KubernetesInternalRuntimeTest {
             runtimeStatesCache,
             machinesCache,
             startSynchronizerFactory,
+            ImmutableSet.of(internalEnvironmentProvisioner),
+            kubernetesEnvironmentProvisioner,
+            toolingProvisioner,
             context,
             namespace,
             emptyList());
@@ -283,6 +299,7 @@ public class KubernetesInternalRuntimeTest {
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
     when(k8sEnv.getPods()).thenReturn(podsMap);
+
     when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
     when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
@@ -295,6 +312,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.internalStart(emptyMap());
 
+    verify(toolingProvisioner).provision(IDENTITY, k8sEnv);
+    verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any());
     verify(ingresses).create(any());
     verify(services).create(any());

@@ -142,9 +142,7 @@ public class CreateFactoryTest {
     createFactoryPage.typeGitRepositoryUrl(repositoryUrl);
     createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_GIT_NAME);
 
-    assertTrue(
-        createFactoryPage.isCreateFactoryButtonEnabled(),
-        "Known issue https://github.com/eclipse/che/issues/9709");
+    assertTrue(createFactoryPage.isCreateFactoryButtonEnabled());
 
     // create factory
     createFactoryPage.clickOnCreateFactoryButton();
