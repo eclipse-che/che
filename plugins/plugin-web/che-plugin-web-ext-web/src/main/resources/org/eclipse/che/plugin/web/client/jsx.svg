@@ -1,0 +1,35 @@
+<?xml version="1.0" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     style="isolation:isolate"
+     viewBox="0 0 32 32"
+     width="32"
+     height="32">
+    <defs>
+        <clipPath id="_clipPath_QnU7mgg6ruLRsrEOIPBRSJZCiUmyZzg6">
+            <rect width="32"
+                  height="32"/>
+        </clipPath>
+    </defs>
+    <g clip-path="url(#_clipPath_QnU7mgg6ruLRsrEOIPBRSJZCiUmyZzg6)">
+        <g transform="matrix(1,0,0,1,4,3.744)">
+            <text transform="matrix(1,0,0,1,1.406,19.239)"
+                  style="font-family:'Open Sans';font-weight:400;font-size:18px;font-style:normal;fill:#4a86e8;stroke:none;">
+                JSX
+            </text>
+        </g>
+    </g>
+</svg>
