@@ -171,6 +171,8 @@ public class NewWorkspace {
     SELENIUM("selenium"),
     SPRING_BOOT("spring-boot"),
     TOM_EE("tomee-default"),
+    WORKSPACE_NEXT_HELLO_WORLD("wsnext-helloworld-openshift"),
+    WORKSPACE_NEXT_REST("wsnext-service-openshift"),
     UBUNTU("ubuntu"),
     ZEND("zend");
 
