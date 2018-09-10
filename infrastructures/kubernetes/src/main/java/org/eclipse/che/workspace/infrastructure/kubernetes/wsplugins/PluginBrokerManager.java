@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import com.google.common.annotations.Beta;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -20,6 +21,8 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -53,6 +56,8 @@ public class PluginBrokerManager {
   private final KubernetesNamespaceFactory factory;
   private final EventService eventService;
   private final WorkspaceVolumesStrategy volumesStrategy;
+  private final AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
+  private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
   private final String pvcName;
   private final String pvcQuantity;
   private final String pvcAccessMode;
@@ -64,6 +69,8 @@ public class PluginBrokerManager {
       KubernetesNamespaceFactory factory,
       EventService eventService,
       WorkspaceVolumesStrategy volumesStrategy,
+      AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
+      MachineTokenEnvVarProvider machineTokenEnvVarProvider,
       @Named("che.infra.kubernetes.pvc.name") String pvcName,
       @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
@@ -72,6 +79,8 @@ public class PluginBrokerManager {
     this.factory = factory;
     this.eventService = eventService;
     this.volumesStrategy = volumesStrategy;
+    this.authEnableEnvVarProvider = authEnableEnvVarProvider;
+    this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
     this.pvcName = pvcName;
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
@@ -93,6 +102,7 @@ public class PluginBrokerManager {
       throws InfrastructureException {
 
     String workspaceId = runtimeID.getWorkspaceId();
+
     CompletableFuture<List<ChePlugin>> toolingFuture = new CompletableFuture<>();
     KubernetesNamespace kubernetesNamespace = factory.create(workspaceId);
 
@@ -103,8 +113,7 @@ public class PluginBrokerManager {
     DeliverMetas deliverMetas =
         getDeliverPhaseMetas(kubernetesNamespace, pluginsMeta, configMapName);
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(toolingFuture);
-    DeployBroker deployBroker =
-        getDeployBrokerPhase(kubernetesNamespace, workspaceId, configMapName);
+    DeployBroker deployBroker = getDeployBrokerPhase(kubernetesNamespace, runtimeID, configMapName);
 
     listenBrokerEvents
         .then(prepareStorage)
@@ -137,17 +146,20 @@ public class PluginBrokerManager {
   }
 
   private DeployBroker getDeployBrokerPhase(
-      KubernetesNamespace kubernetesNamespace, String workspaceId, String configMapName) {
+      KubernetesNamespace kubernetesNamespace, RuntimeIdentity runtimeId, String configMapName)
+      throws InfrastructureException {
     return new DeployBroker(
         kubernetesNamespace,
-        workspaceId,
+        runtimeId.getWorkspaceId(),
         cheWebsocketEndpoint,
         CONF_FOLDER,
         CONFIG_FILE,
         PVC_CLAIM_PROJECTS,
         BROKER_VOLUME,
         configMapName,
-        pluginBrokerImage);
+        pluginBrokerImage,
+        Arrays.asList(
+            authEnableEnvVarProvider.get(runtimeId), machineTokenEnvVarProvider.get(runtimeId)));
   }
 
   private WaitBrokerResult getWaitBrokerPhase(CompletableFuture<List<ChePlugin>> toolingFuture) {

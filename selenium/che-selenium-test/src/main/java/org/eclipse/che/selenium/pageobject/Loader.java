@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.Assert.fail;
 
@@ -53,7 +54,7 @@ public class Loader {
   /** Waits for Loader to hide. */
   public void waitOnClosed() {
     // in this pace pause, because loader can appear not at once
-    WaitUtils.sleepQuietly(1);
+    WaitUtils.sleepQuietly(300, MILLISECONDS);
     try {
       new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC)
           .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.LOADER_ID)));

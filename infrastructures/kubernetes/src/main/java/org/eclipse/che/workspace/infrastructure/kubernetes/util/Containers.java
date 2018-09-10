@@ -64,7 +64,7 @@ public class Containers {
     final ResourceRequirements resources = container.getResources();
     final Quantity quantity;
     if (resources != null
-        && resources.getLimits() != null
+        && resources.getRequests() != null
         && (quantity = resources.getRequests().get("memory")) != null
         && quantity.getAmount() != null) {
       return KubernetesSize.toBytes(quantity.getAmount());

@@ -79,14 +79,14 @@ public class WebModule extends AbstractGinModule {
   @Singleton
   @Named("ES6FileType")
   protected FileType provideES6File(WebExtensionResource res, FileTypeProvider fileTypeProvider) {
-    return fileTypeProvider.getByExtension(res.jsFile(), "es6");
+    return fileTypeProvider.getByExtension(res.es6File(), "es6");
   }
 
   @Provides
   @Singleton
   @Named("JSXFileType")
   protected FileType provideJSXFile(WebExtensionResource res, FileTypeProvider fileTypeProvider) {
-    return fileTypeProvider.getByExtension(res.jsFile(), "jsx");
+    return fileTypeProvider.getByExtension(res.jsxFile(), "jsx");
   }
 
   @Provides
@@ -94,7 +94,7 @@ public class WebModule extends AbstractGinModule {
   @Named("TypeScript")
   protected FileType provideTypeScriptFile(
       WebExtensionResource res, FileTypeProvider fileTypeProvider) {
-    return fileTypeProvider.getByExtension(res.jsFile(), "ts");
+    return fileTypeProvider.getByExtension(res.tsFile(), "ts");
   }
 
   @Provides

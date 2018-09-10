@@ -269,7 +269,7 @@ public class Wizard {
 
   /** wait wizard form is closed */
   public void waitCreateProjectWizardFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, 20)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.CREATE_PROJECT_WIZARD)));
   }
