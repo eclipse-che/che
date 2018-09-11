@@ -35,6 +35,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
@@ -75,7 +76,8 @@ public class MachineLoginFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) {}
+  public void init(FilterConfig filterConfig) {
+  }
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -88,28 +90,24 @@ public class MachineLoginFilter implements Filter {
     }
     // check token signature and verify is this token machine or not
     try {
-      final Claims claims = jwtParser.parseClaimsJws(token).getBody();
-      try {
-        final String userId = claims.get(USER_ID_CLAIM, String.class);
-        // check if user with such id exists
-        final String userName = userManager.getById(userId).getName();
-        final String workspaceId = claims.get(WORKSPACE_ID_CLAIM, String.class);
-        if (isNullOrEmpty(workspaceId)) {
+      HttpSession session = ((HttpServletRequest) request).getSession(true);
+      Subject sessionSubject = (Subject) session.getAttribute("che_subject");
+      if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
+        try {
+          sessionSubject = extractSubject(token, response);
+          session.setAttribute("che_subject", sessionSubject);
+        } catch (NotFoundException e) {
           sendErr(
               response,
-              SC_BAD_REQUEST,
-              "Authentication with machine token failed because no workspace specified.");
+              SC_UNAUTHORIZED,
+              "Authentication with machine token failed because user for this token no longer exist.");
+          return;
         }
-        final Subject authorizedSubject =
-            new MachineTokenAuthorizedSubject(
-                new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
-        EnvironmentContext.getCurrent().setSubject(authorizedSubject);
-        chain.doFilter(addUserInRequest(httpRequest, authorizedSubject), response);
-      } catch (NotFoundException ex) {
-        sendErr(
-            response,
-            SC_UNAUTHORIZED,
-            "Authentication with machine token failed because user for this token no longer exist.");
+      }
+
+      try {
+        EnvironmentContext.getCurrent().setSubject(sessionSubject);
+        chain.doFilter(addUserInRequest(httpRequest, sessionSubject), response);
       } finally {
         EnvironmentContext.reset();
       }
@@ -124,7 +122,27 @@ public class MachineLoginFilter implements Filter {
     }
   }
 
-  /** Sets given error code with err message into give response. */
+  private Subject extractSubject(String token, ServletResponse response)
+      throws NotFoundException, ServerException, IOException {
+    final Claims claims = jwtParser.parseClaimsJws(token).getBody();
+    final String userId = claims.get(USER_ID_CLAIM, String.class);
+    // check if user with such id exists
+    final String userName = userManager.getById(userId).getName();
+    final String workspaceId = claims.get(WORKSPACE_ID_CLAIM, String.class);
+    if (isNullOrEmpty(workspaceId)) {
+      sendErr(
+          response,
+          SC_BAD_REQUEST,
+          "Authentication with machine token failed because no workspace specified.");
+    }
+
+    return new MachineTokenAuthorizedSubject(
+        new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
+  }
+
+  /**
+   * Sets given error code with err message into give response.
+   */
   private static void sendErr(ServletResponse res, int errCode, String msg) throws IOException {
     final HttpServletResponse response = (HttpServletResponse) res;
     response.sendError(errCode, msg);
@@ -146,5 +164,6 @@ public class MachineLoginFilter implements Filter {
   }
 
   @Override
-  public void destroy() {}
+  public void destroy() {
+  }
 }

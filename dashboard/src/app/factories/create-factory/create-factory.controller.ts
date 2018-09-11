@@ -83,8 +83,10 @@ export class CreateFactoryCtrl {
         let factoryContent = this.cheAPI.getFactoryTemplate().getFactoryTemplate(templateName);
         this.factoryObject = angular.fromJson(factoryContent);
         this.updateGitProjectLocation(newValue);
+        this.updateGitProjectName(newValue);
       } else {
         this.updateGitProjectLocation(newValue);
+        this.updateGitProjectName(newValue);
       }
 
     }, true);
@@ -120,6 +122,25 @@ export class CreateFactoryCtrl {
     let project = this.factoryObject.workspace.projects[0];
     project.source.type = 'git';
     project.source.location = location;
+  }
+
+  /**
+   * Update the source project name and path for Git factory
+   * @param location the new location
+   */
+  updateGitProjectName(location: string): void {
+    if (!this.factoryObject || !location) {
+      return;
+    }
+
+    const project = this.factoryObject.workspace.projects[0],
+      re = /([^\/]+?)(?:\.git)?$/i,
+      match = location.match(re);
+
+    if (match && match[1]) {
+      project.name = match[1];
+      project.path = `/${match[1]}`;
+    }
   }
 
   /**

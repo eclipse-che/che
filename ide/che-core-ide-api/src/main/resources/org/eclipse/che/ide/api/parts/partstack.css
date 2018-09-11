@@ -38,8 +38,7 @@ div[maximized="true"] svg[name="workBenchIconMaximize"] * {
     overflow: visible;
 
     background: tabLineError 0 1.3em;
-    background-repeat-y: no-repeat;
-    background-repeat-x: repeat;
+    background-repeat: repeat-x;
     background-size: 15px 7px;
 }
 
@@ -51,7 +50,6 @@ div[maximized="true"] svg[name="workBenchIconMaximize"] * {
     overflow: visible;
 
     background: tabLineWarning 0 1.3em;
-    background-repeat-y: no-repeat;
-    background-repeat-x: repeat;
+    background-repeat: repeat-x;
     background-size: 15px 7px;
 }

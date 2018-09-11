@@ -50,7 +50,7 @@
           "recipe": {
             "contentType": "",
             "type": "dockerimage",
-            "content": "eclipse/che-theia:0.3.13-nightly"
+            "content": "eclipse/che-theia:0.3.14-nightly"
           }
         }
       },
@@ -123,7 +123,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.3.13-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.3.14-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
             "contentType": "application/x-yaml"
           }
         }
@@ -132,6 +132,102 @@
       "name": "theia",
       "projects": [],
       "commands": []
+    },
+    "stackIcon": {
+      "name": "type-theia.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "wsnext-helloworld-openshift",
+    "creator": "ide",
+    "name": "Workspace Next HelloWorld example on OpenShift",
+    "description": "Example of a Theia Hello World plug-in + Theia plug-in (openshift)",
+    "scope": "general",
+    "tags": [
+      "ws.next",
+      "Theia"
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/dev": {
+              "attributes": {},
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "openshift",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "name": "skeleton",
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-dummy-plugin:0.0.1"
+      },
+      "commands": [],
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-theia.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "wsnext-service-openshift",
+    "creator": "ide",
+    "name": "Workspace Next REST Service Example on OpenShift",
+    "description": "Example of a Theia REST Service plug-in + REST server container + Theia plug-in (openshift)",
+    "scope": "general",
+    "tags": [
+      "ws.next",
+      "Theia"
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/dev": {
+              "attributes": {},
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "openshift",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "name": "skeleton",
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-service-plugin:0.0.1"
+      },
+      "commands": [],
+      "links": []
     },
     "stackIcon": {
       "name": "type-theia.svg",

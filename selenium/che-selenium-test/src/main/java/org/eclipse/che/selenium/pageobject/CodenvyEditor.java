@@ -38,6 +38,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
@@ -75,8 +76,10 @@ import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -99,6 +102,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -207,8 +211,10 @@ public class CodenvyEditor {
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
         ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "//span[contains(text(),'%s')]";
-    String HOVER_POPUP_XPATH = "//div[@class='textviewTooltip'][last()]";
+    String HOVER_POPUP_XPATH =
+        "//div[@class='textviewTooltip' and contains(@style,'visibility: visible')]";
     String AUTOCOMPLETE_PROPOSAL_DOC_ID = "gwt-debug-content-assistant-doc-popup";
+    String LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS = "input.orionCodenvy";
   }
 
   public enum TabActionLocator {
@@ -266,6 +272,7 @@ public class CodenvyEditor {
     OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
     NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
     FIND(By.id("contextMenu/Find")),
+    OPEN_ON_GITHUB(By.id("contextMenu/Open on GitHub")),
     CLOSE(By.id("contextMenu/Close"));
 
     @SuppressWarnings("ImmutableEnumChecker")
@@ -339,6 +346,9 @@ public class CodenvyEditor {
 
   @FindBy(id = AUTOCOMPLETE_PROPOSAL_DOC_ID)
   private WebElement proposalDoc;
+
+  @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
+  private WebElement languageServerRenameField;
 
   /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
@@ -446,7 +456,12 @@ public class CodenvyEditor {
    * @param expectedText the expected text into hover pop-up
    */
   public void waitTextInHoverPopup(String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    try {
+      seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   /**
@@ -648,6 +663,23 @@ public class CodenvyEditor {
   }
 
   /**
+   * Select text in defined interval
+   *
+   * @param fromLine beginning of first line for selection
+   * @param numberOfLine end of first line for selection
+   */
+  public void selectLines(int fromLine, int numberOfLine) {
+    Actions action = seleniumWebDriverHelper.getAction(seleniumWebDriver);
+    setCursorToLine(fromLine);
+    action.keyDown(SHIFT).perform();
+    for (int i = 0; i < numberOfLine; i++) {
+      typeTextIntoEditor(Keys.ARROW_DOWN.toString());
+    }
+    action.keyUp(SHIFT).perform();
+    action.sendKeys(Keys.END.toString()).keyUp(SHIFT).perform();
+  }
+
+  /**
    * Sets cursor to specified {@code positionLine} and {@code positionChar}.
    *
    * @param positionLine line's number where cursor should be placed
@@ -785,8 +817,10 @@ public class CodenvyEditor {
             (ExpectedCondition<Boolean>)
                 webDriver -> {
                   for (int i = startLine; i <= endLine; i++) {
+                    WebElement webElement = getListGitMarkers().get(i);
+                    webDriverWaitFactory.get().until(visibilityOf(webElement));
                     if (!"git-change-marker modification"
-                        .equals(getListGitMarkers().get(i).getAttribute("class"))) {
+                        .equals(webElement.getAttribute("class"))) {
                       return false;
                     }
                   }
@@ -2202,5 +2236,16 @@ public class CodenvyEditor {
         .sendKeys("/")
         .keyUp(CONTROL)
         .perform();
+  }
+
+  /**
+   * wait renaming field in the Editor (usually it field is used by language servers), type new
+   * value and wait closing of the field
+   *
+   * @param renameValue
+   */
+  public void doRenamingByLanguageServerField(String renameValue) {
+    seleniumWebDriverHelper.setText(languageServerRenameField, renameValue);
+    seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
   }
 }

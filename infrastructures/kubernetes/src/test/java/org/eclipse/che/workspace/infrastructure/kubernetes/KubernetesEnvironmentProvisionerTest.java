@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
@@ -67,7 +68,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @BeforeMethod
   public void setUp() {
     osInfraProvisioner =
-        new KubernetesEnvironmentProvisioner(
+        new KubernetesEnvironmentProvisionerImpl(
             true,
             uniqueNamesProvisioner,
             serversProvisioner,

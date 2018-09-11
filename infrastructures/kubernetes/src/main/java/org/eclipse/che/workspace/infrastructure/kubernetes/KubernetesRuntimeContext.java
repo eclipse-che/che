@@ -30,7 +30,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 /** @author Sergii Leshchenko */
 public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends RuntimeContext<T> {
 
-  private final KubernetesRuntimeFactory runtimeFactory;
+  private final KubernetesRuntimeFactory<T> runtimeFactory;
   private final KubernetesNamespaceFactory namespaceFactory;
   private final String websocketOutputEndpoint;
   private final KubernetesRuntimeStateCache runtimeStatuses;
@@ -39,7 +39,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
   public KubernetesRuntimeContext(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       KubernetesNamespaceFactory namespaceFactory,
-      KubernetesRuntimeFactory runtimeFactory,
+      KubernetesRuntimeFactory<T> runtimeFactory,
       KubernetesRuntimeStateCache runtimeStatuses,
       @Assisted T kubernetesEnvironment,
       @Assisted RuntimeIdentity identity,

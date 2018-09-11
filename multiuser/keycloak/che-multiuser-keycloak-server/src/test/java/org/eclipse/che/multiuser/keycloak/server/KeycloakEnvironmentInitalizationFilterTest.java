@@ -33,6 +33,7 @@ import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.FilterChain;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -63,6 +64,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @Mock private FilterChain chain;
   @Mock private HttpServletRequest request;
   @Mock private HttpServletResponse response;
+  @Mock private ServletOutputStream servletOutputStream;
   @Mock private HttpSession session;
   @Mock private JwtParser jwtParser;
 
@@ -73,6 +75,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     MockitoAnnotations.initMocks(this);
     when(request.getScheme()).thenReturn("http");
     when(request.getSession()).thenReturn(session);
+    when(response.getOutputStream()).thenReturn(servletOutputStream);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
     filter =
@@ -95,6 +98,29 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     // then
     verify(chain).doFilter(eq(request), eq(response));
     verifyNoMoreInteractions(userManager);
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenNoEmailExists() throws Exception {
+
+    Map<String, Object> claimParams = new HashMap<>();
+    claimParams.put("preferred_username", "username");
+    Claims claims = new DefaultClaims(claimParams).setSubject("id2");
+    DefaultJwt<Claims> jwt = new DefaultJwt<>(new DefaultHeader(), claims);
+    // given
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
+    when(request.getAttribute("token")).thenReturn(jwt);
+
+    // when
+    filter.doFilter(request, response, chain);
+
+    verify(response).setStatus(400);
+    verify(servletOutputStream)
+        .write(
+            eq(
+                "Unable to authenticate user because email address is not set in keycloak profile"
+                    .getBytes()));
+    verifyNoMoreInteractions(chain);
   }
 
   @Test

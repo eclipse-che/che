@@ -11,18 +11,17 @@
  */
 package org.eclipse.che.ide.ui.toolbar;
 
+import static com.google.gwt.safehtml.shared.SimpleHtmlSanitizer.sanitizeHtml;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 import static org.eclipse.che.ide.util.dom.Elements.disableTextSelection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.DOM;
@@ -58,6 +57,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Vitaliy Gulyy
  * @author Oleksii Orel
+ * @author Vlad Zhukovskyi
  */
 public class PopupMenu extends Composite {
 
@@ -92,8 +92,6 @@ public class PopupMenu extends Composite {
 
   /** Working variable. PopupMenu panel. */
   private SimplePanel popupMenuPanel;
-  /** Working variable. Special table uses for handling mouse events. */
-  private PopupMenuTable table;
 
   private PresentationFactory presentationFactory;
   private KeyBindingAgent keyBindingAgent;
@@ -174,6 +172,7 @@ public class PopupMenu extends Composite {
    * @param itemIdPrefix id prefix of the item
    * @param showTooltips indicates whether tooltips should be shown on hover
    */
+  @SuppressWarnings("unused")
   public PopupMenu(
       ActionGroup actionGroup,
       ActionManager actionManager,
@@ -225,8 +224,10 @@ public class PopupMenu extends Composite {
         Utils.renderActionGroup(actionGroup, presentationFactory, actionManager);
 
     list = new ArrayList<>();
-    for (Utils.VisibleActionGroup groupActions : visibleActionGroupList) {
-      list.addAll(groupActions.getActionList());
+    if (visibleActionGroupList != null) {
+      for (Utils.VisibleActionGroup groupActions : visibleActionGroupList) {
+        list.addAll(groupActions.getActionList());
+      }
     }
 
     popupMenuPanel = new SimplePanel();
@@ -234,17 +235,14 @@ public class PopupMenu extends Composite {
     initWidget(popupMenuPanel);
 
     popupMenuPanel.addDomHandler(
-        new MouseOutHandler() {
-          @Override
-          public void onMouseOut(MouseOutEvent event) {
-            closeSubPopupTimer.cancel();
+        event -> {
+          closeSubPopupTimer.cancel();
 
-            PopupMenu.this.setStyleNormal(hoveredTR);
-            hoveredTR = null;
+          PopupMenu.this.setStyleNormal(hoveredTR);
+          hoveredTR = null;
 
-            if (subPopupAnchor != null) {
-              setStyleHovered(subPopupAnchor);
-            }
+          if (subPopupAnchor != null) {
+            setStyleHovered(subPopupAnchor);
           }
         },
         MouseOutEvent.getType());
@@ -254,24 +252,24 @@ public class PopupMenu extends Composite {
     hasCheckedItems = hasCheckedItems();
   }
 
-  private boolean isRowEnabled(Element tr) {
+  private boolean isRowDisabled(Element tr) {
     if (tr == null) {
-      return false;
+      return true;
     }
 
     String index = tr.getAttribute("item-index");
     if (index == null || "".equals(index)) {
-      return false;
+      return true;
     }
 
     String enabled = tr.getAttribute("item-enabled");
     if (enabled == null || "".equals(enabled) || "false".equals(enabled)) {
-      return false;
+      return true;
     }
 
     int itemIndex = Integer.parseInt(index);
     Action menuItem = list.get(itemIndex);
-    return presentationFactory.getPresentation(menuItem).isEnabled();
+    return !presentationFactory.getPresentation(menuItem).isEnabled();
   }
 
   /** Close this Popup Menu. */
@@ -292,7 +290,8 @@ public class PopupMenu extends Composite {
       idPrefix += "/";
     }
 
-    table = new PopupMenuTable();
+    /* Working variable. Special table uses for handling mouse events. */
+    PopupMenuTable table = new PopupMenuTable();
     table.setStyleName(POPUP_RESOURCES.popup().popupMenuTable());
     table.setCellPadding(0);
     table.setCellSpacing(0);
@@ -360,9 +359,9 @@ public class PopupMenu extends Composite {
             work,
             "<nobr id=\""
                 + idPrefix
-                + presentation.getText()
+                + sanitizeHtml(presentation.getText()).asString()
                 + "\">"
-                + presentation.getText()
+                + sanitizeHtml(presentation.getText()).asString()
                 + "</nobr>");
         table
             .getCellFormatter()
@@ -426,8 +425,6 @@ public class PopupMenu extends Composite {
                       : POPUP_RESOURCES.popup().popupMenuSubMenuFieldDisabled());
         }
 
-        work++;
-
         table.getRowFormatter().getElement(i).setAttribute("item-index", Integer.toString(i));
         table
             .getRowFormatter()
@@ -472,18 +469,13 @@ public class PopupMenu extends Composite {
 
   /** @return true when at list one item from list of menu items has selected state. */
   private boolean hasCheckedItems() {
-    for (int i = 0; i < list.size(); i++) {
-      Action action = list.get(i);
-      if (action instanceof ToggleAction) {
-
-        ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
-        if (((ToggleAction) action).isSelected(e)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    return list.stream()
+        .filter(action -> action instanceof ToggleAction)
+        .map(action -> (ToggleAction) action)
+        .anyMatch(
+            action ->
+                action.isSelected(
+                    new ActionEvent(presentationFactory.getPresentation(action), actionManager)));
   }
 
   /**
@@ -491,7 +483,7 @@ public class PopupMenu extends Composite {
    *
    * @param row - element to be processed.
    */
-  protected void setStyleNormal(Element row) {
+  private void setStyleNormal(Element row) {
     if (row != null) {
       row.removeClassName(POPUP_RESOURCES.popup().popupMenuItemOver());
     }
@@ -506,7 +498,7 @@ public class PopupMenu extends Composite {
    *
    * @param tr - element to be processed.
    */
-  protected void onRowHovered(Element tr) {
+  private void onRowHovered(Element tr) {
     if (tr == hoveredTR) {
       return;
     }
@@ -516,7 +508,7 @@ public class PopupMenu extends Composite {
       setStyleHovered(subPopupAnchor);
     }
 
-    if (!isRowEnabled(tr)) {
+    if (isRowDisabled(tr)) {
       hoveredTR = null;
       return;
     }
@@ -538,13 +530,9 @@ public class PopupMenu extends Composite {
     }
   }
 
-  /**
-   * Handle Mouse Click
-   *
-   * @param tr
-   */
-  protected void onRowClicked(Element tr) {
-    if (!isRowEnabled(tr) || tr == subPopupAnchor) {
+  /** Handle Mouse Click */
+  private void onRowClicked(Element tr) {
+    if (isRowDisabled(tr) || tr == subPopupAnchor) {
       return;
     }
 
@@ -613,38 +601,35 @@ public class PopupMenu extends Composite {
 
     Scheduler.get()
         .scheduleDeferred(
-            new ScheduledCommand() {
-              @Override
-              public void execute() {
-                int left = getAbsoluteLeft() + getOffsetWidth() - HORIZONTAL_OFFSET;
-                int top =
-                    tableRowElement.getAbsoluteTop() - lockLayer.getTopOffset() - VERTICAL_OFFSET;
+            () -> {
+              int left = getAbsoluteLeft() + getOffsetWidth() - HORIZONTAL_OFFSET;
+              int top =
+                  tableRowElement.getAbsoluteTop() - lockLayer.getTopOffset() - VERTICAL_OFFSET;
 
-                if (left + openedSubPopup.getOffsetWidth() > Window.getClientWidth()) {
-                  if (left > openedSubPopup.getOffsetWidth()) {
-                    left = getAbsoluteLeft() - openedSubPopup.getOffsetWidth() + HORIZONTAL_OFFSET;
-                  } else {
-                    int diff = left + openedSubPopup.getOffsetWidth() - Window.getClientWidth();
-                    left -= diff;
-                  }
+              if (left + openedSubPopup.getOffsetWidth() > Window.getClientWidth()) {
+                if (left > openedSubPopup.getOffsetWidth()) {
+                  left = getAbsoluteLeft() - openedSubPopup.getOffsetWidth() + HORIZONTAL_OFFSET;
+                } else {
+                  int diff = left + openedSubPopup.getOffsetWidth() - Window.getClientWidth();
+                  left -= diff;
                 }
-
-                if (top + openedSubPopup.getOffsetHeight() > Window.getClientHeight()) {
-                  if (top > openedSubPopup.getOffsetHeight()) {
-                    top =
-                        tableRowElement.getAbsoluteTop()
-                            - openedSubPopup.getOffsetHeight()
-                            + VERTICAL_OFFSET;
-                  } else {
-                    int diff = top + openedSubPopup.getOffsetHeight() - Window.getClientHeight();
-                    top -= diff;
-                  }
-                }
-
-                openedSubPopup.getElement().getStyle().setLeft(left, Unit.PX);
-                openedSubPopup.getElement().getStyle().setTop(top, Unit.PX);
-                openedSubPopup.getElement().getStyle().setVisibility(Visibility.VISIBLE);
               }
+
+              if (top + openedSubPopup.getOffsetHeight() > Window.getClientHeight()) {
+                if (top > openedSubPopup.getOffsetHeight()) {
+                  top =
+                      tableRowElement.getAbsoluteTop()
+                          - openedSubPopup.getOffsetHeight()
+                          + VERTICAL_OFFSET;
+                } else {
+                  int diff = top + openedSubPopup.getOffsetHeight() - Window.getClientHeight();
+                  top -= diff;
+                }
+              }
+
+              openedSubPopup.getElement().getStyle().setLeft(left, Unit.PX);
+              openedSubPopup.getElement().getStyle().setTop(top, Unit.PX);
+              openedSubPopup.getElement().getStyle().setVisibility(Visibility.VISIBLE);
             });
   }
 
@@ -693,8 +678,13 @@ public class PopupMenu extends Composite {
   /** This table uses for handling mouse events. */
   private class PopupMenuTable extends FlexTable {
 
-    public PopupMenuTable() {
+    PopupMenuTable() {
       sinkEvents(Event.ONMOUSEOVER | Event.ONCLICK);
+    }
+
+    @Override
+    public CellFormatter getCellFormatter() {
+      return super.getCellFormatter();
     }
 
     @Override

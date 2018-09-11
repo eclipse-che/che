@@ -42,8 +42,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.che.commons.json.JsonParseException;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
@@ -62,7 +63,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.IAnnotationTransformer;
+import org.testng.IAnnotationTransformer2;
 import org.testng.IConfigurationListener;
 import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
@@ -75,6 +76,9 @@ import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 import org.testng.TestException;
+import org.testng.annotations.IConfigurationAnnotation;
+import org.testng.annotations.IDataProviderAnnotation;
+import org.testng.annotations.IFactoryAnnotation;
 import org.testng.annotations.ITestAnnotation;
 
 /**
@@ -91,7 +95,8 @@ public abstract class SeleniumTestHandler
         ISuiteListener,
         IInvokedMethodListener,
         IExecutionListener,
-        IAnnotationTransformer {
+        IAnnotationTransformer2,
+        IConfigurationListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -142,7 +147,7 @@ public abstract class SeleniumTestHandler
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
 
   // this is the map {test class FQN} -> {failed test method}
-  private final Map<String, ITestNGMethod> testsWithFailure = new ConcurrentHashMap<>();
+  private final Map<String, ITestResult> testsWithFailure = new ConcurrentHashMap<>();
 
   public SeleniumTestHandler() {
     injector = createInjector(getParentModules());
@@ -282,6 +287,34 @@ public abstract class SeleniumTestHandler
     testFilter.excludeTestOfImproperGroup(annotation);
   }
 
+  @Override
+  public void transform(
+      IConfigurationAnnotation annotation,
+      Class testClass,
+      Constructor testConstructor,
+      Method testMethod) {
+    testFilter.excludeTestOfImproperGroup(annotation);
+  }
+
+  @Override
+  public void transform(IDataProviderAnnotation annotation, Method method) {}
+
+  @Override
+  public void transform(IFactoryAnnotation annotation, Method method) {}
+
+  @Override
+  public void onConfigurationSuccess(ITestResult result) {}
+
+  @Override
+  public void onConfigurationFailure(ITestResult result) {
+    onTestFinish(result);
+  }
+
+  @Override
+  public void onConfigurationSkip(ITestResult result) {
+    onTestFinish(result);
+  }
+
   /** Injects dependencies into the given test class using {@link Guice} and custom injectors. */
   private void injectDependencies(ITestContext testContext, Object testInstance) throws Exception {
     Injector injector = testContext.getSuite().getParentInjector();
@@ -297,23 +330,43 @@ public abstract class SeleniumTestHandler
 
   /** Is invoked when test or configuration is finished. */
   private void onTestFinish(ITestResult result) {
+    // do not treat SeleniumTestHandler error as test failure
+    if (testsWithFailure.containsKey(result.getTestClass().getRealClass().getName())
+        && testsWithFailure
+            .get(result.getTestClass().getRealClass().getName())
+            .getMethod()
+            .equals(result.getMethod())
+        && result.getMethod().getCurrentInvocationCount() == 1) {
+      // restore initial test exception
+      result.setThrowable(
+          testsWithFailure.get(result.getTestClass().getRealClass().getName()).getThrowable());
+      return;
+    }
+
     if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
       switch (result.getStatus()) {
         case ITestResult.FAILURE:
-          String errorDetails =
-              result.getThrowable() != null
-                  ? " Error: " + result.getThrowable().getLocalizedMessage()
-                  : "";
+          if (result.getMethod().isTest()) {
+            String errorDetails =
+                result.getThrowable() != null
+                    ? " Error: " + result.getThrowable().getLocalizedMessage()
+                    : "";
 
-          LOG.error("Test {} failed.{}", getCompletedTestLabel(result.getMethod()), errorDetails);
-          LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
+            LOG.error("Test {} failed.{}", getCompletedTestLabel(result.getMethod()), errorDetails);
+            LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
 
-          testsWithFailure.put(result.getTestClass().getRealClass().getName(), result.getMethod());
+            testsWithFailure.put(result.getTestClass().getRealClass().getName(), result);
+          }
+
+          captureWebDriver(result);
+          captureTestWorkspaceLogs(result);
 
           break;
 
         case ITestResult.SKIP:
-          LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
+          if (result.getMethod().isTest()) {
+            LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
+          }
 
           // don't capture test data if test is skipped because of previous test with higher
           // priority failed
@@ -325,11 +378,6 @@ public abstract class SeleniumTestHandler
 
         default:
       }
-
-      captureScreenshot(result);
-      captureHtmlSource(result);
-      captureTestWorkspaceLogs(result);
-      storeWebDriverLogs(result);
     }
   }
 
@@ -351,8 +399,26 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestReference(result));
+      String testReference = getTestReference(result);
+      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, testReference);
       testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
+      Path pathToZipWithWorkspaceLogs =
+          pathToStoreWorkspaceLogs.getParent().resolve(getTestResultFilename(testReference, "zip"));
+
+      if (!Files.exists(pathToStoreWorkspaceLogs)) {
+        return;
+      }
+
+      try {
+        ZipUtils.zipDir(
+            pathToStoreWorkspaceLogs.toFile().getAbsolutePath(),
+            pathToStoreWorkspaceLogs.toFile(),
+            pathToZipWithWorkspaceLogs.toFile(),
+            null);
+        FileUtils.deleteQuietly(pathToStoreWorkspaceLogs.toFile());
+      } catch (IOException | IllegalArgumentException e) {
+        LOG.warn("Error of creation zip-file with workspace logs.", e);
+      }
     }
   }
 
@@ -406,19 +472,12 @@ public abstract class SeleniumTestHandler
         || f.isAnnotationPresent(InjectPageObject.class);
   }
 
-  private void captureScreenshot(ITestResult result) {
+  private void captureWebDriver(ITestResult result) {
     Set<SeleniumWebDriver> webDrivers = new HashSet<>();
     Object testInstance = result.getInstance();
 
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> captureScreenshotsFromOpenedWindows(result, webDriver));
-  }
-
-  private void captureHtmlSource(ITestResult result) {
-    Set<SeleniumWebDriver> webDrivers = new HashSet<>();
-    Object testInstance = result.getInstance();
-    collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> dumpHtmlCodeFromTheCurrentPage(result, webDriver));
+    webDrivers.forEach(webDriver -> captureWebDriver(result, webDriver));
   }
 
   /**
@@ -463,9 +522,9 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureScreenshotFromCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
-    String filename = NameGenerator.generate(testReference + "_", 8) + ".png";
+    String filename = getTestResultFilename(testReference, "png");
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
       Path screenshot = Paths.get(screenshotsDir, filename);
@@ -476,33 +535,31 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private String getTestReference(ITestResult result) {
-    return result.getTestClass().getName() + "." + result.getMethod().getMethodName();
+  private String getTestResultFilename(String testReference, String fileExtension) {
+    return format("%s_time-%s-millis.%s", testReference, System.currentTimeMillis(), fileExtension);
   }
 
-  private void captureScreenshotsFromOpenedWindows(
-      ITestResult result, SeleniumWebDriver webDriver) {
+  private String getTestReference(ITestResult result) {
+    return format("%s.%s", result.getTestClass().getName(), result.getMethod().getMethodName());
+  }
+
+  private void captureWebDriver(ITestResult result, SeleniumWebDriver webDriver) {
     webDriver
         .getWindowHandles()
         .forEach(
             currentWin -> {
               webDriver.switchTo().window(currentWin);
-              captureScreenshotFromWindow(result, webDriver);
+              captureScreenshotFromCurrentWindow(result, webDriver);
+              captureHtmlDumpFromCurrentWindow(result, webDriver);
+              storeLogsFromCurrentWindow(result, webDriver);
             });
   }
 
-  private void storeWebDriverLogs(ITestResult result) {
-    Set<SeleniumWebDriver> webDrivers = new HashSet<>();
-    Object testInstance = result.getInstance();
-    collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> storeWebDriverLogs(result, webDriver));
-  }
-
-  private void storeWebDriverLogs(ITestResult result, SeleniumWebDriver webDriver) {
+  private void storeLogsFromCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
 
     try {
-      String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
+      String filename = getTestResultFilename(testReference, "log");
       Path webDriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
       Files.createDirectories(webDriverLogsDirectory.getParent());
       Files.write(
@@ -517,9 +574,9 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureHtmlDumpFromCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
-    String filename = NameGenerator.generate(testReference + "_", 8) + ".html";
+    String filename = getTestResultFilename(testReference, "html");
     try {
       String pageSource = webDriver.getPageSource();
       Path dumpDirectory = Paths.get(htmldumpsDir, filename);
@@ -567,16 +624,17 @@ public abstract class SeleniumTestHandler
    */
   private void skipTestIfNeeded(ITestResult result) {
     ITestNGMethod testMethodToSkip = result.getMethod();
-    ITestNGMethod failedTestMethod =
+    ITestResult failedTestResult =
         testsWithFailure.get(testMethodToSkip.getInstance().getClass().getName());
 
     // Test with lower priority value is started firstly by TestNG.
-    if (failedTestMethod != null
-        && testMethodToSkip.getPriority() > failedTestMethod.getPriority()) {
+    if (failedTestResult != null
+        && testMethodToSkip.getPriority() > failedTestResult.getMethod().getPriority()) {
       throw new SkipException(
           format(
               "Skipping test %s because it depends on test %s which has failed earlier.",
-              getStartingTestLabel(testMethodToSkip), getCompletedTestLabel(failedTestMethod)));
+              getStartingTestLabel(testMethodToSkip),
+              getCompletedTestLabel(failedTestResult.getMethod())));
     }
   }
 

@@ -131,6 +131,6 @@ public class RunToCursorTest {
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
   }
 }

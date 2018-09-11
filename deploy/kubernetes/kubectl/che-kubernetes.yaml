@@ -69,7 +69,7 @@ items:
     CHE_LOGS_APPENDERS_IMPL: "plaintext"
     CHE_INFRA_KUBERNETES_INGRESS_DOMAIN: "192.168.99.100.nip.io"
     CHE_INFRA_KUBERNETES_SERVER__STRATEGY: "default-host"
-    CHE_WORKSPACE_FEATURE_API: "http://marketplace:80"
+    CHE_WORKSPACE_PLUGIN__REGISTRY__URL: "NULL"
 - apiVersion: extensions/v1beta1
   kind: Ingress
   metadata:
@@ -253,10 +253,10 @@ items:
               configMapKeyRef:
                 key: CHE_INFRA_KUBERNETES_SERVER__STRATEGY
                 name: che
-          - name: CHE_WORKSPACE_FEATURE_API
+          - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             valueFrom:
               configMapKeyRef:
-                key: CHE_WORKSPACE_FEATURE_API
+                key: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
                 name: che
           image: eclipse/che-server:nightly
           imagePullPolicy: Always

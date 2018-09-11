@@ -266,7 +266,7 @@ public class JwtProxyProvisioner {
         .withNewSpec()
         .withContainers(
             new ContainerBuilder()
-                .withImagePullPolicy("IfNotPresent")
+                .withImagePullPolicy("Always")
                 .withName("verifier")
                 .withImage(jwtProxyImage)
                 .withVolumeMounts(

@@ -39,7 +39,10 @@ public class RamLimitProvisioner implements ConfigurationProvisioner {
       for (Container container : pod.getSpec().getContainers()) {
         final Map<String, String> attributes =
             machines.get(machineName(pod, container)).getAttributes();
-        Containers.addRamLimit(container, Long.parseLong(attributes.get(MEMORY_LIMIT_ATTRIBUTE)));
+        String memoryLimitAttribute = attributes.get(MEMORY_LIMIT_ATTRIBUTE);
+        if (memoryLimitAttribute != null) {
+          Containers.addRamLimit(container, Long.parseLong(memoryLimitAttribute));
+        }
       }
     }
   }

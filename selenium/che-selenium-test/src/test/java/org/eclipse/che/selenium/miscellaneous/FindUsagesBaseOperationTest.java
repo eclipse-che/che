@@ -117,18 +117,24 @@ public class FindUsagesBaseOperationTest {
     // Check nodes in the 'find usages' panel by 'double click' and click on the icon node
     findUsages.clickOnIconNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.selectNodeInFindUsagesByDoubleClick(PROJECT_NAME);
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.selectNodeInFindUsagesByDoubleClick("org.eclipse.qa.examples");
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
     findUsages.selectNodeInFindUsagesByDoubleClick(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+
+    findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.clickOnIconNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
@@ -137,8 +143,10 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.selectNodeInFindUsagesPanel("org.eclipse.qa.examples");
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.selectNodeInFindUsagesPanel("AppController");
@@ -147,11 +155,14 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
@@ -162,15 +173,19 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_LEFT.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
+
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_UP.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_UP.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_UP.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_LEFT.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
@@ -185,6 +200,7 @@ public class FindUsagesBaseOperationTest {
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(30);
     editor.waitTextElementsActiveLine("numGuessByUser");
+
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
