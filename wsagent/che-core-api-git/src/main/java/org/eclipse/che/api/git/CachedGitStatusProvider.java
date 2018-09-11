@@ -13,6 +13,7 @@ package org.eclipse.che.api.git;
 
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.fs.server.WsPathUtils.SEPARATOR;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
@@ -266,29 +267,59 @@ public class CachedGitStatusProvider implements VcsStatusProvider {
       return;
     }
 
-    paths.forEach(
-        path -> {
-          cachedStatus.getAdded().remove(path);
-          cachedStatus.getChanged().remove(path);
-          cachedStatus.getModified().remove(path);
-          cachedStatus.getUntracked().remove(path);
-          cachedStatus.getMissing().remove(path);
-          cachedStatus.getRemoved().remove(path);
-          cachedStatus.getConflicting().remove(path);
-          cachedStatus.getUntrackedFolders().remove(path);
-        });
+    Status status = newDto(Status.class);
 
-    changes.getAdded().forEach(added -> cachedStatus.getAdded().add(added));
-    changes.getChanged().forEach(changed -> cachedStatus.getChanged().add(changed));
-    changes.getModified().forEach(modified -> cachedStatus.getModified().add(modified));
-    changes.getUntracked().forEach(untracked -> cachedStatus.getUntracked().add(untracked));
-    changes.getMissing().forEach(missing -> cachedStatus.getMissing().add(missing));
-    changes.getRemoved().forEach(removed -> cachedStatus.getRemoved().add(removed));
-    changes.getConflicting().forEach(conflicting -> cachedStatus.getConflicting().add(conflicting));
+    status.setAdded(
+        cachedStatus.getAdded().stream().filter(added -> !paths.contains(added)).collect(toList()));
+    status.setChanged(
+        cachedStatus
+            .getChanged()
+            .stream()
+            .filter(changed -> !paths.contains(changed))
+            .collect(toList()));
+    status.setModified(
+        cachedStatus
+            .getModified()
+            .stream()
+            .filter(modified -> !paths.contains(modified))
+            .collect(toList()));
+    status.setUntracked(
+        cachedStatus
+            .getUntracked()
+            .stream()
+            .filter(untracked -> !paths.contains(untracked))
+            .collect(toList()));
+    status.setMissing(
+        cachedStatus
+            .getMissing()
+            .stream()
+            .filter(missing -> !paths.contains(missing))
+            .collect(toList()));
+    status.setRemoved(
+        cachedStatus
+            .getRemoved()
+            .stream()
+            .filter(removed -> !paths.contains(removed))
+            .collect(toList()));
+    status.setConflicting(
+        cachedStatus
+            .getConflicting()
+            .stream()
+            .filter(Conflicting -> !paths.contains(Conflicting))
+            .collect(toList()));
+
+    changes.getAdded().forEach(added -> status.getAdded().add(added));
+    changes.getChanged().forEach(changed -> status.getChanged().add(changed));
+    changes.getModified().forEach(modified -> status.getModified().add(modified));
+    changes.getUntracked().forEach(untracked -> status.getUntracked().add(untracked));
+    changes.getMissing().forEach(missing -> status.getMissing().add(missing));
+    changes.getRemoved().forEach(removed -> status.getRemoved().add(removed));
+    changes.getConflicting().forEach(conflicting -> status.getConflicting().add(conflicting));
     changes
         .getUntrackedFolders()
-        .forEach(untrackedFolders -> cachedStatus.getUntrackedFolders().add(untrackedFolders));
+        .forEach(untrackedFolders -> status.getUntrackedFolders().add(untrackedFolders));
 
-    statusCache.put(project, cachedStatus);
+    statusCache.remove(project);
+    statusCache.put(project, status);
   }
 }
