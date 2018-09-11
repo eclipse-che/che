@@ -315,8 +315,7 @@ initRunMode() {
 
     elif [[ ${MODE} == "grid" ]]; then
         export NODE_CHROME_DEBUG_SUFFIX
-        docker-compose -p=selenium up -d > /dev/null
-        docker-compose -p=selenium scale chromenode=${THREADS} > /dev/null
+        docker-compose -p=selenium up -d --scale chromenode=${THREADS} > /dev/null
 
     else
         echo "[TEST] Unrecognized mode "${MODE}
