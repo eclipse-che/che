@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4j.CodeLensParams;
@@ -30,6 +31,7 @@ import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
+import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
@@ -88,13 +90,13 @@ public class MavenTextDocumentService implements TextDocumentService {
   }
 
   @Override
-  public CompletableFuture<List<? extends SymbolInformation>> documentSymbol(
+  public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> documentSymbol(
       DocumentSymbolParams params) {
     return null;
   }
 
   @Override
-  public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams params) {
+  public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
     return null;
   }
 
