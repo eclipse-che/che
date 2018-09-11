@@ -102,6 +102,8 @@ objects:
             value: "${CHE_INFRA_KUBERNETES_MASTER__URL}"
           - name: CHE_INFRA_OPENSHIFT_PROJECT
             value: "${CHE_INFRA_OPENSHIFT_PROJECT}"
+          - name: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME
+            value: "${CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME}"
           - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
             value: "${CHE_INFRA_KUBERNETES_PVC_STRATEGY}"
           - name: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
@@ -241,6 +243,10 @@ parameters:
   displayName: PVC strategy
   description: PVC strategy. Unique implies creating PVC per workspace. Common uses one PVC with subpaths in PV. Defaults to unique
   value: 'unique'
+- name: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME
+  displayName: Workspace service account name
+  description: Service accont name that should be specified to be bound to workspaces pods. Defauls to 'NULL' that means that Che Server won't specify any and default one will be bound.
+  value: 'NULL'
 - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
   displayName: Admin password update
   description: Force an admin to update password after 1st login. True by default

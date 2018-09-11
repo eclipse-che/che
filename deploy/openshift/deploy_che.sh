@@ -445,6 +445,13 @@ ${CHE_VAR_ARRAY}"
         PLUGIN__REGISTRY__URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}"
     fi
 
+    if [ ! -z ${CHE_INFRA_OPENSHIFT_PROJECT} ]; then
+        ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-workspace-service-account.yaml \
+          -p SERVICE_ACCOUNT_NAME='che-workspace' \
+          -p SERVICE_ACCOUNT_NAMESPACE=${CHE_INFRA_OPENSHIFT_PROJECT}
+        WORKSPACE_SERVICE_ACCOUNT_NAME="che-workspace"
+    fi
+
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
                          -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} \
                          -p IMAGE_CHE=${CHE_IMAGE_REPO} \
@@ -458,6 +465,7 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
                          -p CHE_WORKSPACE_PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL} \
+                         -p CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME=${WORKSPACE_SERVICE_ACCOUNT_NAME} \
                          ${ENV}
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
