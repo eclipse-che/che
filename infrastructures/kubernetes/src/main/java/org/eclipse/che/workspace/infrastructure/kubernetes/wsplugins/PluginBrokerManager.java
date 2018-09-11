@@ -26,7 +26,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.DeployBroker;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.ListenBrokerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.PrepareStorage;
@@ -46,7 +46,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   private final KubernetesNamespaceFactory factory;
   private final EventService eventService;
   private final WorkspaceVolumesStrategy volumesStrategy;
-  private final BrokerEnvironmentConfig<E> brokerEnvironmentConfig;
+  private final BrokerEnvironmentFactory<E> brokerEnvironmentConfig;
   private final KubernetesEnvironmentProvisioner<E> environmentProvisioner;
 
   @Inject
@@ -55,7 +55,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       EventService eventService,
       KubernetesEnvironmentProvisioner<E> environmentProvisioner,
       WorkspaceVolumesStrategy volumesStrategy,
-      BrokerEnvironmentConfig<E> brokerEnvironmentConfig) {
+      BrokerEnvironmentFactory<E> brokerEnvironmentConfig) {
     this.factory = factory;
     this.eventService = eventService;
     this.volumesStrategy = volumesStrategy;

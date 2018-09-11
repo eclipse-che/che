@@ -58,8 +58,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureS
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentConfig;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.KBrokerEnvironmentConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.KubernetesBrokerEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerService;
 
 /** @author Sergii Leshchenko */
@@ -154,8 +154,8 @@ public class KubernetesInfraModule extends AbstractModule {
 
     bind(BrokerService.class);
 
-    bind(new TypeLiteral<BrokerEnvironmentConfig<KubernetesEnvironment>>() {})
-        .to(KBrokerEnvironmentConfig.class);
+    bind(new TypeLiteral<BrokerEnvironmentFactory<KubernetesEnvironment>>() {})
+        .to(KubernetesBrokerEnvironmentFactory.class);
 
     bind(PluginBrokerManager.class)
         .to(new TypeLiteral<PluginBrokerManager<KubernetesEnvironment>>() {});

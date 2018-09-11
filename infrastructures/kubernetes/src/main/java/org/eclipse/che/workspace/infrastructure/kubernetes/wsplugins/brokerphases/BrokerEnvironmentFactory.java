@@ -56,7 +56,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * @author Oleksandr Garagatyi
  */
 @Beta
-public abstract class BrokerEnvironmentConfig<E extends KubernetesEnvironment> {
+public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> {
 
   private static final String CONFIG_MAP_NAME_SUFFIX = "broker-config-map";
   private static final String BROKER_VOLUME = "broker-config-volume";
@@ -72,7 +72,7 @@ public abstract class BrokerEnvironmentConfig<E extends KubernetesEnvironment> {
   private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
 
   @Inject
-  public BrokerEnvironmentConfig(
+  public BrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.image") String pluginBrokerImage,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
@@ -108,7 +108,7 @@ public abstract class BrokerEnvironmentConfig<E extends KubernetesEnvironment> {
     return doCreate(machineName, machine, configMapName, configMap, pod);
   }
 
-  /** Needed to reuse this component in both - Kubernetes and Openshift infrastructures. */
+  /** Needed to implement this component in both - Kubernetes and Openshift infrastructures. */
   protected abstract E doCreate(
       String machineName,
       InternalMachineConfig machine,

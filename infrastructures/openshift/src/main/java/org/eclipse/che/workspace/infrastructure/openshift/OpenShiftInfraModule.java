@@ -50,14 +50,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureS
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerService;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OBrokerEnvironmentConfig;
+import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftInfraModule extends AbstractModule {
@@ -124,8 +124,8 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     bind(BrokerService.class);
 
-    bind(new TypeLiteral<BrokerEnvironmentConfig<OpenShiftEnvironment>>() {})
-        .to(OBrokerEnvironmentConfig.class);
+    bind(new TypeLiteral<BrokerEnvironmentFactory<OpenShiftEnvironment>>() {})
+        .to(OpenshiftBrokerEnvironmentFactory.class);
 
     bind(PluginBrokerManager.class)
         .to(new TypeLiteral<PluginBrokerManager<OpenShiftEnvironment>>() {});

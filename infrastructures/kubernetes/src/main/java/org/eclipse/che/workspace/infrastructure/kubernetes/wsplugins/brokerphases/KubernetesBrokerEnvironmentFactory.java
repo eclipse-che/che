@@ -24,17 +24,18 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVar
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
- * Extends {@link BrokerEnvironmentConfig} to be used in the kubernetes infrastructure.
+ * Extends {@link BrokerEnvironmentFactory} to be used in the kubernetes infrastructure.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class KBrokerEnvironmentConfig extends BrokerEnvironmentConfig<KubernetesEnvironment> {
+public class KubernetesBrokerEnvironmentFactory
+    extends BrokerEnvironmentFactory<KubernetesEnvironment> {
 
   @Inject
-  public KBrokerEnvironmentConfig(
+  public KubernetesBrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.image") String pluginBrokerImage,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,

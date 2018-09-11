@@ -21,22 +21,23 @@ import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentConfig;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.KBrokerEnvironmentConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.KubernetesBrokerEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
- * Extends {@link KBrokerEnvironmentConfig} to be used in the openshift infrastructure.
+ * Extends {@link KubernetesBrokerEnvironmentFactory} to be used in the openshift infrastructure.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
  * @author Oleksandr Garagatyi
  */
 @Beta
-public class OBrokerEnvironmentConfig extends BrokerEnvironmentConfig<OpenShiftEnvironment> {
+public class OpenshiftBrokerEnvironmentFactory
+    extends BrokerEnvironmentFactory<OpenShiftEnvironment> {
 
   @Inject
-  public OBrokerEnvironmentConfig(
+  public OpenshiftBrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.image") String pluginBrokerImage,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
