@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.ERROR_NOTIFICATION_MESSAGE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.PROGRESS_BAR_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_RAM;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
@@ -92,6 +93,7 @@ public class Workspaces {
     String WORKSPACE_LIST_ITEM =
         "(//div[@class='workspace-name-clip']/parent::div/parent::div/parent::div)[%s]";
     String PROGRESS_BAR_XPATH = "(//md-progress-linear[@role='progressbar'])[2]";
+    String ERROR_NOTIFICATION_MESSAGE_XPATH = "//md-toast[@che-error-text]";
   }
 
   public interface Status {
@@ -112,6 +114,12 @@ public class Workspaces {
 
   @FindBy(xpath = Locators.SEARCH_WORKSPACE_FIELD)
   WebElement searchWorkspaceField;
+
+  public void waitErrorNotificationContainsText(String expectedText) {
+    final String textAttribute = "che-error-text";
+    seleniumWebDriverHelper.waitAttributeContainsValue(
+        By.xpath(ERROR_NOTIFICATION_MESSAGE_XPATH), textAttribute, expectedText);
+  }
 
   public void waitProgressBarInvisibility() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(PROGRESS_BAR_XPATH));

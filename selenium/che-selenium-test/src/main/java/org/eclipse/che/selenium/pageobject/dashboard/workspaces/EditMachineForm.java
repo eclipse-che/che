@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachi
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.NAME_TEXT_FIELD_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.RAM_TEXT_FIELD;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.RECIPE_EDITOR_BODY_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.RECIPE_EDITOR_CURSOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.RECIPE_EDITOR_TEXT_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.SAVE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.SLIDER_BAR_XPATH;
@@ -50,7 +51,8 @@ public class EditMachineForm {
     String NAME_TEXT_FIELD_XPATH = EDIT_MACHINE_FORM_BODY_XPATH + "//input[@name='name']";
     String RECIPE_EDITOR_BODY_XPATH =
         EDIT_MACHINE_FORM_BODY_XPATH + "//div[@class='CodeMirror-scroll']";
-    String RECIPE_EDITOR_TEXT_XPATH = RECIPE_EDITOR_BODY_XPATH + "//pre";
+    String RECIPE_EDITOR_TEXT_XPATH =
+        RECIPE_EDITOR_BODY_XPATH + "//pre[@class=' CodeMirror-line ']";
     String CLOSE_ICON_XPATH = EDIT_MACHINE_FORM_BODY_XPATH + "//i";
     String SAVE_BUTTON_XPATH = EDIT_MACHINE_FORM_BODY_XPATH + "//button[span[text()='Save']]";
     String CLOSE_BUTTON_XPATH = EDIT_MACHINE_FORM_BODY_XPATH + "//button[span[text()='Close']]";
@@ -60,6 +62,19 @@ public class EditMachineForm {
     String SLIDER_RAM_TEXT_FIELD_XPATH =
         EDIT_MACHINE_FORM_BODY_XPATH + "//div[@class='ng-binding']";
     String NAME_ERROR_MESSAGE = EDIT_MACHINE_FORM_BODY_XPATH + "//div/che-error-messages/div";
+    String RECIPE_EDITOR_CURSOR_XPATH = "(//div[@class='CodeMirror-cursor'])[2]";
+  }
+
+  public void waitRecipeCursorVisibility() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(RECIPE_EDITOR_CURSOR_XPATH));
+  }
+
+  public void waitRecipeCursorInvisibility() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(RECIPE_EDITOR_CURSOR_XPATH));
+  }
+
+  public void clickOnRecipeForm() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(RECIPE_EDITOR_TEXT_XPATH));
   }
 
   public void typeToRecipe(String text) {
