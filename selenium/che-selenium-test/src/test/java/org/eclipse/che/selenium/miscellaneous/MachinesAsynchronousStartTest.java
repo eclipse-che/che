@@ -46,7 +46,7 @@ public class MachinesAsynchronousStartTest {
   private static final String IMAGE_NAME_SUFFIX = NameGenerator.generate("", 4);
   private static final String NOT_EXISTED_IMAGE_NAME = IMAGE_NAME + IMAGE_NAME_SUFFIX;
   private static final String SUCCESS_NOTIFICATION_TEST = "Workspace updated.";
-  private static final String GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE =
+  private static final String GET_WORKSPACE_EVENTS_COMMAND_TEMPLATE =
       "get event --no-headers=true | grep %s | awk '{print $7 \" \" $8}'";
   private static final String EXPECTED_ERROR_NOTIFICATION_TEXT =
       format(
@@ -88,7 +88,7 @@ public class MachinesAsynchronousStartTest {
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
 
-    // change workspace based image to non existed
+    // change base image of workspace to nonexistent one
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(MACHINES);
     workspaceDetailsMachines.waitMachineListItem(MACHINE_NAME);
@@ -124,10 +124,10 @@ public class MachinesAsynchronousStartTest {
     waitEvent("Failed");
   }
 
-  private List<String> getPodRelatedEvents() throws Exception {
+  private List<String> getWorkspaceEvents() throws Exception {
     brokenWorkspace =
         testWorkspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
-    final String command = format(GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE, brokenWorkspace.getId());
+    final String command = format(GET_WORKSPACE_EVENTS_COMMAND_TEMPLATE, brokenWorkspace.getId());
     final String events = openShiftCliCommandExecutor.execute(command);
 
     return asList(events.split("[\\ \\n]"));
@@ -135,7 +135,7 @@ public class MachinesAsynchronousStartTest {
 
   private boolean eventIsPresent(String event) {
     try {
-      return getPodRelatedEvents().contains(event);
+      return getWorkspaceEvents().contains(event);
     } catch (Exception e) {
       throw new RuntimeException("Fail of events logs reading", e);
     }
