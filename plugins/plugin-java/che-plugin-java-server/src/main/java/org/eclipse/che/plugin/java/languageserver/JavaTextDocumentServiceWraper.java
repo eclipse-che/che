@@ -30,11 +30,13 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.che.api.fs.server.WsPathUtils;
 import org.eclipse.che.api.languageserver.LanguageServerException;
 import org.eclipse.che.api.languageserver.LanguageServiceUtils;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,14 +51,16 @@ public class JavaTextDocumentServiceWraper {
     this.wrapped = wrapped;
   }
 
-  public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams params) {
-    CompletableFuture<List<? extends Command>> result = wrapped.codeAction(params);
+  public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
+    CompletableFuture<List<Either<Command, CodeAction>>> result = wrapped.codeAction(params);
     return result.thenApply(
-        (List<? extends Command> commands) -> {
+        (List<Either<Command, CodeAction>> commands) -> {
           commands.forEach(
               cmd -> {
-                if ("java.apply.workspaceEdit".equals(cmd.getCommand())) {
-                  cmd.setCommand("lsp.applyWorkspaceEdit");
+                if (cmd.isLeft()) {
+                  if ("java.apply.workspaceEdit".equals(cmd.getLeft().getCommand())) {
+                    cmd.getLeft().setCommand("lsp.applyWorkspaceEdit");
+                  }
                 }
               });
           return commands;
