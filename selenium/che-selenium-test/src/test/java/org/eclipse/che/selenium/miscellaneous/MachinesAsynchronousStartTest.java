@@ -26,7 +26,6 @@ import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -69,11 +68,11 @@ public class MachinesAsynchronousStartTest {
   @Inject private EditMachineForm editMachineForm;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
-  private TestWorkspace brokenWorkspace;
+  private Workspace brokenWorkspace;
 
   @AfterClass
   public void cleanUp() throws Exception {
-    brokenWorkspace.delete();
+    testWorkspaceServiceClient.delete(brokenWorkspace.getNamespace(), defaultTestUser.getName());
   }
 
   @BeforeClass
@@ -123,11 +122,10 @@ public class MachinesAsynchronousStartTest {
 
     // check openshift events log
     waitEvent("Failed");
-    waitEvent("BackOff");
   }
 
   private List<String> getPodRelatedEvents() throws Exception {
-    final Workspace brokenWorkspace =
+    brokenWorkspace =
         testWorkspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
     final String command = format(GET_POD_RELATED_EVENTS_COMMAND_TEMPLATE, brokenWorkspace.getId());
     final String events = openShiftCliCommandExecutor.execute(command);
