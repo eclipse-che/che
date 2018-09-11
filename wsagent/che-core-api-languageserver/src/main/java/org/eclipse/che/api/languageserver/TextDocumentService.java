@@ -29,6 +29,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.LinearRange;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
@@ -91,6 +93,7 @@ import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
+import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
@@ -205,8 +208,8 @@ public class TextDocumentService {
     textDocument.setUri(uri);
     List<CommandDto> result = new ArrayList<>();
     Set<ExtendedLanguageServer> servers = findServer.byPath(wsPath);
-    LSOperation<ExtendedLanguageServer, List<? extends Command>> op =
-        new LSOperation<ExtendedLanguageServer, List<? extends Command>>() {
+    LSOperation<ExtendedLanguageServer, List<Either<Command, CodeAction>>> op =
+        new LSOperation<ExtendedLanguageServer, List<Either<Command, CodeAction>>>() {
 
           @Override
           public boolean canDo(ExtendedLanguageServer server) {
@@ -214,14 +217,21 @@ public class TextDocumentService {
           }
 
           @Override
-          public CompletableFuture<List<? extends Command>> start(ExtendedLanguageServer element) {
+          public CompletableFuture<List<Either<Command, CodeAction>>> start(
+              ExtendedLanguageServer element) {
             return element.getTextDocumentService().codeAction(params);
           }
 
           @Override
-          public boolean handleResult(ExtendedLanguageServer element, List<? extends Command> res) {
-            for (Command cmd : res) {
-              result.add(new CommandDto(cmd));
+          public boolean handleResult(
+              ExtendedLanguageServer element, List<Either<Command, CodeAction>> res) {
+            for (Either<Command, CodeAction> cmd : res) {
+              if (cmd.isLeft()) {
+                result.add(new CommandDto(cmd.getLeft()));
+              } else {
+                // see https://github.com/eclipse/che/issues/11140
+                LOG.warn("Ignoring code action: {}", cmd.getRight());
+              }
             }
             return false;
           }
@@ -295,7 +305,7 @@ public class TextDocumentService {
 
     OperationUtil.doInParallel(
         servers,
-        new LSOperation<ExtendedLanguageServer, List<? extends SymbolInformation>>() {
+        new LSOperation<ExtendedLanguageServer, List<Either<SymbolInformation, DocumentSymbol>>>() {
 
           @Override
           public boolean canDo(ExtendedLanguageServer element) {
@@ -303,20 +313,40 @@ public class TextDocumentService {
           }
 
           @Override
-          public CompletableFuture<List<? extends SymbolInformation>> start(
+          public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> start(
               ExtendedLanguageServer element) {
             return element.getTextDocumentService().documentSymbol(documentSymbolParams);
           }
 
           @Override
           public boolean handleResult(
-              ExtendedLanguageServer element, List<? extends SymbolInformation> locations) {
+              ExtendedLanguageServer element,
+              List<Either<SymbolInformation, DocumentSymbol>> locations) {
             locations.forEach(
                 o -> {
-                  o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
-                  result.add(new SymbolInformationDto(o));
+                  // minimal fix for https://github.com/eclipse/che/issues/11139 when updating lsp4j
+                  if (o.isLeft()) {
+                    SymbolInformation si = o.getLeft();
+                    si.getLocation().setUri(removePrefixUri(si.getLocation().getUri()));
+                    result.add(new SymbolInformationDto(si));
+                  } else {
+                    result.addAll(convertDocumentSymbol(o.getRight()));
+                  }
                 });
             return true;
+          }
+
+          private Collection<? extends SymbolInformationDto> convertDocumentSymbol(
+              DocumentSymbol symbol) {
+            ArrayList<SymbolInformationDto> result = new ArrayList<>();
+            result.add(
+                new SymbolInformationDto(
+                    new SymbolInformation(
+                        symbol.getName(), symbol.getKind(), new Location(uri, symbol.getRange()))));
+            for (DocumentSymbol child : symbol.getChildren()) {
+              result.addAll(convertDocumentSymbol(child));
+            }
+            return result;
           }
         },
         10000);
