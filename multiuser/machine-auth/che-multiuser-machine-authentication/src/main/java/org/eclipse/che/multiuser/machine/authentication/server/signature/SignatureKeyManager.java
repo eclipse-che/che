@@ -35,6 +35,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
@@ -78,8 +79,7 @@ public class SignatureKeyManager {
     this.signatureKeyDao = signatureKeyDao;
 
     this.workspaceEventsSubscriber =
-        (org.eclipse.che.api.core.notification.EventSubscriber<
-                org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent>)
+        (EventSubscriber<WorkspaceStatusEvent>)
             event -> {
               if (event.getStatus() == STOPPED) {
                 removeKeyPair(event.getWorkspaceId());
@@ -140,7 +140,7 @@ public class SignatureKeyManager {
           algorithm);
     } catch (NoSuchAlgorithmException | ConflictException | ServerException ex) {
       LOG.error(
-          "Unable to generate signature keypairs for ws {}. Cause: {}",
+          "Unable to generate signature keypair for ws {}. Cause: {}",
           workspaceId,
           ex.getMessage());
     }
