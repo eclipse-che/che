@@ -107,9 +107,8 @@ public class LanguageServerInitializer {
    * any point - skips them and proceeds with the rest.
    *
    * @param wsPath absolute workspace path
-   * @return accumulated server capabilities of all initialized language servers
-   * @throws CompletionException if no server initialized throws {@link LanguageServerException}
-   *     wrapped by {@link CompletionException}
+   * @return accumulated server capabilities of all initialized language servers or empty
+   *     capabilities if none language server was found for current path
    */
   public CompletableFuture<ServerCapabilities> initialize(String wsPath) {
     return supplyAsync(
@@ -135,10 +134,8 @@ public class LanguageServerInitializer {
 
           LOG.debug("Calculating number of initialized servers and accumulating capabilities");
           if (serverCapabilitiesSet.isEmpty()) {
-            String message = String.format("Could not initialize any server for '%s'", wsPath);
-            LOG.error(message);
-            LanguageServerException cause = new LanguageServerException(message);
-            throw new CompletionException(cause);
+            // None language server was found for current path
+            return new ServerCapabilities();
           } else {
             return serverCapabilitiesSet
                 .stream()

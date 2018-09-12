@@ -12,7 +12,6 @@
 package org.eclipse.che.ide.ext.java.client.settings.compiler;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPARING_IDENTICAL_VALUES;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_IMPORT;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_LOCAL;
@@ -34,18 +33,15 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
@@ -57,14 +53,12 @@ import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
  */
 @Singleton
 public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePresenter
-    implements PropertyWidget.ActionDelegate, WorkspaceRunningEvent.Handler {
+    implements PropertyWidget.ActionDelegate {
   public static final String CATEGORY = "Java Compiler";
 
   private final ErrorWarningsView view;
   private final PropertyWidgetFactory propertyFactory;
   private final PreferencesManager preferencesManager;
-  private final Provider<NotificationManager> notificationManagerProvider;
-  private final JavaLocalizationConstant locale;
 
   private List<ErrorWarningsOptions> options;
   private Map<String, PropertyWidget> widgets;
@@ -72,29 +66,20 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
   @Inject
   public JavaCompilerPreferencePresenter(
       JavaLocalizationConstant locale,
+      EventBus eventBus,
       ErrorWarningsView view,
       PropertyWidgetFactory propertyFactory,
-      @JavaCompilerPreferenceManager PreferencesManager preferencesManager,
-      Provider<NotificationManager> notificationManagerProvider) {
+      @JavaCompilerPreferenceManager PreferencesManager preferencesManager) {
     super(locale.compilerSetup(), CATEGORY);
 
     this.view = view;
     this.propertyFactory = propertyFactory;
     this.preferencesManager = preferencesManager;
-    this.notificationManagerProvider = notificationManagerProvider;
-    this.locale = locale;
     this.widgets = new HashMap<>();
 
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> updateErrorWarningsPanel());
+
     fillUpOptions();
-  }
-
-  @Inject
-  private void initialize(AppContext appContext, EventBus eventBus) {
-    eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
-
-    if (appContext.getWorkspace().getStatus() == RUNNING) {
-      updateErrorWarningsPanel();
-    }
   }
 
   /** {@inheritDoc} */
@@ -163,11 +148,6 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
     } else {
       container.setWidget(view);
     }
-  }
-
-  @Override
-  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
-    updateErrorWarningsPanel();
   }
 
   private void updateErrorWarningsPanel() {
