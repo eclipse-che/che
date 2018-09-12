@@ -155,13 +155,6 @@ public class MachineLoginFilterTest {
             .setHeader(HEADER)
             .signWith(RS512, pair.getPrivate())
             .compact();
-    machineLoginFilter =
-        new MachineLoginFilter(
-            tokenExtractorMock,
-            userManagerMock,
-            new MachineSigningKeyResolver(keyManagerMock),
-            permissionCheckerMock);
-
     when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
