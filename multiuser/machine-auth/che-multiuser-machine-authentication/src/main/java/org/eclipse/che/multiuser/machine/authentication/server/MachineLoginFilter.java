@@ -13,7 +13,6 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
@@ -76,8 +75,7 @@ public class MachineLoginFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) {
-  }
+  public void init(FilterConfig filterConfig) {}
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -94,7 +92,7 @@ public class MachineLoginFilter implements Filter {
       Subject sessionSubject = (Subject) session.getAttribute("che_subject");
       if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
         try {
-          sessionSubject = extractSubject(token, response);
+          sessionSubject = extractSubject(token);
           session.setAttribute("che_subject", sessionSubject);
         } catch (NotFoundException e) {
           sendErr(
@@ -122,27 +120,17 @@ public class MachineLoginFilter implements Filter {
     }
   }
 
-  private Subject extractSubject(String token, ServletResponse response)
-      throws NotFoundException, ServerException, IOException {
+  private Subject extractSubject(String token) throws NotFoundException, ServerException {
     final Claims claims = jwtParser.parseClaimsJws(token).getBody();
     final String userId = claims.get(USER_ID_CLAIM, String.class);
     // check if user with such id exists
     final String userName = userManager.getById(userId).getName();
     final String workspaceId = claims.get(WORKSPACE_ID_CLAIM, String.class);
-    if (isNullOrEmpty(workspaceId)) {
-      sendErr(
-          response,
-          SC_BAD_REQUEST,
-          "Authentication with machine token failed because no workspace specified.");
-    }
-
     return new MachineTokenAuthorizedSubject(
         new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
   }
 
-  /**
-   * Sets given error code with err message into give response.
-   */
+  /** Sets given error code with err message into give response. */
   private static void sendErr(ServletResponse res, int errCode, String msg) throws IOException {
     final HttpServletResponse response = (HttpServletResponse) res;
     response.sendError(errCode, msg);
@@ -164,6 +152,5 @@ public class MachineLoginFilter implements Filter {
   }
 
   @Override
-  public void destroy() {
-  }
+  public void destroy() {}
 }
