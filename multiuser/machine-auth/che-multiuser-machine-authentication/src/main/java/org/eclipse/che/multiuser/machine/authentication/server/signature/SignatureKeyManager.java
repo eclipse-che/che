@@ -77,23 +77,24 @@ public class SignatureKeyManager {
     this.algorithm = algorithm;
     this.eventService = eventService;
     this.signatureKeyDao = signatureKeyDao;
-
     this.workspaceEventsSubscriber =
-        (EventSubscriber<WorkspaceStatusEvent>)
-            event -> {
-              if (event.getStatus() == STOPPED) {
-                removeKeyPair(event.getWorkspaceId());
-              } else if (event.getStatus() == STARTING) {
-                generateKeyPair(event.getWorkspaceId());
-              }
-            };
+        new EventSubscriber<WorkspaceStatusEvent>() {
+          @Override
+          public void onEvent(WorkspaceStatusEvent event) {
+            if (event.getStatus() == STOPPED) {
+              removeKeyPair(event.getWorkspaceId());
+            } else if (event.getStatus() == STARTING) {
+              generateKeyPair(event.getWorkspaceId());
+            }
+          }
+        };
   }
 
   /**
    * Returns instance of {@link KeyPair} for given workspace.
    *
    * @throws SignatureKeyManagerException when key pair for given workspace cannot be found or
-   * stored keypair is incorrect (e.g. has bad algorithm or keyspec)
+   *     stored keypair is incorrect (e.g. has bad algorithm or keyspec)
    */
   public KeyPair getKeyPair(String workspaceId) throws SignatureKeyManagerException {
     try {
