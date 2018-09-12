@@ -86,15 +86,18 @@ public class CustomNotificationReceiver {
         updateProjectConfig(stringValue(params.getArguments()));
         break;
       case Notifications.UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
-        for (Object project : params.getArguments()) {
-          updateProject(stringValue(project))
-              .then(
-                  container -> {
-                    eventBus.fireEvent(
-                        new ProjectClasspathChangedEvent(
-                            stringValue(container.getLocation().toString())));
-                  });
-        }
+        params
+            .getArguments()
+            .forEach(
+                project -> {
+                  updateProject(stringValue(project))
+                      .then(
+                          container -> {
+                            eventBus.fireEvent(
+                                new ProjectClasspathChangedEvent(
+                                    stringValue(container.getLocation().toString())));
+                          });
+                });
         break;
       default:
         break;
@@ -118,8 +121,18 @@ public class CustomNotificationReceiver {
             optContainer -> {
               if (optContainer.isPresent()) {
                 Container container = optContainer.get();
-                container.synchronize();
-                return promises.resolve(container);
+                return projectService
+                    .getProject(Path.valueOf(project))
+                    .thenPromise(
+                        projectConfigDto -> {
+                          return projectService
+                              .updateProject(projectConfigDto)
+                              .thenPromise(
+                                  arg -> {
+                                    container.synchronize();
+                                    return promises.resolve(container);
+                                  });
+                        });
               }
               return promises.resolve(null);
             });
