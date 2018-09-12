@@ -40,15 +40,11 @@ Default values:
 - CHE_ADMIN_EMAIL: "admin@admin.com"
 - CHE_ADMIN_PASSWORD: "admin"
 
-#### 3. Prepare repository 
-Fork all repositories from [https://github.com/idexmai?tab=repositories](https://github.com/idexmai?tab=repositories) into the main GitHub account.
-Fork the repository [https://github.com/iedexmain1/pull-request-plugin-fork-test](https://github.com/iedexmain1/pull-request-plugin-fork-test) into the auxiliary GitHub account.
-
-#### 4. Start Eclipse Che
+#### 3. Start Eclipse Che
 
 Follow the guide: [https://github.com/eclipse/che](https://github.com/eclipse/che)
 
-#### 5. Run tests
+#### 4. Run tests
 
 Simply launch `./selenium-tests.sh`
 

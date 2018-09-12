@@ -24,6 +24,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
@@ -49,6 +50,7 @@ public class CommandDeserializerTest {
   @Mock MachineConfigsValidator machinesValidator;
   @Mock ComposeEnvironmentValidator composeValidator;
   @Mock ComposeServicesStartStrategy startStrategy;
+  @Mock MemoryAttributeProvisioner memoryProvisioner;
 
   private ComposeEnvironmentFactory factory;
 
@@ -61,7 +63,7 @@ public class CommandDeserializerTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            2048);
+            memoryProvisioner);
   }
 
   private static final String RECIPE_WITHOUT_COMMAND_VALUE =

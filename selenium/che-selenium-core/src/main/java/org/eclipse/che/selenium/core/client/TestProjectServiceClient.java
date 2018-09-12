@@ -25,10 +25,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
@@ -145,6 +147,35 @@ public class TestProjectServiceClient {
     ZipUtils.zipDir(sourceFolder.toString(), sourceFolder.toFile(), zip.toFile(), null);
 
     importZipProject(workspaceId, zip, projectName, template);
+  }
+
+  /** Import project from file system into a user workspace */
+  public void importProject(
+      String workspaceId,
+      String projectName,
+      String location,
+      String type,
+      Map<String, String> parameters)
+      throws Exception {
+    SourceStorageDto source = getInstance().createDto(SourceStorageDto.class);
+    source.setLocation(location);
+    source.setType(type);
+    source.setParameters(parameters);
+
+    importProject(workspaceId, projectName, source);
+  }
+
+  /** Import project from file system into a user workspace */
+  public void importProject(String workspaceId, String projectName, SourceStorageDto source)
+      throws Exception {
+
+    requestFactory
+        .fromUrl(
+            workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/import/" + projectName)
+        .usePostMethod()
+        .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
+        .setBody(source)
+        .request();
   }
 
   /** Creates file in the project. */

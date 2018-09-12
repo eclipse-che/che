@@ -54,7 +54,7 @@ public class KubernetesConfigsMaps {
   }
 
   /**
-   * Deletes all existing secrets.
+   * Deletes all existing config maps.
    *
    * @throws InfrastructureException when any exception occurs
    */

@@ -24,7 +24,13 @@ core/** @skabashnyuk
 infrastructures/** @garagatyi @sleshchenko
 
 # multiuser che
-multiuser/** @skabashnyuk
+multiuser/api/**  @sleshchenko
+multiuser/integration-tests/**  @mshaposhnik @sleshchenko
+multiuser/keycloak/**  @mshaposhnik
+multiuser/machine-auth/**  @mshaposhnik
+multiuser/permission/**  @sleshchenko
+multiuser/personal-account/**  @sleshchenko
+multiuser/sql-schema/**  @mshaposhnik @sleshchenko
 
 # plugins
 plugins/plugin*debugger/** @tolusha
@@ -40,6 +46,9 @@ plugins/plugin-traefik/** @benoitf
 # wsmaster
 wsmaster/** @skabashnyuk
 wsmaster/che-core-api-workspace*/** @garagatyi
+wsmaster/che-core-api-factory/** @mshaposhnik
+wsmaster/che-core-api-factory-shared/**   @mshaposhnik
+wsmaster/che-core-api-workspace-activity/**   @mshaposhnik
 
 # wsagent
 wsagent/activity/** @skabashnyuk

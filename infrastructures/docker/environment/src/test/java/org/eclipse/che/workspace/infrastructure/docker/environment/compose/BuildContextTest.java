@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
@@ -40,6 +41,7 @@ public class BuildContextTest {
   @Mock MachineConfigsValidator machinesValidator;
   @Mock ComposeEnvironmentValidator composeValidator;
   @Mock ComposeServicesStartStrategy startStrategy;
+  @Mock MemoryAttributeProvisioner memoryProvisioner;
 
   private ComposeEnvironmentFactory factory;
 
@@ -52,7 +54,7 @@ public class BuildContextTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            2048);
+            memoryProvisioner);
   }
 
   @Test

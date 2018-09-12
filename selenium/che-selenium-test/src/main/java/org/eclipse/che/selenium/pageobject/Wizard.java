@@ -13,9 +13,9 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -269,7 +269,7 @@ public class Wizard {
 
   /** wait wizard form is closed */
   public void waitCreateProjectWizardFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, 20)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.CREATE_PROJECT_WIZARD)));
   }
@@ -361,7 +361,7 @@ public class Wizard {
 
   public void waitCloseProjectConfigForm() {
     try {
-      new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
+      new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
           .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM_ID)));
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved

@@ -92,7 +92,7 @@ public class CheckGeneratingMavenArchetypeTest {
     projectWizard.typeProjectNameOnWizard(PROJECT_NAME);
     projectWizard.clickNextButton();
     projectWizard.waitInvisibilityOfAchetypeSection();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose(
         "'From Archetype' section is disabled because selected parent contains 'pom.xml' file");
   }
 }

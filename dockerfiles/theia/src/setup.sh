@@ -1,16 +1,18 @@
 #!/bin/sh
+#
+# Copyright (c) 2018-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#   Red Hat, Inc. - initial API and implementation
+#
+
 set -e
 set -u
-
-for f in "/etc/passwd" "/etc/group"; do
-    chgrp -R 0 ${f}
-    chmod -R g+rwX ${f};
-done
-# Generate passwd.template
-cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template
-# Generate group.template
-cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template
-
 
 # Install basic software used for checking github API rate limit
 yum install -y epel-release
@@ -33,6 +35,21 @@ else
         echo "GITHUB_TOKEN variable not set but https://api.github.com rate limit has enough slots";
     fi
 fi
+
+yum install -y sudo
+# Add a regular user
+useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia
+usermod -p "*" theia
+echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+for f in "/etc/passwd" "/etc/group"; do
+    chgrp -R 0 ${f}
+    chmod -R g+rwX ${f};
+done
+# Generate passwd.template
+cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template
+# Generate group.template
+cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template
 
 # Add yarn repo
 curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
@@ -104,7 +121,7 @@ cd ${HOME}
 rm -rf ${HOME}/theia-source-code
 
 # Change version of Theia to specified in THEIA_VERSION
-cd ${HOME} && ${HOME}/versions.sh 
+cd ${HOME} && ${HOME}/versions.sh
 
 # Apply resolution section to the Theia package.json to use strict versions for Theia dependencies
 node ${HOME}/resolutions-provider.js ${HOME}/package.json
@@ -151,4 +168,4 @@ rm add-extensions.js resolutions-provider.js versions.sh setup.sh
 rm extensions.json
 
 # use typescript globally (to have tsc/typescript working)
-npm install -g typescript@2.8.4
+npm install -g typescript@2.9.2

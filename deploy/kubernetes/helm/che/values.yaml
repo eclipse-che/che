@@ -22,6 +22,8 @@ cheKeycloakRealm: "che"
 cheKeycloakClientId: "che-public"
 #customOidcUsernameClaim: ""
 #customOidcProvider: ""
+#workspaceDefaultRamRequest: ""
+#workspaceDefaultRamLimit: ""
 
 global:
   cheNamespace: ""

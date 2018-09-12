@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.ide.ui.dialogs.message;
 
+import static com.google.gwt.safehtml.shared.SimpleHtmlSanitizer.sanitizeHtml;
+
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
@@ -39,7 +41,7 @@ public class MessageDialogPresenter implements MessageDialog, MessageDialogView.
       @NotNull @Assisted("title") String title,
       @NotNull @Assisted("message") String message,
       @Nullable @Assisted ConfirmCallback confirmCallback) {
-    this(view, title, new InlineHTML(message), confirmCallback);
+    this(view, title, new InlineHTML(sanitizeHtml(message)), confirmCallback);
   }
 
   @AssistedInject

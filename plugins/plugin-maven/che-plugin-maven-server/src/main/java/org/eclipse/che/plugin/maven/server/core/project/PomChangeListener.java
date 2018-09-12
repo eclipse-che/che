@@ -59,7 +59,7 @@ public class PomChangeListener {
     this.editorWorkingCopyManager = editorWorkingCopyManager;
     this.workspacePath = pathProvider.get();
 
-    launcher.scheduleWithFixedDelay(this::updateProms, 20, 3, TimeUnit.SECONDS);
+    launcher.scheduleWithFixedDelay(this::updateProjects, 20, 3, TimeUnit.SECONDS);
 
     eventService.subscribe(
         new EventSubscriber<ProjectItemModifiedEvent>() {
@@ -99,14 +99,12 @@ public class PomChangeListener {
         Model.readFrom(new File(workspacePath, path));
       }
     } catch (Exception e) {
-      JavaPlugin.log(e);
       return false;
     }
     return true;
   }
 
-  //    @ScheduleDelay(initialDelay = 30, delay = 3)
-  protected void updateProms() {
+  protected void updateProjects() {
     try {
       if (projectToUpdate.size() == 0) {
         return;

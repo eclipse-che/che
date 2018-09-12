@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -68,9 +67,6 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
-import org.eclipse.che.api.workspace.server.wsnext.model.ChePlugin;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -106,8 +102,6 @@ public class WorkspaceRuntimes {
   private final ProbeScheduler probeScheduler;
   // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
-  private final Map<String, WorkspaceNextApplier> workspaceNextAppliers;
-  private final WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
 
   @VisibleForTesting
   WorkspaceRuntimes(
@@ -120,9 +114,7 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService,
-      Map<String, WorkspaceNextApplier> workspaceNextAppliers,
-      WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever) {
+      WorkspaceLockService lockService) {
     this(
         eventService,
         envFactories,
@@ -132,9 +124,7 @@ public class WorkspaceRuntimes {
         ignored,
         probeScheduler,
         statuses,
-        lockService,
-        workspaceNextAppliers,
-        workspaceNextObjectsRetriever);
+        lockService);
     this.runtimes = runtimes;
   }
 
@@ -148,9 +138,7 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService,
-      Map<String, WorkspaceNextApplier> workspaceNextAppliers,
-      WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever) {
+      WorkspaceLockService lockService) {
     this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
     this.statuses = statuses;
@@ -161,8 +149,6 @@ public class WorkspaceRuntimes {
     this.infrastructure = infra;
     this.environmentFactories = ImmutableMap.copyOf(envFactories);
     this.lockService = lockService;
-    this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
-    this.workspaceNextObjectsRetriever = workspaceNextObjectsRetriever;
     LOG.info("Configured factories for environments: '{}'", envFactories.keySet());
     LOG.info("Registered infrastructure '{}'", infra.getName());
     SetView<String> notSupportedByInfra =
@@ -751,27 +737,9 @@ public class WorkspaceRuntimes {
           format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
     }
     InternalEnvironment internalEnvironment = factory.create(environment);
-
-    applyWorkspaceNext(internalEnvironment, workspaceConfigAttributes, recipeType);
+    internalEnvironment.setAttributes(workspaceConfigAttributes);
 
     return internalEnvironment;
-  }
-
-  private void applyWorkspaceNext(
-      InternalEnvironment internalEnvironment,
-      Map<String, String> workspaceAttributes,
-      String recipeType)
-      throws InfrastructureException {
-    Collection<ChePlugin> chePlugins = workspaceNextObjectsRetriever.get(workspaceAttributes);
-    if (chePlugins.isEmpty()) {
-      return;
-    }
-    WorkspaceNextApplier wsNext = workspaceNextAppliers.get(recipeType);
-    if (wsNext == null) {
-      throw new InfrastructureException(
-          "Workspace.Next features are not supported for recipe type " + recipeType);
-    }
-    wsNext.apply(internalEnvironment, chePlugins);
   }
 
   private String sessionUserNameOr(String nameIfNoUser) {

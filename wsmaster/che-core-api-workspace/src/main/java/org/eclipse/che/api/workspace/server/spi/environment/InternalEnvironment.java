@@ -11,11 +11,13 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import com.google.common.annotations.Beta;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 
@@ -34,6 +36,7 @@ public abstract class InternalEnvironment {
   private InternalRecipe recipe;
   private Map<String, InternalMachineConfig> machines;
   private List<Warning> warnings;
+  private Map<String, String> attributes;
 
   protected InternalEnvironment() {}
 
@@ -88,6 +91,33 @@ public abstract class InternalEnvironment {
 
   public InternalEnvironment setWarnings(List<Warning> warnings) {
     this.warnings = warnings;
+    return this;
+  }
+
+  /**
+   * Note that this field is in Beta and is subject to be removed at any point of time without any
+   * notification.
+   *
+   * <p>Returns map of workspace config attributes that can be used for workspace runtime creation.
+   *
+   * @see WorkspaceConfig#getAttributes()
+   */
+  @Beta
+  public Map<String, String> getAttributes() {
+    return attributes;
+  }
+
+  /**
+   * Note that this field is in Beta and is subject to be removed at any point of time without any
+   * notification.
+   *
+   * @param attributes workspace config attributes that might be used in creation of workspace
+   *     runtime
+   * @see WorkspaceConfig#getAttributes()
+   */
+  @Beta
+  public InternalEnvironment setAttributes(Map<String, String> attributes) {
+    this.attributes = attributes;
     return this;
   }
 }

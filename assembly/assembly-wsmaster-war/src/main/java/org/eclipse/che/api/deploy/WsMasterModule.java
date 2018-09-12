@@ -65,7 +65,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarP
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceMavenServerJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
+import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.core.db.DBTermination;
@@ -266,7 +266,7 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
 
-    MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
+    MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
   }
 
   private void configureSingleUserMode(Map<String, String> persistenceProperties) {
@@ -305,7 +305,9 @@ public class WsMasterModule extends AbstractModule {
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(new ReplicationModule(persistenceProperties));
-
+      bind(
+          org.eclipse.che.multiuser.permission.workspace.infra.kubernetes
+              .BrokerServicePermissionFilter.class);
       configureJwtProxySecureProvisioner(infrastructure);
     } else {
       bind(RemoteSubscriptionStorage.class)
@@ -338,6 +340,8 @@ public class WsMasterModule extends AbstractModule {
 
     // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
+    bind(
+        org.eclipse.che.multiuser.permission.system.SystemEventsSubscriptionPermissionsCheck.class);
 
     Multibinder<String> binder =
         Multibinder.newSetBinder(binder(), String.class, Names.named(SYSTEM_DOMAIN_ACTIONS));
