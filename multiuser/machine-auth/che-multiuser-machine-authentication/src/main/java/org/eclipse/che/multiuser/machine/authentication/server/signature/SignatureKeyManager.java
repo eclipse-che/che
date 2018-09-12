@@ -89,8 +89,12 @@ public class SignatureKeyManager {
             };
   }
 
-  // TODO throws
-  /** Returns instance of {@link KeyPair} or NotFoundException if key/workspace doesn't exists */
+  /**
+   * Returns instance of {@link KeyPair} for given workspace.
+   *
+   * @throws SignatureKeyManagerException when key pair for given workspace cannot be found or
+   * stored keypair is incorrect (e.g. has bad algorithm or keyspec)
+   */
   public KeyPair getKeyPair(String workspaceId) throws SignatureKeyManagerException {
     try {
       SignatureKeyPair keyPair = signatureKeyDao.get(workspaceId);
