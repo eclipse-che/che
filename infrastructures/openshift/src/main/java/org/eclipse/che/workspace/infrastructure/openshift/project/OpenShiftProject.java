@@ -85,7 +85,8 @@ public class OpenShiftProject extends KubernetesNamespace {
     OpenShiftClient osClient = clientFactory.createOC(workspaceId);
 
     if (get(projectName, osClient) == null) {
-      create(projectName, kubeClient, osClient);
+      create(projectName, osClient);
+      waitDefaultServiceAccount(projectName, kubeClient);
     }
   }
 
@@ -104,17 +105,15 @@ public class OpenShiftProject extends KubernetesNamespace {
         configMaps()::delete);
   }
 
-  private void create(String projectName, KubernetesClient kubeClient, OpenShiftClient ocClient)
-      throws InfrastructureException {
+  private void create(String projectName, OpenShiftClient osClient) throws InfrastructureException {
     try {
-      ocClient
+      osClient
           .projectrequests()
           .createNew()
           .withNewMetadata()
           .withName(projectName)
           .endMetadata()
           .done();
-      waitDefaultServiceAccount(projectName, kubeClient);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
