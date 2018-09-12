@@ -955,7 +955,9 @@ public class JavaLanguageServerExtensionService {
    */
   public JavaCoreOptions getJavaCoreOptions(List<String> filter) {
     Type type = new TypeToken<JavaCoreOptions>() {}.getType();
-    return doGetOne(Commands.GET_JAVA_CORE_OPTIONS_СOMMAND, new ArrayList<>(filter), type);
+    JavaCoreOptions result =
+        doGetOne(Commands.GET_JAVA_CORE_OPTIONS_СOMMAND, new ArrayList<>(filter), type);
+    return result == null ? new JavaCoreOptions() : result;
   }
 
   /** Updates JDT LS java core options. */
