@@ -21,6 +21,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerSe
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -57,6 +58,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
+  @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -78,7 +80,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             logsVolumeMachineProvisioner,
             podTerminationGracePeriodProvisioner,
             imagePullSecretProvisioner,
-            proxySettingsProvisioner);
+            proxySettingsProvisioner,
+            serviceAccountProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -92,7 +95,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             ramLimitProvisioner,
             podTerminationGracePeriodProvisioner,
             imagePullSecretProvisioner,
-            proxySettingsProvisioner);
+            proxySettingsProvisioner,
+            serviceAccountProvisioner);
   }
 
   @Test
@@ -115,6 +119,7 @@ public class OpenShiftEnvironmentProvisionerTest {
         .provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(imagePullSecretProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

@@ -25,6 +25,7 @@ const WS_AGENT_WS_LINK: string = 'wsagent/ws';
 
 interface IWorkspaceSettings {
   supportedRecipeTypes: string;
+  cheWorkspacePluginRegistryUrl: string;
 }
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
@@ -748,7 +749,7 @@ export class CheWorkspace {
    *
    * @returns {any} the system settings for workspaces
    */
-  getWorkspaceSettings(): any {
+  getWorkspaceSettings(): IWorkspaceSettings {
     return this.workspaceSettings;
   }
 
