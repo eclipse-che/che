@@ -54,6 +54,7 @@ public class DeployBroker extends BrokerPhase {
       for (ConfigMap configMap : brokerEnvironment.getConfigMaps().values()) {
         namespace.configMaps().create(configMap);
       }
+
       for (Pod toCreate : brokerEnvironment.getPods().values()) {
         deployments.deploy(toCreate);
       }
