@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
@@ -64,9 +65,10 @@ public class DockerImageEnvironmentConverter {
             .build();
     return KubernetesEnvironment.builder()
         .setMachines(environment.getMachines())
-        .setInternalRecipe(environment.getRecipe())
+        .setInternalRecipe(new InternalRecipe(KubernetesEnvironment.TYPE, null, ""))
         .setWarnings(environment.getWarnings())
         .setPods(ImmutableMap.of(POD_NAME, pod))
+        .setWorkspaceConfigAttributes(environment.getAttributes())
         .build();
   }
 }

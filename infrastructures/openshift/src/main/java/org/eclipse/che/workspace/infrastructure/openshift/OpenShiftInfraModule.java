@@ -33,6 +33,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironment
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
@@ -67,6 +69,7 @@ public class OpenShiftInfraModule extends AbstractModule {
         MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
 
     factories.addBinding(OpenShiftEnvironment.TYPE).to(OpenShiftEnvironmentFactory.class);
+    factories.addBinding(KubernetesEnvironment.TYPE).to(KubernetesEnvironmentFactory.class);
     factories.addBinding(DockerImageEnvironment.TYPE).to(DockerImageEnvironmentFactory.class);
 
     bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);

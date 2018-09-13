@@ -28,7 +28,7 @@ public class InternalRecipe {
   private final String contentType;
   private final String content;
 
-  InternalRecipe(String type, String contentType, String content) {
+  public InternalRecipe(String type, String contentType, String content) {
     this.type = type;
     this.contentType = contentType;
     this.content = content;

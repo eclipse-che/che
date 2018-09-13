@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.Builder;
 
 /**
  * Holds objects of OpenShift environment.
@@ -41,6 +40,10 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public OpenShiftEnvironment(KubernetesEnvironment k8sEnv) {
     super(k8sEnv);
     this.routes = new HashMap<>();
+    setRecipe(
+        new InternalRecipe(
+            TYPE, k8sEnv.getRecipe().getContentType(), k8sEnv.getRecipe().getContent()));
+    setAttributes(k8sEnv.getAttributes());
   }
 
   public static Builder builder() {
@@ -132,17 +135,20 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
     }
 
     public OpenShiftEnvironment build() {
-      return new OpenShiftEnvironment(
-          internalRecipe,
-          machines,
-          warnings,
-          pods,
-          services,
-          ingresses,
-          pvcs,
-          secrets,
-          configMaps,
-          routes);
+      OpenShiftEnvironment openShiftEnvironment =
+          new OpenShiftEnvironment(
+              internalRecipe,
+              machines,
+              warnings,
+              pods,
+              services,
+              ingresses,
+              pvcs,
+              secrets,
+              configMaps,
+              routes);
+      openShiftEnvironment.setAttributes(attributes);
+      return openShiftEnvironment;
     }
   }
 }

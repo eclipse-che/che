@@ -53,6 +53,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
         k8sEnv.getPersistentVolumeClaims(),
         k8sEnv.getSecrets(),
         k8sEnv.getConfigMaps());
+    setAttributes(k8sEnv.getAttributes());
   }
 
   public static Builder builder() {
@@ -118,6 +119,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
     protected final Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     protected final Map<String, Secret> secrets = new HashMap<>();
     protected final Map<String, ConfigMap> configMaps = new HashMap<>();
+    protected final Map<String, String> attributes = new HashMap<>();
 
     protected Builder() {}
 
@@ -166,9 +168,25 @@ public class KubernetesEnvironment extends InternalEnvironment {
       return this;
     }
 
+    public Builder setWorkspaceConfigAttributes(Map<String, String> attributes) {
+      this.attributes.putAll(attributes);
+      return this;
+    }
+
     public KubernetesEnvironment build() {
-      return new KubernetesEnvironment(
-          internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
+      KubernetesEnvironment kubernetesEnvironment =
+          new KubernetesEnvironment(
+              internalRecipe,
+              machines,
+              warnings,
+              pods,
+              services,
+              ingresses,
+              pvcs,
+              secrets,
+              configMaps);
+      kubernetesEnvironment.setAttributes(attributes);
+      return kubernetesEnvironment;
     }
   }
 }
