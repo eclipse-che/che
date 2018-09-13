@@ -25,6 +25,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeM
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
@@ -51,7 +52,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private EnvVarsConverter envVarsProvisioner;
-  @Mock private ServersConverter serversProvisioner;
+  @Mock private ServersConverter<KubernetesEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
   @Mock private RamLimitProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
@@ -60,14 +61,15 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private IngressTlsProvisioner externalServerIngressTlsProvisioner;
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
+  @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
 
-  private KubernetesEnvironmentProvisioner osInfraProvisioner;
+  private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
 
   private InOrder provisionOrder;
 
   @BeforeMethod
   public void setUp() {
-    osInfraProvisioner =
+    k8sInfraProvisioner =
         new KubernetesEnvironmentProvisionerImpl(
             true,
             uniqueNamesProvisioner,
@@ -82,7 +84,8 @@ public class KubernetesEnvironmentProvisionerTest {
             podTerminationGracePeriodProvisioner,
             externalServerIngressTlsProvisioner,
             imagePullSecretProvisioner,
-            proxySettingsProvisioner);
+            proxySettingsProvisioner,
+            serviceAccountProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -97,12 +100,13 @@ public class KubernetesEnvironmentProvisionerTest {
             podTerminationGracePeriodProvisioner,
             externalServerIngressTlsProvisioner,
             imagePullSecretProvisioner,
-            proxySettingsProvisioner);
+            proxySettingsProvisioner,
+            serviceAccountProvisioner);
   }
 
   @Test
   public void performsOrderedProvisioning() throws Exception {
-    osInfraProvisioner.provision(k8sEnv, runtimeIdentity);
+    k8sInfraProvisioner.provision(k8sEnv, runtimeIdentity);
 
     provisionOrder
         .verify(installerServersPortProvisioner)
@@ -123,6 +127,7 @@ public class KubernetesEnvironmentProvisionerTest {
         .provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(imagePullSecretProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
