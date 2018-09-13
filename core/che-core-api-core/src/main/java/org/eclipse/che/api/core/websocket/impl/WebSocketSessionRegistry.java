@@ -54,6 +54,18 @@ public class WebSocketSessionRegistry {
     return Optional.ofNullable(sessionsMap.get(endpointId));
   }
 
+  public boolean isOpen(String endpointId) {
+    if (sessionsMap.containsKey(endpointId)) {
+      return sessionsMap.get(endpointId).isOpen();
+    } else {
+      return false;
+    }
+  }
+
+  public boolean isClosed(String endpointId) {
+    return !isOpen(endpointId);
+  }
+
   public Set<Session> getByPartialMatch(String partialEndpointId) {
     return sessionsMap
         .entrySet()

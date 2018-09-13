@@ -38,6 +38,8 @@ public class JsonRpcModule extends AbstractModule {
     bind(JsonRpcQualifier.class).to(GsonJsonRpcQualifier.class);
     bind(JsonRpcComposer.class).to(GsonJsonRpcComposer.class);
 
+    bind(JsonRpcSubscriptionManager.class).asEagerSingleton();
+
     bind(RequestProcessor.class).to(ServerSideRequestProcessor.class);
     bind(TimeoutActionRunner.class).to(ServerSideTimeoutActionRunner.class);
   }
