@@ -88,7 +88,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     this.eventService = eventService;
     this.projectManager = projectManager;
 
-    isStarted = new AtomicBoolean();
+    isStarted = new AtomicBoolean(false);
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
 
