@@ -42,8 +42,8 @@ import {ProfileConfig} from './profile/profile-config';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
-  'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
-  'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
+  'angular-websocket', 'ui.bootstrap', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
+  'ngLodash', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
 
 window.name = 'NG_DEFER_BOOTSTRAP!';
 
