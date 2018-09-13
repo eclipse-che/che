@@ -12,7 +12,6 @@
 'use strict';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import {ICommunicationClient} from './json-rpc-client';
-import { isatty } from 'tty';
 
 enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'machine/log',
