@@ -139,6 +139,8 @@ objects:
             value: "${CHE_INFRA_KUBERNETES_PVC_QUANTITY}"
           - name: PROTOCOL
             value: "${PROTOCOL}"
+          - name: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
+            value: "${CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB}"
           - name: ROUTING_SUFFIX
             value: "${ROUTING_SUFFIX}"
           - name: OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE
@@ -159,7 +161,6 @@ objects:
             initialDelaySeconds: 50
             failureThreshold: 3
             timeoutSeconds: 2
-          name: che
           readinessProbe:
             httpGet:
               path: /api/system/state
@@ -287,6 +288,10 @@ parameters:
   displayName: Eclipse Che plugin registry URL
   description: Url that used to get meta information about Eclipse Che tooling
   value: 'NULL'
+- name: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
+  displayName: Plugin sidecar default memory limit
+  description: Plugin sidecar default memory limit in megabytes
+  value: '128'
 labels:
   app: che
   template: che
