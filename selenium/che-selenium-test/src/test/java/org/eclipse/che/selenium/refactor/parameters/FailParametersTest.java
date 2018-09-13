@@ -101,7 +101,7 @@ public class FailParametersTest {
         askDialog.acceptDialogWithText(testParamObj.getExpectedDialogTextInRefactorWidget());
       } catch (TimeoutException ex) {
         // remove try-catch block after issue has been resolved
-        fail("Known issue https://github.com/eclipse/che/issues/11185");
+        fail("Known random failure https://github.com/eclipse/che/issues/11185");
       }
 
     } else {
