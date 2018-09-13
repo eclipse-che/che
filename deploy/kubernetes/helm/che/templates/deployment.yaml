@@ -186,6 +186,11 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_NAMESPACE
               name: che
+        - name: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME
+              name: che
         - name: CHE_LOCAL_CONF_DIR
           valueFrom:
             configMapKeyRef:
