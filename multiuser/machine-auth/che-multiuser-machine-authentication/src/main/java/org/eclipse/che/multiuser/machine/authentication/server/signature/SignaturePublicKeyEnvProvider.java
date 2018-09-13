@@ -43,7 +43,7 @@ public class SignaturePublicKeyEnvProvider implements EnvVarProvider {
               Base64.getEncoder()
                   .encode(
                       keyManager
-                          .getKeyPair(runtimeIdentity.getWorkspaceId())
+                          .getOrCreateKeyPair(runtimeIdentity.getWorkspaceId())
                           .getPublic()
                           .getEncoded())));
     } catch (SignatureKeyManagerException e) {

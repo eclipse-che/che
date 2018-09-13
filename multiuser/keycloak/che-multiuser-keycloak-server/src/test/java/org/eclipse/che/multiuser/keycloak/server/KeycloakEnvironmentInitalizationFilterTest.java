@@ -85,7 +85,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     parser.setAccessible(true);
     parser.set(filter, jwtParser);
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
-    when(keyManager.getKeyPair(anyString())).thenReturn(kp);
+    when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
   }
 
   @Test

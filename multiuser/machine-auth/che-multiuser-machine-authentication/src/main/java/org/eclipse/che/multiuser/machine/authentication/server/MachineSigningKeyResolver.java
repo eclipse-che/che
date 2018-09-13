@@ -46,7 +46,7 @@ public class MachineSigningKeyResolver extends SigningKeyResolverAdapter {
           "Unable to fetch signature key pair: no workspace id present in token");
     }
     try {
-      return keyManager.getKeyPair(wsId).getPublic();
+      return keyManager.getOrCreateKeyPair(wsId).getPublic();
     } catch (SignatureKeyManagerException e) {
       throw new JwtException("Unable to fetch signature key pair:" + e.getMessage(), e);
     }

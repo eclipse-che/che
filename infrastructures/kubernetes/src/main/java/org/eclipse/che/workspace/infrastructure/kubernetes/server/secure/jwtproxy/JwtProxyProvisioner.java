@@ -211,7 +211,7 @@ public class JwtProxyProvisioner {
 
       KeyPair keyPair;
       try {
-        keyPair = signatureKeyManager.getKeyPair(identity.getWorkspaceId());
+        keyPair = signatureKeyManager.getOrCreateKeyPair(identity.getWorkspaceId());
       } catch (SignatureKeyManagerException e) {
         throw new InternalInfrastructureException(
             "Signature key pair for machine authentication cannot be retrieved. Reason: "

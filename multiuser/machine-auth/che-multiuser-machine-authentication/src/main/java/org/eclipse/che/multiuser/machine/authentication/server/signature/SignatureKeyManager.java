@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 import com.google.common.annotations.Beta;
@@ -83,8 +82,6 @@ public class SignatureKeyManager {
           public void onEvent(WorkspaceStatusEvent event) {
             if (event.getStatus() == STOPPED) {
               removeKeyPair(event.getWorkspaceId());
-            } else if (event.getStatus() == STARTING) {
-              generateKeyPair(event.getWorkspaceId());
             }
           }
         };
@@ -93,27 +90,23 @@ public class SignatureKeyManager {
   /**
    * Returns instance of {@link KeyPair} for given workspace.
    *
-   * @throws SignatureKeyManagerException when key pair for given workspace cannot be found or
-   *     stored keypair is incorrect (e.g. has bad algorithm or keyspec)
+   * @throws SignatureKeyManagerException when stored keypair is incorrect (e.g. has bad algorithm
+   *     or keyspec) or other error
    */
-  public KeyPair getKeyPair(String workspaceId) throws SignatureKeyManagerException {
+  public KeyPair getOrCreateKeyPair(String workspaceId) throws SignatureKeyManagerException {
+    SignatureKeyPair keyPair;
     try {
-      SignatureKeyPair keyPair = signatureKeyDao.get(workspaceId);
-      final PrivateKey privateKey =
-          KeyFactory.getInstance(keyPair.getPrivateKey().getAlgorithm())
-              .generatePrivate(getKeySpec(keyPair.getPrivateKey()));
-      final PublicKey publicKey =
-          KeyFactory.getInstance(keyPair.getPublicKey().getAlgorithm())
-              .generatePublic(getKeySpec(keyPair.getPublicKey()));
-      return new KeyPair(publicKey, privateKey);
-    } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
-      LOG.error("Failed to convert signature key pair to Java keys. Cause: {}", ex.getMessage());
-      throw new SignatureKeyManagerException("Failed to convert signature key pair to Java keys.");
-    } catch (ServerException | NotFoundException ex) {
+      try {
+        keyPair = signatureKeyDao.get(workspaceId);
+      } catch (NotFoundException e) {
+        keyPair = generateKeyPair(workspaceId);
+      }
+    } catch (NoSuchAlgorithmException | ServerException | ConflictException ex) {
       LOG.error(
           "Failed to load signature keys for ws  {}. Cause: {}", workspaceId, ex.getMessage());
       throw new SignatureKeyManagerException(ex.getMessage(), ex);
     }
+    return toJavaKeyPair(keyPair);
   }
 
   /** Removes key pair from cache and DB. */
@@ -131,23 +124,25 @@ public class SignatureKeyManager {
   }
 
   @VisibleForTesting
-  void generateKeyPair(String workspaceId) {
+  SignatureKeyPair generateKeyPair(String workspaceId)
+      throws NoSuchAlgorithmException, ServerException, ConflictException {
     try {
       KeyPairGenerator kpg = KeyPairGenerator.getInstance(algorithm);
       kpg.initialize(keySize);
       final KeyPair pair = kpg.generateKeyPair();
       final SignatureKeyPairImpl kp =
           new SignatureKeyPairImpl(workspaceId, pair.getPublic(), pair.getPrivate());
-      signatureKeyDao.create(kp);
       LOG.debug(
           "Generated signature key pair with ws id {} and algorithm {}.",
           kp.getWorkspaceId(),
           algorithm);
+      return signatureKeyDao.create(kp);
     } catch (NoSuchAlgorithmException | ConflictException | ServerException ex) {
       LOG.error(
           "Unable to generate signature keypair for ws {}. Cause: {}",
           workspaceId,
           ex.getMessage());
+      throw ex;
     }
   }
 
@@ -161,6 +156,21 @@ public class SignatureKeyManager {
       default:
         throw new IllegalArgumentException(
             String.format("Unsupported key spec '%s' for signature keys", key.getFormat()));
+    }
+  }
+
+  private KeyPair toJavaKeyPair(SignatureKeyPair keyPair) throws SignatureKeyManagerException {
+    try {
+      final PrivateKey privateKey =
+          KeyFactory.getInstance(keyPair.getPrivateKey().getAlgorithm())
+              .generatePrivate(getKeySpec(keyPair.getPrivateKey()));
+      final PublicKey publicKey =
+          KeyFactory.getInstance(keyPair.getPublicKey().getAlgorithm())
+              .generatePublic(getKeySpec(keyPair.getPublicKey()));
+      return new KeyPair(publicKey, privateKey);
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+      LOG.error("Failed to convert signature key pair to Java keys. Cause: {}", ex.getMessage());
+      throw new SignatureKeyManagerException("Failed to convert signature key pair to Java keys.");
     }
   }
 

@@ -35,7 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -82,26 +81,6 @@ public class SignatureKeyManagerTest {
     verify(signatureKeyDao, times(1)).remove(eq(wsId));
   }
 
-  @Test
-  public void shouldCreatePairOnWorkspaceStart() throws Exception {
-    final String wsId = "ws123";
-    signatureKeyManager.subscribe();
-    verify(eventService).subscribe(captor.capture());
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
-
-    subscriber.onEvent(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.STARTING)
-            .withWorkspaceId(wsId));
-
-    ArgumentCaptor<SignatureKeyPairImpl> kyeCaptor =
-        ArgumentCaptor.forClass(SignatureKeyPairImpl.class);
-    verify(signatureKeyDao, times(1)).create(kyeCaptor.capture());
-    SignatureKeyPairImpl actualKey = kyeCaptor.getValue();
-    assertNotNull(actualKey);
-    Assert.assertEquals(actualKey.getWorkspaceId(), wsId);
-  }
-
   @Test(expectedExceptions = SignatureKeyManagerException.class)
   public void shouldThrowsExceptionWhenAlgorithmIsNotSupported() throws Exception {
     final SignatureKeyImpl publicKey = new SignatureKeyImpl(new byte[] {}, "ECDH", "PKCS#15");
@@ -109,7 +88,7 @@ public class SignatureKeyManagerTest {
     final SignatureKeyPairImpl kp = new SignatureKeyPairImpl("id_" + 1, publicKey, privateKey);
     doReturn(kp).when(signatureKeyDao).get(anyString());
 
-    signatureKeyManager.getKeyPair("ws1");
+    signatureKeyManager.getOrCreateKeyPair("ws1");
 
     verify(signatureKeyDao).get(anyString());
   }
@@ -120,7 +99,7 @@ public class SignatureKeyManagerTest {
     final SignatureKeyPairImpl kp = newKeyPair(wsId);
     when(signatureKeyDao.get(anyString())).thenReturn(kp);
 
-    final KeyPair cachedPair = signatureKeyManager.getKeyPair(wsId);
+    final KeyPair cachedPair = signatureKeyManager.getOrCreateKeyPair(wsId);
 
     assertNotNull(cachedPair);
     assertKeys(cachedPair.getPublic(), kp.getPublicKey());

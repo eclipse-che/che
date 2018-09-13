@@ -87,7 +87,8 @@ public class MachineTokenRegistry {
   /** Creates new token with given data. */
   private String createToken(String userId, String workspaceId) throws MachineTokenException {
     try {
-      final PrivateKey privateKey = signatureKeyManager.getKeyPair(workspaceId).getPrivate();
+      final PrivateKey privateKey =
+          signatureKeyManager.getOrCreateKeyPair(workspaceId).getPrivate();
       final User user = userManager.getById(userId);
       final Map<String, Object> header = new HashMap<>(2);
       header.put("kind", MACHINE_TOKEN_KIND);
