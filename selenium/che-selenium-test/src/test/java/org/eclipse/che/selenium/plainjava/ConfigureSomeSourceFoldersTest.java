@@ -66,6 +66,7 @@ public class ConfigureSomeSourceFoldersTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

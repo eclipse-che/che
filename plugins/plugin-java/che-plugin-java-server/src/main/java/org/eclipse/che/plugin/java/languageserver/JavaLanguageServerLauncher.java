@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -72,6 +73,8 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private final EventService eventService;
   private final ProjectManager projectManager;
 
+  private AtomicBoolean isStarted;
+
   @Inject
   public JavaLanguageServerLauncher(
       ProcessorJsonRpcCommunication processorJsonRpcCommunication,
@@ -84,14 +87,22 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     this.notifyTransmitter = notifyTransmitter;
     this.eventService = eventService;
     this.projectManager = projectManager;
+
+    isStarted = new AtomicBoolean(false);
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
 
   public void sendStatusReport(StatusReport report) {
     LOG.info("{}: {}", report.getType(), report.getMessage());
     if ("Started".equals(report.getType())) {
+      isStarted.set(true);
       updateWorkspaceOnLSStarted();
     }
+  }
+
+  /** @return {@code true} if jd.ls has started, otherwise {@code false}. */
+  public boolean isStarted() {
+    return isStarted.get();
   }
 
   private void updateWorkspaceOnLSStarted() {
