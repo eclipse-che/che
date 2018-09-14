@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -50,19 +50,6 @@ public class BrokerStatusListenerTest {
   public void shouldDoNothingIfEventWithForeignWorkspaceIdIsReceived() {
     // given
     BrokerEvent event = new BrokerEvent().withWorkspaceId("foreignWorkspace");
-
-    // when
-    brokerStatusListener.onEvent(event);
-
-    // then
-    verifyNoMoreInteractions(finishFuture);
-  }
-
-  @Test
-  public void shouldDoNothingWhenStartedEventIsReceived() {
-    // given
-    BrokerEvent event =
-        new BrokerEvent().withWorkspaceId(WORKSPACE_ID).withStatus(BrokerStatus.STARTED);
 
     // when
     brokerStatusListener.onEvent(event);
