@@ -19,21 +19,15 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -44,10 +38,8 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
-import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainerPort;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
-import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -97,11 +89,11 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   }
 
   /**
-   * Adds k8s and Che specific configuration of a sidecar into the environment.
-   * For example:
+   * Adds k8s and Che specific configuration of a sidecar into the environment. For example:
    * <li>k8s container configuration {@link Container}
    * <li>k8s service configuration {@link Service}
    * <li>Che machine config {@link InternalMachineConfig}
+   *
    * @throws InfrastructureException when any error occurs
    */
   private void addSidecar(
@@ -111,12 +103,17 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       KubernetesEnvironment kubernetesEnvironment)
       throws InfrastructureException {
 
-    List<ChePluginEndpoint> containerEndpoints =
-        getContainerEndpoints(container.getPorts(), chePlugin.getEndpoints());
-    io.fabric8.kubernetes.api.model.Container k8sContainer =
-        addContainer(pod, container.getImage(), container.getEnv(), containerEndpoints);
+    K8sContainerResolver k8sContainerResolver =
+        new K8sContainerResolverBuilder()
+            .setContainer(container)
+            .setPluginEndpoints(chePlugin.getEndpoints())
+            .build();
+    List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
+
+    Container k8sContainer = k8sContainerResolver.create();
 
     String machineName = Names.machineName(pod, k8sContainer);
+    pod.getSpec().getContainers().add(k8sContainer);
 
     InternalMachineConfig machineConfig =
         addMachineConfig(
@@ -167,32 +164,6 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .build();
   }
 
-  private io.fabric8.kubernetes.api.model.Container addContainer(
-      Pod toolingPod, String image, List<EnvVar> env, List<ChePluginEndpoint> containerEndpoints) {
-
-    List<ContainerPort> containerPorts =
-        containerEndpoints
-            .stream()
-            .map(
-                endpoint ->
-                    new ContainerPortBuilder()
-                        .withContainerPort(endpoint.getTargetPort())
-                        .withProtocol("TCP")
-                        .build())
-            .collect(Collectors.toList());
-
-    io.fabric8.kubernetes.api.model.Container container =
-        new ContainerBuilder()
-            .withImage(image)
-            .withName(Names.generateName("tooling"))
-            .withEnv(toK8sEnv(env))
-            .withPorts(containerPorts)
-            .build();
-
-    toolingPod.getSpec().getContainers().add(container);
-    return container;
-  }
-
   private InternalMachineConfig addMachineConfig(
       KubernetesEnvironment kubernetesEnvironment,
       String machineName,
@@ -207,27 +178,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     return machineConfig;
   }
 
-  private List<ChePluginEndpoint> getContainerEndpoints(
-      List<CheContainerPort> ports, List<ChePluginEndpoint> endpoints) {
-
-    if (ports != null) {
-      return ports
-          .stream()
-          .flatMap(
-              cheContainerPort ->
-                  endpoints
-                      .stream()
-                      .filter(
-                          chePluginEndpoint ->
-                              chePluginEndpoint.getTargetPort()
-                                  == cheContainerPort.getExposedPort()))
-          .collect(Collectors.toList());
-    }
-    return Collections.emptyList();
-  }
-
-  private void normalizeMemory(
-      io.fabric8.kubernetes.api.model.Container container, InternalMachineConfig machineConfig) {
+  private void normalizeMemory(Container container, InternalMachineConfig machineConfig) {
     long ramLimit = Containers.getRamLimit(container);
     Map<String, String> attributes = machineConfig.getAttributes();
     if (ramLimit > 0) {
@@ -272,19 +223,6 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         endpoint.getAttributes().get("protocol"),
         endpoint.getAttributes().get("path"),
         attributes);
-  }
-
-  private List<io.fabric8.kubernetes.api.model.EnvVar> toK8sEnv(List<EnvVar> env) {
-    List<io.fabric8.kubernetes.api.model.EnvVar> result = new ArrayList<>();
-
-    if (env != null) {
-      for (EnvVar envVar : env) {
-        result.add(
-            new io.fabric8.kubernetes.api.model.EnvVar(envVar.getName(), envVar.getValue(), null));
-      }
-    }
-
-    return result;
   }
 
   private ServerConfigImpl normalizeServer(ServerConfigImpl serverConfig) {
