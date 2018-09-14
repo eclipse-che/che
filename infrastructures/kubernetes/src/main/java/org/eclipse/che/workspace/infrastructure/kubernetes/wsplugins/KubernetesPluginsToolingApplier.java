@@ -11,17 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
-
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -118,46 +111,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     InternalMachineConfig machineConfig = machineResolver.getMachine();
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
-    addEndpointsServices(kubernetesEnvironment, containerEndpoints, pod.getMetadata().getName());
-  }
-
-  /**
-   * Add k8s Service objects to environment to provide service discovery in sidecar based
-   * workspaces.
-   */
-  private void addEndpointsServices(
-      KubernetesEnvironment kubernetesEnvironment,
-      List<ChePluginEndpoint> endpoints,
-      String podName)
-      throws InfrastructureException {
-
-    for (ChePluginEndpoint endpoint : endpoints) {
-      String serviceName = endpoint.getName();
-      Service service = createService(serviceName, podName, endpoint.getTargetPort());
-
-      Map<String, Service> services = kubernetesEnvironment.getServices();
-      if (!services.containsKey(serviceName)) {
-        services.put(serviceName, service);
-      } else {
-        throw new InfrastructureException(
-            "Applying of sidecar tooling failed. Kubernetes service with name '"
-                + serviceName
-                + "' already exists in the workspace environment.");
-      }
-    }
-  }
-
-  private Service createService(String name, String podName, int port) {
-    ServicePort servicePort =
-        new ServicePortBuilder().withPort(port).withProtocol("TCP").withNewTargetPort(port).build();
-    return new ServiceBuilder()
-        .withNewMetadata()
-        .withName(name)
-        .endMetadata()
-        .withNewSpec()
-        .withSelector(singletonMap(CHE_ORIGINAL_NAME_LABEL, podName))
-        .withPorts(singletonList(servicePort))
-        .endSpec()
-        .build();
+    SidecarServicesProvisioner sidecarServicesProvisioner =
+        new SidecarServicesProvisioner(containerEndpoints, pod.getMetadata().getName());
+    sidecarServicesProvisioner.provision(kubernetesEnvironment);
   }
 }
