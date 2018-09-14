@@ -15,9 +15,6 @@ import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.AC
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.ALL_ACTIONS_XPATH;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.PANEL_ID;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.TEXT_FIELD_ID;
-import static org.openqa.selenium.Keys.ARROW_DOWN;
-import static org.openqa.selenium.Keys.ARROW_UP;
-import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -136,18 +133,6 @@ public class AssistantFindPanel {
 
   public void clickOnActionNode(int index) {
     getActionNode(index).click();
-  }
-
-  public void pressDown() {
-    seleniumWebDriverHelper.getAction().sendKeys(ARROW_DOWN).perform();
-  }
-
-  public void pressUp() {
-    seleniumWebDriverHelper.getAction().sendKeys(ARROW_UP).perform();
-  }
-
-  public void pressEnter() {
-    seleniumWebDriverHelper.getAction().sendKeys(ENTER).perform();
   }
 
   public int getSelectedNodeIndex() {
