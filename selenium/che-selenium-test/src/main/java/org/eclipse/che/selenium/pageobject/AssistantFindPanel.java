@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.PA
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.TEXT_FIELD_ID;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
+import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -66,7 +67,7 @@ public class AssistantFindPanel {
     seleniumWebDriverHelper.setValue(By.id(TEXT_FIELD_ID), text);
   }
 
-  public String detInputtedText() {
+  public String getInputtedText() {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.id(TEXT_FIELD_ID));
   }
 
@@ -95,8 +96,24 @@ public class AssistantFindPanel {
     seleniumWebDriverHelper.waitTextContains(getActionNode(nodeIndex), expectedText);
   }
 
+  public void waitActionContainsText(String expectedText) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> {
+          for (int i = 0; i < getActionsCount(); i++) {
+            if (isNodeContainsText(i, expectedText)) {
+              return true;
+            }
+          }
+          return false;
+        });
+  }
+
   public void waitActionTextEqualsTo(int nodeIndex, String expectedText) {
     seleniumWebDriverHelper.waitTextEqualsTo(getActionNode(nodeIndex), expectedText);
+  }
+
+  public boolean isNodeContainsText(int index, String expectedText) {
+    return getActionNodeText(index).contains(expectedText);
   }
 
   public void clickOnNodeWithText(String visibleText) {
@@ -117,17 +134,21 @@ public class AssistantFindPanel {
     getActionNode(index).click();
   }
 
-  public void pressDownButton() {
-    seleniumWebDriverHelper.getAction().sendKeys(ARROW_DOWN);
+  public void pressDown() {
+    seleniumWebDriverHelper.getAction().sendKeys(ARROW_DOWN).perform();
   }
 
-  public void pressUppButton() {
-    seleniumWebDriverHelper.getAction().sendKeys(ARROW_UP);
+  public void pressUp() {
+    seleniumWebDriverHelper.getAction().sendKeys(ARROW_UP).perform();
+  }
+
+  public void pressEnter() {
+    seleniumWebDriverHelper.getAction().sendKeys(ENTER).perform();
   }
 
   public int getSelectedNodeIndex() {
     for (int i = 0; i < getActionsCount(); i++) {
-      boolean isAttributePresent = null == getActionNode(i).getAttribute("selected");
+      boolean isAttributePresent = null != getActionNode(i).getAttribute("selected");
       if (isAttributePresent) {
         return i;
       }
