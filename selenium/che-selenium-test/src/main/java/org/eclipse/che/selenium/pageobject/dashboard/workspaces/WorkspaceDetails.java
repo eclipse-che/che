@@ -113,7 +113,7 @@ public class WorkspaceDetails {
     APPLY_BUTTON(By.name("apply-button")),
     CANCEL_BUTTON(By.name("cancel-button"));
 
-    private final By buttonLocator;
+    private By buttonLocator;
 
     ActionButton(By buttonLocator) {
       this.buttonLocator = buttonLocator;
