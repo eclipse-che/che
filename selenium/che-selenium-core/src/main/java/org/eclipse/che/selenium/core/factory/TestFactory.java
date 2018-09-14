@@ -69,6 +69,8 @@ public class TestFactory {
   }
 
   public void delete() throws Exception {
+    seleniumWebDriver.quit();
+
     workspaceServiceClient.deleteFactoryWorkspaces(
         factoryDto.getWorkspace().getName(), owner.getName());
     deleteFactory();
