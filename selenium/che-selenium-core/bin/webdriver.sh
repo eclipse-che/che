@@ -327,9 +327,9 @@ initRunMode() {
 stopSeleniumDockerContainers() {
     local containers=$(docker ps -qa --filter="name=selenium_*" | wc -l)
     if [[ ${containers} != "0" ]]; then
-        echo "[TEST] Stopping selenium docker containers..."
-        docker stop $(docker ps -qa --filter="name=selenium_*")
-        docker rm $(docker ps -qa --filter="name=selenium_*")
+        echo "[TEST] Stopping and removing selenium docker containers..."
+        docker stop $(docker ps -qa --filter="name=selenium_*") > /dev/null
+        docker rm $(docker ps -qa --filter="name=selenium_*") > /dev/null
     fi
 }
 
