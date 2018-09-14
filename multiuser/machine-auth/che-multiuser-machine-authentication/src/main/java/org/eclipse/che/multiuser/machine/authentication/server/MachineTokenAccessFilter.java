@@ -11,6 +11,10 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
+import static java.util.Arrays.asList;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -22,6 +26,16 @@ import org.everrest.core.resource.GenericResourceMethod;
 @Path("/{path:.*}")
 public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
 
+  private final SetMultimap<String, String> allowedMethods = HashMultimap.create();
+
+  public MachineTokenAccessFilter() {
+    allowedMethods.putAll(
+        "/workspace", asList("getByKey", "addProject", "updateProject", "deleteProject"));
+    allowedMethods.putAll("/ssh", asList("getPair", "generatePair"));
+    allowedMethods.put("/preferences", "find");
+    allowedMethods.put("/activity", "active");
+  }
+
   @Override
   protected void filter(GenericResourceMethod genericMethodResource, Object[] arguments)
       throws ForbiddenException {
@@ -32,52 +46,8 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
     final String parentResourcePath =
         genericMethodResource.getParentResource().getPathValue().getPath();
 
-    switch (parentResourcePath) {
-      case "/workspace":
-        validateWorkspaceMethods(methodName);
-        break;
-      case "/preferences":
-        validatePreferencesMethods(methodName);
-        break;
-      case "/ssh":
-        validateSshMethods(methodName);
-        break;
-      case "/activity":
-        validateActivityMethods(methodName);
-        break;
-      default:
-        throw new ForbiddenException("This operation cannot be performed using machine token.");
+    if (!allowedMethods.get(parentResourcePath).contains(methodName)) {
+      throw new ForbiddenException("This operation cannot be performed using machine token.");
     }
-  }
-
-  private void validateWorkspaceMethods(String methodName) throws ForbiddenException {
-    if ("getByKey".equals(methodName)
-        || "addProject".equals(methodName)
-        || "updateProject".equals(methodName)
-        || "deleteProject".equals(methodName)) {
-      return;
-    }
-    throw new ForbiddenException("This operation cannot be performed using machine token.");
-  }
-
-  private void validatePreferencesMethods(String methodName) throws ForbiddenException {
-    if ("find".equals(methodName)) {
-      return;
-    }
-    throw new ForbiddenException("This operation cannot be performed using machine token.");
-  }
-
-  private void validateSshMethods(String methodName) throws ForbiddenException {
-    if ("getPair".equals(methodName) || "generatePair".equals(methodName)) {
-      return;
-    }
-    throw new ForbiddenException("This operation cannot be performed using machine token.");
-  }
-
-  private void validateActivityMethods(String methodName) throws ForbiddenException {
-    if ("active".equals(methodName)) {
-      return;
-    }
-    throw new ForbiddenException("This operation cannot be performed using machine token.");
   }
 }
