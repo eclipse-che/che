@@ -64,6 +64,7 @@ public class CommandsEditorTest {
         PROJECT_NAME,
         ProjectTemplates.PLAIN_JAVA);
     ide.open(testWorkspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

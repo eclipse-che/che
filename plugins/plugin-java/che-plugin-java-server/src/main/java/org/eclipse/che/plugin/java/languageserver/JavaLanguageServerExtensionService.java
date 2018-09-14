@@ -350,9 +350,22 @@ public class JavaLanguageServerExtensionService {
   public String getOutputDir(String projectPath) {
     checkLanguageServerInitialized();
 
-    String projectUri = LanguageServiceUtils.prefixURI(projectPath);
+    String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<String>() {}.getType();
     return doGetOne(GET_OUTPUT_DIR_COMMAND, singletonList(projectUri), type);
+  }
+
+  /**
+   * Adds all jars from the folder into the classpath.
+   *
+   * @param projectPath project's path
+   * @param library path to the folder with libraries
+   */
+  public void addJars(String projectPath, String library) {
+    checkLanguageServerInitialized();
+
+    String projectUri = prefixURI(projectPath);
+    executeCommand(Commands.ADD_JARS_COMMAND, Arrays.asList(projectUri, library));
   }
 
   /**
@@ -447,7 +460,7 @@ public class JavaLanguageServerExtensionService {
   public List<String> getSourceFolders(String projectPath) {
     checkLanguageServerInitialized();
 
-    String projectUri = LanguageServiceUtils.prefixURI(projectPath);
+    String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
     List<String> result = doGetList(GET_SOURCE_FOLDERS, projectUri, type);
     return result.stream().map(LanguageServiceUtils::removePrefixUri).collect(Collectors.toList());
@@ -578,9 +591,7 @@ public class JavaLanguageServerExtensionService {
   }
 
   public ImplementersResponseDto findImplementers(TextDocumentPositionParams params) {
-    params
-        .getTextDocument()
-        .setUri(LanguageServiceUtils.prefixURI(params.getTextDocument().getUri()));
+    params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
     CompletableFuture<Object> result =
         executeCommand(FIND_IMPLEMENTERS_COMMAND, singletonList(params));
 
@@ -1036,7 +1047,7 @@ public class JavaLanguageServerExtensionService {
   }
 
   private UsagesResponse usages(TextDocumentPositionParams parameters) {
-    String uri = LanguageServiceUtils.prefixURI(parameters.getUri());
+    String uri = prefixURI(parameters.getUri());
     parameters.setUri(uri);
     parameters.getTextDocument().setUri(uri);
     try {
