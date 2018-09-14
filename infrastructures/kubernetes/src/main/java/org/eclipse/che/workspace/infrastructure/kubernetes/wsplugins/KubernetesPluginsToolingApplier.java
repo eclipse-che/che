@@ -18,6 +18,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.annotations.Beta;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -90,12 +91,20 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         continue;
       }
       for (CheContainer container : chePlugin.getContainers()) {
-        addMachine(pod, container, chePlugin, kubernetesEnvironment);
+        addSidecar(pod, container, chePlugin, kubernetesEnvironment);
       }
     }
   }
 
-  private void addMachine(
+  /**
+   * Adds k8s and Che specific configuration of a sidecar into the environment.
+   * For example:
+   * <li>k8s container configuration {@link Container}
+   * <li>k8s service configuration {@link Service}
+   * <li>Che machine config {@link InternalMachineConfig}
+   * @throws InfrastructureException when any error occurs
+   */
+  private void addSidecar(
       Pod pod,
       CheContainer container,
       ChePlugin chePlugin,
