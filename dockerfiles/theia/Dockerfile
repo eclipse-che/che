@@ -22,6 +22,7 @@ ENV THEIA_VERSION=${THEIA_VERSION} \
 WORKDIR ${HOME}
 
 ADD src/ ${HOME}/
+ADD config.yaml ${HOME}/.config/verdaccio/
 ADD supervisord.conf /etc/
 
 RUN ${HOME}/setup.sh

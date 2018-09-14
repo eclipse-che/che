@@ -11,7 +11,7 @@ using build script:
 with native docker:
 
 ```
-docker build -t eclipse/che-theia:0.3.10-nightly --build-arg GITHUB_TOKEN={your token} --build-arg THEIA_VERSION=0.3.10 .
+docker build -t eclipse/che-theia:0.3.10-nightly --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg THEIA_VERSION=0.3.10 .
 ```
 
 ## Theia version
