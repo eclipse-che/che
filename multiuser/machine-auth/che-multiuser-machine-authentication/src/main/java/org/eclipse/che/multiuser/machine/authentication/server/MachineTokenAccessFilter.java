@@ -42,11 +42,9 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
     if (!(EnvironmentContext.getCurrent().getSubject() instanceof MachineTokenAuthorizedSubject)) {
       return;
     }
-    final String methodName = genericMethodResource.getMethod().getName();
-    final String parentResourcePath =
-        genericMethodResource.getParentResource().getPathValue().getPath();
-
-    if (!allowedMethods.get(parentResourcePath).contains(methodName)) {
+    if (!allowedMethods
+        .get(genericMethodResource.getParentResource().getPathValue().getPath())
+        .contains(genericMethodResource.getMethod().getName())) {
       throw new ForbiddenException("This operation cannot be performed using machine token.");
     }
   }
