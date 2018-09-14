@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
@@ -69,7 +70,10 @@ public class PlainJavaInitHandler implements ProjectInitHandler {
 
     List<String> library = project.getAttributes().get(LIBRARY_FOLDER);
     if (library != null && !library.isEmpty()) {
-      extensionService.get().addJars(project.getPath(), library.get(0));
+      String libraryFolder = library.get(0);
+      if (!isNullOrEmpty(libraryFolder)) {
+        extensionService.get().addJars(project.getPath(), libraryFolder);
+      }
     }
   }
 }
