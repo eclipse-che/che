@@ -39,7 +39,6 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
  */
 @Singleton
 public class ClasspathMacro implements Macro {
-
   private static final String KEY = "${project.java.classpath}";
 
   private final ClasspathContainer classpathContainer;
@@ -99,7 +98,7 @@ public class ClasspathMacro implements Macro {
                   Set<String> libs = classpathResolver.getLibs();
                   StringBuilder classpath = new StringBuilder();
                   for (String lib : libs) {
-                    classpath.append(lib).append(':');
+                    classpath.append(appContext.getProjectsRoot()).append(lib).append(':');
                   }
 
                   for (ClasspathEntry container : classpathResolver.getContainers()) {

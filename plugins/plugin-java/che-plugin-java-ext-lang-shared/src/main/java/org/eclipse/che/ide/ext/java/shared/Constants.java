@@ -26,6 +26,7 @@ public final class Constants {
   public static final String CONTAINS_JAVA_FILES = "containsJavaFiles";
   public static final String SOURCE_FOLDER = "java.source.folder";
   public static final String OUTPUT_FOLDER = "java.output.folder";
+  public static final String DEFAULT_OUTPUT_FOLDER_VALUE = "bin";
 
   public static final String JAVAC = "javac";
 
