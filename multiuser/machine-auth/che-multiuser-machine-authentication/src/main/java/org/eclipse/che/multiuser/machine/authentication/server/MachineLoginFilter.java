@@ -115,7 +115,8 @@ public class MachineLoginFilter implements Filter {
       chain.doFilter(request, response);
     } catch (ServerException | JwtException e) {
       LOG.error(
-          "Machine token requested:{} {}",
+          "Machine token requested: {} {}?{}",
+          httpRequest.getMethod(),
           httpRequest.getRequestURL(),
           firstNonNull(httpRequest.getQueryString(), ""));
       LOG.error(e.getMessage(), e);

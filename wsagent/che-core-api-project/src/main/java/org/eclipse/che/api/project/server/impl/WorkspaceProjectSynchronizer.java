@@ -187,7 +187,8 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer, Worksp
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey")
-            .queryParam("includeInternalServers", "true");
+            .queryParam("includeInternalServers", "true")
+            .queryParam("issuer", "workspaceprojectsynchronizer");
 
     final String href = builder.build(workspaceId).toString();
     try {
