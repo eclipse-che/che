@@ -50,8 +50,9 @@ public abstract class TestWorkspaceLogsReader {
    *
    * @param workspace workspace which logs should be read.
    * @param pathToStore location of directory where logs should be stored.
+   * @param suppressWarnings do not log warnings if there is a problem with getting workspace logs
    */
-  public void store(TestWorkspace workspace, Path pathToStore) {
+  public void store(TestWorkspace workspace, Path pathToStore, boolean suppressWarnings) {
     if (!canWorkspaceLogsBeRead()) {
       return;
     }
@@ -64,15 +65,16 @@ public abstract class TestWorkspaceLogsReader {
       return;
     }
 
-    store(workspaceId, pathToStore);
+    store(workspaceId, pathToStore, suppressWarnings);
   }
 
   /**
    * Store logs from workspace. It ignores absent or empty logs directory.
    *
    * @param workspaceId id of workspace which logs should be read.
+   * @param suppressWarnings do not log warnings if there is a problem with getting workspace logs
    */
-  public void store(String workspaceId, Path pathToStore) {
+  public void store(String workspaceId, Path pathToStore, boolean suppressWarnings) {
     // check if workspace exists
     if (workspaceId == null) {
       return;
@@ -82,15 +84,22 @@ public abstract class TestWorkspaceLogsReader {
       return;
     }
 
+    getLogInfos()
+        .forEach(
+            logInfo ->
+                storeLog(logInfo, workspaceId, pathToStore.resolve(workspaceId), suppressWarnings));
+
     try {
-      getLogInfos().forEach(logInfo -> storeLog(logInfo, workspaceId, pathToStore));
-    } catch (Exception e) {
-      log.warn("It's impossible to store logs of workspace with id='{}'", workspaceId, e);
+      removeDirectoryIfItIsEmpty(pathToStore.resolve(workspaceId));
+      removeDirectoryIfItIsEmpty(pathToStore);
+    } catch (IOException e) {
+      log.debug("Error of removal of empty log directory {}.", pathToStore.resolve(workspaceId), e);
     }
   }
 
-  private void storeLog(LogInfo logInfo, String workspaceId, Path pathToStore) {
-    Path testLogsDirectory = pathToStore.resolve(workspaceId).resolve(logInfo.getName());
+  private void storeLog(
+      LogInfo logInfo, String workspaceId, Path pathToStore, boolean suppressWarnings) {
+    Path testLogsDirectory = pathToStore.resolve(logInfo.getName());
 
     try {
       Files.createDirectories(testLogsDirectory.getParent());
@@ -99,17 +108,19 @@ public abstract class TestWorkspaceLogsReader {
       processAgent.process(
           getReadLogsCommand(workspaceId, testLogsDirectory, logInfo.getLocationInsideWorkspace()));
     } catch (Exception e) {
-      log.warn(
-          READ_LOGS_ERROR_MESSAGE_TEMPLATE,
-          logInfo.getName(),
-          workspaceId,
-          logInfo.getLocationInsideWorkspace(),
-          e);
+      if (!suppressWarnings) {
+        log.warn(
+            READ_LOGS_ERROR_MESSAGE_TEMPLATE,
+            logInfo.getName(),
+            workspaceId,
+            logInfo.getLocationInsideWorkspace(),
+            e);
+      }
     } finally {
       try {
         removeDirectoryIfItIsEmpty(testLogsDirectory);
       } catch (IOException e) {
-        log.warn("Error of removal of empty log directory {}.", testLogsDirectory, e);
+        log.debug("Error of removal of empty log directory {}.", testLogsDirectory, e);
       }
     }
   }

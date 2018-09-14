@@ -68,7 +68,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
                 try {
                   workspaceServiceClient.delete(name, owner.getName());
                 } catch (Exception e1) {
-                  LOG.error("Failed to remove workspace name='{}' when creation is failed.", name);
+                  LOG.warn("Failed to remove workspace name='{}' which creation is failed.", name);
                 }
 
                 throw new IllegalStateException(errorMessage, e);
@@ -84,17 +84,18 @@ public class TestWorkspaceImpl implements TestWorkspace {
                 } catch (Exception e) {
                   String errorMessage =
                       format("Workspace with name='%s' id='%s' start failed.", name, workspaceId);
-                  LOG.error(errorMessage, e);
+                  LOG.error(errorMessage);
 
+                  // try to store the logs of workspace which didn't start
                   Path pathToWorkspaceLogs =
                       get(workspaceLogsDir, "injecting_workspaces_which_did_not_start");
-                  testWorkspaceLogsReader.store(workspaceId, pathToWorkspaceLogs);
+                  testWorkspaceLogsReader.store(workspaceId, pathToWorkspaceLogs, true);
 
                   try {
                     workspaceServiceClient.delete(name, owner.getName());
                   } catch (Exception e1) {
-                    LOG.error(
-                        "Failed to remove workspace with name='{}' id='{}' when start is failed.",
+                    LOG.warn(
+                        "Failed to remove workspace with name='{}' id='{}' which start is failed.",
                         name,
                         workspaceId);
                   }

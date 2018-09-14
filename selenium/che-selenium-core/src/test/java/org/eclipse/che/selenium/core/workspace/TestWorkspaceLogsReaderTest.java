@@ -106,7 +106,7 @@ public class TestWorkspaceLogsReaderTest {
     doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
     verifyZeroInteractions(log);
@@ -119,7 +119,7 @@ public class TestWorkspaceLogsReaderTest {
     doReturn(WRONG_WORKSPACE_STATUS).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
     verifyZeroInteractions(log);
@@ -132,7 +132,7 @@ public class TestWorkspaceLogsReaderTest {
     doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
     verify(testWorkspaceLogsReader, never()).getLogInfos();
@@ -155,7 +155,7 @@ public class TestWorkspaceLogsReaderTest {
     doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
     ArgumentCaptor<String> logArgumentCaptor1 = forClass(String.class);
@@ -184,5 +184,27 @@ public class TestWorkspaceLogsReaderTest {
     String errorMessage = logArgumentCaptor5.getValue().getMessage();
     assertTrue(
         errorMessage.contains(UNKNOWN_COMMAND), "Actual errorMessage content: " + errorMessage);
+  }
+
+  @Test
+  public void shouldSuppressCommandErrorWarnings() throws Exception {
+    // given
+    doReturn(UNKNOWN_COMMAND)
+        .when(testWorkspaceLogsReader)
+        .getReadLogsCommand(
+            TEST_WORKSPACE_ID,
+            Paths.get(
+                format(
+                    "%s/%s/%s", PATH_TO_STORE_LOGS, TEST_WORKSPACE_ID, FIRST_LOG_INFO.getName())),
+            FIRST_LOG_INFO.getLocationInsideWorkspace());
+
+    doReturn(true).when(testWorkspaceLogsReader).canWorkspaceLogsBeRead();
+    doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
+
+    // when
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, true);
+
+    // then
+    verifyZeroInteractions(log);
   }
 }
