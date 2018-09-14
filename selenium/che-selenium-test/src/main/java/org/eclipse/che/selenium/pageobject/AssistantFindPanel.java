@@ -49,21 +49,25 @@ public class AssistantFindPanel {
     String ALL_ACTIONS_XPATH = "//div[contains(@id, 'quick-open-form-action-node-')]";
   }
 
-  public void waitPanel() {
+  public void waitForm() {
     By findPanelLocator = By.id(PANEL_ID);
     seleniumWebDriverHelper.waitVisibility(findPanelLocator);
     testWebElementRenderChecker.waitElementIsRendered(findPanelLocator);
   }
 
-  public void waitPanelClosing() {
+  public void waitFormClosing() {
     seleniumWebDriverHelper.waitInvisibility(By.id(PANEL_ID));
   }
 
-  public void waitTextField() {
+  public void waitInputField() {
     seleniumWebDriverHelper.waitVisibility(By.id(TEXT_FIELD_ID));
   }
 
-  public void typeToTextField(String text) {
+  public void clickOnInputField() {
+    seleniumWebDriverHelper.waitAndClick(By.id(TEXT_FIELD_ID));
+  }
+
+  public void typeToInputField(String text) {
     seleniumWebDriverHelper.setValue(By.id(TEXT_FIELD_ID), text);
   }
 
@@ -76,31 +80,31 @@ public class AssistantFindPanel {
     return seleniumWebDriverHelper.waitVisibility(By.id(actionNodeId));
   }
 
-  public int getActionsCount() {
-    return getActionsList().size();
+  public int getActionNodesCount() {
+    return getActionNodesList().size();
   }
 
-  public List<WebElement> getActionsList() {
+  public List<WebElement> getActionNodesList() {
     return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(ALL_ACTIONS_XPATH));
   }
 
-  public void waitActionsCount(int expectedCount) {
-    seleniumWebDriverHelper.waitSuccessCondition(driver -> getActionsCount() == expectedCount);
+  public void waitActionNodesCount(int expectedCount) {
+    seleniumWebDriverHelper.waitSuccessCondition(driver -> getActionNodesCount() == expectedCount);
   }
 
   public String getActionNodeText(int index) {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(getActionNode(index));
   }
 
-  public void waitActionContainsText(int nodeIndex, String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(getActionNode(nodeIndex), expectedText);
+  public void waitActionNodeContainsText(int index, String expectedText) {
+    seleniumWebDriverHelper.waitTextContains(getActionNode(index), expectedText);
   }
 
-  public void waitActionContainsText(String expectedText) {
+  public void waitActionNodeContainsText(String expectedText) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> {
-          for (int i = 0; i < getActionsCount(); i++) {
-            if (isNodeContainsText(i, expectedText)) {
+          for (int i = 0; i < getActionNodesCount(); i++) {
+            if (isActionNodeContainsText(i, expectedText)) {
               return true;
             }
           }
@@ -108,16 +112,16 @@ public class AssistantFindPanel {
         });
   }
 
-  public void waitActionTextEqualsTo(int nodeIndex, String expectedText) {
+  public void waitActionNodeTextEqualsTo(int nodeIndex, String expectedText) {
     seleniumWebDriverHelper.waitTextEqualsTo(getActionNode(nodeIndex), expectedText);
   }
 
-  public boolean isNodeContainsText(int index, String expectedText) {
+  public boolean isActionNodeContainsText(int index, String expectedText) {
     return getActionNodeText(index).contains(expectedText);
   }
 
-  public void clickOnNodeWithText(String visibleText) {
-    for (int i = 0; i < getActionsCount(); i++) {
+  public void clickOnActionNodeWithText(String visibleText) {
+    for (int i = 0; i < getActionNodesCount(); i++) {
       if (getActionNodeText(i).contains(visibleText)) {
         getActionNode(i).click();
         return;
@@ -147,7 +151,7 @@ public class AssistantFindPanel {
   }
 
   public int getSelectedNodeIndex() {
-    for (int i = 0; i < getActionsCount(); i++) {
+    for (int i = 0; i < getActionNodesCount(); i++) {
       boolean isAttributePresent = null != getActionNode(i).getAttribute("selected");
       if (isAttributePresent) {
         return i;
@@ -157,11 +161,11 @@ public class AssistantFindPanel {
     throw new RuntimeException("Any node has not been selected");
   }
 
-  public void waitNodeSelection(int index) {
+  public void waitActionNodeSelection(int index) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> index == getSelectedNodeIndex());
   }
 
-  public void waitNodeSelection(String visibleText) {
+  public void waitActionNodeSelection(String visibleText) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> {
           int selectedNodeIndex = getSelectedNodeIndex();
