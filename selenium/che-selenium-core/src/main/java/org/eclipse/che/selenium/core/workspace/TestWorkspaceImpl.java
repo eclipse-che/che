@@ -12,8 +12,10 @@
 package org.eclipse.che.selenium.core.workspace;
 
 import static java.lang.String.format;
+import static java.nio.file.Paths.get;
 import static org.eclipse.che.selenium.core.workspace.MemoryMeasure.GB;
 
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,10 +43,13 @@ public class TestWorkspaceImpl implements TestWorkspace {
       int memoryInGB,
       boolean startAfterCreation,
       WorkspaceConfigDto template,
-      TestWorkspaceServiceClient testWorkspaceServiceClient) {
+      TestWorkspaceServiceClient testWorkspaceServiceClient,
+      TestWorkspaceLogsReader testWorkspaceLogsReader,
+      String workspaceLogsDir) {
     if (template == null) {
       throw new IllegalStateException("Workspace template cannot be null");
     }
+
     this.name = name;
     this.owner = owner;
     this.id = new AtomicReference<>();
@@ -53,31 +58,55 @@ public class TestWorkspaceImpl implements TestWorkspace {
     this.future =
         CompletableFuture.runAsync(
             () -> {
+              Workspace ws;
               try {
-
-                final Workspace ws =
-                    workspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
-                long start = System.currentTimeMillis();
-
-                if (startAfterCreation) {
-                  workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner);
-                  LOG.info(
-                      "Workspace name='{}' id='{}' started in {} sec.",
-                      name,
-                      ws.getId(),
-                      (System.currentTimeMillis() - start) / 1000);
-                }
+                ws = workspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
               } catch (Exception e) {
-                String errorMessage = format("Workspace name='%s' start failed.", name);
+                String errorMessage = format("Workspace name='%s' creation failed.", name);
                 LOG.error(errorMessage, e);
 
                 try {
                   workspaceServiceClient.delete(name, owner.getName());
                 } catch (Exception e1) {
-                  LOG.error("Failed to remove workspace name='{}' when start is failed.", name);
+                  LOG.error("Failed to remove workspace name='{}' when creation is failed.", name);
                 }
 
                 throw new IllegalStateException(errorMessage, e);
+              }
+
+              long start = System.currentTimeMillis();
+              String workspaceId = ws.getId();
+              LOG.info(
+                  format("Workspace with name='%s' id='%s' is starting...", name, workspaceId));
+              if (startAfterCreation) {
+                try {
+                  workspaceServiceClient.start(id.updateAndGet((s) -> workspaceId), name, owner);
+                } catch (Exception e) {
+                  String errorMessage =
+                      format("Workspace with name='%s' id='%s' start failed.", name, workspaceId);
+                  LOG.error(errorMessage, e);
+
+                  Path pathToWorkspaceLogs =
+                      get(workspaceLogsDir, "injecting_workspaces_which_did_not_start");
+                  testWorkspaceLogsReader.store(workspaceId, pathToWorkspaceLogs);
+
+                  try {
+                    workspaceServiceClient.delete(name, owner.getName());
+                  } catch (Exception e1) {
+                    LOG.error(
+                        "Failed to remove workspace with name='{}' id='{}' when start is failed.",
+                        name,
+                        workspaceId);
+                  }
+
+                  throw new IllegalStateException(errorMessage, e);
+                }
+
+                LOG.info(
+                    "Workspace name='{}' id='{}' started in {} sec.",
+                    name,
+                    ws.getId(),
+                    (System.currentTimeMillis() - start) / 1000);
               }
             });
   }

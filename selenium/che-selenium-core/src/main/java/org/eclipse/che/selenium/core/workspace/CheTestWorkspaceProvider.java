@@ -35,7 +35,9 @@ public class CheTestWorkspaceProvider extends AbstractTestWorkspaceProvider {
       DefaultTestUser defaultUser,
       WorkspaceDtoDeserializer workspaceDtoDeserializer,
       TestWorkspaceServiceClient testWorkspaceServiceClient,
-      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
+      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory,
+      TestWorkspaceLogsReader testWorkspaceLogsReader,
+      @com.google.inject.name.Named("tests.workspacelogs_dir") String workspaceLogsDir) {
     super(
         poolSize,
         threads,
@@ -43,7 +45,9 @@ public class CheTestWorkspaceProvider extends AbstractTestWorkspaceProvider {
         defaultUser,
         workspaceDtoDeserializer,
         testWorkspaceServiceClient,
-        testWorkspaceServiceClientFactory);
+        testWorkspaceServiceClientFactory,
+        testWorkspaceLogsReader,
+        workspaceLogsDir);
   }
 
   @Override
@@ -73,7 +77,9 @@ public class CheTestWorkspaceProvider extends AbstractTestWorkspaceProvider {
                       true,
                       workspaceDtoDeserializer.deserializeWorkspaceTemplate(
                           WorkspaceTemplate.DEFAULT),
-                      testWorkspaceServiceClient);
+                      testWorkspaceServiceClient,
+                      testWorkspaceLogsReader,
+                      workspaceLogsDir);
             } catch (Exception e) {
               // scheduled executor service doesn't log any exceptions, so log possible exception
               // here

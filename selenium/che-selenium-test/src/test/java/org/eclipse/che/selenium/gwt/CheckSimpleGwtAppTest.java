@@ -20,6 +20,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
@@ -35,6 +36,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -63,8 +65,14 @@ public class CheckSimpleGwtAppTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private WorkspaceDtoDeserializer workspaceDtoDeserializer;
+  @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private DefaultTestUser testUser;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+
+  @Inject
+  @Named("tests.workspacelogs_dir")
+  private String workspaceLogsDir;
+
   private String projectName;
 
   @BeforeClass
@@ -91,7 +99,9 @@ public class CheckSimpleGwtAppTest {
             4,
             true,
             workspace,
-            workspaceServiceClient);
+            workspaceServiceClient,
+            testWorkspaceLogsReader,
+            workspaceLogsDir);
 
     URL resource = getClass().getResource("/projects/web-gwt-java-simple");
     testProjectServiceClient.importProject(

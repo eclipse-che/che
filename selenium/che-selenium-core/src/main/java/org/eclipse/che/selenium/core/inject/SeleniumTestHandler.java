@@ -401,7 +401,7 @@ public abstract class SeleniumTestHandler
 
       String testReference = getTestReference(result);
       Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, testReference);
-      testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
+      testWorkspaceLogsReader.store((TestWorkspace) obj, pathToStoreWorkspaceLogs);
       Path pathToZipWithWorkspaceLogs =
           pathToStoreWorkspaceLogs.getParent().resolve(getTestResultFilename(testReference, "zip"));
 

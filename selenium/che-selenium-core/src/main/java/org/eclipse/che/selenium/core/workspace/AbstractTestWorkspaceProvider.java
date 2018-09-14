@@ -46,6 +46,8 @@ public abstract class AbstractTestWorkspaceProvider implements TestWorkspaceProv
   protected final WorkspaceDtoDeserializer workspaceDtoDeserializer;
   protected ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   protected ScheduledExecutorService executor;
+  protected final TestWorkspaceLogsReader testWorkspaceLogsReader;
+  protected final String workspaceLogsDir;
 
   protected AbstractTestWorkspaceProvider(
       String poolSize,
@@ -54,12 +56,16 @@ public abstract class AbstractTestWorkspaceProvider implements TestWorkspaceProv
       DefaultTestUser defaultUser,
       WorkspaceDtoDeserializer workspaceDtoDeserializer,
       TestWorkspaceServiceClient testWorkspaceServiceClient,
-      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
+      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory,
+      TestWorkspaceLogsReader testWorkspaceLogsReader,
+      String workspaceLogsDir) {
     this.defaultUser = defaultUser;
     this.defaultMemoryGb = defaultMemoryGb;
     this.testWorkspaceServiceClient = testWorkspaceServiceClient;
     this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
     this.workspaceDtoDeserializer = workspaceDtoDeserializer;
+    this.testWorkspaceLogsReader = testWorkspaceLogsReader;
+    this.workspaceLogsDir = workspaceLogsDir;
 
     if (poolSize.equals(AUTO)) {
       this.poolSize = (threads - 1) / 2 + 1;
@@ -85,7 +91,9 @@ public abstract class AbstractTestWorkspaceProvider implements TestWorkspaceProv
         memoryGB,
         startAfterCreation,
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(template),
-        testWorkspaceServiceClientFactory.create(owner));
+        testWorkspaceServiceClientFactory.create(owner),
+        testWorkspaceLogsReader,
+        workspaceLogsDir);
   }
 
   private boolean hasDefaultValues(
