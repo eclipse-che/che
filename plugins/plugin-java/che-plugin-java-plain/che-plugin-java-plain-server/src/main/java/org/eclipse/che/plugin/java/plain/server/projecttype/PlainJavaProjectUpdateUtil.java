@@ -46,6 +46,7 @@ public class PlainJavaProjectUpdateUtil {
     NewProjectConfig projectConfig =
         new NewProjectConfigImpl(
             projectWsPath, project.getName(), project.getType(), project.getSource());
+    projectConfig.setAttributes(project.getAttributes());
     RegisteredProject result = projectManager.update(projectConfig);
     return CompletableFuture.completedFuture(result.getPath());
   }

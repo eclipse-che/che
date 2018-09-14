@@ -14,7 +14,6 @@ package org.eclipse.che.ide.ext.java.client.command.valueproviders;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
@@ -66,28 +65,22 @@ public class OutputDirMacro implements Macro {
     if (resources != null && resources.length == 1) {
 
       final Resource resource = resources[0];
-      final Optional<Project> project = resource.getRelatedProject();
+      Project project = resource.getProject();
 
-      if (!project.isPresent()) {
+      if (!project.exists() || !isJavaProject(project)) {
         return promises.resolve("");
       }
 
-      Project relatedProject = project.get();
-
-      if (!isJavaProject(relatedProject)) {
-        return promises.resolve("");
-      }
-
-      if (relatedProject.getAttributes().containsKey(OUTPUT_FOLDER)) {
+      if (project.getAttributes().containsKey(OUTPUT_FOLDER)) {
         return promises.resolve(
             appContext
                 .getProjectsRoot()
-                .append(relatedProject.getLocation())
-                .append(relatedProject.getAttributes().get(OUTPUT_FOLDER).get(0))
+                .append(project.getLocation())
+                .append(project.getAttributes().get(OUTPUT_FOLDER).get(0))
                 .toString());
       } else {
         return promises.resolve(
-            appContext.getProjectsRoot().append(relatedProject.getLocation()).toString());
+            appContext.getProjectsRoot().append(project.getLocation()).toString());
       }
     }
 
