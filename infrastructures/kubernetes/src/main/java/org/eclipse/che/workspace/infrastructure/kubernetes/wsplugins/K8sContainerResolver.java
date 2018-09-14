@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -18,10 +20,13 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
 /** @author Alexander Garagatyi */
 public class K8sContainerResolver {
@@ -38,15 +43,32 @@ public class K8sContainerResolver {
     return containerEndpoints;
   }
 
-  public Container create() {
-    List<ContainerPort> containerPorts = getContainerPorts();
+  public Container create() throws InfrastructureException {
+    Container container =
+        new ContainerBuilder()
+            .withImage(cheContainer.getImage())
+            .withName(Names.generateName("tooling"))
+            .withEnv(toK8sEnv(cheContainer.getEnv()))
+            .withPorts(getContainerPorts())
+            .build();
 
-    return new ContainerBuilder()
-        .withImage(cheContainer.getImage())
-        .withName(Names.generateName("tooling"))
-        .withEnv(toK8sEnv(cheContainer.getEnv()))
-        .withPorts(containerPorts)
-        .build();
+    provisionMemoryLimit(container, cheContainer);
+
+    return container;
+  }
+
+  private void provisionMemoryLimit(Container container, CheContainer cheContainer)
+      throws InfrastructureException {
+    String memoryLimit = cheContainer.getMemoryLimit();
+    if (isNullOrEmpty(memoryLimit)) {
+      return;
+    }
+    try {
+      KubernetesSize.toBytes(memoryLimit);
+    } catch (IllegalArgumentException e) {
+      throw new InfrastructureException(e.getMessage());
+    }
+    Containers.addRamLimit(container, memoryLimit);
   }
 
   private List<ContainerPort> getContainerPorts() {

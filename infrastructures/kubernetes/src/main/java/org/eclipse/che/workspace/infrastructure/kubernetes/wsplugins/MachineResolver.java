@@ -64,9 +64,7 @@ public class MachineResolver {
   private void normalizeMemory(Container container, InternalMachineConfig machineConfig) {
     long ramLimit = Containers.getRamLimit(container);
     Map<String, String> attributes = machineConfig.getAttributes();
-    if (ramLimit > 0) {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
-    } else {
+    if (ramLimit == 0) {
       attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemorySizeAttribute);
     }
   }

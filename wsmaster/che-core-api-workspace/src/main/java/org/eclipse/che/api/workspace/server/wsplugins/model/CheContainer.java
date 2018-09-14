@@ -126,7 +126,6 @@ public class CheContainer {
         && Objects.equals(getCommands(), that.getCommands())
         && Objects.equals(getVolumes(), that.getVolumes())
         && Objects.equals(getPorts(), that.getPorts())
-        && Objects.equals(getPorts(), that.getPorts())
         && Objects.equals(getMemoryLimit(), that.getMemoryLimit());
   }
 
