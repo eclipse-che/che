@@ -13,8 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.annotations.Beta;
@@ -25,14 +23,10 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -40,10 +34,8 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
-import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
  * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
@@ -115,13 +107,18 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     String machineName = Names.machineName(pod, k8sContainer);
     pod.getSpec().getContainers().add(k8sContainer);
 
-    InternalMachineConfig machineConfig =
-        addMachineConfig(
-            kubernetesEnvironment, machineName, containerEndpoints, container.getVolumes());
+    MachineResolver machineResolver =
+        new MachineResolverBuilder()
+            .setCheContainer(container)
+            .setContainer(k8sContainer)
+            .setContainerEndpoints(containerEndpoints)
+            .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemorySizeAttribute)
+            .build();
+
+    InternalMachineConfig machineConfig = machineResolver.getMachine();
+    kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
     addEndpointsServices(kubernetesEnvironment, containerEndpoints, pod.getMetadata().getName());
-
-    normalizeMemory(k8sContainer, machineConfig);
   }
 
   /**
@@ -162,74 +159,5 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .withPorts(singletonList(servicePort))
         .endSpec()
         .build();
-  }
-
-  private InternalMachineConfig addMachineConfig(
-      KubernetesEnvironment kubernetesEnvironment,
-      String machineName,
-      List<ChePluginEndpoint> endpoints,
-      List<Volume> volumes) {
-
-    InternalMachineConfig machineConfig =
-        new InternalMachineConfig(
-            null, toWorkspaceServers(endpoints), null, null, toWorkspaceVolumes(volumes));
-    kubernetesEnvironment.getMachines().put(machineName, machineConfig);
-
-    return machineConfig;
-  }
-
-  private void normalizeMemory(Container container, InternalMachineConfig machineConfig) {
-    long ramLimit = Containers.getRamLimit(container);
-    Map<String, String> attributes = machineConfig.getAttributes();
-    if (ramLimit > 0) {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
-    } else {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemorySizeAttribute);
-    }
-  }
-
-  private Map<String, ? extends org.eclipse.che.api.core.model.workspace.config.Volume>
-      toWorkspaceVolumes(List<Volume> volumes) {
-
-    Map<String, VolumeImpl> result = new HashMap<>();
-
-    for (Volume volume : volumes) {
-      result.put(volume.getName(), new VolumeImpl().withPath(volume.getMountPath()));
-    }
-    return result;
-  }
-
-  private Map<String, ? extends ServerConfig> toWorkspaceServers(
-      List<ChePluginEndpoint> endpoints) {
-    return endpoints
-        .stream()
-        .collect(
-            toMap(ChePluginEndpoint::getName, endpoint -> normalizeServer(toServer(endpoint))));
-  }
-
-  private ServerConfigImpl toServer(ChePluginEndpoint endpoint) {
-    Map<String, String> attributes = new HashMap<>();
-    attributes.put("internal", Boolean.toString(!endpoint.isPublic()));
-    endpoint
-        .getAttributes()
-        .forEach(
-            (k, v) -> {
-              if (!"protocol".equals(k) && !"path".equals(k)) {
-                attributes.put(k, v);
-              }
-            });
-    return new ServerConfigImpl(
-        Integer.toString(endpoint.getTargetPort()),
-        endpoint.getAttributes().get("protocol"),
-        endpoint.getAttributes().get("path"),
-        attributes);
-  }
-
-  private ServerConfigImpl normalizeServer(ServerConfigImpl serverConfig) {
-    String port = serverConfig.getPort();
-    if (port != null && !port.contains("/")) {
-      serverConfig.setPort(port + "/tcp");
-    }
-    return serverConfig;
   }
 }
