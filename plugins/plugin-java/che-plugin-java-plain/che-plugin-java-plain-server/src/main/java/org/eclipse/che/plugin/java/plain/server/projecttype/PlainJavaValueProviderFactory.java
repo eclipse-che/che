@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -38,6 +39,7 @@ import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.NotifyJsonRpcTransmitter;
 import org.slf4j.Logger;
@@ -119,9 +121,12 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
       String outputDir;
       try {
         outputDir = extensionService.getOutputDir(wsPath);
+        if (isNullOrEmpty(outputDir)) {
+          outputDir = Constants.DEFAULT_OUTPUT_FOLDER_VALUE;
+        }
       } catch (Exception e) {
-        throw new ValueStorageException(
-            format("Failed to get '%s'. ", OUTPUT_FOLDER), e.getCause());
+        // can't read output dir
+        outputDir = Constants.DEFAULT_OUTPUT_FOLDER_VALUE;
       }
 
       String fsPath = transformer.transform(wsPath).toString();
