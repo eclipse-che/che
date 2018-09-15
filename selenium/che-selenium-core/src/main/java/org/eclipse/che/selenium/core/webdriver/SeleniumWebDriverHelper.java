@@ -18,6 +18,9 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLI
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.ARROW_UP;
+import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
@@ -1445,5 +1448,17 @@ public class SeleniumWebDriverHelper {
   public void closeCurrentWindowAndSwitchToAnother(String windowToSwitch) {
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(windowToSwitch);
+  }
+
+  public void pressDown() {
+    getAction().sendKeys(ARROW_DOWN).perform();
+  }
+
+  public void pressUp() {
+    getAction().sendKeys(ARROW_UP).perform();
+  }
+
+  public void pressEnter() {
+    getAction().sendKeys(ENTER).perform();
   }
 }
