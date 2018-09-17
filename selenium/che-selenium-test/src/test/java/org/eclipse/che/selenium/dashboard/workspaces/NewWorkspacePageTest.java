@@ -37,6 +37,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.P
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_REST;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -86,7 +88,9 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          JAVA_THEIA_DOCKER);
+          JAVA_THEIA_DOCKER,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
       asList(
@@ -101,7 +105,9 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          JAVA_THEIA_DOCKER);
+          JAVA_THEIA_DOCKER,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
@@ -141,7 +147,9 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          JAVA_THEIA_DOCKER,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_SINGLE_MACHINE_STACKS =
       asList(
@@ -165,7 +173,9 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          JAVA_THEIA_DOCKER,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
@@ -189,7 +199,9 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          JAVA_THEIA_DOCKER,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
       asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
@@ -205,6 +217,8 @@ public class NewWorkspacePageTest {
           asList(
               JAVA,
               BLANK,
+              WORKSPACE_NEXT_REST,
+              WORKSPACE_NEXT_HELLO_WORLD,
               JAVA_THEIA_DOCKER,
               RAILS,
               PYTHON,
@@ -221,6 +235,8 @@ public class NewWorkspacePageTest {
       asList(
           JAVA,
           BLANK,
+          WORKSPACE_NEXT_REST,
+          WORKSPACE_NEXT_HELLO_WORLD,
           JAVA_THEIA_DOCKER,
           RAILS,
           PYTHON,

@@ -178,6 +178,20 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Plugins tab -->
+    <md-tab ng-if="workspaceDetailsController.pluginRegistry"
+      md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Plugins);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Plugins</span>
+      </md-tab-label>
+      <md-tab-body>
+        <workspace-plugins workspace-config="workspaceDetailsController.workspaceDetails.config"
+                           plugin-registry-location="workspaceDetailsController.pluginRegistry"
+                           on-change="workspaceDetailsController.checkEditMode(true)">
+        </workspace-plugins>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Other tabs -->
     <md-tab ng-repeat="section in workspaceDetailsController.getPages()"
             ng-init="workspaceDetailsController.addTab(section.title);"

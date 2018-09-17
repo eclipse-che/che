@@ -25,6 +25,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeM
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
@@ -60,6 +61,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private IngressTlsProvisioner externalServerIngressTlsProvisioner;
     private ImagePullSecretProvisioner imagePullSecretProvisioner;
     private ProxySettingsProvisioner proxySettingsProvisioner;
+    private ServiceAccountProvisioner serviceAccountProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -76,7 +78,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
         IngressTlsProvisioner externalServerIngressTlsProvisioner,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
-        ProxySettingsProvisioner proxySettingsProvisioner) {
+        ProxySettingsProvisioner proxySettingsProvisioner,
+        ServiceAccountProvisioner serviceAccountProvisioner) {
       this.pvcEnabled = pvcEnabled;
       this.volumesStrategy = volumesStrategy;
       this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -91,6 +94,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.externalServerIngressTlsProvisioner = externalServerIngressTlsProvisioner;
       this.imagePullSecretProvisioner = imagePullSecretProvisioner;
       this.proxySettingsProvisioner = proxySettingsProvisioner;
+      this.serviceAccountProvisioner = serviceAccountProvisioner;
     }
 
     public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
@@ -117,6 +121,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
       imagePullSecretProvisioner.provision(k8sEnv, identity);
       proxySettingsProvisioner.provision(k8sEnv, identity);
+      serviceAccountProvisioner.provision(k8sEnv, identity);
     }
   }
 }

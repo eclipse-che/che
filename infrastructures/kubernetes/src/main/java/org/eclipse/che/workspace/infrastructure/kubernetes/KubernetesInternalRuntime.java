@@ -109,7 +109,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final StartSynchronizer startSynchronizer;
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
-  private final SidecarToolingProvisioner toolingProvisioner;
+  private final SidecarToolingProvisioner<E> toolingProvisioner;
 
   @Inject
   public KubernetesInternalRuntime(
@@ -129,7 +129,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       StartSynchronizerFactory startSynchronizerFactory,
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
-      SidecarToolingProvisioner toolingProvisioner,
+      SidecarToolingProvisioner<E> toolingProvisioner,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace,
       @Assisted List<Warning> warnings) {
