@@ -869,18 +869,6 @@ public class SeleniumWebDriverHelper {
     webDriverWaitFactory.get(timeout).until(visibilityOfElementLocated(elementLocator)).click();
   }
 
-  public void performActionWithExceptionIgnoring(
-      VoidSupplier method, Class<? extends Throwable> ignoredExceptionType) {
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, ignoredExceptionType)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  method.action();
-                  return true;
-                });
-  }
-
   /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and clicks once on
    * it by {@link WebElement#click()}.
@@ -1477,5 +1465,17 @@ public class SeleniumWebDriverHelper {
 
   public void pressEnter() {
     getAction().sendKeys(ENTER).perform();
+  }
+
+  public void waitPerformWithExceptionIgnoring(
+      VoidSupplier method, Class<? extends Throwable> ignoredExceptionType) {
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, ignoredExceptionType)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  method.action();
+                  return true;
+                });
   }
 }
