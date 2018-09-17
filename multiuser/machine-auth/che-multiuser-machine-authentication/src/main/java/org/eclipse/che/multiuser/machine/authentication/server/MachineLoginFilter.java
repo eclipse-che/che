@@ -43,8 +43,6 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Handles requests that comes from machines with specific machine token.
@@ -54,8 +52,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class MachineLoginFilter implements Filter {
-
-  private static final Logger LOG = LoggerFactory.getLogger(MachineLoginFilter.class);
 
   private final RequestTokenExtractor tokenExtractor;
   private final UserManager userManager;
