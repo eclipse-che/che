@@ -880,6 +880,7 @@ public class ProjectExplorer {
   public void clickOnRefreshTreeButton() {
     clickOnProjectExplorerOptionsButton();
     clickOnOptionsMenuItem(REFRESH_MAIN);
+    loader.waitOnClosed();
   }
 
   /**
