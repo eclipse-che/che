@@ -20,10 +20,8 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
@@ -61,8 +59,6 @@ public class PhpFileEditingTest {
   @Inject private CodenvyEditor editor;
   @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setup() throws Exception {
