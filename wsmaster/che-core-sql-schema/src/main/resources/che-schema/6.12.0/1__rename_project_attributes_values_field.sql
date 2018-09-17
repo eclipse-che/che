@@ -10,4 +10,4 @@
 --   Red Hat, Inc. - initial API and implementation
 --
 
-ALTER TABLE projectattribute_values RENAME COLUMN values TO projectattribute_values;
+ALTER TABLE projectattribute_values RENAME COLUMN values TO attribute_values;
