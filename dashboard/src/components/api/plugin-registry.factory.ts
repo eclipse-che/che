@@ -41,7 +41,7 @@ export class PluginRegistry {
   }
 
   fetchPlugins(location: string): ng.IPromise<Array<IPlugin>> {
-    let promise = this.$http({'method': 'GET', 'url': location + '/index.json'});
+    let promise = this.$http({'method': 'GET', 'url': location + '/plugins/'});
     return promise.then((result: any) => {
       return result.data;
     });

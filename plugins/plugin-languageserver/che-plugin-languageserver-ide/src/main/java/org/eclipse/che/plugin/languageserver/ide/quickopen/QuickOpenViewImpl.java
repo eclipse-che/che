@@ -222,6 +222,11 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
 
     list.render(new ArrayList<>(model.getEntries()));
 
+    for (int i = 0; i < itemHolder.getChildElementCount(); i++) {
+      Element element = (Element) itemHolder.getChildren().item(i);
+      element.setId("quick-open-form-action-node-" + i);
+    }
+
     layoutPanel.setWidgetHidden(actionsPanel, false);
     layoutPanel.setHeight("200px");
 
