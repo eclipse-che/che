@@ -31,6 +31,7 @@ import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -80,6 +81,8 @@ public class KubernetesNamespaceTest {
   @Mock private MixedOperation deploymentsMixedOperation;
   @Mock private NonNamespaceOperation deploymentsNamespaceOperation;
   @Mock private ScalableResource deploymentResource;
+  @Mock private Deployment deployment;
+  @Mock private ObjectMeta deploymentMetadata;
 
   // Pod Mocks
   @Mock private MixedOperation podsMixedOperation;
@@ -117,6 +120,8 @@ public class KubernetesNamespaceTest {
         .when(deploymentsMixedOperation)
         .inNamespace(anyString());
     doReturn(deploymentResource).when(deploymentsNamespaceOperation).withName(anyString());
+    doReturn(deployment).when(deploymentResource).get();
+    doReturn(deploymentMetadata).when(deployment).getMetadata();
 
     k8sNamespace =
         new KubernetesNamespace(
@@ -261,7 +266,7 @@ public class KubernetesNamespaceTest {
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
-    new KubernetesDeployments("", "", clientFactory).doDelete(POD_NAME).get(5, TimeUnit.SECONDS);
+    new KubernetesDeployments("", "", clientFactory).doDeletePod(POD_NAME).get(5, TimeUnit.SECONDS);
 
     verify(watch).close();
   }
@@ -276,7 +281,47 @@ public class KubernetesNamespaceTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory).doDelete(POD_NAME).get(5, TimeUnit.SECONDS);
+      new KubernetesDeployments("", "", clientFactory)
+          .doDeletePod(POD_NAME)
+          .get(5, TimeUnit.SECONDS);
+    } catch (KubernetesInfrastructureException e) {
+      assertTrue(e.getCause() instanceof KubernetesClientException);
+      verify(watch).close();
+      return;
+    }
+    fail("The exception should have been rethrown");
+  }
+
+  @Test
+  public void testDeleteNonExistingDeploymentBeforeWatch() throws Exception {
+    final String DEPLOYMENT_NAME = "nonExistingPod";
+    doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
+
+    doReturn(Boolean.FALSE).when(deploymentResource).delete();
+    Watch watch = mock(Watch.class);
+    doReturn(watch).when(podResource).watch(any());
+
+    new KubernetesDeployments("", "", clientFactory)
+        .doDeleteDeployment(DEPLOYMENT_NAME)
+        .get(5, TimeUnit.SECONDS);
+
+    verify(watch).close();
+  }
+
+  @Test
+  public void testDeleteDeploymentThrowingKubernetesClientExceptionShouldCloseWatch()
+      throws Exception {
+    final String DEPLOYMENT_NAME = "nonExistingPod";
+    doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
+
+    doThrow(KubernetesClientException.class).when(deploymentResource).delete();
+    Watch watch = mock(Watch.class);
+    doReturn(watch).when(podResource).watch(any());
+
+    try {
+      new KubernetesDeployments("", "", clientFactory)
+          .doDeleteDeployment(DEPLOYMENT_NAME)
+          .get(5, TimeUnit.SECONDS);
     } catch (KubernetesInfrastructureException e) {
       assertTrue(e.getCause() instanceof KubernetesClientException);
       verify(watch).close();
@@ -295,7 +340,29 @@ public class KubernetesNamespaceTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory).doDelete(POD_NAME).get(5, TimeUnit.SECONDS);
+      new KubernetesDeployments("", "", clientFactory)
+          .doDeletePod(POD_NAME)
+          .get(5, TimeUnit.SECONDS);
+    } catch (RuntimeException e) {
+      verify(watch).close();
+      return;
+    }
+    fail("The exception should have been rethrown");
+  }
+
+  @Test
+  public void testDeleteDeploymentThrowingAnyExceptionShouldCloseWatch() throws Exception {
+    final String DEPLOYMENT_NAME = "nonExistingPod";
+    doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
+
+    doThrow(RuntimeException.class).when(deploymentResource).delete();
+    Watch watch = mock(Watch.class);
+    doReturn(watch).when(podResource).watch(any());
+
+    try {
+      new KubernetesDeployments("", "", clientFactory)
+          .doDeleteDeployment(DEPLOYMENT_NAME)
+          .get(5, TimeUnit.SECONDS);
     } catch (RuntimeException e) {
       verify(watch).close();
       return;
