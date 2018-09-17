@@ -140,6 +140,7 @@ public class NewWorkspace {
     DOT_NET("dotnet-default"),
     ANDROID("android-default"),
     CPP("cpp-default"),
+    CAMEL_SPRINGBOOT("apache-camel-springboot"),
     CENTOS_BLANK("centos"),
     CENTOS_GO("centos-go"),
     CENTOS_NODEJS("nodejs6"),
