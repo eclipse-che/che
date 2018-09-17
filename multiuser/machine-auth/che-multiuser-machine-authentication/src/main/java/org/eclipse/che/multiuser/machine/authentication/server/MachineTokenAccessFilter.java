@@ -22,6 +22,11 @@ import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
+/**
+ * Limits set of methods which can be invoked using machine token signed requests.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
 @Filter
 @Path("/{path:.*}")
 public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
