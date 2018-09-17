@@ -46,6 +46,8 @@ public class PhpAssistantFeaturesTest {
       "/*\n" + "// * Copyright (c) 2012-2018 Red Hat, Inc.";
   private static final String EXPECTED_HOVER_POPUP_TEXT =
       "php\n" + "<?php function sayHello($name) {\n" + "php\n" + "<?php function sayHello($name) {";
+  private static final String EXPECTED_REFERENCE_TEXT =
+      PROJECT + "/index.php\n" + "From:14:5 To:14:13";
   private static final URL RESOURCE =
       PhpFileEditingTest.class.getResource("/projects/plugins/DebuggerPlugin/php-tests");
 
@@ -97,8 +99,11 @@ public class PhpAssistantFeaturesTest {
     editor.moveCursorToText(TEXT_FOR_HOVERING);
     editor.waitTextInHoverPopup(EXPECTED_HOVER_POPUP_TEXT);
 
-    // check find preferences feature
+    // check find references feature
+    editor.waitActive();
+    editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
+    findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
   }
 
   private void performCommentAction() {
