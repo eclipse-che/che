@@ -117,10 +117,6 @@
             <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.xtext</groupId>
-            <artifactId>org.eclipse.xtext.xbase.lib.gwt</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
