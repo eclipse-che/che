@@ -11,10 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
-
 import com.google.common.annotations.Beta;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -32,32 +29,21 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 public class PrepareStorage extends BrokerPhase {
 
   private final String workspaceId;
-  private final KubernetesEnvironment environment;
+  private final KubernetesEnvironment brokerEnvironment;
   private final WorkspaceVolumesStrategy volumesStrategy;
-  private final String pvcName;
-  private final String pvcAccessMode;
-  private final String pvcQuantity;
 
   public PrepareStorage(
       String workspaceId,
-      KubernetesEnvironment environment,
-      WorkspaceVolumesStrategy volumesStrategy,
-      String pvcName,
-      String pvcAccessMode,
-      String pvcQuantity) {
+      KubernetesEnvironment brokerEnvironment,
+      WorkspaceVolumesStrategy volumesStrategy) {
     this.workspaceId = workspaceId;
-    this.environment = environment;
+    this.brokerEnvironment = brokerEnvironment;
     this.volumesStrategy = volumesStrategy;
-    this.pvcName = pvcName;
-    this.pvcAccessMode = pvcAccessMode;
-    this.pvcQuantity = pvcQuantity;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
-    environment.getPersistentVolumeClaims().put(pvcName, pvc);
-    volumesStrategy.prepare(environment, workspaceId);
+    volumesStrategy.prepare(brokerEnvironment, workspaceId);
 
     return nextPhase.execute();
   }
