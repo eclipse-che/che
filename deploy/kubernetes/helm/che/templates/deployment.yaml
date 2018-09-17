@@ -284,6 +284,13 @@ spec:
               key: CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB
               name: che
 {{- end }}
+{{- if .Values.workspaceSidecarDefaultRamLimit }}
+        - name: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
+              name: che
+{{- end }}
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         livenessProbe:
