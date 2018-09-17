@@ -17,7 +17,6 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
@@ -1468,20 +1467,23 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until specified {@code method} will be performed successfully and ignores provided {@code
-   * ignoredExceptionType}.
+   * Waits until specified {@code condition} will be performed successfully and ignores provided
+   * {@code ignoredExceptionType}.
    *
-   * @param method condition which should be performed
+   * <p>Note! For correct work condition should contains find of used element logic, or in
+   * WebElement case it should be defined by {@link org.openqa.selenium.support.FindBy}.
+   *
+   * @param condition condition which should be performed
    * @param ignoredExceptionType exception type which should be ignored during condition performing
    */
   public void waitPerformWithExceptionIgnoring(
-      VoidSupplier method, Class<? extends Throwable> ignoredExceptionType) {
+      VoidSupplier condition, Class<? extends Throwable> ignoredExceptionType) {
     webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, ignoredExceptionType)
+        .get(DEFAULT_TIMEOUT, ignoredExceptionType)
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  method.action();
+                  condition.action();
                   return true;
                 });
   }
