@@ -81,6 +81,7 @@ public class DockerfileEnvironmentConverterTest {
             .setContainers(newLinkedHashMap(singletonMap(DEFAULT_MACHINE_NAME, container)));
     expected.setMachines(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
     expected.setRecipe(recipe);
+    expected.setType(DockerEnvironment.TYPE);
 
     // when
     DockerEnvironment actual = converter.convert(environment);

@@ -40,14 +40,8 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public OpenShiftEnvironment(KubernetesEnvironment k8sEnv) {
     super(k8sEnv);
     this.routes = new HashMap<>();
-    setRecipe(
-        new InternalRecipe(
-            TYPE, k8sEnv.getRecipe().getContentType(), k8sEnv.getRecipe().getContent()));
+    setType(TYPE);
     setAttributes(k8sEnv.getAttributes());
-  }
-
-  public static Builder builder() {
-    return new Builder();
   }
 
   public OpenShiftEnvironment(
@@ -63,6 +57,16 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       Map<String, Route> routes) {
     super(internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
     this.routes = routes;
+    setType(TYPE);
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  @Override
+  public OpenShiftEnvironment setType(String type) {
+    return (OpenShiftEnvironment) super.setType(type);
   }
 
   /** Returns services that should be created when environment starts. */
@@ -73,7 +77,9 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public static class Builder extends KubernetesEnvironment.Builder {
     private final Map<String, Route> routes = new HashMap<>();
 
-    private Builder() {}
+    private Builder() {
+      setType(TYPE);
+    }
 
     @Override
     public Builder setInternalRecipe(InternalRecipe internalRecipe) {
@@ -148,6 +154,7 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
               configMaps,
               routes);
       openShiftEnvironment.setAttributes(attributes);
+      openShiftEnvironment.setType(type);
       return openShiftEnvironment;
     }
   }

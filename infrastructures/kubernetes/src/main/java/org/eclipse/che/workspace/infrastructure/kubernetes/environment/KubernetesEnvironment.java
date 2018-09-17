@@ -56,6 +56,11 @@ public class KubernetesEnvironment extends InternalEnvironment {
     setAttributes(k8sEnv.getAttributes());
   }
 
+  @Override
+  public KubernetesEnvironment setType(String type) {
+    return (KubernetesEnvironment) super.setType(type);
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -111,6 +116,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
   public static class Builder {
     protected InternalRecipe internalRecipe;
+    protected String type = TYPE;
     protected final Map<String, InternalMachineConfig> machines = new HashMap<>();
     protected final List<Warning> warnings = new ArrayList<>();
     protected final Map<String, Pod> pods = new HashMap<>();
@@ -168,8 +174,13 @@ public class KubernetesEnvironment extends InternalEnvironment {
       return this;
     }
 
-    public Builder setWorkspaceConfigAttributes(Map<String, String> attributes) {
+    public Builder setAttributes(Map<String, String> attributes) {
       this.attributes.putAll(attributes);
+      return this;
+    }
+
+    public Builder setType(String type) {
+      this.type = type;
       return this;
     }
 
@@ -186,6 +197,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
               secrets,
               configMaps);
       kubernetesEnvironment.setAttributes(attributes);
+      kubernetesEnvironment.setType(type);
       return kubernetesEnvironment;
     }
   }
