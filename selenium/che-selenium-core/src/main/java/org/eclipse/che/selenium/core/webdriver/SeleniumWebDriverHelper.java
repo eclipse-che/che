@@ -1467,6 +1467,13 @@ public class SeleniumWebDriverHelper {
     getAction().sendKeys(ENTER).perform();
   }
 
+  /**
+   * Waits until specified {@code method} will be performed successfully and ignores provided {@code
+   * ignoredExceptionType}.
+   *
+   * @param method condition which should be performed
+   * @param ignoredExceptionType exception type which should be ignored during condition performing
+   */
   public void waitPerformWithExceptionIgnoring(
       VoidSupplier method, Class<? extends Throwable> ignoredExceptionType) {
     webDriverWaitFactory
