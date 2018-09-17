@@ -364,8 +364,13 @@ public abstract class SeleniumTestHandler
           break;
 
         case ITestResult.SKIP:
+          String skipReasonDetails =
+              result.getThrowable() != null
+                  ? " The reason: " + result.getThrowable().getLocalizedMessage()
+                  : "";
           if (result.getMethod().isTest()) {
-            LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
+            LOG.warn(
+                "Test {} skipped.{}", getCompletedTestLabel(result.getMethod()), skipReasonDetails);
           }
 
           // don't capture test data if test is skipped because of previous test with higher
