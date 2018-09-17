@@ -38,20 +38,15 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 
 /** @author Ihor Okhrimenko */
 @Singleton
@@ -874,19 +869,16 @@ public class SeleniumWebDriverHelper {
     webDriverWaitFactory.get(timeout).until(visibilityOfElementLocated(elementLocator)).click();
   }
 
-  public void performActionWihStaleElementIgnoring(VoidSupplier method) {
-    Wait<WebDriver> wait =
-        new FluentWait<WebDriver>(seleniumWebDriver)
-            .withTimeout(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.SECONDS)
-            .pollingEvery(200, TimeUnit.MILLISECONDS)
-            .ignoring(StaleElementReferenceException.class);
-
-    wait.until(
-        (ExpectedCondition<Boolean>)
-            driver -> {
-              method.action();
-              return true;
-            });
+  public void performActionWithExceptionIgnoring(
+      VoidSupplier method, Class<? extends Throwable> ignoredExceptionType) {
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, ignoredExceptionType)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  method.action();
+                  return true;
+                });
   }
 
   /**

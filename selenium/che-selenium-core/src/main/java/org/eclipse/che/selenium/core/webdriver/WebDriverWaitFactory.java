@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -41,6 +42,14 @@ public class WebDriverWaitFactory {
 
   public FluentWait<WebDriver> get(int timeoutInSec, Supplier<String> messageSupplier) {
     return new WebDriverWait(seleniumWebDriver, timeoutInSec).withMessage(messageSupplier);
+  }
+
+  public FluentWait<WebDriver> get(
+      int timeoutInSec, Class<? extends Throwable> ignoredExceptionType) {
+    return new FluentWait<WebDriver>(seleniumWebDriver)
+        .withTimeout(timeoutInSec, TimeUnit.SECONDS)
+        .pollingEvery(200, TimeUnit.MILLISECONDS)
+        .ignoring(ignoredExceptionType);
   }
 
   /**
