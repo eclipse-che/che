@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.languageserver.php;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.openqa.selenium.Keys.CONTROL;
 
 import com.google.inject.Inject;
@@ -24,6 +26,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -58,6 +61,7 @@ public class PhpAssistantFeaturesTest {
   @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -92,6 +96,9 @@ public class PhpAssistantFeaturesTest {
     editor.waitActive();
     editor.moveCursorToText(TEXT_FOR_HOVERING);
     editor.waitTextInHoverPopup(EXPECTED_HOVER_POPUP_TEXT);
+
+    // check find preferences feature
+    menu.runCommand(ASSISTANT, FIND_REFERENCES);
   }
 
   private void performCommentAction() {
