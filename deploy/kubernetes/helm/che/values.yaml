@@ -24,6 +24,7 @@ cheKeycloakClientId: "che-public"
 #customOidcProvider: ""
 #workspaceDefaultRamRequest: ""
 #workspaceDefaultRamLimit: ""
+#workspaceSidecarDefaultRamLimit: ""
 
 global:
   cheNamespace: ""

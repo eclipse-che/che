@@ -80,6 +80,9 @@ data:
 {{- if .Values.workspaceDefaultRamRequest }}
   CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest }}
 {{- end }}
-{{- if .Values.workspaceDefaultRamRequest }}
-  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamRequest }}
+{{- if .Values.workspaceDefaultRamLimit }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit }}
+{{- end }}
+{{- if .Values.workspaceSidecarDefaultRamLimit }}
+  CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit }}
 {{- end }}
