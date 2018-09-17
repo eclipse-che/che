@@ -18,15 +18,17 @@ import static org.eclipse.che.api.factory.shared.Constants.FACTORY_ACCEPTANCE_RE
 import static org.eclipse.che.api.factory.shared.Constants.NAMED_FACTORY_ACCEPTANCE_REL_ATT;
 import static org.eclipse.che.api.factory.shared.Constants.RETRIEVE_FACTORY_REL_ATT;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriBuilder;
+
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+
+import com.google.common.base.Strings;
 
 /**
  * Helper class for creation links.
@@ -34,9 +36,6 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
  * @author Anton Korneta
  */
 public class FactoryLinksHelper {
-
-  private static final List<String> SNIPPET_TYPES =
-      ImmutableList.of("markdown", "url", "html", "iframe");
 
   private FactoryLinksHelper() {}
 
