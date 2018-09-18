@@ -629,6 +629,7 @@ public abstract class SeleniumTestHandler
    */
   private void skipTestIfNeeded(ITestResult result) {
     ITestNGMethod testMethodToSkip = result.getMethod();
+
     ITestResult failedTestResult =
         testsWithFailure.get(testMethodToSkip.getInstance().getClass().getName());
 
