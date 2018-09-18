@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -37,6 +38,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -96,42 +98,62 @@ public class PhpAssistantFeaturesTest {
   }
 
   @Test
-  public void checkEditor() {
+  public void codeShouldBeCommented() {
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
+    editor.waitActive();
+    editor.waitTextIntoEditor(EXPECTED_ORIGINAL_TEXT);
 
-    // check hover feature
+    editor.setCursorToLine(4);
+    performCommentAction();
+    editor.waitTextIntoEditor(EXPECTED_COMMENTED_TEXT);
+
+    performCommentAction();
+    editor.waitTextIntoEditor(EXPECTED_ORIGINAL_TEXT);
+  }
+
+  @Test
+  public void hoverShouldBeDisplayedWithExpectedText() {
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
     editor.moveCursorToText(TEXT_FOR_HOVERING);
     editor.waitTextInHoverPopup(EXPECTED_HOVER_POPUP_TEXT);
+  }
 
-    // check find references feature
+  @Test
+  public void findReferenceNodeShouldBeDisplayed() {
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
+  }
 
-    // check of signature help
+  @Test
+  public void signatureShouldBeDisplayed() {
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
     editor.goToCursorPositionVisible(15, 22);
     editor.typeTextIntoEditor(ENTER.toString());
     editor.waitCursorPosition(16, 1);
     editor.typeTextIntoEditor(TEXT_FOR_HOVERING + "(");
     editor.waitTextIntoEditor(EXPECTED_TEXT_AFTER_TYPING);
-    // <<--- add try/catch ---------------------------------
-    editor.typeTextIntoEditor(","); // <<< ---   delete
-    editor.waitExpTextIntoShowHintsPopUp(EXPECTED_HINT_TEXT);
-    // ------------------------------------------------------
-
+    waitExpectedTextIntoShowHintsPopup(EXPECTED_HINT_TEXT);
     editor.deleteCurrentLine();
+  }
 
-    // check go to symbol feature
+  @Test
+  public void goToSymbolFeatureShouldWork() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT + "/" + LIB_TAB_NAME);
     editor.waitActive();
     editor.waitTabIsPresent(LIB_TAB_NAME);
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitActionNodeContainsText(EXPECTED_GO_TO_SYMBOL_TEXT);
+  }
 
-    // check find project symbol
+  @Test
+  public void checkEditor() {
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
     editor.selectTabByName(INDEX_TAB_NAME);
     editor.waitActiveTabFileName(INDEX_TAB_NAME);
@@ -144,6 +166,16 @@ public class PhpAssistantFeaturesTest {
 
   private void performCommentAction() {
     String comment = Keys.chord(CONTROL, "/");
-    seleniumWebDriverHelper.getAction().sendKeys(comment).perform();
+    seleniumWebDriverHelper.sendKeys(comment);
+  }
+
+  private void waitExpectedTextIntoShowHintsPopup(String expectedText) {
+    try {
+      editor.waitExpTextIntoShowHintsPopUp(expectedText);
+    } catch (TimeoutException ex) {
+      editor.deleteCurrentLine();
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
+    }
   }
 }
