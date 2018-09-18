@@ -37,9 +37,9 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
     allowedMethodsByPath.putAll(
         "/workspace", asList("getByKey", "addProject", "updateProject", "deleteProject"));
     allowedMethodsByPath.putAll("/ssh", asList("getPair", "generatePair"));
-    allowedMethodsByPath
-        .putAll("/factory",
-            asList("getFactoryJson"."getFactory", "getFactoryByAttribute", "resolveFactory"));
+    allowedMethodsByPath.putAll(
+        "/factory",
+        asList("getFactoryJson", "getFactory", "getFactoryByAttribute", "resolveFactory"));
     allowedMethodsByPath.put("/preferences", "find");
     allowedMethodsByPath.put("/activity", "active");
   }
