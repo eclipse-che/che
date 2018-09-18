@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.languageserver.csharp;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.DOT_NET;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.testng.Assert.fail;
@@ -39,7 +40,6 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -47,7 +47,7 @@ public class CSharpFileAdvancedOperationsTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CSharpClassRenamingTest.class.getSimpleName(), 4);
 
-  private static final String PATH_TO_DOTNET_FILE = PROJECT_NAME + "/Hello.cs";
+  private static final String PATH_TO_DOT_NET_FILE = PROJECT_NAME + "/Hello.cs";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
@@ -72,7 +72,7 @@ public class CSharpFileAdvancedOperationsTest {
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, DOT_NET);
     ide.open(workspace);
     projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.openItemByPath(PATH_TO_DOTNET_FILE);
+    projectExplorer.openItemByPath(PATH_TO_DOT_NET_FILE);
     consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
     projectExplorer.waitItem(PROJECT_NAME + "/obj");
     projectExplorer.waitItem(PROJECT_NAME + "/bin");
@@ -83,14 +83,20 @@ public class CSharpFileAdvancedOperationsTest {
     String expectedTextInHoverPopUp =
         "System.Console\nRepresents the standard input, output, and error streams for console applications. This class cannot be inherited.";
     editor.moveCursorToText("Console");
-    Assert.assertEquals(editor.getTextFromHoverPopup(), expectedTextInHoverPopUp, "https://github.com/eclipse/che/issues/10117");
+    try {
+
+      editor.waitTextInHoverPopUpEqualsTo(expectedTextInHoverPopUp);
+    } catch (TimeoutException ex) {
+      fail("Known permanent failure: https://github.com/eclipse/che/issues/10117", ex);
+    }
   }
 
   @Test(priority = 1, alwaysRun = true)
   public void checkFindDefinition() {
+    //check Find definition from Test.getStr()
     editor.goToCursorPositionVisible(21, 18);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
-    editor.waitTabFileWithSavedStatus("Test.cs");
+    editor.waitTabIsPresent("Test.cs");
     editor.waitCursorPosition(18, 22);
   }
 
@@ -104,7 +110,7 @@ public class CSharpFileAdvancedOperationsTest {
 
   @Test(priority = 3, alwaysRun = true)
   public void checkGoToSymbolFeature() {
-    menu.runCommand(ASSISTANT, FIND_DEFINITION);
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     try {
       assistantFindPanel.waitActionNodeContainsText("Main(string[] args)");
     } catch (TimeoutException ex) {
