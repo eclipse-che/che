@@ -37,7 +37,6 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Supplier;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -1472,7 +1471,7 @@ public class SeleniumWebDriverHelper {
    * @param ignoredExceptionType exception which should be ignored when action is performed
    */
   public void waitNoExceptions(
-      Supplier<Void> action, Class<? extends WebDriverException> ignoredExceptionType) {
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType) {
     waitNoExceptions(action, ignoredExceptionType, DEFAULT_TIMEOUT);
   }
 
@@ -1485,15 +1484,13 @@ public class SeleniumWebDriverHelper {
    * @param timeoutInSec waiting time in seconds
    */
   public void waitNoExceptions(
-      Supplier<Void> action,
-      Class<? extends WebDriverException> ignoredExceptionType,
-      int timeoutInSec) {
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType, int timeoutInSec) {
     webDriverWaitFactory
         .get(timeoutInSec, ignoredExceptionType)
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  action.get();
+                  action.run();
                   return true;
                 });
   }
