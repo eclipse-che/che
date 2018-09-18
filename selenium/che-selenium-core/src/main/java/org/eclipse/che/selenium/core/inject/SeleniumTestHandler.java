@@ -364,8 +364,13 @@ public abstract class SeleniumTestHandler
           break;
 
         case ITestResult.SKIP:
+          String skipReasonDetails =
+              result.getThrowable() != null
+                  ? " The reason: " + result.getThrowable().getLocalizedMessage()
+                  : "";
           if (result.getMethod().isTest()) {
-            LOG.warn("Test {} skipped.", getCompletedTestLabel(result.getMethod()));
+            LOG.warn(
+                "Test {} skipped.{}", getCompletedTestLabel(result.getMethod()), skipReasonDetails);
           }
 
           // don't capture test data if test is skipped because of previous test with higher
@@ -627,9 +632,10 @@ public abstract class SeleniumTestHandler
     ITestResult failedTestResult =
         testsWithFailure.get(testMethodToSkip.getInstance().getClass().getName());
 
-    // Test with lower priority value is started firstly by TestNG.
+    // skip test with lower priority value and if it shouldn't always run
     if (failedTestResult != null
-        && testMethodToSkip.getPriority() > failedTestResult.getMethod().getPriority()) {
+        && testMethodToSkip.getPriority() > failedTestResult.getMethod().getPriority()
+        && !testMethodToSkip.isAlwaysRun()) {
       throw new SkipException(
           format(
               "Skipping test %s because it depends on test %s which has failed earlier.",

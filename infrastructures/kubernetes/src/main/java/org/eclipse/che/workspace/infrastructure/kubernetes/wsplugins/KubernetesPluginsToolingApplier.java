@@ -60,13 +60,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 @Beta
 public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
-  private final String defaultMachineMemorySizeAttribute;
+  private final String defaultSidecarMemorySizeAttribute;
 
   @Inject
   public KubernetesPluginsToolingApplier(
-      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
-    this.defaultMachineMemorySizeAttribute =
-        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
+      @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemorySizeMB) {
+    this.defaultSidecarMemorySizeAttribute =
+        String.valueOf(defaultSidecarMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -224,7 +224,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     if (ramLimit > 0) {
       attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
     } else {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
+      attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemorySizeAttribute);
     }
   }
 
