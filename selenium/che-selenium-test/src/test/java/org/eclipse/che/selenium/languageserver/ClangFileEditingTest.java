@@ -19,6 +19,7 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.CPP;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.openqa.selenium.Keys.F4;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -33,6 +34,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,13 +67,13 @@ public class ClangFileEditingTest {
   }
 
   @Test
-  public void checkMainFeaturesClangdLS() {
+  public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_CPP_FILE);
     editor.waitTabIsPresent(CPP_FILE_NAME);
 
-    // check clangd language sever initialized
+    // check Clang language server initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
@@ -109,8 +111,14 @@ public class ClangFileEditingTest {
     editor.selectTabByName(CPP_FILE_NAME);
     editor.goToPosition(17, 1);
     editor.typeTextIntoEditor("  std::abs(");
-    editor.typeTextIntoEditor(",");
-    editor.waitExpTextIntoShowHintsPopUp("abs(int __x) -> int");
+
+    try {
+      editor.waitExpTextIntoShowHintsPopUp("abs(int __x) -> int");
+    } catch (TimeoutException ex) {
+      editor.deleteCurrentLineAndInsertNew();
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
+    }
 
     editor.deleteCurrentLineAndInsertNew();
   }
@@ -166,11 +174,13 @@ public class ClangFileEditingTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
     editor.waitActive();
 
+    // check selected line formatting
     editor.selectLines(18, 1);
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FORMAT);
     editor.waitTextIntoEditor("  int x = 4;");
 
+    // check full formatting
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.cpp");
     editor.waitActive();
     editor.openContextMenuInEditor();
