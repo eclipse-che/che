@@ -89,6 +89,8 @@ public interface TestMenuCommandsConstants {
     String QUICK_FIX = ASSISTANT_MENU_PREFIX + "quickFix";
     String FIND_DEFINITION = ASSISTANT_MENU_PREFIX + "LSFindDefinitionAction";
     String FIND_REFERENCES = ASSISTANT_MENU_PREFIX + "LSFindReferencesAction";
+    String GO_TO_SYMBOL = ASSISTANT_MENU_PREFIX + "LSGoToSymbolAction";
+    String FIND_PROJECT_SYMBOL = ASSISTANT_MENU_PREFIX + "LSFindSymbolAction";
 
     interface ToolWindows {
       String TOOL_WINDOWS = ASSISTANT_MENU_PREFIX + "toolWindows";

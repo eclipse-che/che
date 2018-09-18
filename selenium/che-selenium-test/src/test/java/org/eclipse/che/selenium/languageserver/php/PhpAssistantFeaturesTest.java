@@ -12,8 +12,11 @@
 package org.eclipse.che.selenium.languageserver.php;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -24,6 +27,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
+import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
@@ -48,6 +52,14 @@ public class PhpAssistantFeaturesTest {
       "php\n" + "<?php function sayHello($name) {\n" + "php\n" + "<?php function sayHello($name) {";
   private static final String EXPECTED_REFERENCE_TEXT =
       PROJECT + "/index.php\n" + "From:14:5 To:14:13";
+  private static final String EXPECTED_TEXT_AFTER_TYPING =
+      "echo sayHello(\"man\");\n" + "sayHello(";
+  private static final String EXPECTED_HINT_TEXT = "mixed $name";
+  private static final String EXPECTED_GO_TO_SYMBOL_TEXT = "sayHellosymbols (1)";
+  private static final String EXPECTED_FIND_PROJECT_TEXT = "sayHello/php-tests/lib.php";
+  private static final String INDEX_TAB_NAME = "index.php";
+  private static final String LIB_TAB_NAME = "lib.php";
+  private static final String FIND_PROJECT_SEARCHING_TEXT = "say";
   private static final URL RESOURCE =
       PhpFileEditingTest.class.getResource("/projects/plugins/DebuggerPlugin/php-tests");
 
@@ -64,6 +76,7 @@ public class PhpAssistantFeaturesTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
+  @Inject private AssistantFindPanel assistantFindPanel;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -84,15 +97,6 @@ public class PhpAssistantFeaturesTest {
 
   @Test
   public void checkEditor() {
-    editor.waitActive();
-
-    // check code commenting
-    editor.waitTextIntoEditor(EXPECTED_ORIGINAL_TEXT);
-    editor.setCursorToLine(4);
-    performCommentAction();
-    editor.waitTextIntoEditor(EXPECTED_COMMENTED_TEXT);
-    performCommentAction();
-    editor.waitTextIntoEditor(EXPECTED_ORIGINAL_TEXT);
 
     // check hover feature
     editor.waitActive();
@@ -104,6 +108,38 @@ public class PhpAssistantFeaturesTest {
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
+
+    // check of signature help
+    editor.waitActive();
+    editor.goToCursorPositionVisible(15, 22);
+    editor.typeTextIntoEditor(ENTER.toString());
+    editor.waitCursorPosition(16, 1);
+    editor.typeTextIntoEditor(TEXT_FOR_HOVERING + "(");
+    editor.waitTextIntoEditor(EXPECTED_TEXT_AFTER_TYPING);
+    // <<--- add try/catch ---------------------------------
+    editor.typeTextIntoEditor(","); // <<< ---   delete
+    editor.waitExpTextIntoShowHintsPopUp(EXPECTED_HINT_TEXT);
+    // ------------------------------------------------------
+
+    editor.deleteCurrentLine();
+
+    // check go to symbol feature
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.openItemByPath(PROJECT + "/" + LIB_TAB_NAME);
+    editor.waitActive();
+    editor.waitTabIsPresent(LIB_TAB_NAME);
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitActionNodeContainsText(EXPECTED_GO_TO_SYMBOL_TEXT);
+
+    // check find project symbol
+    editor.waitActive();
+    editor.selectTabByName(INDEX_TAB_NAME);
+    editor.waitActiveTabFileName(INDEX_TAB_NAME);
+    editor.waitActive();
+    menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.typeToInputField(FIND_PROJECT_SEARCHING_TEXT);
+    assistantFindPanel.waitActionNodeContainsText(EXPECTED_FIND_PROJECT_TEXT);
   }
 
   private void performCommentAction() {
