@@ -28,6 +28,9 @@ public class CheContainer {
   private List<Volume> volumes = new ArrayList<>();
   private List<CheContainerPort> ports = new ArrayList<>();
 
+  @JsonProperty("memory-limit")
+  private String memoryLimit = null;
+
   public CheContainer image(String image) {
     this.image = image;
     return this;
@@ -96,6 +99,19 @@ public class CheContainer {
     this.ports = ports;
   }
 
+  public CheContainer memoryLimit(String memoryLimit) {
+    this.memoryLimit = memoryLimit;
+    return this;
+  }
+
+  public String getMemoryLimit() {
+    return memoryLimit;
+  }
+
+  public void setMemoryLimit(String memoryLimit) {
+    this.memoryLimit = memoryLimit;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -109,13 +125,15 @@ public class CheContainer {
         && Objects.equals(getEnv(), that.getEnv())
         && Objects.equals(getCommands(), that.getCommands())
         && Objects.equals(getVolumes(), that.getVolumes())
-        && Objects.equals(getPorts(), that.getPorts());
+        && Objects.equals(getPorts(), that.getPorts())
+        && Objects.equals(getPorts(), that.getPorts())
+        && Objects.equals(getMemoryLimit(), that.getMemoryLimit());
   }
 
   @Override
   public int hashCode() {
-
-    return Objects.hash(getImage(), getEnv(), getCommands(), getVolumes(), getPorts());
+    return Objects.hash(
+        getImage(), getEnv(), getCommands(), getVolumes(), getPorts(), getMemoryLimit());
   }
 
   @Override
@@ -132,6 +150,8 @@ public class CheContainer {
         + volumes
         + ", ports="
         + ports
+        + ", memoryLimit="
+        + memoryLimit
         + '}';
   }
 }
