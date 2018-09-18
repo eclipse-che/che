@@ -31,14 +31,17 @@ import org.everrest.core.resource.GenericResourceMethod;
 @Path("/{path:.*}")
 public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
 
-  private final SetMultimap<String, String> allowedMethods = HashMultimap.create();
+  private final SetMultimap<String, String> allowedMethodsByPath = HashMultimap.create();
 
   public MachineTokenAccessFilter() {
-    allowedMethods.putAll(
+    allowedMethodsByPath.putAll(
         "/workspace", asList("getByKey", "addProject", "updateProject", "deleteProject"));
-    allowedMethods.putAll("/ssh", asList("getPair", "generatePair"));
-    allowedMethods.put("/preferences", "find");
-    allowedMethods.put("/activity", "active");
+    allowedMethodsByPath.putAll("/ssh", asList("getPair", "generatePair"));
+    allowedMethodsByPath
+        .putAll("/factory",
+            asList("getFactoryJson"."getFactory", "getFactoryByAttribute", "resolveFactory"));
+    allowedMethodsByPath.put("/preferences", "find");
+    allowedMethodsByPath.put("/activity", "active");
   }
 
   @Override
@@ -47,7 +50,7 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
     if (!(EnvironmentContext.getCurrent().getSubject() instanceof MachineTokenAuthorizedSubject)) {
       return;
     }
-    if (!allowedMethods
+    if (!allowedMethodsByPath
         .get(genericMethodResource.getParentResource().getPathValue().getPath())
         .contains(genericMethodResource.getMethod().getName())) {
       throw new ForbiddenException("This operation cannot be performed using machine token.");
