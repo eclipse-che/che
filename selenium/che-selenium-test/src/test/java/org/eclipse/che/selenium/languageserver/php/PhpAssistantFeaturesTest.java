@@ -115,6 +115,7 @@ public class PhpAssistantFeaturesTest {
   public void hoverShouldBeDisplayedWithExpectedText() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
+
     editor.moveCursorToText(TEXT_FOR_HOVERING);
     editor.waitTextInHoverPopup(EXPECTED_HOVER_POPUP_TEXT);
   }
@@ -123,6 +124,7 @@ public class PhpAssistantFeaturesTest {
   public void findReferenceNodeShouldBeDisplayed() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
+
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
@@ -132,6 +134,7 @@ public class PhpAssistantFeaturesTest {
   public void signatureShouldBeDisplayed() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
+
     editor.goToCursorPositionVisible(15, 22);
     editor.typeTextIntoEditor(ENTER.toString());
     editor.waitCursorPosition(16, 1);
@@ -146,6 +149,7 @@ public class PhpAssistantFeaturesTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT + "/" + LIB_TAB_NAME);
     editor.waitActive();
+
     editor.waitTabIsPresent(LIB_TAB_NAME);
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitActionNodeContainsText(EXPECTED_GO_TO_SYMBOL_TEXT);
@@ -158,6 +162,7 @@ public class PhpAssistantFeaturesTest {
     editor.selectTabByName(INDEX_TAB_NAME);
     editor.waitActiveTabFileName(INDEX_TAB_NAME);
     editor.waitActive();
+
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField(FIND_PROJECT_SEARCHING_TEXT);
