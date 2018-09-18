@@ -451,7 +451,7 @@ public class CodenvyEditor {
   }
 
   /** Get text from hover popup */
-  public String waitTextInHoverPopUpEqualsTo(String expectedText) {
+  public void waitTextInHoverPopUpEqualsTo(String expectedText) {
     try {
       seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);
     } catch (TimeoutException ex) {
