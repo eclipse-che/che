@@ -2229,6 +2229,7 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
   }
 
+  /** Type the comment line in the file by keyboard */
   public void launchCommentCodeFeature() {
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -2245,7 +2246,7 @@ public class CodenvyEditor {
    * @param renameValue
    */
   public void doRenamingByLanguageServerField(String renameValue) {
-    seleniumWebDriverHelper.setText(languageServerRenameField, renameValue);
+    seleniumWebDriverHelper.setValue(languageServerRenameField, renameValue);
     seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
   }
 }
