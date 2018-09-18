@@ -83,7 +83,7 @@ public class CSharpFileAdvancedOperationsTest {
     String expectedTextInHoverPopUp =
         "System.Console\nRepresents the standard input, output, and error streams for console applications. This class cannot be inherited.";
     editor.moveCursorToText("Console");
-    Assert.assertEquals(editor.getTextFromHoverPopup(), expectedTextInHoverPopUp);
+    Assert.assertEquals(editor.getTextFromHoverPopup(), expectedTextInHoverPopUp, "https://github.com/eclipse/che/issues/10117");
   }
 
   @Test(priority = 1, alwaysRun = true)
