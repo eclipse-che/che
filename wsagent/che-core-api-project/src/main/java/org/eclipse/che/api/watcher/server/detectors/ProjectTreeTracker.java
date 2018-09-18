@@ -151,7 +151,10 @@ public class ProjectTreeTracker {
         timers.remove(it);
       } else {
         ProjectTreeStateUpdateDto params =
-            newDto(ProjectTreeStateUpdateDto.class).withPath(it).withFile(isFile(it)).withType(CREATED);
+            newDto(ProjectTreeStateUpdateDto.class)
+                .withPath(it)
+                .withFile(isFile(it))
+                .withType(CREATED);
         transmitter
             .newRequest()
             .endpointId(endpointId)
