@@ -11,9 +11,6 @@
  */
 package org.eclipse.che.selenium.hotupdate.recreate;
 
-import static java.lang.Integer.*;
-import static org.testng.Assert.*;
-
 import com.google.inject.Inject;
 import java.io.IOException;
 import org.eclipse.che.api.system.shared.SystemStatus;

@@ -29,7 +29,8 @@ public interface TestWorkspaceProvider {
    * @param startAfterCreation start workspace just after creation, if <bold>true</bold>
    */
   TestWorkspace createWorkspace(
-      TestUser owner, int memoryGB, String template, boolean startAfterCreation) throws Exception;
+      TestUser owner, int memoryGB, WorkspaceTemplate template, boolean startAfterCreation)
+      throws Exception;
 
   /** Release all allocated resources. */
   void shutdown();

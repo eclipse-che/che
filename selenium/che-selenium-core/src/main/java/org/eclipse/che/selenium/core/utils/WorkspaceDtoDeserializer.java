@@ -23,6 +23,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.constant.Infrastructure;
+import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class WorkspaceDtoDeserializer {
   @Named("che.infrastructure")
   private Infrastructure infrastructure;
 
-  public WorkspaceConfigDto deserializeWorkspaceTemplate(String templateName) {
+  public WorkspaceConfigDto deserializeWorkspaceTemplate(WorkspaceTemplate templateName) {
     requireNonNull(templateName);
 
     try {
@@ -60,7 +61,7 @@ public class WorkspaceDtoDeserializer {
     }
   }
 
-  private String getTemplateDirectory(String template) {
+  private String getTemplateDirectory(WorkspaceTemplate template) {
     String templateDirectoryName;
     switch (infrastructure) {
       case OSIO:
@@ -72,6 +73,7 @@ public class WorkspaceDtoDeserializer {
         templateDirectoryName = infrastructure.toString().toLowerCase();
     }
 
-    return String.format("/templates/workspace/%s/%s", templateDirectoryName, template);
+    return String.format(
+        "/templates/workspace/%s/%s", templateDirectoryName, template.getTemplateFileName());
   }
 }

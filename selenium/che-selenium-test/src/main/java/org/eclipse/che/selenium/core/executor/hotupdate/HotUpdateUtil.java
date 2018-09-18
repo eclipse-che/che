@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class HotUpdateUtil {
   private final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @Inject
-  HotUpdateUtil(
+  public HotUpdateUtil(
       OpenShiftCliCommandExecutor openShiftCliCommandExecutor,
       TestUserPreferencesServiceClient testUserPreferencesServiceClient) {
 
@@ -60,7 +61,7 @@ public class HotUpdateUtil {
    * @param timeoutInSec - waiting time in seconds.
    */
   public void waitFullMasterPodUpdate(int masterRevisionBeforeUpdate, int timeoutInSec)
-      throws TimeoutException, InterruptedException {
+      throws TimeoutException, InterruptedException, ExecutionException {
     final int numberOfUpdatedVersion = masterRevisionBeforeUpdate + 1;
     final String beforeUpdatePodNamePattern = "che-" + masterRevisionBeforeUpdate;
     final String updatedPodNamePattern = "che-" + numberOfUpdatedVersion;
@@ -88,7 +89,7 @@ public class HotUpdateUtil {
    * @param timeoutInSec - waiting time in seconds.
    */
   public void waitMasterPodRevision(int expectedRevision, int timeoutInSec)
-      throws TimeoutException, InterruptedException {
+      throws TimeoutException, InterruptedException, ExecutionException {
     WaitUtils.waitSuccessCondition(() -> expectedRevision == getMasterPodRevision(), timeoutInSec);
   }
 
@@ -98,7 +99,7 @@ public class HotUpdateUtil {
    * @param expectedRevision master pod revision.
    */
   public void waitMasterPodRevision(int expectedRevision)
-      throws TimeoutException, InterruptedException {
+      throws TimeoutException, InterruptedException, ExecutionException {
     waitMasterPodRevision(expectedRevision, TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS);
   }
 
@@ -164,7 +165,7 @@ public class HotUpdateUtil {
   }
 
   private void waitPodNameDisappearance(String podName, int timeout)
-      throws TimeoutException, InterruptedException {
+      throws TimeoutException, InterruptedException, ExecutionException {
     WaitUtils.waitSuccessCondition(
         () -> {
           try {
@@ -183,7 +184,7 @@ public class HotUpdateUtil {
   }
 
   private void waitPodNamePatternHasSingleOccurrence(String podName, int timeout)
-      throws TimeoutException, InterruptedException {
+      throws TimeoutException, InterruptedException, ExecutionException {
     WaitUtils.waitSuccessCondition(
         () -> {
           try {
