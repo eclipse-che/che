@@ -21,8 +21,8 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import java.security.Key;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
 
 /** Resolves signing key pair based on workspace Id claim of token. */
 @Singleton
@@ -47,8 +47,8 @@ public class MachineSigningKeyResolver extends SigningKeyResolverAdapter {
     }
     try {
       return keyManager.getKeyPair(wsId).getPublic();
-    } catch (ServerException e) {
-      throw new JwtException("Unable to fetch signature key pair:" + e.getMessage());
+    } catch (SignatureKeyManagerException e) {
+      throw new JwtException("Unable to fetch signature key pair:" + e.getMessage(), e);
     }
   }
 }
