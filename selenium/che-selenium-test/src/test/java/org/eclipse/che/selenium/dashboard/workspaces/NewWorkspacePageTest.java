@@ -88,7 +88,6 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          JAVA_THEIA_DOCKER,
           WORKSPACE_NEXT_HELLO_WORLD,
           WORKSPACE_NEXT_REST);
 
@@ -105,7 +104,6 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          JAVA_THEIA_DOCKER,
           WORKSPACE_NEXT_HELLO_WORLD,
           WORKSPACE_NEXT_REST);
 
@@ -147,7 +145,6 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER,
           WORKSPACE_NEXT_HELLO_WORLD,
           WORKSPACE_NEXT_REST);
 
@@ -173,7 +170,6 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER,
           WORKSPACE_NEXT_HELLO_WORLD,
           WORKSPACE_NEXT_REST);
 
@@ -199,18 +195,17 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER,
           WORKSPACE_NEXT_HELLO_WORLD,
           WORKSPACE_NEXT_REST);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack>
       EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
@@ -219,7 +214,6 @@ public class NewWorkspacePageTest {
               BLANK,
               WORKSPACE_NEXT_REST,
               WORKSPACE_NEXT_HELLO_WORLD,
-              JAVA_THEIA_DOCKER,
               RAILS,
               PYTHON,
               PHP,
@@ -237,7 +231,6 @@ public class NewWorkspacePageTest {
           BLANK,
           WORKSPACE_NEXT_REST,
           WORKSPACE_NEXT_HELLO_WORLD,
-          JAVA_THEIA_DOCKER,
           RAILS,
           PYTHON,
           PHP,
