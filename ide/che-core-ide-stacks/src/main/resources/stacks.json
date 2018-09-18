@@ -607,7 +607,7 @@
               ],
               "servers": {
                 "VNC" : {
-                  "port" : "6091",
+                  "port" : "6901",
                   "protocol" : "http"
                 }
               },
