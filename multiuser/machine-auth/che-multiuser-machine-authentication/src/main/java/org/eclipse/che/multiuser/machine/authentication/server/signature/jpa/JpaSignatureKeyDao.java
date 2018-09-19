@@ -57,7 +57,7 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
     } catch (IntegrityConstraintViolationException x) {
       throw new ConflictException(
           format(
-              "Workspace with id '%s' referenced by signature key pair doesn't exist",
+              "Unable to create signature key pair because referenced workspace with id '%s' doesn't exist",
               keyPair.getWorkspaceId()));
 
     } catch (DuplicateKeyException dkEx) {

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
@@ -114,11 +113,6 @@ public class MachineLoginFilter implements Filter {
       // not a machine token, bypass
       chain.doFilter(request, response);
     } catch (ServerException | JwtException e) {
-      LOG.error(
-          "Machine token requested: {} {}?{}",
-          httpRequest.getMethod(),
-          httpRequest.getRequestURL(),
-          firstNonNull(httpRequest.getQueryString(), ""));
       LOG.error(e.getMessage(), e);
       sendErr(
           response,

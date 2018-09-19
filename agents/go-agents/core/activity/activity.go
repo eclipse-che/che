@@ -44,7 +44,7 @@ type tracker struct {
 // NewTracker creates default implementation of activity tracker
 func NewTracker(wsID string, apiEndpoint string) WorkspaceActivityTracker {
 	return &tracker{
-		activityAPI: apiEndpoint + "/activity/" + wsID + "?issuer=goagent",
+		activityAPI: apiEndpoint + "/activity/" + wsID,
 	}
 }
 

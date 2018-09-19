@@ -124,7 +124,7 @@ public class SignatureKeyDaoTest {
   @Test(
       expectedExceptions = ConflictException.class,
       expectedExceptionsMessageRegExp =
-          "Workspace with id '.*' referenced by signature key pair doesn't exist")
+          "Unable to create signature key pair because referenced workspace with id '.*' doesn't exist")
   public void throwsConflictExceptionWhenCreatingKeyPairNotExistedWs() throws Exception {
 
     dao.create(newKeyPair("wrong_ws"));
