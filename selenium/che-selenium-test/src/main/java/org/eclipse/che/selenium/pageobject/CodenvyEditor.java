@@ -457,7 +457,7 @@ public class CodenvyEditor {
       seleniumWebDriverHelper.waitVisibility(hoverPopup);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10674", ex);
     }
 
     // waits until text in popup is equals to specified
@@ -465,7 +465,7 @@ public class CodenvyEditor {
       seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10117", ex);
+      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10117", ex);
     }
   }
 

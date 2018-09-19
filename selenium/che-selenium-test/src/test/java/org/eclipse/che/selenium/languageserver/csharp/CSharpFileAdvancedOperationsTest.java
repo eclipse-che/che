@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.DOT_NET;
-import static org.openqa.selenium.Keys.CONTROL;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -73,6 +72,10 @@ public class CSharpFileAdvancedOperationsTest {
     ide.open(workspace);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_DOT_NET_FILE);
+
+    // after opening the file we are checking initializing message from LS and than check, that
+    // dependencies have been added properly in this case
+    // folders obj and bin should appear in the Project tree
     consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
     projectExplorer.waitItem(PROJECT_NAME + "/obj");
     projectExplorer.waitItem(PROJECT_NAME + "/bin");
@@ -103,7 +106,7 @@ public class CSharpFileAdvancedOperationsTest {
   @Test(priority = 2, alwaysRun = true)
   public void checkCodeCommentFeature() {
     editor.goToPosition(17, 1);
-    editor.typeTextIntoEditor(CONTROL.toString() + "/");
+    editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor("//private counter = 5;");
     editor.typeTextIntoEditor(Keys.END.toString());
   }
