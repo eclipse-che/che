@@ -113,7 +113,6 @@ public class MachineLoginFilter implements Filter {
       // not a machine token, bypass
       chain.doFilter(request, response);
     } catch (ServerException | JwtException e) {
-      LOG.error(e.getMessage(), e);
       sendErr(
           response,
           SC_UNAUTHORIZED,
