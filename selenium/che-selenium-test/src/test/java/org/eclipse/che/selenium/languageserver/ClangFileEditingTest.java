@@ -157,7 +157,7 @@ public class ClangFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkRenameFeature() {
+  public void checkCodeRenameFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.h");
     editor.waitActive();
 
@@ -171,6 +171,15 @@ public class ClangFileEditingTest {
 
   @Test(priority = 1)
   public void checkFormatCodeFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
+    editor.waitActive();
+
+    // check selected line formatting
+    editor.selectLines(18, 1);
+    editor.openContextMenuInEditor();
+    editor.clickOnItemInContextMenu(FORMAT);
+    editor.waitTextIntoEditor("  int x = 4;");
+
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.cpp");
     editor.waitActive();
 
