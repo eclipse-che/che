@@ -20,6 +20,10 @@ public interface ProjectTreeStateUpdateDto extends FileChange {
 
   ProjectTreeStateUpdateDto withPath(String path);
 
+  boolean isFile();
+
+  ProjectTreeStateUpdateDto withFile(boolean isFile);
+
   FileWatcherEventType getType();
 
   ProjectTreeStateUpdateDto withType(FileWatcherEventType type);
