@@ -19,8 +19,6 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeoutException;
-
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -42,8 +40,8 @@ public class PythonAssistantFeatureTest {
   private static final String EXPECTED_CODE_BEFORE_COMMENTING = "var2 = module.add(100, 200)";
   private static final String EXPECTED_COMMENTED_CODE = "#var2 = module.add(100, 200)";
   private static final String EXPECTED_HOVER_TEXT = "function(self)";
-  private static final String EXPECTED_FIND_REFERENCE_NODE_TEXT = "/console-python3-simple/calc.py\n" +
-      "From:16:1 To:16:5";
+  private static final String EXPECTED_FIND_REFERENCE_NODE_TEXT =
+      "/console-python3-simple/calc.py\n" + "From:16:1 To:16:5";
   private static final String EXPECTED_TEXT_AFTER_RENAME =
       "class MyClass:\n" + "    renamedVar = 1\n" + "    variable = \"variable\"";
 
@@ -121,20 +119,17 @@ public class PythonAssistantFeatureTest {
   }
 
   @Test
-  public void checkSignatureHelpFeature(){
+  public void checkSignatureHelpFeature() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + CALC_TAB_NAME);
     editor.waitTabIsPresent(CALC_TAB_NAME);
     editor.waitActive();
-
-
-
   }
 
-  private void waitReferenceWithText(String expectedText){
-    try{
+  private void waitReferenceWithText(String expectedText) {
+    try {
       findReferencesConsoleTab.waitReferenceWithText(expectedText);
-    }catch(org.openqa.selenium.TimeoutException ex){
+    } catch (org.openqa.selenium.TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
     }
