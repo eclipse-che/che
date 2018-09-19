@@ -42,6 +42,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -67,10 +68,6 @@ public class SeleniumWebDriverHelper {
     this.webDriverWaitFactory = webDriverWaitFactory;
     this.actionsFactory = actionsFactory;
     this.uploadUtil = uploadFileUtil;
-  }
-
-  public interface VoidSupplier {
-    void action();
   }
 
   /**
@@ -1467,23 +1464,33 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until specified {@code condition} will be performed successfully and ignores provided
-   * {@code ignoredExceptionType}.
+   * Waits until {@code action} stop throwing exception of {@code ignoredExceptionType} and during
+   * {@code DEFAULT_TIMEOUT}.
    *
-   * <p>Note! For correct work condition should contains find of used element logic, or in
-   * WebElement case it should be defined by {@link org.openqa.selenium.support.FindBy}.
-   *
-   * @param condition condition which should be performed
-   * @param ignoredExceptionType exception type which should be ignored during condition performing
+   * @param action action which should stop throwing of certain exception during timeout
+   * @param ignoredExceptionType exception which should be ignored when action is performed
    */
-  public void waitPerformWithExceptionIgnoring(
-      VoidSupplier condition, Class<? extends Throwable> ignoredExceptionType) {
+  public void waitNoExceptions(
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType) {
+    waitNoExceptions(action, ignoredExceptionType, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until {@code action} stop throwing exception of {@code ignoredExceptionType} during
+   * {@code timeoutInSec}.
+   *
+   * @param action action which should stop throwing of certain exception during timeout
+   * @param ignoredExceptionType exception which should be ignored when action is being performed
+   * @param timeoutInSec waiting time in seconds
+   */
+  public void waitNoExceptions(
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType, int timeoutInSec) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT, ignoredExceptionType)
+        .get(timeoutInSec, ignoredExceptionType)
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  condition.action();
+                  action.run();
                   return true;
                 });
   }
