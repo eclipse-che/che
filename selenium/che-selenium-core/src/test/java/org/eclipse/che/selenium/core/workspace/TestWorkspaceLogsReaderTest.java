@@ -15,7 +15,6 @@ import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader.LogInfo.create;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -61,7 +60,6 @@ public class TestWorkspaceLogsReaderTest {
   private static final Path PATH_TO_STORE_LOGS =
       Paths.get(TestWorkspaceLogsReaderTest.class.getResource("").getPath());
   private static final WorkspaceStatus WRONG_WORKSPACE_STATUS = WorkspaceStatus.STOPPED;
-  private static final NullPointerException EXCEPTION_TO_BE_THROWN = new NullPointerException();
 
   @Spy private TestWorkspaceLogsReader testWorkspaceLogsReader;
 
@@ -108,28 +106,23 @@ public class TestWorkspaceLogsReaderTest {
     doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.read(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
     verifyZeroInteractions(log);
   }
 
   @Test
-  public void shouldAbortExecutionIfWorkspaceIsNotRunning() throws Exception {
+  public void shouldReadLogIfWorkspaceIsNotRunning() throws Exception {
     // given
     doReturn(true).when(testWorkspaceLogsReader).canWorkspaceLogsBeRead();
     doReturn(WRONG_WORKSPACE_STATUS).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.read(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
-    verify(testWorkspaceLogsReader, never()).getLogInfos();
-    verify(log)
-        .warn(
-            "It's impossible to get logs of workspace with id='{}' because of improper status '{}'",
-            "workspace-id",
-            WRONG_WORKSPACE_STATUS);
+    verifyZeroInteractions(log);
   }
 
   @Test
@@ -139,29 +132,11 @@ public class TestWorkspaceLogsReaderTest {
     doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.read(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
     verify(testWorkspaceLogsReader, never()).getLogInfos();
     verifyZeroInteractions(log);
-  }
-
-  @Test
-  public void shouldAbortExecutionIfItIsImpossibleToGetWorkspaceStatus() throws Exception {
-    // given
-    doReturn(true).when(testWorkspaceLogsReader).canWorkspaceLogsBeRead();
-    doThrow(EXCEPTION_TO_BE_THROWN).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
-
-    // when
-    testWorkspaceLogsReader.read(testWorkspace, PATH_TO_STORE_LOGS);
-
-    // then
-    verify(testWorkspaceLogsReader, never()).getLogInfos();
-    verify(log)
-        .warn(
-            "It's impossible to get status of workspace with id='{}'",
-            "workspace-id",
-            EXCEPTION_TO_BE_THROWN);
   }
 
   @Test
@@ -180,7 +155,7 @@ public class TestWorkspaceLogsReaderTest {
     doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
-    testWorkspaceLogsReader.read(testWorkspace, PATH_TO_STORE_LOGS);
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);
 
     // then
     ArgumentCaptor<String> logArgumentCaptor1 = forClass(String.class);
@@ -209,5 +184,27 @@ public class TestWorkspaceLogsReaderTest {
     String errorMessage = logArgumentCaptor5.getValue().getMessage();
     assertTrue(
         errorMessage.contains(UNKNOWN_COMMAND), "Actual errorMessage content: " + errorMessage);
+  }
+
+  @Test
+  public void shouldSuppressCommandErrorWarnings() throws Exception {
+    // given
+    doReturn(UNKNOWN_COMMAND)
+        .when(testWorkspaceLogsReader)
+        .getReadLogsCommand(
+            TEST_WORKSPACE_ID,
+            Paths.get(
+                format(
+                    "%s/%s/%s", PATH_TO_STORE_LOGS, TEST_WORKSPACE_ID, FIRST_LOG_INFO.getName())),
+            FIRST_LOG_INFO.getLocationInsideWorkspace());
+
+    doReturn(true).when(testWorkspaceLogsReader).canWorkspaceLogsBeRead();
+    doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
+
+    // when
+    testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, true);
+
+    // then
+    verifyZeroInteractions(log);
   }
 }

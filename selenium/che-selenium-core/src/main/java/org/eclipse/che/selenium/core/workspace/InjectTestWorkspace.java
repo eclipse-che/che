@@ -17,12 +17,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /**
  * To instantiate {@link TestWorkspace} in test classes with none default parameters.
  *
- * @see TestWorkspaceProvider#createWorkspace(DefaultTestUser, int, String, boolean)
+ * @see TestWorkspaceProvider#createWorkspace(TestUser, int, WorkspaceTemplate, boolean)
  * @author Anatolii Bazko
  */
 @Target({FIELD})
@@ -36,7 +36,7 @@ public @interface InjectTestWorkspace {
   int memoryGb() default -1;
 
   /** Workspace template to create workspace base upon. */
-  String template() default WorkspaceTemplate.DEFAULT;
+  WorkspaceTemplate template() default WorkspaceTemplate.DEFAULT;
 
   /** The workspace owner. If value is empty then default user will be used. */
   String user() default "";

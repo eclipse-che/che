@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.DefaultClaims;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.HashMap;
@@ -106,7 +107,7 @@ public class MachineLoginFilterTest {
             permissionCheckerMock);
 
     when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(keyManagerMock.getKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
+    when(keyManagerMock.getOrCreateKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
 
     when(userMock.getName()).thenReturn(SUBJECT.getUserName());
     when(userManagerMock.getById(SUBJECT.getUserId())).thenReturn(userMock);
@@ -116,7 +117,7 @@ public class MachineLoginFilterTest {
   public void testProcessRequestWithValidToken() throws Exception {
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verifyZeroInteractions(responseMock);
   }
@@ -127,7 +128,7 @@ public class MachineLoginFilterTest {
     final KeyPairGenerator kpg = KeyPairGenerator.getInstance(SIGNATURE_ALGORITHM);
     kpg.initialize(KEY_SIZE);
     final KeyPair pair = kpg.generateKeyPair();
-    when(keyManagerMock.getKeyPair(eq(WORKSPACE_ID))).thenReturn(pair);
+    when(keyManagerMock.getOrCreateKeyPair(eq(WORKSPACE_ID))).thenReturn(pair);
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
@@ -137,6 +138,32 @@ public class MachineLoginFilterTest {
             401,
             "Authentication with machine token failed cause: JWT signature does not match locally computed signature."
                 + " JWT validity cannot be asserted and should not be trusted.");
+  }
+
+  @Test
+  public void testNotProceedRequestWhenNoWorkspaceIdClaim() throws Exception {
+    final HttpServletRequest requestMock = getRequestMock();
+    final KeyPairGenerator kpg = KeyPairGenerator.getInstance(SIGNATURE_ALGORITHM);
+    kpg.initialize(KEY_SIZE);
+    final KeyPair pair = kpg.generateKeyPair();
+    final Claims badClaims = new DefaultClaims();
+    badClaims.put(Constants.USER_ID_CLAIM, SUBJECT.getUserId());
+    badClaims.put(Claims.ID, "84123-132-fn31");
+    final String token =
+        Jwts.builder()
+            .setClaims(badClaims)
+            .setHeader(HEADER)
+            .signWith(RS512, pair.getPrivate())
+            .compact();
+    when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
+
+    machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
+
+    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(responseMock)
+        .sendError(
+            401,
+            "Authentication with machine token failed cause: Unable to fetch signature key pair: no workspace id present in token");
   }
 
   @Test
@@ -159,7 +186,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(
@@ -173,7 +200,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(

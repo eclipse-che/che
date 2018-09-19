@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core.utils;
 
 import static org.eclipse.che.selenium.core.utils.WaitUtils.DEFAULT_DELAY_BETWEEN_ATTEMPTS_IN_MILLISECONDS;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BooleanSupplier;
@@ -37,11 +38,7 @@ public class WaitSuccessConditionTest {
           throw new RuntimeException(e);
         }
 
-        if (--countToZeroToSuccess > 0) {
-          return false;
-        }
-
-        return true;
+        return --countToZeroToSuccess == 0;
       };
 
   @BeforeMethod
@@ -50,7 +47,7 @@ public class WaitSuccessConditionTest {
   }
 
   @Test
-  public void shouldSuccessWithTimeoutInMillisecs() throws InterruptedException, TimeoutException {
+  public void shouldSuccessWithTimeoutInMillisecs() throws Exception {
     WaitUtils.waitSuccessCondition(
         testCondition,
         NUMBER_OF_SUCCESS_CONDITION_CALL * CONDITION_DELAY_MILLISECS * 4,
@@ -62,7 +59,7 @@ public class WaitSuccessConditionTest {
       expectedExceptions = TimeoutException.class,
       expectedExceptionsMessageRegExp =
           "Expected condition failed: waiting for 600 MILLISECONDS with 150 MILLISECONDS interval")
-  public void shouldFailBecauseTooSmallTimeout() throws InterruptedException, TimeoutException {
+  public void shouldFailBecauseTooSmallTimeout() throws Exception {
     WaitUtils.waitSuccessCondition(
         testCondition,
         (NUMBER_OF_SUCCESS_CONDITION_CALL - 1) * CONDITION_DELAY_MILLISECS,
@@ -75,7 +72,7 @@ public class WaitSuccessConditionTest {
       expectedExceptionsMessageRegExp =
           "Expected condition failed: waiting for 1800 MILLISECONDS with 2700 MILLISECONDS interval")
   public void shouldFailBecauseTooLongDelayBetweenAttempts()
-      throws InterruptedException, TimeoutException {
+      throws InterruptedException, TimeoutException, ExecutionException {
     WaitUtils.waitSuccessCondition(
         testCondition,
         NUMBER_OF_SUCCESS_CONDITION_CALL * CONDITION_DELAY_MILLISECS * 2,
@@ -84,11 +81,24 @@ public class WaitSuccessConditionTest {
   }
 
   @Test(
+      expectedExceptions = ExecutionException.class,
+      expectedExceptionsMessageRegExp = "java.lang.RuntimeException: test")
+  public void shouldFailBecauseConditionCheckException() throws Exception {
+    WaitUtils.waitSuccessCondition(
+        () -> {
+          throw new RuntimeException("test");
+        },
+        CONDITION_DELAY_MILLISECS * 2,
+        CONDITION_DELAY_MILLISECS,
+        TimeUnit.MILLISECONDS);
+  }
+
+  @Test(
       expectedExceptions = TimeoutException.class,
       expectedExceptionsMessageRegExp =
           "Expected condition failed: waiting for 150 MILLISECONDS with 30 MILLISECONDS interval")
   public void shouldFailBecauseOperationTakesTooLongTime()
-      throws InterruptedException, TimeoutException {
+      throws InterruptedException, TimeoutException, ExecutionException {
     countToZeroToSuccess = 0;
     WaitUtils.waitSuccessCondition(
         testCondition,
@@ -101,7 +111,7 @@ public class WaitSuccessConditionTest {
       expectedExceptions = TimeoutException.class,
       expectedExceptionsMessageRegExp =
           "Expected condition failed: waiting for 1 SECONDS with 500 MILLISECONDS interval")
-  public void shouldFailWithDefaultDelay() throws InterruptedException, TimeoutException {
+  public void shouldFailWithDefaultDelay() throws Exception {
     WaitUtils.waitSuccessCondition(
         testCondition, DEFAULT_DELAY_BETWEEN_ATTEMPTS_IN_MILLISECONDS * 2 / 1000);
   }
