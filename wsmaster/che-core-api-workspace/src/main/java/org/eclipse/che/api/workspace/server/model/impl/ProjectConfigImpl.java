@@ -307,7 +307,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     @CollectionTable(
         name = "projectattribute_values",
         joinColumns = @JoinColumn(name = "projectattribute_id"))
-    @Column(name = "values")
+    @Column(name = "attribute_values")
     private List<String> values;
 
     public Attribute() {}

@@ -42,6 +42,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -1460,5 +1461,37 @@ public class SeleniumWebDriverHelper {
 
   public void pressEnter() {
     getAction().sendKeys(ENTER).perform();
+  }
+
+  /**
+   * Waits until {@code action} stop throwing exception of {@code ignoredExceptionType} and during
+   * {@code DEFAULT_TIMEOUT}.
+   *
+   * @param action action which should stop throwing of certain exception during timeout
+   * @param ignoredExceptionType exception which should be ignored when action is performed
+   */
+  public void waitNoExceptions(
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType) {
+    waitNoExceptions(action, ignoredExceptionType, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until {@code action} stop throwing exception of {@code ignoredExceptionType} during
+   * {@code timeoutInSec}.
+   *
+   * @param action action which should stop throwing of certain exception during timeout
+   * @param ignoredExceptionType exception which should be ignored when action is being performed
+   * @param timeoutInSec waiting time in seconds
+   */
+  public void waitNoExceptions(
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType, int timeoutInSec) {
+    webDriverWaitFactory
+        .get(timeoutInSec, ignoredExceptionType)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  action.run();
+                  return true;
+                });
   }
 }
