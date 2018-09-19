@@ -53,7 +53,7 @@ public class PhpAssistantFeaturesTest {
   private static final String EXPECTED_HOVER_POPUP_TEXT =
       "php\n" + "<?php function sayHello($name) {\n" + "php\n" + "<?php function sayHello($name) {";
   private static final String EXPECTED_REFERENCE_TEXT =
-      PROJECT + "/index.php\n" + "From:14:5 To:14:13";
+      PROJECT + "/index.php\n" + "From:15:6 To:15:14";
   private static final String EXPECTED_TEXT_AFTER_TYPING =
       "echo sayHello(\"man\");\n" + "sayHello(";
   private static final String EXPECTED_HINT_TEXT = "mixed $name";
@@ -152,7 +152,7 @@ public class PhpAssistantFeaturesTest {
 
     editor.waitTabIsPresent(LIB_TAB_NAME);
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
-    assistantFindPanel.waitActionNodeContainsText(EXPECTED_GO_TO_SYMBOL_TEXT);
+    waitActionNodeContainsText(EXPECTED_GO_TO_SYMBOL_TEXT);
   }
 
   @Test
@@ -178,9 +178,17 @@ public class PhpAssistantFeaturesTest {
     try {
       editor.waitExpTextIntoShowHintsPopUp(expectedText);
     } catch (TimeoutException ex) {
-      editor.deleteCurrentLine();
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
+    }
+  }
+
+  private void waitActionNodeContainsText(String expectedText) {
+    try {
+      assistantFindPanel.waitActionNodeContainsText(expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
     }
   }
 }
