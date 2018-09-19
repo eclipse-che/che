@@ -450,7 +450,7 @@ public class CodenvyEditor {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(hoverPopup);
   }
 
-  /** Get text from hover popup */
+  /** wait full matching of text in hover popup */
   public void waitTextInHoverPopUpEqualsTo(String expectedText) {
     try {
       seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);

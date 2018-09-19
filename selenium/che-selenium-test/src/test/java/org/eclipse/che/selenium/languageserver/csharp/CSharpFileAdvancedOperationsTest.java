@@ -93,7 +93,7 @@ public class CSharpFileAdvancedOperationsTest {
 
   @Test(priority = 1, alwaysRun = true)
   public void checkFindDefinition() {
-    //check Find definition from Test.getStr()
+    // check Find definition from Test.getStr()
     editor.goToCursorPositionVisible(21, 18);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitTabIsPresent("Test.cs");
