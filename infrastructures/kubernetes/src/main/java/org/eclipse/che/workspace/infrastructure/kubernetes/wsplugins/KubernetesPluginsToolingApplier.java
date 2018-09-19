@@ -233,6 +233,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     Map<String, VolumeImpl> result = new HashMap<>();
 
+    if (volumes == null) {
+      return result;
+    }
+
     for (Volume volume : volumes) {
       result.put(volume.getName(), new VolumeImpl().withPath(volume.getMountPath()));
     }
