@@ -110,25 +110,25 @@ public class ClangFileEditingTest {
     // check Signature Help feature
     editor.selectTabByName(CPP_FILE_NAME);
     editor.goToPosition(17, 1);
+    editor.deleteCurrentLineAndInsertNew();
     editor.typeTextIntoEditor("  std::abs(");
 
     try {
       editor.waitExpTextIntoShowHintsPopUp("abs(int __x) -> int");
     } catch (TimeoutException ex) {
-      editor.deleteCurrentLineAndInsertNew();
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
     }
-
-    editor.deleteCurrentLineAndInsertNew();
   }
 
   @Test(priority = 1)
   public void checkAutocompleteFeature() {
-    editor.selectTabByName(CPP_FILE_NAME);
+    projectExplorer.openItemByPath(PATH_TO_CPP_FILE);
+    editor.waitActive();
 
     // check contents of autocomplete container
     editor.goToPosition(17, 1);
+    editor.deleteCurrentLineAndInsertNew();
     editor.typeTextIntoEditor("std::cou");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("cout ostream");
@@ -169,20 +169,11 @@ public class ClangFileEditingTest {
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
-  @Test(priority = 2)
-  public void checkCodeFormatting() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
-    editor.waitActive();
-
-    // check selected line formatting
-    editor.selectLines(18, 1);
-    editor.openContextMenuInEditor();
-    editor.clickOnItemInContextMenu(FORMAT);
-    editor.waitTextIntoEditor("  int x = 4;");
-
-    // check full formatting
+  @Test(priority = 1)
+  public void checkFormatCodeFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.cpp");
     editor.waitActive();
+
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FORMAT);
     editor.waitTextIntoEditor("int isEven(int x) { return x % 2 == 0; }");
