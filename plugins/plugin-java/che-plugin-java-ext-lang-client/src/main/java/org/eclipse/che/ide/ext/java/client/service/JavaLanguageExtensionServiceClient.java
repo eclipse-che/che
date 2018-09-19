@@ -30,6 +30,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNO
 import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_GET_RENAME_TYPE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_MOVE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_RENAME;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REFACTORING_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
@@ -304,7 +305,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(REFACTORING_RENAME)
                 .paramsAsDto(renameSettings)
-                .sendAndReceiveResultAsDto(RefactoringResult.class, REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsDto(RefactoringResult.class, REFACTORING_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -364,7 +365,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(REFACTORING_MOVE)
                 .paramsAsDto(moveSettings)
-                .sendAndReceiveResultAsDto(RefactoringResult.class, REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsDto(RefactoringResult.class, REFACTORING_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));

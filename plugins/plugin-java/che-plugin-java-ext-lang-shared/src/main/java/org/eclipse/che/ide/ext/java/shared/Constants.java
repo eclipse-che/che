@@ -32,6 +32,7 @@ public final class Constants {
 
   // LS requests timeout constants
   public static final int REQUEST_TIMEOUT = 10_000;
+  public static final int REFACTORING_TIMEOUT = 30_000;
   public static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
   public static final int REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT = 60_000;
 
