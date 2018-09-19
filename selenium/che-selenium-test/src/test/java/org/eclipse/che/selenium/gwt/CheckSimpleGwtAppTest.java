@@ -33,8 +33,8 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
+import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -65,6 +65,8 @@ public class CheckSimpleGwtAppTest {
   @Inject private WorkspaceDtoDeserializer workspaceDtoDeserializer;
   @Inject private DefaultTestUser testUser;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private CheTestWorkspaceProvider testWorkspaceProvider;
+
   private String projectName;
 
   @BeforeClass
@@ -85,13 +87,8 @@ public class CheckSimpleGwtAppTest {
             newDto(ServerConfigDto.class).withProtocol("http").withPort("9876"));
 
     testWorkspace =
-        new TestWorkspaceImpl(
-            NameGenerator.generate("check-gwt-test", 4),
-            testUser,
-            4,
-            true,
-            workspace,
-            workspaceServiceClient);
+        testWorkspaceProvider.createWorkspace(
+            NameGenerator.generate("check-gwt-test", 4), testUser, 4, true, workspace);
 
     URL resource = getClass().getResource("/projects/web-gwt-java-simple");
     testProjectServiceClient.importProject(

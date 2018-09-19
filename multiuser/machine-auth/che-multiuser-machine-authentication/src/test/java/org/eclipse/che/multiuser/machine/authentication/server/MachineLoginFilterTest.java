@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.DefaultClaims;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.HashMap;
@@ -137,6 +138,32 @@ public class MachineLoginFilterTest {
             401,
             "Authentication with machine token failed cause: JWT signature does not match locally computed signature."
                 + " JWT validity cannot be asserted and should not be trusted.");
+  }
+
+  @Test
+  public void testNotProceedRequestWhenNoWorkspaceIdClaim() throws Exception {
+    final HttpServletRequest requestMock = getRequestMock();
+    final KeyPairGenerator kpg = KeyPairGenerator.getInstance(SIGNATURE_ALGORITHM);
+    kpg.initialize(KEY_SIZE);
+    final KeyPair pair = kpg.generateKeyPair();
+    final Claims badClaims = new DefaultClaims();
+    badClaims.put(Constants.USER_ID_CLAIM, SUBJECT.getUserId());
+    badClaims.put(Claims.ID, "84123-132-fn31");
+    final String token =
+        Jwts.builder()
+            .setClaims(badClaims)
+            .setHeader(HEADER)
+            .signWith(RS512, pair.getPrivate())
+            .compact();
+    when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
+
+    machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
+
+    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(responseMock)
+        .sendError(
+            401,
+            "Authentication with machine token failed cause: Unable to fetch signature key pair: no workspace id present in token");
   }
 
   @Test

@@ -14,8 +14,11 @@ package org.eclipse.che.selenium.core.utils;
 import static java.lang.Thread.sleep;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BooleanSupplier;
@@ -69,20 +72,23 @@ public class WaitUtils {
    * @param delayBetweenAttemptsInMilliseconds delay between tries of {@code condition} execution in
    *     milliseconds
    */
-  @SuppressWarnings("FutureReturnValueIgnored")
   public static void waitSuccessCondition(
       BooleanSupplier condition,
       long timeout,
       long delayBetweenAttemptsInMilliseconds,
       TimeUnit timeoutTimeUnit)
-      throws InterruptedException, TimeoutException {
+      throws InterruptedException, TimeoutException, ExecutionException {
     ExecutorService executor = Executors.newSingleThreadExecutor();
-    executor.submit(
-        () -> {
-          while (!condition.getAsBoolean()) {
-            sleepQuietly(delayBetweenAttemptsInMilliseconds, TimeUnit.MILLISECONDS);
-          }
-        });
+    Future<?> conditionVerification =
+        executor.submit(
+            (Callable<Void>)
+                () -> {
+                  while (!condition.getAsBoolean()) {
+                    sleepQuietly(delayBetweenAttemptsInMilliseconds, TimeUnit.MILLISECONDS);
+                  }
+
+                  return null;
+                });
 
     executor.shutdown();
     if (!executor.awaitTermination(timeout, timeoutTimeUnit)) {
@@ -91,6 +97,8 @@ public class WaitUtils {
               "Expected condition failed: waiting for %s %s with %s MILLISECONDS interval",
               timeout, timeoutTimeUnit, delayBetweenAttemptsInMilliseconds));
     }
+
+    conditionVerification.get();
   }
 
   /**
@@ -101,7 +109,7 @@ public class WaitUtils {
    */
   public static void waitSuccessCondition(
       BooleanSupplier condition, long timeout, TimeUnit timeUnit)
-      throws InterruptedException, TimeoutException {
+      throws InterruptedException, TimeoutException, ExecutionException {
     waitSuccessCondition(
         condition, timeout, DEFAULT_DELAY_BETWEEN_ATTEMPTS_IN_MILLISECONDS, timeUnit);
   }
@@ -113,7 +121,7 @@ public class WaitUtils {
    * @param timeoutInSec waiting time in seconds
    */
   public static void waitSuccessCondition(BooleanSupplier condition, long timeoutInSec)
-      throws InterruptedException, TimeoutException {
+      throws InterruptedException, TimeoutException, ExecutionException {
     waitSuccessCondition(condition, timeoutInSec, TimeUnit.SECONDS);
   }
 
@@ -123,7 +131,7 @@ public class WaitUtils {
    * @param condition expression which should be performed
    */
   public static void waitSuccessCondition(BooleanSupplier condition)
-      throws InterruptedException, TimeoutException {
+      throws InterruptedException, TimeoutException, ExecutionException {
     waitSuccessCondition(condition, DEFAULT_TIMEOUT_IN_SEC);
   }
 }

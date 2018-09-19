@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
+import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -41,7 +42,6 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 
 /**
@@ -121,9 +121,9 @@ public class MachineLoginFilter implements Filter {
     final String userId = claims.get(USER_ID_CLAIM, String.class);
     // check if user with such id exists
     final String userName = userManager.getById(userId).getName();
-
-    return new AuthorizedSubject(
-        new SubjectImpl(userName, userId, token, false), permissionChecker);
+    final String workspaceId = claims.get(WORKSPACE_ID_CLAIM, String.class);
+    return new MachineTokenAuthorizedSubject(
+        new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
   }
 
   /** Sets given error code with err message into give response. */
