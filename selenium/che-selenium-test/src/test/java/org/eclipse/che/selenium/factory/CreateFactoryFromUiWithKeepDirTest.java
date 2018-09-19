@@ -108,7 +108,9 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Test
   public void createFactoryFromUiWithKeepDirTest() throws Exception {
     projectExplorer.waitProjectExplorer();
+    consoles.waitJDTLSStartedMessage();
     makeKeepDirectoryFromGitUrl(PROJECT_URL, PROJECT_NAME, KEEPED_DIR);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     setUpModuleForFactory();
     consoles.clickOnProcessesButton();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
