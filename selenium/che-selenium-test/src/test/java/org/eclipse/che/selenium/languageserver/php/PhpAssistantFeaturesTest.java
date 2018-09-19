@@ -51,7 +51,7 @@ public class PhpAssistantFeaturesTest {
   private static final String EXPECTED_COMMENTED_TEXT =
       "/*\n" + "// * Copyright (c) 2012-2018 Red Hat, Inc.";
   private static final String EXPECTED_HOVER_POPUP_TEXT =
-      "php\n" + "<?php function sayHello($name) {\n" + "php\n" + "<?php function sayHello($name) {";
+      "php\n" + "<?php function sayHello($name) {\n";
   private static final String EXPECTED_REFERENCE_TEXT =
       PROJECT + "/index.php\n" + "From:15:6 To:15:14";
   private static final String EXPECTED_TEXT_AFTER_TYPING =
@@ -127,7 +127,12 @@ public class PhpAssistantFeaturesTest {
 
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
+    try {
+      findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
+    }
   }
 
   @Test
@@ -156,7 +161,7 @@ public class PhpAssistantFeaturesTest {
   }
 
   @Test
-  public void checkEditor() {
+  public void checkFindProjectFeature() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
     editor.selectTabByName(INDEX_TAB_NAME);
