@@ -36,6 +36,8 @@ public interface TestWorkspaceServiceClient {
   void waitStatus(String workspaceName, String userName, WorkspaceStatus expectedStatus)
       throws Exception;
 
+  void waitWorkspaceStart(String workspaceName, String userName) throws Exception;
+
   /** Creates a new workspace. */
   Workspace createWorkspace(
       String workspaceName, int memory, MemoryMeasure memoryUnit, WorkspaceConfigDto workspace)

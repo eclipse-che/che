@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.google.inject.Inject;
@@ -84,6 +83,6 @@ public class CheTestWorkspaceServiceClient extends AbstractTestWorkspaceServiceC
   public void start(String workspaceId, String workspaceName, TestUser workspaceOwner)
       throws Exception {
     sendStartRequest(workspaceId, workspaceName);
-    waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
+    waitWorkspaceStart(workspaceName, workspaceOwner.getName());
   }
 }
