@@ -60,6 +60,9 @@ public class Command {
   }
 
   public List<String> getCommand() {
+    if (command == null) {
+      command = new ArrayList<>();
+    }
     return command;
   }
 

@@ -18,7 +18,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainerPort;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 
-/** @author Alexander Garagatyi */
+/** @author Oleksandr Garagatyi */
 public class K8sContainerResolverBuilder {
 
   private CheContainer container;
@@ -46,19 +46,13 @@ public class K8sContainerResolverBuilder {
   private List<ChePluginEndpoint> getContainerEndpoints(
       List<CheContainerPort> ports, List<ChePluginEndpoint> endpoints) {
 
-    if (ports != null) {
-      return ports
-          .stream()
-          .flatMap(
-              cheContainerPort ->
-                  endpoints
-                      .stream()
-                      .filter(
-                          chePluginEndpoint ->
-                              chePluginEndpoint.getTargetPort()
-                                  == cheContainerPort.getExposedPort()))
-          .collect(Collectors.toList());
+    if (ports == null || ports.isEmpty()) {
+      return Collections.emptyList();
     }
-    return Collections.emptyList();
+    return ports
+        .stream()
+        .map(CheContainerPort::getExposedPort)
+        .flatMap(port -> endpoints.stream().filter(e -> e.getTargetPort() == port))
+        .collect(Collectors.toList());
   }
 }

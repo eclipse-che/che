@@ -38,13 +38,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 @Beta
 public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
-  private final String defaultSidecarMemorySizeAttribute;
+  private final String defaultSidecarMemoryLimitBytes;
 
   @Inject
   public KubernetesPluginsToolingApplier(
-      @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemorySizeMB) {
-    this.defaultSidecarMemorySizeAttribute =
-        String.valueOf(defaultSidecarMemorySizeMB * 1024 * 1024);
+      @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB) {
+    this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
   }
 
   @Override
@@ -64,9 +63,6 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     Pod pod = pods.values().iterator().next();
 
     for (ChePlugin chePlugin : chePlugins) {
-      if (chePlugin.getContainers() == null) {
-        continue;
-      }
       for (CheContainer container : chePlugin.getContainers()) {
         addSidecar(pod, container, chePlugin, kubernetesEnvironment);
       }
@@ -95,7 +91,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .build();
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
 
-    Container k8sContainer = k8sContainerResolver.create();
+    Container k8sContainer = k8sContainerResolver.resolve();
 
     String machineName = Names.machineName(pod, k8sContainer);
     pod.getSpec().getContainers().add(k8sContainer);
@@ -105,10 +101,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setCheContainer(container)
             .setContainer(k8sContainer)
             .setContainerEndpoints(containerEndpoints)
-            .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemorySizeAttribute)
+            .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
             .build();
 
-    InternalMachineConfig machineConfig = machineResolver.getMachine();
+    InternalMachineConfig machineConfig = machineResolver.resolve();
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
     SidecarServicesProvisioner sidecarServicesProvisioner =

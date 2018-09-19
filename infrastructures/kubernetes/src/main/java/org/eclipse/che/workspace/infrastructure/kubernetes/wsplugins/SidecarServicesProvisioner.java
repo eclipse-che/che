@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
@@ -25,7 +26,15 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
-/** @author Alexander Garagatyi */
+/**
+ * Resolves Kubernetes {@link Service}s needed for a proper accessibility of a Che workspace
+ * sidecar.
+ *
+ * <p>Proper accessibility here means that sidecar endpoint should be discoverable by an endpoint
+ * name inside of a workspace.
+ *
+ * @author Oleksandr Garagatyi
+ */
 public class SidecarServicesProvisioner {
 
   private final List<ChePluginEndpoint> endpoints;
@@ -51,9 +60,9 @@ public class SidecarServicesProvisioner {
         services.put(serviceName, service);
       } else {
         throw new InfrastructureException(
-            "Applying of sidecar tooling failed. Kubernetes service with name '"
-                + serviceName
-                + "' already exists in the workspace environment.");
+            format(
+                "Applying of sidecar tooling failed. Kubernetes service with name '%s' already exists in the workspace environment.",
+                serviceName));
       }
     }
   }

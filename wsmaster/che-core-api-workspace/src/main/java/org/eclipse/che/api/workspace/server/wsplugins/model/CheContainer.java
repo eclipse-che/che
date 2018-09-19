@@ -51,6 +51,9 @@ public class CheContainer {
   }
 
   public List<EnvVar> getEnv() {
+    if (env == null) {
+      env = new ArrayList<>();
+    }
     return env;
   }
 
@@ -65,6 +68,9 @@ public class CheContainer {
   }
 
   public List<Command> getCommands() {
+    if (commands == null) {
+      commands = new ArrayList<>();
+    }
     return commands;
   }
 
@@ -79,6 +85,9 @@ public class CheContainer {
   }
 
   public List<Volume> getVolumes() {
+    if (volumes == null) {
+      volumes = new ArrayList<>();
+    }
     return volumes;
   }
 
@@ -92,6 +101,9 @@ public class CheContainer {
   }
 
   public List<CheContainerPort> getPorts() {
+    if (ports == null) {
+      ports = new ArrayList<>();
+    }
     return ports;
   }
 

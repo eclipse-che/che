@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
@@ -27,45 +28,42 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
-/** @author Alexander Garagatyi */
+/** @author Oleksandr Garagatyi */
 public class MachineResolver {
 
   private final Container container;
   private final CheContainer cheContainer;
-  private final String defaultSidecarMemorySizeAttribute;
+  private final String defaultSidecarMemoryLimitBytes;
   private final List<ChePluginEndpoint> containerEndpoints;
 
   public MachineResolver(
       Container container,
       CheContainer cheContainer,
-      String defaultSidecarMemorySizeAttribute,
+      String defaultSidecarMemoryLimitBytes,
       List<ChePluginEndpoint> containerEndpoints) {
     this.container = container;
     this.cheContainer = cheContainer;
-    this.defaultSidecarMemorySizeAttribute = defaultSidecarMemorySizeAttribute;
+    this.defaultSidecarMemoryLimitBytes = defaultSidecarMemoryLimitBytes;
     this.containerEndpoints = containerEndpoints;
   }
 
-  public InternalMachineConfig getMachine() {
+  public InternalMachineConfig resolve() {
     InternalMachineConfig machineConfig =
-        addMachineConfig(containerEndpoints, cheContainer.getVolumes());
+        new InternalMachineConfig(
+            null,
+            toServers(containerEndpoints),
+            null,
+            null,
+            toWorkspaceVolumes(cheContainer.getVolumes()));
 
     normalizeMemory(container, machineConfig);
     return machineConfig;
   }
 
-  private InternalMachineConfig addMachineConfig(
-      List<ChePluginEndpoint> endpoints, List<Volume> volumes) {
-
-    return new InternalMachineConfig(
-        null, toWorkspaceServers(endpoints), null, null, toWorkspaceVolumes(volumes));
-  }
-
   private void normalizeMemory(Container container, InternalMachineConfig machineConfig) {
     long ramLimit = Containers.getRamLimit(container);
-    Map<String, String> attributes = machineConfig.getAttributes();
     if (ramLimit == 0) {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemorySizeAttribute);
+      machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemoryLimitBytes);
     }
   }
 
@@ -80,36 +78,25 @@ public class MachineResolver {
     return result;
   }
 
-  private Map<String, ? extends ServerConfig> toWorkspaceServers(
-      List<ChePluginEndpoint> endpoints) {
-    return endpoints
-        .stream()
-        .collect(
-            toMap(ChePluginEndpoint::getName, endpoint -> normalizeServer(toServer(endpoint))));
+  private Map<String, ? extends ServerConfig> toServers(List<ChePluginEndpoint> endpoints) {
+    return endpoints.stream().collect(toMap(ChePluginEndpoint::getName, this::toServer));
   }
 
   private ServerConfigImpl toServer(ChePluginEndpoint endpoint) {
-    Map<String, String> attributes = new HashMap<>();
-    attributes.put("internal", Boolean.toString(!endpoint.isPublic()));
-    endpoint
-        .getAttributes()
-        .forEach(
-            (k, v) -> {
-              if (!"protocol".equals(k) && !"path".equals(k)) {
-                attributes.put(k, v);
-              }
-            });
-    return new ServerConfigImpl(
-        Integer.toString(endpoint.getTargetPort()),
-        endpoint.getAttributes().get("protocol"),
-        endpoint.getAttributes().get("path"),
-        attributes);
-  }
-
-  private ServerConfigImpl normalizeServer(ServerConfigImpl serverConfig) {
-    String port = serverConfig.getPort();
-    if (port != null && !port.contains("/")) {
-      serverConfig.setPort(port + "/tcp");
+    ServerConfigImpl serverConfig =
+        new ServerConfigImpl().withPort(Integer.toString(endpoint.getTargetPort()) + "/tcp");
+    serverConfig.getAttributes().put("internal", Boolean.toString(!endpoint.isPublic()));
+    for (Entry<String, String> attribute : endpoint.getAttributes().entrySet()) {
+      switch (attribute.getKey()) {
+        case "protocol":
+          serverConfig.setProtocol(attribute.getValue());
+          break;
+        case "path":
+          serverConfig.setPath(attribute.getValue());
+          break;
+        default:
+          serverConfig.getAttributes().put(attribute.getKey(), attribute.getValue());
+      }
     }
     return serverConfig;
   }
