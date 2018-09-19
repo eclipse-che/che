@@ -57,6 +57,7 @@ public class MacrosCommandsEditorTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJ_NAME);
   }
 
   @Test(priority = 1)
