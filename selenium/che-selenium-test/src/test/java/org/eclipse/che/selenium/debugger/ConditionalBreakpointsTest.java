@@ -81,6 +81,7 @@ public class ConditionalBreakpointsTest {
     projectExplorer.waitItem(PROJECT);
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick("build");
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
     projectExplorer.quickExpandWithJavaScript();
   }
 
