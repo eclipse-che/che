@@ -96,7 +96,7 @@ public class ClangFileEditingTest {
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
 
-    // comment lines by Ctrl+'/' buttons
+    // comment line by Ctrl+'/' buttons
     projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
     editor.waitActive();
 
@@ -104,6 +104,7 @@ public class ClangFileEditingTest {
     editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor("//  return 0;");
 
+    // uncomment line by Ctrl+'/' buttons
     editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor("  return 0;");
 
@@ -157,7 +158,7 @@ public class ClangFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkCodeRenameFeature() {
+  public void checkRenameFieldFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.h");
     editor.waitActive();
 
@@ -170,7 +171,7 @@ public class ClangFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkFormatCodeFeature() {
+  public void checkSelectedCodeFormatFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
     editor.waitActive();
 
@@ -179,7 +180,10 @@ public class ClangFileEditingTest {
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FORMAT);
     editor.waitTextIntoEditor("  int x = 4;");
+  }
 
+  @Test(priority = 1)
+  public void checkFormatCodeFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.cpp");
     editor.waitActive();
 
