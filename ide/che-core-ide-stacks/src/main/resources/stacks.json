@@ -50,7 +50,7 @@
           "recipe": {
             "contentType": "",
             "type": "dockerimage",
-            "content": "eclipse/che-theia:0.3.14-6.11.0"
+            "content": "eclipse/che-theia:0.3.14-6.11.1"
           }
         }
       },
@@ -123,7 +123,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.3.14-6.11.0\n        name: theia\n      -\n        image: eclipse/che-dev:6.11.0\n        name: dev",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.3.14-6.11.1\n        name: theia\n      -\n        image: eclipse/che-dev:6.11.0\n        name: dev",
             "contentType": "application/x-yaml"
           }
         }
@@ -167,7 +167,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:6.11.0\n        name: dev",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:6.11.1\n        name: dev",
             "contentType": "application/x-yaml"
           }
         }
@@ -215,7 +215,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:6.11.0\n        name: dev",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:6.11.1\n        name: dev",
             "contentType": "application/x-yaml"
           }
         }
