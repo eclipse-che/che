@@ -9,20 +9,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using System;
 
-namespace HelloWeb
+namespace tmpCsharp
 {
-    public class Startup
+    class Program
     {
-        public void Configure(IApplicationBuilder app)
+
+        static void Main(string[] args)
         {
-            app.Run(context =>
-            {
-                return context.Response.WriteAsync("Hello World!");
-             });
+            Test.getStr();
+            Console.WriteLine("Hello World!");
         }
     }
 }

@@ -450,6 +450,25 @@ public class CodenvyEditor {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(hoverPopup);
   }
 
+  /** wait full matching of text in hover popup */
+  public void waitTextInHoverPopUpEqualsTo(String expectedText) {
+    // waits popup body visibility
+    try {
+      seleniumWebDriverHelper.waitVisibility(hoverPopup);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10674", ex);
+    }
+
+    // waits until text in popup is equals to specified
+    try {
+      seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10117", ex);
+    }
+  }
+
   /**
    * wait text in hover pop-up (after hovering on text)
    *

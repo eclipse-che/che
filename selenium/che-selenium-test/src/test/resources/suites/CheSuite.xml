@@ -24,6 +24,7 @@
           <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
           <class name="org.eclipse.che.selenium.languageserver.csharp.CSharpFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.csharp.CSharpClassRenamingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.csharp.CSharpFileAdvancedOperationsTest"/>
           <class name="org.eclipse.che.selenium.languageserver.php.PhpFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.php.PhpAssistantFeaturesTest"/>
           <class name="org.eclipse.che.selenium.languageserver.PythonFileEditingTest"/>
