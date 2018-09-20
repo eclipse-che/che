@@ -25,16 +25,19 @@ import org.eclipse.che.api.watcher.server.FileWatcherManager;
 public class RootDirCreationHandler {
   private final FileWatcherManager fileWatcherManager;
   private final ProjectConfigRegistry projectConfigRegistry;
-  private HiddenItemPathMatcher hiddenItemPathMatcher;
+  private final HiddenItemPathMatcher hiddenItemPathMatcher;
+  private final RootDirPathProvider rootDirPathProvider;
 
   @Inject
   public RootDirCreationHandler(
       FileWatcherManager fileWatcherManager,
       ProjectConfigRegistry projectConfigRegistry,
-      HiddenItemPathMatcher hiddenItemPathMatcher) {
+      HiddenItemPathMatcher hiddenItemPathMatcher,
+      RootDirPathProvider rootDirPathProvider) {
     this.fileWatcherManager = fileWatcherManager;
     this.projectConfigRegistry = projectConfigRegistry;
     this.hiddenItemPathMatcher = hiddenItemPathMatcher;
+    this.rootDirPathProvider = rootDirPathProvider;
   }
 
   @PostConstruct
@@ -43,7 +46,8 @@ public class RootDirCreationHandler {
   }
 
   private void consumeCreate(String wsPath) {
-    if (!hiddenItemPathMatcher.matches(Paths.get(wsPath))) {
+    if (!hiddenItemPathMatcher.matches(Paths.get(wsPath))
+        && Paths.get(rootDirPathProvider.get(), wsPath).toFile().isDirectory()) {
       projectConfigRegistry.putIfAbsent(wsPath, true, true);
     }
   }

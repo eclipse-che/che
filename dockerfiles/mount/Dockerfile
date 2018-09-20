@@ -38,7 +38,7 @@
 #   /bin/synch.sh <ip> <ws-port>
 FROM alpine:3.4
 
-ENV UNISON_VERSION=2.48.4
+ENV UNISON_VERSION=2.51.2
 
 RUN apk add --update build-base curl bash sshfs && \
     apk add ocaml --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community/ --allow-untrusted && \

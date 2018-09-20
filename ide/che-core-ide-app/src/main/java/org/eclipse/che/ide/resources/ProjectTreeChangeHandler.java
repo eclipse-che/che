@@ -121,11 +121,13 @@ public class ProjectTreeChangeHandler {
     private Promise<Void> doProcessMultipleChanges(List<FileChange> changes) {
       Promise<Void> multipleChainPromise = ProjectTreeChangeHandler.this.promises.resolve(null);
 
-      multipleChainPromise =
-          multipleChainPromise.thenPromise(ignored -> doProcessDeleteChanges(changes));
+      List<FileChange> preProcessedChanges = skipFilesInTheRootDirectory(changes);
 
       multipleChainPromise =
-          multipleChainPromise.thenPromise(ignored -> doProcessUpdateChanges(changes));
+          multipleChainPromise.thenPromise(ignored -> doProcessDeleteChanges(preProcessedChanges));
+
+      multipleChainPromise =
+          multipleChainPromise.thenPromise(ignored -> doProcessUpdateChanges(preProcessedChanges));
 
       return multipleChainPromise;
     }
@@ -196,12 +198,23 @@ public class ProjectTreeChangeHandler {
       return change.getType() != DELETED;
     }
 
+    private boolean isFileInRootDirectory(FileChange change) {
+      return change.isFile() && Path.valueOf(change.getPath()).segmentCount() == 1;
+    }
+
     private List<FileChange> getDeleteFileChanges(List<FileChange> changes) {
       return changes.stream().filter(this::isDeleteChange).collect(toList());
     }
 
     private List<FileChange> getUpdateFileChanges(List<FileChange> changes) {
       return changes.stream().filter(this::isNotDeleteChange).collect(toList());
+    }
+
+    private List<FileChange> skipFilesInTheRootDirectory(List<FileChange> changes) {
+      List<FileChange> newChanges = new ArrayList<>(changes);
+      newChanges.removeIf(this::isFileInRootDirectory);
+
+      return newChanges;
     }
 
     private List<Path> getUpdateFileChangePaths(List<FileChange> changes) {
@@ -252,6 +265,10 @@ public class ProjectTreeChangeHandler {
     }
 
     private Promise<Void> doProcessSingleChange(FileChange change) {
+      if (isFileInRootDirectory(change)) {
+        return promises.resolve(null);
+      }
+
       return isNullOrEmpty(change.getPath())
           ? synchronizeChanges()
           : synchronizeChanges(getResourceDelta(change));

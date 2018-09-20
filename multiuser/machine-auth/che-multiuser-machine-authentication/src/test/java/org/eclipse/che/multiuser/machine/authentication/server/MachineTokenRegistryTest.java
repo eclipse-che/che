@@ -31,6 +31,8 @@ import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.mockito.Mock;
@@ -58,6 +60,7 @@ public class MachineTokenRegistryTest {
 
   @Mock private SignatureKeyManager signatureKeyManager;
   @Mock private UserManager userManager;
+  @Mock private WorkspaceManager workspaceManager;
 
   private KeyPair keyPair;
 
@@ -69,7 +72,7 @@ public class MachineTokenRegistryTest {
     keyPair = kpg.generateKeyPair();
 
     mockUser(USER_ID, USER_NAME);
-    when(signatureKeyManager.getKeyPair(anyString())).thenReturn(keyPair);
+    when(signatureKeyManager.getOrCreateKeyPair(anyString())).thenReturn(keyPair);
   }
 
   @Test
@@ -89,11 +92,11 @@ public class MachineTokenRegistryTest {
     assertEquals(subject.getUserName(), USER_NAME);
     assertEquals(claims.get(WORKSPACE_ID_CLAIM, String.class), WORKSPACE_ID);
     verify(userManager).getById(USER_ID);
-    verify(signatureKeyManager).getKeyPair(anyString());
+    verify(signatureKeyManager).getOrCreateKeyPair(anyString());
     assertNotNull(generatedToken);
   }
 
-  @Test(expectedExceptions = IllegalStateException.class)
+  @Test(expectedExceptions = MachineTokenException.class)
   public void testThrowsIllegalStateExceptionWhenTryToGetTokenForNonExistingUser()
       throws Exception {
     when(userManager.getById(anyString())).thenThrow(new NotFoundException("User not found"));

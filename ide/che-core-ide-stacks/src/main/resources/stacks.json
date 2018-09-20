@@ -1954,5 +1954,116 @@
       "name": "type-ceylon.svg",
       "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "apache-camel-springboot",
+    "creator": "Aurélien Pupier",
+    "name": "Apache Camel based projects",
+    "description": "Stack with environment ready to develop Integration projects with Apache Camel based on SpringBoot.",
+    "scope": "advanced",
+    "tags": [
+      "Apache Camel",
+      "Red Hat Fuse",
+      "Agile Integration"
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "recipe": {
+            "type": "dockerimage",
+            "content": "registry.centos.org/che-stacks/spring-boot"
+          },
+          "machines": {
+            "dev-machine": {
+              "env": {
+              },
+              "volumes": {
+              },
+              "installers": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ls.camel"
+              ],
+              "servers": {
+                "tomcat8-debug": {
+                  "attributes": {
+                  },
+                  "protocol": "http",
+                  "port": "8000"
+                },
+                "springboot": {
+                  "attributes": {
+                  },
+                  "protocol": "http",
+                  "port": "8080"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          }
+        }
+      },
+      "projects": [
+      ],
+      "commands": [
+        {
+          "commandLine": "scl enable rh-maven33 'mvn install -f ${current.project.path}'",
+          "name": "build",
+          "type": "mvn",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "name": "clean build",
+          "type": "mvn",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
+          "name": "run",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.springboot}"
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn spring-boot:run -Drun.jvmArguments=\"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005\" -f ${current.project.path}'",
+          "name": "debug",
+          "type": "custom",
+          "attributes": {
+            "goal": "Debug",
+            "previewUrl": "${server.springboot}"
+          }
+        }
+      ],
+      "name": "default",
+      "links": [
+      ]
+    },
+    "components": [
+      {
+        "version": "7",
+        "name": "CentOS"
+      },
+      {
+        "version": "1.8.0_161",
+        "name": "OpenJDK"
+      },
+      {
+        "version": "3.3.9",
+        "name": "RH-Maven"
+      }
+    ]
   }
 ]

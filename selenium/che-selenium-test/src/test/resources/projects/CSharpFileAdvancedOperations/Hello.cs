@@ -9,11 +9,18 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-#include <iostream>
- 
-int main()
-{
-  std::cout << "Hello World!" << std::endl;
+using System;
 
-  return 0;
+namespace tmpCsharp
+{
+    class Program
+    {
+
+        static void Main(string[] args)
+        {
+            Test.getStr();
+            Console.WriteLine("Hello World!");
+        }
+    }
 }
+

@@ -107,7 +107,7 @@ public class MachineLoginFilterTest {
             permissionCheckerMock);
 
     when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(keyManagerMock.getKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
+    when(keyManagerMock.getOrCreateKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
 
     when(userMock.getName()).thenReturn(SUBJECT.getUserName());
     when(userManagerMock.getById(SUBJECT.getUserId())).thenReturn(userMock);
@@ -117,7 +117,7 @@ public class MachineLoginFilterTest {
   public void testProcessRequestWithValidToken() throws Exception {
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verifyZeroInteractions(responseMock);
   }
@@ -128,7 +128,7 @@ public class MachineLoginFilterTest {
     final KeyPairGenerator kpg = KeyPairGenerator.getInstance(SIGNATURE_ALGORITHM);
     kpg.initialize(KEY_SIZE);
     final KeyPair pair = kpg.generateKeyPair();
-    when(keyManagerMock.getKeyPair(eq(WORKSPACE_ID))).thenReturn(pair);
+    when(keyManagerMock.getOrCreateKeyPair(eq(WORKSPACE_ID))).thenReturn(pair);
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
@@ -186,7 +186,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(
@@ -200,7 +200,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(

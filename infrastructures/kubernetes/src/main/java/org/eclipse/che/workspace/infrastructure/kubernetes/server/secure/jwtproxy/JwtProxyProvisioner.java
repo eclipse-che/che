@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -52,6 +51,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
@@ -211,8 +211,8 @@ public class JwtProxyProvisioner {
 
       KeyPair keyPair;
       try {
-        keyPair = signatureKeyManager.getKeyPair(identity.getWorkspaceId());
-      } catch (ServerException e) {
+        keyPair = signatureKeyManager.getOrCreateKeyPair(identity.getWorkspaceId());
+      } catch (SignatureKeyManagerException e) {
         throw new InternalInfrastructureException(
             "Signature key pair for machine authentication cannot be retrieved. Reason: "
                 + e.getMessage());
