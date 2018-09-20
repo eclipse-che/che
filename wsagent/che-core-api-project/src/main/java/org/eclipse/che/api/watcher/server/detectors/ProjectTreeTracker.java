@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
@@ -55,15 +56,18 @@ public class ProjectTreeTracker {
   private final RequestTransmitter transmitter;
   private final FileWatcherManager fileWatcherManager;
   private final HiddenItemPathMatcher hiddenItemPathMatcher;
+  private final RootDirPathProvider rootDirPathProvider;
 
   @Inject
   public ProjectTreeTracker(
       RequestTransmitter transmitter,
       FileWatcherManager fileWatcherManager,
-      HiddenItemPathMatcher hiddenItemPathMatcher) {
+      HiddenItemPathMatcher hiddenItemPathMatcher,
+      RootDirPathProvider rootDirPathProvider) {
     this.transmitter = transmitter;
     this.fileWatcherManager = fileWatcherManager;
     this.hiddenItemPathMatcher = hiddenItemPathMatcher;
+    this.rootDirPathProvider = rootDirPathProvider;
   }
 
   @Inject
@@ -147,7 +151,10 @@ public class ProjectTreeTracker {
         timers.remove(it);
       } else {
         ProjectTreeStateUpdateDto params =
-            newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(CREATED);
+            newDto(ProjectTreeStateUpdateDto.class)
+                .withPath(it)
+                .withFile(isFile(it))
+                .withType(CREATED);
         transmitter
             .newRequest()
             .endpointId(endpointId)
@@ -189,6 +196,10 @@ public class ProjectTreeTracker {
               },
               1_000L);
     };
+  }
+
+  private boolean isFile(String path) {
+    return Paths.get(rootDirPathProvider.get(), path).toFile().isFile();
   }
 
   private boolean isExcluded(String path) {

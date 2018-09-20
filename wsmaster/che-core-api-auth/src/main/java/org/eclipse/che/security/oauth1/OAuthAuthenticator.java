@@ -108,12 +108,12 @@ public abstract class OAuthAuthenticator {
       callbackUrl.put(STATE_PARAM_KEY, requestUrl.getQuery());
 
       OAuthGetTemporaryToken temporaryToken;
-      if (requestMethod != null && "post".equals(requestMethod.toLowerCase())) {
+      if (requestMethod != null && "post".equalsIgnoreCase(requestMethod)) {
         temporaryToken = new OAuthPostTemporaryToken(requestTokenUri);
       } else {
         temporaryToken = new OAuthGetTemporaryToken(requestTokenUri);
       }
-      if (signatureMethod != null && "rsa".equals(signatureMethod.toLowerCase())) {
+      if (signatureMethod != null && "rsa".equalsIgnoreCase(signatureMethod)) {
         temporaryToken.signer = getOAuthRsaSigner();
       } else {
         temporaryToken.signer = getOAuthHmacSigner(null, null);
@@ -162,7 +162,7 @@ public abstract class OAuthAuthenticator {
       final String oauthTemporaryToken = (String) callbackUrl.getFirst(OAUTH_TOKEN_PARAM_KEY);
 
       OAuthGetAccessToken getAccessToken;
-      if (requestMethod != null && "post".equals(requestMethod.toLowerCase())) {
+      if (requestMethod != null && "post".equalsIgnoreCase(requestMethod)) {
         getAccessToken = new OAuthPostAccessToken(accessTokenUri);
       } else {
         getAccessToken = new OAuthGetAccessToken(accessTokenUri);
@@ -171,7 +171,7 @@ public abstract class OAuthAuthenticator {
       getAccessToken.temporaryToken = oauthTemporaryToken;
       getAccessToken.verifier = (String) callbackUrl.getFirst(OAUTH_VERIFIER_PARAM_KEY);
       getAccessToken.transport = httpTransport;
-      if (signatureMethod != null && "rsa".equals(signatureMethod.toLowerCase())) {
+      if (signatureMethod != null && "rsa".equalsIgnoreCase(signatureMethod)) {
         getAccessToken.signer = getOAuthRsaSigner();
       } else {
         getAccessToken.signer =

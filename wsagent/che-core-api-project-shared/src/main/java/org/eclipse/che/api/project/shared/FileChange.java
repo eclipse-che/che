@@ -22,5 +22,7 @@ import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 public interface FileChange {
   String getPath();
 
+  boolean isFile();
+
   FileWatcherEventType getType();
 }
