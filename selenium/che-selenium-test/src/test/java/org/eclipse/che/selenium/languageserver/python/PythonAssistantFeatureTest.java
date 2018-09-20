@@ -11,24 +11,29 @@
  */
 package org.eclipse.che.selenium.languageserver.python;
 
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.PYTHON;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -42,6 +47,10 @@ public class PythonAssistantFeatureTest {
   private static final String EXPECTED_HOVER_TEXT = "function(self)";
   private static final String EXPECTED_FIND_REFERENCE_NODE_TEXT =
       "/console-python3-simple/calc.py\n" + "From:16:1 To:16:5";
+  private static final String INVOKING_SIGNATURE_TEXT = "module.add(,";
+  private static final String EXPECTED_SIGNATURE_TEXT = "add(a,b)";
+  private static final List<String> EXPECTED_GO_TO_SYMBOL_NODES =
+      asList("MyClasssymbols (4)", "var", "variable", "function");
   private static final String EXPECTED_TEXT_AFTER_RENAME =
       "class MyClass:\n" + "    renamedVar = 1\n" + "    variable = \"variable\"";
 
@@ -55,6 +64,7 @@ public class PythonAssistantFeatureTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
+  @Inject private AssistantFindPanel assistantFindPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -124,6 +134,21 @@ public class PythonAssistantFeatureTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + CALC_TAB_NAME);
     editor.waitTabIsPresent(CALC_TAB_NAME);
     editor.waitActive();
+
+    editor.setCursorToLine(15);
+    editor.typeTextIntoEditor(INVOKING_SIGNATURE_TEXT);
+    waitExpectedTextIntoShowHintsPopup(EXPECTED_SIGNATURE_TEXT);
+    editor.deleteCurrentLine();
+  }
+
+  @Test
+  public void checkGoToSymbolFeature() {
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + MAIN_TAB_NAME);
+    editor.waitTabIsPresent(MAIN_TAB_NAME);
+    editor.waitActive();
+
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
   }
 
   private void waitReferenceWithText(String expectedText) {
@@ -132,6 +157,16 @@ public class PythonAssistantFeatureTest {
     } catch (org.openqa.selenium.TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
+    }
+  }
+
+  private void waitExpectedTextIntoShowHintsPopup(String expectedText) {
+    try {
+      editor.waitExpTextIntoShowHintsPopUp(expectedText);
+    } catch (TimeoutException ex) {
+      editor.deleteCurrentLine();
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
     }
   }
 }
