@@ -253,6 +253,7 @@
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRenameWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromBlankStackTest"/>
+          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromCamelStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaMySqlStackTest"/>
