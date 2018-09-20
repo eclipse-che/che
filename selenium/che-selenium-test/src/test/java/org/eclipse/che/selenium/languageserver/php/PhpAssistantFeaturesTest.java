@@ -127,7 +127,7 @@ public class PhpAssistantFeaturesTest {
 
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
+    findReferencesConsoleTab.waitAllReferencesWithText(EXPECTED_REFERENCE_TEXT);
   }
 
   @Test
@@ -152,7 +152,7 @@ public class PhpAssistantFeaturesTest {
 
     editor.waitTabIsPresent(LIB_TAB_NAME);
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
-    assistantFindPanel.waitActionNodeContainsText(EXPECTED_GO_TO_SYMBOL_TEXT);
+    assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_TEXT);
   }
 
   @Test
@@ -166,7 +166,7 @@ public class PhpAssistantFeaturesTest {
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField(FIND_PROJECT_SEARCHING_TEXT);
-    assistantFindPanel.waitActionNodeContainsText(EXPECTED_FIND_PROJECT_TEXT);
+    assistantFindPanel.waitAllNodes(EXPECTED_FIND_PROJECT_TEXT);
   }
 
   private void performCommentAction() {

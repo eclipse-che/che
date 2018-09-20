@@ -49,6 +49,7 @@ public class PythonAssistantFeatureTest {
       "/console-python3-simple/calc.py\n" + "From:16:1 To:16:5";
   private static final String INVOKING_SIGNATURE_TEXT = "module.add(,";
   private static final String EXPECTED_SIGNATURE_TEXT = "add(a,b)";
+  private static final String EXPECTED_LINE_TEXT = "class MyClass:";
   private static final List<String> EXPECTED_GO_TO_SYMBOL_NODES =
       asList("MyClasssymbols (4)", "var", "variable", "function");
   private static final String EXPECTED_TEXT_AFTER_RENAME =
@@ -125,7 +126,7 @@ public class PythonAssistantFeatureTest {
 
     editor.goToCursorPositionVisible(16, 2);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    waitReferenceWithText(EXPECTED_FIND_REFERENCE_NODE_TEXT);
+    waitAllReferenceWithText(EXPECTED_FIND_REFERENCE_NODE_TEXT);
   }
 
   @Test
@@ -147,13 +148,18 @@ public class PythonAssistantFeatureTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + MAIN_TAB_NAME);
     editor.waitTabIsPresent(MAIN_TAB_NAME);
     editor.waitActive();
+    editor.setCursorToLine(1);
 
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_NODES);
+    assistantFindPanel.clickOnActionNodeWithText(EXPECTED_GO_TO_SYMBOL_NODES.get(0));
+    editor.waitCursorPosition(14, 1);
+    editor.waitVisibleTextEqualsTo(14, EXPECTED_LINE_TEXT);
   }
 
-  private void waitReferenceWithText(String expectedText) {
+  private void waitAllReferenceWithText(String expectedText) {
     try {
-      findReferencesConsoleTab.waitReferenceWithText(expectedText);
+      findReferencesConsoleTab.waitAllReferencesWithText(expectedText);
     } catch (org.openqa.selenium.TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
