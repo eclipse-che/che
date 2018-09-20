@@ -2064,6 +2064,10 @@
         "version": "3.3.9",
         "name": "RH-Maven"
       }
-    ]
+    ],
+    "stackIcon": {
+      "name": "type-apache-camel.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]
