@@ -47,8 +47,8 @@ public class PythonAssistantFeatureTest {
   private static final String EXPECTED_HOVER_TEXT = "function(self)";
   private static final String EXPECTED_FIND_REFERENCE_NODE_TEXT =
       "/console-python3-simple/calc.py\n" + "From:16:1 To:16:5";
-  private static final String INVOKING_SIGNATURE_TEXT = "module.add(,";
-  private static final String EXPECTED_SIGNATURE_TEXT = "add(a,b)";
+  private static final String TEXT_FOR_INVOKING_SIGNATURE_HELP = "module.add(";
+  private static final String EXPECTED_SIGNATURE_TEXT = "add(a, b)";
   private static final String EXPECTED_LINE_TEXT = "class MyClass:";
   private static final List<String> EXPECTED_GO_TO_SYMBOL_NODES =
       asList("MyClasssymbols (4)", "var", "variable", "function");
@@ -114,7 +114,7 @@ public class PythonAssistantFeatureTest {
     editor.waitActive();
 
     editor.goToCursorPositionVisible(18, 11);
-    // <<<< ---- hoverPopupEqualsTo(EXPECTED_HOVER_TEXT);
+    editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_TEXT);
   }
 
   @Test
@@ -137,7 +137,7 @@ public class PythonAssistantFeatureTest {
     editor.waitActive();
 
     editor.setCursorToLine(15);
-    editor.typeTextIntoEditor(INVOKING_SIGNATURE_TEXT);
+    editor.typeTextIntoEditor(TEXT_FOR_INVOKING_SIGNATURE_HELP);
     waitExpectedTextIntoShowHintsPopup(EXPECTED_SIGNATURE_TEXT);
     editor.deleteCurrentLine();
   }
