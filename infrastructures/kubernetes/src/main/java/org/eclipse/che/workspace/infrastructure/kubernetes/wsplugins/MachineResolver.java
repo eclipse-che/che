@@ -11,10 +11,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 
 import io.fabric8.kubernetes.api.model.Container;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
 /** @author Oleksandr Garagatyi */
 public class MachineResolver {
@@ -35,16 +40,19 @@ public class MachineResolver {
   private final CheContainer cheContainer;
   private final String defaultSidecarMemoryLimitBytes;
   private final List<ChePluginEndpoint> containerEndpoints;
+  private Map<String, String> wsAttributes;
 
   public MachineResolver(
       Container container,
       CheContainer cheContainer,
       String defaultSidecarMemoryLimitBytes,
-      List<ChePluginEndpoint> containerEndpoints) {
+      List<ChePluginEndpoint> containerEndpoints,
+      Map<String, String> wsAttributes) {
     this.container = container;
     this.cheContainer = cheContainer;
     this.defaultSidecarMemoryLimitBytes = defaultSidecarMemoryLimitBytes;
     this.containerEndpoints = containerEndpoints;
+    this.wsAttributes = wsAttributes != null ? wsAttributes : Collections.emptyMap();
   }
 
   public InternalMachineConfig resolve() {
@@ -64,6 +72,15 @@ public class MachineResolver {
     long ramLimit = Containers.getRamLimit(container);
     if (ramLimit == 0) {
       machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemoryLimitBytes);
+    }
+    String overriddenSidecarMemLimit =
+        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, cheContainer.getName()));
+    if (!isNullOrEmpty(overriddenSidecarMemLimit)) {
+      machineConfig
+          .getAttributes()
+          .put(
+              MEMORY_LIMIT_ATTRIBUTE,
+              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemLimit)));
     }
   }
 
