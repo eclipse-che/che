@@ -75,7 +75,8 @@ public class JwtProxyProvisionerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(signatureKeyManager.getKeyPair(anyString())).thenReturn(new KeyPair(publicKey, null));
+    when(signatureKeyManager.getOrCreateKeyPair(anyString()))
+        .thenReturn(new KeyPair(publicKey, null));
     when(publicKey.getEncoded()).thenReturn("publickey".getBytes());
 
     when(configBuilderFactory.create(any()))

@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 
@@ -53,6 +54,12 @@ public class JpaSignatureKeyDao implements SignatureKeyDao {
     requireNonNull(keyPair, "Required non-null key pair");
     try {
       doCreate(keyPair);
+    } catch (IntegrityConstraintViolationException x) {
+      throw new ConflictException(
+          format(
+              "Unable to create signature key pair because referenced workspace with id '%s' doesn't exist",
+              keyPair.getWorkspaceId()));
+
     } catch (DuplicateKeyException dkEx) {
       throw new ConflictException(
           format("Signature key pair for workspace '%s' already exists", keyPair.getWorkspaceId()));
