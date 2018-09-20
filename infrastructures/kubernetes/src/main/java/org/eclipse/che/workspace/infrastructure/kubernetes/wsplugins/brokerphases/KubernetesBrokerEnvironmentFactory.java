@@ -38,11 +38,13 @@ public class KubernetesBrokerEnvironmentFactory
   public KubernetesBrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.image") String pluginBrokerImage,
+      @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider) {
     super(
         cheWebsocketEndpoint,
         pluginBrokerImage,
+        brokerPullPolicy,
         authEnableEnvVarProvider,
         machineTokenEnvVarProvider);
   }
