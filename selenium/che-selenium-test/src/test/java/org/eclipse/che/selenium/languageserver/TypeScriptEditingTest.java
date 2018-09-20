@@ -11,10 +11,8 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -34,7 +32,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -53,16 +50,15 @@ public class TypeScriptEditingTest {
   @InjectTestWorkspace(template = ECLIPSE_NODEJS)
   private TestWorkspace workspace;
 
-  @Inject private Ide                      ide;
-  @Inject private Menu                     menu;
-  @Inject private Wizard                   wizard;
-  @Inject private Consoles                 consoles;
-  @Inject private CodenvyEditor            editor;
-  @Inject private CommandsPalette          commandsPalette;
-  @Inject private ProjectExplorer          projectExplorer;
-  @Inject private AskForValueDialog        askForValueDialog;
+  @Inject private Ide ide;
+  @Inject private Menu menu;
+  @Inject private Wizard wizard;
+  @Inject private Consoles consoles;
+  @Inject private CodenvyEditor editor;
+  @Inject private CommandsPalette commandsPalette;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -78,26 +74,16 @@ public class TypeScriptEditingTest {
     projectExplorer.openItemByPath(PATH_TO_GREETER_FILE);
   }
 
-  @Test()
+  @Test
   public void checkMainFeaturesTypeScriptLS() {
     String intitTypeScriptLanguageServerMessage =
-        format(
+        String.format(
             "Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
 
     consoles.waitExpectedTextIntoConsole(intitTypeScriptLanguageServerMessage);
     checkCodeValidation();
     checkCodeAssistant();
     checkGoToDefinition();
-  }
-
-  @Test(priority = 1)
-  public void checkFindReferencesFeature() {
-    String referenceInGreeterClass =format("/%s/Greeter.ts\n" + "From:24:17 To:24:22", PROJECT_NAME);
-    String referenceInTestPrintClass =format("/%s/testPrint.ts\n" + "From:14:0 To:14:5", PROJECT_NAME);
-    menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    findReferencesConsoleTab.waitReferenceWithText(referenceInGreeterClass);
-    findReferencesConsoleTab.clickOnReference(referenceInTestPrintClass);
-    editor.waitCursorPosition(15,6);
   }
 
   private void checkCodeValidation() {
@@ -113,7 +99,7 @@ public class TypeScriptEditingTest {
     assertEquals(
         actualValueErrorMarkers,
         expectedAmountOfErrorMarkers,
-        format(
+        String.format(
             "The expected value of errors marker should be %d but actual %d",
             expectedAmountOfErrorMarkers, actualValueErrorMarkers));
     editor.moveToMarker(ERROR_OVERVIEW, 14);
