@@ -420,6 +420,10 @@ public class Consoles {
   /** wait JDT LS message about project is updated */
   public void waitJDTLSProjectResolveFinishedMessage(String project) {
     waitExpectedTextIntoConsole(String.format(LANGUAGE_SERVER_UPDATE_MESSAGE, project));
+    // once a new project has been added to the workspace, stuff in the project
+    // explorer will be updated, for example showing packages instead of folders
+    // wait for this to be finished
+    loader.waitOnClosed();
   }
 
   /** get visible text from command console */
