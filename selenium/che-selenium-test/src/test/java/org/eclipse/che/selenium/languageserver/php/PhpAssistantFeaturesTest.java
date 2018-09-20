@@ -117,7 +117,7 @@ public class PhpAssistantFeaturesTest {
     editor.waitActive();
 
     editor.moveCursorToText(TEXT_FOR_HOVERING);
-    editor.waitTextInHoverPopup(EXPECTED_HOVER_POPUP_TEXT);
+    editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_POPUP_TEXT);
   }
 
   @Test
