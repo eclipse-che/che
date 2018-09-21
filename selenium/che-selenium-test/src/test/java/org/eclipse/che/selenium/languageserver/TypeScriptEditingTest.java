@@ -53,14 +53,14 @@ public class TypeScriptEditingTest {
   @InjectTestWorkspace(template = ECLIPSE_NODEJS)
   private TestWorkspace workspace;
 
-  @Inject private Ide                      ide;
-  @Inject private Menu                     menu;
-  @Inject private Wizard                   wizard;
-  @Inject private Consoles                 consoles;
-  @Inject private CodenvyEditor            editor;
-  @Inject private CommandsPalette          commandsPalette;
-  @Inject private ProjectExplorer          projectExplorer;
-  @Inject private AskForValueDialog        askForValueDialog;
+  @Inject private Ide ide;
+  @Inject private Menu menu;
+  @Inject private Wizard wizard;
+  @Inject private Consoles consoles;
+  @Inject private CodenvyEditor editor;
+  @Inject private CommandsPalette commandsPalette;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
 
@@ -81,8 +81,7 @@ public class TypeScriptEditingTest {
   @Test()
   public void checkMainFeaturesTypeScriptLS() {
     String intitTypeScriptLanguageServerMessage =
-        format(
-            "Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
+        format("Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
 
     consoles.waitExpectedTextIntoConsole(intitTypeScriptLanguageServerMessage);
     checkCodeValidation();
@@ -92,13 +91,18 @@ public class TypeScriptEditingTest {
 
   @Test(priority = 1)
   public void checkFindReferencesFeature() {
-    String referenceInGreeterClass =format("/%s/Greeter.ts\n" + "From:24:17 To:24:22", PROJECT_NAME);
-    String referenceInTestPrintClass =format("/%s/testPrint.ts\n" + "From:14:0 To:14:5", PROJECT_NAME);
+    String referenceInGreeterClass =
+        format("/%s/Greeter.ts\n" + "From:24:17 To:24:22", PROJECT_NAME);
+    String referenceInTestPrintClass =
+        format("/%s/testPrint.ts\n" + "From:14:0 To:14:5", PROJECT_NAME);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     findReferencesConsoleTab.waitReferenceWithText(referenceInGreeterClass);
-    findReferencesConsoleTab.clickOnReference(referenceInTestPrintClass);
-    editor.waitCursorPosition(15,6);
+    findReferencesConsoleTab.doubleClickOnReference(referenceInGreeterClass);
+    editor.waitCursorPosition(25, 23);
   }
+
+
+
 
   private void checkCodeValidation() {
 
