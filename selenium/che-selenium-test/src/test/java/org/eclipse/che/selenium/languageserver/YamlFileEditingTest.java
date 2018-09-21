@@ -64,18 +64,7 @@ public class YamlFileEditingTest {
           + "    app: che\n"
           + "    template: che\n"
           + "  name: che";
-  private String[] symbols = {
-    "namesymbols (12)",
-    "version",
-    "description",
-    "main",
-    "scripts",
-    "test",
-    "author",
-    "license",
-    "dependencies",
-    "express"
-  };
+  private String[] symbols = {"apiVersionsymbols (194)"};
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS_YAML)
   private TestWorkspace workspace;
@@ -187,7 +176,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  @Test(priority = 1)
+  //  @Test(priority = 1)
   public void checkCodeValidation() {
     editor.selectTabByName("deployment.yaml");
     editor.waitAllMarkersInvisibility(ERROR);
@@ -229,42 +218,42 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor(UNCOMMENTED_CODE);
   }
 
-  @Test(priority = 2)
+  @Test(priority = 1)
   public void checkGoToSymbolFeature() {
-    editor.selectTabByName(YAML_FILE_NAME);
+    editor.selectTabByName("deployment.yaml");
 
     // check list for expected items
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
-    assistantFindPanel.waitAllNodesContainText("");
+    assistantFindPanel.waitAllNodes(symbols);
 
     // open item by mouse click
-    assistantFindPanel.clickOnActionNodeWithText("version");
-    editor.waitCursorPosition(3, 3);
+    assistantFindPanel.clickOnActionNodeWithText("apiVersion");
+    editor.waitCursorPosition(13, 1);
 
     // find and open item from Go To Symbol panel
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
-    assistantFindPanel.typeToInputField("nam");
-    assistantFindPanel.waitActionNodeContainsText("name");
-    assistantFindPanel.clickOnActionNodeWithText("name");
-    editor.waitCursorPosition(2, 3);
+    assistantFindPanel.typeToInputField("kin");
+    assistantFindPanel.waitNode("kind");
+    assistantFindPanel.clickOnActionNodeWithText("kind");
+    editor.waitCursorPosition(14, 1);
 
     // select items by DOWN and UP buttons
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
     editor.typeTextIntoEditor(Keys.DOWN.toString());
-    editor.waitCursorPosition(2, 26);
+    editor.waitCursorPosition(13, 15);
     editor.typeTextIntoEditor(Keys.DOWN.toString());
-    editor.waitCursorPosition(3, 21);
+    editor.waitCursorPosition(14, 23);
     editor.typeTextIntoEditor(Keys.DOWN.toString());
-    editor.waitCursorPosition(4, 20);
+    editor.waitCursorPosition(27, 44);
     editor.typeTextIntoEditor(Keys.UP.toString());
-    editor.waitCursorPosition(3, 21);
+    editor.waitCursorPosition(14, 23);
 
     // open item by pressing ENTER key
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitCursorPosition(3, 3);
+    editor.waitCursorPosition(14, 1);
   }
 
   private void addYamlSchema() {
