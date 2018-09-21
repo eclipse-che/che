@@ -36,6 +36,7 @@
         <module>che-core-api-model</module>
         <module>che-core-db</module>
         <module>che-core-db-vendor-h2</module>
+        <module>che-core-db-vendor-mysql</module>
         <module>che-core-db-vendor-postgresql</module>
     </modules>
 </project>
