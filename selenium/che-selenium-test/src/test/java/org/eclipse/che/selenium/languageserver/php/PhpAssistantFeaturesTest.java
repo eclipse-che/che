@@ -171,7 +171,7 @@ public class PhpAssistantFeaturesTest {
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField(FIND_PROJECT_SEARCHING_TEXT);
-    assistantFindPanel.waitActionNodeContainsText(EXPECTED_FIND_PROJECT_TEXT);
+    assistantFindPanel.waitNode(EXPECTED_FIND_PROJECT_TEXT);
   }
 
   private void performCommentAction() {
@@ -190,7 +190,7 @@ public class PhpAssistantFeaturesTest {
 
   private void waitActionNodeContainsText(String expectedText) {
     try {
-      assistantFindPanel.waitActionNodeContainsText(expectedText);
+      assistantFindPanel.waitNode(expectedText);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);

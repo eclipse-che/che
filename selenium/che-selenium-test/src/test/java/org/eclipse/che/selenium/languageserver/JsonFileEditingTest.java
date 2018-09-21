@@ -184,7 +184,7 @@ public class JsonFileEditingTest {
     // check list for expected items
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
-    assistantFindPanel.waitAllNodesContainText(symbols);
+    assistantFindPanel.waitAllNodes(symbols);
 
     // open item by mouse click
     assistantFindPanel.clickOnActionNodeWithText("version");
@@ -194,7 +194,7 @@ public class JsonFileEditingTest {
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField("nam");
-    assistantFindPanel.waitActionNodeContainsText("name");
+    assistantFindPanel.waitNode("name");
     assistantFindPanel.clickOnActionNodeWithText("name");
     editor.waitCursorPosition(2, 3);
 
