@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.git;
 
 import static java.lang.String.format;
+import static java.util.regex.Pattern.compile;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.BRANCHES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
@@ -25,11 +26,15 @@ import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.NEW_CO
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.PULL_REQUEST_ISSUED;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.PULL_REQUEST_UPDATED;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
@@ -53,7 +58,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.openqa.selenium.By;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -90,6 +94,10 @@ public class PullRequestPluginTest {
   @Inject
   @Named("github.password")
   private String gitHubPassword;
+
+  @Inject
+  @Named("che.host")
+  private String cheHost;
 
   @Inject private Ide ide;
   @Inject private Git git;
@@ -210,10 +218,9 @@ public class PullRequestPluginTest {
     pullRequestPanel.waitStatusOk(PULL_REQUEST_ISSUED);
     pullRequestPanel.waitMessage(PULL_REQUEST_CREATED);
 
-    // check the pull header on the GitHub page
-    pullRequestPanel.openPullRequestOnGitHub();
-    seleniumWebDriverHelper.switchToNextWindow(mainBrowserTabHandle);
-    checkBranchNamesOnGitHubPage();
+    // check the base and head branches in the pull request
+    assertEquals(testRepo2.getPullRequestHeadBranchName(1), DEV_BRANCH_NAME);
+    assertEquals(testRepo2.getPullRequestBaseBranchName(1), BASE_BRANCH_NAME);
   }
 
   @Test(priority = 1)
@@ -263,14 +270,22 @@ public class PullRequestPluginTest {
   }
 
   @Test(priority = 3)
-  public void checkFactoryOnGitHub() {
-    // open and check projects page on github
-    pullRequestPanel.openPullRequestOnGitHub();
-    seleniumWebDriverHelper.switchToNextWindow(mainBrowserTabHandle);
-    checkGitHubUserPage();
+  public void checkFactoryOnGitHub() throws IOException {
+    // check pull request elements
+    assertEquals(testRepo2.getPullRequestUserName(1), gitHubUsername);
+    assertEquals(testRepo2.getPullRequestTitle(1), TITLE);
 
-    consumeFactoryOnGitHub();
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    String pullRequestDescription = testRepo2.getPullRequestBody(1);
+    String expectedPullRequestDescriptionRegexp =
+        format(
+            "\\[!\\[Review\\]\\(.*%1$s/factory/resources/factory-review.svg\\)\\]\\(.*%1$s/f\\?id=factory.*%2$s",
+            cheHost, COMMENT);
+
+    assertTrue(
+        compile(expectedPullRequestDescriptionRegexp, Pattern.MULTILINE | Pattern.DOTALL)
+            .matcher(pullRequestDescription)
+            .matches(),
+        "Actual PR description was " + pullRequestDescription);
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(FIRST_PROJECT_NAME);
@@ -307,29 +322,5 @@ public class PullRequestPluginTest {
     projectExplorer.openItemByPath(filePath);
     editor.waitActive();
     testProjectServiceClient.updateFile(testWorkspace.getId(), filePath, text);
-  }
-
-  /** check the target branches in the pull header */
-  private void checkBranchNamesOnGitHubPage() {
-    String pullHeaderText =
-        format(
-            "%s wants to merge 1 commit into %s\n" + "from %s",
-            gitHubUsername, BASE_BRANCH_NAME, DEV_BRANCH_NAME);
-    seleniumWebDriverHelper.waitTextContains(
-        By.xpath("//div[@class='TableObject-item TableObject-item--primary']"), pullHeaderText);
-  }
-
-  /** check main elements of the GitHub user page */
-  private void checkGitHubUserPage() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath("//h1//a[text()='" + gitHubUsername + "']"));
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath("//h1//a[text()='" + testRepo.getName() + "']"));
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath("//h1//span[contains(text(), '" + TITLE + "')]"));
-    seleniumWebDriverHelper.waitVisibility(By.xpath("//p[text()='" + COMMENT + "']"));
-  }
-
-  private void consumeFactoryOnGitHub() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath("//a[contains(@href, 'id=factory')]"));
   }
 }
