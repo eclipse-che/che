@@ -49,6 +49,7 @@ data:
   CHE_KEYCLOAK_USERNAME__CLAIM: {{ .Values.customOidcUsernameClaim }}
 {{- end }}
   CHE_INFRA_KUBERNETES_NAMESPACE: {{ .Values.global.cheWorkspacesNamespace }}
+  CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME: {{ template "workspaceServiceAccountName" . }}
   CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
   CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
   CHE_INFRA_KUBERNETES_PVC_QUANTITY: {{ .Values.global.pvcClaim }}
@@ -79,6 +80,9 @@ data:
 {{- if .Values.workspaceDefaultRamRequest }}
   CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest }}
 {{- end }}
-{{- if .Values.workspaceDefaultRamRequest }}
-  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamRequest }}
+{{- if .Values.workspaceDefaultRamLimit }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit }}
+{{- end }}
+{{- if .Values.workspaceSidecarDefaultRamLimit }}
+  CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit }}
 {{- end }}

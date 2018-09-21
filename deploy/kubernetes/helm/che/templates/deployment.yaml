@@ -186,6 +186,11 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_NAMESPACE
               name: che
+        - name: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME
+              name: che
         - name: CHE_LOCAL_CONF_DIR
           valueFrom:
             configMapKeyRef:
@@ -277,6 +282,13 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB
+              name: che
+{{- end }}
+{{- if .Values.workspaceSidecarDefaultRamLimit }}
+        - name: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
               name: che
 {{- end }}
         image: {{ .Values.cheImage }}

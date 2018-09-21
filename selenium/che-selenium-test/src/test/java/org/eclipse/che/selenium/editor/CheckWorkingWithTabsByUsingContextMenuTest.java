@@ -96,16 +96,6 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     editor.waitTabIsNotPresent(NAME_TO_HTML);
     editor.closeAllTabs();
 
-    // close other tabs by using context menu
-    openTabsInEditor();
-    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_OTHER);
-    editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
-    editor.waitTabIsNotPresent(NAME_TO_CSS);
-    editor.waitTabIsNotPresent(NAME_TO_XML);
-    editor.waitTabIsNotPresent(NAME_TO_HTML);
-    editor.closeAllTabs();
-
     // pin and close all tabs without pinned by using context menu
     openTabsInEditor();
     editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
@@ -141,12 +131,20 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
   private void openTabsInEditor() {
     projectExplorer.waitItem(PATH_TO_JAVA_CLASS);
     projectExplorer.openItemByPath(PATH_TO_JAVA_CLASS);
+    editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
+
     projectExplorer.waitItem(PATH_TO_CSS);
     projectExplorer.openItemByPath(PATH_TO_CSS);
+    editor.waitTabIsPresent(NAME_TO_CSS);
+
     projectExplorer.waitItem(PATH_TO_XML);
     projectExplorer.openItemByPath(PATH_TO_XML);
+    editor.waitTabIsPresent(NAME_TO_XML);
+
     projectExplorer.waitItem(PATH_TO_HTML);
     projectExplorer.openItemByPath(PATH_TO_HTML);
+    editor.waitTabIsPresent(NAME_TO_HTML);
+
     loader.waitOnClosed();
   }
 }

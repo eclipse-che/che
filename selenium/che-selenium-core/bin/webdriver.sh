@@ -327,9 +327,8 @@ initRunMode() {
 stopSeleniumDockerContainers() {
     local containers=$(docker ps -qa --filter="name=selenium_*" | wc -l)
     if [[ ${containers} != "0" ]]; then
-        echo "[TEST] Stopping selenium docker containers..."
-        docker stop $(docker ps -qa --filter="name=selenium_*")
-        docker rm $(docker ps -qa --filter="name=selenium_*")
+        echo "[TEST] Stopping and removing selenium docker containers..."
+        docker rm -f $(docker ps -qa --filter="name=selenium_*") > /dev/null
     fi
 }
 
@@ -809,6 +808,18 @@ generateFailSafeReport () {
         local divRegTag="<h2>REGRESSION<\/h2>"${aTag}
         sed -i "s/${aTag}/${divRegTag}/" ${FAILSAFE_REPORT}
     done
+
+    # pack logs of workspaces which failed on start when injecting into test object and add link into the 'Summary' section of failsafe report
+    local dirWithFailedWorkspacesLogs="target/site/workspace-logs/injecting_workspaces_which_did_not_start"
+    if [[ -d ${dirWithFailedWorkspacesLogs} ]]; then
+        cd ${dirWithFailedWorkspacesLogs}
+        zip -qr "../injecting_workspaces_which_did_not_start_logs.zip" .
+        cd - > /dev/null
+        rm -rf ${dirWithFailedWorkspacesLogs}
+        summaryTag="Summary<\/h2><a name=\"Summary\"><\/a>"
+        linkToFailedWorkspacesLogsTag="<p>\[<a href=\"workspace-logs\/injecting_workspaces_which_did_not_start_logs.zip\" target=\"_blank\">Injecting workspaces which didn't start logs<\/a>\]<\/p>"
+        sed -i "s/${summaryTag}/${summaryTag}${linkToFailedWorkspacesLogsTag}/" ${FAILSAFE_REPORT}
+    fi
 
     # add link the che server logs archive into the 'Summary' section of failsafe report
     local summaryTag="Summary<\/h2><a name=\"Summary\"><\/a>"

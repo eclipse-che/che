@@ -140,6 +140,7 @@ public class NewWorkspace {
     DOT_NET("dotnet-default"),
     ANDROID("android-default"),
     CPP("cpp-default"),
+    CAMEL_SPRINGBOOT("apache-camel-springboot"),
     CENTOS_BLANK("centos"),
     CENTOS_GO("centos-go"),
     CENTOS_NODEJS("nodejs6"),
@@ -171,6 +172,8 @@ public class NewWorkspace {
     SELENIUM("selenium"),
     SPRING_BOOT("spring-boot"),
     TOM_EE("tomee-default"),
+    WORKSPACE_NEXT_HELLO_WORLD("wsnext-helloworld-openshift"),
+    WORKSPACE_NEXT_REST("wsnext-service-openshift"),
     UBUNTU("ubuntu"),
     ZEND("zend");
 

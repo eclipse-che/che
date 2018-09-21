@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
@@ -37,6 +38,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.P
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_REST;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -86,7 +89,8 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
       asList(
@@ -101,7 +105,8 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
@@ -125,6 +130,7 @@ public class NewWorkspacePageTest {
           BLANK,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
           CENTOS_GO,
@@ -141,7 +147,8 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_SINGLE_MACHINE_STACKS =
       asList(
@@ -149,6 +156,7 @@ public class NewWorkspacePageTest {
           BLANK,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
           CENTOS_GO,
@@ -165,7 +173,8 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
@@ -173,6 +182,7 @@ public class NewWorkspacePageTest {
           BLANK,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
           CENTOS_GO,
@@ -189,23 +199,25 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack>
       EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
           asList(
               JAVA,
               BLANK,
-              JAVA_THEIA_DOCKER,
+              WORKSPACE_NEXT_REST,
+              WORKSPACE_NEXT_HELLO_WORLD,
               RAILS,
               PYTHON,
               PHP,
@@ -221,7 +233,8 @@ public class NewWorkspacePageTest {
       asList(
           JAVA,
           BLANK,
-          JAVA_THEIA_DOCKER,
+          WORKSPACE_NEXT_REST,
+          WORKSPACE_NEXT_HELLO_WORLD,
           RAILS,
           PYTHON,
           PHP,

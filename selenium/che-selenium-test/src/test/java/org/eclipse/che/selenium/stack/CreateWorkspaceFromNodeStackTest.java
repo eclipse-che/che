@@ -114,14 +114,15 @@ public class CreateWorkspaceFromNodeStackTest {
   public void checkWebNodejsSimpleProjectCommands() {
     By textOnPreviewPage = By.xpath("//p[text()=' from the Yeoman team']");
 
-    consoles.executeCommandFromProjectExplorer(
-        WEB_NODE_JS_PROJECT,
+    projectExplorer.waitAndSelectItem(WEB_NODE_JS_PROJECT);
+    consoles.executeCommandInsideProcessesArea(
+        "dev-machine",
         BUILD_GOAL,
         INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT),
         "bower_components/angular");
 
-    consoles.executeCommandFromProjectExplorer(
-        WEB_NODE_JS_PROJECT,
+    consoles.executeCommandInsideProcessesArea(
+        "dev-machine",
         RUN_GOAL,
         RUN_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT),
         "Started connect web server");
