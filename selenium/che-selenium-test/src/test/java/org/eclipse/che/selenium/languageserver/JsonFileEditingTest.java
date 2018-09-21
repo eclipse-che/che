@@ -23,8 +23,11 @@ import static org.openqa.selenium.Keys.BACK_SPACE;
 import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -46,6 +49,19 @@ public class JsonFileEditingTest {
   private static final String LS_INIT_MESSAGE =
       format("Finished language servers initialization, file path '/%s'", PATH_TO_JSON_FILE);
 
+  private String[] symbols = {
+    "namesymbols (12)",
+    "version",
+    "description",
+    "main",
+    "scripts",
+    "test",
+    "author",
+    "license",
+    "dependencies",
+    "express"
+  };
+
   @InjectTestWorkspace(template = NODEJS_WITH_JSON_LS)
   private TestWorkspace workspace;
 
@@ -55,11 +71,13 @@ public class JsonFileEditingTest {
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private AskForValueDialog askForValueDialog;
   @Inject private AssistantFindPanel assistantFindPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     createProjectFromWizard();
   }
 
@@ -70,7 +88,7 @@ public class JsonFileEditingTest {
     projectExplorer.openItemByPath(PATH_TO_JSON_FILE);
     editor.waitTabIsPresent(JSON_FILE_NAME);
 
-    // check JSON language sever initialized
+    // check JSON language server initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
@@ -120,38 +138,81 @@ public class JsonFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkGoToSymbolFeature() {
-    editor.selectTabByName(JSON_FILE_NAME);
-
-    // select item from Go To Symbol panel
-    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
-    assistantFindPanel.waitForm();
-    assistantFindPanel.waitActionNodeContainsText("version");
-    assistantFindPanel.clickOnActionNodeWithText("version");
-    editor.waitCursorPosition(3, 3);
-
-    // find and select item from Go To Symbol panel
-    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
-    assistantFindPanel.waitForm();
-    assistantFindPanel.typeToInputField("nam");
-    assistantFindPanel.waitActionNodeContainsText("name");
-    assistantFindPanel.clickOnActionNodeWithText("name");
-    editor.waitCursorPosition(2, 3);
-  }
-
-  @Test(priority = 1)
   public void checkAutocompleteFeature() {
     editor.selectTabByName(JSON_FILE_NAME);
 
     editor.goToCursorPositionVisible(13, 4);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.typeTextIntoEditor("\"obj\":");
+
+    editor.typeTextIntoEditor("obj");
+    editor.launchAutocomplete();
+    editor.waitTextIntoEditor("\"obj\"");
+
+    editor.typeTextIntoEditor(":");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("Empty object");
     editor.waitProposalIntoAutocompleteContainer("Empty array");
     editor.closeAutocomplete();
 
     editor.deleteCurrentLine();
+  }
+
+  @Test(priority = 1)
+  public void checkHoverFeature() {
+    menu.runCommand(Project.PROJECT, New.NEW, New.FILE);
+    askForValueDialog.createNotJavaFileByName("schema.json");
+    editor.waitTabIsPresent("schema.json");
+
+    editor.goToPosition(1, 1);
+    editor.typeTextIntoEditor("{\n");
+    editor.typeTextIntoEditor(
+        "   \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n"
+            + "\"title\": \"Items\",\n"
+            + "\"type\": \"string\"");
+
+    editor.moveCursorToText("title");
+    editor.waitTextInHoverPopup("A descriptive title of the element");
+
+    editor.moveCursorToText("$schema");
+    editor.waitTextInHoverPopup("The schema to verify this document against");
+  }
+
+  @Test(priority = 2)
+  public void checkGoToSymbolFeature() {
+    editor.selectTabByName(JSON_FILE_NAME);
+
+    // check list for expected items
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.waitAllNodesContainText(symbols);
+
+    // open item by mouse click
+    assistantFindPanel.clickOnActionNodeWithText("version");
+    editor.waitCursorPosition(3, 3);
+
+    // find and open item from Go To Symbol panel
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.typeToInputField("nam");
+    assistantFindPanel.waitActionNodeContainsText("name");
+    assistantFindPanel.clickOnActionNodeWithText("name");
+    editor.waitCursorPosition(2, 3);
+
+    // select items by DOWN and UP buttons
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(2, 26);
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(3, 21);
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(4, 20);
+    editor.typeTextIntoEditor(Keys.UP.toString());
+    editor.waitCursorPosition(3, 21);
+
+    // open item by pressing ENTER key
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.waitCursorPosition(3, 3);
   }
 
   private void createProjectFromWizard() {
