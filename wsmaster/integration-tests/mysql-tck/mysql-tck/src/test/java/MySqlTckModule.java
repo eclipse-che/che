@@ -86,7 +86,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Module for running TCKs based on PostgreSQL.
+ * Module for running TCKs based on MySQL.
  *
  * @author Sergii Kabashniuk
  * @author Barry Dresdner
