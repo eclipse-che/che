@@ -13,6 +13,8 @@ package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
@@ -31,12 +33,14 @@ import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
+import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -60,6 +64,18 @@ public class YamlFileEditingTest {
           + "    app: che\n"
           + "    template: che\n"
           + "  name: che";
+  private String[] symbols = {
+    "namesymbols (12)",
+    "version",
+    "description",
+    "main",
+    "scripts",
+    "test",
+    "author",
+    "license",
+    "dependencies",
+    "express"
+  };
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS_YAML)
   private TestWorkspace workspace;
@@ -71,6 +87,7 @@ public class YamlFileEditingTest {
   @Inject private Preferences preferences;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private AskForValueDialog askForValueDialog;
+  @Inject private AssistantFindPanel assistantFindPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -210,6 +227,44 @@ public class YamlFileEditingTest {
     editor.goToPosition(23, 1);
     editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor(UNCOMMENTED_CODE);
+  }
+
+  @Test(priority = 2)
+  public void checkGoToSymbolFeature() {
+    editor.selectTabByName(YAML_FILE_NAME);
+
+    // check list for expected items
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.waitAllNodesContainText("");
+
+    // open item by mouse click
+    assistantFindPanel.clickOnActionNodeWithText("version");
+    editor.waitCursorPosition(3, 3);
+
+    // find and open item from Go To Symbol panel
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.typeToInputField("nam");
+    assistantFindPanel.waitActionNodeContainsText("name");
+    assistantFindPanel.clickOnActionNodeWithText("name");
+    editor.waitCursorPosition(2, 3);
+
+    // select items by DOWN and UP buttons
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(2, 26);
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(3, 21);
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(4, 20);
+    editor.typeTextIntoEditor(Keys.UP.toString());
+    editor.waitCursorPosition(3, 21);
+
+    // open item by pressing ENTER key
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.waitCursorPosition(3, 3);
   }
 
   private void addYamlSchema() {
