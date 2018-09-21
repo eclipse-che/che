@@ -68,8 +68,6 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Defines Factory REST API.
@@ -80,7 +78,6 @@ import org.slf4j.LoggerFactory;
 @Api(value = "/factory", description = "Factory manager")
 @Path("/factory")
 public class FactoryService extends Service {
-  private static final Logger LOG = LoggerFactory.getLogger(FactoryService.class);
 
   /** Error message if there is no plugged resolver. */
   public static final String ERROR_NO_RESOLVER_AVAILABLE =

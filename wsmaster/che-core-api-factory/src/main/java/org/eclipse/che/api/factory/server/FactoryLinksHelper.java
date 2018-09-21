@@ -19,7 +19,6 @@ import static org.eclipse.che.api.factory.shared.Constants.NAMED_FACTORY_ACCEPTA
 import static org.eclipse.che.api.factory.shared.Constants.RETRIEVE_FACTORY_REL_ATT;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import java.util.LinkedList;
 import java.util.List;
 import javax.ws.rs.HttpMethod;
@@ -34,9 +33,6 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
  * @author Anton Korneta
  */
 public class FactoryLinksHelper {
-
-  private static final List<String> SNIPPET_TYPES =
-      ImmutableList.of("markdown", "url", "html", "iframe");
 
   private FactoryLinksHelper() {}
 

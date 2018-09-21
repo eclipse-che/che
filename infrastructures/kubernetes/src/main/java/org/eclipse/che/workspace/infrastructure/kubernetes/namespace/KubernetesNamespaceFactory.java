@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.inject.Named;
@@ -29,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
 public class KubernetesNamespaceFactory {
 
   private final String namespaceName;
+  private final boolean isPredefined;
   private final KubernetesClientFactory clientFactory;
 
   @Inject
@@ -36,6 +38,7 @@ public class KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.namespace") String namespaceName,
       KubernetesClientFactory clientFactory) {
     this.namespaceName = namespaceName;
+    this.isPredefined = !isNullOrEmpty(namespaceName);
     this.clientFactory = clientFactory;
   }
 
@@ -44,7 +47,7 @@ public class KubernetesNamespaceFactory {
    * provided with a new namespace.
    */
   public boolean isPredefined() {
-    return isNullOrEmpty(namespaceName);
+    return isPredefined;
   }
 
   /**
@@ -58,10 +61,8 @@ public class KubernetesNamespaceFactory {
    * @throws InfrastructureException if any exception occurs during namespace preparing
    */
   public KubernetesNamespace create(String workspaceId) throws InfrastructureException {
-    final String namespaceName =
-        isNullOrEmpty(this.namespaceName) ? workspaceId : this.namespaceName;
-    KubernetesNamespace namespace =
-        new KubernetesNamespace(clientFactory, namespaceName, workspaceId);
+    final String namespaceName = isPredefined ? this.namespaceName : workspaceId;
+    KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
     namespace.prepare();
     return namespace;
   }
@@ -75,6 +76,11 @@ public class KubernetesNamespaceFactory {
    * @return created namespace
    */
   public KubernetesNamespace create(String workspaceId, String namespace) {
-    return new KubernetesNamespace(clientFactory, namespace, workspaceId);
+    return doCreateNamespace(workspaceId, namespace);
+  }
+
+  @VisibleForTesting
+  KubernetesNamespace doCreateNamespace(String workspaceId, String name) {
+    return new KubernetesNamespace(clientFactory, name, workspaceId);
   }
 }
