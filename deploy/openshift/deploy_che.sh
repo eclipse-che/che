@@ -446,11 +446,12 @@ ${CHE_VAR_ARRAY}"
     fi
 
     if [ ! -z ${CHE_INFRA_OPENSHIFT_PROJECT} ]; then
+        # create workspace service account in the predefined workspace
         ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-workspace-service-account.yaml \
           -p SERVICE_ACCOUNT_NAME='che-workspace' \
           -p SERVICE_ACCOUNT_NAMESPACE=${CHE_INFRA_OPENSHIFT_PROJECT}
-        WORKSPACE_SERVICE_ACCOUNT_NAME="che-workspace"
     fi
+    WORKSPACE_SERVICE_ACCOUNT_NAME="che-workspace"
 
     ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-server-template.yaml \
                          -p ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX} \
