@@ -115,7 +115,7 @@ public class CSharpFileAdvancedOperationsTest {
   public void checkGoToSymbolFeature() {
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     try {
-      assistantFindPanel.waitActionNodeContainsText("Main(string[] args)");
+      assistantFindPanel.waitNode("Main(string[] args)");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure: https://github.com/eclipse/che/issues/11258", ex);

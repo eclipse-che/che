@@ -94,11 +94,11 @@ public class AssistantFindPanel {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(getActionNode(index));
   }
 
-  public void waitActionNodeContainsText(int index, String expectedText) {
+  public void waitNode(int index, String expectedText) {
     seleniumWebDriverHelper.waitTextContains(getActionNode(index), expectedText);
   }
 
-  public void waitActionNodeContainsText(String expectedText) {
+  public void waitNode(String expectedText) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> {
           for (int i = 0; i < getActionNodesCount(); i++) {
@@ -110,8 +110,12 @@ public class AssistantFindPanel {
         });
   }
 
-  public void waitAllNodesContainText(String... expectedText) {
-    asList(expectedText).forEach(text -> waitActionNodeContainsText(text));
+  public void waitAllNodes(String... expectedNodesText) {
+    asList(expectedNodesText).forEach(nodeText -> waitNode(nodeText));
+  }
+
+  public void waitAllNodes(List<String> expectedNodesText) {
+    expectedNodesText.forEach(nodeText -> waitNode(nodeText));
   }
 
   public void waitActionNodeTextEqualsTo(int nodeIndex, String expectedText) {
@@ -128,12 +132,11 @@ public class AssistantFindPanel {
         getActionNode(i).click();
         return;
       }
-
-      String exceptionMessage =
-          String.format(
-              "Item with expected visible text: \"%s\" has not been detected", visibleText);
-      throw new RuntimeException(exceptionMessage);
     }
+
+    String exceptionMessage =
+        String.format("Item with expected visible text: \"%s\" has not been detected", visibleText);
+    throw new RuntimeException(exceptionMessage);
   }
 
   public void clickOnActionNode(int index) {
