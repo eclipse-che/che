@@ -147,8 +147,7 @@ public class CheckRestoringSplitEditorTest {
 
   private void setPositionsForSplitEditor() {
     editor.selectTabByIndexEditorWindow(0, javaClassTab);
-    editor.goToCursorPositionVisible(
-        0, cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
+    editor.goToPosition(0, cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
     editor.selectTabByName(readmeFileName);
     editor.goToPosition(1, cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);

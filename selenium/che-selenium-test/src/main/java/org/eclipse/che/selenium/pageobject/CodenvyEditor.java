@@ -32,7 +32,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGE
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_ACTIVE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_INACTIVE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_PREFIX_XPATH;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEFINED_EDITOR_ACTIVE_LINE_TEMPLATE_XPATH;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEFINED_EDITOR_ACTIVE_LINE_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM_PATTERN;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HOVER_POPUP_XPATH;
@@ -155,7 +155,7 @@ public class CodenvyEditor {
     String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
     String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
-    String DEFINED_EDITOR_ACTIVE_LINE_TEMPLATE_XPATH =
+    String DEFINED_EDITOR_ACTIVE_LINE_XPATH_TEMPLATE =
         "(//div[@id='gwt-debug-editorPartStack-contentPanel'])[%s]"
             + "//div[@id='gwt-debug-cursorPosition']";
     String TAB_CONTEXT_MENU_BODY = "//*[@id='gwt-debug-contextMenu/closeAllEditors']/parent::tbody";
@@ -674,12 +674,6 @@ public class CodenvyEditor {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
     waitActive();
     waitSpecifiedValueForLineAndChar(positionLine, positionChar);
-  }
-
-  public void goToCursorPositionVisible(int editorIndex, int positionLine, int positionChar) {
-    openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
-    waitActive();
-    waitCursorPosition(editorIndex, positionLine, positionChar);
   }
 
   /**
@@ -1629,24 +1623,25 @@ public class CodenvyEditor {
   /**
    * Gets current cursor position, it means line's number and char's number.
    *
-   * @return cursor position which defined in line's number and char's number.
+   * @return cursor position which defined in line's {@link Pair#first} number and char's {@link
+   *     Pair#second} number.
    */
-  public Pair<Integer, Integer> getCurrentCursorPositionsFromVisible() {
+  public Pair<Integer, Integer> getCurrentCursorPosition() {
     waitActive();
     WebElement currentActiveElement =
         activeLineNumbers.stream().filter(webElement -> webElement.isDisplayed()).findFirst().get();
     return getCursorPositionFromWebElement(currentActiveElement);
   }
 
-  public Pair<Integer, Integer> getCurrentCursorPositionFromVisible(int editorIndex) {
+  public Pair<Integer, Integer> getCurrentCursorPosition(int editorIndex) {
     int adoptedIndexOfEditor = editorIndex + 1;
     String editorActiveLineXpath =
-        format(DEFINED_EDITOR_ACTIVE_LINE_TEMPLATE_XPATH, adoptedIndexOfEditor);
+        format(DEFINED_EDITOR_ACTIVE_LINE_XPATH_TEMPLATE, adoptedIndexOfEditor);
 
     List<WebElement> positionWidget =
         seleniumWebDriverHelper.waitPresenceOfAllElements(By.xpath(editorActiveLineXpath));
 
-    String cursorPositionText =
+    String cursorPosition =
         positionWidget
             .stream()
             .filter(element -> !element.getText().isEmpty())
@@ -1654,10 +1649,10 @@ public class CodenvyEditor {
             .get()
             .getText();
 
-    List<String> positions = asList(cursorPositionText.split(":"));
-    int positionRow = Integer.parseInt(positions.get(0));
-    int positionChar = Integer.parseInt(positions.get(1));
-    return new Pair<Integer, Integer>(positionRow, positionChar);
+    List<String> lineAndCharPosition = asList(cursorPosition.split(":"));
+    int positionRow = Integer.parseInt(lineAndCharPosition.get(0));
+    int positionChar = Integer.parseInt(lineAndCharPosition.get(1));
+    return new Pair<>(positionRow, positionChar);
   }
 
   /**
@@ -1693,8 +1688,7 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
-                  Pair<Integer, Integer> position =
-                      getCurrentCursorPositionFromVisible(editorIndex);
+                  Pair<Integer, Integer> position = getCurrentCursorPosition(editorIndex);
 
                   return (linePosition == position.first) && (charPosition == position.second);
                 });
@@ -1709,7 +1703,7 @@ public class CodenvyEditor {
   /** Gets number of the current line where cursor is placed */
   public int getPositionVisible() {
     waitActive();
-    return getCurrentCursorPositionsFromVisible().first;
+    return getCurrentCursorPosition().first;
   }
 
   /**
@@ -1730,7 +1724,7 @@ public class CodenvyEditor {
    * @return number of the char's position on which cursor is placed
    */
   public int getPositionOfChar() {
-    return getCurrentCursorPositionsFromVisible().second;
+    return getCurrentCursorPosition().second;
   }
 
   /**
