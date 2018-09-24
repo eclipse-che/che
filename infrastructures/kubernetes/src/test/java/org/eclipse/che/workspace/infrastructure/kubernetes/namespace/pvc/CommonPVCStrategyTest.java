@@ -96,6 +96,7 @@ public class CommonPVCStrategyTest {
   @Mock private KubernetesNamespaceFactory factory;
   @Mock private KubernetesNamespace k8sNamespace;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
+  @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   private CommonPVCStrategy commonPVCStrategy;
 
@@ -103,7 +104,13 @@ public class CommonPVCStrategyTest {
   public void setup() throws Exception {
     commonPVCStrategy =
         new CommonPVCStrategy(
-            PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, true, pvcSubPathHelper, factory);
+            PVC_NAME,
+            PVC_QUANTITY,
+            PVC_ACCESS_MODE,
+            true,
+            pvcSubPathHelper,
+            factory,
+            ephemeralWorkspaceAdapter);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
@@ -208,7 +215,13 @@ public class CommonPVCStrategyTest {
   public void testDoNotAddsSubpathsWhenPreCreationIsNotNeeded() throws Exception {
     commonPVCStrategy =
         new CommonPVCStrategy(
-            PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, false, pvcSubPathHelper, factory);
+            PVC_NAME,
+            PVC_QUANTITY,
+            PVC_ACCESS_MODE,
+            false,
+            pvcSubPathHelper,
+            factory,
+            ephemeralWorkspaceAdapter);
 
     commonPVCStrategy.provision(k8sEnv, IDENTITY);
 

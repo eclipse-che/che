@@ -21,7 +21,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -89,8 +91,11 @@ public class WorkspacePVCCleanerTest {
                   invocationOnMock.getArgument(0);
               final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
               final Workspace removed = mock(Workspace.class);
+              final WorkspaceConfig config = mock(WorkspaceConfig.class);
               when(event.getWorkspace()).thenReturn(removed);
               when(removed.getId()).thenReturn(WORKSPACE_ID);
+              when(removed.getConfig()).thenReturn(config);
+              when(removed.getConfig().getAttributes()).thenReturn(Collections.emptyMap());
               argument.onEvent(event);
               return invocationOnMock;
             })
@@ -110,8 +115,11 @@ public class WorkspacePVCCleanerTest {
                   invocationOnMock.getArgument(0);
               final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
               final Workspace removed = mock(Workspace.class);
+              final WorkspaceConfig config = mock(WorkspaceConfig.class);
               when(event.getWorkspace()).thenReturn(removed);
               when(removed.getId()).thenReturn(WORKSPACE_ID);
+              when(removed.getConfig()).thenReturn(config);
+              when(removed.getConfig().getAttributes()).thenReturn(Collections.emptyMap());
               argument.onEvent(event);
               return invocationOnMock;
             })

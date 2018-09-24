@@ -11,9 +11,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
+import static org.eclipse.che.api.workspace.shared.Constants.MOUNT_SOURCES_ATTRIBUTE;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
@@ -56,12 +59,24 @@ public class WorkspacePVCCleaner {
           event -> {
             final String workspaceId = event.getWorkspace().getId();
             try {
-              strategy.cleanup(workspaceId);
+              if (!isEphemeral(event.getWorkspace())) {
+                strategy.cleanup(workspaceId);
+              }
             } catch (InfrastructureException ex) {
               LOG.error(
                   "Failed to cleanup workspace '{}' data. Cause: {}", workspaceId, ex.getMessage());
             }
           },
           WorkspaceRemovedEvent.class);
+  }
+
+  /**
+   * @param workspace
+   * @return true if workspace config contains `mountSources` attribute which is set to false, which
+   *     means that workspace is ephemeral with no PVC attached
+   */
+  private boolean isEphemeral(final Workspace workspace) {
+    String mountSources = workspace.getConfig().getAttributes().get(MOUNT_SOURCES_ATTRIBUTE);
+    return "false".equals(mountSources);
   }
 }

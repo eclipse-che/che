@@ -74,6 +74,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private final String pvcAccessMode;
   private final PVCSubPathHelper pvcSubPathHelper;
   private final KubernetesNamespaceFactory factory;
+  private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   @Inject
   public CommonPVCStrategy(
@@ -82,55 +83,63 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
       PVCSubPathHelper pvcSubPathHelper,
-      KubernetesNamespaceFactory factory) {
+      KubernetesNamespaceFactory factory,
+      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter) {
     this.pvcName = pvcName;
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
     this.preCreateDirs = preCreateDirs;
     this.pvcSubPathHelper = pvcSubPathHelper;
     this.factory = factory;
+    this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
   }
 
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
-    final Set<String> subPaths = new HashSet<>();
-    final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
-    k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
-    for (Pod pod : k8sEnv.getPods().values()) {
-      PodSpec podSpec = pod.getSpec();
-      for (Container container : podSpec.getContainers()) {
-        String machineName = Names.machineName(pod, container);
-        InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
-        addMachineVolumes(workspaceId, subPaths, pod, container, machineConfig.getVolumes());
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
+      ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
+    } else {
+      final Set<String> subPaths = new HashSet<>();
+      final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
+      k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
+      for (Pod pod : k8sEnv.getPods().values()) {
+        PodSpec podSpec = pod.getSpec();
+        for (Container container : podSpec.getContainers()) {
+          String machineName = Names.machineName(pod, container);
+          InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
+          addMachineVolumes(workspaceId, subPaths, pod, container, machineConfig.getVolumes());
+        }
       }
-    }
-    if (preCreateDirs && !subPaths.isEmpty()) {
-      pvc.setAdditionalProperty(
-          format(SUBPATHS_PROPERTY_FMT, workspaceId),
-          subPaths.toArray(new String[subPaths.size()]));
+      if (preCreateDirs && !subPaths.isEmpty()) {
+        pvc.setAdditionalProperty(
+            format(SUBPATHS_PROPERTY_FMT, workspaceId),
+            subPaths.toArray(new String[subPaths.size()]));
+      }
     }
   }
 
   @Override
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
       throws InfrastructureException {
-    final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
-    if (!claims.isEmpty()) {
-      final KubernetesNamespace namespace = factory.create(workspaceId);
-      final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
-      final Set<String> existing =
-          pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
-      for (PersistentVolumeClaim pvc : claims) {
-        final String[] subpaths =
-            (String[])
-                pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
-        if (!existing.contains(pvc.getMetadata().getName())) {
-          pvcs.create(pvc);
-        }
-        if (preCreateDirs && subpaths != null) {
-          pvcSubPathHelper.createDirs(workspaceId, subpaths);
+    if (!ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
+      final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
+      if (!claims.isEmpty()) {
+        final KubernetesNamespace namespace = factory.create(workspaceId);
+        final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
+        final Set<String> existing =
+            pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
+        for (PersistentVolumeClaim pvc : claims) {
+          final String[] subpaths =
+              (String[])
+                  pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
+          if (!existing.contains(pvc.getMetadata().getName())) {
+            pvcs.create(pvc);
+          }
+          if (preCreateDirs && subpaths != null) {
+            pvcSubPathHelper.createDirs(workspaceId, subpaths);
+          }
         }
       }
     }
