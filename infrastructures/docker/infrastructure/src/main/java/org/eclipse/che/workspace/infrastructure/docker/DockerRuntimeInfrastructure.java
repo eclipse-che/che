@@ -90,6 +90,13 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
   private DockerEnvironment convertToDockerEnv(InternalEnvironment sourceEnv)
       throws ValidationException {
     String recipeType = sourceEnv.getRecipe().getType();
+    String envType = sourceEnv.getType();
+    if (!recipeType.equals(envType)) {
+      throw new ValidationException(
+          format(
+              "Environments with different type and source type are not supported. Type '%s'. Source type '%s'.",
+              envType, recipeType));
+    }
     DockerEnvironmentConverter converter = envConverters.get(recipeType);
     if (converter == null) {
       throw new ValidationException(
