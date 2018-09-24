@@ -15,12 +15,15 @@ import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removeUriScheme;
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_PROJECT_SOURCE_LOCATIONS_COMMAND;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,9 +34,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.languageserver.ExtendedLanguageServer;
 import org.eclipse.che.api.languageserver.FindServer;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
+import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.watcher.server.impl.FileWatcherByPathMatcher;
 import org.eclipse.che.plugin.java.inject.JavaModule;
@@ -55,21 +61,26 @@ public class PlainJavaProjectSourceFolderWatcher {
   private final FileWatcherManager manager;
   private final FileWatcherByPathMatcher matcher;
   private final FindServer lsRegistry;
-
+  private final ProjectManager projectManager;
   private final EventService eventService;
-
   private final CopyOnWriteArrayList<Integer> watcherIds = new CopyOnWriteArrayList<>();
+
+  private PathTransformer pathTransformer;
 
   @Inject
   public PlainJavaProjectSourceFolderWatcher(
       FileWatcherManager manager,
       FileWatcherByPathMatcher matcher,
       FindServer lsRegistry,
-      EventService eventService) {
+      ProjectManager projectManager,
+      EventService eventService,
+      PathTransformer pathTransformer) {
     this.manager = manager;
     this.matcher = matcher;
     this.lsRegistry = lsRegistry;
+    this.projectManager = projectManager;
     this.eventService = eventService;
+    this.pathTransformer = pathTransformer;
   }
 
   @PostConstruct
@@ -116,7 +127,15 @@ public class PlainJavaProjectSourceFolderWatcher {
   }
 
   private PathMatcher folderMatcher() {
-    return it -> isDirectory(it);
+    return it -> isDirectoryOfJavaProject(it);
+  }
+
+  private boolean isDirectoryOfJavaProject(Path path, LinkOption... options) {
+    if (!isDirectory(path, options)) {
+      return false;
+    }
+    RegisteredProject project = projectManager.getClosestOrNull(pathTransformer.transform(path));
+    return project != null && project.getType().equals(JAVAC);
   }
 
   private void report(String path, FileChangeType changeType) {
