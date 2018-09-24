@@ -799,13 +799,13 @@ public class TextDocumentService {
 
   private static List<ExtendedTextEdit> convertToExtendedEdit(
       List<TextEdit> edits, String filePath) {
-    try {
-      // for some reason C# LS sends ws related path,
-      if (!isStartWithProject(filePath)) {
-        filePath = prefixProject(filePath);
-      }
+    // for some reason C# LS sends ws related path,
+    if (!isStartWithProject(filePath)) {
+      filePath = prefixProject(filePath);
+    }
+    try (FileReader reader = new FileReader(filePath)) {
       CharStreamIterator charStreamIter =
-          new CharStreamIterator(CharStreamEditor.forReader(new FileReader(filePath)));
+          new CharStreamIterator(CharStreamEditor.forReader(reader));
 
       return convertToExtendedEdits(edits, charStreamIter);
     } catch (IOException e) {
