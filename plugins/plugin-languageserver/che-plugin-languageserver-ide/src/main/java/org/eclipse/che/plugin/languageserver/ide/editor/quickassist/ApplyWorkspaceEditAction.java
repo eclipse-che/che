@@ -40,6 +40,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.FileEvent;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.Notification;
@@ -410,8 +411,16 @@ public class ApplyWorkspaceEditAction extends BaseAction {
       Range r = e.getRange();
       Position start = r.getStart();
       Position end = r.getEnd();
-      document.replace(
-          start.getLine(), start.getCharacter(), end.getLine(), end.getCharacter(), e.getNewText());
+      int startIndex =
+          document.getIndexFromPosition(new TextPosition(start.getLine(), start.getCharacter()));
+      // python ls, for example shows as end position index 0 of the line after the change. If the
+      // change is on the last line, we crash
+      int endIndex =
+          document.getIndexFromPosition(new TextPosition(end.getLine(), end.getCharacter()));
+      if (endIndex < 0) {
+        endIndex = document.getContentsCharCount();
+      }
+      document.replace(startIndex, endIndex - startIndex, e.getNewText());
     }
   }
 }
