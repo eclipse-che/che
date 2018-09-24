@@ -11,28 +11,29 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -50,6 +51,9 @@ public class SignatureKeyManagerTest {
   private static final String ALGORITHM = "RSA";
 
   @Mock SignatureKeyDao signatureKeyDao;
+  @Mock EventService eventService;
+
+  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> captor;
 
   private KeyPairGenerator kpg;
   private SignatureKeyManager signatureKeyManager;
@@ -58,70 +62,48 @@ public class SignatureKeyManagerTest {
   public void createEntities() throws Exception {
     kpg = KeyPairGenerator.getInstance(ALGORITHM);
     kpg.initialize(KEY_SIZE);
-    signatureKeyManager = new SignatureKeyManager(KEY_SIZE, ALGORITHM, signatureKeyDao);
+    signatureKeyManager =
+        new SignatureKeyManager(KEY_SIZE, ALGORITHM, eventService, signatureKeyDao);
   }
 
   @Test
-  public void testLoadSignatureKeys() throws Exception {
-    final SignatureKeyPairImpl kp = newKeyPair("id_" + 1);
-    when(signatureKeyDao.getAll(anyInt(), anyLong()))
-        .thenReturn(new Page<>(singleton(kp), 0, 1, 1));
+  public void shouldRemoveKeyPairOnWorkspaceStop() throws Exception {
+    final String wsId = "ws123";
+    signatureKeyManager.subscribe();
+    verify(eventService).subscribe(captor.capture());
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
 
-    signatureKeyManager.loadKeyPair();
+    subscriber.onEvent(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withStatus(WorkspaceStatus.STOPPED)
+            .withWorkspaceId(wsId));
 
-    final KeyPair cachedPair = signatureKeyManager.getKeyPair();
-    assertNotNull(cachedPair);
-    assertKeys(cachedPair.getPublic(), kp.getPublicKey());
-    assertKeys(cachedPair.getPrivate(), kp.getPrivateKey());
+    verify(signatureKeyDao, times(1)).remove(eq(wsId));
   }
 
-  @Test
-  public void testTriesToLoadKeysOnGettingKeyPairAndNoCachedKeyPair() throws Exception {
-    when(signatureKeyDao.getAll(anyInt(), anyLong()))
-        .thenThrow(new ServerException("unexpected end of stack"));
-
-    signatureKeyManager.getKeyPair();
-
-    verify(signatureKeyDao).getAll(anyInt(), anyLong());
-  }
-
-  @Test
-  public void testGeneratesNewKeyPairWhenNoExistingKeyPairFound() throws Exception {
-    doReturn(new Page<>(emptyList(), 0, 1, 0)).when(signatureKeyDao).getAll(anyInt(), anyLong());
-    when(signatureKeyDao.create(any(SignatureKeyPairImpl.class)))
-        .thenAnswer((Answer<SignatureKeyPairImpl>) invoke -> invoke.getArgument(0));
-
-    final KeyPair cachedPair = signatureKeyManager.getKeyPair();
-
-    verify(signatureKeyDao).getAll(anyInt(), anyLong());
-    verify(signatureKeyDao).create(any(SignatureKeyPairImpl.class));
-    assertNotNull(cachedPair);
-  }
-
-  @Test
-  public void testReturnNullKeyPairWhenFailedToLoadAndGenerateKeys() throws Exception {
-    doReturn(new Page<>(emptyList(), 0, 1, 0)).when(signatureKeyDao).getAll(anyInt(), anyLong());
-    when(signatureKeyDao.create(any(SignatureKeyPairImpl.class)))
-        .thenThrow(new ServerException("unexpected end of stack"));
-
-    final KeyPair cachedPair = signatureKeyManager.getKeyPair();
-
-    verify(signatureKeyDao).getAll(anyInt(), anyLong());
-    verify(signatureKeyDao).create(any(SignatureKeyPairImpl.class));
-    assertNull(cachedPair);
-  }
-
-  @Test
-  public void testReturnNullKeyPairWhenAlgorithmIsNotSupported() throws Exception {
+  @Test(expectedExceptions = SignatureKeyManagerException.class)
+  public void shouldThrowsExceptionWhenAlgorithmIsNotSupported() throws Exception {
     final SignatureKeyImpl publicKey = new SignatureKeyImpl(new byte[] {}, "ECDH", "PKCS#15");
     final SignatureKeyImpl privateKey = new SignatureKeyImpl(new byte[] {}, "ECDH", "PKCS#3");
     final SignatureKeyPairImpl kp = new SignatureKeyPairImpl("id_" + 1, publicKey, privateKey);
-    doReturn(new Page<>(singleton(kp), 0, 1, 1)).when(signatureKeyDao).getAll(anyInt(), anyLong());
+    doReturn(kp).when(signatureKeyDao).get(anyString());
 
-    final KeyPair cachedPair = signatureKeyManager.getKeyPair();
+    signatureKeyManager.getOrCreateKeyPair("ws1");
 
-    verify(signatureKeyDao).getAll(anyInt(), anyLong());
-    assertNull(cachedPair);
+    verify(signatureKeyDao).get(anyString());
+  }
+
+  @Test
+  public void shouldReturnSignatureKeys() throws Exception {
+    String wsId = "WS_id_1";
+    final SignatureKeyPairImpl kp = newKeyPair(wsId);
+    when(signatureKeyDao.get(anyString())).thenReturn(kp);
+
+    final KeyPair cachedPair = signatureKeyManager.getOrCreateKeyPair(wsId);
+
+    assertNotNull(cachedPair);
+    assertKeys(cachedPair.getPublic(), kp.getPublicKey());
+    assertKeys(cachedPair.getPrivate(), kp.getPrivateKey());
   }
 
   private SignatureKeyPairImpl newKeyPair(String id) {

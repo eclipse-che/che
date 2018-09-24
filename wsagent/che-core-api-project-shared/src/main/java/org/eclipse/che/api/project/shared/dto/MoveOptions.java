@@ -25,9 +25,8 @@ public interface MoveOptions {
    * @return overWrite attribute
    */
   @ApiModelProperty(
-    value = "Overwrite if there's a conflict with file names",
-    allowableValues = "true, false"
-  )
+      value = "Overwrite if there's a conflict with file names",
+      allowableValues = "true, false")
   Boolean getOverWrite();
   /**
    * Set value of overWrite attribute

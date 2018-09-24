@@ -35,6 +35,7 @@ import org.eclipse.che.ide.command.actions.CommandExplorerContextMenu;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.CommandGoalNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
+import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -91,9 +92,12 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
                 }
               }
 
-              tree.getNodeDescriptor(event.getSelectedItem())
-                  .getNodeContainerElement()
-                  .setAttribute("selected", "selected");
+              if (event.getSelectedItem() != null) {
+                NodeDescriptor nodeDescriptor = tree.getNodeDescriptor(event.getSelectedItem());
+                if (nodeDescriptor != null) {
+                  nodeDescriptor.getNodeContainerElement().setAttribute("selected", "selected");
+                }
+              }
             });
 
     tree.setContextMenuInvocationHandler(contextMenu::show);

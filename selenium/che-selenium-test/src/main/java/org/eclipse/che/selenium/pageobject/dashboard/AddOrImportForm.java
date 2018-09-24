@@ -26,8 +26,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Loca
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.GITHUG_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.GIT_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.PROJECT_TAB_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.SAMPLES_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.TOOLTIP_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm.Locators.ZIP_BUTTON_ID;
 
 import com.google.inject.Inject;
@@ -88,6 +88,8 @@ public class AddOrImportForm {
     String BLANK_FORM_DESCRIPTION_FIELD_XPATH = "//input[@name='description']";
     String BLANK_FORM_NAME_ERROR_MESSAGE_XPATH =
         "//div[@id='project-source-selector']//div[@id='new-workspace-error-message']/div";
+
+    String TOOLTIP_XPATH_TEMPLATE = "//*[contains(@class, 'tooltip') and @content='%s']";
   }
 
   public WebElement waitAddOrImportProjectButton(int timeout) {
@@ -124,6 +126,18 @@ public class AddOrImportForm {
 
   public void clickOnAddButton() {
     seleniumWebDriverHelper.waitAndClick(By.id(ADD_BUTTON_ID));
+  }
+
+  public void addSampleToWorkspace(String sampleName) {
+    waitAddOrImportFormOpened();
+
+    if (!isSampleCheckboxEnabled(sampleName)) {
+      clickOnSampleCheckbox(sampleName);
+    }
+
+    waitSampleCheckboxEnabled(sampleName);
+    clickOnAddButton();
+    waitProjectTabAppearance(sampleName);
   }
 
   public void clickOnCancelButton() {
@@ -239,13 +253,12 @@ public class AddOrImportForm {
 
   private void waitTextInTooltip(String expectedText) {
     seleniumWebDriverHelper.waitTextEqualsTo(
-        By.xpath("//*[contains(@class, 'tooltip')]"), expectedText);
+        By.xpath(format(TOOLTIP_XPATH_TEMPLATE, expectedText)), expectedText);
   }
 
   public void clickOnProjectTab(String tabName) {
     waitProjectTabAppearance(tabName);
-    String locator = format(PROJECT_TAB_XPATH_TEMPLATE, tabName);
-    seleniumWebDriverHelper.moveCursorTo(By.xpath(locator));
+    seleniumWebDriverHelper.moveCursorTo(By.id(tabName));
 
     try {
       waitTextInTooltip(tabName);
@@ -253,7 +266,7 @@ public class AddOrImportForm {
       // sometimes the tooltip does not display on the CI
     }
 
-    seleniumWebDriverHelper.waitAndClick(By.xpath(locator));
+    seleniumWebDriverHelper.waitAndClick(By.id(tabName));
   }
 
   private List<WebElement> getSamples() {
@@ -297,6 +310,14 @@ public class AddOrImportForm {
 
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format("//*[@id='%s']/md-checkbox/div", checkboxId)));
+  }
+
+  public boolean isSampleCheckboxEnabled(String sampleName) {
+    String checkboxId = format(CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE, sampleName);
+    String checkboxLocator = format("//div[@id='%s']/md-checkbox", checkboxId);
+    return seleniumWebDriverHelper
+        .waitVisibilityAndGetAttribute(By.xpath(checkboxLocator), "aria-checked")
+        .equals("true");
   }
 
   private void waitSampleCheckboxState(String sampleName, boolean state) {

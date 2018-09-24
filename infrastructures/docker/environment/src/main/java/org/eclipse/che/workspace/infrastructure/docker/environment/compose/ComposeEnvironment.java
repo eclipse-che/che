@@ -40,6 +40,11 @@ public class ComposeEnvironment extends InternalEnvironment {
     this.services = services;
   }
 
+  @Override
+  public ComposeEnvironment setType(String type) {
+    return (ComposeEnvironment) super.setType(type);
+  }
+
   public String getVersion() {
     return version;
   }
@@ -65,12 +70,21 @@ public class ComposeEnvironment extends InternalEnvironment {
         && Objects.equals(getServices(), that.getServices())
         && Objects.equals(getRecipe(), that.getRecipe())
         && Objects.equals(getMachines(), that.getMachines())
-        && Objects.equals(getWarnings(), that.getWarnings());
+        && Objects.equals(getWarnings(), that.getWarnings())
+        && Objects.equals(getType(), that.getType())
+        && Objects.equals(getAttributes(), that.getAttributes());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(version, getServices(), getMachines(), getRecipe(), getWarnings());
+    return Objects.hash(
+        version,
+        getServices(),
+        getMachines(),
+        getRecipe(),
+        getWarnings(),
+        getType(),
+        getAttributes());
   }
 
   @Override
@@ -87,6 +101,10 @@ public class ComposeEnvironment extends InternalEnvironment {
         + getRecipe()
         + ", warnings="
         + getWarnings()
+        + ", type="
+        + getType()
+        + ", attributes="
+        + getAttributes()
         + '}';
   }
 }

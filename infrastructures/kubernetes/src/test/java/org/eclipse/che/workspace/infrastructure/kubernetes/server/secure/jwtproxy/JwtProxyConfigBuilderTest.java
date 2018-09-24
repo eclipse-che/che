@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import static org.testng.Assert.assertEquals;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import org.testng.annotations.BeforeMethod;
@@ -30,21 +31,28 @@ public class JwtProxyConfigBuilderTest {
 
   @BeforeMethod
   public void setUp() {
-    jwtProxyConfigBuilder = new JwtProxyConfigBuilder("workspace123");
+    jwtProxyConfigBuilder =
+        new JwtProxyConfigBuilder(
+            URI.create("http://che-host.com"),
+            "wsmaster",
+            "1m",
+            "/app/loader.html",
+            "workspace123");
   }
 
   @Test
   public void shouldBuildJwtProxyConfigInYamlFormat() throws Exception {
     // given
     Set<String> excludes = new HashSet<>();
-    jwtProxyConfigBuilder.addVerifierProxy(8080, "http://tomcat:8080", new HashSet<>(excludes));
+    jwtProxyConfigBuilder.addVerifierProxy(
+        8080, "http://tomcat:8080", new HashSet<>(excludes), false);
     excludes.add("/api/liveness");
     excludes.add("/other/exclude");
-    jwtProxyConfigBuilder.addVerifierProxy(4101, "ws://terminal:4101", new HashSet<>(excludes));
+    jwtProxyConfigBuilder.addVerifierProxy(
+        4101, "ws://terminal:4101", new HashSet<>(excludes), true);
 
     // when
     String jwtProxyConfigYaml = jwtProxyConfigBuilder.build();
-
     // then
     assertEquals(
         jwtProxyConfigYaml,

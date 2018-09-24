@@ -285,7 +285,7 @@ public class CommandsEditor {
    * @param expectedText text which should be present in the container
    */
   public void waitTextIntoAutocompleteContainer(final String expectedText) {
-    editor.waitTextIntoAutocompleteContainer(expectedText);
+    editor.waitProposalIntoAutocompleteContainer(expectedText);
   }
 
   /**

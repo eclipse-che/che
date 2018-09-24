@@ -68,10 +68,9 @@ public class JpaUserDaoTest {
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp =
-        "The number of items to skip can't be negative or greater than 2147483647"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "The number of items to skip can't be negative or greater than 2147483647")
   public void shouldThrowExceptionOnGetAllWithGraterThanMaximumIntegerValueAsSkipCountParameter()
       throws Exception {
     userDao.getAll(30, Integer.MAX_VALUE + 1L);

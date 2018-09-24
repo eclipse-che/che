@@ -380,13 +380,14 @@ public class ProjectServiceApi {
   }
 
   /** Upload a folder from zip represented by form data to a specified location */
-  public Response uploadFolderFromZip(String wsPath, Iterator<FileItem> formData)
+  public Response uploadFolderFromZip(
+      String wsPath, Iterator<FileItem> formData, boolean force, boolean skipRoot)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException {
     wsPath = absolutize(wsPath);
 
     FileItemParsed fileItemParsed = parseDir(formData);
     InputStream content = fileItemParsed.getContent();
-    fsManager.unzip(wsPath, content, false);
+    fsManager.unzip(wsPath, content, force, force, skipRoot);
 
     return Response.ok("", MediaType.TEXT_HTML).build();
   }

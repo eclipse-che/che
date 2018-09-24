@@ -23,6 +23,8 @@ public class ProjectTemplates {
   public static final String MAVEN_JAVA_MULTIMODULE = "maven_java_multimodule.json";
   public static final String PLAIN_JAVA = "plain_java.json";
   public static final String CONSOLE_JAVA_SIMPLE = "console_java_simple.json";
+  public static final String GO = "go.json";
+  public static final String DOT_NET = "dotNet.json";
 
   private ProjectTemplates() {}
 }

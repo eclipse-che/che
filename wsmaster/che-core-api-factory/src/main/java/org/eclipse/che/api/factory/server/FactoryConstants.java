@@ -91,7 +91,7 @@ public class FactoryConstants {
 
   public static final String PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE =
       "The parameter %s has a value submitted %s with a value that is unexpected. For more information, "
-          + "please visit http://docs.codenvy.com/user/project-lifecycle/#configuration-reference";
+          + "please visit https://www.eclipse.org/che/docs/workspace-data-model.html#projects";
 
   private FactoryConstants() {}
 }

@@ -97,9 +97,8 @@ public class SystemTerminatorTest {
   }
 
   @Test(
-    expectedExceptions = InterruptedException.class,
-    expectedExceptionsMessageRegExp = "interrupt!"
-  )
+      expectedExceptions = InterruptedException.class,
+      expectedExceptionsMessageRegExp = "interrupt!")
   public void stopsExecutingTerminationIfOneIsInterrupted() throws Exception {
     doThrow(new InterruptedException("interrupt!")).when(termination1).terminate();
 
@@ -119,29 +118,26 @@ public class SystemTerminatorTest {
   }
 
   @Test(
-    dataProvider = "loopableTerminations",
-    expectedExceptions = RuntimeException.class,
-    expectedExceptionsMessageRegExp = "Circular dependency found between terminations \\[B, D\\]"
-  )
+      dataProvider = "loopableTerminations",
+      expectedExceptions = RuntimeException.class,
+      expectedExceptionsMessageRegExp = "Circular dependency found between terminations \\[B, D\\]")
   public void shouldFailOnCyclicDependency(Set<ServiceTermination> terminations) throws Exception {
     new ServiceTerminator(eventService, terminations);
   }
 
   @Test(
-    dataProvider = "sameNameTerminations",
-    expectedExceptions = RuntimeException.class,
-    expectedExceptionsMessageRegExp = "Duplicate termination found with service name .+"
-  )
+      dataProvider = "sameNameTerminations",
+      expectedExceptions = RuntimeException.class,
+      expectedExceptionsMessageRegExp = "Duplicate termination found with service name .+")
   public void shouldFailOnTerminationsWithSameServiceName(Set<ServiceTermination> terminations)
       throws Exception {
     new ServiceTerminator(eventService, terminations);
   }
 
   @Test(
-    dataProvider = "wrongDependencyTerminations",
-    expectedExceptions = RuntimeException.class,
-    expectedExceptionsMessageRegExp = "Unknown dependency found in termination .+"
-  )
+      dataProvider = "wrongDependencyTerminations",
+      expectedExceptions = RuntimeException.class,
+      expectedExceptionsMessageRegExp = "Unknown dependency found in termination .+")
   public void shouldFailOnTerminationsWithUnexistingDeps(Set<ServiceTermination> terminations)
       throws Exception {
     new ServiceTerminator(eventService, terminations);

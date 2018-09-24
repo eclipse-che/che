@@ -11,7 +11,7 @@
  */
 'use strict';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
-import { ICommunicationClient, CODE_REQUEST_TIMEOUT } from './json-rpc-client';
+import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } from './json-rpc-client';
 
 enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'machine/log',
@@ -51,6 +51,14 @@ export class CheJsonRpcMasterApi {
           this.connect(entryPoint);
       }
     });
+  }
+
+  addListener(eventType: CommunicationClientEvent, handler: Function): void {
+    this.client.addListener(eventType, handler);
+  }
+
+  removeListener(eventType: CommunicationClientEvent, handler: Function): void {
+    this.client.removeListener(eventType, handler);
   }
 
   onConnectionOpen(): void {
@@ -113,8 +121,6 @@ export class CheJsonRpcMasterApi {
     }
     return this.cheJsonRpcApi.connect(entryPoint).then(() => {
       return this.fetchClientId();
-    }).catch((error: any) => {
-      console.error(`Failed to connect to ${entryPoint}:`, error);
     });
   }
 

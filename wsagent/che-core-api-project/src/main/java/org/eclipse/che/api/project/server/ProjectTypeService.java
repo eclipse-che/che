@@ -54,10 +54,9 @@ public class ProjectTypeService extends Service {
   @Produces(MediaType.APPLICATION_JSON)
   @GenerateLink(rel = LINK_REL_PROJECT_TYPES)
   @ApiOperation(
-    value = "Get project types",
-    responseContainer = "List",
-    response = ProjectTypeDto.class
-  )
+      value = "Get project types",
+      responseContainer = "List",
+      response = ProjectTypeDto.class)
   @ApiResponses(@ApiResponse(code = 200, message = "Project types successfully fetched"))
   public List<ProjectTypeDto> getProjectTypes() {
     return registry

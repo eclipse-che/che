@@ -57,10 +57,9 @@ public class DockerfileEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment of type '.*' doesn't support multiple machines, but contains machines: .*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
   public void shouldFailIfSeveralMachineConfigsArePresent() throws Exception {
     // given
     when(environment.getMachines())
@@ -82,6 +81,7 @@ public class DockerfileEnvironmentConverterTest {
             .setContainers(newLinkedHashMap(singletonMap(DEFAULT_MACHINE_NAME, container)));
     expected.setMachines(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
     expected.setRecipe(recipe);
+    expected.setType(DockerEnvironment.TYPE);
 
     // when
     DockerEnvironment actual = converter.convert(environment);
@@ -91,9 +91,8 @@ public class DockerfileEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "The specified environment is not dockerfile environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "The specified environment is not dockerfile environment")
   public void shouldThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType()
       throws Exception {
     // when

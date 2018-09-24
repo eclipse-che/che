@@ -72,7 +72,11 @@ class CurrentUserInitializer {
             profile -> {
               user.setId(profile.getUserId());
 
-              return loadPreferences();
+              return loadPreferences()
+                  .then(
+                      preferences -> {
+                        updateGitCommitterPreferencesIfEmpty(preferences, profile);
+                      });
             })
         .then(
             (Function<Map<String, String>, Void>)
@@ -103,6 +107,32 @@ class CurrentUserInitializer {
                   throw new OperationException(
                       messages.unableToLoadPreference() + ": " + arg.getCause());
                 });
+  }
+
+  private void updateGitCommitterPreferencesIfEmpty(
+      Map<String, String> preferences, ProfileDto profile) {
+    String name = profile.getAttributes().get("name");
+    String email = profile.getEmail();
+
+    if (name == null || email == null) {
+      return;
+    }
+
+    String gitCommitterNamePreference = "git.committer.name";
+    String gitCommitterEmailPreference = "git.committer.email";
+
+    String gitCommitterName = preferences.get(gitCommitterNamePreference);
+    String gitCommitterEmail = preferences.get(gitCommitterEmailPreference);
+
+    if (gitCommitterName == null || gitCommitterEmail == null) {
+      if (gitCommitterName == null) {
+        preferencesManager.setValue(gitCommitterNamePreference, name);
+      }
+      if (gitCommitterEmail == null) {
+        preferencesManager.setValue(gitCommitterEmailPreference, email);
+      }
+      preferencesManager.flushPreferences();
+    }
   }
 
   private Promise<ProfileDto> getUserProfile() {

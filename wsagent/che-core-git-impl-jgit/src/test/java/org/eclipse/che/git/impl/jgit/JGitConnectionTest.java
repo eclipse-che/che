@@ -231,10 +231,9 @@ public class JGitConnectionTest {
 
   /** Test for workaround related to https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685. */
   @Test(
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "Changes are present but not changed path was specified for commit."
-  )
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "Changes are present but not changed path was specified for commit.")
   public void testCommitNotChangedSpecifiedPathsWithAmendWhenOtherStagedChangesArePresent()
       throws Exception {
     // given
@@ -251,10 +250,9 @@ public class JGitConnectionTest {
 
   /** Test for workaround related to https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685. */
   @Test(
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp =
-        "Changes are present but not changed path was specified for commit."
-  )
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp =
+          "Changes are present but not changed path was specified for commit.")
   public void
       testCommitNotChangedSpecifiedPathsWithAmendAndWithAllWhenOtherUnstagedChangesArePresent()
           throws Exception {

@@ -59,6 +59,13 @@ public class EditorRegistryImpl implements EditorRegistry {
     register(fileType, provider);
   }
 
+  @Override
+  public void unRegister(FileType fileType, EditorProvider provider) {
+    if (fileType != null && registry.containsKey(fileType)) {
+      registry.get(fileType).remove(provider);
+    }
+  }
+
   /** {@inheritDoc} */
   @Override
   public EditorProvider getEditor(@NotNull FileType fileType) {

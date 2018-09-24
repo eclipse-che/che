@@ -67,7 +67,7 @@ public class CommandsEditorTest {
   }
 
   @Test
-  public void checkComamandsEditor() {
+  public void checkCommandsEditor() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();

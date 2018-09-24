@@ -14,17 +14,17 @@ package org.eclipse.che.selenium.core.webdriver;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
+import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Singleton
 public class WebDriverWaitFactory {
   private SeleniumWebDriver seleniumWebDriver;
-  private Map<Integer, WebDriverWait> webDriverWaits = new HashMap<>();
 
   @Inject
   public WebDriverWaitFactory(SeleniumWebDriver seleniumWebDriver) {
@@ -36,23 +36,39 @@ public class WebDriverWaitFactory {
   }
 
   public WebDriverWait get(int timeoutInSec) {
-    if (!webDriverWaits.isEmpty()) {
-      if (webDriverWaits.containsKey(timeoutInSec)) {
-        return webDriverWaits.get(timeoutInSec);
-      }
-    }
-
-    WebDriverWait webDriverWait = new WebDriverWait(seleniumWebDriver, timeoutInSec);
-    webDriverWaits.put(timeoutInSec, webDriverWait);
-
-    return webDriverWait;
+    return new WebDriverWait(seleniumWebDriver, timeoutInSec);
   }
 
   /**
-   * Creates an instance of the {@link WebDriverWait} with specified {@code timeout} and frequency
-   * of attempts.
+   * Creates an instance of the {@link FluentWait} with specified {@code timeoutInSec} and error
+   * message supplier.
    *
-   * @param timeoutInSec waiting time for condition in seconds.
+   * @param timeoutInSec waiting time in seconds.
+   * @param messageSupplier error message supplier
+   * @return
+   */
+  public FluentWait<WebDriver> get(int timeoutInSec, Supplier<String> messageSupplier) {
+    return new WebDriverWait(seleniumWebDriver, timeoutInSec).withMessage(messageSupplier);
+  }
+
+  /**
+   * Creates an instance of the {@link FluentWait} with specified {@code timeoutInSec} and ignoring
+   * exception of {@code ignoringExceptionType}.
+   *
+   * @param timeoutInSec waiting time in seconds.
+   * @param ignoredExceptionType exception which is ignoring during timeout.
+   * @return
+   */
+  public FluentWait<WebDriver> get(
+      int timeoutInSec, Class<? extends Throwable> ignoredExceptionType) {
+    return new WebDriverWait(seleniumWebDriver, timeoutInSec).ignoring(ignoredExceptionType);
+  }
+
+  /**
+   * Creates an instance of the {@link WebDriverWait} with specified {@code timeoutInSec} and
+   * frequency of attempts.
+   *
+   * @param timeoutInSec waiting time in seconds.
    * @param delayBetweenAttemptsInSec delay between attempts.
    * @return instance of the {@link WebDriverWait} initialized by specified values.
    */

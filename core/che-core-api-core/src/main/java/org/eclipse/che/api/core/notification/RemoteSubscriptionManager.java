@@ -22,6 +22,9 @@ import org.eclipse.che.api.core.notification.dto.EventSubscription;
 @Singleton
 public class RemoteSubscriptionManager {
 
+  public static final String SUBSCRIBE_JSON_RPC_METHOD = "subscribe";
+  public static final String UNSUBSCRIBE_JSON_RPC_METHOD = "unSubscribe";
+
   private final EventService eventService;
   private final RequestTransmitter requestTransmitter;
   private final RemoteSubscriptionStorage remoteSubscriptionStorage;
@@ -40,14 +43,14 @@ public class RemoteSubscriptionManager {
   private void configureSubscription(RequestHandlerConfigurator requestHandlerConfigurator) {
     requestHandlerConfigurator
         .newConfiguration()
-        .methodName("subscribe")
+        .methodName(SUBSCRIBE_JSON_RPC_METHOD)
         .paramsAsDto(EventSubscription.class)
         .noResult()
         .withBiConsumer(this::consumeSubscriptionRequest);
 
     requestHandlerConfigurator
         .newConfiguration()
-        .methodName("unSubscribe")
+        .methodName(UNSUBSCRIBE_JSON_RPC_METHOD)
         .paramsAsDto(EventSubscription.class)
         .noResult()
         .withBiConsumer(this::consumeUnSubscriptionRequest);

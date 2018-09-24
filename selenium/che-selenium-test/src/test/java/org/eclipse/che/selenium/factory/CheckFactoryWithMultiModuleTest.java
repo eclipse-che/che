@@ -12,13 +12,16 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -27,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,11 +44,7 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
-
-  @Inject
-  @Named("github.username")
-  private String gitHubUsername;
-
+  @Inject private TestGitHubRepository testRepo;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
@@ -52,15 +52,18 @@ public class CheckFactoryWithMultiModuleTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    // preconditions - add the project to the test repository
+    Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+    testRepo.addContent(entryPath);
+    String repositoryUrl = testRepo.getHttpsTransportUrl();
+
     TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
     ProjectConfigDto projectConfigDto = factoryBuilder.getWorkspace().getProjects().get(0);
     projectConfigDto.setName(PROJECT_NAME);
     projectConfigDto.setPath("/" + PROJECT_NAME);
     projectConfigDto.getSource().setParameters(ImmutableMap.of("branch", "master"));
-    projectConfigDto
-        .getSource()
-        .setLocation("https://github.com/" + gitHubUsername + "/gitPullTest.git");
+    projectConfigDto.getSource().setLocation(repositoryUrl);
     testFactory = factoryBuilder.build();
   }
 
@@ -70,13 +73,20 @@ public class CheckFactoryWithMultiModuleTest {
   }
 
   @Test
-  public void checkFactoryProcessing() throws Exception {
+  public void checkFactoryProcessing() {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
-    notifications.waitExpectedMessageOnProgressPanelAndClosed(
-        "Project " + PROJECT_NAME + " imported");
+
+    try {
+      notifications.waitExpectedMessageOnProgressPanelAndClose(
+          "Project " + PROJECT_NAME + " imported");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
+
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);

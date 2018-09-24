@@ -63,7 +63,6 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextObjectsRetriever;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.core.db.DBInitializer;
@@ -95,8 +94,6 @@ public class WorkspaceRuntimesTest {
 
   @Mock private WorkspaceStatusCache statuses;
 
-  @Mock private WorkspaceNextObjectsRetriever workspaceNextObjectsRetriever;
-
   private RuntimeInfrastructure infrastructure;
 
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
@@ -117,9 +114,7 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            emptyMap(),
-            workspaceNextObjectsRetriever);
+            lockService);
   }
 
   @Test
@@ -144,10 +139,9 @@ public class WorkspaceRuntimesTest {
   }
 
   @Test(
-    expectedExceptions = ServerException.class,
-    expectedExceptionsMessageRegExp =
-        "Workspace configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered"
-  )
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered")
   public void runtimeIsNotRecoveredIfNoWorkspaceFound() throws Exception {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     when(workspaceDao.get(identity.getWorkspaceId())).thenThrow(new NotFoundException("no!"));
@@ -159,10 +153,9 @@ public class WorkspaceRuntimesTest {
   }
 
   @Test(
-    expectedExceptions = ServerException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered"
-  )
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered")
   public void runtimeIsNotRecoveredIfNoEnvironmentFound() throws Exception {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     WorkspaceImpl workspace = mockWorkspace(identity);
@@ -175,9 +168,9 @@ public class WorkspaceRuntimesTest {
   }
 
   @Test(
-    expectedExceptions = ServerException.class,
-    expectedExceptionsMessageRegExp = "Couldn't recover runtime 'workspace123:my-env'. Error: oops!"
-  )
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Couldn't recover runtime 'workspace123:my-env'. Error: oops!")
   public void runtimeIsNotRecoveredIfInfraPreparationFailed() throws Exception {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
@@ -208,9 +201,7 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            emptyMap(),
-            workspaceNextObjectsRetriever);
+            lockService);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)
@@ -269,9 +260,7 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            emptyMap(),
-            workspaceNextObjectsRetriever);
+            lockService);
 
     // when
     localRuntimes.injectRuntime(workspace);

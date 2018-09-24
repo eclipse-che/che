@@ -1,11 +1,13 @@
-/**
- * ***************************************************************************** Copyright (c) 2016
- * Rogue Wave Software, Inc. All rights reserved. This program and the accompanying materials are
- * made available under the terms of the Eclipse Public License v1.0 which accompanies this
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
- * <p>Contributors: Rogue Wave Software, Inc. - initial API and implementation
- * *****************************************************************************
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Rogue Wave Software, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.zdb.server;
 
@@ -51,9 +53,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   private final FsManager fsManager = mock(FsManager.class);
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testSslConnection() throws Exception {
     triggerSession(dbgHelloFile, getDbgSettings(true, true), fsManager);
     awaitSuspend(dbgHelloFile, 2);
@@ -61,9 +62,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   }
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testStepping() throws Exception {
     triggerSession(dbgHelloFile, getDbgSettings(true, false), fsManager);
     awaitSuspend(dbgHelloFile, 2);
@@ -76,9 +76,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   }
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testEvaluation() throws Exception {
     triggerSession(dbgHelloFile, getDbgSettings(true, false), fsManager);
     awaitSuspend(dbgHelloFile, 2);
@@ -91,9 +90,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   }
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testBreakpoints() throws Exception {
     List<Breakpoint> breakpoints = new ArrayList<>();
     Breakpoint bp1 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgHelloFile, 4));
@@ -118,9 +116,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   }
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testBreaking() throws Exception {
     List<Breakpoint> breakpoints = new ArrayList<>();
     Breakpoint bp1 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgHelloFile, 4));
@@ -136,9 +133,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   }
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testVariables() throws Exception {
     List<Breakpoint> breakpoints = new ArrayList<>();
     Breakpoint bp1 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgClassesFile, 16));
@@ -170,9 +166,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   }
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testGetValue() throws Exception {
     List<Breakpoint> breakpoints = new ArrayList<>();
     Breakpoint bp1 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgClassesFile, 16));
@@ -199,9 +194,8 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
   }
 
   @Test(
-    groups = {"zendDbg"},
-    dependsOnGroups = {"checkPHP"}
-  )
+      groups = {"zendDbg"},
+      dependsOnGroups = {"checkPHP"})
   public void testSetValue() throws Exception {
     List<Breakpoint> breakpoints = new ArrayList<>();
     Breakpoint bp1 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgHelloFile, 5));

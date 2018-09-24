@@ -29,9 +29,8 @@ import org.eclipse.che.account.shared.model.Account;
 @Entity(name = "Account")
 @NamedQueries({
   @NamedQuery(
-    name = "Account.getByName",
-    query = "SELECT a " + "FROM Account a " + "WHERE a.name = :name"
-  )
+      name = "Account.getByName",
+      query = "SELECT a " + "FROM Account a " + "WHERE a.name = :name")
 })
 @Table(name = "account")
 public class AccountImpl implements Account {

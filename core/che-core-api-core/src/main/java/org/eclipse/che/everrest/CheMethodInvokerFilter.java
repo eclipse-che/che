@@ -36,6 +36,7 @@ public abstract class CheMethodInvokerFilter implements MethodInvokerFilter {
   public void accept(GenericResourceMethod genericMethodResource, Object[] arguments)
       throws WebApplicationException {
     try {
+
       filter(genericMethodResource, arguments);
     } catch (ApiException exception) {
       Response response;

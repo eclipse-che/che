@@ -18,7 +18,6 @@ import static org.eclipse.che.commons.lang.ZipUtils.unzip;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,13 +37,14 @@ import org.eclipse.che.selenium.core.utils.DockerUtil;
  */
 @Singleton
 public class DownloadedIntoGridFileUtil implements DownloadedFileUtil {
-  private final String downloadDir;
+  // default download directory in selenium chrome-node 3.10+ which doesn't depend from value of
+  // "download.default_directory" preference
+  private final String downloadDir = "/home/seluser/Downloads";
+
   private final DockerUtil dockerUtil;
 
   @Inject
-  public DownloadedIntoGridFileUtil(
-      @Named("tests.tmp_dir") String downloadDir, DockerUtil dockerUtil) {
-    this.downloadDir = downloadDir;
+  public DownloadedIntoGridFileUtil(DockerUtil dockerUtil) {
     this.dockerUtil = dockerUtil;
   }
 

@@ -49,9 +49,8 @@ public class ShowFileContentTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testShowFileContentFromHead(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -67,9 +66,8 @@ public class ShowFileContentTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testShowFileContentFromBranch(GitConnectionFactory connectionFactory)
       throws IOException, ServerException, URISyntaxException, UnauthorizedException {
     // given
@@ -86,11 +84,10 @@ public class ShowFileContentTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp = "fatal: Path 'dummyFile' does not exist in 'HEAD'\n"
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp = "fatal: Path 'dummyFile' does not exist in 'HEAD'\n")
   public void testShowContentOfNotExistFile(GitConnectionFactory connectionFactory)
       throws Exception {
     // given

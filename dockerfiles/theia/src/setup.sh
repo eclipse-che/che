@@ -1,14 +1,27 @@
 #!/bin/sh
+#
+# Copyright (c) 2018-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#   Red Hat, Inc. - initial API and implementation
+#
+
+set -e
+set -u
 
 # Install basic software used for checking github API rate limit
-apk update && apk add --no-cache curl jq ca-certificates openssl expect
-
-# update certificates
-update-ca-certificates
+yum install -y epel-release
+yum -y install curl jq expect
 
 # define in env variable GITHUB_TOKEN only if it is defined
 # else check if github rate limit is enough, else will abort requiring to set GITHUB_TOKEN value
-if [ "$GITHUB_TOKEN" != "" ]; then
+
+if [ ! -z "${GITHUB_TOKEN-}" ]; then
     export GITHUB_TOKEN=$GITHUB_TOKEN;
     echo "Setting GITHUB_TOKEN value as provided";
 else
@@ -23,17 +36,34 @@ else
     fi
 fi
 
-# install remaining packages
+yum install -y sudo
+# Add a regular user
+useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia
+usermod -p "*" theia
+echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+for f in "/etc/passwd" "/etc/group"; do
+    chgrp -R 0 ${f}
+    chmod -R g+rwX ${f};
+done
+# Generate passwd.template
+cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template
+# Generate group.template
+cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template
+
+# Add yarn repo
+curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
+# Install nodejs/npm/yarn
+curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
+yum install -y nodejs yarn patch
+
+echo "npm version:"
+npm --version
+echo "nodejs version:"
+node --version
+
 # Include opendjk for Java support
-apk add --no-cache make gcc g++ python git bash supervisor openjdk8
-# Cleanup APK cache
-rm -rf /tmp/* /var/cache/apk/*
-
-# Install Yarn 1.7.0 (detect EPL 2.0 as a valid SPDX identifier)
-npm install -g yarn@1.7.0
-chmod u+x /usr/local/bin/yarn
-yarn --version
-
+yum install -y gcc-c++ make python git supervisor java-1.8.0-openjdk-devel bzip2
 
 # Clone specific tag of a Theia version
 git clone --branch v${THEIA_VERSION} https://github.com/theia-ide/theia ${HOME}/theia-source-code
@@ -91,7 +121,7 @@ cd ${HOME}
 rm -rf ${HOME}/theia-source-code
 
 # Change version of Theia to specified in THEIA_VERSION
-cd ${HOME} && ${HOME}/versions.sh 
+cd ${HOME} && ${HOME}/versions.sh
 
 # Apply resolution section to the Theia package.json to use strict versions for Theia dependencies
 node ${HOME}/resolutions-provider.js ${HOME}/package.json
@@ -123,7 +153,8 @@ cd ${HOME}
 yarn cache clean
 
 # cleanup stuff installed temporary
-apk del curl jq expect
+yum erase -y jq expect
+yum clean all
 npm uninstall -g verdaccio
 rm -rf ${HOME}/.config/verdaccio/
 
@@ -137,4 +168,4 @@ rm add-extensions.js resolutions-provider.js versions.sh setup.sh
 rm extensions.json
 
 # use typescript globally (to have tsc/typescript working)
-npm install -g typescript@2.8.4
+npm install -g typescript@2.9.2

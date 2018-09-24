@@ -55,9 +55,8 @@ public class RemoteAddTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testSimpleRemoteAdd(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -71,9 +70,8 @@ public class RemoteAddTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testAddNotAllBranchesTracked(GitConnectionFactory connectionFactory)
       throws GitException, URISyntaxException, IOException, UnauthorizedException {
     // given

@@ -16,10 +16,12 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
@@ -28,17 +30,12 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(groups = TestGroup.GITHUB)
 public class DirectUrlFactoryWithKeepDirectoryTest {
-
-  @Inject
-  @Named("github.username")
-  private String gitHubUsername;
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestFactoryInitializer testFactoryInitializer;
@@ -48,15 +45,18 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient projectServiceClient;
   @Inject private DefaultTestUser testUser;
-  @Inject private Dashboard dashboard;
+  @Inject private TestGitHubRepository testRepo;
 
   private TestFactory testFactoryWithKeepDir;
 
   @BeforeClass
   public void setUp() throws Exception {
-    testFactoryWithKeepDir =
-        testFactoryInitializer.fromUrl(
-            "https://github.com/" + gitHubUsername + "/gitPullTest/tree/master/my-lib");
+    // preconditions - add the project to the test repository
+    Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
+    testRepo.addContent(entryPath);
+    String repositoryUrl = testRepo.getHtmlUrl();
+
+    testFactoryWithKeepDir = testFactoryInitializer.fromUrl(repositoryUrl + "/tree/master/my-lib");
   }
 
   @AfterClass
@@ -66,15 +66,16 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
 
   @Test
   public void factoryWithDirectUrlWithKeepDirectory() throws Exception {
+    String repoName = testRepo.getName();
     testFactoryWithKeepDir.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
-    events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
+    events.waitExpectedMessage("Project " + repoName + " imported", UPDATING_PROJECT_TIMEOUT_SEC);
 
-    projectExplorer.waitItem("gitPullTest");
+    projectExplorer.waitItem(repoName);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
+    projectExplorer.waitItem(repoName + "/my-lib/pom.xml");
 
     String wsId =
         workspaceServiceClient
@@ -82,8 +83,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
             .getId();
 
     List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
-    assertTrue(
-        visibleItems.containsAll(ImmutableList.of("gitPullTest", "my-lib", "src", "pom.xml")));
+    assertTrue(visibleItems.containsAll(ImmutableList.of(repoName, "my-lib", "src", "pom.xml")));
 
     String projectType = projectServiceClient.getFirstProject(wsId).getType();
     assertTrue(projectType.equals("blank"));

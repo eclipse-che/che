@@ -56,6 +56,9 @@ import org.eclipse.che.multiuser.api.permission.server.jpa.JpaSystemPermissionsD
 import org.eclipse.che.multiuser.api.permission.server.model.impl.SystemPermissionsImpl;
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
 import org.eclipse.che.multiuser.api.permission.server.spi.tck.SystemPermissionsDaoTest;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.jpa.JpaSignatureKeyDao;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationDomain;
 import org.eclipse.che.multiuser.organization.spi.MemberDao;
 import org.eclipse.che.multiuser.organization.spi.OrganizationDao;
@@ -163,6 +166,10 @@ public class MultiuserPostgresqlTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {})
         .toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
+    // machine token keys
+    bind(new TypeLiteral<TckRepository<SignatureKeyPairImpl>>() {})
+        .toInstance(new JpaTckRepository<>(SignatureKeyPairImpl.class));
+
     // dao
     bind(OrganizationDao.class).to(JpaOrganizationDao.class);
     bind(OrganizationDistributedResourcesDao.class)
@@ -171,6 +178,7 @@ public class MultiuserPostgresqlTckModule extends TckModule {
 
     bind(WorkerDao.class).to(JpaWorkerDao.class);
     bind(MemberDao.class).to(JpaMemberDao.class);
+    bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
     bind(new TypeLiteral<PermissionsDao<MemberImpl>>() {}).to(JpaMemberDao.class);
     bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 

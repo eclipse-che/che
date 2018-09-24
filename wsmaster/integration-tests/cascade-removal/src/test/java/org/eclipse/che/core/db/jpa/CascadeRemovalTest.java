@@ -233,9 +233,7 @@ public class CascadeRemovalTest {
                             mock(DBInitializer.class),
                             mock(ProbeScheduler.class),
                             new DefaultWorkspaceStatusCache(),
-                            new DefaultWorkspaceLockService(),
-                            emptyMap(),
-                            null));
+                            new DefaultWorkspaceLockService()));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);

@@ -117,7 +117,7 @@ public class JavaTestPluginJunit4Test {
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
 
     // then
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Test runner executed successfully.");
 
     pluginConsole.waitFqnOfTesClassInResultTree("org.eclipse.che.examples.AppOneTest");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
@@ -149,7 +149,7 @@ public class JavaTestPluginJunit4Test {
 
     // when
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Test runner executed successfully.");
 
     // then
     pluginConsole.waitFqnOfTesClassInResultTree("org.eclipse.che.examples.AppAnotherTest");
@@ -159,7 +159,7 @@ public class JavaTestPluginJunit4Test {
 
     editor.goToCursorPositionVisible(33, 5);
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
@@ -169,7 +169,7 @@ public class JavaTestPluginJunit4Test {
 
     editor.goToCursorPositionVisible(39, 5);
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
-    notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
+    notifications.waitExpectedMessageOnProgressPanelAndClose("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(IGNORED).size() == 1);
   }

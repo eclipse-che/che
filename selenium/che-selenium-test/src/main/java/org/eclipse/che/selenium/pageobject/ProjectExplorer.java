@@ -64,7 +64,6 @@ import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuCons
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -265,6 +264,7 @@ public class ProjectExplorer {
   public void waitProjectExplorer(int timeout) {
     try {
       seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
+      loader.waitOnClosed();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
@@ -482,19 +482,10 @@ public class ProjectExplorer {
    */
   public void waitAndSelectItem(String path, int timeout) {
     waitItem(path);
-    try {
-      waitAndGetItem(path, timeout).click();
-    }
-    // sometimes an element in the project explorer may not be attached to the DOM. We should
-    // refresh all items.
-    catch (StaleElementReferenceException ex) {
-      LOG.debug(ex.getLocalizedMessage(), ex);
-
-      waitProjectExplorer();
-      clickOnRefreshTreeButton();
-      waitItem(path);
-      waitAndGetItem(path, timeout).click();
-    }
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> waitAndGetItem(path, timeout).click(),
+        StaleElementReferenceException.class,
+        LOAD_PAGE_TIMEOUT_SEC);
   }
 
   /**
@@ -553,22 +544,13 @@ public class ProjectExplorer {
     waitAndSelectItem(path);
     waitItemIsSelected(path);
 
-    try {
-      action.moveToElement(waitAndGetItem(path)).perform();
-      action.doubleClick().perform();
-    }
-    // sometimes an element in the project explorer may not be attached to the DOM. We should
-    // refresh all items.
-    catch (StaleElementReferenceException ex) {
-      LOG.debug(ex.getLocalizedMessage(), ex);
-
-      clickOnRefreshTreeButton();
-      waitAndSelectItem(path);
-      waitItemIsSelected(path);
-      action.moveToElement(waitAndGetItem(path)).perform();
-      action.doubleClick().perform();
-    }
-    loader.waitOnClosed();
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> {
+          action.moveToElement(waitAndGetItem(path)).perform();
+          action.doubleClick().perform();
+        },
+        StaleElementReferenceException.class,
+        LOAD_PAGE_TIMEOUT_SEC);
   }
 
   /**
@@ -639,7 +621,8 @@ public class ProjectExplorer {
         By.xpath(
             format(
                 "//div[@path='/%s']/div/*[local-name() = 'svg' and @id='%s']",
-                path, folderType.get())));
+                path, folderType.get())),
+        ELEMENT_TIMEOUT_SEC);
   }
 
   /**
@@ -679,6 +662,13 @@ public class ProjectExplorer {
 
     seleniumWebDriverHelper.waitVisibility(
         By.id(ContextMenuFirstLevelItems.NEW.get()), WIDGET_TIMEOUT_SEC);
+  }
+
+  /** Waits on context menu item is not visible */
+  public void waitContexMenuItemIsNotVisible(ContextMenuItems item) {
+    waitContextMenu();
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item.get())));
   }
 
   /**
@@ -1060,8 +1050,7 @@ public class ProjectExplorer {
   /** Invokes special javascript function for 'quick' expand project(s) tree */
   public void quickExpandWithJavaScript() {
     String jsScript = "IDE.ProjectExplorer.expandAll();";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 
@@ -1070,8 +1059,7 @@ public class ProjectExplorer {
    */
   public void quickCollapseJavaScript() {
     String jsScript = "IDE.ProjectExplorer.collapseAll()";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 
@@ -1083,8 +1071,7 @@ public class ProjectExplorer {
    */
   public void quickRevealToItemWithJavaScript(String absPathToResource) {
     String jsScript = "IDE.ProjectExplorer.reveal(\"" + absPathToResource.replace(".", "/") + "\")";
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
-    js.executeScript(jsScript);
+    seleniumWebDriver.executeScript(jsScript);
     loader.waitOnClosed();
   }
 

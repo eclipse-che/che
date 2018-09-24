@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.common.collect.ImmutableMap;
@@ -22,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -54,9 +54,8 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Workspace name required"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Workspace name required")
   public void shouldFailValidationIfNameIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.withName(null);
@@ -65,13 +64,12 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    dataProvider = "invalidNameProvider",
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Incorrect workspace name, it must be between 3 and 100 "
-            + "characters and may contain digits, latin letters, underscores, dots, dashes and must "
-            + "start and end only with digits, latin letters or underscores"
-  )
+      dataProvider = "invalidNameProvider",
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Incorrect workspace name, it must be between 3 and 100 "
+              + "characters and may contain digits, latin letters, underscores, dots, dashes and must "
+              + "start and end only with digits, latin letters or underscores")
   public void shouldFailValidationIfNameIsInvalid(String name) throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.withName(name);
@@ -118,9 +116,8 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Attribute name 'null' is not valid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Attribute name 'null' is not valid")
   public void shouldFailValidationIfAttributeNameIsNull() throws Exception {
     Map<String, String> attributes = new HashMap<>();
     attributes.put(null, "value1");
@@ -129,25 +126,22 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Attribute name '' is not valid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Attribute name '' is not valid")
   public void shouldFailValidationIfAttributeNameIsEmpty() throws Exception {
     wsValidator.validateAttributes(ImmutableMap.of("", "value1"));
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Attribute name 'codenvy_key' is not valid"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Attribute name 'codenvy_key' is not valid")
   public void shouldFailValidationIfAttributeNameStartsWithWordCodenvy() throws Exception {
     wsValidator.validateAttributes(ImmutableMap.of("codenvy_key", "value1"));
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Workspace default environment name required"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Workspace default environment name required")
   public void shouldFailValidationIfDefaultEnvNameIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.setDefaultEnv(null);
@@ -156,9 +150,8 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Workspace default environment name required"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Workspace default environment name required")
   public void shouldFailValidationIfDefaultEnvNameIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.setDefaultEnv("");
@@ -167,9 +160,8 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Workspace default environment configuration required"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Workspace default environment configuration required")
   public void shouldFailValidationIfEnvWithDefaultEnvNameIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.setEnvironments(null);
@@ -178,9 +170,9 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Workspace ws-name contains command with null or empty name"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace ws-name contains command with null or empty name")
   public void shouldFailValidationIfCommandNameIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withName(null);
@@ -189,17 +181,31 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Value '.*' of attribute '" + MEMORY_LIMIT_ATTRIBUTE + "' in machine '.*' is illegal",
-    dataProvider = "illegalMemoryAttributeValueProvider"
-  )
-  public void shouldFailValidationIfMemoryMachineAttributeHasIllegalValue(String attributeValue)
-      throws Exception {
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Value '.*' of attribute '" + MEMORY_LIMIT_ATTRIBUTE + "' in machine '.*' is illegal",
+      dataProvider = "illegalMemoryAttributeValueProvider")
+  public void shouldFailValidationIfMemoryLimitMachineAttributeHasIllegalValue(
+      String attributeValue) throws Exception {
     final WorkspaceConfigDto config = createConfig();
     EnvironmentDto env = config.getEnvironments().values().iterator().next();
     MachineConfigDto machine = env.getMachines().values().iterator().next();
-    machine.getAttributes().put(MachineConfig.MEMORY_LIMIT_ATTRIBUTE, attributeValue);
+    machine.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, attributeValue);
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Value '.*' of attribute '" + MEMORY_REQUEST_ATTRIBUTE + "' in machine '.*' is illegal",
+      dataProvider = "illegalMemoryAttributeValueProvider")
+  public void shouldFailValidationIfMemoryRequestMachineAttributeHasIllegalValue(
+      String attributeValue) throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    EnvironmentDto env = config.getEnvironments().values().iterator().next();
+    MachineConfigDto machine = env.getMachines().values().iterator().next();
+    machine.getAttributes().put(MEMORY_REQUEST_ATTRIBUTE, attributeValue);
 
     wsValidator.validateConfig(config);
   }
@@ -210,9 +216,9 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Workspace ws-name contains command with null or empty name"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace ws-name contains command with null or empty name")
   public void shouldFailValidationIfCommandNameIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withName(null);
@@ -221,9 +227,8 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Command line required for command '.*'"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Command line required for command '.*'")
   public void shouldFailValidationIfCommandLineIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withCommandLine(null);
@@ -232,9 +237,8 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Command line required for command '.*'"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Command line required for command '.*'")
   public void shouldFailValidationIfCommandLineIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withCommandLine("");
@@ -243,10 +247,9 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Volume name '.*' in machine '.*' is invalid",
-    dataProvider = "illegalVolumeNameProvider"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Volume name '.*' in machine '.*' is invalid",
+      dataProvider = "illegalVolumeNameProvider")
   public void shouldFailValidationIfVolumeNameDoesNotMatchCriteria(String volumeName)
       throws Exception {
     final WorkspaceConfigDto config = createConfig();
@@ -270,10 +273,9 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Path of volume '.*' in machine '.*' is invalid. It should not be empty"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Path of volume '.*' in machine '.*' is invalid. It should not be empty")
   public void shouldFailValidationIfVolumeValueIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     EnvironmentDto env = config.getEnvironments().values().iterator().next();
@@ -284,10 +286,9 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Path of volume '.*' in machine '.*' is invalid. It should not be empty"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Path of volume '.*' in machine '.*' is invalid. It should not be empty")
   public void shouldFailValidationIfVolumePathIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     EnvironmentDto env = config.getEnvironments().values().iterator().next();
@@ -298,10 +299,9 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Path of volume '.*' in machine '.*' is invalid. It should not be empty"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Path of volume '.*' in machine '.*' is invalid. It should not be empty")
   public void shouldFailValidationIfVolumePathIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     EnvironmentDto env = config.getEnvironments().values().iterator().next();
@@ -312,10 +312,9 @@ public class WorkspaceValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Path '.*' of volume '.*' in machine '.*' is invalid. It should be absolute"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Path '.*' of volume '.*' in machine '.*' is invalid. It should be absolute")
   public void shouldFailValidationIfVolumePathIsNotAbsolute() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     EnvironmentDto env = config.getEnvironments().values().iterator().next();

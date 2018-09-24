@@ -43,7 +43,7 @@ export class WebsocketClient implements ICommunicationClient {
 
     this.websocketStream.onOpen(() => {
       const event: communicationClientEvent = 'open';
-      if (this.handlers[event] && this.handlers[event].length === 0) {
+      if (this.handlers[event] && this.handlers[event].length > 0) {
         this.handlers[event].forEach((handler: Function) => handler() );
       }
 

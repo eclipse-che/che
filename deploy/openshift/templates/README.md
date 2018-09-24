@@ -257,9 +257,3 @@ To allow creating workspace OpenShift resources in personal OpenShift accounts, 
 ```
 -p CHE_INFRA_OPENSHIFT_PROJECT=NULL -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=openshift-v3
 ```
-
-
-## Workspace.Next
-
-There is a file `../../kubernetes/kubectl/wsnext/feature-api.yaml` which contains apache service that hosts Workspace.Next files. It is needed to test Workspace.Next.
-To use it call `oc apply -f ../../kubernetes/kubectl/wsnext/feature-api.yaml` and Che will be able to use Workspace.Next flow.

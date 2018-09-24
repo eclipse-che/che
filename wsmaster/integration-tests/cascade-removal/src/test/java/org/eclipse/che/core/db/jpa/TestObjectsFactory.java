@@ -90,7 +90,8 @@ public final class TestObjectsFactory {
         asList(createProjectConfig(id + "-project1"), createProjectConfig(id + "-project2")),
         ImmutableMap.of(
             id + "env1", createEnv(),
-            id + "env2", createEnv()));
+            id + "env2", createEnv()),
+        ImmutableMap.of("attr1", "value1", "attr2", "value2"));
   }
 
   public static ProjectConfigImpl createProjectConfig(String name) {

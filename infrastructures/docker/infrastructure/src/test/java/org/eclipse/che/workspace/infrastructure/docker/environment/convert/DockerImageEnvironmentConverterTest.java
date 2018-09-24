@@ -17,7 +17,6 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.collections.Maps.newLinkedHashMap;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.core.ValidationException;
@@ -58,10 +57,9 @@ public class DockerImageEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment of type '.*' doesn't support multiple machines, but contains machines: .*"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
   public void shouldFailIfSeveralMachineConfigsArePresent() throws Exception {
     // given
     when(environment.getMachines())
@@ -80,7 +78,8 @@ public class DockerImageEnvironmentConverterTest {
     DockerEnvironment expectedEnv =
         new DockerEnvironment(
                 recipe, singletonMap(DEFAULT_MACHINE_NAME, machineConfig), emptyList())
-            .setContainers(newLinkedHashMap(singletonMap(DEFAULT_MACHINE_NAME, expectedContainer)));
+            .setContainers(newLinkedHashMap(singletonMap(DEFAULT_MACHINE_NAME, expectedContainer)))
+            .setType(DockerEnvironment.TYPE);
 
     // when
     DockerEnvironment actual = converter.convert(environment);
@@ -90,9 +89,8 @@ public class DockerImageEnvironmentConverterTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "The specified environment is not docker image environment"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "The specified environment is not docker image environment")
   public void shouldThrowExceptionInCaseEnvironmentHasWrongType() throws Exception {
     // when
     converter.convert(mock(InternalEnvironment.class));

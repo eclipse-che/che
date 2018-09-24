@@ -76,9 +76,8 @@ public class ProjectConfigImpl implements ProjectConfig {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "projectconfig_mixins",
-    joinColumns = @JoinColumn(name = "projectconfig_id")
-  )
+      name = "projectconfig_mixins",
+      joinColumns = @JoinColumn(name = "projectconfig_id"))
   @Column(name = "mixins")
   private List<String> mixins;
 
@@ -306,10 +305,9 @@ public class ProjectConfigImpl implements ProjectConfig {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-      name = "projectattribute_values",
-      joinColumns = @JoinColumn(name = "projectattribute_id")
-    )
-    @Column(name = "values")
+        name = "projectattribute_values",
+        joinColumns = @JoinColumn(name = "projectattribute_id"))
+    @Column(name = "attribute_values")
     private List<String> values;
 
     public Attribute() {}

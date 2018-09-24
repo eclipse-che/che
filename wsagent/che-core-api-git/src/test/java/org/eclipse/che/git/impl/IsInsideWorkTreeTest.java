@@ -51,9 +51,8 @@ public class IsInsideWorkTreeTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void shouldReturnTrueInsideWorkingTree(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
     // given
@@ -72,9 +71,8 @@ public class IsInsideWorkTreeTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void shouldReturnFalseInsideDotGitDirectory(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
     // given
@@ -90,9 +88,8 @@ public class IsInsideWorkTreeTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void shouldReturnFalseOutsideRepositoryDirectory(GitConnectionFactory connectionFactory)
       throws ServerException, IOException, UnauthorizedException, URISyntaxException {
     // given

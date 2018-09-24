@@ -35,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -82,7 +83,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   @Test
   public void checkImportAndResolveDependenciesEclipceCheProject() {
     final int timeoutToOpenInfoPanel = 120;
-    final int timeoutToClosingInfoPanel = 2900;
+    final int timeoutToClosingInfoPanel = 5400;
 
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();
@@ -99,7 +100,13 @@ public class ImportAndValidateEclipseCheProjectTest {
     // TODO https://github.com/eclipse/che/issues/10515
     closeErrorDialog();
 
-    projectWizard.waitCreateProjectWizardFormIsClosed();
+    try {
+      projectWizard.waitCreateProjectWizardFormIsClosed();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure: https://github.com/eclipse/che/issues/11145");
+    }
+
     loader.waitOnClosed();
 
     // expand the project

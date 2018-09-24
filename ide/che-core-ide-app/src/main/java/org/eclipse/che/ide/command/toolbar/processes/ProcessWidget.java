@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.command.toolbar.processes;
 
+import static com.google.gwt.safehtml.shared.SimpleHtmlSanitizer.sanitizeHtml;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -85,7 +86,7 @@ class ProcessWidget extends FlowPanel {
   }
 
   private Label createMachineNameLabel(Process process) {
-    final Label label = new InlineHTML(process.getMachineName() + ":&nbsp;");
+    final Label label = new InlineHTML(sanitizeHtml(process.getMachineName()) + ":&nbsp;");
 
     label.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
     label.addStyleName(RESOURCES.commandToolbarCss().processWidgetMachineNameLabel());
@@ -98,7 +99,7 @@ class ProcessWidget extends FlowPanel {
   }
 
   private Label createCommandNameLabel(Process process) {
-    final Label label = new InlineHTML(process.getName());
+    final Label label = new InlineHTML(sanitizeHtml(process.getName()));
 
     label.addStyleName(RESOURCES.commandToolbarCss().processWidgetText());
     label.addStyleName(RESOURCES.commandToolbarCss().processWidgetCommandNameLabel());

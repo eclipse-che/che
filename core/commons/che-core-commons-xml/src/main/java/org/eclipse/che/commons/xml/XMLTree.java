@@ -375,6 +375,7 @@ public final class XMLTree {
   private Document parseQuietly(byte[] xml) {
     try {
       final DocumentBuilder db = DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
+      db.setErrorHandler(new QuietXmlErrorHandler());
       return db.parse(new ByteArrayInputStream(xml));
     } catch (Exception ex) {
       throw XMLTreeException.wrap(ex);

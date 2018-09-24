@@ -25,13 +25,16 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
+import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
@@ -46,12 +49,17 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerService;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftInfraModule extends AbstractModule {
@@ -61,6 +69,7 @@ public class OpenShiftInfraModule extends AbstractModule {
         MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
 
     factories.addBinding(OpenShiftEnvironment.TYPE).to(OpenShiftEnvironmentFactory.class);
+    factories.addBinding(KubernetesEnvironment.TYPE).to(KubernetesEnvironmentFactory.class);
     factories.addBinding(DockerImageEnvironment.TYPE).to(DockerImageEnvironmentFactory.class);
 
     bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);
@@ -98,9 +107,9 @@ public class OpenShiftInfraModule extends AbstractModule {
         .addBinding()
         .to(KubernetesClientTermination.class);
 
-    MapBinder<String, WorkspaceNextApplier> wsNext =
-        MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
-    wsNext.addBinding(OpenShiftEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
+    MapBinder<String, ChePluginsApplier> pluginsAppliers =
+        MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
+    pluginsAppliers.addBinding(OpenShiftEnvironment.TYPE).to(KubernetesPluginsToolingApplier.class);
 
     bind(new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {})
         .toProvider(new TypeLiteral<SecureServerExposerFactoryProvider<OpenShiftEnvironment>>() {});
@@ -115,5 +124,19 @@ public class OpenShiftInfraModule extends AbstractModule {
     secureServerExposerFactories
         .addBinding("default")
         .to(new TypeLiteral<DefaultSecureServersFactory<OpenShiftEnvironment>>() {});
+
+    bind(BrokerService.class);
+
+    bind(new TypeLiteral<BrokerEnvironmentFactory<OpenShiftEnvironment>>() {})
+        .to(OpenshiftBrokerEnvironmentFactory.class);
+
+    bind(PluginBrokerManager.class)
+        .to(new TypeLiteral<PluginBrokerManager<OpenShiftEnvironment>>() {});
+
+    bind(SidecarToolingProvisioner.class)
+        .to(new TypeLiteral<SidecarToolingProvisioner<OpenShiftEnvironment>>() {});
+
+    bind(new TypeLiteral<KubernetesEnvironmentProvisioner<OpenShiftEnvironment>>() {})
+        .to(OpenShiftEnvironmentProvisioner.class);
   }
 }

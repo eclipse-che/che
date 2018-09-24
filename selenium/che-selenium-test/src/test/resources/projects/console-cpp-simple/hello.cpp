@@ -14,9 +14,8 @@
 
 void test(int);
 
-int main()
-{
-  int x = 4;
+int main() {
+    int x   =   4;
   std::cout << "Hello World!" << std::endl;
   std::cout << isEven(x) << std::endl;
   return 0;

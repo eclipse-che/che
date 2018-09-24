@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
@@ -63,6 +64,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -78,6 +80,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,9 +88,8 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  * @author Anton Korneta
  */
-public class KubernetesInternalRuntime<
-        T extends KubernetesRuntimeContext<? extends KubernetesEnvironment>>
-    extends InternalRuntime<T> {
+public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
+    extends InternalRuntime<KubernetesRuntimeContext<E>> {
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesInternalRuntime.class);
 
@@ -105,6 +107,9 @@ public class KubernetesInternalRuntime<
   private final KubernetesRuntimeStateCache runtimeStates;
   private final KubernetesMachineCache machines;
   private final StartSynchronizer startSynchronizer;
+  private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
+  private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
+  private final SidecarToolingProvisioner<E> toolingProvisioner;
 
   @Inject
   public KubernetesInternalRuntime(
@@ -122,7 +127,10 @@ public class KubernetesInternalRuntime<
       KubernetesRuntimeStateCache runtimeStates,
       KubernetesMachineCache machines,
       StartSynchronizerFactory startSynchronizerFactory,
-      @Assisted T context,
+      Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
+      KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
+      SidecarToolingProvisioner<E> toolingProvisioner,
+      @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace,
       @Assisted List<Warning> warnings) {
     super(context, urlRewriter, warnings);
@@ -139,16 +147,36 @@ public class KubernetesInternalRuntime<
     this.executor = sharedPool.getExecutor();
     this.runtimeStates = runtimeStates;
     this.machines = machines;
+    this.toolingProvisioner = toolingProvisioner;
+    this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
+    this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
   }
 
   @Override
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
-    KubernetesRuntimeContext<? extends KubernetesEnvironment> context = getContext();
+    KubernetesRuntimeContext<E> context = getContext();
     String workspaceId = context.getIdentity().getWorkspaceId();
     try {
       startSynchronizer.setStartThread();
       startSynchronizer.start();
+
+      // Tooling side car provisioner should be applied before other provisioners
+      // because new machines may be provisioned there
+      toolingProvisioner.provision(context.getIdentity(), context.getEnvironment());
+
+      startSynchronizer.checkFailure();
+
+      // Workspace API provisioners should be reapplied here to bring needed
+      // changed into new machines that came during tooling provisioning
+      for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
+        envProvisioner.provision(context.getIdentity(), context.getEnvironment());
+      }
+
+      // Infrastructure specific provisioner should be applied last
+      // because it converts all Workspace API model objects that comes
+      // from previous provisioners into infrastructure specific objects
+      kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
 
       volumesStrategy.prepare(context.getEnvironment(), workspaceId);
 
@@ -750,7 +778,16 @@ public class KubernetesInternalRuntime<
     /** Returns true if event belongs to one of the workspace pods, false otherwise */
     private boolean isWorkspaceEvent(PodEvent event) {
       String podName = event.getPodName();
-      return workspacePods.containsKey(podName);
+      if (Strings.isNullOrEmpty(podName)) {
+        return false;
+      }
+      // Note it is necessary to compare via startsWith rather than equals here, as pods managed by
+      // deployments have their name set as [deploymentName]-[hash]. `workspacePodName` is used to
+      // define the deployment name, so pods that are created aren't an exact match.
+      return workspacePods
+          .keySet()
+          .stream()
+          .anyMatch(workspacePodName -> podName.startsWith(workspacePodName));
     }
 
     /**

@@ -16,7 +16,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.che.api.languageserver.shared.model.LanguageRegex;
 import org.eclipse.che.api.promises.client.Promise;
@@ -92,16 +94,29 @@ public class LanguageServerRegistry {
   }
 
   /**
+   * Remove given File Type from registry.
+   *
+   * @param fileType the file type for removing
+   */
+  public void unRegister(FileType fileType) {
+    if (fileType != null) {
+      registeredFileTypes.remove(fileType);
+    }
+  }
+
+  /** Returns the set of all registered file types. */
+  public Set<FileType> getRegisteredFileTypes() {
+    return new HashSet<>(registeredFileTypes.keySet());
+  }
+
+  /**
    * Get the language that is registered for this file. May return null if none is found.
    *
    * @param file
    * @return
    */
   public LanguageRegex getLanguageFilter(VirtualFile file) {
-    FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
-    if (fileType == null) {
-      return null;
-    }
+    FileType fileType = fileTypeRegistry.getFileTypeByFileName(file.getName());
     return registeredFileTypes.get(fileType);
   }
 }

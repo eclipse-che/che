@@ -17,11 +17,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>6.10.0-SNAPSHOT</version>
+        <version>6.12.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>6.10.0-SNAPSHOT</version>
+    <version>6.12.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -40,6 +40,7 @@
         <module>workspace-loader</module>
         <module>assembly</module>
         <module>selenium</module>
+        <module>dockerfiles</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
@@ -48,9 +49,9 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.docs.version>6.10.0-SNAPSHOT</che.docs.version>
-        <che.lib.version>6.10.0-SNAPSHOT</che.lib.version>
-        <che.version>6.10.0-SNAPSHOT</che.version>
+        <che.docs.version>6.12.0-SNAPSHOT</che.docs.version>
+        <che.lib.version>6.12.0-SNAPSHOT</che.lib.version>
+        <che.version>6.12.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -864,12 +865,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-test-ls</artifactId>
-                <version>${che.lib.version}</version>
-                <type>tar.gz</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-tomcat8-slf4j-logback</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
@@ -1025,6 +1020,11 @@
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-permission-factory</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-infra-kubernetes</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -1996,28 +1996,16 @@
     </dependencyManagement>
     <repositories>
         <repository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+            <id>ossrh</id>
+            <name>central public snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>codenvy-public-snapshots-repo</id>
-            <name>codenvy public snapshots</name>
-            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
             <id>codenvy-public-repo</id>
             <name>codenvy public</name>
             <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>codenvy-public-snapshots-repo</id>
-            <name>codenvy public snapshots</name>
-            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
+        </repository>
+    </repositories>
     <build>
         <pluginManagement>
             <plugins>

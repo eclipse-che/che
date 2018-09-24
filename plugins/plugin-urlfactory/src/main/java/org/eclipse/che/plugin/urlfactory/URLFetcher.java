@@ -40,8 +40,8 @@ public class URLFetcher {
   /** Logger. */
   private static final Logger LOG = LoggerFactory.getLogger(URLFetcher.class);
 
-  /** Maximum size of allowed data. (30KB) */
-  protected static final long MAXIMUM_READ_BYTES = 30 * 1000;
+  /** Maximum size of allowed data. (40KB) */
+  protected static final long MAXIMUM_READ_BYTES = 40 * 1000;
 
   /** The Compiled REGEX PATTERN that can be used for http|https git urls */
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");

@@ -141,6 +141,7 @@ public class ComposeEnvironmentConverterTest {
                 "machine1", cheContainer1,
                 "machine2", cheContainer2,
                 "machine3", cheContainer3)));
+    cheContainersEnvironment.setType(DockerEnvironment.TYPE);
     return cheContainersEnvironment;
   }
 }
