@@ -20,17 +20,18 @@ import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removeUriScheme;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Singleton;
 import java.io.BufferedInputStream;
-import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -71,14 +73,13 @@ import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
 import org.eclipse.che.api.languageserver.shared.model.SnippetParameters;
 import org.eclipse.che.api.languageserver.shared.model.SnippetResult;
+import org.eclipse.che.api.languageserver.shared.util.CharStreamEditor;
+import org.eclipse.che.api.languageserver.shared.util.CharStreamIterator;
 import org.eclipse.che.api.languageserver.shared.util.LinearRangeComparator;
 import org.eclipse.che.api.languageserver.util.LSOperation;
 import org.eclipse.che.api.languageserver.util.LineReader;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
 import org.eclipse.che.jdt.ls.extension.api.dto.LinearRange;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
@@ -100,6 +101,7 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MarkupKind;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.SignatureHelp;
@@ -324,7 +326,8 @@ public class TextDocumentService {
               List<Either<SymbolInformation, DocumentSymbol>> locations) {
             locations.forEach(
                 o -> {
-                  // minimal fix for https://github.com/eclipse/che/issues/11139 when updating lsp4j
+                  // minimal fix for https://github.com/eclipse/che/issues/11139 when updating
+                  // lsp4j
                   if (o.isLeft()) {
                     SymbolInformation si = o.getLeft();
                     si.getLocation().setUri(removePrefixUri(si.getLocation().getUri()));
@@ -794,41 +797,77 @@ public class TextDocumentService {
     }
   }
 
-  private List<ExtendedTextEdit> convertToExtendedEdit(List<TextEdit> edits, String filePath) {
-    try {
-      // for some reason C# LS sends ws related path,
-      if (!isStartWithProject(filePath)) {
-        filePath = prefixProject(filePath);
-      }
-      String fileContent =
-          com.google.common.io.Files.toString(new File(filePath), Charset.defaultCharset());
-      Document document = new Document(fileContent);
-      return edits
-          .stream()
-          .map(
-              textEdit -> {
-                ExtendedTextEdit result = new ExtendedTextEdit();
-                result.setRange(textEdit.getRange());
-                result.setNewText(textEdit.getNewText());
-                try {
-                  IRegion lineInformation =
-                      document.getLineInformation(textEdit.getRange().getStart().getLine());
-                  String lineText =
-                      document.get(lineInformation.getOffset(), lineInformation.getLength());
-                  result.setLineText(lineText);
-                  result.setInLineStart(textEdit.getRange().getStart().getCharacter());
-                  result.setInLineEnd(textEdit.getRange().getEnd().getCharacter());
-                } catch (BadLocationException e) {
-                  LOG.error("Can't read file line", e);
-                }
+  private static List<ExtendedTextEdit> convertToExtendedEdit(
+      List<TextEdit> edits, String filePath) {
+    // for some reason C# LS sends ws related path,
+    if (!isStartWithProject(filePath)) {
+      filePath = prefixProject(filePath);
+    }
+    try (FileReader reader = new FileReader(filePath)) {
+      CharStreamIterator charStreamIter =
+          new CharStreamIterator(CharStreamEditor.forReader(reader));
 
-                return result;
-              })
-          .collect(Collectors.toList());
+      return convertToExtendedEdits(edits, charStreamIter);
     } catch (IOException e) {
       LOG.error("Can't read file", e);
+      return Collections.emptyList();
     }
-    return Collections.emptyList();
+  }
+
+  @VisibleForTesting
+  static List<ExtendedTextEdit> convertToExtendedEdits(
+      List<TextEdit> edits, CharStreamIterator charStreamIter) {
+    // don't manipulate the original collection
+    edits = new ArrayList<>(edits);
+    edits.sort(CharStreamEditor.COMPARATOR);
+
+    List<ExtendedTextEdit> result = new ArrayList<>(edits.size());
+    Iterator<TextEdit> editIterator = edits.iterator();
+    if (editIterator.hasNext()) {
+      TextEdit edit = editIterator.next();
+      while (edit != null) {
+        int currentLine = edit.getRange().getStart().getLine();
+        Position lineStart = new Position(edit.getRange().getStart().getLine(), 0);
+        Position nextLineStart = new Position(edit.getRange().getStart().getLine() + 1, 0);
+        charStreamIter.advanceTo(lineStart, CharStreamIterator.NULL_CONSUMER);
+        StringBuilder lineText = new StringBuilder();
+        charStreamIter.advanceTo(
+            nextLineStart,
+            new BiConsumer<Integer, Integer>() {
+
+              @Override
+              public void accept(Integer t, Integer u) {
+                if (t != '\r' && t != '\n') {
+                  lineText.append((char) t.intValue());
+                }
+              }
+            });
+        while (edit != null && edit.getRange().getStart().getLine() == currentLine) {
+          result.add(doConvert(edit, lineText));
+          if (editIterator.hasNext()) {
+            edit = editIterator.next();
+          } else {
+            edit = null;
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  private static ExtendedTextEdit doConvert(TextEdit edit, StringBuilder currentLine) {
+    ExtendedTextEdit extendedEdit = new ExtendedTextEdit();
+    extendedEdit.setRange(edit.getRange());
+    extendedEdit.setNewText(edit.getNewText());
+
+    extendedEdit.setLineText(currentLine.toString());
+    extendedEdit.setInLineStart(edit.getRange().getStart().getCharacter());
+    if (edit.getRange().getEnd().getLine() == edit.getRange().getStart().getLine()) {
+      extendedEdit.setInLineEnd(edit.getRange().getEnd().getCharacter());
+    } else {
+      extendedEdit.setInLineEnd(Math.max(0, currentLine.length() - 1));
+    }
+    return extendedEdit;
   }
 
   private String getFileContent(String uri) {
