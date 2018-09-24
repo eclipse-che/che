@@ -20,11 +20,11 @@
         <version>6.12.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
-    <artifactId>mysql</artifactId>
+    <artifactId>mysql-tck</artifactId>
     <packaging>pom</packaging>
     <name>Integration Tests :: MySQL</name>
     <modules>
-        <module>mysql-tck</module>
+        <module>mysql-tests</module>
         <module>mysql-support</module>
     </modules>
     <properties>
