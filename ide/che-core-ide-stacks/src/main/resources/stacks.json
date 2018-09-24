@@ -199,7 +199,7 @@
       "name": "skeleton",
       "attributes": {
         "editor": "org.eclipse.che.editor.theia:1.0.0",
-        "plugins": "che-dummy-plugin:0.0.1"
+        "plugins": "che-dummy-plugin:0.0.1,che-machine-exec-plugin:0.0.1"
       },
       "commands": [],
       "links": []
@@ -247,7 +247,7 @@
       "name": "skeleton",
       "attributes": {
         "editor": "org.eclipse.che.editor.theia:1.0.0",
-        "plugins": "che-service-plugin:0.0.1"
+        "plugins": "che-service-plugin:0.0.1,che-machine-exec-plugin:0.0.1"
       },
       "commands": [],
       "links": []
@@ -2064,6 +2064,10 @@
         "version": "3.3.9",
         "name": "RH-Maven"
       }
-    ]
+    ],
+    "stackIcon": {
+      "name": "type-apache-camel.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]

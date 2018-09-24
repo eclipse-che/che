@@ -16,7 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Represents a network endpoint that can be accessed by clients inside or outside of workspace.
+ *
+ * <p>Whether an endpoint is accessible from the outside of a workspace is defined by {@link
+ * #isPublic()} method.
+ */
 public class ChePluginEndpoint {
+
   private String name = null;
 
   @JsonProperty("public")
@@ -66,6 +73,9 @@ public class ChePluginEndpoint {
   }
 
   public Map<String, String> getAttributes() {
+    if (attributes == null) {
+      attributes = new HashMap<>();
+    }
     return attributes;
   }
 

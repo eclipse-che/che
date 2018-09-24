@@ -67,6 +67,8 @@ public class DockerImageEnvironmentConverter {
         .setInternalRecipe(environment.getRecipe())
         .setWarnings(environment.getWarnings())
         .setPods(ImmutableMap.of(POD_NAME, pod))
+        .setAttributes(environment.getAttributes())
+        .setType(KubernetesEnvironment.TYPE)
         .build();
   }
 }
