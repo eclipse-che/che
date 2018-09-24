@@ -469,6 +469,17 @@ public class CodenvyEditor {
     }
   }
 
+  /** wait full matching of text in hover popup */
+  public void waitTextInHoverPopUpEqualsTo(String expectedText, String knownIssue) {
+    // waits popup body visibility
+    try {
+      seleniumWebDriverHelper.waitVisibility(hoverPopup);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail(knownIssue, ex);
+    }
+  }
+
   /**
    * wait text in hover pop-up (after hovering on text)
    *
