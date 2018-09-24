@@ -128,7 +128,7 @@ public class PhpAssistantFeaturesTest {
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     try {
-      findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
+      findReferencesConsoleTab.waitAllReferencesWithText(EXPECTED_REFERENCE_TEXT);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
