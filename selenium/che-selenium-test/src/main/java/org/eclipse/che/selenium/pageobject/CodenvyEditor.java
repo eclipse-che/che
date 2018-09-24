@@ -1654,11 +1654,6 @@ public class CodenvyEditor {
             .get()
             .getText();
 
-    /*
-    String cursorPositionText =
-        seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(editorActiveLineXpath));
-    */
-
     List<String> positions = asList(cursorPositionText.split(":"));
     int positionRow = Integer.parseInt(positions.get(0));
     int positionChar = Integer.parseInt(positions.get(1));
@@ -1700,11 +1695,6 @@ public class CodenvyEditor {
                 webDriver -> {
                   Pair<Integer, Integer> position =
                       getCurrentCursorPositionFromVisible(editorIndex);
-
-                  System.out.println(
-                      "======>>>>>  " + position.first + " ----- " + position.second);
-                  System.out.println(
-                      "== expected ====>>>>>  " + linePosition + " ----- " + charPosition);
 
                   return (linePosition == position.first) && (charPosition == position.second);
                 });
