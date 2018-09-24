@@ -9,6 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+package org.eclipse.che.core.db.mysql.jpa.eclipselink;
 
 import java.sql.SQLException;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
@@ -18,8 +19,7 @@ import org.eclipse.persistence.exceptions.ExceptionHandler;
 
 /**
  * Rethrows vendor specific exceptions as common exceptions. See <a
- * href="https://dev.mysql.com/doc/refman/8.0/en/error-messages-server.html">MySQL error
- * codes</a>.
+ * href="https://dev.mysql.com/doc/refman/8.0/en/error-messages-server.html">MySQL error codes</a>.
  *
  * @author Barry Dresdner
  */
