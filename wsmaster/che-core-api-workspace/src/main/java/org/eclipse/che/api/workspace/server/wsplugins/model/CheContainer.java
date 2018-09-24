@@ -20,6 +20,7 @@ import java.util.Objects;
 public class CheContainer {
 
   private String image = null;
+  private String name = null;
   private List<EnvVar> env = new ArrayList<>();
 
   @JsonProperty("editor-commands")
@@ -44,6 +45,19 @@ public class CheContainer {
     this.image = image;
   }
 
+  public CheContainer name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
   /** List of environment variables to set in the container. Cannot be updated. */
   public CheContainer env(List<EnvVar> env) {
     this.env = env;
@@ -51,6 +65,9 @@ public class CheContainer {
   }
 
   public List<EnvVar> getEnv() {
+    if (env == null) {
+      env = new ArrayList<>();
+    }
     return env;
   }
 
@@ -65,6 +82,9 @@ public class CheContainer {
   }
 
   public List<Command> getCommands() {
+    if (commands == null) {
+      commands = new ArrayList<>();
+    }
     return commands;
   }
 
@@ -79,6 +99,9 @@ public class CheContainer {
   }
 
   public List<Volume> getVolumes() {
+    if (volumes == null) {
+      volumes = new ArrayList<>();
+    }
     return volumes;
   }
 
@@ -92,6 +115,9 @@ public class CheContainer {
   }
 
   public List<CheContainerPort> getPorts() {
+    if (ports == null) {
+      ports = new ArrayList<>();
+    }
     return ports;
   }
 
@@ -126,14 +152,14 @@ public class CheContainer {
         && Objects.equals(getCommands(), that.getCommands())
         && Objects.equals(getVolumes(), that.getVolumes())
         && Objects.equals(getPorts(), that.getPorts())
-        && Objects.equals(getPorts(), that.getPorts())
-        && Objects.equals(getMemoryLimit(), that.getMemoryLimit());
+        && Objects.equals(getMemoryLimit(), that.getMemoryLimit())
+        && Objects.equals(getName(), that.getName());
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        getImage(), getEnv(), getCommands(), getVolumes(), getPorts(), getMemoryLimit());
+        getImage(), getEnv(), getCommands(), getVolumes(), getPorts(), getMemoryLimit(), getName());
   }
 
   @Override
@@ -152,6 +178,8 @@ public class CheContainer {
         + ports
         + ", memoryLimit="
         + memoryLimit
+        + ", name="
+        + name
         + '}';
   }
 }

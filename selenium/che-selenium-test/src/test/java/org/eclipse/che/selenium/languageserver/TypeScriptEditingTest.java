@@ -29,9 +29,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
+
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -90,18 +92,18 @@ public class TypeScriptEditingTest {
   @Test
   public void checkGoToSymbolFeature() {
     editor.goToCursorPositionVisible(14, 7);
-    Stream<String> expectedListSymbols =
-        Stream.of(
-            "greeter",
-            "Greeter",
-            "greet",
-            "constructor",
-            "\"Greeter\"",
-            "print",
-            "printVar",
-            "greeting");
+    List<String > expectedListSymbols =
+            Arrays.asList(
+                    "greeter",
+                    "Greeter",
+                    "greet",
+                    "constructor",
+                    "\"Greeter\"",
+                    "print",
+                    "printVar",
+                    "greeting");
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
-    checkAllFoundSymbols(expectedListSymbols);
+    assistantFindPanel.waitAllNodes(expectedListSymbols);
     assistantFindPanel.clickOnActionNodeWithTextEqualsTo("greet");
     editor.waitCursorPosition(19, 5);
   }
@@ -214,9 +216,5 @@ public class TypeScriptEditingTest {
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitActiveTabFileName("testPrint.ts");
     editor.waitCursorPosition(15, 6);
-  }
-
-  private void checkAllFoundSymbols(Stream<String> symbols) {
-    symbols.forEach(e -> assistantFindPanel.waitActionNodeContainsText(e));
   }
 }

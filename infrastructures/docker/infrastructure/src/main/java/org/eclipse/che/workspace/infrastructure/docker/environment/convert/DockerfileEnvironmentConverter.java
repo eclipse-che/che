@@ -40,7 +40,8 @@ public class DockerfileEnvironmentConverter implements DockerEnvironmentConverte
 
     DockerEnvironment cheContainerEnv =
         new DockerEnvironment(
-            environment.getRecipe(), environment.getMachines(), environment.getWarnings());
+                environment.getRecipe(), environment.getMachines(), environment.getWarnings())
+            .setType(DockerEnvironment.TYPE);
     DockerContainerConfig container =
         new DockerContainerConfig()
             .setBuild(new DockerBuildContext().setDockerfileContent(dockerfile));

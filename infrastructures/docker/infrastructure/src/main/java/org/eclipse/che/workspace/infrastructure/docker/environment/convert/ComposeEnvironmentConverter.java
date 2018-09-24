@@ -72,6 +72,7 @@ public class ComposeEnvironmentConverter implements DockerEnvironmentConverter {
     }
     return new DockerEnvironment(
             environment.getRecipe(), environment.getMachines(), environment.getWarnings())
-        .setContainers(containers);
+        .setContainers(containers)
+        .setType(DockerEnvironment.TYPE);
   }
 }
