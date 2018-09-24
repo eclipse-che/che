@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.inject.Inject;
@@ -75,9 +76,11 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
     if (source instanceof DockerImageEnvironment) {
       return dockerImageEnvConverter.convert((DockerImageEnvironment) source);
     }
+
     throw new InternalInfrastructureException(
         format(
             "Environment type '%s' is not supported. Supported environment types: %s",
-            source.getRecipe().getType(), KubernetesEnvironment.TYPE));
+            source.getType(),
+            Joiner.on(",").join(KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE)));
   }
 }

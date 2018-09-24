@@ -55,11 +55,11 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
       return;
     }
 
-    String recipeType = environment.getRecipe().getType();
+    String recipeType = environment.getType();
     ChePluginsApplier pluginsApplier = workspaceNextAppliers.get(recipeType);
     if (pluginsApplier == null) {
       throw new InfrastructureException(
-          "Sidecar tooling configuration is not supported with recipe type " + recipeType);
+          "Sidecar tooling configuration is not supported with environment type " + recipeType);
     }
 
     List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta);

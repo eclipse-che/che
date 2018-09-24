@@ -57,6 +57,21 @@ public class Containers {
   }
 
   /**
+   * Sets given RAM limit in kubernetes notion to specified container. Note if the container already
+   * contains a RAM limit, it will be overridden, other resources won't be affected.
+   */
+  public static void addRamLimit(Container container, String limitInK8sNotion) {
+    final ResourceRequirementsBuilder resourceBuilder;
+    if (container.getResources() != null) {
+      resourceBuilder = new ResourceRequirementsBuilder(container.getResources());
+    } else {
+      resourceBuilder = new ResourceRequirementsBuilder();
+    }
+    container.setResources(
+        resourceBuilder.addToLimits("memory", new Quantity(limitInK8sNotion)).build());
+  }
+
+  /**
    * Returns the RAM request in bytes, if it is present in given container otherwise 0 will be
    * returned.
    */
