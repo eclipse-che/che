@@ -28,7 +28,7 @@
           <class name="org.eclipse.che.selenium.languageserver.php.PhpFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.php.PhpAssistantFeaturesTest"/>
           <class name="org.eclipse.che.selenium.languageserver.python.PythonFileEditingTest"/>
-          <class name="org.eclipse.che.selenium.languageserver.python.PythonAssistantFeatureTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.python.PythonAssistantFeaturesTest"/>
           <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest"/>

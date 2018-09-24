@@ -37,7 +37,7 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class PythonAssistantFeatureTest {
+public class PythonAssistantFeaturesTest {
   private static final String PROJECT_NAME = "console-python3-simple";
   private static final String CALC_TAB_NAME = "calc.py";
   private static final String MAIN_TAB_NAME = "main.py";
@@ -78,7 +78,7 @@ public class PythonAssistantFeatureTest {
   }
 
   @Test
-  public void checkCommenting() {
+  public void checkCodeCommentFeature() {
     projectExplorer.waitProjectExplorer();
 
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + CALC_TAB_NAME);
@@ -94,7 +94,7 @@ public class PythonAssistantFeatureTest {
   }
 
   @Test
-  public void checkRenaming() {
+  public void checkRenameFeature() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + MAIN_TAB_NAME);
     editor.waitTabIsPresent(MAIN_TAB_NAME);
