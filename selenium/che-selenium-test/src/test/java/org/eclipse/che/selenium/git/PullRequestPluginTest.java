@@ -34,6 +34,7 @@ import com.google.inject.name.Named;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -82,6 +83,9 @@ public class PullRequestPluginTest {
   private static final String COMMENT = generate("Comment: ", 8);
   private static final String PATH_TO_README_FILE_1ST_PROJECT = FIRST_PROJECT_NAME + "/README.md";
   private static final String PATH_TO_README_FILE_2ND_PROJECT = SECOND_PROJECT_NAME + "/README.md";
+  private static final String READ_FACTORY_URL_FROM_PR_DESCRIPTION_TEMPLATE =
+      "\\[!\\[Review\\]\\(.*%1$s/factory/resources/factory-review.svg\\)\\]\\((.*%1$s/f\\?id=factory.*)\\).*"
+          + COMMENT;
 
   private String mainBrowserTabHandle;
   private String firstProjectUrl;
@@ -271,21 +275,24 @@ public class PullRequestPluginTest {
 
   @Test(priority = 3)
   public void checkFactoryOnGitHub() throws IOException {
-    // check pull request elements
+    // check pull request description
     assertEquals(testRepo2.getPullRequestUserName(1), gitHubUsername);
     assertEquals(testRepo2.getPullRequestTitle(1), TITLE);
 
     String pullRequestDescription = testRepo2.getPullRequestBody(1);
-    String expectedPullRequestDescriptionRegexp =
-        format(
-            "\\[!\\[Review\\]\\(.*%1$s/factory/resources/factory-review.svg\\)\\]\\(.*%1$s/f\\?id=factory.*%2$s",
-            cheHost, COMMENT);
 
-    assertTrue(
-        compile(expectedPullRequestDescriptionRegexp, Pattern.MULTILINE | Pattern.DOTALL)
-            .matcher(pullRequestDescription)
-            .matches(),
-        "Actual PR description was " + pullRequestDescription);
+    Matcher matcher =
+        compile(
+                format(READ_FACTORY_URL_FROM_PR_DESCRIPTION_TEMPLATE, cheHost),
+                Pattern.MULTILINE | Pattern.DOTALL)
+            .matcher(pullRequestDescription);
+
+    assertTrue(matcher.find(), "Actual PR description was " + pullRequestDescription);
+
+    // open factory from URL in pull request description
+    String factoryUrlFromPrDescription = matcher.group(1);
+    seleniumWebDriver.navigate().to(factoryUrlFromPrDescription);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(FIRST_PROJECT_NAME);
