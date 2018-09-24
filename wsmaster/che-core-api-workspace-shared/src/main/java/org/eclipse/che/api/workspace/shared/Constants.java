@@ -104,6 +104,8 @@ public final class Constants {
    */
   public static final String WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE = "plugins";
 
+  public static final String SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE = "sidecar.%s.memory_limit";
+
   /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
    * from {@link Workspace#getAttributes}

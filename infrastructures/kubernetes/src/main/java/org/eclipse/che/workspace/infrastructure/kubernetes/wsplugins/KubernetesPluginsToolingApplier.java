@@ -102,6 +102,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setContainer(k8sContainer)
             .setContainerEndpoints(containerEndpoints)
             .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
+            .setAttributes(kubernetesEnvironment.getAttributes())
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();

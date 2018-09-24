@@ -171,7 +171,7 @@ public class PhpAssistantFeaturesTest {
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField(FIND_PROJECT_SEARCHING_TEXT);
-    assistantFindPanel.waitNode(EXPECTED_FIND_PROJECT_TEXT);
+    assistantFindPanel.waitAllNodes(EXPECTED_FIND_PROJECT_TEXT);
   }
 
   private void performCommentAction() {

@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
@@ -88,7 +89,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -376,6 +376,51 @@ public class CodenvyEditor {
         seleniumWebDriverHelper.waitPresenceOfAllElements(
             By.xpath(ORION_CONTENT_ACTIVE_EDITOR_XPATH), ELEMENT_TIMEOUT_SEC);
     return getTextFromOrionLines(lines);
+  }
+
+  /**
+   * Gets visible text from specified {@code line}.
+   *
+   * @param editorLine number of line for getting text
+   * @return visible text from specified line
+   */
+  public String getVisibleText(int editorLine) {
+    if (0 == editorLine) {
+      String errorMessage =
+          format(
+              "Specified line: \"%s\" does not exist. The editor numeration starts from \"1\". "
+                  + "Please specify correct line.",
+              editorLine);
+      throw new ArrayIndexOutOfBoundsException(errorMessage);
+    }
+
+    final int lineIndex = editorLine - 1;
+    final List<String> editorVisibleText = asList(getVisibleTextFromEditor().split("\n"));
+    final String lineText = editorVisibleText.get(lineIndex);
+
+    return lineText;
+  }
+
+  /**
+   * Waits until visible text from specified {@code editorLine} contains {@code expectedText}.
+   *
+   * @param editorLine number of line for getting text
+   * @param expectedText text which should be present in specified line
+   */
+  public void waitVisibleText(int editorLine, String expectedText) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> getVisibleText(editorLine).contains(expectedText));
+  }
+
+  /**
+   * Waits until visible text from specified {@code editorLine} equals to {@code expectedText}.
+   *
+   * @param line number of line for getting text
+   * @param expectedText text which should be present in specified line
+   */
+  public void waitVisibleTextEqualsTo(int line, String expectedText) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> getVisibleText(line).equals(expectedText));
   }
 
   /**
@@ -1654,10 +1699,7 @@ public class CodenvyEditor {
 
   private Pair<Integer, Integer> getCursorPositionFromWebElement(WebElement webElement) {
     int[] currentCursorPositions =
-        Arrays.asList(webElement.getText().split(":"))
-            .stream()
-            .mapToInt(Integer::parseInt)
-            .toArray();
+        asList(webElement.getText().split(":")).stream().mapToInt(Integer::parseInt).toArray();
     return new Pair<Integer, Integer>(currentCursorPositions[0], currentCursorPositions[1]);
   }
 

@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
@@ -19,6 +20,7 @@ import static org.testng.Assert.assertNull;
 
 import io.fabric8.kubernetes.api.model.Container;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -28,7 +30,9 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -37,8 +41,10 @@ import org.testng.annotations.Test;
 public class MachineResolverTest {
 
   private static final String DEFAULT_MEM_LIMIT = "100001";
+  private static final String SIDECAR_NAME = "testSidecar";
 
   private List<ChePluginEndpoint> endpoints;
+  private Map<String, String> wsAttributes;
   private CheContainer cheContainer;
   private Container container;
   private MachineResolver resolver;
@@ -48,7 +54,11 @@ public class MachineResolverTest {
     endpoints = new ArrayList<>();
     cheContainer = new CheContainer();
     container = new Container();
-    resolver = new MachineResolver(container, cheContainer, DEFAULT_MEM_LIMIT, endpoints);
+    wsAttributes = new HashMap<>();
+    resolver =
+        new MachineResolver(container, cheContainer, DEFAULT_MEM_LIMIT, endpoints, wsAttributes);
+
+    cheContainer.setName(SIDECAR_NAME);
   }
 
   @Test
@@ -119,6 +129,41 @@ public class MachineResolverTest {
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), DEFAULT_MEM_LIMIT);
   }
 
+  @Test(dataProvider = "memoryAttributeProvider")
+  public void shouldSetMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet(
+      String attributeValue, String expectedMemLimit) {
+    wsAttributes.put(
+        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, SIDECAR_NAME), attributeValue);
+
+    InternalMachineConfig machineConfig = resolver.resolve();
+
+    assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), expectedMemLimit);
+  }
+
+  @DataProvider
+  public static Object[][] memoryAttributeProvider() {
+    return new Object[][] {
+      {"", DEFAULT_MEM_LIMIT},
+      {null, DEFAULT_MEM_LIMIT},
+      {"100Ki", toBytesString("100Ki")},
+      {"1M", toBytesString("1M")},
+      {"10Gi", toBytesString("10Gi")},
+    };
+  }
+
+  @Test
+  public void shouldOverrideMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet() {
+    String attributeValue = "300Mi";
+    String expectedMemLimit = toBytesString(attributeValue);
+    Containers.addRamLimit(container, 123456789);
+    wsAttributes.put(
+        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, SIDECAR_NAME), attributeValue);
+
+    InternalMachineConfig machineConfig = resolver.resolve();
+
+    assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), expectedMemLimit);
+  }
+
   @Test
   public void shouldNotSetMemLimitAttributeIfLimitIsInContainer() {
     Containers.addRamLimit(container, 123456789);
@@ -126,6 +171,10 @@ public class MachineResolverTest {
     InternalMachineConfig machineConfig = resolver.resolve();
 
     assertNull(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE));
+  }
+
+  private static String toBytesString(String k8sMemorySize) {
+    return Long.toString(KubernetesSize.toBytes(k8sMemorySize));
   }
 
   private static ChePluginEndpoint endptPath(String name, int port, String path) {
