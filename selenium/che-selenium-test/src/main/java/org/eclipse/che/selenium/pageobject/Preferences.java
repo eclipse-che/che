@@ -126,6 +126,8 @@ public class Preferences {
         "gwt-debug-preferences-git-contribute-activateByProjectSelection-input";
     String ADD_SCHEMA_URL_BUTTON_ID = "gwt-debug-preferences-addUrl";
     String ADD_SCHEMA_URL_INPUT_ID = "gwt-debug-askValueDialog-textBox";
+    String DELETE_SCHEMA_BUTTON_XPATH =
+        "//table[@id='gwt-debug-preferences-cellTable-keys']//button";
   }
 
   public interface DropDownListsHeaders {
@@ -228,6 +230,9 @@ public class Preferences {
 
   @FindBy(id = Locators.ADD_SCHEMA_URL_INPUT_ID)
   private WebElement addSchemaUrlInput;
+
+  @FindBy(xpath = Locators.DELETE_SCHEMA_BUTTON_XPATH)
+  private WebElement deleteSchemaButton;
 
   /** wait preferences form */
   public void waitPreferencesForm() {
@@ -332,6 +337,12 @@ public class Preferences {
     webDriverHelper.waitVisibility(addSchemaUrlInput);
     addSchemaUrlInput.sendKeys(schemaName);
     webDriverHelper.waitAndClick(By.id("askValue-dialog-ok"));
+  }
+
+  public void deleteSchema() {
+    webDriverHelper.waitAndClick(deleteSchemaButton);
+    askDialog.clickOkBtn();
+    askDialog.waitFormToClose();
   }
 
   public void clickOnGenerateAndUploadToGitHub() {

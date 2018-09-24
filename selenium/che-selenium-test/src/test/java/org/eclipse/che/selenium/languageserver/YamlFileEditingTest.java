@@ -17,6 +17,9 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS_YAML;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -27,9 +30,10 @@ import static org.openqa.selenium.Keys.ENTER;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -41,6 +45,8 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -64,7 +70,17 @@ public class YamlFileEditingTest {
           + "    app: che\n"
           + "    template: che\n"
           + "  name: che";
-  private String[] symbols = {"apiVersionsymbols (194)"};
+  private List<String> symbols =
+      Arrays.asList(
+          "apiVersionsymbols (194)",
+          "kind",
+          "metadata",
+          "annotations",
+          "openshift.io/generated-by",
+          "creationTimestamp",
+          "generation",
+          "labels",
+          "app");
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS_YAML)
   private TestWorkspace workspace;
@@ -91,11 +107,16 @@ public class YamlFileEditingTest {
     addYamlSchema();
   }
 
+  @AfterClass
+  public void tearDown() {
+    deleteSchema();
+  }
+
   @Test
   public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
-    menu.runCommand(Project.PROJECT, New.NEW, New.FILE);
+    menu.runCommand(PROJECT, NEW, FILE);
     askForValueDialog.createNotJavaFileByName(YAML_FILE_NAME);
     editor.waitTabIsPresent(YAML_FILE_NAME);
 
@@ -107,7 +128,7 @@ public class YamlFileEditingTest {
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
-  @Test(priority = 1)
+  //  @Test(priority = 1)
   public void checkAutocompleteFeature() {
     editor.selectTabByName(YAML_FILE_NAME);
 
@@ -159,7 +180,7 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor("spec:");
   }
 
-  @Test(priority = 1)
+  //  @Test(priority = 1)
   public void checkHoverFeature() {
     editor.selectTabByName("deployment.yaml");
 
@@ -173,7 +194,7 @@ public class YamlFileEditingTest {
 
     editor.moveCursorToText("apiVersion:");
     editor.waitTextInHoverPopup(
-        "APIVersion defines the versioned schema of this representation of an object.");
+        "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
   }
 
   //  @Test(priority = 1)
@@ -194,7 +215,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  @Test(priority = 1)
+  //  @Test(priority = 1)
   public void checkCommentCodeFeature() {
     editor.selectTabByName("deployment.yaml");
 
@@ -225,6 +246,9 @@ public class YamlFileEditingTest {
     // check list for expected items
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
+
+    assistantFindPanel.getActionNodesList();
+    Assert.assertTrue(!Collections.disjoint(assistantFindPanel.getActionNodesList(), symbols));
     assistantFindPanel.waitAllNodes(symbols);
 
     // open item by mouse click
@@ -265,6 +289,19 @@ public class YamlFileEditingTest {
 
     preferences.clickOnAddSchemaUrlButton();
     preferences.addSchemaUrl("kubernetes");
+    preferences.clickOnOkBtn();
+
+    preferences.closeForm();
+  }
+
+  private void deleteSchema() {
+    menu.runCommand(PROFILE_MENU, PREFERENCES);
+    preferences.waitPreferencesForm();
+
+    preferences.waitMenuInCollapsedDropdown(YAML);
+    preferences.selectDroppedMenuByName(YAML);
+
+    preferences.deleteSchema();
     preferences.clickOnOkBtn();
 
     preferences.closeForm();
