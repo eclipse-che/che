@@ -116,4 +116,9 @@ public class TheiaIde {
   public void waitAboutDialogContains(String expectedText) {
     seleniumWebDriverHelper.waitTextContains(aboutDialogContent, expectedText);
   }
+
+  public void switchToIdeFrame() {
+    seleniumWebDriverHelper.waitAndSwitchToFrame(
+        By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+  }
 }
