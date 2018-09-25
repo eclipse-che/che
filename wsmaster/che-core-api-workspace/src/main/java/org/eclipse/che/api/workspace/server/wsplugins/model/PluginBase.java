@@ -69,6 +69,9 @@ public class PluginBase {
   }
 
   public List<CheContainer> getContainers() {
+    if (containers == null) {
+      containers = new ArrayList<>();
+    }
     return containers;
   }
 
@@ -82,6 +85,9 @@ public class PluginBase {
   }
 
   public List<ChePluginEndpoint> getEndpoints() {
+    if (endpoints == null) {
+      endpoints = new ArrayList<>();
+    }
     return endpoints;
   }
 
