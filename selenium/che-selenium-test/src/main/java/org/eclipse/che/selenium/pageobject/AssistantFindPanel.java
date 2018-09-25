@@ -126,7 +126,7 @@ public class AssistantFindPanel {
     return getActionNodeText(index).contains(expectedText);
   }
 
-  public void clickOnActionNodeWithText(String visibleText) {
+  public void clickOnActionNodeWithTextContains(String visibleText) {
     for (int i = 0; i < getActionNodesCount(); i++) {
       if (getActionNodeText(i).contains(visibleText)) {
         getActionNode(i).click();
@@ -136,18 +136,6 @@ public class AssistantFindPanel {
 
     String exceptionMessage =
         String.format("Item with expected visible text: \"%s\" has not been detected", visibleText);
-    throw new RuntimeException(exceptionMessage);
-  }
-
-  public void clickOnActionNodeWithTextEqualsTo(String visibleText) {
-    for (int i = 0; i < getActionNodesCount(); i++) {
-      if (getActionNodeText(i).equals(visibleText)) {
-        getActionNode(i).click();
-        return;
-      }
-    }
-    String exceptionMessage =
-        String.format("Item which has visible text equals to \"%s\" has not been detected", visibleText);
     throw new RuntimeException(exceptionMessage);
   }
 

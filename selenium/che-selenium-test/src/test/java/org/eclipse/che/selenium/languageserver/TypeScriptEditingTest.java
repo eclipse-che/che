@@ -110,7 +110,7 @@ public class TypeScriptEditingTest {
             "greeting");
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitAllNodes(expectedGoToSymbolAlternatives);
-    assistantFindPanel.clickOnActionNodeWithTextEqualsTo("greet");
+    assistantFindPanel.clickOnActionNodeWithTextContains("greet");
     editor.waitCursorPosition(19, 5);
   }
 
@@ -119,16 +119,16 @@ public class TypeScriptEditingTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.typeToInputField("testPrint");
-    assistantFindPanel.clickOnActionNodeWithText("testPrint");
+    assistantFindPanel.clickOnActionNodeWithTextContains("testPrint");
     editor.waitCursorPosition(26, 6);
   }
 
   @Test(priority = 2, alwaysRun = true)
   public void checkMainFeaturesTypeScriptLS() {
-    String intitTypeScriptLanguageServerMessage =
+    String initTypeScriptLanguageServerMessage =
         format("Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
 
-    consoles.waitExpectedTextIntoConsole(intitTypeScriptLanguageServerMessage);
+    consoles.waitExpectedTextIntoConsole(initTypeScriptLanguageServerMessage);
     checkCodeValidation();
     checkCodeAssistant();
     checkGoToDefinition();
