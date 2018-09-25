@@ -15,13 +15,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>mysql</artifactId>
+        <artifactId>mysql-tck</artifactId>
         <groupId>org.eclipse.che.core</groupId>
         <version>6.12.0-SNAPSHOT</version>
     </parent>
     <artifactId>mysql-tests</artifactId>
     <packaging>jar</packaging>
-    <name>Integration Tests :: MYSQL</name>
+    <name>Integration Tests :: MYSQL Tests</name>
     <properties>
         <db.image.name>centos/mysql-57-centos7</db.image.name>
         <jdbc.admin.name>root</jdbc.admin.name>
@@ -181,7 +181,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>mysql-support</artifactId>
-            <version>6.12.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

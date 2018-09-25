@@ -24,30 +24,7 @@
     <packaging>pom</packaging>
     <name>Integration Tests :: MySQL</name>
     <modules>
-        <module>mysql-tests</module>
         <module>mysql-support</module>
+        <module>mysql-tests</module>
     </modules>
-    <properties>
-        <db.image.name>centos/mysql-57-centos7</db.image.name>
-        <jdbc.admin.name>root</jdbc.admin.name>
-        <jdbc.admin.password>che2</jdbc.admin.password>
-        <jdbc.driver>com.mysql.cj.jdbc.Driver</jdbc.driver>
-        <jdbc.url>jdbc:mysql://${docker.host.address}:${jdbc.port}/che</jdbc.url>
-        <jdbc.user.name>user</jdbc.user.name>
-        <jdbc.user.password>che1</jdbc.user.password>
-    </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>8.0.12</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>mysql-support</artifactId>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 </project>

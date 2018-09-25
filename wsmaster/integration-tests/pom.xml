@@ -25,13 +25,13 @@
     <name>Integration Tests :: Parent</name>
     <modules>
         <module>cascade-removal</module>
-        <module>mysql-tck</module>
     </modules>
     <profiles>
         <profile>
             <id>integration</id>
             <modules>
                 <module>postgresql-tck</module>
+                <module>mysql-tck</module>
             </modules>
         </profile>
     </profiles>
