@@ -19,7 +19,6 @@ import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.ESCAPE;
 import static org.openqa.selenium.Keys.F12;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,14 +26,11 @@ import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev on 11.12.15 */
@@ -42,13 +38,18 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class FileStructure {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
 
   @Inject
   public FileStructure(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
@@ -69,38 +70,30 @@ public class FileStructure {
 
   /** wait the 'file structure' form is open */
   public void waitFileStructureFormIsOpen(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_FORM, fileName))));
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(Locators.FILE_STRUCTURE_FORM, fileName)));
   }
 
   /** wait the 'file structure' form is closed */
   public void waitFileStructureFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                (By.id(Locators.FILE_STRUCTURE_CONTENT))));
+    seleniumWebDriverHelper.waitInvisibility(By.id(Locators.FILE_STRUCTURE_CONTENT));
   }
 
   /** launch the 'File Structure' form by keyboard */
   public void launchFileStructureFormByKeyboard() {
     loader.waitOnClosed();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).sendKeys(F12).keyUp(CONTROL).perform();
+    seleniumWebDriverHelper.getAction().keyDown(CONTROL).sendKeys(F12).keyUp(CONTROL).perform();
     loader.waitOnClosed();
   }
 
   /** close the 'File Structure' form by the key 'Esc' */
   public void closeFileStructureFormByEscape() {
-    Actions closeWindow = actionsFactory.createAction(seleniumWebDriver);
-    closeWindow.sendKeys(ESCAPE).perform();
+    seleniumWebDriverHelper.getAction().sendKeys(ESCAPE).perform();
   }
 
   /** close the 'File Structure' form by click on the close icon */
   public void clickFileStructureCloseIcon() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.id(Locators.FILE_STRUCTURE_CLOSE_ICON)))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(By.id(Locators.FILE_STRUCTURE_CLOSE_ICON));
   }
 
   /**
@@ -110,10 +103,7 @@ public class FileStructure {
    */
   public void waitExpectedTextInFileStructure(String expText) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> getTextFromFileStructurePanel().contains(expText));
+    seleniumWebDriverHelper.waitTextContains(fileStructureContent, expText);
   }
 
   /**
@@ -122,14 +112,7 @@ public class FileStructure {
    * @param expText expected value
    */
   public void waitExpectedTextIsNotPresentInFileStructure(String expText) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            new ExpectedCondition<Boolean>() {
-              @Override
-              public Boolean apply(WebDriver driver) {
-                return !(getTextFromFileStructurePanel().contains(expText));
-              }
-            });
+    seleniumWebDriverHelper.waitTextIsNotPresented(fileStructureContent, expText);
   }
 
   /**
@@ -138,7 +121,7 @@ public class FileStructure {
    * @return text from 'file structure' container
    */
   public String getTextFromFileStructurePanel() {
-    return fileStructureContent.getText();
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(fileStructureContent);
   }
 
   /**
@@ -147,12 +130,9 @@ public class FileStructure {
    * @param nameNode is name
    */
   public void clickOnIconNodeInFileStructure(String nameNode) {
-    WaitUtils.sleepQuietly(1);
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode))))
-        .click();
+    //    WaitUtils.sleepQuietly(1);
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode)));
   }
 
   /**
@@ -161,12 +141,7 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByDoubleClick(String item) {
-    selectItemInFileStructure(item);
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .moveToElement(getFileStructureItem(item))
-        .doubleClick()
-        .perform();
+    seleniumWebDriverHelper.moveCursorToAndDoubleClick(getFileStructureItem(item));
   }
 
   /**
@@ -175,8 +150,8 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByEnter(String item) {
-    selectItemInFileStructure(item);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(ENTER).perform();
+    //    selectItemInFileStructure(item);
+    seleniumWebDriverHelper.getAction().sendKeys(ENTER).perform();
   }
 
   /**
@@ -185,16 +160,12 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructure(String item) {
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .moveToElement(getFileStructureItem(item))
-        .click()
-        .perform();
+    seleniumWebDriverHelper.waitAndClick(getFileStructureItem(item));
   }
 
   private WebElement getFileStructureItem(String item) {
-    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item))));
+    return seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item)));
   }
 
   /**
@@ -203,16 +174,15 @@ public class FileStructure {
    * @param command is the command by keyboard
    */
   public void sendCommandByKeyboardInFileStructure(String command) {
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(command).perform();
+    seleniumWebDriverHelper.sendKeys(command);
   }
 
   public void moveDownToItemInFileStructure(String itemName) {
     List<WebElement> items =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                presenceOfAllElementsLocatedBy(
-                    By.xpath(
-                        "//div[@id='gwt-debug-file-structure-mainPanel']//div[@id[contains(.,'gwt-uid-')]]//div[text()]")));
+        seleniumWebDriverHelper.waitPresenceOfAllElements(
+            By.xpath(
+                "//div[@id='gwt-debug-file-structure-mainPanel']//div[@id[contains(.,'gwt-uid-')]]//div[text()]"));
+
     for (int i = 0; i < items.size(); i++) {
       actionsFactory.createAction(seleniumWebDriver).sendKeys(ARROW_DOWN).perform();
       WaitUtils.sleepQuietly(1);
@@ -222,6 +192,7 @@ public class FileStructure {
                   presenceOfAllElementsLocatedBy(
                       By.xpath(
                           "//div[@id='gwt-debug-file-structure-mainPanel']/div[3]/div/div[1]//div[text()]")));
+
       if (items.get(i).getText().contains(itemName)) {
         break;
       }
@@ -230,6 +201,6 @@ public class FileStructure {
 
   public void type(String text) {
     WaitUtils.sleepQuietly(1);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
+    seleniumWebDriverHelper.sendKeys(text);
   }
 }
