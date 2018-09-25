@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -23,7 +22,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 
 /** @author Aleksandr Shmaraev on 16.12.15 */
 @Singleton
@@ -153,14 +151,11 @@ public class FindUsages {
 
   /** wait a selected element in the 'find usages' panel */
   public void waitSelectedElementInFindUsagesPanel(String nameElement) {
-    webDriverWaitFactory
-        .get(LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    getHighlightedItem(nameElement)
-                        .getCssValue("background-image")
-                        .contains(HIGHLIGHTED_IMAGE));
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver ->
+            getHighlightedItem(nameElement)
+                .getCssValue("background-image")
+                .contains(HIGHLIGHTED_IMAGE));
   }
 
   private WebElement getHighlightedItem(String nameElement) {
