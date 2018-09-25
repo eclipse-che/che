@@ -2376,6 +2376,26 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
   }
 
+  /** enter the 'Ctrl + F12' */
+  public void enterCtrlF12() {
+    seleniumWebDriverHelper.pressCtrlF12();
+  }
+
+  /** press the key 'Arrow Up' */
+  public void pressArrowUp() {
+    seleniumWebDriverHelper.pressArrowUp();
+  }
+
+  /** press the key 'Arrow Down' */
+  public void pressArrowDown() {
+    seleniumWebDriverHelper.pressArrowDown();
+  }
+
+  /** press the key 'Enter' */
+  public void pressEnter() {
+    seleniumWebDriverHelper.pressEnter();
+  }
+
   /** Type the comment line in the file by keyboard */
   public void launchCommentCodeFeature() {
     actionsFactory

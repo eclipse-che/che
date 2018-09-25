@@ -13,10 +13,15 @@ package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_GO;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.F4;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -27,12 +32,15 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -53,6 +61,25 @@ public class GolangFileEditingTest {
           + "func print() {\n"
           + " fmt.Printf(\"Hello, world. Sqrt(2) = %v\\n\", math.Sqrt(2))\n"
           + "}";
+
+  private static final String REFERENCES_NOTJHING_TO_SHOW_TEXT = "Nothing to show";
+
+  private static final String[] REFERENCES_EXPECTED_TEXT = {
+    "/desktop-go-simple/towers.go\nFrom:19:5 To:19:10",
+    "/desktop-go-simple/towers.go\nFrom:23:3 To:23:8",
+    "/desktop-go-simple/towers.go\nFrom:24:72 To:24:77",
+    "/desktop-go-simple/towers.go\nFrom:29:2 To:29:7",
+    "/desktop-go-simple/towers.go\nFrom:30:72 To:30:77"
+  };
+
+  private static final String[] GO_TO_SYMBOL_EXPECTED_TEXT = {
+    "mainsymbols (4)", "count", "hanoi", "main"
+  };
+
+  private static final String[] PROJECT_SYMBOL_EXPECTED_TEXT = {
+    "print/desktop-go-simple/format.go", "Print/desktop-go-simple/print.go"
+  };
+
   private List<String> expectedProposals = ImmutableList.of("Print", "Println", "Printf");
 
   @InjectTestWorkspace(template = UBUNTU_GO)
@@ -64,6 +91,8 @@ public class GolangFileEditingTest {
   @Inject private CodenvyEditor editor;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
+  @Inject private AssistantFindPanel assistantFindPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -117,6 +146,15 @@ public class GolangFileEditingTest {
     editor.goToCursorPositionVisible(13, 1);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
+
+    // check code line commenting
+    editor.goToCursorPositionVisible(13, 1);
+    editor.launchCommentCodeFeature();
+    editor.waitTextIntoEditor("//package main");
+
+    // check code line uncommenting
+    editor.launchCommentCodeFeature();
+    editor.waitTextNotPresentIntoEditor("//package main");
   }
 
   @Test(priority = 1)
@@ -135,6 +173,7 @@ public class GolangFileEditingTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
 
+    // check the 'Hover' popup
     editor.moveCursorToText("COLOR_YELLOW");
     editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
 
@@ -152,5 +191,152 @@ public class GolangFileEditingTest {
     editor.waitTabIsPresent("print.go");
     editor.waitCursorPosition(24, 6);
     editor.clickOnCloseFileIcon("print.go");
+  }
+
+  @Test(priority = 1)
+  public void checkRenameFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitTabIsPresent("towers.go");
+    editor.goToCursorPositionVisible(22, 5);
+    editor.waitTextElementsActiveLine("if n == 1");
+    editor.launchLocalRefactor();
+    editor.doRenamingByLanguageServerField("k");
+
+    try {
+      editor.waitTextElementsActiveLine("if k == 1");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10524");
+    }
+  }
+
+  @Test(priority = 1)
+  public void checkFindReferencesFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitActive();
+
+    // check the LS info panel when is 'Nothing to show'
+    editor.goToPosition(12, 1);
+    menu.runCommand(ASSISTANT, FIND_REFERENCES);
+    findReferencesConsoleTab.waitExpectedTextInLsPanel(REFERENCES_NOTJHING_TO_SHOW_TEXT);
+
+    // check element in the editor
+    editor.goToPosition(19, 5);
+    menu.runCommand(ASSISTANT, FIND_REFERENCES);
+
+    // it is a workaround, need to fix after resolve the issue
+    try {
+      findReferencesConsoleTab.waitAllReferencesWithText(
+          "/desktop-go-simple/towers.go\nFrom:23:71 To:23:76");
+      findReferencesConsoleTab.doubleClickOnReference("From:23:71 To:23:76");
+    } catch (TimeoutException ex) {
+      fail(
+          "Need to delete 'try/catch' and change values of the parameters, because the known issue https://github.com/eclipse/che/issues/10698 is resolved");
+    }
+
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(24, 72);
+    editor.waitTextElementsActiveLine("count");
+
+    // check the references expected text
+    editor.goToPosition(19, 5);
+    menu.runCommand(ASSISTANT, FIND_REFERENCES);
+
+    try {
+      findReferencesConsoleTab.waitAllReferencesWithText(REFERENCES_EXPECTED_TEXT);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
+    }
+  }
+
+  @Test(priority = 1)
+  public void checkSignatureHelpFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.goToPosition(27, 1);
+    editor.typeTextIntoEditor("    hanoi(");
+
+    try {
+      editor.waitExpTextIntoShowHintsPopUp("hanoi(n int, a, b, c string)");
+    } catch (TimeoutException ex) {
+      editor.deleteCurrentLineAndInsertNew();
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
+    }
+  }
+
+  @Test(priority = 1)
+  public void checkGoToSymbolFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitActive();
+
+    // open and close 'Go To Symbol' panel by keyboard
+    editor.enterCtrlF12();
+    assistantFindPanel.waitForm();
+    editor.cancelFormInEditorByEscape();
+    assistantFindPanel.waitFormIsClosed();
+
+    // select item from 'Go To Symbol' panel
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.waitAllNodes(GO_TO_SYMBOL_EXPECTED_TEXT);
+    assistantFindPanel.clickOnActionNodeWithText("count");
+    assistantFindPanel.waitFormIsClosed();
+    editor.waitCursorPosition(19, 5);
+
+    // navigation to nodes by keyboard
+    editor.enterCtrlF12();
+    assistantFindPanel.waitForm();
+    editor.pressArrowDown();
+    editor.pressArrowDown();
+    assistantFindPanel.waitActionNodeSelection("count");
+    editor.pressArrowUp();
+    assistantFindPanel.waitActionNodeSelection("main" + "symbols (4)");
+    editor.pressEnter();
+    assistantFindPanel.waitFormIsClosed();
+    editor.waitCursorPosition(13, 1);
+
+    // find and select item from 'Go To Symbol' panel
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.typeToInputField("ha");
+    assistantFindPanel.waitNode("hanoi");
+    assistantFindPanel.clickOnActionNodeWithText("hanoi");
+    assistantFindPanel.waitFormIsClosed();
+    editor.waitCursorPosition(21, 1);
+  }
+
+  @Test(priority = 1)
+  public void checkFindProjectSymbolFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitActive();
+
+    // check item in the find panel
+    menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.clickOnInputField();
+    assistantFindPanel.typeToInputField("hanoi");
+    assistantFindPanel.waitAllNodes("hanoi/desktop-go-simple/towers.go");
+    assistantFindPanel.typeToInputField("print");
+    assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT);
+
+    // select item in the find panel by clicking on node
+    assistantFindPanel.clickOnActionNodeWithText("print/desktop-go-simple/format.go");
+    assistantFindPanel.waitFormIsClosed();
+    editor.waitTabVisibilityAndCheckFocus("format.go");
+    editor.waitCursorPosition(23, 1);
+
+    // select item in the find panel by keyboard
+    editor.selectTabByName("towers.go");
+    menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.typeToInputField("print");
+    assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT);
+    editor.pressArrowDown();
+    assistantFindPanel.waitActionNodeSelection("Print/desktop-go-simple/print.go");
+    editor.pressEnter();
+    assistantFindPanel.waitFormIsClosed();
+    editor.waitTabVisibilityAndCheckFocus("print.go");
+    editor.waitCursorPosition(24, 1);
   }
 }
