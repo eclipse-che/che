@@ -73,6 +73,15 @@
       <project-source-selector></project-source-selector>
     </che-label-container>
 
+    <!-- Plugin selector -->
+    <che-label-container che-label-name="Plugins"
+                         che-label-description="Choose plugins for your workspace."
+                         ng-if="createWorkspaceController.pluginRegistry" >
+      <workspace-plugins workspace-config="createWorkspaceController.workspaceConfig"
+                         plugin-registry-location="createWorkspaceController.pluginRegistry">
+      </workspace-plugins>
+    </che-label-container>
+
     <che-label-container>
       <che-button-save-flat class="create-workspace-footer-button"
                             name="saveButton"

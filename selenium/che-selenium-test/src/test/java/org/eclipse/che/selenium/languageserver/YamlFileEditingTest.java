@@ -13,8 +13,13 @@ package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS_YAML;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -25,18 +30,21 @@ import static org.openqa.selenium.Keys.ENTER;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
+import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.Keys;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -47,6 +55,8 @@ public class YamlFileEditingTest {
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
       format("Finished language servers initialization, file path '/%s'", PATH_TO_YAML_FILE);
+  private static final List<String> EXPECTED_GO_TO_SYMBOL_ALTERNATIVES =
+      Arrays.asList("apiVersionsymbols (194)", "kind", "metadata");
 
   private static final String COMMENTED_CODE =
       "#  generation: 4\n"
@@ -71,6 +81,7 @@ public class YamlFileEditingTest {
   @Inject private Preferences preferences;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private AskForValueDialog askForValueDialog;
+  @Inject private AssistantFindPanel assistantFindPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -85,11 +96,16 @@ public class YamlFileEditingTest {
     addYamlSchema();
   }
 
+  @AfterClass
+  public void tearDown() {
+    deleteSchema();
+  }
+
   @Test
   public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
-    menu.runCommand(Project.PROJECT, New.NEW, New.FILE);
+    menu.runCommand(PROJECT, NEW, FILE);
     askForValueDialog.createNotJavaFileByName(YAML_FILE_NAME);
     editor.waitTabIsPresent(YAML_FILE_NAME);
 
@@ -166,8 +182,11 @@ public class YamlFileEditingTest {
         "Kind is a string value representing the REST resource this object represents.");
 
     editor.moveCursorToText("apiVersion:");
-    editor.waitTextInHoverPopup(
-        "APIVersion defines the versioned schema of this representation of an object.");
+    editor.waitTextInHoverPopUpEqualsTo(
+        "APIVersion defines the versioned schema of this representation of an object. "
+            + "Servers should convert recognized schemas to the latest internal value, "
+            + "and may reject unrecognized values. More info: "
+            + "http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
   }
 
   @Test(priority = 1)
@@ -212,6 +231,44 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor(UNCOMMENTED_CODE);
   }
 
+  @Test(priority = 1)
+  public void checkGoToSymbolFeature() {
+    editor.selectTabByName("deployment.yaml");
+
+    // check list for expected items
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_ALTERNATIVES);
+
+    // open item by mouse click
+    assistantFindPanel.clickOnActionNodeWithText("apiVersion");
+    editor.waitCursorPosition(13, 1);
+
+    // find and open item from Go To Symbol panel
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    assistantFindPanel.typeToInputField("kin");
+    assistantFindPanel.waitNode("kind");
+    assistantFindPanel.clickOnActionNodeWithText("kind");
+    editor.waitCursorPosition(14, 1);
+
+    // select items by DOWN and UP buttons
+    menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
+    assistantFindPanel.waitForm();
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(13, 15);
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(14, 23);
+    editor.typeTextIntoEditor(Keys.DOWN.toString());
+    editor.waitCursorPosition(27, 44);
+    editor.typeTextIntoEditor(Keys.UP.toString());
+    editor.waitCursorPosition(14, 23);
+
+    // open item by pressing ENTER key
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.waitCursorPosition(14, 1);
+  }
+
   private void addYamlSchema() {
     menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
@@ -221,6 +278,19 @@ public class YamlFileEditingTest {
 
     preferences.clickOnAddSchemaUrlButton();
     preferences.addSchemaUrl("kubernetes");
+    preferences.clickOnOkBtn();
+
+    preferences.closeForm();
+  }
+
+  private void deleteSchema() {
+    menu.runCommand(PROFILE_MENU, PREFERENCES);
+    preferences.waitPreferencesForm();
+
+    preferences.waitMenuInCollapsedDropdown(YAML);
+    preferences.selectDroppedMenuByName(YAML);
+
+    preferences.deleteSchema();
     preferences.clickOnOkBtn();
 
     preferences.closeForm();

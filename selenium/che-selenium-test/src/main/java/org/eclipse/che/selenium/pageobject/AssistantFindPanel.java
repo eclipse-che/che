@@ -53,7 +53,7 @@ public class AssistantFindPanel {
     testWebElementRenderChecker.waitElementIsRendered(findPanelLocator);
   }
 
-  public void waitFormClosing() {
+  public void waitFormIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.id(PANEL_ID));
   }
 

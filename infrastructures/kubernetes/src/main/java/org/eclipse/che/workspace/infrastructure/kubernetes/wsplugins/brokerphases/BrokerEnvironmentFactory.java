@@ -68,6 +68,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
   private final String cheWebsocketEndpoint;
   private final String pluginBrokerImage;
+  private final String brokerPullPolicy;
   private final AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
 
@@ -75,10 +76,12 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   public BrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.image") String pluginBrokerImage,
+      @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.pluginBrokerImage = pluginBrokerImage;
+    this.brokerPullPolicy = brokerPullPolicy;
     this.authEnableEnvVarProvider = authEnableEnvVarProvider;
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
   }
@@ -136,7 +139,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                 cheWebsocketEndpoint,
                 "-workspace-id",
                 workspaceId)
-            .withImagePullPolicy("Always")
+            .withImagePullPolicy(brokerPullPolicy)
             .withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", BROKER_VOLUME, true, null))
             .withEnv(envVars.stream().map(this::asEnvVar).collect(toList()))
             .withNewResources()

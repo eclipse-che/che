@@ -30,7 +30,7 @@ public enum WorkspaceTemplate {
   UBUNTU_GO("ubuntu_go.json"),
   UBUNTU_JDK8("ubuntu_jdk8.json"),
   UBUNTU_LSP("ubuntu_with_c_sharp_lsp.json"),
-  UBUNTU_CAMEL("ubuntu_jdk8_with_camel_ls.json");
+  APACHE_CAMEL("spring_boot_with_apache_camel_ls.json");
 
   private final String templateFileName;
 

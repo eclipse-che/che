@@ -28,6 +28,8 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
  * @author Alexander Garagatyi
  */
 public class DockerEnvironment extends InternalEnvironment {
+  public static final String TYPE = "docker";
+
   private LinkedHashMap<String, DockerContainerConfig> containers;
   private String network;
 
@@ -48,6 +50,11 @@ public class DockerEnvironment extends InternalEnvironment {
     super(recipe, machines, warnings);
     this.containers = containers;
     this.network = network;
+  }
+
+  @Override
+  public DockerEnvironment setType(String type) {
+    return (DockerEnvironment) super.setType(type);
   }
 
   public DockerEnvironment(DockerEnvironment environment) throws InfrastructureException {
@@ -100,12 +107,21 @@ public class DockerEnvironment extends InternalEnvironment {
         && Objects.equals(getNetwork(), that.getNetwork())
         && Objects.equals(getRecipe(), that.getRecipe())
         && Objects.equals(getMachines(), that.getMachines())
-        && Objects.equals(getWarnings(), that.getWarnings());
+        && Objects.equals(getWarnings(), that.getWarnings())
+        && Objects.equals(getType(), that.getType())
+        && Objects.equals(getAttributes(), that.getAttributes());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getContainers(), getNetwork(), getMachines(), getRecipe(), getWarnings());
+    return Objects.hash(
+        getContainers(),
+        getNetwork(),
+        getMachines(),
+        getRecipe(),
+        getWarnings(),
+        getType(),
+        getAttributes());
   }
 
   @Override
@@ -122,6 +138,10 @@ public class DockerEnvironment extends InternalEnvironment {
         + getRecipe()
         + ", warnings="
         + getWarnings()
+        + ", type="
+        + getType()
+        + ", attributes="
+        + getAttributes()
         + '}';
   }
 }

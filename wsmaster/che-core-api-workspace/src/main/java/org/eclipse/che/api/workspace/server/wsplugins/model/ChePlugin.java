@@ -25,6 +25,9 @@ public class ChePlugin extends PluginBase {
   }
 
   public List<EditorCompatibility> getEditors() {
+    if (editors == null) {
+      editors = new ArrayList<>();
+    }
     return editors;
   }
 
