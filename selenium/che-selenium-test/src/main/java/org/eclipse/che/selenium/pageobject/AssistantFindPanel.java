@@ -147,7 +147,7 @@ public class AssistantFindPanel {
       }
     }
     String exceptionMessage =
-        String.format("Item with expected visible text: \"%s\" has not been detected", visibleText);
+        String.format("Item which has visible text equals to \"%s\" has not been detected", visibleText);
     throw new RuntimeException(exceptionMessage);
   }
 
