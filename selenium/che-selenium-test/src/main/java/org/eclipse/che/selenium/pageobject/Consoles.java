@@ -41,6 +41,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -414,12 +415,20 @@ public class Consoles {
 
   /** wait on "Starting: 100% Starting Java Language Server" message appears in console */
   public void waitJDTLSStartedMessage() {
-    waitExpectedTextIntoConsole(JAVA_LANGUAGE_SERVER_STARTED);
+    try {
+      waitExpectedTextIntoConsole(JAVA_LANGUAGE_SERVER_STARTED);
+    } catch (TimeoutException e) {
+      LOG.warn("timed out waiting for java language server to start");
+    }
   }
 
   /** wait JDT LS message about project is updated */
   public void waitJDTLSProjectResolveFinishedMessage(String project) {
-    waitExpectedTextIntoConsole(String.format(LANGUAGE_SERVER_UPDATE_MESSAGE, project));
+    try {
+      waitExpectedTextIntoConsole(String.format(LANGUAGE_SERVER_UPDATE_MESSAGE, project));
+    } catch (TimeoutException e) {
+      LOG.warn("timed out waiting for resolving project {}", project);
+    }
     // once a new project has been added to the workspace, stuff in the project
     // explorer will be updated, for example showing packages instead of folders
     // wait for this to be finished
