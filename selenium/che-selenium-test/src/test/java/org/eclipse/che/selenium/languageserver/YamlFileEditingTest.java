@@ -31,7 +31,6 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -45,7 +44,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -70,17 +68,7 @@ public class YamlFileEditingTest {
           + "    app: che\n"
           + "    template: che\n"
           + "  name: che";
-  private List<String> symbols =
-      Arrays.asList(
-          "apiVersionsymbols (194)",
-          "kind",
-          "metadata",
-          "annotations",
-          "openshift.io/generated-by",
-          "creationTimestamp",
-          "generation",
-          "labels",
-          "app");
+  private List<String> symbols = Arrays.asList("apiVersionsymbols (194)", "kind", "metadata");
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS_YAML)
   private TestWorkspace workspace;
@@ -128,7 +116,7 @@ public class YamlFileEditingTest {
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
-  //  @Test(priority = 1)
+  @Test(priority = 1)
   public void checkAutocompleteFeature() {
     editor.selectTabByName(YAML_FILE_NAME);
 
@@ -180,7 +168,7 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor("spec:");
   }
 
-  //  @Test(priority = 1)
+  @Test(priority = 1)
   public void checkHoverFeature() {
     editor.selectTabByName("deployment.yaml");
 
@@ -197,7 +185,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
   }
 
-  //  @Test(priority = 1)
+  @Test(priority = 1)
   public void checkCodeValidation() {
     editor.selectTabByName("deployment.yaml");
     editor.waitAllMarkersInvisibility(ERROR);
@@ -215,7 +203,7 @@ public class YamlFileEditingTest {
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
-  //  @Test(priority = 1)
+  @Test(priority = 1)
   public void checkCommentCodeFeature() {
     editor.selectTabByName("deployment.yaml");
 
@@ -246,9 +234,6 @@ public class YamlFileEditingTest {
     // check list for expected items
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
-
-    assistantFindPanel.getActionNodesList();
-    Assert.assertTrue(!Collections.disjoint(assistantFindPanel.getActionNodesList(), symbols));
     assistantFindPanel.waitAllNodes(symbols);
 
     // open item by mouse click
