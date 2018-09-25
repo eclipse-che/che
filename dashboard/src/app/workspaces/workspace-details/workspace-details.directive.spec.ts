@@ -197,6 +197,9 @@ describe(`WorkspaceDetailsController >`, () => {
         this.getSupportedRecipeTypes = () => {
           return ['dockerimage', 'dockerfile', 'compose'];
         };
+        this.getWorkspaceSettings = () => {
+          return {};
+        };
       })
       // terminal directives which prevent to execute an original ones
       .directive('mdTab', function () {

@@ -83,6 +83,10 @@ export class CreateWorkspaceController {
    */
   private stack: che.IStack;
   /**
+   * The workspace config of the current stack.
+   */
+  private workspaceConfig: che.IWorkspaceConfig;
+  /**
    * The selected namespace ID.
    */
   private namespaceId: string;
@@ -112,6 +116,11 @@ export class CreateWorkspaceController {
   private hideLoader: boolean;
 
   /**
+   * Plugin registry location if defined.
+   */
+  private pluginRegistry: string;
+
+  /**
    * Default constructor that is using resource injection
    */
   constructor($mdDialog: ng.material.IDialogService,
@@ -137,6 +146,8 @@ export class CreateWorkspaceController {
     this.stackMachines = [];
     this.memoryByMachine = {};
     this.forms = new Map();
+
+    this.pluginRegistry = this.createWorkspaceSvc.getPluginRegistryLocation();
 
     this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
     this.buildListOfUsedNames().then(() => {
@@ -186,6 +197,7 @@ export class CreateWorkspaceController {
     }, 10);
 
     this.stack = this.stackSelectorSvc.getStackById(stackId);
+    this.workspaceConfig = angular.copy(this.stack.workspaceConfig);
 
     if (!this.stack.workspaceConfig) {
       this.memoryByMachine = {};
@@ -338,7 +350,7 @@ export class CreateWorkspaceController {
    */
   createWorkspace(): ng.IPromise<che.IWorkspace> {
     // update workspace name
-    this.stack.workspaceConfig.name = this.workspaceName;
+    this.workspaceConfig.name = this.workspaceName;
 
     // update memory limits of machines
     if (Object.keys(this.memoryByMachine).length !== 0) {
@@ -347,15 +359,14 @@ export class CreateWorkspaceController {
           this.environmentManager.setMemoryLimit(machine, this.memoryByMachine[machine.name]);
         }
       });
-      const environmentName = this.stack.workspaceConfig.defaultEnv;
-      const environment = this.stack.workspaceConfig.environments[environmentName];
+      const environmentName = this.workspaceConfig.defaultEnv;
+      const environment = this.workspaceConfig.environments[environmentName];
       const newEnvironment = this.environmentManager.getEnvironment(environment, this.stackMachines);
-      this.stack.workspaceConfig.environments[environmentName] = newEnvironment;
+      this.workspaceConfig.environments[environmentName] = newEnvironment;
     }
     let attributes = {stackId: this.stack.id};
-    let workspaceConfig = angular.copy(this.stack.workspaceConfig);
 
-    return this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
+    return this.createWorkspaceSvc.createWorkspace(this.workspaceConfig, attributes);
   }
 
   /**
