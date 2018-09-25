@@ -18,6 +18,8 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.FORMAT;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -29,8 +31,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -48,6 +53,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -92,24 +98,24 @@ public class TypeScriptEditingTest {
   @Test
   public void checkGoToSymbolFeature() {
     editor.goToCursorPositionVisible(14, 7);
-    List<String > expectedListSymbols =
-            Arrays.asList(
-                    "greeter",
-                    "Greeter",
-                    "greet",
-                    "constructor",
-                    "\"Greeter\"",
-                    "print",
-                    "printVar",
-                    "greeting");
+    List<String> expectedGoToSymbolAlternatives =
+        Arrays.asList(
+            "greeter",
+            "Greeter",
+            "greet",
+            "constructor",
+            "\"Greeter\"",
+            "print",
+            "printVar",
+            "greeting");
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
-    assistantFindPanel.waitAllNodes(expectedListSymbols);
+    assistantFindPanel.waitAllNodes(expectedGoToSymbolAlternatives);
     assistantFindPanel.clickOnActionNodeWithTextEqualsTo("greet");
     editor.waitCursorPosition(19, 5);
   }
 
   @Test(priority = 1, alwaysRun = true)
-  public void checkGoToSymbolInWorkspaceFeature() {
+  public void checkFindProjectSymbolsFeature() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.typeToInputField("testPrint");
@@ -128,12 +134,10 @@ public class TypeScriptEditingTest {
     checkGoToDefinition();
   }
 
-  @Test(priority = 3, alwaysRun = true)
+  @Test(priority = 3)
   public void checkFindReferencesFeature() {
-    String referenceInGreeterClass =
-        format("/%s/Greeter.ts\n" + "From:24:17 To:24:22", PROJECT_NAME);
-    String referenceInTestPrintClass =
-        format("/%s/testPrint.ts\n" + "From:14:0 To:14:5", PROJECT_NAME);
+    String referenceInGreeterClass = format("/%s/Greeter.ts\nFrom:24:17 To:24:22", PROJECT_NAME);
+    String referenceInTestPrintClass = format("/%s/testPrint.ts\nFrom:14:0 To:14:5", PROJECT_NAME);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     findReferencesConsoleTab.waitAllReferencesWithText(
         referenceInGreeterClass, referenceInTestPrintClass);
@@ -144,8 +148,11 @@ public class TypeScriptEditingTest {
   @Test(priority = 4, alwaysRun = true)
   public void checkHoveringFeature() {
     editor.moveCursorToText("Greeter");
-    editor.waitTextInHoverPopUpEqualsTo(
-        "class Greeter", "Known permanent failure: ihttps://github.com/eclipse/che/issues/10699");
+    try {
+      editor.waitAppearanceHowerPopUp();
+    } catch (TimeoutException ex) {
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10699");
+    }
   }
 
   @Test(priority = 5, alwaysRun = true)
@@ -155,10 +162,40 @@ public class TypeScriptEditingTest {
     editor.typeTextIntoEditor("printVar.print(");
 
     try {
-      editor.waitExpTextIntoShowHintsPopUp("");
+      editor.waitExpTextIntoShowHintsPopUp("setVAlue: string");
     } catch (WebDriverException ex) {
-      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/11324");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11324", ex);
     }
+  }
+
+  @Test(priority = 6, alwaysRun = true)
+  public void checkCodeCommentFeature() {
+    editor.goToCursorPositionVisible(26, 9);
+    editor.launchCommentCodeFeature();
+    editor.waitTextIntoEditor("//        printVar.print()", 2);
+    editor.launchCommentCodeFeature();
+    // after uncommenting we get error in the editor
+    editor.waitMarkerInPosition(CodenvyEditor.MarkerLocator.ERROR, 26);
+  }
+
+  @Test(priority = 7, alwaysRun = true)
+  public void checkCodeFormattingFeature() throws URISyntaxException, IOException {
+    // read all lines from template
+    URL resources =
+        getClass()
+            .getResource("/org/eclipse/che/selenium/languageServers/typeScriptAfterFormatting.txt");
+    List<String> listWithAllLines =
+        Files.readAllLines(Paths.get(resources.toURI()), Charset.forName("UTF-8"));
+
+    // save it ot StringBuilder with return symbols
+    StringBuilder stringBuilder = new StringBuilder();
+    for (String currentLine : listWithAllLines) {
+      stringBuilder.append(currentLine + "\n");
+    }
+
+    // format text and compare with text from template
+    menu.runCommand(EDIT, FORMAT);
+    editor.waitTextIntoEditor(stringBuilder.toString());
   }
 
   private void checkCodeValidation() {
