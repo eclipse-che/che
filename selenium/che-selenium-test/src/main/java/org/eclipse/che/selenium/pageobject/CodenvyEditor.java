@@ -514,7 +514,7 @@ public class CodenvyEditor {
     }
   }
 
-  public void waitAppearanceHowerPopUp() {
+  public void waitHoverPopupAppearance() {
     seleniumWebDriverHelper.waitVisibility(hoverPopup);
   }
 

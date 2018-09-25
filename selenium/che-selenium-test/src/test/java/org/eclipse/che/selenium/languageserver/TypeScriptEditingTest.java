@@ -149,7 +149,7 @@ public class TypeScriptEditingTest {
   public void checkHoveringFeature() {
     editor.moveCursorToText("Greeter");
     try {
-      editor.waitAppearanceHowerPopUp();
+      editor.waitHoverPopupAppearance();
     } catch (TimeoutException ex) {
       fail("Known permanent failure https://github.com/eclipse/che/issues/10699");
     }
