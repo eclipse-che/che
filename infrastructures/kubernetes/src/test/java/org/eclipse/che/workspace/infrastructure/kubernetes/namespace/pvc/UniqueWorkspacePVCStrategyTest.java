@@ -90,13 +90,15 @@ public class UniqueWorkspacePVCStrategyTest {
   @Mock private Container container;
   @Mock private Container container2;
   @Mock private Container container3;
+  @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   private UniqueWorkspacePVCStrategy strategy;
 
   @BeforeMethod
   public void setup() throws Exception {
     strategy =
-        new UniqueWorkspacePVCStrategy(PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, factory);
+        new UniqueWorkspacePVCStrategy(
+            PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, factory, ephemeralWorkspaceAdapter);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
