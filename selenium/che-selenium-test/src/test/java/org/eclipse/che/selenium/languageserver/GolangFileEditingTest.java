@@ -65,19 +65,19 @@ public class GolangFileEditingTest {
   private static final String REFERENCES_NOTJHING_TO_SHOW_TEXT = "Nothing to show";
 
   private static final String[] REFERENCES_EXPECTED_TEXT = {
-    "/desktop-go-simple/towers.go\n" + "From:19:5 To:19:10",
-    "/desktop-go-simple/towers.go\n" + "From:23:3 To:23:8",
-    "/desktop-go-simple/towers.go\n" + "From:24:72 To:24:77",
-    "/desktop-go-simple/towers.go\n" + "From:29:2 To:29:7",
-    "/desktop-go-simple/towers.go\n" + "From:30:72 To:30:77"
+    "/desktop-go-simple/towers.go\nFrom:19:5 To:19:10",
+    "/desktop-go-simple/towers.go\nFrom:23:3 To:23:8",
+    "/desktop-go-simple/towers.go\nFrom:24:72 To:24:77",
+    "/desktop-go-simple/towers.go\nFrom:29:2 To:29:7",
+    "/desktop-go-simple/towers.go\nFrom:30:72 To:30:77"
   };
 
   private static final String[] GO_TO_SYMBOL_EXPECTED_TEXT = {
-    "main" + "symbols (4)", "count", "hanoi", "main"
+    "mainsymbols (4)", "count", "hanoi", "main"
   };
 
   private static final String[] PROJECT_SYMBOL_EXPECTED_TEXT = {
-    "print" + "/desktop-go-simple/format.go", "Print" + "/desktop-go-simple/print.go"
+    "print/desktop-go-simple/format.go", "Print/desktop-go-simple/print.go"
   };
 
   private List<String> expectedProposals = ImmutableList.of("Print", "Println", "Printf");
@@ -147,12 +147,14 @@ public class GolangFileEditingTest {
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
 
-    // check adding comment code by keyboard 'Ctrl+/'
+    // check code line commenting
     editor.goToCursorPositionVisible(13, 1);
     editor.launchCommentCodeFeature();
     editor.waitTextIntoEditor("//package main");
+
+    // check code line uncommenting
     editor.launchCommentCodeFeature();
-    editor.waitTextIntoEditor("package main");
+    editor.waitTextNotPresentIntoEditor("//package main");
   }
 
   @Test(priority = 1)
@@ -192,7 +194,7 @@ public class GolangFileEditingTest {
   }
 
   @Test(priority = 1)
-  public void checkRenameCodeFeature() {
+  public void checkRenameFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
     editor.goToCursorPositionVisible(22, 5);
@@ -225,7 +227,7 @@ public class GolangFileEditingTest {
     // it is a workaround, need to fix after resolve the issue
     try {
       findReferencesConsoleTab.waitAllReferencesWithText(
-          "/desktop-go-simple/towers.go\n" + "From:23:71 To:23:76");
+          "/desktop-go-simple/towers.go\nFrom:23:71 To:23:76");
       findReferencesConsoleTab.doubleClickOnReference("From:23:71 To:23:76");
     } catch (TimeoutException ex) {
       fail(
@@ -314,12 +316,12 @@ public class GolangFileEditingTest {
     assistantFindPanel.waitForm();
     assistantFindPanel.clickOnInputField();
     assistantFindPanel.typeToInputField("hanoi");
-    assistantFindPanel.waitAllNodes("hanoi" + "/desktop-go-simple/towers.go");
+    assistantFindPanel.waitAllNodes("hanoi/desktop-go-simple/towers.go");
     assistantFindPanel.typeToInputField("print");
     assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT);
 
-    // select item in the find panel
-    assistantFindPanel.clickOnActionNodeWithText("print" + "/desktop-go-simple/format.go");
+    // select item in the find panel by clicking on node
+    assistantFindPanel.clickOnActionNodeWithText("print/desktop-go-simple/format.go");
     assistantFindPanel.waitFormIsClosed();
     editor.waitTabVisibilityAndCheckFocus("format.go");
     editor.waitCursorPosition(23, 1);
@@ -331,7 +333,7 @@ public class GolangFileEditingTest {
     assistantFindPanel.typeToInputField("print");
     assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT);
     editor.pressArrowDown();
-    assistantFindPanel.waitActionNodeSelection("Print" + "/desktop-go-simple/print.go");
+    assistantFindPanel.waitActionNodeSelection("Print/desktop-go-simple/print.go");
     editor.pressEnter();
     assistantFindPanel.waitFormIsClosed();
     editor.waitTabVisibilityAndCheckFocus("print.go");
