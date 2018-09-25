@@ -29,7 +29,7 @@
         }
       },
       "recipe": {
-        "content": "eclipse/ubuntu_jdk8",
+        "content": "registry.centos.org/che-stacks/spring-boot",
         "type": "dockerimage"
       }
     }
