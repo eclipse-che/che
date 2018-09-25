@@ -1,15 +1,17 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -114,11 +116,17 @@ public class Annotations {
         if (refMatcher.matches()) {
           String ref = refMatcher.group("ref");
           if (!servers.containsKey(ref)) {
+            // Null is serialized to empty string in annotations, but empty string as protocol
+            // doesn't make any sense, so convert empty protocol to null which is respected
+            // in other components
+            String protocol =
+                Strings.emptyToNull(
+                    annotations.get(String.format(SERVER_PROTOCOL_ANNOTATION_FMT, ref)));
             servers.put(
                 ref,
                 new ServerConfigImpl(
                     annotations.get(String.format(SERVER_PORT_ANNOTATION_FMT, ref)),
-                    annotations.get(String.format(SERVER_PROTOCOL_ANNOTATION_FMT, ref)),
+                    protocol,
                     annotations.get(String.format(SERVER_PATH_ANNOTATION_FMT, ref)),
                     GSON.fromJson(
                         annotations.get(String.format(SERVER_ATTR_ANNOTATION_FMT, ref)),

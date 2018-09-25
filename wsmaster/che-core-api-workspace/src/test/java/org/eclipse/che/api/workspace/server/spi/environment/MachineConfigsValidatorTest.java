@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -13,10 +14,14 @@ package org.eclipse.che.api.workspace.server.spi.environment;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -56,28 +61,25 @@ public class MachineConfigsValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine")
   public void shouldFailIfMachinesIsNull() throws Exception {
     // when
     machinesValidator.validate(null);
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine")
   public void shouldFailIfMachinesIsEmpty() throws Exception {
     // when
     machinesValidator.validate(emptyMap());
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp = "Name of machine '.*' in environment is invalid",
-    dataProvider = "invalidMachineNames"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Name of machine '.*' in environment is invalid",
+      dataProvider = "invalidMachineNames")
   public void shouldFailIfMachinesNameAreInvalid(String machineName) throws Exception {
     // when
     machinesValidator.validate(singletonMap(machineName, machineConfig));
@@ -104,11 +106,10 @@ public class MachineConfigsValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Machine '.*' in environment contains server conf '.*' with invalid port '.*'",
-    dataProvider = "invalidServerPorts"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Machine '.*' in environment contains server conf '.*' with invalid port '.*'",
+      dataProvider = "invalidServerPorts")
   public void shouldFailIfServerPortIsInvalid(String servicePort) throws Exception {
     // given
     ServerConfigImpl server =
@@ -147,11 +148,10 @@ public class MachineConfigsValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Machine '.*' in environment contains server conf '.*' with invalid protocol '.*'",
-    dataProvider = "invalidServerProtocols"
-  )
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Machine '.*' in environment contains server conf '.*' with invalid protocol '.*'",
+      dataProvider = "invalidServerProtocols")
   public void shouldFailIfServerProtocolIsInvalid(String serviceProtocol) throws Exception {
     // given
     ServerConfigImpl server =
@@ -166,6 +166,49 @@ public class MachineConfigsValidatorTest {
   @DataProvider(name = "invalidServerProtocols")
   public Object[][] invalidServerProtocols() {
     return new Object[][] {{"0"}, {"0sds"}, {"TCP"}, {"UDP"}, {"http@"}};
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Machine '.*' in environment contains inconsistent memory attributes: Memory limit: '.*', Memory request: '.*'")
+  public void shouldFailIfMemoryAttributesAreInconsistent() throws Exception {
+    // given
+    when(machineConfig.getAttributes())
+        .thenReturn(
+            ImmutableMap.of(
+                MEMORY_LIMIT_ATTRIBUTE,
+                String.valueOf(1024L * 1024L * 1024L),
+                MEMORY_REQUEST_ATTRIBUTE,
+                String.valueOf(2048L * 1024L * 1024L)));
+    // when
+    machinesValidator.validate(singletonMap(MACHINE_NAME, machineConfig));
+  }
+
+  @Test(dataProvider = "validMemoryAttributes")
+  public void shouldSucceedIfMemoryAttributesAreConsistentOrNotPresent(
+      String memoryLimit, String memoryRequest) throws Exception {
+    // given
+    Map<String, String> attributes = new HashMap<>();
+    if (memoryLimit != null) {
+      attributes.put(MEMORY_LIMIT_ATTRIBUTE, memoryLimit);
+    }
+    if (memoryRequest != null) {
+      attributes.put(MEMORY_LIMIT_ATTRIBUTE, memoryRequest);
+    }
+    when(machineConfig.getAttributes()).thenReturn(attributes);
+    // when
+    machinesValidator.validate(singletonMap(MACHINE_NAME, machineConfig));
+  }
+
+  @DataProvider(name = "validMemoryAttributes")
+  public Object[][] validMemoryAttributes() {
+    return new Object[][] {
+      {null, String.valueOf(2048L * 1024L * 1024L)},
+      {String.valueOf(2048L * 1024L * 1024L), null},
+      {null, null},
+      {String.valueOf(2048L * 1024L * 1024L), String.valueOf(2048L * 1024L * 1024L)}
+    };
   }
 
   @Test(dataProvider = "validServerProtocols")

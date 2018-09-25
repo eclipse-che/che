@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -15,11 +16,14 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
@@ -37,7 +41,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProv
  * @author Alexander Garagatyi
  */
 @Singleton
-public class OpenShiftEnvironmentProvisioner {
+public class OpenShiftEnvironmentProvisioner
+    implements KubernetesEnvironmentProvisioner<OpenShiftEnvironment> {
 
   private final boolean pvcEnabled;
   private final WorkspaceVolumesStrategy volumesStrategy;
@@ -51,6 +56,8 @@ public class OpenShiftEnvironmentProvisioner {
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   private final ImagePullSecretProvisioner imagePullSecretProvisioner;
+  private final ProxySettingsProvisioner proxySettingsProvisioner;
+  private final ServiceAccountProvisioner serviceAccountProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -65,7 +72,9 @@ public class OpenShiftEnvironmentProvisioner {
       InstallerServersPortProvisioner installerServersPortProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
       PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
-      ImagePullSecretProvisioner imagePullSecretProvisioner) {
+      ImagePullSecretProvisioner imagePullSecretProvisioner,
+      ProxySettingsProvisioner proxySettingsProvisioner,
+      ServiceAccountProvisioner serviceAccountProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -78,8 +87,11 @@ public class OpenShiftEnvironmentProvisioner {
     this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
     this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
     this.imagePullSecretProvisioner = imagePullSecretProvisioner;
+    this.proxySettingsProvisioner = proxySettingsProvisioner;
+    this.serviceAccountProvisioner = serviceAccountProvisioner;
   }
 
+  @Override
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     // 1 stage - update environment according Infrastructure specific
@@ -102,5 +114,7 @@ public class OpenShiftEnvironmentProvisioner {
     ramLimitProvisioner.provision(osEnv, identity);
     podTerminationGracePeriodProvisioner.provision(osEnv, identity);
     imagePullSecretProvisioner.provision(osEnv, identity);
+    proxySettingsProvisioner.provision(osEnv, identity);
+    serviceAccountProvisioner.provision(osEnv, identity);
   }
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -25,6 +26,8 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmitry Kuleshov
  */
 public abstract class BasicWebSocketEndpoint {
+
   private static final Logger LOG = LoggerFactory.getLogger(BasicWebSocketEndpoint.class);
 
   private final WebSocketSessionRegistry registry;
@@ -70,14 +74,21 @@ public abstract class BasicWebSocketEndpoint {
 
   @OnMessage
   public void onMessage(String messagePart, boolean last, Session session) {
-    StringBuffer buffer = sessionMessagesBuffer.get(session);
-    buffer.append(messagePart);
-    if (last) {
-      try {
-        onMessage(buffer.toString(), session);
-      } finally {
-        buffer.setLength(0);
+    try {
+      EnvironmentContext.getCurrent()
+          .setSubject((Subject) session.getUserProperties().get("che_subject"));
+
+      StringBuffer buffer = sessionMessagesBuffer.get(session);
+      buffer.append(messagePart);
+      if (last) {
+        try {
+          onMessage(buffer.toString(), session);
+        } finally {
+          buffer.setLength(0);
+        }
       }
+    } finally {
+      EnvironmentContext.reset();
     }
   }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -15,9 +16,11 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPA
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_DOCKER;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.pageobject.TheiaIde;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
@@ -26,9 +29,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
+@Test(groups = {TestGroup.DOCKER})
 public class CreateWorkspaceFromJavaTheiaDockerStackTest {
   private static final String WORKSPACE_NAME = generate("workspace", 4);
 
+  @Inject private TheiaIde theiaIde;
   @Inject private Dashboard dashboard;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
@@ -52,6 +57,18 @@ public class CreateWorkspaceFromJavaTheiaDockerStackTest {
     seleniumWebDriverHelper.waitAndSwitchToFrame(
         By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
 
-    seleniumWebDriverHelper.waitVisibility(By.id("theia-app-shell"), PREPARING_WS_TIMEOUT_SEC);
+    // wait Theia is ready to use
+    theiaIde.waitTheiaIde();
+    theiaIde.waitTheiaIdeTopPanel();
+    theiaIde.waitLoaderInvisibility();
+
+    // run 'About' command from 'Help' menu
+    theiaIde.runMenuCommand("Help", "About");
+
+    // wait 'About' dialog, check its content and close
+    theiaIde.waitAboutDialogIsOpen();
+    theiaIde.waitAboutDialogContains("List of extensions");
+    theiaIde.closeAboutDialog();
+    theiaIde.waitAboutDialogIsClosed();
   }
 }

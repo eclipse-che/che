@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -108,7 +109,7 @@ public class InheritClassTest {
     editor.typeTextIntoEditor(" Code");
     loader.waitOnClosed();
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
     editor.enterAutocompleteProposal("CodenvyTest");
     editor.waitAutocompleteContainerIsClosed();
     editor.waitTextIntoEditor("CodenvyTestInherite extends CodenvyTest");
@@ -117,11 +118,11 @@ public class InheritClassTest {
 
     editor.selectTabByName("AppController");
     editor.waitActive();
-    editor.setCursorToLine(32);
+    editor.setCursorToLine(33);
     editor.typeTextIntoEditor("Code");
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
-    editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
     editor.enterAutocompleteProposal("CodenvyTest");
     editor.waitAutocompleteContainerIsClosed();
 
@@ -129,14 +130,14 @@ public class InheritClassTest {
     editor.typeTextIntoEditor(" codenvyTest = n");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitAutocompleteContainer();
-    editor.waitTextIntoAutocompleteContainer("new");
+    editor.waitProposalIntoAutocompleteContainer("new");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
     editor.typeTextIntoEditor(" Code");
     editor.waitCodeAssistMarkers(ERROR);
     editor.launchAutocompleteAndWaitContainer();
-    editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
-    editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
+    editor.waitProposalIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
     editor.enterAutocompleteProposal("CodenvyTestInherite");
     editor.waitAutocompleteContainerIsClosed();
     editor.typeTextIntoEditor(";");

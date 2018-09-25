@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -99,12 +100,11 @@ public class FactoryBaseValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ApiException.class,
-    expectedExceptionsMessageRegExp =
-        "The parameter project.source.location has a value submitted http://codenvy.com/git/04%2 with a value that is "
-            + "unexpected. "
-            + "For more information, please visit http://docs.codenvy.com/user/project-lifecycle/#configuration-reference"
-  )
+      expectedExceptions = ApiException.class,
+      expectedExceptionsMessageRegExp =
+          "The parameter project.source.location has a value submitted http://codenvy.com/git/04%2 with a value that is "
+              + "unexpected. "
+              + "For more information, please visit https://www.eclipse.org/che/docs/workspace-data-model.html#projects")
   public void shouldNotValidateIfStorageLocationContainIncorrectEncodedSymbol()
       throws ApiException {
     // given
@@ -167,12 +167,11 @@ public class FactoryBaseValidatorTest {
   }
 
   @Test(
-    dataProvider = "invalidProjectNamesProvider",
-    expectedExceptions = ApiException.class,
-    expectedExceptionsMessageRegExp =
-        "Project name must contain only Latin letters, "
-            + "digits or these following special characters -._."
-  )
+      dataProvider = "invalidProjectNamesProvider",
+      expectedExceptions = ApiException.class,
+      expectedExceptionsMessageRegExp =
+          "Project name must contain only Latin letters, "
+              + "digits or these following special characters -._.")
   public void shouldThrowFactoryUrlExceptionIfProjectNameInvalid(String projectName)
       throws Exception {
     // given
@@ -240,27 +239,24 @@ public class FactoryBaseValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ApiException.class,
-    expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCE_MESSAGE
-  )
+      expectedExceptions = ApiException.class,
+      expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCE_MESSAGE)
   public void shouldNotValidateIfSinceBeforeCurrent() throws ApiException {
     factory.withPolicies(newDto(PoliciesDto.class).withSince(1L));
     validator.validateCurrentTimeAfterSinceUntil(factory);
   }
 
   @Test(
-    expectedExceptions = ApiException.class,
-    expectedExceptionsMessageRegExp = FactoryConstants.INVALID_UNTIL_MESSAGE
-  )
+      expectedExceptions = ApiException.class,
+      expectedExceptionsMessageRegExp = FactoryConstants.INVALID_UNTIL_MESSAGE)
   public void shouldNotValidateIfUntilBeforeCurrent() throws ApiException {
     factory.withPolicies(newDto(PoliciesDto.class).withUntil(1L));
     validator.validateCurrentTimeAfterSinceUntil(factory);
   }
 
   @Test(
-    expectedExceptions = ApiException.class,
-    expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCEUNTIL_MESSAGE
-  )
+      expectedExceptions = ApiException.class,
+      expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCEUNTIL_MESSAGE)
   public void shouldNotValidateIfUntilBeforeSince() throws ApiException {
     factory.withPolicies(newDto(PoliciesDto.class).withSince(2L).withUntil(1L));
 
@@ -268,9 +264,8 @@ public class FactoryBaseValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ApiException.class,
-    expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_UNTIL_MESSAGE
-  )
+      expectedExceptions = ApiException.class,
+      expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_UNTIL_MESSAGE)
   public void shouldNotValidateIfUntilBeforeCurrentTime() throws ApiException {
     Long currentTime = new Date().getTime();
     factory.withPolicies(newDto(PoliciesDto.class).withUntil(currentTime - 10000L));
@@ -289,9 +284,8 @@ public class FactoryBaseValidatorTest {
   }
 
   @Test(
-    expectedExceptions = ApiException.class,
-    expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_SINCE_MESSAGE
-  )
+      expectedExceptions = ApiException.class,
+      expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_SINCE_MESSAGE)
   public void shouldNotValidateIfUntilSinceAfterCurrentTime() throws ApiException {
     Long currentTime = new Date().getTime();
     factory.withPolicies(newDto(PoliciesDto.class).withSince(currentTime + 10000L));

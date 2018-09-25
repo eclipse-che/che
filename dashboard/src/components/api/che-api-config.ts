@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -41,6 +42,7 @@ import {CheTeam} from './che-team.factory';
 import {CheTeamEventsManager} from './che-team-events-manager.factory';
 import {CheInvite} from './che-invite.factory';
 import {NpmRegistry} from './npm-registry.factory';
+import {PluginRegistry} from './plugin-registry.factory';
 
 export class ApiConfig {
 
@@ -76,5 +78,6 @@ export class ApiConfig {
     register.factory('cheTeamEventsManager', CheTeamEventsManager);
     register.factory('cheInvite', CheInvite);
     register.factory('npmRegistry', NpmRegistry);
+    register.factory('pluginRegistry', PluginRegistry);
   }
 }

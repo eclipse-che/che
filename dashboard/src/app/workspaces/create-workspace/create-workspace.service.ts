@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -160,9 +161,9 @@ export class CreateWorkspaceSvc {
    *
    * @param {che.IWorkspaceConfig} workspaceConfig the config of workspace which will be created
    * @param {any} attributes the attributes of the workspace
-   * @returns {ng.IPromise<any>}
+   * @returns {ng.IPromise<che.IWorkspace>}
    */
-  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<any> {
+  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
@@ -170,6 +171,9 @@ export class CreateWorkspaceSvc {
       workspaceConfig.projects = projectTemplates;
       this.addProjectCommands(workspaceConfig, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
+        return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
+      })
+      .then((workspace: che.IWorkspace) => {
         this.projectSourceSelectorService.clearTemplatesList();
         const workspaces = this.cheWorkspace.getWorkspaces();
         if (workspaces.findIndex((_workspace: che.IWorkspace) => {
@@ -177,7 +181,6 @@ export class CreateWorkspaceSvc {
           }) === -1) {
           workspaces.push(workspace);
         }
-        this.cheWorkspace.getWorkspacesById().set(workspace.id, workspace);
         this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
 
         return workspace;
@@ -247,4 +250,12 @@ export class CreateWorkspaceSvc {
     });
   }
 
+  /**
+   * Returns the location of the plugin registry.
+   *
+   * @returns {string} the location of the plugin registry if exists
+   */
+  getPluginRegistryLocation(): string {
+    return this.cheWorkspace.getWorkspaceSettings() != null ? this.cheWorkspace.getWorkspaceSettings().cheWorkspacePluginRegistryUrl : null;
+  }
 }

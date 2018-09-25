@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -29,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -97,6 +99,14 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
     eventBus.addHandler(
         WorkspaceStoppingEvent.TYPE,
         e -> {
+          if (e.getReason() != null) {
+            notificationManagerProvider
+                .get()
+                .notify(
+                    e.getReason(),
+                    StatusNotification.Status.WARNING,
+                    StatusNotification.DisplayMode.EMERGE_MODE);
+          }
           setSuccess(STARTING_WORKSPACE_RUNTIME);
           show(STOPPING_WORKSPACE);
         });

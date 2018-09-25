@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -25,17 +25,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
-import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 
@@ -50,7 +45,7 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
 
   private final ComposeServicesStartStrategy startStrategy;
   private final ComposeEnvironmentValidator composeValidator;
-  private final String defaultMachineMemorySizeAttribute;
+  private final MemoryAttributeProvisioner memoryProvisioner;
 
   @Inject
   public ComposeEnvironmentFactory(
@@ -59,12 +54,11 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
       MachineConfigsValidator machinesValidator,
       ComposeEnvironmentValidator composeValidator,
       ComposeServicesStartStrategy startStrategy,
-      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+      MemoryAttributeProvisioner memoryProvisioner) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.startStrategy = startStrategy;
     this.composeValidator = composeValidator;
-    this.defaultMachineMemorySizeAttribute =
-        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
+    this.memoryProvisioner = memoryProvisioner;
   }
 
   @Override
@@ -90,7 +84,7 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
     }
     ComposeRecipe composeRecipe = doParse(recipeContent);
 
-    addRamLimitAttribute(machines, composeRecipe.getServices());
+    addRamAttributes(machines, composeRecipe.getServices());
 
     ComposeEnvironment composeEnvironment =
         new ComposeEnvironment(
@@ -106,7 +100,7 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
   }
 
   @VisibleForTesting
-  void addRamLimitAttribute(
+  void addRamAttributes(
       Map<String, InternalMachineConfig> machines, Map<String, ComposeService> services)
       throws InfrastructureException {
     for (Entry<String, ComposeService> entry : services.entrySet()) {
@@ -115,15 +109,8 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
         machineConfig = new InternalMachineConfig();
         machines.put(entry.getKey(), machineConfig);
       }
-      final Map<String, String> attributes = machineConfig.getAttributes();
-      if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
-        final Long ramLimit = entry.getValue().getMemLimit();
-        if (ramLimit != null && ramLimit > 0) {
-          attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
-        } else {
-          attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
-        }
-      }
+      memoryProvisioner.provision(
+          machineConfig, entry.getValue().getMemLimit(), entry.getValue().getMemRequest());
     }
   }
 

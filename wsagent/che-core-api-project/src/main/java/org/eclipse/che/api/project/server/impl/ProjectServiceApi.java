@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -363,13 +364,14 @@ public class ProjectServiceApi {
   }
 
   /** Upload a folder from zip represented by form data to a specified location */
-  public Response uploadFolderFromZip(String wsPath, Iterator<FileItem> formData)
+  public Response uploadFolderFromZip(
+      String wsPath, Iterator<FileItem> formData, boolean force, boolean skipRoot)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException {
     wsPath = absolutize(wsPath);
 
     FileItemParsed fileItemParsed = parseDir(formData);
     InputStream content = fileItemParsed.getContent();
-    fsManager.unzip(wsPath, content, false);
+    fsManager.unzip(wsPath, content, force, force, skipRoot);
 
     return Response.ok("", MediaType.TEXT_HTML).build();
   }

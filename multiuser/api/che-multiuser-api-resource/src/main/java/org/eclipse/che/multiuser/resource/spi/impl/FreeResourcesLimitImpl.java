@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -37,17 +38,14 @@ import org.eclipse.che.multiuser.resource.model.Resource;
 @Entity(name = "FreeResourcesLimit")
 @NamedQueries({
   @NamedQuery(
-    name = "FreeResourcesLimit.get",
-    query = "SELECT limit FROM FreeResourcesLimit limit WHERE limit.accountId= :accountId"
-  ),
+      name = "FreeResourcesLimit.get",
+      query = "SELECT limit FROM FreeResourcesLimit limit WHERE limit.accountId= :accountId"),
   @NamedQuery(
-    name = "FreeResourcesLimit.getAll",
-    query = "SELECT limit FROM FreeResourcesLimit limit"
-  ),
+      name = "FreeResourcesLimit.getAll",
+      query = "SELECT limit FROM FreeResourcesLimit limit"),
   @NamedQuery(
-    name = "FreeResourcesLimit.getTotalCount",
-    query = "SELECT COUNT(limit) FROM FreeResourcesLimit limit"
-  )
+      name = "FreeResourcesLimit.getTotalCount",
+      query = "SELECT COUNT(limit) FROM FreeResourcesLimit limit")
 })
 @Table(name = "che_free_resources_limit")
 public class FreeResourcesLimitImpl implements FreeResourcesLimit {
@@ -59,10 +57,9 @@ public class FreeResourcesLimitImpl implements FreeResourcesLimit {
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
-    name = "che_free_resources_limit_resource",
-    joinColumns = @JoinColumn(name = "free_resources_limit_account_id"),
-    inverseJoinColumns = @JoinColumn(name = "resources_id")
-  )
+      name = "che_free_resources_limit_resource",
+      joinColumns = @JoinColumn(name = "free_resources_limit_account_id"),
+      inverseJoinColumns = @JoinColumn(name = "resources_id"))
   private List<ResourceImpl> resources;
 
   public FreeResourcesLimitImpl() {}

@@ -1,14 +1,17 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.selenium.refactor.parameters;
+
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -27,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -92,7 +96,14 @@ public class FailParametersTest {
     refactor.typeAndWaitNewName(testParamObj.getRefactorValue());
     if (testParamObj.isHandleRefactorWithConfirming()) {
       refactor.clickOkButtonRefactorForm();
-      askDialog.acceptDialogWithText(testParamObj.getExpectedDialogTextInRefactorWidget());
+
+      try {
+        askDialog.acceptDialogWithText(testParamObj.getExpectedDialogTextInRefactorWidget());
+      } catch (TimeoutException ex) {
+        // remove try-catch block after issue has been resolved
+        fail("Known random failure https://github.com/eclipse/che/issues/11185");
+      }
+
     } else {
       refactor.waitTextInErrorMessage(testParamObj.getExpectedDialogTextInRefactorWidget());
       refactor.clickCancelButtonRefactorForm();
@@ -173,13 +184,13 @@ public class FailParametersTest {
   @DataProvider(name = "checkRefactoringDataWthConfirmBtnClick")
   private Object[][] refactorParameters() {
     return new Object[][] {
-      {new TestParams("testfail2", 14, 23, "i", "Duplicate parameter i", true)},
-      {new TestParams("testfail3", 14, 15, "9", "'9' is not a valid Java identifier", false)},
-      {new TestParams("testfail7", 17, 16, "j", "Name collision with name 'j'", true)},
-      {new TestParams("testfail11", 14, 16, "j", "Duplicate parameter j", true)},
-      {new TestParams("testfail14", 18, 15, "j", "Name collision with name 'j'", true)},
-      {new TestParams("testfail17", 14, 17, "j", "Duplicate parameter j", true)},
-      {new TestParams("testfail20", 17, 17, "j", "Name collision with name 'j'", true)}
+      {new TestParams("testfail2", 15, 23, "i", "Duplicate parameter i", true)},
+      {new TestParams("testfail3", 15, 15, "9", "'9' is not a valid Java identifier", false)},
+      {new TestParams("testfail7", 18, 16, "j", "Name collision with name 'j'", true)},
+      {new TestParams("testfail11", 15, 16, "j", "Duplicate parameter j", true)},
+      {new TestParams("testfail14", 19, 15, "j", "Name collision with name 'j'", true)},
+      {new TestParams("testfail17", 15, 17, "j", "Duplicate parameter j", true)},
+      {new TestParams("testfail20", 18, 17, "j", "Name collision with name 'j'", true)}
     };
   }
 }

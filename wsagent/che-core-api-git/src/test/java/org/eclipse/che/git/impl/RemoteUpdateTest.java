@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -50,9 +51,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testUpdateBranches(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -70,9 +70,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testAddUrl(GitConnectionFactory connectionFactory) throws GitException, IOException {
     // given
     GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
@@ -85,9 +84,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testAddPushUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -101,9 +99,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testDeleteUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -120,9 +117,8 @@ public class RemoteUpdateTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = GitConnectionFactoryProvider.class)
   public void testDeletePushUrl(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given

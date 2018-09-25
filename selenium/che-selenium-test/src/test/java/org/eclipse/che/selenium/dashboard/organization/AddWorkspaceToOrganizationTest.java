@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -15,7 +16,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -29,12 +29,11 @@ import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationLi
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class AddWorkspaceToOrganizationTest {
 
   private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);
@@ -151,13 +150,7 @@ public class AddWorkspaceToOrganizationTest {
     organizationPage.clickOnWorkspacesTab();
     workspaces.waitWorkspaceIsPresent(WORKSPACE_FOR_MEMBER_1);
     workspaces.selectWorkspaceItemName(WORKSPACE_FOR_MEMBER_1);
-
-    try {
-      workspaceDetails.waitToolbarTitleName(WORKSPACE_FOR_MEMBER_1);
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9148", ex);
-    }
+    workspaceDetails.waitToolbarTitleName(WORKSPACE_FOR_MEMBER_1);
   }
 
   private void createWorkspace(String organizationName, String workspaceName) {

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -16,12 +17,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /**
  * To instantiate {@link TestWorkspace} in test classes with none default parameters.
  *
- * @see TestWorkspaceProvider#createWorkspace(DefaultTestUser, int, String, boolean)
+ * @see TestWorkspaceProvider#createWorkspace(TestUser, int, WorkspaceTemplate, boolean)
  * @author Anatolii Bazko
  */
 @Target({FIELD})
@@ -35,7 +36,7 @@ public @interface InjectTestWorkspace {
   int memoryGb() default -1;
 
   /** Workspace template to create workspace base upon. */
-  String template() default WorkspaceTemplate.DEFAULT;
+  WorkspaceTemplate template() default WorkspaceTemplate.DEFAULT;
 
   /** The workspace owner. If value is empty then default user will be used. */
   String user() default "";

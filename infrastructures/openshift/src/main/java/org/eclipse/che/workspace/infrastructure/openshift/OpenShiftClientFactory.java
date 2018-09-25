@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -59,9 +60,6 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   public OpenShiftClientFactory(
       OpenShiftClientConfigFactory configBuilder,
       @Nullable @Named("che.infra.kubernetes.master_url") String masterUrl,
-      @Nullable @Named("che.infra.kubernetes.username") String username,
-      @Nullable @Named("che.infra.kubernetes.password") String password,
-      @Nullable @Named("che.infra.kubernetes.oauth_token") String oauthToken,
       @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts,
       @Named("che.infra.kubernetes.client.http.async_requests.max") int maxConcurrentRequests,
       @Named("che.infra.kubernetes.client.http.async_requests.max_per_host")
@@ -71,9 +69,6 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
           int connectionPoolKeepAlive) {
     super(
         masterUrl,
-        username,
-        password,
-        oauthToken,
         doTrustCerts,
         maxConcurrentRequests,
         maxConcurrentRequestsPerHost,
@@ -118,23 +113,10 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   @Override
-  protected Config buildDefaultConfig(
-      String masterUrl, String username, String password, String oauthToken, Boolean doTrustCerts) {
+  protected Config buildDefaultConfig(String masterUrl, Boolean doTrustCerts) {
     OpenShiftConfigBuilder configBuilder = new OpenShiftConfigBuilder();
     if (!isNullOrEmpty(masterUrl)) {
       configBuilder.withMasterUrl(masterUrl);
-    }
-
-    if (!isNullOrEmpty(username)) {
-      configBuilder.withUsername(username);
-    }
-
-    if (!isNullOrEmpty(password)) {
-      configBuilder.withPassword(password);
-    }
-
-    if (!isNullOrEmpty(oauthToken)) {
-      configBuilder.withOauthToken(oauthToken);
     }
 
     if (doTrustCerts != null) {

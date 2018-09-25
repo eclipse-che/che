@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -32,12 +33,12 @@ public class CheckSearchFeatureInEditorTest {
       NameGenerator.generate(CheckSearchFeatureInEditorTest.class.getSimpleName(), 4);
   private static final String FIND_TEXT = "Num";
   private static final String FIND_TEXT_REGULAR_EXP = "Num.*";
-  private static final String FIRST_CURSOR_POSITION = "22:42";
-  private static final String SECOND_CURSOR_POSITION = "26:19";
-  private static final String THIRD_CURSOR_POSITION = "38:28";
-  private static final String FOURTH_CURSOR_POSITION = "30:60";
-  private static final String FIFTH_CURSOR_POSITION = "30:61";
-  private static final String SIXTH_CURSOR_POSITION = "22:88";
+  private static final String FIRST_CURSOR_POSITION = "23:42";
+  private static final String SECOND_CURSOR_POSITION = "27:19";
+  private static final String THIRD_CURSOR_POSITION = "39:28";
+  private static final String FOURTH_CURSOR_POSITION = "31:60";
+  private static final String FIFTH_CURSOR_POSITION = "31:61";
+  private static final String SIXTH_CURSOR_POSITION = "23:88";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;

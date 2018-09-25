@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -12,6 +13,7 @@ package org.eclipse.che.selenium.debugger;
 
 import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.BTN_DISCONNECT;
 import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.RESUME_BTN_ID;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
@@ -32,6 +34,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -101,16 +104,23 @@ public class InnerClassAndLambdaDebuggingTest {
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
     // set breakpoints
     editor.waitActive();
-    editor.setCursorToLine(41);
-    editor.setInactiveBreakpoint(41);
+    editor.setCursorToLine(42);
+    editor.setInactiveBreakpoint(42);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         String.format(
             "//*[@id=\"%1$s/%2$s\" or @id=\"topmenu/Run/Debug/Debug '%2$s'\"]",
             TestMenuCommandsConstants.Run.DEBUG, PROJECT));
-    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitActiveBreakpoint(41);
+
+    try {
+      notificationPopup.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10728");
+    }
+
+    editor.waitActiveBreakpoint(42);
   }
 
   @AfterMethod
@@ -122,74 +132,74 @@ public class InnerClassAndLambdaDebuggingTest {
   @Test
   public void shouldDebugAnonymousClass() {
     // when
-    editor.setCursorToLine(37);
-    editor.setBreakpoint(37);
+    editor.setCursorToLine(38);
+    editor.setBreakpoint(38);
     debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
-    editor.waitActiveBreakpoint(37);
+    editor.waitActiveBreakpoint(38);
     debugPanel.waitTextInVariablesPanel("anonym=\"App anonym\"");
   }
 
   @Test(priority = 1)
   public void shouldDebugMethodLocalInnerClass() {
     // when
-    editor.setCursorToLine(53);
-    editor.setBreakpoint(53);
+    editor.setCursorToLine(54);
+    editor.setBreakpoint(54);
     debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
-    editor.waitActiveBreakpoint(53);
+    editor.waitActiveBreakpoint(54);
   }
 
   @Test(priority = 2)
   public void shouldDebugInnerClass() {
     // when
-    editor.setCursorToLine(64);
-    editor.setBreakpoint(64);
+    editor.setCursorToLine(65);
+    editor.setBreakpoint(65);
     debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
-    editor.waitActiveBreakpoint(64);
+    editor.waitActiveBreakpoint(65);
     debugPanel.waitTextInVariablesPanel("innerValue=\"App inner value\"");
   }
 
   @Test(priority = 3)
   public void shouldDebugStaticInnerClass() {
     // when
-    editor.setCursorToLine(72);
-    editor.setBreakpoint(72);
+    editor.setCursorToLine(73);
+    editor.setBreakpoint(73);
     debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
-    editor.waitActiveBreakpoint(72);
+    editor.waitActiveBreakpoint(73);
     debugPanel.waitTextInVariablesPanel("staticInnerValue=\"App static inner value\"");
   }
 
   @Test(priority = 4)
   public void shouldDebugLambdaExpressions() {
     // when
-    editor.setCursorToLine(79);
-    editor.setBreakPointAndWaitActiveState(79);
-    editor.setBreakPointAndWaitActiveState(87);
+    editor.setCursorToLine(80);
+    editor.setBreakPointAndWaitActiveState(80);
+    editor.setBreakPointAndWaitActiveState(88);
     debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
-    editor.waitActiveBreakpoint(79);
+    editor.waitActiveBreakpoint(80);
     debugPanel.waitTextInVariablesPanel("j=1");
 
     // when
     debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
-    editor.waitActiveBreakpoint(79);
+    editor.waitActiveBreakpoint(80);
     debugPanel.waitTextInVariablesPanel("j=2");
 
     // when
     debugPanel.clickOnButton(RESUME_BTN_ID);
 
     // then
-    editor.waitActiveBreakpoint(87);
+    editor.waitActiveBreakpoint(88);
     debugPanel.waitTextInVariablesPanel("j=2");
   }
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -39,9 +40,8 @@ import org.eclipse.che.api.installer.shared.model.Installer;
   @NamedQuery(name = "Inst.getAll", query = "SELECT i FROM Inst i"),
   @NamedQuery(name = "Inst.getAllById", query = "SELECT i FROM Inst i WHERE i.id = :id"),
   @NamedQuery(
-    name = "Inst.getByKey",
-    query = "SELECT i FROM Inst i WHERE i.id = :id AND i.version = :version"
-  ),
+      name = "Inst.getByKey",
+      query = "SELECT i FROM Inst i WHERE i.id = :id AND i.version = :version"),
   @NamedQuery(name = "Inst.getTotalCount", query = "SELECT COUNT(i) FROM Inst i")
 })
 @Table(name = "installer")
@@ -66,18 +66,16 @@ public class InstallerImpl implements Installer {
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "dependency", nullable = false)
   @CollectionTable(
-    name = "installer_dependencies",
-    joinColumns = {@JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")}
-  )
+      name = "installer_dependencies",
+      joinColumns = {@JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")})
   private List<String> dependencies;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @MapKeyColumn(name = "name")
   @Column(name = "value", nullable = false)
   @CollectionTable(
-    name = "installer_properties",
-    joinColumns = {@JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")}
-  )
+      name = "installer_properties",
+      joinColumns = {@JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")})
   private Map<String, String> properties;
 
   @Column(name = "script")

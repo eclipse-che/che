@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -41,6 +42,7 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -96,6 +98,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
@@ -122,6 +125,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -136,6 +140,7 @@ import org.testng.annotations.Test;
  * @author Anton Korneta
  */
 public class KubernetesInternalRuntimeTest {
+
   private static final int EXPOSED_PORT_1 = 4401;
   private static final int EXPOSED_PORT_2 = 8081;
   private static final int INTERNAL_PORT = 4411;
@@ -149,6 +154,9 @@ public class KubernetesInternalRuntimeTest {
   private static final String CONTAINER_NAME_2 = "test2";
   private static final String EVENT_CREATION_TIMESTAMP = "2018-05-15T16:17:54Z";
   private static final String EVENT_LAST_TIMESTAMP_IN_PAST = "2018-05-15T16:18:54Z";
+  /* Pods created by a deployment are created with a random suffix, so Pod names won't match
+  exactly. */
+  private static final String POD_NAME_RANDOM_SUFFIX = "-12345";
 
   private static final String INGRESS_HOST = "localhost";
 
@@ -182,15 +190,20 @@ public class KubernetesInternalRuntimeTest {
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
+  @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
+
+  @Mock
+  private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
+
+  @Mock private SidecarToolingProvisioner toolingProvisioner;
   private KubernetesRuntimeStateCache runtimeStatesCache;
   private KubernetesMachineCache machinesCache;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
-  private KubernetesInternalRuntime<KubernetesRuntimeContext<KubernetesEnvironment>>
-      internalRuntime;
+  private KubernetesInternalRuntime<KubernetesEnvironment> internalRuntime;
 
-  private KubernetesInternalRuntime<KubernetesRuntimeContext<KubernetesEnvironment>>
+  private KubernetesInternalRuntime<KubernetesEnvironment>
       internalRuntimeWithoutUnrecoverableHandler;
 
   private final ImmutableMap<String, Pod> podsMap =
@@ -227,6 +240,9 @@ public class KubernetesInternalRuntimeTest {
             runtimeStatesCache,
             machinesCache,
             startSynchronizerFactory,
+            ImmutableSet.of(internalEnvironmentProvisioner),
+            kubernetesEnvironmentProvisioner,
+            toolingProvisioner,
             context,
             namespace,
             emptyList());
@@ -247,6 +263,9 @@ public class KubernetesInternalRuntimeTest {
             runtimeStatesCache,
             machinesCache,
             startSynchronizerFactory,
+            ImmutableSet.of(internalEnvironmentProvisioner),
+            kubernetesEnvironmentProvisioner,
+            toolingProvisioner,
             context,
             namespace,
             emptyList());
@@ -273,20 +292,17 @@ public class KubernetesInternalRuntimeTest {
     final Map<String, Service> allServices = ImmutableMap.of(SERVICE_NAME, mockService());
     final Ingress ingress = mockIngress();
     final Map<String, Ingress> allIngresses = ImmutableMap.of(INGRESS_NAME, ingress);
-    final Container container = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1, INTERNAL_PORT);
-    final ImmutableMap<String, Pod> allPods =
-        ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container)));
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(any(), anyInt(), any())).thenReturn(ingress);
     when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
-    when(k8sEnv.getPods()).thenReturn(allPods);
+    when(k8sEnv.getPods()).thenReturn(podsMap);
+
     when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
     when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
-    when(k8sEnv.getPods()).thenReturn(podsMap);
   }
 
   @Test
@@ -296,6 +312,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.internalStart(emptyMap());
 
+    verify(toolingProvisioner).provision(IDENTITY, k8sEnv);
+    verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any());
     verify(ingresses).create(any());
     verify(services).create(any());
@@ -392,11 +411,10 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = RuntimeStartInterruptedException.class,
-    expectedExceptionsMessageRegExp =
-        "Runtime start for identity 'workspace: workspace123, "
-            + "environment: env1, ownerId: id1' is interrupted"
-  )
+      expectedExceptions = RuntimeStartInterruptedException.class,
+      expectedExceptionsMessageRegExp =
+          "Runtime start for identity 'workspace: workspace123, "
+              + "environment: env1, ownerId: id1' is interrupted")
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
     when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
@@ -427,14 +445,14 @@ public class KubernetesInternalRuntimeTest {
   public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
     final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
     final PodEvent out1 =
-        mockContainerEvent(
+        mockContainerEventWithoutRandomName(
             WORKSPACE_POD_NAME,
             "Pulling",
             "pulling image",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
     final PodEvent out2 =
-        mockContainerEvent(
+        mockContainerEventWithoutRandomName(
             WORKSPACE_POD_NAME,
             "Pulled",
             "image pulled",
@@ -449,6 +467,7 @@ public class KubernetesInternalRuntimeTest {
     verify(eventService, atLeastOnce()).publish(captor.capture());
     final ImmutableList<MachineLogEvent> machineLogs =
         ImmutableList.of(asMachineLogEvent(out1), asMachineLogEvent(out2));
+
     assertTrue(captor.getAllValues().containsAll(machineLogs));
   }
 
@@ -581,9 +600,8 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = "Runtime is already started"
-  )
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = "Runtime is already started")
   public void shouldThrowExceptionIfRuntimeIsAlreadyStarting() throws Exception {
     // given
     runtimeStatesCache.putIfAbsent(
@@ -623,10 +641,9 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test(
-    expectedExceptions = StateException.class,
-    expectedExceptionsMessageRegExp = "The environment must be running or starting",
-    dataProvider = "nonRunningStatuses"
-  )
+      expectedExceptions = StateException.class,
+      expectedExceptionsMessageRegExp = "The environment must be running or starting",
+      dataProvider = "nonRunningStatuses")
   public void shouldThrowExceptionWhenTryToMakeNonRunningNorStartingRuntimeAsStopping(
       WorkspaceStatus status) throws Exception {
     // given
@@ -823,7 +840,38 @@ public class KubernetesInternalRuntimeTest {
     return metadata;
   }
 
+  /**
+   * Mock a container event, as though it was triggered by the OpenShift API. As workspace Pods are
+   * created indirectly through deployments, they are given generated names with the provided name
+   * as a root. <br>
+   * Use this method in a test to ensure that tested code manages this fact correctly. For example,
+   * code such as unrecoverable events handling cannot directly look at an event's pod name and
+   * compare it to the internal representation, and so must confirm the event is relevant in some
+   * other way.
+   */
   private static PodEvent mockContainerEvent(
+      String podName,
+      String reason,
+      String message,
+      String creationTimestamp,
+      String lastTimestamp) {
+    final PodEvent event = mock(PodEvent.class);
+    when(event.getPodName()).thenReturn(podName + POD_NAME_RANDOM_SUFFIX);
+    when(event.getContainerName()).thenReturn(CONTAINER_NAME_1);
+    when(event.getReason()).thenReturn(reason);
+    when(event.getMessage()).thenReturn(message);
+    when(event.getCreationTimeStamp()).thenReturn(creationTimestamp);
+    when(event.getLastTimestamp()).thenReturn(lastTimestamp);
+    return event;
+  }
+
+  /**
+   * Mock a container event, without modifying the involved Pod's name. Avoid using this method
+   * unless it is necessary to check that a specific event (in terms of fields) is emitted.
+   *
+   * @see KubernetesInternalRuntimeTest#mockContainerEvent(String, String, String, String, String)
+   */
+  private static PodEvent mockContainerEventWithoutRandomName(
       String podName,
       String reason,
       String message,

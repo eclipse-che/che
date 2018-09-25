@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
+    "test:watch": "jest --watch",
     "build": "webpack --config webpack.prod.js",
     "start": "webpack-dev-server --open --config webpack.dev.js"
   },
@@ -25,7 +26,10 @@
     "webpack-dev-server": "^2.11.1",
     "webpack-merge": "^4.1.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "4.17.10",
+    "reconnecting-websocket": "3.2.2"
+  },
   "jest": {
     "moduleFileExtensions": [
       "ts",
@@ -39,6 +43,7 @@
     },
     "testMatch": [
       "**/test/*.(ts)"
-    ]
+    ],
+    "testURL": "http://localhost"
   }
 }

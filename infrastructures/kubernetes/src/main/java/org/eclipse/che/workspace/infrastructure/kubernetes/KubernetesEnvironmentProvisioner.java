@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -22,7 +23,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsP
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
@@ -36,75 +39,89 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
  * @author Anton Korneta
  * @author Alexander Garagatyi
  */
-@Singleton
-public class KubernetesEnvironmentProvisioner {
+public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironment> {
 
-  private final boolean pvcEnabled;
-  private final WorkspaceVolumesStrategy volumesStrategy;
-  private final UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
-  private final ServersConverter<KubernetesEnvironment> serversConverter;
-  private final EnvVarsConverter envVarsConverter;
-  private final RestartPolicyRewriter restartPolicyRewriter;
-  private final RamLimitProvisioner ramLimitProvisioner;
-  private final InstallerServersPortProvisioner installerServersPortProvisioner;
-  private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
-  private final SecurityContextProvisioner securityContextProvisioner;
-  private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
-  private final IngressTlsProvisioner externalServerIngressTlsProvisioner;
-  private final ImagePullSecretProvisioner imagePullSecretProvisioner;
+  void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException;
 
-  @Inject
-  public KubernetesEnvironmentProvisioner(
-      @Named("che.infra.kubernetes.pvc.enabled") boolean pvcEnabled,
-      UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner,
-      ServersConverter<KubernetesEnvironment> serversConverter,
-      EnvVarsConverter envVarsConverter,
-      RestartPolicyRewriter restartPolicyRewriter,
-      WorkspaceVolumesStrategy volumesStrategy,
-      RamLimitProvisioner ramLimitProvisioner,
-      InstallerServersPortProvisioner installerServersPortProvisioner,
-      LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
-      SecurityContextProvisioner securityContextProvisioner,
-      PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
-      IngressTlsProvisioner externalServerIngressTlsProvisioner,
-      ImagePullSecretProvisioner imagePullSecretProvisioner) {
-    this.pvcEnabled = pvcEnabled;
-    this.volumesStrategy = volumesStrategy;
-    this.uniqueNamesProvisioner = uniqueNamesProvisioner;
-    this.serversConverter = serversConverter;
-    this.envVarsConverter = envVarsConverter;
-    this.restartPolicyRewriter = restartPolicyRewriter;
-    this.ramLimitProvisioner = ramLimitProvisioner;
-    this.installerServersPortProvisioner = installerServersPortProvisioner;
-    this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
-    this.securityContextProvisioner = securityContextProvisioner;
-    this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
-    this.externalServerIngressTlsProvisioner = externalServerIngressTlsProvisioner;
-    this.imagePullSecretProvisioner = imagePullSecretProvisioner;
-  }
+  @Singleton
+  class KubernetesEnvironmentProvisionerImpl
+      implements KubernetesEnvironmentProvisioner<KubernetesEnvironment> {
 
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
-      throws InfrastructureException {
-    // 1 stage - update environment according Infrastructure specific
-    installerServersPortProvisioner.provision(k8sEnv, identity);
-    if (pvcEnabled) {
-      logsVolumeMachineProvisioner.provision(k8sEnv, identity);
+    private boolean pvcEnabled;
+    private WorkspaceVolumesStrategy volumesStrategy;
+    private UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
+    private ServersConverter<KubernetesEnvironment> serversConverter;
+    private EnvVarsConverter envVarsConverter;
+    private RestartPolicyRewriter restartPolicyRewriter;
+    private RamLimitProvisioner ramLimitProvisioner;
+    private InstallerServersPortProvisioner installerServersPortProvisioner;
+    private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
+    private SecurityContextProvisioner securityContextProvisioner;
+    private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
+    private IngressTlsProvisioner externalServerIngressTlsProvisioner;
+    private ImagePullSecretProvisioner imagePullSecretProvisioner;
+    private ProxySettingsProvisioner proxySettingsProvisioner;
+    private ServiceAccountProvisioner serviceAccountProvisioner;
+
+    @Inject
+    public KubernetesEnvironmentProvisionerImpl(
+        @Named("che.infra.kubernetes.pvc.enabled") boolean pvcEnabled,
+        UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner,
+        ServersConverter<KubernetesEnvironment> serversConverter,
+        EnvVarsConverter envVarsConverter,
+        RestartPolicyRewriter restartPolicyRewriter,
+        WorkspaceVolumesStrategy volumesStrategy,
+        RamLimitProvisioner ramLimitProvisioner,
+        InstallerServersPortProvisioner installerServersPortProvisioner,
+        LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
+        SecurityContextProvisioner securityContextProvisioner,
+        PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
+        IngressTlsProvisioner externalServerIngressTlsProvisioner,
+        ImagePullSecretProvisioner imagePullSecretProvisioner,
+        ProxySettingsProvisioner proxySettingsProvisioner,
+        ServiceAccountProvisioner serviceAccountProvisioner) {
+      this.pvcEnabled = pvcEnabled;
+      this.volumesStrategy = volumesStrategy;
+      this.uniqueNamesProvisioner = uniqueNamesProvisioner;
+      this.serversConverter = serversConverter;
+      this.envVarsConverter = envVarsConverter;
+      this.restartPolicyRewriter = restartPolicyRewriter;
+      this.ramLimitProvisioner = ramLimitProvisioner;
+      this.installerServersPortProvisioner = installerServersPortProvisioner;
+      this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
+      this.securityContextProvisioner = securityContextProvisioner;
+      this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
+      this.externalServerIngressTlsProvisioner = externalServerIngressTlsProvisioner;
+      this.imagePullSecretProvisioner = imagePullSecretProvisioner;
+      this.proxySettingsProvisioner = proxySettingsProvisioner;
+      this.serviceAccountProvisioner = serviceAccountProvisioner;
     }
 
-    // 2 stage - converting Che model env to Kubernetes env
-    serversConverter.provision(k8sEnv, identity);
-    envVarsConverter.provision(k8sEnv, identity);
-    if (pvcEnabled) {
-      volumesStrategy.provision(k8sEnv, identity);
-    }
+    public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+        throws InfrastructureException {
+      // 1 stage - update environment according Infrastructure specific
+      installerServersPortProvisioner.provision(k8sEnv, identity);
+      if (pvcEnabled) {
+        logsVolumeMachineProvisioner.provision(k8sEnv, identity);
+      }
 
-    // 3 stage - add Kubernetes env items
-    restartPolicyRewriter.provision(k8sEnv, identity);
-    uniqueNamesProvisioner.provision(k8sEnv, identity);
-    ramLimitProvisioner.provision(k8sEnv, identity);
-    externalServerIngressTlsProvisioner.provision(k8sEnv, identity);
-    securityContextProvisioner.provision(k8sEnv, identity);
-    podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
-    imagePullSecretProvisioner.provision(k8sEnv, identity);
+      // 2 stage - converting Che model env to Kubernetes env
+      serversConverter.provision(k8sEnv, identity);
+      envVarsConverter.provision(k8sEnv, identity);
+      if (pvcEnabled) {
+        volumesStrategy.provision(k8sEnv, identity);
+      }
+
+      // 3 stage - add Kubernetes env items
+      restartPolicyRewriter.provision(k8sEnv, identity);
+      uniqueNamesProvisioner.provision(k8sEnv, identity);
+      ramLimitProvisioner.provision(k8sEnv, identity);
+      externalServerIngressTlsProvisioner.provision(k8sEnv, identity);
+      securityContextProvisioner.provision(k8sEnv, identity);
+      podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
+      imagePullSecretProvisioner.provision(k8sEnv, identity);
+      proxySettingsProvisioner.provision(k8sEnv, identity);
+      serviceAccountProvisioner.provision(k8sEnv, identity);
+    }
   }
 }

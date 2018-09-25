@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -22,6 +23,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
@@ -37,6 +39,7 @@ public class CheckStoppingWsByTimeoutTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestWorkspace testWorkspace;
   @Inject private DefaultTestUser testUser;
+  @Inject private Events eventsPanel;
 
   @Inject
   @Named("che.workspace_agent_dev_inactive_stop_timeout_ms")
@@ -63,9 +66,15 @@ public class CheckStoppingWsByTimeoutTest {
     assertEquals(workspace.getStatus(), STOPPED);
   }
 
-  @Test
+  @Test(priority = 1)
   public void checkLoadToasterAfterStopping() {
     toastLoader.waitToastLoaderButton("Start");
+  }
+
+  @Test(priority = 2)
+  public void checkStopReasonNotification() {
+    eventsPanel.clickEventLogBtn();
+    eventsPanel.waitExpectedMessage("Workspace idle timeout exceeded");
   }
 
   private int getCommonTimeoutInMilliSec() {

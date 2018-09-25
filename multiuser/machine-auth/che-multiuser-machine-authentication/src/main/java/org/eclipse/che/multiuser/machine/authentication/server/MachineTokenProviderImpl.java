@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -11,12 +12,20 @@
 package org.eclipse.che.multiuser.machine.authentication.server;
 
 import static java.lang.String.format;
+import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
+import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.USE;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.workspace.server.token.MachineAccessForbidden;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 
 /**
  * Provides machine token from {@link MachineTokenRegistry}.
@@ -28,15 +37,19 @@ import org.eclipse.che.commons.subject.Subject;
  */
 @Singleton
 public class MachineTokenProviderImpl implements MachineTokenProvider {
+
+  private final PermissionChecker permissionChecker;
   private final MachineTokenRegistry tokenRegistry;
 
   @Inject
-  public MachineTokenProviderImpl(MachineTokenRegistry tokenRegistry) {
+  public MachineTokenProviderImpl(
+      PermissionChecker permissionChecker, MachineTokenRegistry tokenRegistry) {
+    this.permissionChecker = permissionChecker;
     this.tokenRegistry = tokenRegistry;
   }
 
   @Override
-  public String getToken(String workspaceId) {
+  public String getToken(String workspaceId) throws MachineTokenException {
     final Subject subject = EnvironmentContext.getCurrent().getSubject();
     if (subject.isAnonymous()) {
       throw new IllegalStateException(
@@ -49,7 +62,18 @@ public class MachineTokenProviderImpl implements MachineTokenProvider {
   }
 
   @Override
-  public String getToken(String userId, String workspaceId) {
+  public String getToken(String userId, String workspaceId) throws MachineTokenException {
+    try {
+      if (!permissionChecker.hasPermission(userId, DOMAIN_ID, workspaceId, USE)) {
+        throw new MachineAccessForbidden(
+            format(
+                "The user `%s` doesn't have the required `use` permission for workspace `%s`",
+                userId, workspaceId));
+      }
+    } catch (ServerException | NotFoundException | ConflictException e) {
+      throw new MachineTokenException(e.getMessage(), e);
+    }
+
     return tokenRegistry.getOrCreateToken(userId, workspaceId);
   }
 }

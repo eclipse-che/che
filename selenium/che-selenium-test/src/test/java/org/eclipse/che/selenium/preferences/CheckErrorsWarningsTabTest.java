@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -84,7 +85,7 @@ public class CheckErrorsWarningsTabTest {
     editor.deleteAllContent();
     editor.typeTextIntoEditorWithoutDelayForSaving(embedCode);
     loader.waitOnClosed();
-    editor.removeLineAndAllAfterIt(104);
+    editor.removeLineAndAllAfterIt(105);
 
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
@@ -97,13 +98,13 @@ public class CheckErrorsWarningsTabTest {
     consoles.closeProcessesArea();
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
-    Assert.assertEquals(editor.getMarkersQuantity(WARNING_OVERVIEW), 13);
+    Assert.assertEquals(editor.getMarkersQuantity(WARNING_OVERVIEW), 12);
     Assert.assertEquals(editor.getMarkersQuantity(WARNING), 22);
 
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.ERROR);
-    Assert.assertEquals(editor.getMarkersQuantity(ERROR_OVERVIEW), 13);
+    Assert.assertEquals(editor.getMarkersQuantity(ERROR_OVERVIEW), 12);
     Assert.assertEquals(editor.getMarkersQuantity(ERROR), 22);
     editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
@@ -124,7 +125,7 @@ public class CheckErrorsWarningsTabTest {
     projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     loader.waitOnClosed();
-    editor.setCursorToLine(84);
+    editor.setCursorToLine(85);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditorWithoutDelayForSaving(Keys.ARROW_LEFT.toString());

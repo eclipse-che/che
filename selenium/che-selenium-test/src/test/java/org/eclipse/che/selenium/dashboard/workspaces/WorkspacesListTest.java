@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -71,6 +72,9 @@ public class WorkspacesListTest {
 
   @InjectTestWorkspace(memoryGb = 2, startAfterCreation = false)
   private TestWorkspace blankWorkspace;
+
+  @InjectTestWorkspace(memoryGb = 2, startAfterCreation = false)
+  private TestWorkspace workspaceToDelete;
 
   @InjectTestWorkspace(template = UBUNTU_JDK8, memoryGb = 3)
   private TestWorkspace javaWorkspace;
@@ -337,7 +341,6 @@ public class WorkspacesListTest {
     newWorkspace.selectStack(BLANK);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
-    dashboard.waitWorkspacesCountInWorkspacesItem(getWorkspacesCount());
 
     dashboard.selectWorkspacesItemOnDashboard();
 
@@ -351,22 +354,15 @@ public class WorkspacesListTest {
     assertTrue(newestCreatedWorkspaceItem.equals(expectedNewestWorkspaceItem));
   }
 
-  @Test(priority = 1)
-  public void deleteWorkspacesByCheckboxes() {
+  @Test
+  public void deleteWorkspacesByCheckboxes() throws Exception {
     workspaces.waitPageLoading();
 
-    workspaces.selectWorkspaceByCheckbox(expectedNewestWorkspaceItem.getWorkspaceName());
+    workspaces.selectWorkspaceByCheckbox(workspaceToDelete.getName());
     workspaces.clickOnDeleteWorkspacesBtn();
     workspaces.clickOnDeleteButtonInDialogWindow();
 
-    workspaces.waitWorkspaceIsNotPresent(expectedNewestWorkspaceItem.getWorkspaceName());
-
-    workspaces.selectAllWorkspacesByBulk();
-    workspaces.clickOnDeleteWorkspacesBtn();
-    workspaces.clickOnDeleteButtonInDialogWindow();
-
-    workspaces.waitWorkspaceIsNotPresent(expectedBlankItem.getWorkspaceName());
-    workspaces.waitWorkspaceIsNotPresent(expectedJavaItem.getWorkspaceName());
+    workspaces.waitWorkspaceIsNotPresent(workspaceToDelete.getName());
   }
 
   private void checkExpectedBlankWorkspaceDisplaying() {

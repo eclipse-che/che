@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -109,12 +110,22 @@ public class PomReconciler {
     List<Problem> result = new ArrayList<>();
 
     if (isNullOrEmpty(pomContent)) {
-      throw new ServerException(
-          format("Couldn't reconcile pom file '%s' because its content is empty", pomPath));
+      Problem problem =
+          DtoFactory.newDto(Problem.class)
+              .withError(true)
+              .withMessage("Content of pom file is empty")
+              .withSourceStart(1)
+              .withSourceEnd(1);
+      result.add(problem);
+      return result;
     }
 
     try {
       Model.readFrom(new ByteArrayInputStream(pomContent.getBytes(defaultCharset())));
+
+      if (isNullOrEmpty(projectPath)) {
+        return result;
+      }
 
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectPath);
       MavenProject mavenProject = mavenProjectManager.findMavenProject(project);
@@ -181,15 +192,11 @@ public class PomReconciler {
       return;
     }
 
-    String newPomContent = workingCopy.getContentAsString();
-    if (isNullOrEmpty(newPomContent)) {
-      return;
-    }
-
-    List<Problem> problems;
     try {
-      problems = reconcile(fileLocation, projectPath, newPomContent);
+      String newPomContent = workingCopy.getContentAsString();
+      List<Problem> problems = reconcile(fileLocation, projectPath, newPomContent);
       List<Diagnostic> diagnostics = convertProblems(newPomContent, problems);
+
       client.publishDiagnostics(
           new PublishDiagnosticsParams(LanguageServiceUtils.prefixURI(fileLocation), diagnostics));
     } catch (ServerException | NotFoundException e) {

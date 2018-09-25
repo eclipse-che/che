@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -12,6 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -77,7 +79,7 @@ public class Swagger {
   private void expandWorkSpaceItem() {
     Wait fluentWait =
         new FluentWait(seleniumWebDriver)
-            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
+            .withTimeout(ELEMENT_TIMEOUT_SEC, SECONDS)
             .pollingEvery(MINIMUM_SEC, SECONDS)
             .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
     fluentWait.until((ExpectedCondition<Boolean>) input -> workSpaceLink.isEnabled());

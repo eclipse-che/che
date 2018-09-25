@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -23,7 +24,7 @@ export  interface IInitData {
   workspaceDetails: che.IWorkspace;
 }
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Tools'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Tools', 'Plugins'];
 
 /**
  * @ngdoc controller
@@ -65,6 +66,7 @@ export class WorkspaceDetailsController {
   private errorMessage: string = '';
   private tabsValidationTimeout: ng.IPromise<any>;
   private toolsFilter: Function;
+  private pluginRegistry: string;
   /**
    * There are unsaved changes to apply (with restart) when is't <code>true</code>.
    */
@@ -94,6 +96,7 @@ export class WorkspaceDetailsController {
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
     this.workspacesService = workspacesService;
+    this.pluginRegistry = cheWorkspace.getWorkspaceSettings() != null ? cheWorkspace.getWorkspaceSettings().cheWorkspacePluginRegistryUrl : null;
 
     if (!initData.workspaceDetails) {
       cheNotification.showError(`There is no workspace with name ${initData.workspaceName}`);

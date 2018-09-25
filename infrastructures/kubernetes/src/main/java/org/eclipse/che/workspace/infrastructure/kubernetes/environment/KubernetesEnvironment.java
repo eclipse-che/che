@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -52,6 +53,12 @@ public class KubernetesEnvironment extends InternalEnvironment {
         k8sEnv.getPersistentVolumeClaims(),
         k8sEnv.getSecrets(),
         k8sEnv.getConfigMaps());
+    setAttributes(k8sEnv.getAttributes());
+  }
+
+  @Override
+  public KubernetesEnvironment setType(String type) {
+    return (KubernetesEnvironment) super.setType(type);
   }
 
   public static Builder builder() {
@@ -109,6 +116,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
   public static class Builder {
     protected InternalRecipe internalRecipe;
+    protected String type = TYPE;
     protected final Map<String, InternalMachineConfig> machines = new HashMap<>();
     protected final List<Warning> warnings = new ArrayList<>();
     protected final Map<String, Pod> pods = new HashMap<>();
@@ -117,6 +125,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
     protected final Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     protected final Map<String, Secret> secrets = new HashMap<>();
     protected final Map<String, ConfigMap> configMaps = new HashMap<>();
+    protected final Map<String, String> attributes = new HashMap<>();
 
     protected Builder() {}
 
@@ -165,9 +174,31 @@ public class KubernetesEnvironment extends InternalEnvironment {
       return this;
     }
 
+    public Builder setAttributes(Map<String, String> attributes) {
+      this.attributes.putAll(attributes);
+      return this;
+    }
+
+    public Builder setType(String type) {
+      this.type = type;
+      return this;
+    }
+
     public KubernetesEnvironment build() {
-      return new KubernetesEnvironment(
-          internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
+      KubernetesEnvironment kubernetesEnvironment =
+          new KubernetesEnvironment(
+              internalRecipe,
+              machines,
+              warnings,
+              pods,
+              services,
+              ingresses,
+              pvcs,
+              secrets,
+              configMaps);
+      kubernetesEnvironment.setAttributes(attributes);
+      kubernetesEnvironment.setType(type);
+      return kubernetesEnvironment;
     }
   }
 }

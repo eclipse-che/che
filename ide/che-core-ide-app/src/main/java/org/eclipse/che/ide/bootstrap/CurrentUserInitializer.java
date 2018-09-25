@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -71,7 +72,11 @@ class CurrentUserInitializer {
             profile -> {
               user.setId(profile.getUserId());
 
-              return loadPreferences();
+              return loadPreferences()
+                  .then(
+                      preferences -> {
+                        updateGitCommitterPreferencesIfEmpty(preferences, profile);
+                      });
             })
         .then(
             (Function<Map<String, String>, Void>)
@@ -102,6 +107,32 @@ class CurrentUserInitializer {
                   throw new OperationException(
                       messages.unableToLoadPreference() + ": " + arg.getCause());
                 });
+  }
+
+  private void updateGitCommitterPreferencesIfEmpty(
+      Map<String, String> preferences, ProfileDto profile) {
+    String name = profile.getAttributes().get("name");
+    String email = profile.getEmail();
+
+    if (name == null || email == null) {
+      return;
+    }
+
+    String gitCommitterNamePreference = "git.committer.name";
+    String gitCommitterEmailPreference = "git.committer.email";
+
+    String gitCommitterName = preferences.get(gitCommitterNamePreference);
+    String gitCommitterEmail = preferences.get(gitCommitterEmailPreference);
+
+    if (gitCommitterName == null || gitCommitterEmail == null) {
+      if (gitCommitterName == null) {
+        preferencesManager.setValue(gitCommitterNamePreference, name);
+      }
+      if (gitCommitterEmail == null) {
+        preferencesManager.setValue(gitCommitterEmailPreference, email);
+      }
+      preferencesManager.flushPreferences();
+    }
   }
 
   private Promise<ProfileDto> getUserProfile() {

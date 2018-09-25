@@ -7,7 +7,6 @@
     "scope": "general",
     "tags": [
       "Theia",
-      "Alpine",
       "CentOS"
     ],
     "workspaceConfig": {
@@ -21,7 +20,8 @@
                     "type": "ide"
                   },
                   "protocol": "http",
-                  "port": "3000"
+                  "port": "3000",
+                  "path": "/"
                 },
                 "theia-dev": {
                   "attributes": {
@@ -44,12 +44,24 @@
               "attributes": {
                 "memoryLimitBytes": "2147483648"
               }
+            },
+            "machine-exec": {
+              "servers": {
+                "machine-exec": {
+                  "attributes": {
+                    "type": "terminal"
+                  },
+                  "protocol": "ws",
+                  "port": "4444"
+                }
+              },
+              "installers": []
             }
           },
           "recipe": {
-            "contentType": "",
-            "type": "dockerimage",
-            "content": "eclipse/che-theia:0.4.0-next.b17727c1-nightly"
+            "contentType": "application/x-yaml",
+            "type": "compose",
+            "content": "services:\n  machine-exec:\n    image: 'wsskeleton/che-machine-exec:latest'\n    mem_limit: 536870912\n  theia:\n    image: 'eclipse/che-theia:0.3.14-nightly'\n    mem_limit: 1073741824\n    depends_on:\n      - machine-exec\n"
           }
         }
       },
@@ -66,7 +78,7 @@
   {
     "id": "java-theia-openshift",
     "creator": "ide",
-    "name": "Java Theia (openshift)",
+    "name": "Java Theia on OpenShift",
     "description": "Che development + Theia in a sidecar container (openshift)",
     "scope": "general",
     "tags": [
@@ -85,6 +97,7 @@
                 "theia": {
                   "protocol": "http",
                   "port": "3000",
+                  "path": "/",
                   "attributes": {
                     "type": "ide"
                   }
@@ -117,11 +130,23 @@
               },
               "installers": [],
               "env": {}
+            },
+            "ws/machine-exec": {
+              "servers": {
+                "machine-exec": {
+                  "attributes": {
+                    "type": "terminal"
+                  },
+                  "protocol": "ws",
+                  "port": "4444"
+                }
+              },
+              "installers": []
             }
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.4.0-next.b17727c1-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:0.3.14-nightly'\n     name: theia\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     mem_limit: 536870912\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }
@@ -130,6 +155,102 @@
       "name": "theia",
       "projects": [],
       "commands": []
+    },
+    "stackIcon": {
+      "name": "type-theia.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "wsnext-helloworld-openshift",
+    "creator": "ide",
+    "name": "Workspace Next HelloWorld example on OpenShift",
+    "description": "Example of a Theia Hello World plug-in + Theia plug-in (openshift)",
+    "scope": "general",
+    "tags": [
+      "ws.next",
+      "Theia"
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/dev": {
+              "attributes": {},
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "openshift",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "name": "skeleton",
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-dummy-plugin:0.0.1,che-machine-exec-plugin:0.0.1"
+      },
+      "commands": [],
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-theia.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "wsnext-service-openshift",
+    "creator": "ide",
+    "name": "Workspace Next REST Service Example on OpenShift",
+    "description": "Example of a Theia REST Service plug-in + REST server container + Theia plug-in (openshift)",
+    "scope": "general",
+    "tags": [
+      "ws.next",
+      "Theia"
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/dev": {
+              "attributes": {},
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "openshift",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "name": "skeleton",
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-service-plugin:0.0.1,che-machine-exec-plugin:0.0.1"
+      },
+      "commands": [],
+      "links": []
     },
     "stackIcon": {
       "name": "type-theia.svg",
@@ -1831,6 +1952,121 @@
     },
     "stackIcon": {
       "name": "type-ceylon.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "apache-camel-springboot",
+    "creator": "Aurélien Pupier",
+    "name": "Apache Camel based projects",
+    "description": "Stack with environment ready to develop Integration projects with Apache Camel based on SpringBoot.",
+    "scope": "advanced",
+    "tags": [
+      "Apache Camel",
+      "Red Hat Fuse",
+      "Agile Integration"
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "recipe": {
+            "type": "dockerimage",
+            "content": "registry.centos.org/che-stacks/spring-boot"
+          },
+          "machines": {
+            "dev-machine": {
+              "env": {
+              },
+              "volumes": {
+              },
+              "installers": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ls.camel"
+              ],
+              "servers": {
+                "tomcat8-debug": {
+                  "attributes": {
+                  },
+                  "protocol": "http",
+                  "port": "8000"
+                },
+                "springboot": {
+                  "attributes": {
+                  },
+                  "protocol": "http",
+                  "port": "8080"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          }
+        }
+      },
+      "projects": [
+      ],
+      "commands": [
+        {
+          "commandLine": "scl enable rh-maven33 'mvn install -f ${current.project.path}'",
+          "name": "build",
+          "type": "mvn",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "name": "clean build",
+          "type": "mvn",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
+          "name": "run",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.springboot}"
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn spring-boot:run -Drun.jvmArguments=\"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005\" -f ${current.project.path}'",
+          "name": "debug",
+          "type": "custom",
+          "attributes": {
+            "goal": "Debug",
+            "previewUrl": "${server.springboot}"
+          }
+        }
+      ],
+      "name": "default",
+      "links": [
+      ]
+    },
+    "components": [
+      {
+        "version": "7",
+        "name": "CentOS"
+      },
+      {
+        "version": "1.8.0_161",
+        "name": "OpenJDK"
+      },
+      {
+        "version": "3.3.9",
+        "name": "RH-Maven"
+      }
+    ],
+    "stackIcon": {
+      "name": "type-apache-camel.svg",
       "mediaType": "image/svg+xml"
     }
   }

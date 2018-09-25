@@ -1,18 +1,17 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -32,18 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
-import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
@@ -75,7 +68,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
   private final OpenShiftClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
-  private final String defaultMachineMemorySizeAttribute;
+  private final MemoryAttributeProvisioner memoryProvisioner;
 
   @Inject
   public OpenShiftEnvironmentFactory(
@@ -84,12 +77,11 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       MachineConfigsValidator machinesValidator,
       OpenShiftClientFactory clientFactory,
       KubernetesEnvironmentValidator envValidator,
-      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+      MemoryAttributeProvisioner memoryProvisioner) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
-    this.defaultMachineMemorySizeAttribute =
-        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
+    this.memoryProvisioner = memoryProvisioner;
   }
 
   @Override
@@ -168,7 +160,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
           new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
     }
 
-    addRamLimitAttribute(machines, pods.values());
+    addRamAttributes(machines, pods.values());
 
     OpenShiftEnvironment osEnv =
         OpenShiftEnvironment.builder()
@@ -189,7 +181,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
   }
 
   @VisibleForTesting
-  void addRamLimitAttribute(Map<String, InternalMachineConfig> machines, Collection<Pod> pods) {
+  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<Pod> pods) {
     for (Pod pod : pods) {
       for (Container container : pod.getSpec().getContainers()) {
         final String machineName = Names.machineName(pod, container);
@@ -198,15 +190,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
           machineConfig = new InternalMachineConfig();
           machines.put(machineName, machineConfig);
         }
-        final Map<String, String> attributes = machineConfig.getAttributes();
-        if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
-          final long ramLimit = Containers.getRamLimit(container);
-          if (ramLimit > 0) {
-            attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
-          } else {
-            attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
-          }
-        }
+        memoryProvisioner.provision(
+            machineConfig, Containers.getRamLimit(container), Containers.getRamRequest(container));
       }
     }
   }

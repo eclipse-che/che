@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -15,7 +16,6 @@ import static java.nio.file.Paths.get;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.UPLOAD_FILE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.UPLOAD_FOLDER;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -35,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.upload.UploadDirectoryDialogPage;
 import org.eclipse.che.selenium.pageobject.upload.UploadFileDialogPage;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -70,7 +69,7 @@ public class UploadIntoProjectTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(testWorkspace);
-    projectExplorer.waitVisibleItem(PROJECT_NAME);
+    projectExplorer.waitProjectInitialization(PROJECT_NAME);
   }
 
   @BeforeMethod
@@ -198,12 +197,7 @@ public class UploadIntoProjectTest {
     projectExplorer.quickRevealToItemWithJavaScript(
         get(pathToUploadingFileInsideTheProject).getParent().toString());
     projectExplorer.openItemByPath(pathToUploadingFileInsideTheProject);
-
-    try {
-      editor.waitTextIntoEditor(TEXT_TO_INSERT);
-    } catch (WebDriverException ex) {
-      fail("Known issue https://github.com/eclipse/che/issues/10484", ex);
-    }
+    editor.waitTextIntoEditor(TEXT_TO_INSERT);
   }
 
   @Test
@@ -250,13 +244,7 @@ public class UploadIntoProjectTest {
     uploadFileDialogPage.waitOnClose();
     projectExplorer.quickRevealToItemWithJavaScript(pathToUploadingTextFileInsideTheProject);
     projectExplorer.openItemByPath(pathToUploadingTextFileInsideTheProject);
-
-    try {
-      editor.waitTextNotPresentIntoEditor(TEXT_TO_INSERT);
-    } catch (WebDriverException ex) {
-      fail("Known issue https://github.com/eclipse/che/issues/10437", ex);
-    }
-
+    editor.waitTextNotPresentIntoEditor(TEXT_TO_INSERT);
     projectExplorer.waitVisibleItem(pathToUploadingHtmlFileInsideTheProject);
     projectExplorer.openItemByPath(pathToUploadingHtmlFileInsideTheProject);
     editor.waitTextNotPresentIntoEditor(TEXT_TO_INSERT);
@@ -281,12 +269,7 @@ public class UploadIntoProjectTest {
 
     // then
     projectExplorer.quickRevealToItemWithJavaScript(pathToUploadingFileInsideTheProject);
-
-    try {
-      projectExplorer.waitVisibleItem(pathToUploadingFileInsideTheProject);
-    } catch (WebDriverException ex) {
-      fail("Known issue https://github.com/eclipse/che/issues/9430", ex);
-    }
+    projectExplorer.waitVisibleItem(pathToUploadingFileInsideTheProject);
   }
 
   private void openFormAndSelectUploadFile(Path pathToUploadFile) throws IOException {

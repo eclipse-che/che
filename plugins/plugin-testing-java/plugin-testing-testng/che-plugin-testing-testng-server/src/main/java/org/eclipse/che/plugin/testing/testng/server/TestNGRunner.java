@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -41,6 +42,8 @@ import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -193,11 +196,14 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   }
 
   @Override
-  protected boolean isTestSuite(String filePath, IJavaProject project) {
-    int projectPathLength = project.getPath().toString().length();
-    String path = filePath.substring(projectPathLength, filePath.length());
-    IFile file = project.getProject().getFile(path);
+  protected boolean isTestSuite(String fileLocation, IJavaProject project) {
+    IPath projectPath = project.getPath();
+    IPath filePath = new Path(fileLocation);
+    if (!projectPath.isPrefixOf(filePath)) {
+      return false;
+    }
 
+    IFile file = project.getProject().getFile(filePath.makeRelativeTo(projectPath));
     if (!file.exists()) {
       return false;
     }
@@ -208,9 +214,9 @@ public class TestNGRunner extends AbstractJavaTestRunner {
       SAXParser parser = factory.newSAXParser();
       parser.parse(file.getContents(), suiteParser);
     } catch (ParserConfigurationException | SAXException | IOException e) {
-      LOG.error("It is not possible to parse file " + path, e);
+      LOG.debug("It is not possible to parse file " + fileLocation);
     } catch (CoreException e) {
-      LOG.error("It is not possible to read file " + path, e);
+      LOG.error("It is not possible to read file " + fileLocation, e);
     }
 
     return suiteParser.isSuite();

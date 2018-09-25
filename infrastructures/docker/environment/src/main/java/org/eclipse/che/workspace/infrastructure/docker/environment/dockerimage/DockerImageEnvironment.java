@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -33,6 +34,11 @@ public class DockerImageEnvironment extends InternalEnvironment {
     this.dockerImage = dockerImage;
   }
 
+  @Override
+  public DockerImageEnvironment setType(String type) {
+    return (DockerImageEnvironment) super.setType(type);
+  }
+
   public String getDockerImage() {
     return dockerImage;
   }
@@ -49,12 +55,15 @@ public class DockerImageEnvironment extends InternalEnvironment {
     return Objects.equals(dockerImage, that.dockerImage)
         && Objects.equals(getRecipe(), that.getRecipe())
         && Objects.equals(getMachines(), that.getMachines())
-        && Objects.equals(getWarnings(), that.getWarnings());
+        && Objects.equals(getWarnings(), that.getWarnings())
+        && Objects.equals(getType(), that.getType())
+        && Objects.equals(getAttributes(), that.getAttributes());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dockerImage, getRecipe(), getMachines(), getWarnings());
+    return Objects.hash(
+        dockerImage, getRecipe(), getMachines(), getWarnings(), getType(), getAttributes());
   }
 
   @Override
@@ -69,6 +78,10 @@ public class DockerImageEnvironment extends InternalEnvironment {
         + getRecipe()
         + ", warnings="
         + getWarnings()
+        + ", type="
+        + getType()
+        + ", attributes="
+        + getAttributes()
         + '}';
   }
 }

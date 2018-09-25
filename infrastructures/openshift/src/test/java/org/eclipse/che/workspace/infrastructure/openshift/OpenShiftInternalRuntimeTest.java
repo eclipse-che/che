@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -29,6 +30,7 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -64,6 +66,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -78,6 +81,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
@@ -136,6 +140,9 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private ProbeScheduler probesScheduler;
   @Mock private KubernetesRuntimeStateCache runtimeStateCache;
   @Mock private KubernetesMachineCache machinesCache;
+  @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
+  @Mock private OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner;
+  @Mock private SidecarToolingProvisioner toolingProvisioner;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -167,6 +174,9 @@ public class OpenShiftInternalRuntimeTest {
             runtimeStateCache,
             machinesCache,
             startSynchronizerFactory,
+            ImmutableSet.of(internalEnvironmentProvisioner),
+            kubernetesEnvironmentProvisioner,
+            toolingProvisioner,
             context,
             project,
             emptyList());
@@ -187,6 +197,9 @@ public class OpenShiftInternalRuntimeTest {
             runtimeStateCache,
             machinesCache,
             startSynchronizerFactory,
+            ImmutableSet.of(internalEnvironmentProvisioner),
+            kubernetesEnvironmentProvisioner,
+            toolingProvisioner,
             context,
             project,
             emptyList());

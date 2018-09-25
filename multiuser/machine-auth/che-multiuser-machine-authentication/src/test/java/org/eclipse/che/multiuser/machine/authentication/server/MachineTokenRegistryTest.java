@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -30,6 +31,8 @@ import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.mockito.Mock;
@@ -57,6 +60,7 @@ public class MachineTokenRegistryTest {
 
   @Mock private SignatureKeyManager signatureKeyManager;
   @Mock private UserManager userManager;
+  @Mock private WorkspaceManager workspaceManager;
 
   private KeyPair keyPair;
 
@@ -68,7 +72,7 @@ public class MachineTokenRegistryTest {
     keyPair = kpg.generateKeyPair();
 
     mockUser(USER_ID, USER_NAME);
-    when(signatureKeyManager.getKeyPair()).thenReturn(keyPair);
+    when(signatureKeyManager.getOrCreateKeyPair(anyString())).thenReturn(keyPair);
   }
 
   @Test
@@ -88,11 +92,11 @@ public class MachineTokenRegistryTest {
     assertEquals(subject.getUserName(), USER_NAME);
     assertEquals(claims.get(WORKSPACE_ID_CLAIM, String.class), WORKSPACE_ID);
     verify(userManager).getById(USER_ID);
-    verify(signatureKeyManager).getKeyPair();
+    verify(signatureKeyManager).getOrCreateKeyPair(anyString());
     assertNotNull(generatedToken);
   }
 
-  @Test(expectedExceptions = IllegalStateException.class)
+  @Test(expectedExceptions = MachineTokenException.class)
   public void testThrowsIllegalStateExceptionWhenTryToGetTokenForNonExistingUser()
       throws Exception {
     when(userManager.getById(anyString())).thenThrow(new NotFoundException("User not found"));

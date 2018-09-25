@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -12,12 +13,15 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -123,24 +127,55 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
         userName);
   }
 
+  /** Waits workspace is started. */
+  @Override
+  public void waitWorkspaceStart(String workspaceName, String userName) throws Exception {
+    WaitUtils.sleepQuietly(5); // delay 5 secs to obtain starting status for sure
+    WaitUtils.waitSuccessCondition(
+        () -> {
+          WorkspaceStatus status;
+          try {
+            status = getByName(workspaceName, userName).getStatus();
+          } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+          }
+
+          switch (status) {
+            case RUNNING:
+              return true;
+
+            case STARTING:
+              return false;
+
+            default:
+              throw new RuntimeException(
+                  format("Workspace with name '%s' didn't start", workspaceName));
+          }
+        },
+        600,
+        1000,
+        TimeUnit.SECONDS);
+  }
+
   /** Waits needed status. */
   @Override
   public void waitStatus(String workspaceName, String userName, WorkspaceStatus expectedStatus)
       throws Exception {
+    WaitUtils.waitSuccessCondition(
+        () -> {
+          try {
+            if (getByName(workspaceName, userName).getStatus() == expectedStatus) {
+              return true;
+            }
+          } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+          }
 
-    WorkspaceStatus status = null;
-    for (int i = 0; i < 600; i++) {
-      status = getByName(workspaceName, userName).getStatus();
-      if (status == expectedStatus) {
-        return;
-      } else {
-        WaitUtils.sleepQuietly(1);
-      }
-    }
-
-    throw new IllegalStateException(
-        format(
-            "Workspace %s, status=%s, expected status=%s", workspaceName, status, expectedStatus));
+          return false;
+        },
+        600,
+        1000,
+        TimeUnit.SECONDS);
   }
 
   /** Sends start workspace request. */

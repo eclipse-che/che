@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -39,8 +40,8 @@ public class URLFetcher {
   /** Logger. */
   private static final Logger LOG = LoggerFactory.getLogger(URLFetcher.class);
 
-  /** Maximum size of allowed data. (30KB) */
-  protected static final long MAXIMUM_READ_BYTES = 30 * 1000;
+  /** Maximum size of allowed data. (40KB) */
+  protected static final long MAXIMUM_READ_BYTES = 40 * 1000;
 
   /** The Compiled REGEX PATTERN that can be used for http|https git urls */
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");

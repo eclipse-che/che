@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -30,33 +31,29 @@ import org.testng.annotations.Test;
 public class PageTest {
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Required non-negative value of items before"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Required non-negative value of items before")
   public void shouldThrowIllegalArgumentWhenItemsBeforeIsNegative() throws Exception {
     new Page<>(emptyList(), -1, 1, 10);
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Required positive value of page size"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Required positive value of page size")
   public void shouldThrowIllegalArgumentWhenPageSizeIsNotPositive() throws Exception {
     new Page<>(emptyList(), 1, 0, 10);
   }
 
   @Test(
-    expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = "Required non-negative value of total items"
-  )
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Required non-negative value of total items")
   public void shouldThrowIllegalArgumentWhenTotalCountIsNegative() throws Exception {
     new Page<>(emptyList(), 1, 1, -1);
   }
 
   @Test(
-    expectedExceptions = NullPointerException.class,
-    expectedExceptionsMessageRegExp = "Required non-null items"
-  )
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "Required non-null items")
   public void shouldThrownNPEWhenItemsListIsNull() throws Exception {
     new Page<>(null, 1, 1, 1);
   }

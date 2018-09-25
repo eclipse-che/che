@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -28,7 +29,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
-import org.eclipse.che.api.workspace.server.wsnext.WorkspaceNextApplier;
+import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
@@ -54,7 +55,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Singl
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsnext.KubernetesWorkspaceNextApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.KubernetesBrokerEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerService;
 
 /** @author Sergii Leshchenko */
 public class KubernetesInfraModule extends AbstractModule {
@@ -68,9 +74,14 @@ public class KubernetesInfraModule extends AbstractModule {
 
     bind(RuntimeInfrastructure.class).to(KubernetesInfrastructure.class);
 
+    bind(new TypeLiteral<KubernetesEnvironmentProvisioner<KubernetesEnvironment>>() {})
+        .to(KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl.class);
+
     install(new FactoryModuleBuilder().build(KubernetesRuntimeContextFactory.class));
 
-    install(new FactoryModuleBuilder().build(KubernetesRuntimeFactory.class));
+    install(
+        new FactoryModuleBuilder()
+            .build(new TypeLiteral<KubernetesRuntimeFactory<KubernetesEnvironment>>() {}));
     install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
     install(new FactoryModuleBuilder().build(StartSynchronizerFactory.class));
 
@@ -120,9 +131,11 @@ public class KubernetesInfraModule extends AbstractModule {
 
     install(new JpaKubernetesRuntimeCacheModule());
 
-    MapBinder<String, WorkspaceNextApplier> wsNext =
-        MapBinder.newMapBinder(binder(), String.class, WorkspaceNextApplier.class);
-    wsNext.addBinding(KubernetesEnvironment.TYPE).to(KubernetesWorkspaceNextApplier.class);
+    MapBinder<String, ChePluginsApplier> chePluginsAppliers =
+        MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
+    chePluginsAppliers
+        .addBinding(KubernetesEnvironment.TYPE)
+        .to(KubernetesPluginsToolingApplier.class);
 
     bind(new TypeLiteral<SecureServerExposerFactory<KubernetesEnvironment>>() {})
         .toProvider(
@@ -138,5 +151,16 @@ public class KubernetesInfraModule extends AbstractModule {
     secureServerExposerFactories
         .addBinding("default")
         .to(new TypeLiteral<DefaultSecureServersFactory<KubernetesEnvironment>>() {});
+
+    bind(BrokerService.class);
+
+    bind(new TypeLiteral<BrokerEnvironmentFactory<KubernetesEnvironment>>() {})
+        .to(KubernetesBrokerEnvironmentFactory.class);
+
+    bind(PluginBrokerManager.class)
+        .to(new TypeLiteral<PluginBrokerManager<KubernetesEnvironment>>() {});
+
+    bind(SidecarToolingProvisioner.class)
+        .to(new TypeLiteral<SidecarToolingProvisioner<KubernetesEnvironment>>() {});
   }
 }

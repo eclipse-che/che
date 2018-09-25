@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -80,9 +81,8 @@ public class ProfileService extends Service {
   @ApiResponses({
     @ApiResponse(code = 200, message = "The response contains requested profile entity"),
     @ApiResponse(
-      code = 404,
-      message = "Profile for the user with requested identifier doesn't exist"
-    ),
+        code = 404,
+        message = "Profile for the user with requested identifier doesn't exist"),
     @ApiResponse(code = 500, message = "Couldn't retrieve profile due to internal server error")
   })
   public ProfileDto getById(@ApiParam("User identifier") @PathParam("id") String userId)
@@ -96,22 +96,19 @@ public class ProfileService extends Service {
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Update the profile attributes of the user with requested identifier",
-    notes =
-        "The replace strategy is used for the update, so all the existing profile "
-            + "attributes will be override by the profile update"
-  )
+      value = "Update the profile attributes of the user with requested identifier",
+      notes =
+          "The replace strategy is used for the update, so all the existing profile "
+              + "attributes will be override by the profile update")
   @ApiResponses({
     @ApiResponse(
-      code = 200,
-      message =
-          "The profile successfully updated and the response contains "
-              + "newly updated profile entity"
-    ),
+        code = 200,
+        message =
+            "The profile successfully updated and the response contains "
+                + "newly updated profile entity"),
     @ApiResponse(
-      code = 404,
-      message = "When profile for the user with requested identifier doesn't exist"
-    ),
+        code = 404,
+        message = "When profile for the user with requested identifier doesn't exist"),
     @ApiResponse(code = 500, message = "Couldn't retrieve profile due to internal server error")
   })
   public ProfileDto updateAttributesById(
@@ -132,11 +129,10 @@ public class ProfileService extends Service {
   @Produces(APPLICATION_JSON)
   @GenerateLink(rel = LINK_REL_CURRENT_PROFILE_ATTRIBUTES)
   @ApiOperation(
-    value = "Update the profile attributes of the currently logged in user",
-    notes =
-        "The replace strategy is used for the update, so all the existing profile "
-            + "attributes will be override with incoming values"
-  )
+      value = "Update the profile attributes of the currently logged in user",
+      notes =
+          "The replace strategy is used for the update, so all the existing profile "
+              + "attributes will be override with incoming values")
   public ProfileDto updateAttributes(
       @ApiParam("New profile attributes") Map<String, String> updates)
       throws NotFoundException, ServerException, BadRequestException {
@@ -153,12 +149,11 @@ public class ProfileService extends Service {
   @GenerateLink(rel = LINK_REL_CURRENT_PROFILE_ATTRIBUTES)
   @Consumes(APPLICATION_JSON)
   @ApiOperation(
-    value = "Remove profile attributes which names are equal to given",
-    notes =
-        "If names list is not send, all the attributes will be removed, "
-            + "if there are no attributes which names equal to some of the given names, "
-            + "then those names are skipped."
-  )
+      value = "Remove profile attributes which names are equal to given",
+      notes =
+          "If names list is not send, all the attributes will be removed, "
+              + "if there are no attributes which names equal to some of the given names, "
+              + "then those names are skipped.")
   @ApiResponses({
     @ApiResponse(code = 204, message = "Attributes successfully removed"),
     @ApiResponse(code = 500, message = "Couldn't remove attributes due to internal server error")

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -35,6 +36,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROFILE;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RECENT_FILES;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_MAIN_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_TOOLBAR_CONTROLLER;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
@@ -406,6 +408,8 @@ public class StandardComponentInitializer {
   @Inject private MoveCommandAction moveCommandAction;
 
   @Inject private OpenInTerminalAction openInTerminalAction;
+
+  @Inject private FreeDiskSpaceStatusBarAction freeDiskSpaceStatusBarAction;
 
   @Inject
   @Named("XMLFileType")
@@ -876,6 +880,10 @@ public class StandardComponentInitializer {
     commandExplorerMenuGroup.add(renameCommandAction);
     actionManager.registerAction("moveCommand", moveCommandAction);
     commandExplorerMenuGroup.add(moveCommandAction);
+
+    DefaultActionGroup rightStatusPanelGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);
+    rightStatusPanelGroup.add(freeDiskSpaceStatusBarAction);
 
     // Define hot-keys
     keyBinding

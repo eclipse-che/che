@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -50,27 +51,22 @@ import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 @Table(name = "workspace")
 @NamedQueries({
   @NamedQuery(
-    name = "Workspace.getByNamespace",
-    query = "SELECT w FROM Workspace w WHERE w.account.name = :namespace"
-  ),
+      name = "Workspace.getByNamespace",
+      query = "SELECT w FROM Workspace w WHERE w.account.name = :namespace"),
   @NamedQuery(
-    name = "Workspace.getByName",
-    query = "SELECT w FROM Workspace w WHERE w.account.name = :namespace AND w.name = :name"
-  ),
+      name = "Workspace.getByName",
+      query = "SELECT w FROM Workspace w WHERE w.account.name = :namespace AND w.name = :name"),
   @NamedQuery(name = "Workspace.getAll", query = "SELECT w FROM Workspace w"),
   @NamedQuery(
-    name = "Workspace.getByTemporary",
-    query = "SELECT w " + "FROM Workspace w " + "WHERE w.isTemporary = :temporary "
-  ),
+      name = "Workspace.getByTemporary",
+      query = "SELECT w " + "FROM Workspace w " + "WHERE w.isTemporary = :temporary "),
   @NamedQuery(name = "Workspace.getAllCount", query = "SELECT COUNT(w) FROM Workspace w"),
   @NamedQuery(
-    name = "Workspace.getByNamespaceCount",
-    query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.account.name = :namespace "
-  ),
+      name = "Workspace.getByNamespaceCount",
+      query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.account.name = :namespace "),
   @NamedQuery(
-    name = "Workspace.getByTemporaryCount",
-    query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.isTemporary = :temporary "
-  )
+      name = "Workspace.getByTemporaryCount",
+      query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.isTemporary = :temporary ")
 })
 @EntityListeners(WorkspaceImpl.SyncNameOnUpdateAndPersistEventListener.class)
 public class WorkspaceImpl implements Workspace {

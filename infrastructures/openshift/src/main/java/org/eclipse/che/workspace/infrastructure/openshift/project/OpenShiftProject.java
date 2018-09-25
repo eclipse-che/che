@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -84,7 +85,8 @@ public class OpenShiftProject extends KubernetesNamespace {
     OpenShiftClient osClient = clientFactory.createOC(workspaceId);
 
     if (get(projectName, osClient) == null) {
-      create(projectName, kubeClient, osClient);
+      create(projectName, osClient);
+      waitDefaultServiceAccount(projectName, kubeClient);
     }
   }
 
@@ -103,17 +105,15 @@ public class OpenShiftProject extends KubernetesNamespace {
         configMaps()::delete);
   }
 
-  private void create(String projectName, KubernetesClient kubeClient, OpenShiftClient ocClient)
-      throws InfrastructureException {
+  private void create(String projectName, OpenShiftClient osClient) throws InfrastructureException {
     try {
-      ocClient
+      osClient
           .projectrequests()
           .createNew()
           .withNewMetadata()
           .withName(projectName)
           .endMetadata()
           .done();
-      waitDefaultServiceAccount(projectName, kubeClient);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }

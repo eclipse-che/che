@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -26,7 +27,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 
 /**
  * Action to open new terminal and navigate to selected directory. If on selected folder in Project
@@ -78,7 +79,6 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
     Path path = resource.getLocation().makeRelative();
     Command cmdTmpl = GWT.create(Command.class);
     String command = cmdTmpl.openInTerminalCommand(path.toString()).asString();
-    processesPanelPresenter.newTerminal(
-        TerminalOptionsJso.createDefault().withCommand(command).withFocusOnOpen(true));
+    processesPanelPresenter.newTerminal(TerminalOptionsJso.create().withCommand(command), true);
   }
 }

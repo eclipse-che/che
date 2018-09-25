@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -24,6 +25,7 @@ const WS_AGENT_WS_LINK: string = 'wsagent/ws';
 
 interface IWorkspaceSettings {
   supportedRecipeTypes: string;
+  cheWorkspacePluginRegistryUrl: string;
 }
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
@@ -325,9 +327,9 @@ export class CheWorkspace {
   /**
    * Ask for loading the workspaces in asynchronous way
    * If there are no changes, it's not updated
-   * @returns {ng.IPromise<any>}
+   * @returns {ng.IPromise<Array<che.IWorkspace>>}
    */
-  fetchWorkspaces(): ng.IPromise<any> {
+  fetchWorkspaces(): ng.IPromise<Array<che.IWorkspace>> {
     let promise = this.remoteWorkspaceAPI.query().$promise;
     let updatedPromise = promise.then((data: Array<che.IWorkspace>) => {
       this.workspaces.length = 0;
@@ -344,7 +346,7 @@ export class CheWorkspace {
       return this.$q.reject(error);
     });
 
-    let callbackPromises = updatedPromise.then((data: any) => {
+    let callbackPromises = updatedPromise.then((data: Array<che.IWorkspace>) => {
       let promises = [];
       promises.push(updatedPromise);
 
@@ -352,7 +354,7 @@ export class CheWorkspace {
         let promise = listener.onChangeWorkspaces(data);
         promises.push(promise);
       });
-      return this.$q.all(promises);
+      return this.$q.all(promises).then(() => data);
     }, (error: any) => {
       return this.$q.reject(error);
     });
@@ -747,7 +749,7 @@ export class CheWorkspace {
    *
    * @returns {any} the system settings for workspaces
    */
-  getWorkspaceSettings(): any {
+  getWorkspaceSettings(): IWorkspaceSettings {
     return this.workspaceSettings;
   }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -20,6 +21,9 @@ import org.eclipse.che.api.core.notification.dto.EventSubscription;
 
 @Singleton
 public class RemoteSubscriptionManager {
+
+  public static final String SUBSCRIBE_JSON_RPC_METHOD = "subscribe";
+  public static final String UNSUBSCRIBE_JSON_RPC_METHOD = "unSubscribe";
 
   private final EventService eventService;
   private final RequestTransmitter requestTransmitter;
@@ -39,14 +43,14 @@ public class RemoteSubscriptionManager {
   private void configureSubscription(RequestHandlerConfigurator requestHandlerConfigurator) {
     requestHandlerConfigurator
         .newConfiguration()
-        .methodName("subscribe")
+        .methodName(SUBSCRIBE_JSON_RPC_METHOD)
         .paramsAsDto(EventSubscription.class)
         .noResult()
         .withBiConsumer(this::consumeSubscriptionRequest);
 
     requestHandlerConfigurator
         .newConfiguration()
-        .methodName("unSubscribe")
+        .methodName(UNSUBSCRIBE_JSON_RPC_METHOD)
         .paramsAsDto(EventSubscription.class)
         .noResult()
         .withBiConsumer(this::consumeUnSubscriptionRequest);

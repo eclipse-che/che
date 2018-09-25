@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -19,8 +20,10 @@ import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.rest.shared.dto.ExtendedError;
 import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -42,7 +45,10 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
   @Override
   public ItemReference asDto(String wsPath) throws NotFoundException {
     if (!fsManager.exists(wsPath)) {
-      throw new NotFoundException("Can't find item " + wsPath);
+      throw new NotFoundException(
+          newDto(ExtendedError.class)
+              .withMessage("Can't find item " + wsPath)
+              .withErrorCode(ErrorCodes.ITEM_NOT_FOUND));
     }
 
     String name = nameOf(wsPath);

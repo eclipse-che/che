@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -24,7 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
-import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.MemLimitDeserializer;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.MemAttributeDeserializer;
 
 /**
  * Description of docker compose service.
@@ -56,9 +57,13 @@ public class ComposeService {
   @JsonProperty("volumes_from")
   private List<String> volumesFrom;
 
-  @JsonDeserialize(using = MemLimitDeserializer.class)
+  @JsonDeserialize(using = MemAttributeDeserializer.class)
   @JsonProperty("mem_limit")
   private Long memLimit;
+
+  @JsonDeserialize(using = MemAttributeDeserializer.class)
+  @JsonProperty("mem_request")
+  private Long memRequest;
 
   private BuildContext build;
   private List<String> networks;
@@ -102,6 +107,7 @@ public class ComposeService {
       volumes = new ArrayList<>(service.getVolumes());
     }
     memLimit = service.getMemLimit();
+    memRequest = service.getMemRequest();
     if (service.getNetworks() != null) {
       networks = new ArrayList<>(service.getNetworks());
     }
@@ -395,12 +401,25 @@ public class ComposeService {
     return memLimit;
   }
 
+  public Long getMemRequest() {
+    return memRequest;
+  }
+
   public void setMemLimit(Long memLimit) {
     this.memLimit = memLimit;
   }
 
+  public void setMemRequest(Long memRequest) {
+    this.memRequest = memRequest;
+  }
+
   public ComposeService withMemLimit(Long memLimit) {
     this.memLimit = memLimit;
+    return this;
+  }
+
+  public ComposeService withMemRequest(Long memRequest) {
+    this.memRequest = memRequest;
     return this;
   }
 
@@ -439,6 +458,7 @@ public class ComposeService {
         && Objects.equals(volumes, service.volumes)
         && Objects.equals(volumesFrom, service.volumesFrom)
         && Objects.equals(memLimit, service.memLimit)
+        && Objects.equals(memRequest, service.memRequest)
         && Objects.equals(build, service.build)
         && Objects.equals(networks, service.networks);
   }
@@ -460,6 +480,7 @@ public class ComposeService {
         volumes,
         volumesFrom,
         memLimit,
+        memRequest,
         networks);
   }
 
@@ -494,6 +515,8 @@ public class ComposeService {
         + volumesFrom
         + ", memLimit="
         + memLimit
+        + ", memRequest="
+        + memRequest
         + ", build="
         + build
         + ", networks="

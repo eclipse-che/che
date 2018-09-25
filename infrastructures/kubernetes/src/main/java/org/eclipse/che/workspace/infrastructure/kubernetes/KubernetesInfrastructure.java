@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -12,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.inject.Inject;
@@ -36,14 +38,12 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
-  private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
 
   @Inject
   public KubernetesInfrastructure(
       EventService eventService,
       KubernetesRuntimeContextFactory runtimeContextFactory,
-      KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
       KubernetesRuntimeStateCache runtimeStatusesCache) {
@@ -53,7 +53,6 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
         eventService,
         internalEnvProvisioners);
     this.runtimeContextFactory = runtimeContextFactory;
-    this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
   }
@@ -66,11 +65,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   @Override
   protected KubernetesRuntimeContext internalPrepare(
       RuntimeIdentity id, InternalEnvironment environment) throws InfrastructureException {
-    final KubernetesEnvironment kubernetesEnvironment = asKubernetesEnv(environment);
-
-    k8sEnvProvisioner.provision(kubernetesEnvironment, id);
-
-    return runtimeContextFactory.create(kubernetesEnvironment, id, this);
+    return runtimeContextFactory.create(asKubernetesEnv(environment), id, this);
   }
 
   private KubernetesEnvironment asKubernetesEnv(InternalEnvironment source)
@@ -81,9 +76,11 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
     if (source instanceof DockerImageEnvironment) {
       return dockerImageEnvConverter.convert((DockerImageEnvironment) source);
     }
+
     throw new InternalInfrastructureException(
         format(
             "Environment type '%s' is not supported. Supported environment types: %s",
-            source.getRecipe().getType(), KubernetesEnvironment.TYPE));
+            source.getType(),
+            Joiner.on(",").join(KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE)));
   }
 }

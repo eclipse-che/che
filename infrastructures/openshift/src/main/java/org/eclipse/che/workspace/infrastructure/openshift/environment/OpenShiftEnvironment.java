@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -24,7 +25,6 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.Builder;
 
 /**
  * Holds objects of OpenShift environment.
@@ -40,10 +40,8 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public OpenShiftEnvironment(KubernetesEnvironment k8sEnv) {
     super(k8sEnv);
     this.routes = new HashMap<>();
-  }
-
-  public static Builder builder() {
-    return new Builder();
+    setType(TYPE);
+    setAttributes(k8sEnv.getAttributes());
   }
 
   public OpenShiftEnvironment(
@@ -59,6 +57,16 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       Map<String, Route> routes) {
     super(internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
     this.routes = routes;
+    setType(TYPE);
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  @Override
+  public OpenShiftEnvironment setType(String type) {
+    return (OpenShiftEnvironment) super.setType(type);
   }
 
   /** Returns services that should be created when environment starts. */
@@ -69,7 +77,9 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public static class Builder extends KubernetesEnvironment.Builder {
     private final Map<String, Route> routes = new HashMap<>();
 
-    private Builder() {}
+    private Builder() {
+      setType(TYPE);
+    }
 
     @Override
     public Builder setInternalRecipe(InternalRecipe internalRecipe) {
@@ -131,17 +141,21 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
     }
 
     public OpenShiftEnvironment build() {
-      return new OpenShiftEnvironment(
-          internalRecipe,
-          machines,
-          warnings,
-          pods,
-          services,
-          ingresses,
-          pvcs,
-          secrets,
-          configMaps,
-          routes);
+      OpenShiftEnvironment openShiftEnvironment =
+          new OpenShiftEnvironment(
+              internalRecipe,
+              machines,
+              warnings,
+              pods,
+              services,
+              ingresses,
+              pvcs,
+              secrets,
+              configMaps,
+              routes);
+      openShiftEnvironment.setAttributes(attributes);
+      openShiftEnvironment.setType(type);
+      return openShiftEnvironment;
     }
   }
 }

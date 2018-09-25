@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -87,6 +88,9 @@ public interface TestMenuCommandsConstants {
     String GENERATE_EFFECTIVE_POM = ASSISTANT_MENU_PREFIX + "getEffectivePom";
     String QUICK_FIX = ASSISTANT_MENU_PREFIX + "quickFix";
     String FIND_DEFINITION = ASSISTANT_MENU_PREFIX + "LSFindDefinitionAction";
+    String FIND_REFERENCES = ASSISTANT_MENU_PREFIX + "LSFindReferencesAction";
+    String GO_TO_SYMBOL = ASSISTANT_MENU_PREFIX + "LSGoToSymbolAction";
+    String FIND_PROJECT_SYMBOL = ASSISTANT_MENU_PREFIX + "LSFindSymbolAction";
 
     interface ToolWindows {
       String TOOL_WINDOWS = ASSISTANT_MENU_PREFIX + "toolWindows";
@@ -98,6 +102,7 @@ public interface TestMenuCommandsConstants {
       String REFACTORING = ASSISTANT_MENU_PREFIX + "assistantRefactoringGroup";
       String MOVE = ASSISTANT_MENU_PREFIX + "Refactoring/javaMoveRefactoring";
       String RENAME = ASSISTANT_MENU_PREFIX + "Refactoring/javaRenameRefactoring";
+      String LS_RENAME = ASSISTANT_MENU_PREFIX + "Refactoring/LS.rename";
     }
   }
 

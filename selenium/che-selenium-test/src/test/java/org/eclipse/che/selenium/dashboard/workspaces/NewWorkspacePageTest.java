@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -14,6 +15,7 @@ import static java.util.Arrays.asList;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
@@ -36,11 +38,12 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.P
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_REST;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
@@ -51,7 +54,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -72,10 +74,11 @@ public class NewWorkspacePageTest {
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
   private static final List<NewWorkspace.Stack> EXPECTED_JDK_STACKS = asList(JAVA, ECLIPSE_CHE);
+
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_QUICK_START_STACKS =
       asList(
-          BLANK,
           JAVA,
+          BLANK,
           DOT_NET,
           ANDROID,
           CPP,
@@ -86,62 +89,48 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
+
+  private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
+      asList(
+          JAVA,
+          BLANK,
+          DOT_NET,
+          ANDROID,
+          CPP,
+          ECLIPSE_CHE,
+          GO,
+          NODE,
+          PHP,
+          PYTHON,
+          RAILS,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
-          BLANK,
           JAVA,
           JAVA_MYSQL,
+          BLANK,
           DOT_NET,
           ANDROID,
           CPP,
           ECLIPSE_CHE,
           GO,
-          JAVA_THEIA_DOCKER,
           NODE,
           PHP,
           PYTHON,
-          RAILS);
-
-  private static List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER =
-      asList(
-          BLANK.getId(),
-          JAVA.getId(),
-          DOT_NET.getId(),
-          ANDROID.getId(),
-          CPP.getId(),
-          ECLIPSE_CHE.getId(),
-          GO.getId(),
-          JAVA_THEIA_OPENSHIFT.getId(),
-          NODE.getId(),
-          PHP.getId(),
-          PYTHON.getId(),
-          RAILS.getId(),
-          JAVA_THEIA_DOCKER.getId());
-
-  private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_ORDER =
-      asList(
-          BLANK.getId(),
-          JAVA.getId(),
-          JAVA_MYSQL.getId(),
-          DOT_NET.getId(),
-          ANDROID.getId(),
-          CPP.getId(),
-          ECLIPSE_CHE.getId(),
-          GO.getId(),
-          NODE.getId(),
-          PHP.getId(),
-          PYTHON.getId(),
-          RAILS.getId(),
-          JAVA_THEIA_DOCKER.getId());
+          RAILS,
+          JAVA_THEIA_DOCKER);
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
-          BLANK,
           JAVA,
+          BLANK,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
           CENTOS_GO,
@@ -158,14 +147,42 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
+
+  private static List<NewWorkspace.Stack> EXPECTED_K8S_SINGLE_MACHINE_STACKS =
+      asList(
+          JAVA,
+          BLANK,
+          DOT_NET,
+          ANDROID,
+          CAMEL_SPRINGBOOT,
+          CPP,
+          CENTOS_BLANK,
+          CENTOS_GO,
+          CENTOS_NODEJS,
+          CENTOS_WILDFLY_SWARM,
+          CEYLON_WITH_JAVA_JAVASCRIPT,
+          ECLIPSE_CHE,
+          ECLIPSE_VERTX,
+          GO,
+          JAVA_CENTOS,
+          KOTLIN,
+          NODE,
+          PHP,
+          PYTHON,
+          RAILS,
+          SPRING_BOOT,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
-          BLANK,
           JAVA,
+          BLANK,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
           CENTOS_GO,
@@ -182,54 +199,79 @@ public class NewWorkspacePageTest {
           PYTHON,
           RAILS,
           SPRING_BOOT,
-          JAVA_THEIA_DOCKER);
+          WORKSPACE_NEXT_HELLO_WORLD,
+          WORKSPACE_NEXT_REST);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
+
+  private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS);
+      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
-  private static final List<String> EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
-      asList(
-          BLANK.getId(),
-          JAVA.getId(),
-          DOT_NET.getId(),
-          JAVA_THEIA_DOCKER.getId(),
-          RAILS.getId(),
-          PYTHON.getId(),
-          PHP.getId(),
-          NODE.getId(),
-          JAVA_THEIA_OPENSHIFT.getId(),
-          GO.getId(),
-          ECLIPSE_CHE.getId(),
-          CPP.getId(),
-          ANDROID.getId());
+  private static final List<NewWorkspace.Stack>
+      EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
+          asList(
+              JAVA,
+              BLANK,
+              WORKSPACE_NEXT_REST,
+              WORKSPACE_NEXT_HELLO_WORLD,
+              RAILS,
+              PYTHON,
+              PHP,
+              NODE,
+              JAVA_THEIA_OPENSHIFT,
+              GO,
+              ECLIPSE_CHE,
+              CPP,
+              ANDROID,
+              DOT_NET);
 
-  private static final List<String> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
+  private static final List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          BLANK.getId(),
-          JAVA.getId(),
-          JAVA_MYSQL.getId(),
-          JAVA_THEIA_DOCKER.getId(),
-          RAILS.getId(),
-          PYTHON.getId(),
-          PHP.getId(),
-          NODE.getId(),
-          GO.getId(),
-          ECLIPSE_CHE.getId(),
-          CPP.getId(),
-          ANDROID.getId(),
-          DOT_NET.getId());
+          JAVA,
+          BLANK,
+          WORKSPACE_NEXT_REST,
+          WORKSPACE_NEXT_HELLO_WORLD,
+          RAILS,
+          PYTHON,
+          PHP,
+          NODE,
+          GO,
+          ECLIPSE_CHE,
+          CPP,
+          ANDROID,
+          DOT_NET);
+
+  private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
+      asList(
+          JAVA,
+          JAVA_MYSQL,
+          BLANK,
+          JAVA_THEIA_DOCKER,
+          RAILS,
+          PYTHON,
+          PHP,
+          NODE,
+          GO,
+          ECLIPSE_CHE,
+          CPP,
+          ANDROID,
+          DOT_NET);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_JAVA_STACKS =
       asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_THEIA_OPENSHIFT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_JAVA_STACKS =
-      asList(JAVA_MYSQL, JAVA, ECLIPSE_CHE, ANDROID);
+      asList(JAVA, JAVA_MYSQL, ECLIPSE_CHE, ANDROID);
 
   private static final List<String> EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_1_8_SUGGESTION_TITLE);
+
+  private static final List<String> EXPECTED_K8S_FILTERS_SUGGESTIONS =
+      asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE);
 
   private static final List<String> EXPECTED_DOCKER_FILTERS_SUGGESTIONS =
       asList(JAVA_SUGGESTION_TITLE, JDK_SUGGESTION_TITLE, JAVA_TOMCAT_MYSQL_SUGGESTION_TITLE);
@@ -298,14 +340,22 @@ public class NewWorkspacePageTest {
     checkValidNames();
   }
 
-  @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
+  @Test(groups = {TestGroup.OPENSHIFT})
   public void checkOpenshiftStackButtons() {
     checkStackButtons(
         EXPECTED_OPENSHIFT_QUICK_START_STACKS,
         EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS,
         EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS,
-        EXPECTED_OPENSHIFT_QUICK_START_STACKS_ORDER,
         EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER);
+  }
+
+  @Test(groups = {TestGroup.K8S})
+  public void checkK8SStackButtons() {
+    checkStackButtons(
+        EXPECTED_K8S_QUICK_START_STACKS,
+        EXPECTED_K8S_SINGLE_MACHINE_STACKS,
+        EXPECTED_K8S_MULTI_MACHINE_STACKS,
+        EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
   @Test(groups = TestGroup.DOCKER)
@@ -314,19 +364,23 @@ public class NewWorkspacePageTest {
         EXPECTED_DOCKER_QUICK_START_STACKS,
         EXPECTED_DOCKER_SINGLE_MACHINE_STACKS,
         EXPECTED_DOCKER_MULTI_MACHINE_STACKS,
-        EXPECTED_DOCKER_QUICK_START_STACKS_ORDER,
         EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER);
   }
 
-  @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S})
+  @Test(groups = {TestGroup.OPENSHIFT})
   public void checkOpenshiftFiltersButton() {
     checkFiltersButton(
-        EXPECTED_OPENSHIFT_QUICK_START_STACKS, EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS);
+        EXPECTED_OPENSHIFT_FILTERS_SUGGESTIONS, EXPECTED_OPENSHIFT_QUICK_START_STACKS);
+  }
+
+  @Test(groups = {TestGroup.K8S})
+  public void checkK8SFiltersButton() {
+    checkFiltersButton(EXPECTED_K8S_FILTERS_SUGGESTIONS, EXPECTED_K8S_QUICK_START_STACKS);
   }
 
   @Test(groups = TestGroup.DOCKER)
   public void checkDockerFiltersButton() {
-    checkFiltersButton(EXPECTED_DOCKER_QUICK_START_STACKS, EXPECTED_DOCKER_FILTERS_SUGGESTIONS);
+    checkFiltersButton(EXPECTED_DOCKER_FILTERS_SUGGESTIONS, EXPECTED_DOCKER_QUICK_START_STACKS);
   }
 
   @Test
@@ -424,8 +478,7 @@ public class NewWorkspacePageTest {
       List<NewWorkspace.Stack> expectedQuickStartStacks,
       List<NewWorkspace.Stack> expectedSingleMachineStacks,
       List<NewWorkspace.Stack> expectedMultiMachineStacks,
-      List<String> expectedQuickStartStacksOrder,
-      List<String> expectedQuickStartStacksReverseOrder) {
+      List<NewWorkspace.Stack> expectedQuickStartStacksReverseOrder) {
 
     newWorkspace.waitPageLoad();
     newWorkspace.waitQuickStartButton();
@@ -452,22 +505,16 @@ public class NewWorkspacePageTest {
 
     // quick start stacks
     newWorkspace.clickOnQuickStartButton();
-    newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
+    newWorkspace.waitStacksOrder(expectedQuickStartStacks);
     newWorkspace.clickNameButton();
-
-    try {
-      newWorkspace.waitStacksOrder(expectedQuickStartStacksReverseOrder);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/5650", ex);
-    }
+    newWorkspace.waitStacksOrder(expectedQuickStartStacksReverseOrder);
 
     newWorkspace.clickNameButton();
-    newWorkspace.waitStacksOrder(expectedQuickStartStacksOrder);
+    newWorkspace.waitStacksOrder(expectedQuickStartStacks);
   }
 
   private void checkFiltersButton(
-      List<NewWorkspace.Stack> expectedQuickStartStacks, List<String> expectedSuggestions) {
+      List<String> expectedSuggestions, List<NewWorkspace.Stack> expectedQuickStartStacks) {
     newWorkspace.waitPageLoad();
 
     // close by "Escape" button

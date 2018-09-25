@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -44,26 +45,23 @@ public class MachineConfigImpl implements MachineConfig {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "externalmachine_installers",
-    joinColumns = @JoinColumn(name = "externalmachine_id")
-  )
+      name = "externalmachine_installers",
+      joinColumns = @JoinColumn(name = "externalmachine_id"))
   @Column(name = "installers")
   private List<String> installers;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "externalmachine_attributes",
-    joinColumns = @JoinColumn(name = "externalmachine_id")
-  )
+      name = "externalmachine_attributes",
+      joinColumns = @JoinColumn(name = "externalmachine_id"))
   @MapKeyColumn(name = "attributes_key")
   @Column(name = "attributes")
   private Map<String, String> attributes;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-    name = "externalmachine_env",
-    joinColumns = @JoinColumn(name = "externalmachine_id")
-  )
+      name = "externalmachine_env",
+      joinColumns = @JoinColumn(name = "externalmachine_id"))
   @MapKeyColumn(name = "env_key")
   @Column(name = "env_value")
   private Map<String, String> env;

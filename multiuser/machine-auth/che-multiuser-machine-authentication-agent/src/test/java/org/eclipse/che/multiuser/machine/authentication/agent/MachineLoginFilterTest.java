@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -58,7 +59,7 @@ public class MachineLoginFilterTest {
 
   private static final String SIGNATURE_ALGORITHM = "RSA";
   private static final String WORKSPACE_ID = "workspace31";
-  private static final String PRINCIPAL = "principal";
+  private static final String SUBJECT = "che_subject";
   private static final String USER_ID = "test_user31";
   private static final String USER_NAME = "test_user";
 
@@ -104,11 +105,11 @@ public class MachineLoginFilterTest {
 
   @Test
   public void testProcessRequestWithSubjectFromSession() throws Exception {
-    when(sessionMock.getAttribute(PRINCIPAL)).thenReturn(subject);
+    when(sessionMock.getAttribute(SUBJECT)).thenReturn(subject);
 
     machineLoginFilter.doFilter(getRequestMock(sessionMock, machineToken), responseMock, chainMock);
 
-    verify(sessionMock).getAttribute(PRINCIPAL);
+    verify(sessionMock).getAttribute(SUBJECT);
     verifyZeroInteractions(tokenExtractorMock);
   }
 
@@ -128,7 +129,7 @@ public class MachineLoginFilterTest {
     machineLoginFilter.doFilter(getRequestMock(null, machineToken), responseMock, chainMock);
 
     verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
-    verify(sessionMock).setAttribute(PRINCIPAL, subject);
+    verify(sessionMock).setAttribute(SUBJECT, subject);
     verifyZeroInteractions(responseMock);
   }
 

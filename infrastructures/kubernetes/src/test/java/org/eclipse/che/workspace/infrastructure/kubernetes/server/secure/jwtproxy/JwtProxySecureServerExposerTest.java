@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -12,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -71,7 +73,7 @@ public class JwtProxySecureServerExposerTest {
     ServicePort jwtProxyServicePort = new ServicePort();
     doReturn(jwtProxyServicePort)
         .when(jwtProxyProvisioner)
-        .expose(any(), anyString(), anyInt(), anyString());
+        .expose(any(), anyString(), anyInt(), anyString(), anyMap());
 
     when(jwtProxyProvisioner.getServiceName()).thenReturn(JWT_PROXY_SERVICE_NAME);
 
@@ -80,7 +82,7 @@ public class JwtProxySecureServerExposerTest {
         k8sEnv, MACHINE_NAME, MACHINE_SERVICE_NAME, machineServicePort, servers);
 
     // then
-    verify(jwtProxyProvisioner).expose(k8sEnv, MACHINE_SERVICE_NAME, 8080, "TCP");
+    verify(jwtProxyProvisioner).expose(k8sEnv, MACHINE_SERVICE_NAME, 8080, "TCP", servers);
     verify(externalServerExposer)
         .expose(k8sEnv, MACHINE_NAME, JWT_PROXY_SERVICE_NAME, jwtProxyServicePort, servers);
   }

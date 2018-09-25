@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -13,6 +14,7 @@ package org.eclipse.che.ide.menu;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -134,8 +136,16 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
       popupMenu.getElement().getStyle().setLeft(x, PX);
     }
 
-    if (y + popupMenu.getOffsetHeight() > Window.getClientHeight()) {
-      popupMenu.getElement().getStyle().setTop(y - popupMenu.getOffsetHeight() - 1, PX);
+    // adjust popup menu by the client window height (add scrollbars if necessary)
+    if (popupMenu.getOffsetHeight() > Window.getClientHeight()) {
+      popupMenu.getElement().getStyle().setOverflowY(Style.Overflow.SCROLL);
+      popupMenu.getElement().getStyle().setTop(5., PX);
+      popupMenu.getElement().getStyle().setBottom(5., PX);
+    } else if (y + popupMenu.getOffsetHeight() > Window.getClientHeight()) {
+      popupMenu
+          .getElement()
+          .getStyle()
+          .setTop(Math.max(y - popupMenu.getOffsetHeight() - 1, 5), PX);
     } else {
       popupMenu.getElement().getStyle().setTop(y, PX);
     }

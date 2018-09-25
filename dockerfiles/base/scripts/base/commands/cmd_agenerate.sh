@@ -1,9 +1,11 @@
 #!/bin/bash
+#
 # Copyright (c) 2012-2017 Red Hat, Inc.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
 #
 # Contributors:
 #   Tyler Jewell - Initial Implementation
@@ -101,7 +103,6 @@ cmd_agenerate() {
                    -w /home/user/che-build \
                       ${UTILITY_IMAGE_DEV} \
                           mvn -Dmaven.repo.local=/home/user/.m2/repository/ org.apache.maven.plugins:maven-archetype-plugin:2.4:generate \
-                              -DarchetypeRepository=http://maven.codenvycorp.com/content/groups/public/ \
                               -DarchetypeGroupId=org.eclipse.che.archetype \
                               -DarchetypeArtifactId=$ARCHETYPE_ID \
                               -DarchetypeVersion=$ARCHETYPE_VERSION \

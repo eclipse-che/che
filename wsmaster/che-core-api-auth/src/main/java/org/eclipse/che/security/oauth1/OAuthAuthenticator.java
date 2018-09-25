@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -107,12 +108,12 @@ public abstract class OAuthAuthenticator {
       callbackUrl.put(STATE_PARAM_KEY, requestUrl.getQuery());
 
       OAuthGetTemporaryToken temporaryToken;
-      if (requestMethod != null && "post".equals(requestMethod.toLowerCase())) {
+      if (requestMethod != null && "post".equalsIgnoreCase(requestMethod)) {
         temporaryToken = new OAuthPostTemporaryToken(requestTokenUri);
       } else {
         temporaryToken = new OAuthGetTemporaryToken(requestTokenUri);
       }
-      if (signatureMethod != null && "rsa".equals(signatureMethod.toLowerCase())) {
+      if (signatureMethod != null && "rsa".equalsIgnoreCase(signatureMethod)) {
         temporaryToken.signer = getOAuthRsaSigner();
       } else {
         temporaryToken.signer = getOAuthHmacSigner(null, null);
@@ -161,7 +162,7 @@ public abstract class OAuthAuthenticator {
       final String oauthTemporaryToken = (String) callbackUrl.getFirst(OAUTH_TOKEN_PARAM_KEY);
 
       OAuthGetAccessToken getAccessToken;
-      if (requestMethod != null && "post".equals(requestMethod.toLowerCase())) {
+      if (requestMethod != null && "post".equalsIgnoreCase(requestMethod)) {
         getAccessToken = new OAuthPostAccessToken(accessTokenUri);
       } else {
         getAccessToken = new OAuthGetAccessToken(accessTokenUri);
@@ -170,7 +171,7 @@ public abstract class OAuthAuthenticator {
       getAccessToken.temporaryToken = oauthTemporaryToken;
       getAccessToken.verifier = (String) callbackUrl.getFirst(OAUTH_VERIFIER_PARAM_KEY);
       getAccessToken.transport = httpTransport;
-      if (signatureMethod != null && "rsa".equals(signatureMethod.toLowerCase())) {
+      if (signatureMethod != null && "rsa".equalsIgnoreCase(signatureMethod)) {
         getAccessToken.signer = getOAuthRsaSigner();
       } else {
         getAccessToken.signer =

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -60,9 +61,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleCheckout(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -89,9 +89,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testSimpleFileCheckout(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -122,9 +121,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCheckoutTwoFiles(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -170,9 +168,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCreateNewAndCheckout(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -192,9 +189,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testCheckoutFromStartPoint(GitConnectionFactory connectionFactory)
       throws GitException, IOException {
     // given
@@ -226,9 +222,8 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
   public void testTrackRemoteBranch(GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {
     // given
@@ -260,11 +255,10 @@ public class CheckoutTest {
   }
 
   @Test(
-    dataProvider = "GitConnectionFactory",
-    dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
-    expectedExceptions = GitException.class,
-    expectedExceptionsMessageRegExp = "A branch named 'new' exists in more than one remote repos"
-  )
+      dataProvider = "GitConnectionFactory",
+      dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+      expectedExceptions = GitException.class,
+      expectedExceptionsMessageRegExp = "A branch named 'new' exists in more than one remote repos")
   public void shouldThrowExceptionIfTheBranchIsPresentInSeveralRemotes(
       GitConnectionFactory connectionFactory)
       throws GitException, IOException, UnauthorizedException {

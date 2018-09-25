@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -82,8 +83,10 @@ export class CreateFactoryCtrl {
         let factoryContent = this.cheAPI.getFactoryTemplate().getFactoryTemplate(templateName);
         this.factoryObject = angular.fromJson(factoryContent);
         this.updateGitProjectLocation(newValue);
+        this.updateGitProjectName(newValue);
       } else {
         this.updateGitProjectLocation(newValue);
+        this.updateGitProjectName(newValue);
       }
 
     }, true);
@@ -119,6 +122,25 @@ export class CreateFactoryCtrl {
     let project = this.factoryObject.workspace.projects[0];
     project.source.type = 'git';
     project.source.location = location;
+  }
+
+  /**
+   * Update the source project name and path for Git factory
+   * @param location the new location
+   */
+  updateGitProjectName(location: string): void {
+    if (!this.factoryObject || !location) {
+      return;
+    }
+
+    const project = this.factoryObject.workspace.projects[0],
+      re = /([^\/]+?)(?:\.git)?$/i,
+      match = location.match(re);
+
+    if (match && match[1]) {
+      project.name = match[1];
+      project.path = `/${match[1]}`;
+    }
   }
 
   /**

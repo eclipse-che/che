@@ -1,10 +1,11 @@
 #!/bin/bash
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
+# Copyright (c) 2012-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
 #
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
@@ -77,8 +78,6 @@ initVariables() {
     PRODUCT_PROTOCOL="http"
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
-
-    SUPPORTED_INFRASTRUCTURES=(docker openshift k8s osio)
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -328,9 +327,8 @@ initRunMode() {
 stopSeleniumDockerContainers() {
     local containers=$(docker ps -qa --filter="name=selenium_*" | wc -l)
     if [[ ${containers} != "0" ]]; then
-        echo "[TEST] Stopping selenium docker containers..."
-        docker stop $(docker ps -qa --filter="name=selenium_*")
-        docker rm $(docker ps -qa --filter="name=selenium_*")
+        echo "[TEST] Stopping and removing selenium docker containers..."
+        docker rm -f $(docker ps -qa --filter="name=selenium_*") > /dev/null
     fi
 }
 
@@ -461,7 +459,7 @@ printRunOptions() {
     echo "[TEST] Product Host        : ${PRODUCT_HOST}"
     echo "[TEST] Product Port        : ${PRODUCT_PORT}"
     echo "[TEST] Product Config      : $(getProductConfig)"
-    echo "[TEST] Tests               : ${TESTS_SCOPE}"
+    echo "[TEST] Tests scope         : ${TESTS_SCOPE}"
     echo "[TEST] Tests to exclude    : $(getExcludedGroups)"
     echo "[TEST] Threads             : ${THREADS}"
     echo "[TEST] Workspace pool size : ${WORKSPACE_POOL_SIZE}"
@@ -725,45 +723,9 @@ getProductConfig() {
 }
 
 # Prepare list of test groups to exclude.
-# It consists of "--exclude" parameter value + list of groups which don't comply with product config
 getExcludedGroups() {
     local excludeParamArray=(${EXCLUDE_PARAM//,/ })
-
-    local productConfig=$(getProductConfig)
-    local productConfigArray=(${productConfig//,/ })
-
-    local uncomplyingGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singleuser multiuser)
-
-    for productConfigGroup in ${productConfigArray[*]}; do
-        for i in ${!uncomplyingGroups[@]}; do
-            if [[ "${productConfigGroup}" == "${uncomplyingGroups[i]}" ]]; then
-                unset uncomplyingGroups[i]
-            fi
-        done
-    done
-
-    #if product based on "openshift" remove "k8s" from excluded groups
-    #added as workaround for issue #10430, after fix reason should be deleted
-    if [[ "${productConfigArray[@]}" =~ "openshift" ]]; then
-    for i in ${!uncomplyingGroups[@]}; do
-            if [[ "k8s" == "${uncomplyingGroups[i]}" ]]; then
-                unset uncomplyingGroups[i]
-            fi
-        done
-    fi
-
-    #if product based on "k8s" remove "openshift" from excluded groups
-    #added as workaround for issue #10430, after fix reason should be deleted
-    if [[ "${productConfigArray[@]}" =~ "k8s" ]]; then
-    for i in ${!uncomplyingGroups[@]}; do
-            if [[ "openshift" == "${uncomplyingGroups[i]}" ]]; then
-                unset uncomplyingGroups[i]
-            fi
-        done
-    fi
-
-    local excludedGroups=("${uncomplyingGroups[@]}" "${excludeParamArray[@]}")
-    echo $(IFS=$','; echo "${excludedGroups[*]}")
+    echo $(IFS=$','; echo "${excludeParamArray[*]}")
 }
 
 # Reruns failed tests
@@ -837,30 +799,73 @@ generateFailSafeReport () {
 
     local regressions=$(findRegressions)
 
-    # add REGRESSION mark
+    # add REGRESSION marks
     for r in ${regressions[*]}
     do
         local test=$(basename $(echo ${r} | tr '.' '/') | sed 's/\(.*\)_.*/\1/')
 
-        local divTag="<a href=\"#"${r}"\">"${test}"<\/a>"
-        local divRegTag="<h2>REGRESSION<\/h2>"${divTag}
-        sed -i 's/'"${divTag}"'/'"${divRegTag}"'/' ${FAILSAFE_REPORT}
+        local aTag="<a href=\"#"${r}"\">"${test}"<\/a>"
+        local divRegTag="<h2>REGRESSION<\/h2>"${aTag}
+        sed -i "s/${aTag}/${divRegTag}/" ${FAILSAFE_REPORT}
     done
 
+    # pack logs of workspaces which failed on start when injecting into test object and add link into the 'Summary' section of failsafe report
+    local dirWithFailedWorkspacesLogs="target/site/workspace-logs/injecting_workspaces_which_did_not_start"
+    if [[ -d ${dirWithFailedWorkspacesLogs} ]]; then
+        cd ${dirWithFailedWorkspacesLogs}
+        zip -qr "../injecting_workspaces_which_did_not_start_logs.zip" .
+        cd - > /dev/null
+        rm -rf ${dirWithFailedWorkspacesLogs}
+        summaryTag="Summary<\/h2><a name=\"Summary\"><\/a>"
+        linkToFailedWorkspacesLogsTag="<p>\[<a href=\"workspace-logs\/injecting_workspaces_which_did_not_start_logs.zip\" target=\"_blank\">Injecting workspaces which didn't start logs<\/a>\]<\/p>"
+        sed -i "s/${summaryTag}/${summaryTag}${linkToFailedWorkspacesLogsTag}/" ${FAILSAFE_REPORT}
+    fi
+
+    # add link the che server logs archive into the 'Summary' section of failsafe report
+    local summaryTag="Summary<\/h2><a name=\"Summary\"><\/a>"
+    local linkToCheServerLogsTag="<p>\[<a href=\"che_server_logs.zip\" target=\"_blank\">Eclipse Che Server logs<\/a>\]<\/p>"
+    sed -i "s/${summaryTag}/${summaryTag}${linkToCheServerLogsTag}/" ${FAILSAFE_REPORT}
+
     # attach screenshots
-    for f in target/screenshots/*
-    do
-        local test=$(basename ${f} | sed 's/\(.*\)_.*/\1/')
-        local divTag="<div id=\""${test}"error\" style=\"display:none;\">"
-        local imgTag="<img src=\"..\/screenshots\/"$(basename ${f})"\">"
-        sed -i "s/${divTag}/${divTag}${imgTag}/" ${FAILSAFE_REPORT}
-    done
+    if [[ -d "target/site/screenshots" ]]; then
+        for file in $(ls target/site/screenshots/* | sort -r)
+        do
+            local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
+            local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
+            local screenshotTag="<p><img src=\"screenshots\/"$(basename ${file})"\"><p>"
+            sed -i "s/${testDetailTag}/${testDetailTag}${screenshotTag}/" ${FAILSAFE_REPORT}
+        done
+    fi
+
+    attachLinkToTestReport workspace-logs "Workspace logs"
+    attachLinkToTestReport webdriver-logs "Browser logs"
+    attachLinkToTestReport htmldumps "Web page source"
 
     echo "[TEST]"
     echo "[TEST] Failsafe report"
     echo -e "[TEST] \t${BLUE}file://${CUR_DIR}/${FAILSAFE_REPORT}${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST]"
+}
+
+# first argument - relative path to directory inside target/site
+# second argument - title of the link
+attachLinkToTestReport() {
+    # attach links to resource related to failed test
+    local relativePathToResource=$1
+    local titleOfLink=$2
+    local dirWithResources="target/site/$relativePathToResource"
+
+    [[ ! -d ${dirWithResources} ]] && return
+
+    for file in $(ls ${dirWithResources}/* | sort -r)
+    do
+        local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
+        local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
+        local filename=$(basename ${file})
+        local linkTag="<p><li><a href=\"$relativePathToResource\/$filename\" target=\"_blank\"><b>$titleOfLink<\/b>: $filename<\/a><\/li><\/p>"
+        sed -i "s/${testDetailTag}/${testDetailTag}${linkTag}/" ${FAILSAFE_REPORT}
+    done
 }
 
 storeTestReport() {

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -242,6 +243,19 @@ public interface Debugger {
    */
   default List<ThreadState> getThreadDump() throws DebuggerException {
     return Collections.emptyList();
+  }
+
+  /**
+   * Gets a location of the resources for the given frame.
+   *
+   * @throws DebuggerException if any error occur
+   */
+  default Location getStackFrameLocation(long threadId, int frameIndex) throws DebuggerException {
+    if (threadId == -1) {
+      return dumpStackFrame().getLocation();
+    }
+
+    return getStackFrameDump(threadId, frameIndex).getLocation();
   }
 
   /** Is used to send back any events to client. */

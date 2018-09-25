@@ -21,7 +21,7 @@ This means that if you are encountering an error, it is likely due to a unique c
 
 Therefore:
 * The details of your environment including OS version, Docker configuration, and the steps how you configure & run Che.
-* Provide reproducibule steps, what the result of the steps was, and what you would have expected.
+* Provide reproducible steps, what the result of the steps was, and what you would have expected.
 * When providing reproduction steps, start with launching Che providing its configuration and every step taken to create the problem.
 * A detailed description of the behavior that you expect.
 * Animated GIFs that show the behavior are often times necessary to observe the problems.

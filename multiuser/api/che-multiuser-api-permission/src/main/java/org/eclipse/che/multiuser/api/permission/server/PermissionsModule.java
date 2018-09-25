@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -20,6 +21,7 @@ import org.eclipse.che.multiuser.api.permission.server.filter.RemovePermissionsF
 import org.eclipse.che.multiuser.api.permission.server.filter.SetPermissionsFilter;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.RemovePermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.SetPermissionsChecker;
+import org.eclipse.che.multiuser.api.permission.server.jsonrpc.RemoteSubscriptionPermissionManager;
 
 /** @author Sergii Leschenko */
 public class PermissionsModule extends AbstractModule {
@@ -29,6 +31,7 @@ public class PermissionsModule extends AbstractModule {
     bind(SetPermissionsFilter.class);
     bind(RemovePermissionsFilter.class);
     bind(GetPermissionsFilter.class);
+    bind(RemoteSubscriptionPermissionManager.class).asEagerSingleton();
 
     // Creates empty multibinder to avoid error during container starting
     Multibinder.newSetBinder(

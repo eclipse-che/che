@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -11,6 +12,7 @@
 package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 /**
  * Constants for Workspace API
@@ -25,6 +27,7 @@ public final class Constants {
   public static final String LINK_REL_ENVIRONMENT_STATUS_CHANNEL = "environment/statusChannel";
 
   public static final String WORKSPACE_STOPPED_BY = "stopped_by";
+  public static final String WORKSPACE_STOP_REASON = "stop_reason";
 
   public static final String LINK_REL_CREATE_STACK = "create stack";
   public static final String LINK_REL_UPDATE_STACK = "update stack";
@@ -40,6 +43,12 @@ public final class Constants {
   public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
+
+  /**
+   * Property name for Che plugin registry url. Key name of api workspace/settings method results.
+   */
+  public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR =
+      "che.workspace.plugin_registry_url";
 
   /** Name for environment variable of machine name */
   public static final String CHE_MACHINE_NAME_ENV_VAR = "CHE_MACHINE_NAME";
@@ -68,17 +77,35 @@ public final class Constants {
    * Workspace#getAttributes}
    */
   public static final String ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage";
+
   /**
-   * Contains Workspace.Next features list that should be added to a workspace. Should be set/read
-   * from {@link Workspace#getAttributes}.
+   * Contains an identifier of an editor that should be used in a workspace. Should be set/read from
+   * {@link WorkspaceConfig#getAttributes}.
    *
-   * <p>Value is comma separated list of features in a format: '< feature1Name >/< feature1Version
-   * >,< feature2Name >/< feature2Version >' <br>
-   * Spaces around commas are trimmed. <br>
-   * This is beta constant that is subject to change or removal. Example of the attribute value:
-   * 'org.eclipse.che.feature1/0.0.1, com.redhat.enterpriseFeature1/1.0.0'
+   * <p>Value is colon separated id, version.
+   *
+   * <p>This is beta constant that is subject to change or removal.
+   *
+   * <p>Example of the attribute value: 'org.eclipse.che.super-editor:0.0.1'
    */
-  public static final String WORKSPACE_NEXT_FEATURES = "features";
+  public static final String WORKSPACE_TOOLING_EDITOR_ATTRIBUTE = "editor";
+
+  /**
+   * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
+   * set/read from {@link WorkspaceConfig#getAttributes}.
+   *
+   * <p>Value is comma separated list of plugins in a format: '< plugin1ID >:< plugin1Version >,<
+   * plugin2ID >/< plugin2Version >'<br>
+   * Spaces around commas are trimmed. <br>
+   *
+   * <p>This is beta constant that is subject to change or removal.
+   *
+   * <p>Example of the attribute value: 'org.eclipse.che.plugin1:0.0.1, com.redhat.plugin2:1.0.0'
+   */
+  public static final String WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE = "plugins";
+
+  public static final String SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE = "sidecar.%s.memory_limit";
+
   /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
    * from {@link Workspace#getAttributes}

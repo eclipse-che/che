@@ -1,14 +1,17 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.ide.ui.dialogs.message;
+
+import static com.google.gwt.safehtml.shared.SimpleHtmlSanitizer.sanitizeHtml;
 
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -38,7 +41,7 @@ public class MessageDialogPresenter implements MessageDialog, MessageDialogView.
       @NotNull @Assisted("title") String title,
       @NotNull @Assisted("message") String message,
       @Nullable @Assisted ConfirmCallback confirmCallback) {
-    this(view, title, new InlineHTML(message), confirmCallback);
+    this(view, title, new InlineHTML(sanitizeHtml(message)), confirmCallback);
   }
 
   @AssistedInject

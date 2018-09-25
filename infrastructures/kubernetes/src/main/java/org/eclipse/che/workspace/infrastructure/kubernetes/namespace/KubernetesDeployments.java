@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -12,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.allOf;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_DEPLOYMENT_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_RUNNING;
@@ -28,7 +30,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DoneableDeployment;
-import io.fabric8.kubernetes.api.model.extensions.ReplicaSet;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
@@ -87,7 +88,7 @@ public class KubernetesDeployments {
 
   // TODO https://github.com/eclipse/che/issues/7656
   public static final int POD_REMOVAL_TIMEOUT_MIN = 5;
-  public static final int POD_CREATION_TIMEOUT_MIN = 5;
+  public static final int POD_CREATION_TIMEOUT_MIN = 1;
 
   private static final String POD_OBJECT_KIND = "Pod";
   // error stream data initial capacity
@@ -122,29 +123,58 @@ public class KubernetesDeployments {
    */
   public Pod deploy(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
+
     ObjectMeta metadata = pod.getMetadata();
+    // Note: metadata.name will be changed as for pods it is set by the deployment.
+    String originalName = metadata.getName();
+    putLabel(pod, CHE_DEPLOYMENT_NAME_LABEL, originalName);
+
     PodSpec podSpec = pod.getSpec();
     podSpec.setRestartPolicy("Always"); // Only allowable value
+    final CompletableFuture<Pod> createFuture = new CompletableFuture<>();
+    final Watch createWatch =
+        clientFactory
+            .create(workspaceId)
+            .pods()
+            .inNamespace(namespace)
+            .watch(new CreateWatcher(createFuture, workspaceId, originalName));
     try {
-      Deployment deployment =
-          clientFactory
-              .create(workspaceId)
-              .extensions()
-              .deployments()
-              .inNamespace(namespace)
-              .createNew()
-              .withMetadata(metadata)
-              .withNewSpec()
-              .withReplicas(1)
-              .withNewTemplate()
-              .withMetadata(metadata)
-              .withSpec(podSpec)
-              .endTemplate()
-              .endSpec()
-              .done();
-      return awaitAndGetPod(deployment);
+      clientFactory
+          .create(workspaceId)
+          .extensions()
+          .deployments()
+          .inNamespace(namespace)
+          .createNew()
+          .withMetadata(metadata)
+          .withNewSpec()
+          .withReplicas(1)
+          .withNewTemplate()
+          .withMetadata(metadata)
+          .withSpec(podSpec)
+          .endTemplate()
+          .endSpec()
+          .done();
+      return createFuture.get(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new InfrastructureException(
+          String.format(
+              "Interrupted while waiting for Pod creation. -id: %s -message: %s",
+              metadata.getName(), e.getMessage()));
+    } catch (ExecutionException e) {
+      throw new InfrastructureException(
+          String.format(
+              "Error occured while waiting for Pod creation. -id: %s -message: %s",
+              metadata.getName(), e.getCause().getMessage()));
+    } catch (TimeoutException e) {
+      throw new InfrastructureException(
+          String.format(
+              "Pod creation timeout exceeded. -id: %s -message: %s",
+              metadata.getName(), e.getMessage()));
+    } finally {
+      createWatch.close();
     }
   }
 
@@ -434,7 +464,7 @@ public class KubernetesDeployments {
                   if (happenedAfterWatcherInitialization(podEvent)) {
                     containerEventsHandlers.forEach(h -> h.handle(podEvent));
                   }
-                } catch (ParseException e) {
+                } catch (ParseException | IllegalArgumentException e) {
                   LOG.error("Failed to parse last timestamp of the event: {}", podEvent);
                 }
               }
@@ -610,7 +640,13 @@ public class KubernetesDeployments {
    */
   public void delete(String name) throws InfrastructureException {
     try {
-      doDelete(name).get(POD_REMOVAL_TIMEOUT_MIN, TimeUnit.MINUTES);
+      Pod pod =
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get();
+      if (pod != null) {
+        doDeletePod(name).get(POD_REMOVAL_TIMEOUT_MIN, TimeUnit.MINUTES);
+      } else {
+        doDeleteDeployment(name).get(POD_REMOVAL_TIMEOUT_MIN, TimeUnit.MINUTES);
+      }
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
@@ -635,18 +671,35 @@ public class KubernetesDeployments {
    */
   public void delete() throws InfrastructureException {
     try {
-      // pods are removed with some delay related to stopping of containers. It is need to wait them
+      final List<CompletableFuture<Void>> deleteFutures = new ArrayList<>();
+      // We first delete all deployments, then clean up any bare Pods.
+      List<Deployment> deployments =
+          clientFactory
+              .create(workspaceId)
+              .extensions()
+              .deployments()
+              .inNamespace(namespace)
+              .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+              .list()
+              .getItems();
+      for (Deployment deployment : deployments) {
+        deleteFutures.add(doDeleteDeployment(deployment.getMetadata().getName()));
+      }
+      // We have to be careful to not include pods that are controlled by a deployment
       List<Pod> pods =
           clientFactory
               .create(workspaceId)
               .pods()
               .inNamespace(namespace)
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+              .withoutLabel(CHE_DEPLOYMENT_NAME_LABEL)
               .list()
               .getItems();
-      final List<CompletableFuture<Void>> deleteFutures = new ArrayList<>();
       for (Pod pod : pods) {
-        deleteFutures.add(doDelete(pod.getMetadata().getName()));
+        List<OwnerReference> ownerReferences = pod.getMetadata().getOwnerReferences();
+        if (ownerReferences == null || ownerReferences.isEmpty()) {
+          deleteFutures.add(doDeletePod(pod.getMetadata().getName()));
+        }
       }
       final CompletableFuture<Void> removed =
           allOf(deleteFutures.toArray(new CompletableFuture[deleteFutures.size()]));
@@ -667,33 +720,86 @@ public class KubernetesDeployments {
     }
   }
 
-  protected CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
-    final String podName = getPodName(name);
+  protected CompletableFuture<Void> doDeleteDeployment(String deploymentName)
+      throws InfrastructureException {
+    // Try to get pod name if it exists (it may not, if e.g. workspace config refers to
+    // nonexistent service account).
+    String podName;
+    try {
+      podName = getPodName(deploymentName);
+    } catch (InfrastructureException e) {
+      // Not an error, just means the Deployment has failed to create a pod.
+      podName = null;
+    }
+
+    Watch toCloseOnException = null;
+    try {
+      ScalableResource<Deployment, DoneableDeployment> deploymentResource =
+          clientFactory
+              .create(workspaceId)
+              .extensions()
+              .deployments()
+              .inNamespace(namespace)
+              .withName(deploymentName);
+      if (deploymentResource.get() == null) {
+        throw new InfrastructureException(
+            String.format("No deployment foud to delete for name %s", deploymentName));
+      }
+
+      final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
+      final Watch watch;
+      // If we have a Pod, we have to watch to make sure it is deleted, otherwise, we watch the
+      // Deployment we are deleting.
+      if (!Strings.isNullOrEmpty(podName)) {
+        PodResource<Pod, DoneablePod> podResource =
+            clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
+        watch = podResource.watch(new DeleteWatcher<Pod>(deleteFuture));
+        toCloseOnException = watch;
+      } else {
+        watch = deploymentResource.watch(new DeleteWatcher<Deployment>(deleteFuture));
+        toCloseOnException = watch;
+      }
+
+      Boolean deleteSucceeded = deploymentResource.delete();
+
+      if (deleteSucceeded == null || !deleteSucceeded) {
+        deleteFuture.complete(null);
+      }
+      return deleteFuture.whenComplete(
+          (v, e) -> {
+            if (e != null) {
+              LOG.warn("Failed to remove deployment {} cause {}", deploymentName, e.getMessage());
+            }
+            watch.close();
+          });
+    } catch (KubernetesClientException e) {
+      if (toCloseOnException != null) {
+        toCloseOnException.close();
+      }
+      throw new KubernetesInfrastructureException(e);
+    } catch (Exception e) {
+      if (toCloseOnException != null) {
+        toCloseOnException.close();
+      }
+      throw e;
+    }
+  }
+
+  protected CompletableFuture<Void> doDeletePod(String podName) throws InfrastructureException {
     Watch toCloseOnException = null;
     try {
       PodResource<Pod, DoneablePod> podResource =
           clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
-      Pod pod = podResource.get();
-      if (pod == null) {
+      if (podResource.get() == null) {
         throw new InfrastructureException(
-            String.format("No pod found to delete for name %s", name));
+            String.format("No pod found to delete for name %s", podName));
       }
-      List<OwnerReference> ownerReferences = pod.getMetadata().getOwnerReferences();
+
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
-      final Watch watch = podResource.watch(new DeleteWatcher(deleteFuture));
+      final Watch watch = podResource.watch(new DeleteWatcher<Pod>(deleteFuture));
       toCloseOnException = watch;
 
-      Boolean deleteSucceeded = false;
-      if (ownerReferences != null && ownerReferences.size() > 0) {
-        // Part of deployment
-        ScalableResource<Deployment, DoneableDeployment> deploymentResource =
-            getDeploymentResource(pod);
-        deleteSucceeded = deploymentResource.delete();
-      } else {
-        // Bare pod
-        deleteSucceeded = podResource.delete();
-      }
-
+      Boolean deleteSucceeded = podResource.delete();
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }
@@ -704,11 +810,11 @@ public class KubernetesDeployments {
             }
             watch.close();
           });
-    } catch (KubernetesClientException ex) {
+    } catch (KubernetesClientException e) {
       if (toCloseOnException != null) {
         toCloseOnException.close();
       }
-      throw new KubernetesInfrastructureException(ex);
+      throw new KubernetesInfrastructureException(e);
     } catch (Exception e) {
       if (toCloseOnException != null) {
         toCloseOnException.close();
@@ -727,83 +833,6 @@ public class KubernetesDeployments {
       }
     }
     return encoded;
-  }
-
-  /**
-   * Wait until deployment is ready and return created Pod
-   *
-   * @param deploy the deployment responsible for creating the pod
-   * @return the created Pod
-   * @throws InfrastructureException if timeout elapses while waiting.
-   */
-  private Pod awaitAndGetPod(Deployment deploy) throws InfrastructureException {
-    String deploymentName = deploy.getMetadata().getName();
-    try {
-      clientFactory
-          .create(workspaceId)
-          .extensions()
-          .deployments()
-          .inNamespace(namespace)
-          .withName(deploymentName)
-          .waitUntilReady(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
-      return get(deploymentName)
-          .orElseThrow(
-              () ->
-                  new InfrastructureException(
-                      String.format("Failed to create Deployment %s", deploymentName)));
-    } catch (InterruptedException e) {
-      throw new InfrastructureException(
-          String.format("Timeout while creating Deployment %s", deploymentName));
-    }
-  }
-
-  /**
-   * Get the Deployment resource that owns a specified Pod via the Pod's owner references.
-   *
-   * @param pod the pod controlled by desired deployment
-   * @return the deployment that manages the specified pod
-   * @throws InfrastructureException if any error occurs.
-   */
-  private ScalableResource<Deployment, DoneableDeployment> getDeploymentResource(Pod pod)
-      throws InfrastructureException {
-    List<OwnerReference> podOwners = pod.getMetadata().getOwnerReferences();
-    String podName = pod.getMetadata().getName();
-    String replicaSetName =
-        podOwners
-            .stream()
-            .filter(owner -> "ReplicaSet".equals(owner.getKind()))
-            .map(owner -> owner.getName())
-            .findAny()
-            .orElseThrow(
-                () ->
-                    new InfrastructureException(
-                        String.format("Failed to get ReplicaSet controlling Pod %s", podName)));
-
-    ReplicaSet replicaSet =
-        clientFactory
-            .create(workspaceId)
-            .extensions()
-            .replicaSets()
-            .inNamespace(namespace)
-            .withName(replicaSetName)
-            .get();
-    List<OwnerReference> rsOwners = replicaSet.getMetadata().getOwnerReferences();
-    String deploymentName =
-        rsOwners
-            .stream()
-            .filter(owner -> "Deployment".equals(owner.getKind()))
-            .map(owner -> owner.getName())
-            .findAny()
-            .orElseThrow(
-                () ->
-                    new InfrastructureException(
-                        String.format("Failed to get Deployment controlling Pod %s", podName)));
-    return clientFactory
-        .create(workspaceId)
-        .extensions()
-        .deployments()
-        .inNamespace(namespace)
-        .withName(deploymentName);
   }
 
   /**
@@ -852,7 +881,35 @@ public class KubernetesDeployments {
     return pods.get(0).getMetadata().getName();
   }
 
-  private static class DeleteWatcher implements Watcher<Pod> {
+  private static class CreateWatcher implements Watcher<Pod> {
+
+    private final CompletableFuture<Pod> future;
+    private final String workspaceId;
+    private final String originalName;
+
+    private CreateWatcher(CompletableFuture<Pod> future, String workspaceId, String originalName) {
+      this.future = future;
+      this.workspaceId = workspaceId;
+      this.originalName = originalName;
+    }
+
+    @Override
+    public void eventReceived(Action action, Pod resource) {
+      Map<String, String> labels = resource.getMetadata().getLabels();
+      if (workspaceId.equals(labels.get(CHE_WORKSPACE_ID_LABEL))
+          && originalName.equals(labels.get(CHE_DEPLOYMENT_NAME_LABEL))) {
+        future.complete(resource);
+      }
+    }
+
+    @Override
+    public void onClose(KubernetesClientException cause) {
+      future.completeExceptionally(
+          new RuntimeException("Websocket connection closed before Pod creation event received"));
+    }
+  }
+
+  private static class DeleteWatcher<T> implements Watcher<T> {
 
     private final CompletableFuture<Void> future;
 
@@ -861,7 +918,7 @@ public class KubernetesDeployments {
     }
 
     @Override
-    public void eventReceived(Action action, Pod hasMetadata) {
+    public void eventReceived(Action action, T hasMetadata) {
       if (action == Action.DELETED) {
         future.complete(null);
       }
@@ -872,7 +929,7 @@ public class KubernetesDeployments {
       // if event about removing is received then this completion has no effect
       future.completeExceptionally(
           new RuntimeException(
-              "Webscoket connection is closed. But event about removing is not received.", e));
+              "Websocket connection is closed. But event about removing is not received.", e));
     }
   }
 

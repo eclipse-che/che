@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -11,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
@@ -24,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
@@ -40,21 +43,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class WorkspaceDetails {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
   private final Dashboard dashboard;
-
-  public interface TabNames {
-    String OVERVIEW = "Overview";
-    String PROJECTS = "Projects";
-    String MACHINES = "Machines";
-    String SERVERS = "Servers";
-    String INSTALLERS = "Installers";
-    String ENV_VARIABLES = "Env Variables";
-    String CONFIG = "Config";
-    String SSH = "SSH";
-    String SHARE = "Share";
-    String VOLUMES = "Volumes";
-  }
 
   private interface Locators {
     String WORKSPACE_STATE = "workspace-status";
@@ -76,6 +67,30 @@ public class WorkspaceDetails {
     String OPEN_ORGANIZATION_BUTTON_ID = "open-namespace-button";
   }
 
+  public enum WorkspaceDetailsTab {
+    OVERVIEW("Overview"),
+    PROJECTS("Projects"),
+    MACHINES("Machines"),
+    INSTALLERS("Installers"),
+    SERVERS("Servers"),
+    ENV_VARIABLES("Env Variables"),
+    VOLUMES("Volumes"),
+    CONFIG("Config"),
+    SSH("SSH"),
+    TOOLS("Tools"),
+    SHARE("Share");
+
+    private final String tabTitle;
+
+    WorkspaceDetailsTab(String tabTitle) {
+      this.tabTitle = tabTitle;
+    }
+
+    public String getTabTitle() {
+      return this.tabTitle;
+    }
+  }
+
   public enum StateWorkspace {
     STOPPED("Stopped"),
     STARTING("Starting"),
@@ -93,9 +108,30 @@ public class WorkspaceDetails {
     }
   }
 
+  public enum ActionButton {
+    SAVE_BUTTON(By.name("save-button")),
+    APPLY_BUTTON(By.name("apply-button")),
+    CANCEL_BUTTON(By.name("cancel-button"));
+
+    private By buttonLocator;
+
+    ActionButton(By buttonLocator) {
+      this.buttonLocator = buttonLocator;
+    }
+
+    public By getLocator() {
+      return this.buttonLocator;
+    }
+  }
+
   @Inject
-  public WorkspaceDetails(SeleniumWebDriver seleniumWebDriver, Loader loader, Dashboard dashboard) {
+  public WorkspaceDetails(
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      Loader loader,
+      Dashboard dashboard) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     this.dashboard = dashboard;
     PageFactory.initElements(seleniumWebDriver, this);
@@ -127,6 +163,38 @@ public class WorkspaceDetails {
 
   @FindBy(xpath = Locators.CLOSE_DIALOG_BUTTON)
   WebElement closeBtn;
+
+  public WebElement wait(ActionButton actionButton) {
+    return seleniumWebDriverHelper.waitVisibility(actionButton.getLocator());
+  }
+
+  public void waitAllInvisibility(ActionButton... actionButtons) {
+    asList(actionButtons)
+        .forEach(
+            actionButton -> seleniumWebDriverHelper.waitInvisibility(actionButton.getLocator()));
+  }
+
+  public void waitAndClickOn(ActionButton actionButton) {
+    wait(actionButton).click();
+  }
+
+  private void waitState(ActionButton actionButton, boolean enabled) {
+    waitState(actionButton.getLocator(), enabled);
+  }
+
+  private void waitState(By locator, boolean enabled) {
+    final String buttonStateAttribute = "aria-disabled";
+    seleniumWebDriverHelper.waitAttributeEqualsTo(
+        locator, buttonStateAttribute, Boolean.toString(!enabled));
+  }
+
+  public void waitAllDisabled(ActionButton... actionButtons) {
+    asList(actionButtons).forEach(actionButton -> waitState(actionButton, false));
+  }
+
+  public void waitAllEnabled(ActionButton... actionButtons) {
+    asList(actionButtons).forEach(actionButton -> waitState(actionButton, true));
+  }
 
   /**
    * Check state of workspace in 'Workspace Information'
@@ -175,12 +243,14 @@ public class WorkspaceDetails {
   /**
    * Select tab into workspace menu
    *
-   * @param tabName is the tab name into workspace menu
+   * @param tab is the tab name into workspace menu
    */
-  public void selectTabInWorkspaceMenu(String tabName) {
+  public void selectTabInWorkspaceMenu(WorkspaceDetailsTab tab) {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.TAB_NAMES_IN_WS, tabName))))
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.TAB_NAMES_IN_WS, tab.getTabTitle()))))
         .click();
   }
 

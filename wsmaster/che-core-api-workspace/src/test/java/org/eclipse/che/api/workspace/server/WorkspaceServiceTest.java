@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -107,6 +108,7 @@ public class WorkspaceServiceTest {
   private static final String NAMESPACE = "user";
   private static final String USER_ID = "user123";
   private static final String API_ENDPOINT = "http://localhost:8080/api";
+  private static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR = "http://localhost:9898/plugins/";
   private static final Account TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
 
   @SuppressWarnings("unused")
@@ -121,7 +123,13 @@ public class WorkspaceServiceTest {
   @BeforeMethod
   public void setup() {
     service =
-        new WorkspaceService(API_ENDPOINT, true, wsManager, machineTokenProvider, linksGenerator);
+        new WorkspaceService(
+            API_ENDPOINT,
+            true,
+            wsManager,
+            machineTokenProvider,
+            linksGenerator,
+            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR);
   }
 
   @Test
@@ -1131,8 +1139,12 @@ public class WorkspaceServiceTest {
     assertEquals(
         settings,
         ImmutableMap.of(
-            Constants.SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile",
-            Constants.CHE_WORKSPACE_AUTO_START, "true"));
+            Constants.SUPPORTED_RECIPE_TYPES,
+            "dockerimage,dockerfile",
+            Constants.CHE_WORKSPACE_AUTO_START,
+            "true",
+            "cheWorkspacePluginRegistryUrl",
+            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR));
   }
 
   private static String unwrapError(Response response) {

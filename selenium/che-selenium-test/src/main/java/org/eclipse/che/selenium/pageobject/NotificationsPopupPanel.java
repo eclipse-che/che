@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 
@@ -18,6 +18,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -30,11 +32,13 @@ public class NotificationsPopupPanel {
   private static final Logger LOG = LoggerFactory.getLogger(NotificationsPopupPanel.class);
 
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
   public NotificationsPopupPanel(
       SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -73,8 +77,8 @@ public class NotificationsPopupPanel {
    *
    * @param message expected text
    */
-  public void waitExpectedMessageOnProgressPanelAndClosed(final String message) {
-    waitExpectedMessageOnProgressPanelAndClosed(message, ELEMENT_TIMEOUT_SEC);
+  public void waitExpectedMessageOnProgressPanelAndClose(final String message) {
+    waitExpectedMessageOnProgressPanelAndClose(message, WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -83,9 +87,27 @@ public class NotificationsPopupPanel {
    * @param message expected text
    * @param timeout timeout defined by user
    */
-  public void waitExpectedMessageOnProgressPanelAndClosed(final String message, final int timeout) {
+  public void waitExpectedMessageOnProgressPanelAndClose(final String message, final int timeout) {
     seleniumWebDriverHelper.waitTextContains(progressPopupPanel, message, timeout);
-    waitProgressPopupPanelClose(timeout);
+
+    // close popup panel
+    closeAllMessages(timeout);
+  }
+
+  public void closeAllMessages(final int timeout) {
+    seleniumWebDriver
+        .findElements(By.xpath(CLOSE_POPUP_IMG_XPATH))
+        .forEach(
+            webElement -> {
+              if (webElement.isDisplayed()) {
+                try {
+                  webElement.click();
+                  seleniumWebDriverHelper.waitInvisibility(webElement, timeout);
+                } catch (WebDriverException e) {
+                  // ignore exception if notification has been closed by timeout
+                }
+              }
+            });
   }
 
   /** wait disappearance of notification popups */

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -81,6 +82,7 @@ public class SeleniumWebDriver
   private final RemoteWebDriver driver;
   private final HttpJsonRequestFactory httpJsonRequestFactory;
   private final DockerUtil dockerUtil;
+  private final String downloadDir;
 
   @Inject
   public SeleniumWebDriver(
@@ -88,12 +90,14 @@ public class SeleniumWebDriver
       @Named("sys.driver.port") String webDriverPort,
       @Named("sys.grid.mode") boolean gridMode,
       HttpJsonRequestFactory httpJsonRequestFactory,
-      DockerUtil dockerUtil) {
+      DockerUtil dockerUtil,
+      @Named("tests.tmp_dir") String downloadDir) {
     this.browser = browser;
     this.webDriverPort = webDriverPort;
     this.gridMode = gridMode;
     this.httpJsonRequestFactory = httpJsonRequestFactory;
     this.dockerUtil = dockerUtil;
+    this.downloadDir = downloadDir;
 
     try {
       URL webDriverUrl =
@@ -247,10 +251,12 @@ public class SeleniumWebDriver
         options.addArguments("--dns-prefetch-disable");
 
         // set parameters required for automatic download capability
-        String downloadDirectory = "/tmp/";
         Map<String, Object> chromePrefs = new HashMap<>();
-        chromePrefs.put("download.default_directory", downloadDirectory);
+        chromePrefs.put("download.default_directory", downloadDir);
         chromePrefs.put("download.prompt_for_download", false);
+        chromePrefs.put("download.directory_upgrade", true);
+        chromePrefs.put("safebrowsing.enabled", true);
+        chromePrefs.put("profile.default_content_settings.popups", 0);
         chromePrefs.put("plugins.plugins_disabled", "['Chrome PDF Viewer']");
         options.setExperimentalOption("prefs", chromePrefs);
 
@@ -295,8 +301,6 @@ public class SeleniumWebDriver
 
   /**
    * calculate name of workspace from browser url cut symbols from end of slash symbol ("/") to end
-   *
-   * @return
    */
   public String getWorkspaceNameFromBrowserUrl() {
     String currentUrl = getCurrentUrl();

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -73,21 +74,19 @@ public class SshService extends Service {
   @Produces(APPLICATION_JSON)
   @GenerateLink(rel = Constants.LINK_REL_GENERATE_PAIR)
   @ApiOperation(
-    value = "Generate and stores ssh pair based on the request",
-    notes =
-        "This operation can be performed only by authorized user,"
-            + "this user will be the owner of the created ssh pair",
-    response = SshPairDto.class
-  )
+      value = "Generate and stores ssh pair based on the request",
+      notes =
+          "This operation can be performed only by authorized user,"
+              + "this user will be the owner of the created ssh pair",
+      response = SshPairDto.class)
   @ApiResponses({
     @ApiResponse(code = 201, message = "The ssh pair successfully generated"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Conflict error occurred during the ssh pair generation"
-              + "(e.g. The Ssh pair with such name and service already exists)"
-    ),
+        code = 409,
+        message =
+            "Conflict error occurred during the ssh pair generation"
+                + "(e.g. The Ssh pair with such name and service already exists)"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response generatePair(
@@ -155,20 +154,18 @@ public class SshService extends Service {
   @Consumes(APPLICATION_JSON)
   @GenerateLink(rel = Constants.LINK_REL_CREATE_PAIR)
   @ApiOperation(
-    value = "Create a new ssh pair",
-    notes =
-        "This operation can be performed only by authorized user,"
-            + "this user will be the owner of the created ssh pair"
-  )
+      value = "Create a new ssh pair",
+      notes =
+          "This operation can be performed only by authorized user,"
+              + "this user will be the owner of the created ssh pair")
   @ApiResponses({
     @ApiResponse(code = 204, message = "The ssh pair successfully created"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(
-      code = 409,
-      message =
-          "Conflict error occurred during the ssh pair creation"
-              + "(e.g. The Ssh pair with such name and service already exists)"
-    ),
+        code = 409,
+        message =
+            "Conflict error occurred during the ssh pair creation"
+                + "(e.g. The Ssh pair with such name and service already exists)"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public void createPair(
@@ -188,16 +185,14 @@ public class SshService extends Service {
   @Path("{service}/find")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get the ssh pair by the name of pair and name of service owned by the current user",
-    notes = "This operation can be performed only by authorized user."
-  )
+      value = "Get the ssh pair by the name of pair and name of service owned by the current user",
+      notes = "This operation can be performed only by authorized user.")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The ssh pair successfully fetched"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(
-      code = 404,
-      message = "The ssh pair with specified name and service does not exist for current user"
-    ),
+        code = 404,
+        message = "The ssh pair with specified name and service does not exist for current user"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public SshPairDto getPair(
@@ -211,8 +206,8 @@ public class SshService extends Service {
   @DELETE
   @Path("{service}")
   @ApiOperation(
-    value = "Remove the ssh pair by the name of pair and name of service owned by the current user"
-  )
+      value =
+          "Remove the ssh pair by the name of pair and name of service owned by the current user")
   @ApiResponses({
     @ApiResponse(code = 204, message = "The ssh pair successfully removed"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -231,11 +226,10 @@ public class SshService extends Service {
   @Path("{service}")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
-    value = "Get the ssh pairs by name of service owned by the current user",
-    notes = "This operation can be performed only by authorized user.",
-    response = SshPairDto.class,
-    responseContainer = "List"
-  )
+      value = "Get the ssh pairs by name of service owned by the current user",
+      notes = "This operation can be performed only by authorized user.",
+      response = SshPairDto.class,
+      responseContainer = "List")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The ssh pairs successfully fetched"),
     @ApiResponse(code = 500, message = "Internal server error occurred")

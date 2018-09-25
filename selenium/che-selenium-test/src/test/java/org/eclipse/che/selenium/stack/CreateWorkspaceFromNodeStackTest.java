@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -113,14 +114,15 @@ public class CreateWorkspaceFromNodeStackTest {
   public void checkWebNodejsSimpleProjectCommands() {
     By textOnPreviewPage = By.xpath("//p[text()=' from the Yeoman team']");
 
-    consoles.executeCommandFromProjectExplorer(
-        WEB_NODE_JS_PROJECT,
+    projectExplorer.waitAndSelectItem(WEB_NODE_JS_PROJECT);
+    consoles.executeCommandInsideProcessesArea(
+        "dev-machine",
         BUILD_GOAL,
         INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT),
         "bower_components/angular");
 
-    consoles.executeCommandFromProjectExplorer(
-        WEB_NODE_JS_PROJECT,
+    consoles.executeCommandInsideProcessesArea(
+        "dev-machine",
         RUN_GOAL,
         RUN_COMMAND_ITEM.getItem(WEB_NODE_JS_PROJECT),
         "Started connect web server");

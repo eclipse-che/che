@@ -1,21 +1,28 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.selenium.core.webdriver;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.ARROW_UP;
+import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.ENTER;
+import static org.openqa.selenium.Keys.F12;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
@@ -32,12 +39,12 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -394,7 +401,7 @@ public class SeleniumWebDriverHelper {
    * @param text text for sending
    */
   public void waitAndSendKeysTo(By elementLocator, String text) {
-    waitVisibility(elementLocator).sendKeys(text);
+    waitAndSendKeysTo(elementLocator, text, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -435,7 +442,19 @@ public class SeleniumWebDriverHelper {
    * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(By elementLocator) {
-    return waitVisibility(elementLocator).getAttribute("value");
+    return waitVisibilityAndGetValue(elementLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} visibility of {@link WebElement} with specified {@code
+   * elementLocator} and gets text.
+   *
+   * @param elementLocator locator of element from which text should be got
+   * @param timeout waiting time in seconds
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetValue(By elementLocator, int timeout) {
+    return waitVisibilityAndGetAttribute(elementLocator, "value", timeout);
   }
 
   /**
@@ -445,7 +464,18 @@ public class SeleniumWebDriverHelper {
    * @return text which extracted from element by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(WebElement webElement) {
-    return waitVisibility(webElement).getAttribute("value");
+    return waitVisibilityAndGetValue(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} visibility of provided {@code webElement} and gets text.
+   *
+   * @param webElement element, text from which should be got
+   * @param timeout waiting time in seconds
+   * @return text which extracted from element by {@link WebElement#getAttribute(String)}
+   */
+  public String waitVisibilityAndGetValue(WebElement webElement, int timeout) {
+    return waitVisibilityAndGetAttribute(webElement, "value", timeout);
   }
 
   /**
@@ -502,7 +532,7 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(By elementLocator) {
-    return waitVisibility(elementLocator).getText();
+    return waitVisibilityAndGetText(elementLocator, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -524,24 +554,39 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(WebElement webElement) {
-    return waitVisibility(webElement).getText();
+    return waitVisibilityAndGetText(webElement, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
-   * elementLocator} by {@link WebElement#getAttribute(String)} equals to provided {@code
-   * expectedValue}.
+   * Waits during {@code timeout} visibility of provided {@code webElement} and gets text.
    *
-   * @param elementLocator locator of element in which text should be checked
-   * @param expectedValue expected text which should be present in the element
+   * @param webElement element from which text should be got
+   * @param timeout waiting time in seconds
+   * @return element text by {@link WebElement#getText()}
+   */
+  public String waitVisibilityAndGetText(WebElement webElement, int timeout) {
+    return waitVisibility(webElement, timeout).getText();
+  }
+
+  /**
+   * Waits during {@code timeout} until value extracted from {@link WebElement} with specified
+   * {@code locator} by {@link WebElement#getAttribute(String)} equals to provided {@code expected}
+   * one.
+   *
+   * @param locator locator of element in which value should be checked
+   * @param expected expected value which should be present in the element
    * @param timeout waiting time in seconds
    */
-  public void waitValueEqualsTo(By elementLocator, String expectedValue, int timeout) {
+  public void waitValueEqualsTo(By locator, String expected, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(timeout, () -> format("\nexpected:\n'%s'\nbut was:\n'%s'\n", expected, actual[0]))
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetValue(elementLocator).equals(expectedValue));
+                driver -> {
+                  actual[0] = waitVisibilityAndGetValue(locator, timeout);
+                  return actual[0].contains(expected);
+                });
   }
 
   /**
@@ -556,48 +601,58 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
-   * WebElement#getAttribute(String)} equals to provided {@code expectedValue}.
+   * Waits during {@code timeout} until value extracted from specified {@code element} by {@link
+   * WebElement#getAttribute(String)} equals to provided {@code expected} one.
    *
-   * @param webElement element in which text should be checked
-   * @param expectedValue expected text which should be present in the element
+   * @param element element in which text should be checked
+   * @param expected expected value which should be present in the element
    * @param timeout waiting time in seconds
    */
-  public void waitValueEqualsTo(WebElement webElement, String expectedValue, int timeout) {
+  public void waitValueEqualsTo(WebElement element, String expected, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(timeout, () -> format("\nexpected:\n'%s'\nbut was:\n'%s'\n", expected, actual[0]))
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetValue(webElement).equals(expectedValue));
+                driver -> {
+                  actual[0] = waitVisibilityAndGetValue(element, timeout);
+                  return actual[0].equals(expected);
+                });
   }
 
   /**
-   * Waits until text extracted from specified {@code webElement} by {@link
+   * Waits until text extracted from specified {@code element} by {@link
    * WebElement#getAttribute(String)} equals to provided {@code expectedValue}.
    *
-   * @param webElement element in which text should be checked
+   * @param element element in which text should be checked
    * @param expectedValue expected text which should be present in the element
    */
-  public void waitValueEqualsTo(WebElement webElement, String expectedValue) {
-    waitValueEqualsTo(webElement, expectedValue, DEFAULT_TIMEOUT);
+  public void waitValueEqualsTo(WebElement element, String expectedValue) {
+    waitValueEqualsTo(element, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
    * Waits during {@code timeout} until specified {@code element} contains the defined {@code
-   * expectedText}.
+   * expected} value.
    *
    * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
    *
    * @param element element which should be checked
-   * @param expectedText text which should be presented
+   * @param expected value which should be presented
    * @param timeout waiting time in seconds
    */
-  public void waitValueContains(WebElement element, String expectedText, int timeout) {
+  public void waitValueContains(WebElement element, String expected, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(
+            timeout,
+            () -> format("\nactual value:\n'%s'\ndidn't contain:\n'%s'\n", actual[0], expected))
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibility(element).getAttribute("value").contains(expectedText));
+                driver -> {
+                  actual[0] = waitVisibilityAndGetValue(element, timeout);
+                  return actual[0].contains(expected);
+                });
   }
 
   /**
@@ -641,18 +696,22 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
-   * elementLocator} by {@link WebElement#getText()} equals to provided {@code expectedText}.
+   * locator} by {@link WebElement#getText()} equals to provided {@code expected} one.
    *
-   * @param elementLocator locator of element in which text should be checked
-   * @param expectedText expected text which should be present in the element
+   * @param locator locator of element in which text should be checked
+   * @param expected expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
-  public void waitTextEqualsTo(By elementLocator, String expectedText, int timeout) {
+  public void waitTextEqualsTo(By locator, String expected, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(timeout, () -> format("\nexpected:\n'%s'\nbut was:\n'%s'\n", expected, actual[0]))
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetText(elementLocator).equals(expectedText));
+                driver -> {
+                  actual[0] = waitVisibilityAndGetText(locator, timeout);
+                  return actual[0].equals(expected);
+                });
   }
 
   /**
@@ -667,19 +726,23 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
-   * WebElement#getText()} equals to provided {@code expectedText}.
+   * Waits during {@code timeout} until text extracted from specified {@code element} by {@link
+   * WebElement#getText()} equals to provided {@code expected} one.
    *
-   * @param webElement element in which text should be checked
-   * @param expectedText expected text which should be present in the element
+   * @param element element in which text should be checked
+   * @param expected expected text which element text should be equal to
    * @param timeout waiting time in seconds
    */
-  public void waitTextEqualsTo(WebElement webElement, String expectedText, int timeout) {
+  public void waitTextEqualsTo(WebElement element, String expected, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(timeout, () -> format("\nexpected:\n'%s'\nbut was:\n'%s'\n", expected, actual[0]))
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetText(webElement).equals(expectedText));
+                driver -> {
+                  actual[0] = waitVisibilityAndGetText(element, timeout);
+                  return actual[0].equals(expected);
+                });
   }
 
   /**
@@ -687,7 +750,7 @@ public class SeleniumWebDriverHelper {
    * provided {@code expectedText}.
    *
    * @param webElement element in which text should be checked
-   * @param expectedText expected text which should be present in the element
+   * @param expectedText expected text which element text should be equal to
    */
   public void waitTextEqualsTo(WebElement webElement, String expectedText) {
     waitTextEqualsTo(webElement, expectedText, DEFAULT_TIMEOUT);
@@ -695,20 +758,26 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until specified {@code element} contains the specified {@code
-   * expectedText}.
+   * expected} one.
    *
    * <p>Note! Text is extracted by {@link WebElement#getText()} method.
    *
    * @param element element which should be checked
-   * @param expectedText text which should be presented
+   * @param expected text which should be presented
    * @param timeout waiting time in seconds
    */
-  public void waitTextContains(WebElement element, String expectedText, int timeout) {
+  public void waitTextContains(WebElement element, String expected, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(
+            timeout,
+            () -> format("\nactual text:\n'%s'\ndidn't contain:\n'%s'\n", actual[0], expected))
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibility(element, timeout).getText().contains(expectedText));
+                driver -> {
+                  actual[0] = waitVisibilityAndGetText(element, timeout);
+                  return actual[0].contains(expected);
+                });
   }
 
   /**
@@ -752,33 +821,39 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until specified {@code element} does not contain the specified
-   * {@code expectedText}.
+   * {@code absentText}.
    *
    * <p>Note! Text is extracted by {@link WebElement#getText()} method.
    *
-   * @param element element which should be checked
-   * @param expectedText text which should not be presented
+   * @param webElement element which should be checked
+   * @param absentText text which should be absent
    * @param timeout waiting time in seconds
    */
-  public void waitTextIsNotPresented(WebElement element, String expectedText, int timeout) {
+  public void waitTextIsNotPresented(WebElement webElement, String absentText, int timeout) {
+    String[] actual = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(
+            timeout,
+            () -> format("\nactual text:\n'%s'\ndid contain:\n'%s'\n", actual[0], absentText))
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> !(waitVisibilityAndGetText(element).contains(expectedText)));
+                driver -> {
+                  actual[0] = waitVisibilityAndGetText(webElement, timeout);
+                  return !actual[0].contains(absentText);
+                });
   }
 
   /**
    * Waits until {@link WebElement} which defined by {@code element} does not contain the specified
-   * {@code expectedText}.
+   * {@code absentText}.
    *
    * <p>Note! Text is extracted by {@link WebElement#getText()} method.
    *
    * @param element element which should be checked
-   * @param expectedText text which should not be presented
+   * @param absentText text which should be absent
    */
-  public void waitTextIsNotPresented(WebElement element, String expectedText) {
-    waitTextIsNotPresented(element, expectedText, DEFAULT_TIMEOUT);
+  public void waitTextIsNotPresented(WebElement element, String absentText) {
+    waitTextIsNotPresented(element, absentText, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -1082,11 +1157,31 @@ public class SeleniumWebDriverHelper {
     webDriverWaitFactory
         .get(WIDGET_TIMEOUT_SEC)
         .until(
+            (ExpectedCondition<Boolean>) driver -> seleniumWebDriver.getWindowHandles().size() > 1);
+  }
+
+  /**
+   * Waits during {@code timeout} until count of opened browser tabs are equals to {@code
+   * expectedCount}.
+   *
+   * @param expectedCount count of the opened browsers tabs
+   * @param timeout waiting time in seconds
+   */
+  public void waitWindowsCount(int expectedCount, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
             (ExpectedCondition<Boolean>)
-                input -> {
-                  Set<String> driverWindows = seleniumWebDriver.getWindowHandles();
-                  return (driverWindows.size() > 1);
-                });
+                driver -> seleniumWebDriver.getWindowHandles().size() == expectedCount);
+  }
+
+  /**
+   * Waits until count of opened browser tabs are equals to {@code expectedCount}.
+   *
+   * @param expectedCount count of the opened browsers tabs
+   */
+  public void waitWindowsCount(int expectedCount) {
+    waitWindowsCount(expectedCount, WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -1127,7 +1222,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until attribute with specified {@code attributeName} has {@code
-   * expectedValue}.
+   * expected} value.
    *
    * @param element element which contains attribute
    * @param attributeName name of the attribute
@@ -1136,13 +1231,20 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAttributeEqualsTo(
       WebElement element, String attributeName, String expectedValue, int timeout) {
+    String[] actualValue = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(
+            timeout,
+            () ->
+                format(
+                    "\nexpected value of attribute '%s' was:\n'%s'\nbut actual was:\n'%s'\n",
+                    attributeName, expectedValue, actualValue[0]))
         .until(
             (ExpectedCondition<Boolean>)
-                driver ->
-                    waitVisibilityAndGetAttribute(element, attributeName, timeout)
-                        .equals(expectedValue));
+                driver -> {
+                  actualValue[0] = waitVisibilityAndGetAttribute(element, attributeName, timeout);
+                  return actualValue[0].contains(expectedValue);
+                });
   }
 
   /**
@@ -1172,24 +1274,31 @@ public class SeleniumWebDriverHelper {
    * Waits during {@code timeout} until attribute with specified {@code attributeName} contains
    * {@code expectedValue}.
    *
-   * @param elementLocator element which contains attribute
+   * @param locator element which contains attribute
    * @param attributeName name of the attribute
    * @param expectedValue expected attribute value
    * @param timeout waiting time in seconds
    */
   public void waitAttributeContainsValue(
-      By elementLocator, String attributeName, String expectedValue, int timeout) {
+      By locator, String attributeName, String expectedValue, int timeout) {
+    String[] actualValue = new String[1];
     webDriverWaitFactory
-        .get(timeout)
+        .get(
+            timeout,
+            () ->
+                format(
+                    "\nactual attribute '%s' value:\n'%s'\ndidn't contain:\n'%s'\n",
+                    attributeName, actualValue[0], expectedValue))
         .until(
             (ExpectedCondition<Boolean>)
-                driver ->
-                    waitVisibilityAndGetAttribute(elementLocator, attributeName, timeout)
-                        .contains(expectedValue));
+                driver -> {
+                  actualValue[0] = waitVisibilityAndGetAttribute(locator, attributeName, timeout);
+                  return actualValue[0].contains(expectedValue);
+                });
   }
 
   /**
-   * Waits until attribute with specified {@code attributeName} contains {@code expectedValue}.
+   * ~ Waits until attribute with specified {@code attributeName} contains {@code expectedValue}.
    *
    * @param elementLocator element which contains attribute
    * @param attributeName name of the attribute
@@ -1316,5 +1425,84 @@ public class SeleniumWebDriverHelper {
     webElement.sendKeys(readyToUploadFile.toString());
 
     return readyToUploadFile.getFileName().toString();
+  }
+
+  /**
+   * Waits during {@code timeout} until specified {@code expression} returns "true".
+   *
+   * @param expression the condition which should be waits until it has a "true" state
+   * @param timeout waiting time in seconds
+   */
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression, int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until((ExpectedCondition<Boolean>) driver -> expression.apply(this.seleniumWebDriver));
+  }
+
+  /**
+   * Waits until specified {@code expression} returns "true".
+   *
+   * @param expression the condition which should be waits until it has a "true" state
+   */
+  public void waitSuccessCondition(ExpectedCondition<Boolean> expression) {
+    waitSuccessCondition(expression, DEFAULT_TIMEOUT);
+  }
+
+  public void closeCurrentWindowAndSwitchToAnother(String windowToSwitch) {
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(windowToSwitch);
+  }
+
+  public void pressArrowDown() {
+    getAction().sendKeys(ARROW_DOWN.toString()).perform();
+  }
+
+  public void pressArrowUp() {
+    getAction().sendKeys(ARROW_UP.toString()).perform();
+  }
+
+  public void pressEnter() {
+    getAction().sendKeys(ENTER.toString()).perform();
+  }
+
+  public void pressCtrlF12() {
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys(F12)
+        .keyUp(CONTROL)
+        .perform();
+  }
+
+  /**
+   * Waits until {@code action} stop throwing exception of {@code ignoredExceptionType} and during
+   * {@code DEFAULT_TIMEOUT}.
+   *
+   * @param action action which should stop throwing of certain exception during timeout
+   * @param ignoredExceptionType exception which should be ignored when action is performed
+   */
+  public void waitNoExceptions(
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType) {
+    waitNoExceptions(action, ignoredExceptionType, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until {@code action} stop throwing exception of {@code ignoredExceptionType} during
+   * {@code timeoutInSec}.
+   *
+   * @param action action which should stop throwing of certain exception during timeout
+   * @param ignoredExceptionType exception which should be ignored when action is being performed
+   * @param timeoutInSec waiting time in seconds
+   */
+  public void waitNoExceptions(
+      Runnable action, Class<? extends WebDriverException> ignoredExceptionType, int timeoutInSec) {
+    webDriverWaitFactory
+        .get(timeoutInSec, ignoredExceptionType)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  action.run();
+                  return true;
+                });
   }
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -13,6 +14,7 @@ package org.eclipse.che.api.workspace.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -119,18 +121,14 @@ public class WorkspaceValidator {
     }
   }
 
-  private void validateMachine(String name, MachineConfig machine) throws ValidationException {
-    String memoryAttribute = machine.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE);
-    if (memoryAttribute != null) {
-      try {
-        Long.parseLong(memoryAttribute);
-      } catch (NumberFormatException e) {
-        throw new ValidationException(
-            format(
-                "Value '%s' of attribute '%s' in machine '%s' is illegal",
-                memoryAttribute, MEMORY_LIMIT_ATTRIBUTE, name));
-      }
-    }
+  private void validateMachine(String machineName, MachineConfig machine)
+      throws ValidationException {
+    validateLongAttribute(
+        MEMORY_LIMIT_ATTRIBUTE, machine.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), machineName);
+    validateLongAttribute(
+        MEMORY_REQUEST_ATTRIBUTE,
+        machine.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE),
+        machineName);
 
     for (Entry<String, ? extends Volume> volumeEntry : machine.getVolumes().entrySet()) {
       String volumeName = volumeEntry.getKey();
@@ -138,19 +136,33 @@ public class WorkspaceValidator {
           VOLUME_NAME.matcher(volumeName).matches(),
           "Volume name '%s' in machine '%s' is invalid",
           volumeName,
-          name);
+          machineName);
       Volume volume = volumeEntry.getValue();
       check(
           volume != null && !isNullOrEmpty(volume.getPath()),
           "Path of volume '%s' in machine '%s' is invalid. It should not be empty",
           volumeName,
-          name);
+          machineName);
       check(
           VOLUME_PATH.matcher(volume.getPath()).matches(),
           "Path '%s' of volume '%s' in machine '%s' is invalid. It should be absolute",
           volume.getPath(),
           volumeName,
-          name);
+          machineName);
+    }
+  }
+
+  private void validateLongAttribute(
+      String attributeName, String attributeValue, String machineName) throws ValidationException {
+    if (attributeValue != null) {
+      try {
+        Long.parseLong(attributeValue);
+      } catch (NumberFormatException e) {
+        throw new ValidationException(
+            format(
+                "Value '%s' of attribute '%s' in machine '%s' is illegal",
+                attributeValue, attributeName, machineName));
+      }
     }
   }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -34,33 +35,27 @@ import org.eclipse.che.api.core.model.user.User;
 @Entity(name = "Usr")
 @NamedQueries({
   @NamedQuery(
-    name = "User.getByAliasAndPassword",
-    query = "SELECT u " + "FROM Usr u " + "WHERE :alias = u.name OR" + "      :alias = u.email"
-  ),
+      name = "User.getByAliasAndPassword",
+      query = "SELECT u " + "FROM Usr u " + "WHERE :alias = u.name OR" + "      :alias = u.email"),
   @NamedQuery(
-    name = "User.getByAlias",
-    query = "SELECT u FROM Usr u WHERE :alias MEMBER OF u.aliases"
-  ),
+      name = "User.getByAlias",
+      query = "SELECT u FROM Usr u WHERE :alias MEMBER OF u.aliases"),
   @NamedQuery(name = "User.getByName", query = "SELECT u FROM Usr u WHERE u.name = :name"),
   @NamedQuery(name = "User.getByEmail", query = "SELECT u FROM Usr u WHERE u.email = :email"),
   @NamedQuery(name = "User.getAll", query = "SELECT u FROM Usr u"),
   @NamedQuery(name = "User.getTotalCount", query = "SELECT COUNT(u) FROM Usr u"),
   @NamedQuery(
-    name = "User.getByEmailPart",
-    query = "SELECT u FROM Usr u WHERE LOWER(u.email) LIKE CONCAT('%', :email, '%')"
-  ),
+      name = "User.getByEmailPart",
+      query = "SELECT u FROM Usr u WHERE LOWER(u.email) LIKE CONCAT('%', :email, '%')"),
   @NamedQuery(
-    name = "User.getByEmailPartCount",
-    query = "SELECT COUNT(u) FROM Usr u WHERE LOWER(u.email) LIKE CONCAT('%', :email, '%')"
-  ),
+      name = "User.getByEmailPartCount",
+      query = "SELECT COUNT(u) FROM Usr u WHERE LOWER(u.email) LIKE CONCAT('%', :email, '%')"),
   @NamedQuery(
-    name = "User.getByNamePart",
-    query = "SELECT u FROM Usr u WHERE LOWER(u.name) LIKE CONCAT('%', :name, '%')"
-  ),
+      name = "User.getByNamePart",
+      query = "SELECT u FROM Usr u WHERE LOWER(u.name) LIKE CONCAT('%', :name, '%')"),
   @NamedQuery(
-    name = "User.getByNamePartCount",
-    query = "SELECT COUNT(u) FROM Usr u WHERE LOWER(u.name) LIKE CONCAT('%', :name, '%')"
-  )
+      name = "User.getByNamePartCount",
+      query = "SELECT COUNT(u) FROM Usr u WHERE LOWER(u.name) LIKE CONCAT('%', :name, '%')")
 })
 @Table(name = "usr")
 public class UserImpl implements User {
@@ -80,10 +75,9 @@ public class UserImpl implements User {
   @ElementCollection
   @Column(name = "alias", nullable = false, unique = true)
   @CollectionTable(
-    name = "user_aliases",
-    indexes = @Index(columnList = "alias"),
-    joinColumns = @JoinColumn(name = "user_id")
-  )
+      name = "user_aliases",
+      indexes = @Index(columnList = "alias"),
+      joinColumns = @JoinColumn(name = "user_id"))
   private List<String> aliases;
 
   public UserImpl() {}

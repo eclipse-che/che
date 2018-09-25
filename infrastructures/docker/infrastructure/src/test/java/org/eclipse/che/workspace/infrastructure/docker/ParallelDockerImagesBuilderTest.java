@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -56,10 +57,9 @@ public class ParallelDockerImagesBuilderTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Che container '.*' doesn't have neither build nor image fields"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Che container '.*' doesn't have neither build nor image fields")
   void shouldThrowExceptionWhenNoBuildDataPresent() throws Throwable {
     DockerContainerConfig config = new DockerContainerConfig();
     config.setBuild(new DockerBuildContext());
@@ -68,10 +68,9 @@ public class ParallelDockerImagesBuilderTest {
   }
 
   @Test(
-    expectedExceptions = InfrastructureException.class,
-    expectedExceptionsMessageRegExp =
-        "Try to build a docker machine source with an invalid location/content. It is not in the expected format"
-  )
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Try to build a docker machine source with an invalid location/content. It is not in the expected format")
   void shouldThrowExceptionWhenImageFormatWrong() throws Throwable {
     DockerContainerConfig config = new DockerContainerConfig();
     config.setImage("**/%%");

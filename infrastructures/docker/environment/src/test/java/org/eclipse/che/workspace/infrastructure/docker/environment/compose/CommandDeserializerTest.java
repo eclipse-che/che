@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -23,6 +24,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
@@ -48,6 +50,7 @@ public class CommandDeserializerTest {
   @Mock MachineConfigsValidator machinesValidator;
   @Mock ComposeEnvironmentValidator composeValidator;
   @Mock ComposeServicesStartStrategy startStrategy;
+  @Mock MemoryAttributeProvisioner memoryProvisioner;
 
   private ComposeEnvironmentFactory factory;
 
@@ -60,7 +63,7 @@ public class CommandDeserializerTest {
             machinesValidator,
             composeValidator,
             startStrategy,
-            2048);
+            memoryProvisioner);
   }
 
   private static final String RECIPE_WITHOUT_COMMAND_VALUE =

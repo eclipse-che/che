@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -22,6 +23,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -40,6 +42,7 @@ import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.TimeoutException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -93,6 +96,16 @@ public class PullRequestPluginWithForkTest {
     menu.runCommand(PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
     preferences.generateAndUploadSshKeyOnGithub(githubUserName, githubUserPassword);
+  }
+
+  @AfterClass
+  public void removeTestRepository() {
+    try {
+      new TestGitHubRepository(githubUserName, githubUserPassword, testAuxiliaryRepo.getName())
+          .delete();
+    } catch (IOException e) {
+      // ignore IOException in case of there is no repository to delete
+    }
   }
 
   @Test

@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -19,6 +20,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSe
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -54,6 +57,8 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
+  @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
+  @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -74,7 +79,9 @@ public class OpenShiftEnvironmentProvisionerTest {
             installerServersPortProvisioner,
             logsVolumeMachineProvisioner,
             podTerminationGracePeriodProvisioner,
-            imagePullSecretProvisioner);
+            imagePullSecretProvisioner,
+            proxySettingsProvisioner,
+            serviceAccountProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -87,7 +94,9 @@ public class OpenShiftEnvironmentProvisionerTest {
             restartPolicyRewriter,
             ramLimitProvisioner,
             podTerminationGracePeriodProvisioner,
-            imagePullSecretProvisioner);
+            imagePullSecretProvisioner,
+            proxySettingsProvisioner,
+            serviceAccountProvisioner);
   }
 
   @Test
@@ -109,6 +118,8 @@ public class OpenShiftEnvironmentProvisionerTest {
         .verify(podTerminationGracePeriodProvisioner)
         .provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(imagePullSecretProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

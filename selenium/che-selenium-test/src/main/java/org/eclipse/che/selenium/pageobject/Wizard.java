@@ -1,24 +1,29 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -264,7 +269,7 @@ public class Wizard {
 
   /** wait wizard form is closed */
   public void waitCreateProjectWizardFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, 20)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.CREATE_PROJECT_WIZARD)));
   }
@@ -355,8 +360,13 @@ public class Wizard {
   }
 
   public void waitCloseProjectConfigForm() {
-    new WebDriverWait(seleniumWebDriver, 30)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM_ID)));
+    try {
+      new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+          .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM_ID)));
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10713", ex);
+    }
   }
 
   /** wait parent directory name on the 'Project Configuration' form */
@@ -503,6 +513,14 @@ public class Wizard {
   public void waitArcheTypeDropdawn() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(archetypeDropDown));
+  }
+
+  /** wait for the archetype section in the import widget to be invisible */
+  public void waitInvisibilityOfAchetypeSection() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.invisibilityOfAllElements(singletonList(fromArchetypeChkBox)));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.invisibilityOfAllElements(singletonList(archetypeDropDown)));
   }
 
   public void selectArcheTypeFromList(Archetypes type) {

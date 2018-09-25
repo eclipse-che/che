@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2012-2018 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
@@ -123,6 +124,10 @@ public class Preferences {
         "gwt-debug-preferences-git-contribute-activateByProjectSelection";
     String SHOW_CONTRIBUTE_CHECKBOX_ID =
         "gwt-debug-preferences-git-contribute-activateByProjectSelection-input";
+    String ADD_SCHEMA_URL_BUTTON_ID = "gwt-debug-preferences-addUrl";
+    String ADD_SCHEMA_URL_INPUT_ID = "gwt-debug-askValueDialog-textBox";
+    String DELETE_SCHEMA_BUTTON_XPATH =
+        "//table[@id='gwt-debug-preferences-cellTable-keys']//button";
   }
 
   public interface DropDownListsHeaders {
@@ -136,6 +141,10 @@ public class Preferences {
   public interface DropDownSshKeysMenu {
     String VCS = "VCS";
     String MACHINE = "Machine";
+  }
+
+  public interface DropDownLanguageServerSettings {
+    String YAML = "Yaml";
   }
 
   public interface DropDownGitInformationMenu {
@@ -215,6 +224,15 @@ public class Preferences {
 
   @FindBy(id = Locators.SHOW_CONTRIBUTE_CHECKBOX_ID)
   private WebElement showContributeCheckbox;
+
+  @FindBy(id = Locators.ADD_SCHEMA_URL_BUTTON_ID)
+  private WebElement addSchemaUrlButton;
+
+  @FindBy(id = Locators.ADD_SCHEMA_URL_INPUT_ID)
+  private WebElement addSchemaUrlInput;
+
+  @FindBy(xpath = Locators.DELETE_SCHEMA_BUTTON_XPATH)
+  private WebElement deleteSchemaButton;
 
   /** wait preferences form */
   public void waitPreferencesForm() {
@@ -309,6 +327,22 @@ public class Preferences {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOf(generateKeyBtn))
         .click();
+  }
+
+  public void clickOnAddSchemaUrlButton() {
+    webDriverHelper.waitAndClick(addSchemaUrlButton);
+  }
+
+  public void addSchemaUrl(String schemaName) {
+    webDriverHelper.waitVisibility(addSchemaUrlInput);
+    addSchemaUrlInput.sendKeys(schemaName);
+    webDriverHelper.waitAndClick(By.id("askValue-dialog-ok"));
+  }
+
+  public void deleteSchema() {
+    webDriverHelper.waitAndClick(deleteSchemaButton);
+    askDialog.clickOkBtn();
+    askDialog.waitFormToClose();
   }
 
   public void clickOnGenerateAndUploadToGitHub() {
