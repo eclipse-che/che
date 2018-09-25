@@ -18,6 +18,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -40,6 +41,7 @@ public class TheiaStackTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TheiaTerminal theiaTerminal;
+  @Inject private CheTerminal cheTerminal;
 
   @BeforeClass
   public void prepare() {
@@ -59,5 +61,6 @@ public class TheiaStackTest {
   @Test
   public void testing() {
     int i = 0;
+    cheTerminal.getVisibleTextFromTerminal(1);
   }
 }
