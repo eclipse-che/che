@@ -55,6 +55,8 @@ public class YamlFileEditingTest {
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
       format("Finished language servers initialization, file path '/%s'", PATH_TO_YAML_FILE);
+  private static final List<String> EXPECTED_GO_TO_SYMBOL_ALTERNATIVES =
+      Arrays.asList("apiVersionsymbols (194)", "kind", "metadata");
 
   private static final String COMMENTED_CODE =
       "#  generation: 4\n"
@@ -68,7 +70,6 @@ public class YamlFileEditingTest {
           + "    app: che\n"
           + "    template: che\n"
           + "  name: che";
-  private List<String> symbols = Arrays.asList("apiVersionsymbols (194)", "kind", "metadata");
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS_YAML)
   private TestWorkspace workspace;
@@ -237,7 +238,7 @@ public class YamlFileEditingTest {
     // check list for expected items
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
-    assistantFindPanel.waitAllNodes(symbols);
+    assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_ALTERNATIVES);
 
     // open item by mouse click
     assistantFindPanel.clickOnActionNodeWithText("apiVersion");
