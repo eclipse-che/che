@@ -40,7 +40,9 @@ public class ApacheCamelFileEditingTest {
   private static final String PATH_TO_CAMEL_FILE = PROJECT_NAME + "/" + CAMEL_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
       format("Finished language servers initialization, file path '/%s'", PATH_TO_CAMEL_FILE);
-  private static final String[] GO_TO_SYMBOL_EXPECTED_TEXT = {"<no id>symbols (2)", "<no id>"};
+  private static final String[] EXPECTED_GO_TO_SYMBOL_ALTERNATIVES = {
+    "<no id>symbols (2)", "<no id>"
+  };
 
   @InjectTestWorkspace(template = APACHE_CAMEL)
   private TestWorkspace workspace;
@@ -122,7 +124,7 @@ public class ApacheCamelFileEditingTest {
     // select the item by click
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
-    assistantFindPanel.waitAllNodes(GO_TO_SYMBOL_EXPECTED_TEXT);
+    assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_ALTERNATIVES);
     assistantFindPanel.clickOnActionNodeWithText("<no id>symbols (2)");
     assistantFindPanel.waitFormIsClosed();
     editor.waitCursorPosition(49, 12);
