@@ -971,6 +971,11 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitCodeAssistMarkers(MarkerLocator markerLocator) {
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> waitMarkers(markerLocator), StaleElementReferenceException.class);
+  }
+
+  private void waitMarkers(MarkerLocator markerLocator) {
     seleniumWebDriverHelper.waitVisibilityOfAllElements(
         By.xpath(markerLocator.get()), ELEMENT_TIMEOUT_SEC);
   }
