@@ -591,7 +591,7 @@ public class JavaLanguageServerExtensionService {
   }
 
   public ImplementersResponseDto findImplementers(TextDocumentPositionParams params) {
-    params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
+    params.getTextDocument().setUri(fixJdtUri(params.getTextDocument().getUri()));
     CompletableFuture<Object> result =
         executeCommand(FIND_IMPLEMENTERS_COMMAND, singletonList(params));
 
