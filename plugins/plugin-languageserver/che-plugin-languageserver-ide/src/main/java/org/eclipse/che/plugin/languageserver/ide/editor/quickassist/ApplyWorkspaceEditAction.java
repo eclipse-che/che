@@ -52,6 +52,7 @@ import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.editor.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
@@ -91,6 +92,8 @@ public class ApplyWorkspaceEditAction extends BaseAction {
   private NotificationManager notificationManager;
   private PromiseProvider promiseProvider;
 
+  private EditorFileStatusNotificationOperation fileStatusNotifier;
+
   @Inject
   public ApplyWorkspaceEditAction(
       EditorAgent editorAgent,
@@ -105,7 +108,8 @@ public class ApplyWorkspaceEditAction extends BaseAction {
       TextDocumentServiceClient textDocumentService,
       LanguageServerLocalization localization,
       NotificationManager notificationManager,
-      PromiseProvider promiseProvider) {
+      PromiseProvider promiseProvider,
+      EditorFileStatusNotificationOperation fileStatusNotifier) {
     this.editorAgent = editorAgent;
     this.dtoFactory = dtoFactory;
     this.dtoHelper = dtoHelper;
@@ -119,6 +123,7 @@ public class ApplyWorkspaceEditAction extends BaseAction {
     this.localization = localization;
     this.notificationManager = notificationManager;
     this.promiseProvider = promiseProvider;
+    this.fileStatusNotifier = fileStatusNotifier;
   }
 
   @Override
@@ -152,6 +157,7 @@ public class ApplyWorkspaceEditAction extends BaseAction {
                       TextDocumentEdit::getEdits));
     }
 
+    fileStatusNotifier.suspend();
     Promise<Void> done =
         promiseHelper.forEach(
             changes.entrySet().iterator(),
@@ -185,6 +191,10 @@ public class ApplyWorkspaceEditAction extends BaseAction {
                         }
                       });
             })
+        .then(
+            (nul) -> {
+              fileStatusNotifier.resume();
+            })
         .catchError(
             (error) -> {
               Log.info(getClass(), "caught error applying changes", error);
@@ -193,17 +203,23 @@ public class ApplyWorkspaceEditAction extends BaseAction {
               promiseHelper
                   .forEach(undos.iterator(), Supplier::get, (Void v) -> {})
                   .then(
-                      (Void v) ->
-                          notification.setContent(
-                              localization.applyWorkspaceActionNotificationUndone()))
+                      (nul) -> {
+                        notification.setContent(
+                            localization.applyWorkspaceActionNotificationUndone());
+                      })
+                  .then(
+                      (nul) -> {
+                        fileStatusNotifier.resume();
+                      })
                   .catchError(
                       e -> {
+                        fileStatusNotifier.resume();
                         Log.info(getClass(), "Error undoing changes", e);
                         notification.setContent(
                             localization.applyWorkspaceActionNotificationUndoFailed());
                       });
             });
-  }
+  };
 
   private Promise<Void> deleteResouce(Path oldPath) {
     return projectService.deleteItem(oldPath);
@@ -413,8 +429,8 @@ public class ApplyWorkspaceEditAction extends BaseAction {
       Position end = r.getEnd();
       int startIndex =
           document.getIndexFromPosition(new TextPosition(start.getLine(), start.getCharacter()));
-      // python ls, for example shows as end position index 0 of the line after the change. If the
-      // change is on the last line, we crash
+      // python ls, for example shows as end position index 0 of the line after the
+      // change. If the change is on the last line, we crash
       int endIndex =
           document.getIndexFromPosition(new TextPosition(end.getLine(), end.getCharacter()));
       if (endIndex < 0) {
