@@ -58,7 +58,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       KubernetesEnvironmentProvisioner<E> environmentProvisioner,
       WorkspaceVolumesStrategy volumesStrategy,
       BrokerEnvironmentFactory<E> brokerEnvironmentConfig,
-      @Named("che.infra.kubernetes.plugin_broker_wait_timeout_min")
+      @Named("che.workspace.plugin_broker.wait_timeout_min")
           int pluginBrokerWaitingTimeout) {
     this.factory = factory;
     this.eventService = eventService;
