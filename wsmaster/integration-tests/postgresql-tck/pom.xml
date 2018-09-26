@@ -165,11 +165,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-machine-authentication</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>javax.persistence</artifactId>
             <scope>test</scope>
@@ -237,7 +232,6 @@
                                     che-core-api-ssh,
                                     che-core-api-workspace,
                                     che-core-api-installer,
-                                    che-multiuser-machine-authentication,
                                     infrastructure-kubernetes</includeArtifactIds>
                             <includeScope>test</includeScope>
                             <includeClassifiers>tests</includeClassifiers>
