@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -131,11 +132,11 @@ public class FileStructureNodesTest {
           + "getId() : double\n"
           + "FIVE\n";
 
-  @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
+  @Inject private TestWorkspace workspace;
   @Inject private FileStructure fileStructure;
+  @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -177,42 +178,45 @@ public class FileStructureNodesTest {
     // check work nodes in the 'file structure' by double click
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
+
+    // open and close nodes by click
+    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+
+    // open and close nodes by double click
     fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
+    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+
+    // close and open root node
+    fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
+    fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+    fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
+    fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
 
-    // check work nodes in the 'file structure' by click on the icon
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
-    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
 
     fileStructure.closeFileStructureFormByEscape();
     fileStructure.waitFileStructureFormIsClosed();

@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
@@ -124,7 +125,7 @@ public class FileStructure {
    * @param nameNode is name
    */
   public void clickOnIconNodeInFileStructure(String nameNode) {
-    WaitUtils.sleepQuietly(1);
+    WaitUtils.sleepQuietly(500, MILLISECONDS);
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode)));
   }
@@ -135,7 +136,7 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByDoubleClick(String item) {
-    selectItemInFileStructure(item);
+    WaitUtils.sleepQuietly(500, MILLISECONDS);
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(getFileStructureItem(item));
   }
 
