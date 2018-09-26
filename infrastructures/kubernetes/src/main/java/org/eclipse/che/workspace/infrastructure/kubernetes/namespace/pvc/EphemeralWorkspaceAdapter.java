@@ -35,7 +35,15 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
-/** @author Ilya Buziuk (ibuziuk) */
+/**
+ * Allows to create ephemeral workspaces (with no PVC attached) based on workspace config
+ * `mountSources` attribute. If `mountSources` attribute is set to false, workspace volumes would be
+ * created as `emptyDir` regardless of the PVC strategy. When a workspace Pod is removed for any
+ * reason, the data in the `emptyDir` volume is deleted forever.
+ *
+ * @see <a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a>
+ * @author Ilya Buziuk
+ */
 @Singleton
 public class EphemeralWorkspaceAdapter {
   private final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
