@@ -25,18 +25,20 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
+/** @author Ilya Buziuk (ibuziuk) */
 @Singleton
 public class EphemeralWorkspaceAdapter {
+  private final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
   private WorkspaceManager workspaceManager;
 
   @Inject
@@ -46,18 +48,33 @@ public class EphemeralWorkspaceAdapter {
 
   /**
    * @param workspaceId
-   * @return true if workspace config contains `mountSources` attribute which is set to false
+   * @return true if workspace config contains `mountSources` attribute which is set to false. In
+   *     this case regardless of the PVC strategy, workspace volumes would be created as `emptyDir`.
+   *     When a workspace Pod is removed for any reason, the data in the `emptyDir` volume is
+   *     deleted forever
    * @throws InternalInfrastructureException
    */
   public boolean isEphemeral(String workspaceId) throws InternalInfrastructureException {
     try {
       WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
-      String mountSources = workspace.getConfig().getAttributes().get(MOUNT_SOURCES_ATTRIBUTE);
-      return "false".equals(mountSources);
+      return isEphemeral(workspace);
     } catch (NotFoundException | ServerException e) {
       throw new InternalInfrastructureException(
           "Failed to load workspace info" + e.getMessage(), e);
     }
+  }
+
+  /**
+   * @param workspace
+   * @return true if workspace config contains `mountSources` attribute which is set to false. In
+   *     this case regardless of the PVC strategy, workspace volumes would be created as `emptyDir`.
+   *     When a workspace Pod is removed for any reason, the data in the `emptyDir` volume is
+   *     deleted forever
+   * @throws InternalInfrastructureException
+   */
+  public boolean isEphemeral(Workspace workspace) {
+    String mountSources = workspace.getConfig().getAttributes().get(MOUNT_SOURCES_ATTRIBUTE);
+    return "false".equals(mountSources);
   }
 
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
@@ -66,7 +83,6 @@ public class EphemeralWorkspaceAdapter {
       PodSpec podSpec = pod.getSpec();
       for (Container container : podSpec.getContainers()) {
         String machineName = Names.machineName(pod, container);
-        InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
         Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
         addMachineVolumes(identity.getWorkspaceId(), pod, container, volumes);
       }
@@ -87,32 +103,31 @@ public class EphemeralWorkspaceAdapter {
               ? volumeEntry.getKey() + '-' + pod.getMetadata().getName()
               : volumeEntry.getKey();
 
-      final String uniqueVolumeMountName = Names.generateName("ephemeral-");
+      final String uniqueVolumeName = Names.generateName(EPHEMERAL_VOLUME_NAME_PREFIX);
 
-      // binds pvc to pod and container
+      // binds volume to pod and container
       container
           .getVolumeMounts()
           .add(
               newVolumeMount(
-                  uniqueVolumeMountName,
+                  uniqueVolumeName,
                   volumePath,
                   getSubPath(workspaceId, volumeName, Names.machineName(pod, container))));
-      addEmptyDirVolumeIfAbsent(pod.getSpec(), uniqueVolumeMountName);
+      addEmptyDirVolumeIfAbsent(pod.getSpec(), uniqueVolumeName);
     }
   }
 
-  private void addEmptyDirVolumeIfAbsent(PodSpec podSpec, String uniqueVolumeMountName) {
+  private void addEmptyDirVolumeIfAbsent(PodSpec podSpec, String uniqueVolumeName) {
     if (podSpec
         .getVolumes()
         .stream()
-        .noneMatch(volume -> volume.getName().equals(uniqueVolumeMountName))) {
+        .noneMatch(volume -> volume.getName().equals(uniqueVolumeName))) {
       podSpec
           .getVolumes()
           .add(
               new VolumeBuilder()
-                  .withName(uniqueVolumeMountName)
+                  .withName(uniqueVolumeName)
                   .withNewEmptyDir()
-                  .withMedium("Memory")
                   .endEmptyDir()
                   .build());
     }

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
-import static org.eclipse.che.api.workspace.shared.Constants.MOUNT_SOURCES_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -22,10 +21,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -45,11 +41,10 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class WorkspacePVCCleanerTest {
 
-  private static final String WORKSPACE_ID = "workspace132";
-
   @Mock private WorkspaceVolumesStrategy pvcStrategy;
   @Mock private EventService eventService;
   @Mock private KubernetesNamespaceFactory namespaceFactory;
+  @Mock private Workspace workspace;
 
   private WorkspacePVCCleaner workspacePVCCleaner;
 
@@ -92,12 +87,7 @@ public class WorkspacePVCCleanerTest {
               final EventSubscriber<WorkspaceRemovedEvent> argument =
                   invocationOnMock.getArgument(0);
               final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              final Workspace removed = mock(Workspace.class);
-              final WorkspaceConfig config = mock(WorkspaceConfig.class);
-              when(event.getWorkspace()).thenReturn(removed);
-              when(removed.getId()).thenReturn(WORKSPACE_ID);
-              when(removed.getConfig()).thenReturn(config);
-              when(removed.getConfig().getAttributes()).thenReturn(Collections.emptyMap());
+              when(event.getWorkspace()).thenReturn(workspace);
               argument.onEvent(event);
               return invocationOnMock;
             })
@@ -106,7 +96,7 @@ public class WorkspacePVCCleanerTest {
 
     workspacePVCCleaner.subscribe(eventService);
 
-    verify(pvcStrategy).cleanup(WORKSPACE_ID);
+    verify(pvcStrategy).cleanup(workspace);
   }
 
   @Test
@@ -116,70 +106,16 @@ public class WorkspacePVCCleanerTest {
               final EventSubscriber<WorkspaceRemovedEvent> argument =
                   invocationOnMock.getArgument(0);
               final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              final Workspace removed = mock(Workspace.class);
-              final WorkspaceConfig config = mock(WorkspaceConfig.class);
-              when(event.getWorkspace()).thenReturn(removed);
-              when(removed.getId()).thenReturn(WORKSPACE_ID);
-              when(removed.getConfig()).thenReturn(config);
-              when(removed.getConfig().getAttributes()).thenReturn(Collections.emptyMap());
+              when(event.getWorkspace()).thenReturn(workspace);
               argument.onEvent(event);
               return invocationOnMock;
             })
         .when(eventService)
         .subscribe(any(), eq(WorkspaceRemovedEvent.class));
-    doThrow(InfrastructureException.class).when(pvcStrategy).cleanup(WORKSPACE_ID);
+    doThrow(InfrastructureException.class).when(pvcStrategy).cleanup(workspace);
 
     workspacePVCCleaner.subscribe(eventService);
 
-    verify(pvcStrategy).cleanup(WORKSPACE_ID);
-  }
-
-  @Test
-  public void testDoNotInvokeCleanupIfMountSourcesAttributeSetToFalse()
-      throws InfrastructureException {
-    doAnswer(
-            invocationOnMock -> {
-              final EventSubscriber<WorkspaceRemovedEvent> argument =
-                  invocationOnMock.getArgument(0);
-              final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              final Workspace removed = mock(Workspace.class);
-              final WorkspaceConfig config = mock(WorkspaceConfig.class);
-              Map<String, String> attributes =
-                  Collections.singletonMap(MOUNT_SOURCES_ATTRIBUTE, "false");
-              when(event.getWorkspace()).thenReturn(removed);
-              when(removed.getId()).thenReturn(WORKSPACE_ID);
-              when(removed.getConfig()).thenReturn(config);
-              when(removed.getConfig().getAttributes()).thenReturn(attributes);
-              argument.onEvent(event);
-              return invocationOnMock;
-            })
-        .when(eventService)
-        .subscribe(any(), eq(WorkspaceRemovedEvent.class));
-    workspacePVCCleaner.subscribe(eventService);
-    verify(pvcStrategy, never()).cleanup(WORKSPACE_ID);
-  }
-
-  @Test
-  public void testDoInvokeCleanupIfMountSourcesAttributeSetToTrue() throws InfrastructureException {
-    doAnswer(
-            invocationOnMock -> {
-              final EventSubscriber<WorkspaceRemovedEvent> argument =
-                  invocationOnMock.getArgument(0);
-              final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              final Workspace removed = mock(Workspace.class);
-              final WorkspaceConfig config = mock(WorkspaceConfig.class);
-              Map<String, String> attributes =
-                  Collections.singletonMap(MOUNT_SOURCES_ATTRIBUTE, "true");
-              when(event.getWorkspace()).thenReturn(removed);
-              when(removed.getId()).thenReturn(WORKSPACE_ID);
-              when(removed.getConfig()).thenReturn(config);
-              when(removed.getConfig().getAttributes()).thenReturn(attributes);
-              argument.onEvent(event);
-              return invocationOnMock;
-            })
-        .when(eventService)
-        .subscribe(any(), eq(WorkspaceRemovedEvent.class));
-    workspacePVCCleaner.subscribe(eventService);
-    verify(pvcStrategy).cleanup(WORKSPACE_ID);
+    verify(pvcStrategy).cleanup(workspace);
   }
 }

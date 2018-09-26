@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -100,53 +101,58 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     final String workspaceId = identity.getWorkspaceId();
     if (ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
-    } else {
-      final Set<String> subPaths = new HashSet<>();
-      final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
-      k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
-      for (Pod pod : k8sEnv.getPods().values()) {
-        PodSpec podSpec = pod.getSpec();
-        for (Container container : podSpec.getContainers()) {
-          String machineName = Names.machineName(pod, container);
-          InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
-          addMachineVolumes(workspaceId, subPaths, pod, container, machineConfig.getVolumes());
-        }
+      return;
+    }
+    final Set<String> subPaths = new HashSet<>();
+    final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
+    k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
+    for (Pod pod : k8sEnv.getPods().values()) {
+      PodSpec podSpec = pod.getSpec();
+      for (Container container : podSpec.getContainers()) {
+        String machineName = Names.machineName(pod, container);
+        InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
+        addMachineVolumes(workspaceId, subPaths, pod, container, machineConfig.getVolumes());
       }
-      if (preCreateDirs && !subPaths.isEmpty()) {
-        pvc.setAdditionalProperty(
-            format(SUBPATHS_PROPERTY_FMT, workspaceId),
-            subPaths.toArray(new String[subPaths.size()]));
-      }
+    }
+    if (preCreateDirs && !subPaths.isEmpty()) {
+      pvc.setAdditionalProperty(
+          format(SUBPATHS_PROPERTY_FMT, workspaceId),
+          subPaths.toArray(new String[subPaths.size()]));
     }
   }
 
   @Override
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
       throws InfrastructureException {
-    if (!ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
-      final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
-      if (!claims.isEmpty()) {
-        final KubernetesNamespace namespace = factory.create(workspaceId);
-        final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
-        final Set<String> existing =
-            pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
-        for (PersistentVolumeClaim pvc : claims) {
-          final String[] subpaths =
-              (String[])
-                  pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
-          if (!existing.contains(pvc.getMetadata().getName())) {
-            pvcs.create(pvc);
-          }
-          if (preCreateDirs && subpaths != null) {
-            pvcSubPathHelper.createDirs(workspaceId, subpaths);
-          }
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
+      return;
+    }
+    final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
+    if (!claims.isEmpty()) {
+      final KubernetesNamespace namespace = factory.create(workspaceId);
+      final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
+      final Set<String> existing =
+          pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
+      for (PersistentVolumeClaim pvc : claims) {
+        final String[] subpaths =
+            (String[])
+                pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
+        if (!existing.contains(pvc.getMetadata().getName())) {
+          pvcs.create(pvc);
+        }
+        if (preCreateDirs && subpaths != null) {
+          pvcSubPathHelper.createDirs(workspaceId, subpaths);
         }
       }
     }
   }
 
   @Override
-  public void cleanup(String workspaceId) throws InfrastructureException {
+  public void cleanup(Workspace workspace) throws InfrastructureException {
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspace)) {
+      return;
+    }
+    String workspaceId = workspace.getId();
     pvcSubPathHelper.removeDirsAsync(workspaceId, getWorkspaceSubPath(workspaceId));
   }
 
@@ -172,7 +178,6 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
   private void addVolumeIfNeeded(PodSpec podSpec) {
     if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcName))) {
-
       podSpec.getVolumes().add(newVolume(pvcName, pvcName));
     }
   }

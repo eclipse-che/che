@@ -95,7 +95,8 @@ public final class Constants {
    * OpenShift infrastructure. Should be set/read from {@link WorkspaceConfig#getAttributes}.
    *
    * <p>Value is expected to be boolean, and if set to 'false' regardless of the PVC strategy,
-   * workspace volumes would be created as `emptyDir`
+   * workspace volumes would be created as `emptyDir`. When a workspace Pod is removed for any
+   * reason, the data in the `emptyDir` volume is deleted forever
    *
    * @see <a
    *     href="https://www.eclipse.org/che/docs/kubernetes-admin-guide.html#che-workspaces-storage">Che

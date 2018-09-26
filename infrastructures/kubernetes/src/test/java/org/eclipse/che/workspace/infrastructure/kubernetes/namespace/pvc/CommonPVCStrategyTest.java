@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -96,6 +97,7 @@ public class CommonPVCStrategyTest {
   @Mock private KubernetesNamespaceFactory factory;
   @Mock private KubernetesNamespace k8sNamespace;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
+  @Mock private Workspace workspace;
   @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   private CommonPVCStrategy commonPVCStrategy;
@@ -158,6 +160,7 @@ public class CommonPVCStrategyTest {
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
+    when(workspace.getId()).thenReturn(WORKSPACE_ID);
   }
 
   @Test
@@ -272,7 +275,7 @@ public class CommonPVCStrategyTest {
 
   @Test
   public void testCleanup() throws Exception {
-    commonPVCStrategy.cleanup(WORKSPACE_ID);
+    commonPVCStrategy.cleanup(workspace);
 
     verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, WORKSPACE_ID);
   }

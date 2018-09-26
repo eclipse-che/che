@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -90,22 +91,22 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     final String workspaceId = identity.getWorkspaceId();
     if (ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
-    } else {
-      final Map<String, PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims();
-      // fetches all existing PVCs related to given workspace and groups them by volume name
-      final Map<String, PersistentVolumeClaim> volumeName2PVC =
-          groupByVolumeName(
-              factory
-                  .create(workspaceId)
-                  .persistentVolumeClaims()
-                  .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId));
-      for (Pod pod : k8sEnv.getPods().values()) {
-        final PodSpec podSpec = pod.getSpec();
-        for (Container container : podSpec.getContainers()) {
-          final String machineName = Names.machineName(pod, container);
-          Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
-          addMachineVolumes(workspaceId, claims, volumeName2PVC, pod, container, volumes);
-        }
+      return;
+    }
+    final Map<String, PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims();
+    // fetches all existing PVCs related to given workspace and groups them by volume name
+    final Map<String, PersistentVolumeClaim> volumeName2PVC =
+        groupByVolumeName(
+            factory
+                .create(workspaceId)
+                .persistentVolumeClaims()
+                .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId));
+    for (Pod pod : k8sEnv.getPods().values()) {
+      final PodSpec podSpec = pod.getSpec();
+      for (Container container : podSpec.getContainers()) {
+        final String machineName = Names.machineName(pod, container);
+        Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
+        addMachineVolumes(workspaceId, claims, volumeName2PVC, pod, container, volumes);
       }
     }
   }
@@ -113,13 +114,14 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   @Override
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
       throws InfrastructureException {
-    if (!ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
-      if (!k8sEnv.getPersistentVolumeClaims().isEmpty()) {
-        final KubernetesPersistentVolumeClaims k8sClaims =
-            factory.create(workspaceId).persistentVolumeClaims();
-        for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
-          k8sClaims.create(pvc);
-        }
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspaceId)) {
+      return;
+    }
+    if (!k8sEnv.getPersistentVolumeClaims().isEmpty()) {
+      final KubernetesPersistentVolumeClaims k8sClaims =
+          factory.create(workspaceId).persistentVolumeClaims();
+      for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
+        k8sClaims.create(pvc);
       }
     }
   }
@@ -175,7 +177,11 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
-  public void cleanup(String workspaceId) throws InfrastructureException {
+  public void cleanup(Workspace workspace) throws InfrastructureException {
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspace)) {
+      return;
+    }
+    String workspaceId = workspace.getId();
     factory
         .create(workspaceId)
         .persistentVolumeClaims()

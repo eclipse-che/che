@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -47,8 +48,8 @@ public interface WorkspaceVolumesStrategy extends ConfigurationProvisioner {
   /**
    * Cleanups workspace backed up data in a strategy specific way.
    *
-   * @param workspaceId the workspace identifier for which cleanup will be performed
+   * @param workspace the workspace for which cleanup will be performed
    * @throws InfrastructureException when any error while cleanup occurs
    */
-  void cleanup(String workspaceId) throws InfrastructureException;
+  void cleanup(Workspace workspace) throws InfrastructureException;
 }
