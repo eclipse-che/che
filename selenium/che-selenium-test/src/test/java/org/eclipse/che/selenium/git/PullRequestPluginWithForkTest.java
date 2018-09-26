@@ -106,6 +106,11 @@ public class PullRequestPluginWithForkTest {
     }
   }
 
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
+  }
+
   @Test
   public void createPullRequest() throws Exception {
     // import project

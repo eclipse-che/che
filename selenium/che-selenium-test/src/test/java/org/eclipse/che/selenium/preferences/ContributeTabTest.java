@@ -14,10 +14,7 @@ package org.eclipse.che.selenium.preferences;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ToolWindows.CONTRIBUTE_TOOL_WIDOWS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ToolWindows.TOOL_WINDOWS;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
 import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_RIGHT_BOTTOM_ID;
-import static org.eclipse.che.selenium.pageobject.Preferences.DropDownGitInformationMenu.CONTRIBUTE_PREFERENCES;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -28,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -40,16 +38,13 @@ import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.eclipse.che.selenium.refactor.move.MoveItemsTest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class ContributeTabTest {
-  private static final Logger LOG = LoggerFactory.getLogger(MoveItemsTest.class);
   private static final String FIRST_PROJECT_NAME = "first-vcs-project";
   private static final String SECOND_PROJECT_NAME = "second-vcs-project";
   private static final String THIRD_PROJECT_NAME = "not-vcs-project";
@@ -75,6 +70,7 @@ public class ContributeTabTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private PanelSelector panelSelector;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -108,6 +104,13 @@ public class ContributeTabTest {
     }
 
     preferences.waitPreferencesFormIsClosed();
+    preferences.openContributeTab();
+    preferences.setStateContributeChecboxAndCloseForm(true);
+  }
+
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
   }
 
   @Test
@@ -132,14 +135,14 @@ public class ContributeTabTest {
     pullRequestPanel.waitTextNotVcsProject(EXP_TEXT_NOT_VCS);
 
     // check the 'Contribute' checkbox is true by default
-    openContributeTab();
+    preferences.openContributeTab();
     preferences.waitContributeCheckboxIsSelected();
-    preferences.closeForm();
+    preferences.close();
   }
 
   @Test(priority = 1)
   public void checkRefreshAndSaveButton() {
-    openContributeTab();
+    preferences.openContributeTab();
 
     preferences.setContributeCheckbox(true);
     preferences.clickOnOkBtn();
@@ -157,19 +160,19 @@ public class ContributeTabTest {
 
     assertFalse(preferences.isSaveButtonIsEnabled());
 
-    preferences.closeForm();
+    preferences.close();
   }
 
   @Test(priority = 1)
   public void checkSwitchProjectsWhenContributeIsFalse() {
-    openContributeTab();
-    setStateContributeChecboxAndCloseForm(true);
+    preferences.openContributeTab();
+    preferences.setStateContributeChecboxAndCloseForm(true);
 
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
 
-    openContributeTab();
-    setStateContributeChecboxAndCloseForm(false);
+    preferences.openContributeTab();
+    preferences.setStateContributeChecboxAndCloseForm(false);
 
     // switch between projects
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
@@ -186,8 +189,8 @@ public class ContributeTabTest {
 
   @Test(priority = 1)
   public void checkAutomaticChangeContributeToFalse() {
-    openContributeTab();
-    setStateContributeChecboxAndCloseForm(true);
+    preferences.openContributeTab();
+    preferences.setStateContributeChecboxAndCloseForm(true);
 
     // change 'Contribute' to false by 'Hide' button
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
@@ -195,11 +198,11 @@ public class ContributeTabTest {
     pullRequestPanel.closePanelByHideButton();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose(NOTIFICATION_MESSAGE);
 
-    openContributeTab();
+    preferences.openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();
 
     // change 'Contribute' to false by 'Hide' from 'Options' on the PR panel
-    setStateContributeChecboxAndCloseForm(true);
+    preferences.setStateContributeChecboxAndCloseForm(true);
 
     projectExplorer.waitAndSelectItem(SECOND_PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
@@ -207,11 +210,11 @@ public class ContributeTabTest {
     pullRequestPanel.closePanelFromContextMenu();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose(NOTIFICATION_MESSAGE);
 
-    openContributeTab();
+    preferences.openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();
 
     // change 'Contribute' to false by 'Contribute' action from 'Assistant'
-    setStateContributeChecboxAndCloseForm(true);
+    preferences.setStateContributeChecboxAndCloseForm(true);
 
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
@@ -220,15 +223,15 @@ public class ContributeTabTest {
     menu.runCommand(ASSISTANT, TOOL_WINDOWS, CONTRIBUTE_TOOL_WIDOWS);
     pullRequestPanel.waitClosePanel();
 
-    openContributeTab();
+    preferences.openContributeTab();
     preferences.waitContributeCheckboxIsNotSelected();
-    preferences.closeForm();
+    preferences.close();
   }
 
   @Test(priority = 1)
   public void checkDirectAccessToContributeTab() {
-    openContributeTab();
-    setStateContributeChecboxAndCloseForm(false);
+    preferences.openContributeTab();
+    preferences.setStateContributeChecboxAndCloseForm(false);
 
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     pullRequestPanel.waitClosePanel();
@@ -255,8 +258,8 @@ public class ContributeTabTest {
 
   @Test(priority = 1)
   public void checkHidingPrPanelWhenProjectExplorerIsMaximized() {
-    openContributeTab();
-    setStateContributeChecboxAndCloseForm(true);
+    preferences.openContributeTab();
+    preferences.setStateContributeChecboxAndCloseForm(true);
 
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
@@ -269,18 +272,5 @@ public class ContributeTabTest {
 
     projectExplorer.clickOnMaximizeButton();
     pullRequestPanel.waitOpenPanel();
-  }
-
-  private void setStateContributeChecboxAndCloseForm(boolean state) {
-    preferences.setContributeCheckbox(state);
-    preferences.clickOnOkBtn();
-    preferences.closeForm();
-  }
-
-  private void openContributeTab() {
-    menu.runCommand(PROFILE_MENU, PREFERENCES);
-    preferences.waitPreferencesForm();
-    preferences.waitMenuInCollapsedDropdown(CONTRIBUTE_PREFERENCES);
-    preferences.selectDroppedMenuByName(CONTRIBUTE_PREFERENCES);
   }
 }

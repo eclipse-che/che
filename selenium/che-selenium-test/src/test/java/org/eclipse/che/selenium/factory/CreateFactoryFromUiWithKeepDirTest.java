@@ -26,6 +26,7 @@ import java.io.IOException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -84,6 +85,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -91,9 +93,14 @@ public class CreateFactoryFromUiWithKeepDirTest {
   }
 
   @AfterClass
-  public void tearDown() throws Exception {
+  public void deleteFactoryRelatedStaff() throws Exception {
     workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
     factoryServiceClient.deleteFactory(FACTORY_NAME);
+  }
+
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
   }
 
   @Test

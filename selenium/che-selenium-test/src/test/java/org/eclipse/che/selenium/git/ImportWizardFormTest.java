@@ -139,7 +139,7 @@ public class ImportWizardFormTest {
       preferences.deleteSshKeyByHost(GITHUB_COM);
     }
 
-    preferences.closeForm();
+    preferences.close();
   }
 
   @AfterMethod

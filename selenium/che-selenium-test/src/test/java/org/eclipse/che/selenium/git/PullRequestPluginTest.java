@@ -122,7 +122,7 @@ public class PullRequestPluginTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private ImportProjectFromLocation importWidget;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
@@ -164,11 +164,16 @@ public class PullRequestPluginTest {
   }
 
   @AfterClass
-  public void tearDown() throws Exception {
-    workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
+  public void deleteFactoryWorkspace() throws Exception {
+    testWorkspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
   }
 
-  @Test()
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
+  }
+
+  @Test
   public void switchingBetweenProjects() {
     projectExplorer.waitItem(FIRST_PROJECT_NAME);
     projectExplorer.waitAndSelectItem(FIRST_PROJECT_NAME);
