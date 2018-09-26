@@ -93,7 +93,7 @@ public class FindUsagesBaseOperationTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
 
-    // check basic operations of the 'find usages' panel
+    // Check basic operations of the FindUsages panel
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(27, 17);
     menu.runCommand(ASSISTANT, FIND_USAGES);
