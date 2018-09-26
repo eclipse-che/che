@@ -15,7 +15,9 @@ import static java.lang.String.format;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
@@ -109,6 +111,7 @@ public class FindUsages {
   public void clickOnIconNodeInFindUsagesPanel(String nameNode) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.FIND_USAGES_ICON_NODE, nameNode)));
+    WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -119,6 +122,7 @@ public class FindUsages {
   public void selectNodeInFindUsagesByDoubleClick(String node) {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
         By.xpath(format(Locators.FIND_USAGES_NODE, node)));
+    WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
   }
 
   /**
