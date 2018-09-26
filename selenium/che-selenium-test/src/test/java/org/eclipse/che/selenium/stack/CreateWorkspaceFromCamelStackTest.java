@@ -13,17 +13,16 @@ package org.eclipse.che.selenium.stack;
 
 import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.BUILD_COMMAND;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import java.net.URL;
-import java.nio.file.Paths;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -37,9 +36,11 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceFromCamelStackTest {
 
   private static final String WORKSPACE_NAME = generate("workspaceCamel", 4);
-  private static final String PROJECT_NAME = "project-for-camel-ls";
-  private static final String CAMEL_FILE_NAME = "camel.xml";
-  private static final String PATH_TO_CAMEL_FILE = PROJECT_NAME + "/" + CAMEL_FILE_NAME;
+  private static final String PROJECT_NAME = "spring-boot-camel-xml";
+  private List<String> projects = ImmutableList.of(PROJECT_NAME);
+  private static final String CAMEL_FILE_NAME = "camel-context.xml";
+  private static final String PATH_TO_CAMEL_FILE =
+      PROJECT_NAME + "/src/main/resources/spring/" + CAMEL_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
       format("Finished language servers initialization, file path '/%s'", PATH_TO_CAMEL_FILE);
 
@@ -51,7 +52,6 @@ public class CreateWorkspaceFromCamelStackTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private Consoles consoles;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
   public void setUp() {
@@ -65,24 +65,28 @@ public class CreateWorkspaceFromCamelStackTest {
 
   @Test
   public void createWorkspaceFromCamelStackTest() throws Exception {
-    createWorkspaceHelper.createWorkspaceFromStackWithoutProject(CAMEL_SPRINGBOOT, WORKSPACE_NAME);
+    createWorkspaceHelper.createWorkspaceFromStackWithProjects(
+        CAMEL_SPRINGBOOT, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     checkLanguageServerInitialized();
+
+    checkBuildCommandWorking();
   }
 
   private void checkLanguageServerInitialized() throws Exception {
-    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/project-for-camel-ls");
-    Workspace ws = workspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
-    testProjectServiceClient.importProject(
-        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
     editor.waitTabIsPresent(CAMEL_FILE_NAME);
 
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
+  }
+
+  private void checkBuildCommandWorking() {
+    consoles.executeCommandFromProjectExplorer(
+        PROJECT_NAME, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);
   }
 }

@@ -1057,5 +1057,33 @@
     "tags": [
       "SDK"
     ]
+  },
+  {
+    "name": "spring-boot-camel-xml",
+    "displayName": "spring-boot-camel-xml",
+    "path": "/spring-boot-camel-xml",
+    "description": "a quickstart showing how to use spring boot and Apache Camel with the XML DSL together with Kubernetes or OpenShift",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java",
+        "xml"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/fabric8-quickstarts/spring-boot-camel-xml.git",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Apache Camel",
+      "Red Hat Fuse"
+    ]
   }
 ]
