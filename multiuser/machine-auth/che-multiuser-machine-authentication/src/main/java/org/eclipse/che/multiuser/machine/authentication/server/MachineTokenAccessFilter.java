@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.lang.reflect.Method;
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -50,10 +51,15 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
     if (!(EnvironmentContext.getCurrent().getSubject() instanceof MachineTokenAuthorizedSubject)) {
       return;
     }
-    if (!allowedMethodsByPath
+    if (allowedMethodsByPath
         .get(genericMethodResource.getParentResource().getPathValue().getPath())
         .contains(genericMethodResource.getMethod().getName())) {
-      throw new ForbiddenException("This operation cannot be performed using machine token.");
+      return;
     }
+    Method method = genericMethodResource.getMethod();
+    if (method != null && method.isAnnotationPresent(MachineAuthorized.class)) {
+      return;
+    }
+    throw new ForbiddenException("This operation cannot be performed using machine token.");
   }
 }
