@@ -134,7 +134,7 @@ spec:
                   name: openshift-identity-provider
                   optional: true
             - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
-              value: 'NULL'
+              value: 'https://che-plugin-registry.openshift.io'
           image: 'eclipse/che-server:latest'
           imagePullPolicy: Always
           livenessProbe:
