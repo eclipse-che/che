@@ -10,9 +10,11 @@
         "@theia/git": "latest",
         "@theia/file-search": "latest",
         "@theia/markers": "latest",
+        "@theia/mini-browser": "latest",
         "@theia/plugin-ext": "latest",
         "@theia/plugin-ext-vscode": "latest",
         "@theia/extension-manager": "latest",
+        "@theia/textmate-grammars": "latest",
         "@theia/messages": "latest"
     },
     "devDependencies": {
