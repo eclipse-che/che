@@ -126,7 +126,7 @@ public class AssistantFindPanel {
     return getActionNodeText(index).contains(expectedText);
   }
 
-  public void clickOnActionNodeWithText(String visibleText) {
+  public void clickOnActionNodeWithTextContains(String visibleText) {
     for (int i = 0; i < getActionNodesCount(); i++) {
       if (getActionNodeText(i).contains(visibleText)) {
         getActionNode(i).click();

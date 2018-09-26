@@ -521,6 +521,10 @@ public class CodenvyEditor {
     }
   }
 
+  public void waitHoverPopupAppearance() {
+    seleniumWebDriverHelper.waitVisibility(hoverPopup);
+  }
+
   /**
    * wait text in hover pop-up (after hovering on text)
    *
