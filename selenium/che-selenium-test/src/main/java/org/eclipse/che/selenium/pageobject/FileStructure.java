@@ -12,46 +12,37 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.ESCAPE;
 import static org.openqa.selenium.Keys.F12;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev on 11.12.15 */
 @Singleton
 public class FileStructure {
 
-  private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
-  private final ActionsFactory actionsFactory;
 
   @Inject
   public FileStructure(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
-      ActionsFactory actionsFactory,
       SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
-    this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -66,7 +57,10 @@ public class FileStructure {
   }
 
   @FindBy(id = Locators.FILE_STRUCTURE_CONTENT)
-  WebElement fileStructureContent;
+  private WebElement fileStructureContent;
+
+  @FindBy(id = Locators.FILE_STRUCTURE_CLOSE_ICON)
+  private WebElement fileStructureCloseIcon;
 
   /** wait the 'file structure' form is open */
   public void waitFileStructureFormIsOpen(String fileName) {
@@ -93,7 +87,7 @@ public class FileStructure {
 
   /** close the 'File Structure' form by click on the close icon */
   public void clickFileStructureCloseIcon() {
-    seleniumWebDriverHelper.waitAndClick(By.id(Locators.FILE_STRUCTURE_CLOSE_ICON));
+    seleniumWebDriverHelper.waitAndClick(fileStructureCloseIcon);
   }
 
   /**
@@ -130,7 +124,7 @@ public class FileStructure {
    * @param nameNode is name
    */
   public void clickOnIconNodeInFileStructure(String nameNode) {
-    //    WaitUtils.sleepQuietly(1);
+    WaitUtils.sleepQuietly(1);
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode)));
   }
@@ -141,6 +135,7 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByDoubleClick(String item) {
+    selectItemInFileStructure(item);
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(getFileStructureItem(item));
   }
 
@@ -150,7 +145,6 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByEnter(String item) {
-    //    selectItemInFileStructure(item);
     seleniumWebDriverHelper.getAction().sendKeys(ENTER).perform();
   }
 
@@ -184,14 +178,12 @@ public class FileStructure {
                 "//div[@id='gwt-debug-file-structure-mainPanel']//div[@id[contains(.,'gwt-uid-')]]//div[text()]"));
 
     for (int i = 0; i < items.size(); i++) {
-      actionsFactory.createAction(seleniumWebDriver).sendKeys(ARROW_DOWN).perform();
+      seleniumWebDriverHelper.getAction().sendKeys(ARROW_DOWN).perform();
       WaitUtils.sleepQuietly(1);
       items =
-          new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-              .until(
-                  presenceOfAllElementsLocatedBy(
-                      By.xpath(
-                          "//div[@id='gwt-debug-file-structure-mainPanel']/div[3]/div/div[1]//div[text()]")));
+          seleniumWebDriverHelper.waitPresenceOfAllElements(
+              By.xpath(
+                  "//div[@id='gwt-debug-file-structure-mainPanel']/div[3]/div/div[1]//div[text()]"));
 
       if (items.get(i).getText().contains(itemName)) {
         break;

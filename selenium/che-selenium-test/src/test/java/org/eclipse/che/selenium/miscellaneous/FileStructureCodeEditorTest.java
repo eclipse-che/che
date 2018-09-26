@@ -11,13 +11,13 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 15.12.15 */
 public class FileStructureCodeEditorTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
+  private static final String PROJECT_NAME = generate("project", 5);
   private static final String JAVA_FILE_NAME = "Company";
 
   private static final String NEW_CONTENT =
@@ -79,6 +79,7 @@ public class FileStructureCodeEditorTest {
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
+    fileStructure.selectItemInFileStructure("INSTANCE");
     fileStructure.selectItemInFileStructureByEnter("INSTANCE");
     fileStructure.waitFileStructureFormIsClosed();
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
@@ -87,6 +88,7 @@ public class FileStructureCodeEditorTest {
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
+    fileStructure.selectItemInFileStructure("getId() : double");
     fileStructure.selectItemInFileStructureByEnter("getId() : double");
     fileStructure.waitFileStructureFormIsClosed();
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
@@ -104,7 +106,7 @@ public class FileStructureCodeEditorTest {
     fileStructure.waitExpectedTextInFileStructure(NEW_ITEMS);
   }
 
-  public void expandTReeProjectAndOpenClass(String fileName) {
+  private void expandTReeProjectAndOpenClass(String fileName) {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main");
