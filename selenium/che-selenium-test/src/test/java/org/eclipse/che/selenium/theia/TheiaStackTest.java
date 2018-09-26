@@ -18,18 +18,20 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TheiaStackTest {
+  private static final Logger LOG = LoggerFactory.getLogger(TheiaStackTest.class.getSimpleName());
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
 
   @Inject private Dashboard dashboard;
@@ -41,7 +43,6 @@ public class TheiaStackTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TheiaTerminal theiaTerminal;
-  @Inject private CheTerminal cheTerminal;
 
   @BeforeClass
   public void prepare() {
@@ -60,7 +61,14 @@ public class TheiaStackTest {
 
   @Test
   public void testing() {
+
+    theiaIde.runMenuCommand("File", "Open New Terminal");
+    theiaTerminal.waitTerminal();
+    theiaTerminal.clickOnTerminalTextArea();
+    theiaTerminal.type("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
+
+    theiaTerminal.waitTerminalText("");
+    LOG.info(theiaTerminal.getClipboardText());
     int i = 0;
-    cheTerminal.getVisibleTextFromTerminal(1);
   }
 }
