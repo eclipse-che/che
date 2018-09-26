@@ -80,6 +80,7 @@ public class DebuggerWatchExpressionTest {
 
     projectExplorer.waitItem(PROJECT);
     projectExplorer.quickExpandWithJavaScript();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
     debugPanel.openDebugPanel();
 
     projectExplorer.openItemByPath(PROJECT + PATH_TO_CLASS);
