@@ -25,7 +25,6 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
 @Singleton
 public class FindReferencesConsoleTab {
@@ -89,10 +88,9 @@ public class FindReferencesConsoleTab {
   }
 
   public void doubleClickOnReference(String visibleText) {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
     clickOnReference(visibleText);
     waitReferenceSelection(visibleText);
-    action.doubleClick().perform();
+    seleniumWebDriverHelper.doubleClick();
   }
 
   public boolean isReferenceSelected(String visibleText) {
@@ -105,6 +103,7 @@ public class FindReferencesConsoleTab {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isReferenceSelected(visibleText));
   }
 
+  /** use to check the text when nothing to show */
   public void waitExpectedTextInLsPanel(String text) {
     seleniumWebDriverHelper.waitTextContains(By.id(Locators.LS_INFO_PANEL_ID), text);
   }
