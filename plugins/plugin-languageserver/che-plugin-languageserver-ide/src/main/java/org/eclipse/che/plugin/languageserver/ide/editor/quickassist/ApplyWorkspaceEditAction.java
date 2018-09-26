@@ -430,8 +430,7 @@ public class ApplyWorkspaceEditAction extends BaseAction {
       int startIndex =
           document.getIndexFromPosition(new TextPosition(start.getLine(), start.getCharacter()));
       // python ls, for example shows as end position index 0 of the line after the
-      // change. If the
-      // change is on the last line, we crash
+      // change. If the change is on the last line, we crash
       int endIndex =
           document.getIndexFromPosition(new TextPosition(end.getLine(), end.getCharacter()));
       if (endIndex < 0) {
