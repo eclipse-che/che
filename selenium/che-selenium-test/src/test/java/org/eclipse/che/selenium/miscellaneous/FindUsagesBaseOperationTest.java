@@ -93,7 +93,7 @@ public class FindUsagesBaseOperationTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
 
-    // Check basic operations of the FindUsages panel
+    // Check basic operations of the Find Usages panel
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(27, 17);
     menu.runCommand(ASSISTANT, FIND_USAGES);
@@ -102,22 +102,21 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
     findUsages.waitSelectedElementInFindUsagesPanel("numGuessByUser");
 
-    // Switch to the Events panel and check that the FindUsages panel is not visible
+    // Switch to the Events panel and check that the Find Usages panel is not visible
     findUsages.waitFindUsagesPanelIsOpen();
     events.clickEventLogBtn();
     events.waitOpened();
     findUsages.waitFindUsagesPanelIsClosed();
 
-    // Switch to the FindUsages panel and check its expected content
+    // Switch to the Find Usages panel and check its expected content
     findUsages.clickFindUsagesIcon();
     findUsages.waitFindUsagesPanelIsOpen();
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
     findUsages.waitSelectedElementInFindUsagesPanel("numGuessByUser");
 
-    // Check nodes in the FindUsages panel by 'double click' and click on the icon node
-    findUsages.clickOnIconNodeInFindUsagesPanel(PROJECT_NAME);
+    // Check nodes in the FindUsages panel by 'double click' and click
+    findUsages.selectNodeInFindUsagesByDoubleClick(PROJECT_NAME);
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
-
     findUsages.selectNodeInFindUsagesByDoubleClick(PROJECT_NAME);
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesByDoubleClick("org.eclipse.qa.examples");
@@ -128,7 +127,6 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesByDoubleClick(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
-
     findUsages.clickOnIconNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
@@ -138,7 +136,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
 
-    // Check nodes in the FindUsages panel by 'Enter' button
+    // Check nodes in the Find Usages panel by 'Enter' button
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
@@ -162,7 +160,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
 
-    // Check nodes in the FindUsages panel by keyboard
+    // Check nodes in the Find Usages panel by keyboard
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_LEFT.toString());

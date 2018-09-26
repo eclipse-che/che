@@ -111,6 +111,8 @@ public class FindUsages {
   public void clickOnIconNodeInFindUsagesPanel(String nameNode) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.FIND_USAGES_ICON_NODE, nameNode)));
+
+    // wait after clicking because sometimes after quick click on nodes they do not close
     WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
   }
 
@@ -122,6 +124,8 @@ public class FindUsages {
   public void selectNodeInFindUsagesByDoubleClick(String node) {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
         By.xpath(format(Locators.FIND_USAGES_NODE, node)));
+
+    // wait after double click because sometimes after quick clicking on nodes they do not close
     WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
   }
 
