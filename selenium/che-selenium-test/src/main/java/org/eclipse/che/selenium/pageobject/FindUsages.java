@@ -109,11 +109,11 @@ public class FindUsages {
    * @param nameNode is name of the node
    */
   public void clickOnIconNodeInFindUsagesPanel(String nameNode) {
+    // we need to wait a little to avoid node closing after quick clicking
+    WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
+
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(Locators.FIND_USAGES_ICON_NODE, nameNode)));
-
-    // wait after clicking because sometimes after quick click on nodes they do not close
-    WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -122,11 +122,11 @@ public class FindUsages {
    * @param node is the name of the node
    */
   public void selectNodeInFindUsagesByDoubleClick(String node) {
+    // we need to wait a little to avoid node closing after quick clicking
+    WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
+
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
         By.xpath(format(Locators.FIND_USAGES_NODE, node)));
-
-    // wait after double click because sometimes after quick clicking on nodes they do not close
-    WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
   }
 
   /**
