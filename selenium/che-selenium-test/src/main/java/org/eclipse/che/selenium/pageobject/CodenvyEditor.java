@@ -913,13 +913,14 @@ public class CodenvyEditor {
    * @param line line's number where the marker should be displayed
    */
   public void waitGitDeletionMarkerInPosition(int line) {
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
                 webDriver ->
                     "git-change-marker deletion"
-                        .equals(getListGitMarkers().get(line).getAttribute("class")));
+                        .equals(getListGitMarkers().get(line).getAttribute("class")),
+                REDRAW_UI_ELEMENTS_TIMEOUT_SEC),
+        StaleElementReferenceException.class);
   }
 
   /**
