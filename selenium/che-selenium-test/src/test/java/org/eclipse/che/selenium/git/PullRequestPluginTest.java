@@ -77,8 +77,8 @@ public class PullRequestPluginTest {
   private static final String PULL_REQUEST_CREATED = "Your pull request has been created.";
   private static final String PUll_REQUEST_UPDATED = "Your pull request has been updated.";
   private static final String DEV_BRANCH_NAME = generate("dev-", 4);
-  private static final String BASE_BRANCH_NAME = generate("contrib-", 4);
-  private static final String NEW_BRANCH_NAME = generate("branch-", 8);
+  private static final String BASE_BRANCH_NAME = generate("base-", 4);
+  private static final String NEW_BRANCH_NAME = generate("new-", 8);
   private static final String TITLE = generate("Title: ", 8);
   private static final String COMMENT = generate("Comment: ", 8);
   private static final String PATH_TO_README_FILE_1ST_PROJECT = FIRST_PROJECT_NAME + "/README.md";
@@ -242,7 +242,7 @@ public class PullRequestPluginTest {
     pullRequestPanel.waitOpenPanel();
     checkoutToBranch("origin/" + NEW_BRANCH_NAME);
     pullRequestPanel.clickPullRequestBtn();
-    pullRequestPanel.clickRefreshContributionBranchButton();
+    pullRequestPanel.clickRefreshBranchListButton();
     pullRequestPanel.selectBranch(NEW_BRANCH_NAME);
 
     // change content in README.md file

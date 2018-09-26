@@ -199,8 +199,8 @@ public class PullRequestPanel {
         By.xpath(String.format(PullRequestLocators.BRANCH_NAME, branchName)));
   }
 
-  /** Click 'refresh contribution branch name' button on the 'Pull Request' panel */
-  public void clickRefreshContributionBranchButton() {
+  /** Click 'refresh branch list' button on the 'Pull Request' panel */
+  public void clickRefreshBranchListButton() {
     seleniumWebDriverHelper.waitAndClick(refreshBranchListButton);
   }
 
