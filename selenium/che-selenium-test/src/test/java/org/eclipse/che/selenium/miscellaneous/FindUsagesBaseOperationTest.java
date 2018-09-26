@@ -114,7 +114,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
     findUsages.waitSelectedElementInFindUsagesPanel("numGuessByUser");
 
-    // Check nodes in the FindUsages panel by 'double click'
+    // Check nodes in the Find Usages panel by 'double click'
     findUsages.selectNodeInFindUsagesByDoubleClick(PROJECT_NAME);
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesByDoubleClick(PROJECT_NAME);
@@ -128,7 +128,7 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
 
-    // Check nodes in the FindUsages panel by click on node icon
+    // Check nodes in the Find Usages panel by click on node icon
     findUsages.clickOnIconNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
