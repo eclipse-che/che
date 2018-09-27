@@ -70,10 +70,6 @@ import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.jpa.JpaSignatureKeyDao;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyImpl;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.SHA512PasswordEncryptor;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -133,8 +129,6 @@ public class PostgreSqlTckModule extends TckModule {
                 InstallerServerConfigImpl.class,
                 WorkspaceExpiration.class,
                 VolumeImpl.class,
-                SignatureKeyImpl.class,
-                SignatureKeyPairImpl.class,
                 // k8s-runtimes
                 KubernetesRuntimeState.class,
                 KubernetesRuntimeState.RuntimeId.class,
@@ -193,11 +187,6 @@ public class PostgreSqlTckModule extends TckModule {
     bind(InstallerDao.class).to(JpaInstallerDao.class);
     bind(new TypeLiteral<TckRepository<InstallerImpl>>() {})
         .toInstance(new JpaTckRepository<>(InstallerImpl.class));
-
-    // sign keys
-    bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
-    bind(new TypeLiteral<TckRepository<SignatureKeyPairImpl>>() {})
-        .toInstance(new JpaTckRepository<>(SignatureKeyPairImpl.class));
 
     // k8s runtimes
     bind(new TypeLiteral<TckRepository<KubernetesRuntimeState>>() {})
