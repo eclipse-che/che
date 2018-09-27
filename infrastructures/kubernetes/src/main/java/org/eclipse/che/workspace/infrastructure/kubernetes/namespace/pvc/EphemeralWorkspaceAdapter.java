@@ -46,7 +46,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 @Singleton
 public class EphemeralWorkspaceAdapter {
-  private final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
+  private static final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
   private WorkspaceManager workspaceManager;
 
   @Inject
@@ -68,7 +68,7 @@ public class EphemeralWorkspaceAdapter {
       return isEphemeral(workspace);
     } catch (NotFoundException | ServerException e) {
       throw new InternalInfrastructureException(
-          "Failed to load workspace info" + e.getMessage(), e);
+          "Failed to load workspace info " + e.getMessage(), e);
     }
   }
 
@@ -78,7 +78,6 @@ public class EphemeralWorkspaceAdapter {
    *     this case regardless of the PVC strategy, workspace volumes would be created as `emptyDir`.
    *     When a workspace Pod is removed for any reason, the data in the `emptyDir` volume is
    *     deleted forever
-   * @throws InternalInfrastructureException
    */
   public boolean isEphemeral(Workspace workspace) {
     String mountSources = workspace.getConfig().getAttributes().get(MOUNT_SOURCES_ATTRIBUTE);
