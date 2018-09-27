@@ -11,9 +11,10 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
+import static java.util.Arrays.asList;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -42,7 +43,7 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
     while (tokenizer.hasMoreTokens()) {
       String[] serviceToMethodsMapping = tokenizer.nextToken().split("=");
       allowedMethodsByPath.putAll(
-          serviceToMethodsMapping[0], Arrays.asList(serviceToMethodsMapping[1].split(",")));
+          serviceToMethodsMapping[0], asList(serviceToMethodsMapping[1].split(",")));
     }
   }
 
