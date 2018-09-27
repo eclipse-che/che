@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.FILES_TAB_XPATH;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,7 +44,6 @@ public class TheiaIde {
     String ABOUT_DIALOG_TITLE_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogTitle']";
     String ABOUT_DIALOG_CONTENT_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogContent']";
     String ABOUT_DIALOG_OK_BUTTON_XPATH = ABOUT_DIALOG_XPATH + "//button";
-    String FILES_TAB_XPATH = "(//div[@id='theia-left-content-panel']//div[text()='Files'])[1]";
   }
 
   @FindBy(id = Locators.THEIA_IDE_ID)
@@ -68,10 +66,6 @@ public class TheiaIde {
 
   @FindBy(xpath = Locators.ABOUT_DIALOG_OK_BUTTON_XPATH)
   WebElement aboutDialogOkButton;
-
-  public void clickOnFilesTab() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(FILES_TAB_XPATH));
-  }
 
   public void waitTheiaIde() {
     seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);

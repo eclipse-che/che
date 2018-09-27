@@ -1,19 +1,26 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.selenium.pageobject.theia;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_TEXT_LAYER;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_UPPEST_LAYER;
 import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.INSERT;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -25,12 +32,28 @@ import org.openqa.selenium.interactions.Actions;
 public class TheiaTerminal {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final SeleniumWebDriver seleniumWebDriver;
+  private final TheiaProjectTree theiaProjectTree;
+  private final TheiaEditor theiaEditor;
+  private final TheiaIde theiaIde;
+  private final TheiaNewFileDialog theiaNewFileDialog;
+  private final TheiaDeleteFileDialog theiaDeleteFileDialog;
 
   @Inject
   private TheiaTerminal(
-      SeleniumWebDriverHelper seleniumWebDriverHelper, SeleniumWebDriver seleniumWebDriver) {
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      SeleniumWebDriver seleniumWebDriver,
+      TheiaProjectTree theiaProjectTree,
+      TheiaEditor theiaEditor,
+      TheiaIde theiaIde,
+      TheiaNewFileDialog theiaNewFileDialog,
+      TheiaDeleteFileDialog theiaDeleteFileDialog) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.seleniumWebDriver = seleniumWebDriver;
+    this.theiaProjectTree = theiaProjectTree;
+    this.theiaEditor = theiaEditor;
+    this.theiaIde = theiaIde;
+    this.theiaNewFileDialog = theiaNewFileDialog;
+    this.theiaDeleteFileDialog = theiaDeleteFileDialog;
   }
 
   public interface Locators {
@@ -55,6 +78,11 @@ public class TheiaTerminal {
     seleniumWebDriverHelper.sendKeys(expectedText);
   }
 
+  public void performCommand(String command) {
+    type(command);
+    seleniumWebDriverHelper.sendKeys(ENTER.toString());
+  }
+
   private void copyTerminalTextToClipboard() {
     Dimension textLayerSize = getTerminalTextLayer().getSize();
     final Actions action = seleniumWebDriverHelper.getAction();
@@ -64,14 +92,14 @@ public class TheiaTerminal {
 
     seleniumWebDriverHelper.moveCursorTo(getTerminalTextLayer());
 
-    WaitUtils.sleepQuietly(3);
+    // WaitUtils.sleepQuietly(3);
 
     seleniumWebDriverHelper
         .getAction()
         .moveByOffset(xBeginCoordinateShift, yBeginCoordinateShift)
         .perform();
 
-    WaitUtils.sleepQuietly(3);
+    // WaitUtils.sleepQuietly(3);
 
     action.clickAndHold().perform();
     seleniumWebDriverHelper
@@ -79,7 +107,7 @@ public class TheiaTerminal {
         .moveByOffset(textLayerSize.getWidth(), textLayerSize.getHeight())
         .perform();
 
-    WaitUtils.sleepQuietly(3);
+    // WaitUtils.sleepQuietly(3);
 
     action.release().perform();
 
@@ -89,24 +117,50 @@ public class TheiaTerminal {
     clickOnTerminalTextArea();
   }
 
-  public void waitTerminalText(String expectedText) {
-    copyTerminalTextToClipboard();
+  public void waitTerminalOutput(String expectedText) {
+    final int timeout = LOADER_TIMEOUT_SEC;
+
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> {
+          copyTerminalTextToClipboard();
+          return getTerminalOutput().contains(expectedText);
+        },
+        timeout);
   }
 
-  public String getClipboardText() {
+  public String getTerminalOutput() {
+    // this is workaround and should be resolved by issue:
+    // https://github.com/eclipse/che/issues/11387
 
-    String result = "";
+    final String expectedTextFileName = "Untitled.txt";
+    String terminalOutput = "";
 
-    Toolkit toolkit = Toolkit.getDefaultToolkit();
-    Clipboard clipboard = toolkit.getSystemClipboard();
-    try {
-      result = (String) clipboard.getData(DataFlavor.stringFlavor);
-    } catch (UnsupportedFlavorException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    // create text file
+    theiaProjectTree.clickOnProjectRootFolder();
+    theiaIde.runMenuCommand("File", "New File");
+    theiaNewFileDialog.waitDialog();
+    theiaNewFileDialog.waitInputFieldValue(expectedTextFileName);
+    theiaNewFileDialog.clickOkButton();
+    theiaNewFileDialog.waitDialogClossing();
 
-    return result;
+    // check text file availability
+    theiaEditor.waitEditorTab(expectedTextFileName);
+    theiaEditor.waitTabSelecting(expectedTextFileName);
+    theiaEditor.waitActiveEditor();
+    theiaEditor.performPasteAction();
+
+    terminalOutput = theiaEditor.getEditorTextAsString();
+
+    // delete text file
+    theiaProjectTree.clickOnItem(expectedTextFileName);
+    theiaProjectTree.waitItemSelecting(expectedTextFileName);
+    seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
+    theiaDeleteFileDialog.waitDialog();
+    theiaDeleteFileDialog.clickOkButton();
+    theiaDeleteFileDialog.waitDialogDesapearance();
+    theiaProjectTree.waitItemDesapearance(expectedTextFileName);
+    theiaEditor.waitEditorTabDesapearance(expectedTextFileName);
+
+    return terminalOutput;
   }
 }

@@ -13,12 +13,14 @@ package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.EXPAND_ITEM_ICON_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.FILES_TAB_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.ROOT_PROJECTS_FOLDER_ID;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.SELECTED_ITEM_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.TREE_ITEM_ID_TEMPLATE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 
@@ -41,6 +43,11 @@ public class TheiaProjectTree {
     String COLLAPSED_ITEM_XPATH_TEMPLATE =
         "//div[@data-node-id='/projects:/projects/%s' and contains(@class, 'theia-mod-collapsed')]";
     String EXPAND_ITEM_ICON_XPATH_TEMPLATE = "//div[@data-node-id='/projects:/projects/%s']";
+    String FILES_TAB_XPATH = "(//div[@id='theia-left-content-panel']//div[text()='Files'])[1]";
+  }
+
+  public void clickOnFilesTab() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(FILES_TAB_XPATH));
   }
 
   private String getProjectItemId(String itemPath) {
@@ -51,12 +58,17 @@ public class TheiaProjectTree {
     return String.format(EXPAND_ITEM_ICON_XPATH_TEMPLATE, itemPath);
   }
 
+  public void waitItemDesapearance(String itemPath) {
+    String itemId = getProjectItemId(itemPath);
+    seleniumWebDriverHelper.waitInvisibility(By.id(itemId));
+  }
+
   public void waitProjectsRootFolder() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(ROOT_PROJECTS_FOLDER_ID));
   }
 
   public void clickOnProjectRootFolder() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(ROOT_PROJECTS_FOLDER_ID));
+    seleniumWebDriverHelper.waitAndClick(By.id(ROOT_PROJECTS_FOLDER_ID));
   }
 
   public void clickOnItem(String itemPath) {
@@ -89,6 +101,7 @@ public class TheiaProjectTree {
   public void waitItemSelecting(String itemPath) {
     String itemXpath = format(SELECTED_ITEM_XPATH_TEMPLATE, itemPath);
     seleniumWebDriverHelper.waitVisibility(By.xpath(itemXpath));
+    WaitUtils.sleepQuietly(2);
   }
 
   public void openItem(String itemPath) {
