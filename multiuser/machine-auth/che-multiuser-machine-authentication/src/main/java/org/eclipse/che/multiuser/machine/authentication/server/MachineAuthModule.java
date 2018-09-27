@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
+import static java.util.Arrays.asList;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
@@ -45,6 +47,30 @@ public class MachineAuthModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(SignaturePublicKeyEnvProvider.class);
     envVarProviders.addBinding().to(SignatureAlgorithmEnvProvider.class);
+
+    final Multibinder<MachineAuthenticatedResource> machineAuthenticatedResources =
+        Multibinder.newSetBinder(binder(), MachineAuthenticatedResource.class);
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "/workspace", asList("getByKey", "addProject", "updateProject", "deleteProject")));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/ssh", asList("getPair", "generatePair")));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "/factory",
+                asList("getFactoryJson", "getFactory", "getFactoryByAttribute", "resolveFactory")));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/preferences", asList("find")));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/activity", asList("active")));
+
     bindConstant().annotatedWith(Names.named("che.auth.signature_key_size")).to(2048);
     bindConstant().annotatedWith(Names.named("che.auth.signature_key_algorithm")).to("RSA");
   }
