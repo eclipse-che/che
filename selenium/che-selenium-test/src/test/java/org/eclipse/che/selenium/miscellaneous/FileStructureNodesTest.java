@@ -180,13 +180,14 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
 
     // open and close nodes by click
+    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
@@ -197,6 +198,7 @@ public class FileStructureNodesTest {
     fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
