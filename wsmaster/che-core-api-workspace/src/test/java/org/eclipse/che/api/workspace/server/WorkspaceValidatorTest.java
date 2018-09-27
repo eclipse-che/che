@@ -324,6 +324,28 @@ public class WorkspaceValidatorTest {
     wsValidator.validateConfig(config);
   }
 
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = ".*([pP]lugin.*[iI]nstaller|[iI]nstaller.*[pP]lugin).*")
+  public void shouldFailValidationIfBothPluginsAndInstallersPresent() throws Exception {
+    // createConfig creates config with one installer by default
+    final WorkspaceConfigDto config = createConfig();
+    config.getAttributes().put(WorkspaceValidator.PLUGINS_ATTRIBUTE, "plugin1");
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = ".*([pP]lugin.*[iI]nstaller|[iI]nstaller.*[pP]lugin).*")
+  public void shouldFailValidationIfBothEditorAndInstallersPresent() throws Exception {
+    // createConfig creates config with one installer by default
+    final WorkspaceConfigDto config = createConfig();
+    config.getAttributes().put(WorkspaceValidator.EDITOR_ATTRIBUTE, "editor1");
+
+    wsValidator.validateConfig(config);
+  }
+
   private static WorkspaceConfigDto createConfig() {
     final WorkspaceConfigDto workspaceConfigDto =
         newDto(WorkspaceConfigDto.class).withName("ws-name").withDefaultEnv("dev-env");

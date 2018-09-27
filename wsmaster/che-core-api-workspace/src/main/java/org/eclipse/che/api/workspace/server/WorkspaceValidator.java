@@ -16,9 +16,13 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
+import com.google.common.base.Strings;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
@@ -47,6 +51,9 @@ public class WorkspaceValidator {
 
   private static final Pattern VOLUME_NAME = Pattern.compile("[a-z][a-z0-9]{1,18}");
   private static final Pattern VOLUME_PATH = Pattern.compile("/.+");
+
+  static final String PLUGINS_ATTRIBUTE = "plugins";
+  static final String EDITOR_ATTRIBUTE = "editor";
 
   /**
    * Checks whether given workspace configuration object is in application valid state, so it
@@ -100,6 +107,9 @@ public class WorkspaceValidator {
 
     // projects
     // TODO
+
+    // ensure using either plugins or installers but not both
+    validatePlugins(config);
   }
 
   /**
@@ -163,6 +173,35 @@ public class WorkspaceValidator {
                 "Value '%s' of attribute '%s' in machine '%s' is illegal",
                 attributeValue, attributeName, machineName));
       }
+    }
+  }
+
+  /**
+   * Check that workspace has either plugins defined in attributes (Che 7) or installers defined in
+   * machines (Che 6).
+   *
+   * @throws ValidationException
+   */
+  private void validatePlugins(WorkspaceConfig config) throws ValidationException {
+    List<String> installers =
+        config
+            .getEnvironments()
+            .values()
+            .stream()
+            .map(
+                env ->
+                    env.getMachines()
+                        .values()
+                        .stream()
+                        .map(MachineConfig::getInstallers)
+                        .flatMap(List::stream))
+            .flatMap(Function.identity())
+            .collect(Collectors.toList());
+    Map<String, String> attributes = config.getAttributes();
+    boolean hasPlugins = !Strings.isNullOrEmpty(attributes.getOrDefault(PLUGINS_ATTRIBUTE, null));
+    boolean hasEditor = !Strings.isNullOrEmpty(attributes.getOrDefault(EDITOR_ATTRIBUTE, null));
+    if ((hasPlugins || hasEditor) && installers.size() > 0) {
+      throw new ValidationException("Workspace config cannot have both plugins and installers.");
     }
   }
 
