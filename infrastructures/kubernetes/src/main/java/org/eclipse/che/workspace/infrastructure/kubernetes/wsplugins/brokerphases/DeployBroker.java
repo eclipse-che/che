@@ -11,17 +11,25 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.slf4j.Logger;
 
 /**
@@ -39,10 +47,21 @@ public class DeployBroker extends BrokerPhase {
 
   private final KubernetesNamespace namespace;
   private final KubernetesEnvironment brokerEnvironment;
+  private final UnrecoverablePodEventListenerFactory factory;
+  private final String workspaceId;
+  private final CompletableFuture<List<ChePlugin>> pluginsFuture;
 
-  public DeployBroker(KubernetesNamespace namespace, KubernetesEnvironment brokerEnvironment) {
+  public DeployBroker(
+      String workspaceId,
+      KubernetesNamespace namespace,
+      KubernetesEnvironment brokerEnvironment,
+      CompletableFuture<List<ChePlugin>> pluginsFuture,
+      UnrecoverablePodEventListenerFactory factory) {
+    this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.brokerEnvironment = brokerEnvironment;
+    this.factory = factory;
+    this.pluginsFuture = pluginsFuture;
   }
 
   @Override
@@ -54,12 +73,24 @@ public class DeployBroker extends BrokerPhase {
       for (ConfigMap configMap : brokerEnvironment.getConfigMaps().values()) {
         namespace.configMaps().create(configMap);
       }
-      for (Pod toCreate : brokerEnvironment.getPods().values()) {
-        deployments.deploy(toCreate);
+
+      Pod pluginBrokerPod = getPluginBrokerPod(brokerEnvironment.getPods());
+
+      if (factory.isConfigured()) {
+        UnrecoverablePodEventListener unrecoverableEventListener =
+            factory.create(
+                ImmutableSet.of(pluginBrokerPod.getMetadata().getName()),
+                this::handleUnrecoverableEvent);
+        namespace.deployments().watchEvents(unrecoverableEventListener);
       }
+
+      Pod deployedPod = deployments.deploy(pluginBrokerPod);
+
+      deployments.waitRunningAsync(deployedPod.getMetadata().getName());
 
       return nextPhase.execute();
     } finally {
+      namespace.deployments().stopWatch();
       try {
         deployments.delete();
       } catch (InfrastructureException e) {
@@ -72,5 +103,33 @@ public class DeployBroker extends BrokerPhase {
             "Broker deployment config map removal failed. Error: " + ex.getLocalizedMessage(), ex);
       }
     }
+  }
+
+  private void handleUnrecoverableEvent(PodEvent podEvent) {
+    String reason = podEvent.getReason();
+    String message = podEvent.getMessage();
+    LOG.error(
+        "Unrecoverable event occurred during plugin broking for workspace '{}' startup: {}, {}, {}",
+        workspaceId,
+        reason,
+        message,
+        podEvent.getPodName());
+    pluginsFuture.completeExceptionally(
+        new InfrastructureException(
+            format(
+                "Unrecoverable event occurred: '%s', '%s', '%s'",
+                reason, message, podEvent.getPodName())));
+  }
+
+  private Pod getPluginBrokerPod(Map<String, Pod> pods) throws InfrastructureException {
+    if (pods.size() != 1) {
+      throw new InternalInfrastructureException(
+          format(
+              "Plugin broker environment must have only "
+                  + "one pod. Workspace `%s` contains `%s` pods.",
+              workspaceId, pods.size()));
+    }
+
+    return pods.values().iterator().next();
   }
 }
