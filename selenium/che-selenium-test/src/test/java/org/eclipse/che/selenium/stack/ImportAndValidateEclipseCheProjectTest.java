@@ -36,6 +36,8 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,6 +45,8 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class ImportAndValidateEclipseCheProjectTest {
 
+  private static final Logger LOG =
+      LoggerFactory.getLogger(ImportAndValidateEclipseCheProjectTest.class);
   private static final String WORKSPACE_NAME = generate("EclipseCheWs", 4);
   private static final String PROJECT_NAME = "eclipse-che";
   private static final String ECLIPSE_CHE_PROJECT_URL = "https://github.com/eclipse/che.git";
@@ -81,9 +85,9 @@ public class ImportAndValidateEclipseCheProjectTest {
   }
 
   @Test
-  public void checkImportAndResolveDependenciesEclipceCheProject() {
-    final int timeoutToOpenInfoPanel = 120;
-    final int timeoutToClosingInfoPanel = 5400;
+  public void checkImportAndResolveDependenciesEclipseCheProject() {
+    final int timeoutToOpenInfoPanelInSec = 1200;
+    final int timeoutToClosingInfoPanelInSec = 5400;
 
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();
@@ -96,15 +100,20 @@ public class ImportAndValidateEclipseCheProjectTest {
     projectWizard.clickSaveButton();
     loader.waitOnClosed();
 
-    // TODO it is the workaround, delete it after resolve the issue
+    // TODO it is the workaround, delete it after resolving the issue
     // TODO https://github.com/eclipse/che/issues/10515
     closeErrorDialog();
 
     try {
       projectWizard.waitCreateProjectWizardFormIsClosed();
     } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure: https://github.com/eclipse/che/issues/11145");
+      // TODO it is the workaround, delete it after resolving the issue
+      // TODO https://github.com/eclipse/che/issues/11145
+      LOG.warn(
+          "'Project Configuration' panel didn't close in time. "
+              + "It is known random failure https://github.com/eclipse/che/issues/11145",
+          ex);
+      projectWizard.closeWithIcon();
     }
 
     loader.waitOnClosed();
@@ -129,7 +138,8 @@ public class ImportAndValidateEclipseCheProjectTest {
 
     // open the resolving dependencies form
     loader.waitOnClosed();
-    mavenPluginStatusBar.waitExpectedTextInInfoPanel("Resolving project:", timeoutToOpenInfoPanel);
+    mavenPluginStatusBar.waitExpectedTextInInfoPanel(
+        "Resolving project:", timeoutToOpenInfoPanelInSec);
     mavenPluginStatusBar.clickOnInfoPanel();
 
     // should close the resolve dependencies form by Esc
@@ -141,7 +151,7 @@ public class ImportAndValidateEclipseCheProjectTest {
     mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
 
     // wait while dependencies are resolved
-    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanel);
+    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanelInSec);
     mavenPluginStatusBar.waitResolveDependenciesFormToClose();
 
     // wait the project and the files

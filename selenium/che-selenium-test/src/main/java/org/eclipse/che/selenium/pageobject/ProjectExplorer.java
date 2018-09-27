@@ -484,8 +484,8 @@ public class ProjectExplorer {
     waitItem(path);
     seleniumWebDriverHelper.waitNoExceptions(
         () -> waitAndGetItem(path, timeout).click(),
-        StaleElementReferenceException.class,
-        LOAD_PAGE_TIMEOUT_SEC);
+        LOAD_PAGE_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
   }
 
   /**
@@ -542,15 +542,17 @@ public class ProjectExplorer {
   public void openItemByPath(String path) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     waitAndSelectItem(path);
-    waitItemIsSelected(path);
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> waitItemIsSelected(path), LOAD_PAGE_TIMEOUT_SEC, NoSuchElementException.class);
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> {
           action.moveToElement(waitAndGetItem(path)).perform();
           action.doubleClick().perform();
         },
-        StaleElementReferenceException.class,
-        LOAD_PAGE_TIMEOUT_SEC);
+        LOAD_PAGE_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
   }
 
   /**
