@@ -79,6 +79,7 @@ public class GitPullTest {
     prepareFilesForTest(jsFileName);
     prepareFilesForTest(htmlFileName);
     prepareFilesForTest(folderWithPlainFilesPath + "/" + readmeTxtFileName);
+    prepareFilesForTest(folderWithPlainFilesPath + "/README.md");
 
     testRepo.changeFileContent(jsFileName, currentTimeInMillis);
     testRepo.changeFileContent(htmlFileName, currentTimeInMillis);
@@ -103,7 +104,7 @@ public class GitPullTest {
         readmeTxtFileName,
         String.format("/%s/%s/%s", PROJECT_NAME, folderWithPlainFilesPath, readmeTxtFileName));
     checkPullAfterRemovingContent(
-        readmeTxtFileName,
+        "README.md",
         String.format("/%s/%s/%s", PROJECT_NAME, folderWithPlainFilesPath, "README.md"));
   }
 
@@ -127,7 +128,7 @@ public class GitPullTest {
 
   private void checkPullAfterRemovingContent(
       String tabNameOpenedFile, String pathToItemInProjectExplorer) {
-    editor.waitTextNotPresentIntoEditor(tabNameOpenedFile);
+    editor.waitTabIsNotPresent(tabNameOpenedFile);
     projectExplorer.waitLibrariesAreNotPresent(pathToItemInProjectExplorer);
   }
 }
