@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
-import static org.eclipse.che.api.workspace.shared.Constants.MOUNT_SOURCES_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
@@ -46,14 +46,14 @@ public class EphemeralWorkspaceAdapterTest {
 
   @BeforeMethod
   public void setup() throws Exception {
-    ephemeralWorkspaceAdapter = new EphemeralWorkspaceAdapter(workspaceManager);
+    ephemeralWorkspaceAdapter = new EphemeralWorkspaceAdapter();
 
     // ephemeral workspace configuration
     when(ephemeralWorkspace.getId()).thenReturn(EPHEMERAL_WORKSPACE_ID);
     WorkspaceConfig ephemeralWorkspaceConfig = mock(WorkspaceConfig.class);
     when(ephemeralWorkspace.getConfig()).thenReturn(ephemeralWorkspaceConfig);
     Map<String, String> ephemeralConfigAttributes =
-        Collections.singletonMap(MOUNT_SOURCES_ATTRIBUTE, "false");
+        Collections.singletonMap(PERSIST_VOLUMES_ATTRIBUTE, "false");
     when(ephemeralWorkspaceConfig.getAttributes()).thenReturn(ephemeralConfigAttributes);
 
     // regular / non-ephemeral workspace configuration

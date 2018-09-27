@@ -103,7 +103,7 @@ public final class Constants {
    *     PVC strategies</a>
    * @see <a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a>
    */
-  public static final String MOUNT_SOURCES_ATTRIBUTE = "mountSources";
+  public static final String PERSIST_VOLUMES_ATTRIBUTE = "persistVolumes";
 
   /**
    * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
