@@ -63,7 +63,7 @@ public class FindReferencesConsoleTab {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(reference).contains(expectedText);
   }
 
-  private boolean isReferenceEqulasText(WebElement reference, String expectedText) {
+  private boolean isReferenceEqualsText(WebElement reference, String expectedText) {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(reference).equals(expectedText);
   }
 
@@ -92,7 +92,7 @@ public class FindReferencesConsoleTab {
 
   public void clickOnReferenceWithTextEqualsTo(String visibleText) {
     for (WebElement reference : getReferences()) {
-      if (isReferenceEqulasText(reference, visibleText)) {
+      if (isReferenceEqualsText(reference, visibleText)) {
         seleniumWebDriverHelper.waitAndClick(reference);
         return;
       }
