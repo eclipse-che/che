@@ -207,7 +207,7 @@ public class JwtProxyProvisioner {
   private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv) throws InfrastructureException {
     if (!k8sEnv.getMachines().containsKey(JWT_PROXY_MACHINE_NAME)) {
       k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
-      k8sEnv.getPods().put(JWT_PROXY_POD_NAME, createJwtProxyPod(identity));
+      k8sEnv.getPods().put(JWT_PROXY_POD_NAME, createJwtProxyPod());
 
       KeyPair keyPair;
       try {
@@ -255,7 +255,7 @@ public class JwtProxyProvisioner {
         null);
   }
 
-  private Pod createJwtProxyPod(RuntimeIdentity identity) {
+  private Pod createJwtProxyPod() {
     return new PodBuilder()
         .withNewMetadata()
         .withName(JWT_PROXY_POD_NAME)
@@ -278,7 +278,7 @@ public class JwtProxyProvisioner {
             new VolumeBuilder()
                 .withName("jwtproxy-config-volume")
                 .withNewConfigMap()
-                .withName("jwtproxy-config-" + identity.getWorkspaceId())
+                .withName(getConfigMapName())
                 .endConfigMap()
                 .build())
         .endSpec()
