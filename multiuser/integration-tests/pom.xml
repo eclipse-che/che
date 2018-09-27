@@ -25,5 +25,6 @@
     <modules>
         <module>che-multiuser-cascade-removal</module>
         <module>che-multiuser-postgresql-tck</module>
+        <module>che-multiuser-mysql-tck</module>
     </modules>
 </project>
