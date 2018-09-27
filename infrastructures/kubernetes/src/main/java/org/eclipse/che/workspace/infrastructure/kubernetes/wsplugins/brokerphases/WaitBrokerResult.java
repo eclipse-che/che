@@ -33,15 +33,19 @@ public class WaitBrokerResult extends BrokerPhase {
 
   private final CompletableFuture<List<ChePlugin>> toolingFuture;
 
-  public WaitBrokerResult(CompletableFuture<List<ChePlugin>> toolingFuture) {
+  private final int resultWaitingTimeout;
+
+  public WaitBrokerResult(
+      CompletableFuture<List<ChePlugin>> toolingFuture, int resultWaitingTimeout) {
 
     this.toolingFuture = toolingFuture;
+    this.resultWaitingTimeout = resultWaitingTimeout;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     try {
-      return toolingFuture.get(3, TimeUnit.MINUTES);
+      return toolingFuture.get(resultWaitingTimeout, TimeUnit.MINUTES);
     } catch (InterruptedException e) {
       throw new InfrastructureException(
           "Plugins installation process was interrupted. Error: " + e.getMessage(), e);
