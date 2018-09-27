@@ -63,6 +63,10 @@ public class FindReferencesConsoleTab {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(reference).contains(expectedText);
   }
 
+  private boolean isReferenceEqulasText(WebElement reference, String expectedText) {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(reference).equals(expectedText);
+  }
+
   private void waitReferenceWithText(String expectedText) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver ->
@@ -82,13 +86,29 @@ public class FindReferencesConsoleTab {
         return;
       }
     }
+    String errorMessage = format("No reference with text \"%s\" has been detected", visibleText);
+    throw new RuntimeException(errorMessage);
+  }
 
+  public void clickOnReferenceWithTextEqualsTo(String visibleText) {
+    for (WebElement reference : getReferences()) {
+      if (isReferenceEqulasText(reference, visibleText)) {
+        seleniumWebDriverHelper.waitAndClick(reference);
+        return;
+      }
+    }
     String errorMessage = format("No reference with text \"%s\" has been detected", visibleText);
     throw new RuntimeException(errorMessage);
   }
 
   public void doubleClickOnReference(String visibleText) {
     clickOnReference(visibleText);
+    waitReferenceSelection(visibleText);
+    seleniumWebDriverHelper.doubleClick();
+  }
+
+  public void doubleClickOnReferenceWithTextEqualsTo(String visibleText) {
+    clickOnReferenceWithTextEqualsTo(visibleText);
     waitReferenceSelection(visibleText);
     seleniumWebDriverHelper.doubleClick();
   }
