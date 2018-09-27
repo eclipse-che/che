@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
@@ -39,7 +38,7 @@ public class ApacheCamelFileEditingTest {
   private static final String CAMEL_FILE_NAME = "camel.xml";
   private static final String PATH_TO_CAMEL_FILE = PROJECT_NAME + "/" + CAMEL_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_CAMEL_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.camel.server.languageserver'";
   private static final String[] EXPECTED_GO_TO_SYMBOL_ALTERNATIVES = {
     "<no id>symbols (2)", "<no id>"
   };
