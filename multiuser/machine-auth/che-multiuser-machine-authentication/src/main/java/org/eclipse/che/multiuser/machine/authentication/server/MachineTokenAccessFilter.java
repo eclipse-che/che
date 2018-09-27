@@ -36,7 +36,7 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
   @Inject
   public MachineTokenAccessFilter(Set<MachineAuthenticatedResource> resources) {
     for (MachineAuthenticatedResource resource : resources) {
-      allowedMethodsByPath.putAll(resource.getServicePath(), resource.getMethodPaths());
+      allowedMethodsByPath.putAll(resource.getServicePath(), resource.getMethodNames());
     }
   }
 

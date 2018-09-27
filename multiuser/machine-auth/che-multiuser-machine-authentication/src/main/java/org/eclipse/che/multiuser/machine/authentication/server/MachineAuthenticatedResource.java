@@ -19,18 +19,18 @@ public class MachineAuthenticatedResource {
 
   private final String servicePath;
 
-  private final Set<String> methodPaths;
+  private final Set<String> methodNames;
 
-  public MachineAuthenticatedResource(String servicePath, List<String> methodPaths) {
+  public MachineAuthenticatedResource(String servicePath, List<String> methodNames) {
     this.servicePath = servicePath;
-    this.methodPaths = new HashSet<>(methodPaths);
+    this.methodNames = new HashSet<>(methodNames);
   }
 
   public String getServicePath() {
     return servicePath;
   }
 
-  public Set<String> getMethodPaths() {
-    return methodPaths;
+  public Set<String> getMethodNames() {
+    return methodNames;
   }
 }
