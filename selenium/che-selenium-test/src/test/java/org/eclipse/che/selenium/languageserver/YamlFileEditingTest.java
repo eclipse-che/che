@@ -241,7 +241,7 @@ public class YamlFileEditingTest {
     assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_ALTERNATIVES);
 
     // open item by mouse click
-    assistantFindPanel.clickOnActionNodeWithText("apiVersion");
+    assistantFindPanel.clickOnActionNodeWithTextContains("apiVersion");
     editor.waitCursorPosition(13, 1);
 
     // find and open item from Go To Symbol panel
@@ -249,7 +249,7 @@ public class YamlFileEditingTest {
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField("kin");
     assistantFindPanel.waitNode("kind");
-    assistantFindPanel.clickOnActionNodeWithText("kind");
+    assistantFindPanel.clickOnActionNodeWithTextContains("kind");
     editor.waitCursorPosition(14, 1);
 
     // select items by DOWN and UP buttons

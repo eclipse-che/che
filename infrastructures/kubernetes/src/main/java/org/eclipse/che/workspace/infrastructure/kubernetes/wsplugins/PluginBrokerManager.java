@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -43,6 +44,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphase
 @Beta
 public class PluginBrokerManager<E extends KubernetesEnvironment> {
 
+  private final int pluginBrokerWaitingTimeout;
   private final KubernetesNamespaceFactory factory;
   private final EventService eventService;
   private final WorkspaceVolumesStrategy volumesStrategy;
@@ -55,12 +57,14 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       EventService eventService,
       KubernetesEnvironmentProvisioner<E> environmentProvisioner,
       WorkspaceVolumesStrategy volumesStrategy,
-      BrokerEnvironmentFactory<E> brokerEnvironmentConfig) {
+      BrokerEnvironmentFactory<E> brokerEnvironmentConfig,
+      @Named("che.workspace.plugin_broker.wait_timeout_min") int pluginBrokerWaitingTimeout) {
     this.factory = factory;
     this.eventService = eventService;
     this.volumesStrategy = volumesStrategy;
     this.brokerEnvironmentConfig = brokerEnvironmentConfig;
     this.environmentProvisioner = environmentProvisioner;
+    this.pluginBrokerWaitingTimeout = pluginBrokerWaitingTimeout;
   }
 
   /**
@@ -105,6 +109,6 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   }
 
   private WaitBrokerResult getWaitBrokerPhase(CompletableFuture<List<ChePlugin>> toolingFuture) {
-    return new WaitBrokerResult(toolingFuture);
+    return new WaitBrokerResult(toolingFuture, pluginBrokerWaitingTimeout);
   }
 }
