@@ -63,7 +63,7 @@ public class FindReferencesConsoleTab {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(reference).contains(expectedText);
   }
 
-  private boolean isReferenceEqualsText(WebElement reference, String expectedText) {
+  private boolean isReferenceEqualsTo(WebElement reference, String expectedText) {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(reference).equals(expectedText);
   }
 
@@ -79,20 +79,20 @@ public class FindReferencesConsoleTab {
     asList(expectedText).forEach(text -> waitReferenceWithText(text));
   }
 
-  public void clickOnReference(String visibleText) {
+  public void clickOnReference(String referenceText) {
     for (WebElement reference : getReferences()) {
-      if (isReferenceContainsText(reference, visibleText)) {
+      if (isReferenceContainsText(reference, referenceText)) {
         seleniumWebDriverHelper.waitAndClick(reference);
         return;
       }
     }
-    String errorMessage = format("No reference with text \"%s\" has been detected", visibleText);
+    String errorMessage = format("No reference with text \"%s\" has been detected", referenceText);
     throw new RuntimeException(errorMessage);
   }
 
-  public void clickOnReferenceWithTextEqualsTo(String visibleText) {
+  public void clickOnReferenceEqualsTo(String visibleText) {
     for (WebElement reference : getReferences()) {
-      if (isReferenceEqualsText(reference, visibleText)) {
+      if (isReferenceEqualsTo(reference, visibleText)) {
         seleniumWebDriverHelper.waitAndClick(reference);
         return;
       }
@@ -107,9 +107,9 @@ public class FindReferencesConsoleTab {
     seleniumWebDriverHelper.doubleClick();
   }
 
-  public void doubleClickOnReferenceWithTextEqualsTo(String visibleText) {
-    clickOnReferenceWithTextEqualsTo(visibleText);
-    waitReferenceSelection(visibleText);
+  public void doubleClickOnReferenceEqualsTo(String referenceText) {
+    clickOnReferenceEqualsTo(referenceText);
+    waitReferenceSelection(referenceText);
     seleniumWebDriverHelper.doubleClick();
   }
 

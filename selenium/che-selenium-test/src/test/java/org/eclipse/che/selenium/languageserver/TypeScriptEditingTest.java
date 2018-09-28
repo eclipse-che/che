@@ -141,7 +141,7 @@ public class TypeScriptEditingTest {
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     findReferencesConsoleTab.waitAllReferencesWithText(
         referenceInGreeterClass, referenceInTestPrintClass);
-    findReferencesConsoleTab.doubleClickOnReferenceWithTextEqualsTo(referenceInGreeterClass);
+    findReferencesConsoleTab.doubleClickOnReferenceEqualsTo(referenceInGreeterClass);
     editor.waitCursorPosition(25, 23);
   }
 
