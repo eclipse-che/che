@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -74,6 +75,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private final String pvcAccessMode;
   private final PVCSubPathHelper pvcSubPathHelper;
   private final KubernetesNamespaceFactory factory;
+  private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   @Inject
   public CommonPVCStrategy(
@@ -82,19 +84,25 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
       PVCSubPathHelper pvcSubPathHelper,
-      KubernetesNamespaceFactory factory) {
+      KubernetesNamespaceFactory factory,
+      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter) {
     this.pvcName = pvcName;
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
     this.preCreateDirs = preCreateDirs;
     this.pvcSubPathHelper = pvcSubPathHelper;
     this.factory = factory;
+    this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
   }
 
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
+    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+      ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
+      return;
+    }
     final Set<String> subPaths = new HashSet<>();
     final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
     k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
@@ -116,6 +124,9 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   @Override
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
       throws InfrastructureException {
+    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+      return;
+    }
     final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
     if (!claims.isEmpty()) {
       final KubernetesNamespace namespace = factory.create(workspaceId);
@@ -137,7 +148,11 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
-  public void cleanup(String workspaceId) throws InfrastructureException {
+  public void cleanup(Workspace workspace) throws InfrastructureException {
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspace)) {
+      return;
+    }
+    String workspaceId = workspace.getId();
     pvcSubPathHelper.removeDirsAsync(workspaceId, getWorkspaceSubPath(workspaceId));
   }
 
@@ -163,7 +178,6 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
   private void addVolumeIfNeeded(PodSpec podSpec) {
     if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcName))) {
-
       podSpec.getVolumes().add(newVolume(pvcName, pvcName));
     }
   }

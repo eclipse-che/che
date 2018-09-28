@@ -465,7 +465,10 @@ public class KubernetesDeployments {
                     containerEventsHandlers.forEach(h -> h.handle(podEvent));
                   }
                 } catch (ParseException | IllegalArgumentException e) {
-                  LOG.error("Failed to parse last timestamp of the event: {}", podEvent);
+                  LOG.error(
+                      "Failed to parse last timestamp of the event. Cause: {}. Event: {}",
+                      e.getMessage(),
+                      podEvent);
                 }
               }
             }

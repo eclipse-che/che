@@ -22,26 +22,27 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Oleksandr Garagatyi
  */
 @DTO
-public interface BrokerResultEvent {
+public interface BrokerStatusChangedEvent {
 
   /** Status of execution of a broker process. */
   BrokerStatus getStatus();
 
-  BrokerResultEvent withStatus(BrokerStatus status);
+  BrokerStatusChangedEvent withStatus(BrokerStatus status);
 
   /** ID of a workspace this event is related to. */
   String getWorkspaceId();
 
-  BrokerResultEvent withWorkspaceId(String workspaceId);
+  BrokerStatusChangedEvent withWorkspaceId(String workspaceId);
 
   /**
    * Error message that explains the reason of the broker process failure.
    *
-   * <p>When this method returns non-null value method {@link #getTooling()} must return null.
+   * <p>This method must return non-null value if {@link #getStatus() status} is {@link
+   * BrokerStatus#FAILED}.
    */
   String getError();
 
-  BrokerResultEvent withError(String error);
+  BrokerStatusChangedEvent withError(String error);
 
   /**
    * Stringified workspace tooling in JSON format.
@@ -50,9 +51,10 @@ public interface BrokerResultEvent {
    * framework (dashes in field name, field name not matching POJO getter), so we have to stringify
    * it to pass over Che JSON_RPC framework.
    *
-   * <p>When this method returns non-null value method {@link #getError()} must return null.
+   * <p>This method must return non-null value if {@link #getStatus() status} is {@link
+   * BrokerStatus#DONE}.
    */
   String getTooling();
 
-  BrokerResultEvent withTooling(String tooling);
+  BrokerStatusChangedEvent withTooling(String tooling);
 }

@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Singleton
 public class ApiAccessRejectionFilter implements Filter {
-  public static final String ERROR_MESSAGE = "Internal server occurs. API is not accessible";
+  public static final String ERROR_MESSAGE = "Internal server error occurs. API is not accessible";
 
   private static final byte[] ERROR_MESSAGE_IN_BYTES = ERROR_MESSAGE.getBytes();
 
