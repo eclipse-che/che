@@ -17,7 +17,6 @@ import static org.eclipse.che.selenium.pageobject.theia.TheiaDeleteFileDialog.Lo
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 
@@ -45,7 +44,6 @@ public class TheiaDeleteFileDialog {
   }
 
   public void clickOkButton() {
-    WaitUtils.sleepQuietly(2);
     seleniumWebDriverHelper.waitAndClick(By.xpath(OK_BUTTON_XPATH));
   }
 
