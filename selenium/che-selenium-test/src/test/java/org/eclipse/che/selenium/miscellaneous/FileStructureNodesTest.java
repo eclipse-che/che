@@ -144,12 +144,13 @@ public class FileStructureNodesTest {
     URL resource = getClass().getResource("/projects/prOutline");
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
+
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
   void checkFileStructureFilter() {
-    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("Company.java");
@@ -161,7 +162,7 @@ public class FileStructureNodesTest {
       fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8300");
+      fail("Known random failure https://github.com/eclipse/che/issues/8300");
     }
 
     fileStructure.type("get");
@@ -175,30 +176,28 @@ public class FileStructureNodesTest {
 
   @Test(priority = 1)
   public void checkFileStructureNodes() {
-    // check work nodes in the 'file structure' by double click
+    // check work nodes in the File Structure form by double click
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
 
-    // open and close nodes by click
+    // open and close nodes in the File Structure form by click
+    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
 
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
+    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
 
-    // open and close nodes by double click
+    // open and close nodes in the File Structure form by double click
     fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
@@ -214,12 +213,13 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
 
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
+    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
 
+    // close File Structure form by ESC button
     fileStructure.closeFileStructureFormByEscape();
     fileStructure.waitFileStructureFormIsClosed();
   }

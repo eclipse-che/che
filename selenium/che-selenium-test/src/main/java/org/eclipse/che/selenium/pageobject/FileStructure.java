@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -124,9 +125,14 @@ public class FileStructure {
    * @param nameNode is name
    */
   public void clickOnIconNodeInFileStructure(String nameNode) {
+    // we need to wait a little to avoid node closing after quick clicking
     WaitUtils.sleepQuietly(1);
-    seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode)));
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitAndClick(
+                By.xpath(format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode))),
+        StaleElementReferenceException.class);
   }
 
   /**
@@ -135,8 +141,12 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByDoubleClick(String item) {
+    // we need to wait a little to avoid node closing after quick clicking
     WaitUtils.sleepQuietly(1);
-    seleniumWebDriverHelper.moveCursorToAndDoubleClick(getFileStructureItem(item));
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> seleniumWebDriverHelper.moveCursorToAndDoubleClick(getFileStructureItem(item)),
+        StaleElementReferenceException.class);
   }
 
   /**
