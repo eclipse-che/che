@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.XML_FILE;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.BLANK_PROJECT;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
 
@@ -41,7 +42,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-public class ConvertToProjectWithPomFileTest {
+public class CheckConvertingToMavenProjectTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String NEW_FOLDER_NAME = "new-folder";
   private static final String NEW_MODULE_NAME = "new-module";
@@ -73,9 +74,9 @@ public class ConvertToProjectWithPomFileTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = getClass().getResource("/projects/guess-project");
+    URL resource = getClass().getResource("/projects/blank_project_with_read_md_file");
     testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, BLANK_PROJECT);
     ide.open(workspace);
 
     ide.waitOpenedWorkspaceIsReadyToUse();
@@ -170,4 +171,6 @@ public class ConvertToProjectWithPomFileTest {
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
   }
+
+
 }
