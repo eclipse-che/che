@@ -56,7 +56,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
   @Override
   public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
     SecureServerExposer<T> secureServerExposer =
-        secureServerExposerFactoryProvider.get().create(identity);
+        secureServerExposerFactoryProvider.get(k8sEnv).create(identity);
 
     for (Pod podConfig : k8sEnv.getPods().values()) {
       final PodSpec podSpec = podConfig.getSpec();
