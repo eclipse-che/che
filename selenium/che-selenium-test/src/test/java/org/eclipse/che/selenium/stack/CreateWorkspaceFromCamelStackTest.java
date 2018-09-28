@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.stack;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
@@ -42,7 +41,7 @@ public class CreateWorkspaceFromCamelStackTest {
   private static final String CAMEL_FILE_NAME = "camel.xml";
   private static final String PATH_TO_CAMEL_FILE = PROJECT_NAME + "/" + CAMEL_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_CAMEL_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.camel.server.languageserver'";
 
   @Inject private Ide ide;
   @Inject private Dashboard dashboard;
