@@ -68,7 +68,7 @@ gulp.task('html', ['inject', 'partials'], function () {
     .pipe(jsFilter.restore)
     .pipe(cssFilter)
     .pipe($.sourcemaps.init())
-    .pipe($.replace('../../bower_components/material-design-iconfont/iconfont/', '../fonts/'))
+    .pipe($.replace('../../node_modules/material-design-iconfont/iconfont/', '../fonts/'))
     .pipe($.minifyCss({ processImport: false }))
     .pipe($.sourcemaps.write('maps'))
     .pipe(cssFilter.restore)
@@ -111,7 +111,7 @@ gulp.task('existingfonts', function () {
 });
 
 gulp.task('fonts', ['colors', 'outputcolors', 'proxySettings', 'existingfonts'], function () {
-  return gulp.src($.mainBowerFiles().concat('bower_components/material-design-iconfont/iconfont/*'))
+  return gulp.src($.mainBowerFiles().concat('node_modules/material-design-iconfont/iconfont/*'))
     .pipe($.filter('**/*.{eot,svg,ttf,woff,woff2}'))
     .pipe($.flatten())
     .pipe(gulp.dest(path.join(conf.paths.dist, '/fonts/')));

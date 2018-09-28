@@ -179,11 +179,14 @@
                         <configuration>
                             <filesets>
                                 <fileset>
-                                    <directory>${basedir}/bower_components</directory>
+                                    <directory>${basedir}/node_modules</directory>
                                     <followSymlinks>false</followSymlinks>
                                 </fileset>
                                 <fileset>
-                                    <directory>${basedir}/node_modules</directory>
+                                    <directory>${basedir}</directory>
+                                    <includes>
+                                        <include>yarn.lock</include>
+                                    </includes>
                                     <followSymlinks>false</followSymlinks>
                                 </fileset>
                             </filesets>
@@ -193,6 +196,22 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>install-yarn</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build user dashboard -->
+                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                            <arg value="install" />
+                                            <arg value="yarn" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>build-dashboard</id>
                                 <phase>compile</phase>
                                 <goals>
@@ -201,7 +220,7 @@
                                 <configuration>
                                     <target>
                                         <!-- build user dashboard -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <exec dir="${basedir}" executable="yarn" failonerror="true">
                                             <arg value="install" />
                                         </exec>
                                         <!-- Change base HREF of the application that will be hosted on /dashboard -->
@@ -221,7 +240,7 @@
                                 <configuration>
                                     <target unless="skipTests">
                                         <!-- Run unit tests -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <exec dir="${basedir}" executable="yarn" failonerror="true">
                                             <arg value="run" />
                                             <arg value="test" />
                                         </exec>
