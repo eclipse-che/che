@@ -103,9 +103,9 @@ public class ThreadDumpTest {
 
     Location location = stackFrameDump.getLocation();
     assertEquals(location.getLineNumber(), 27);
-    assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest1");
-    assertEquals(location.getExternalResourceId(), 0);
-    assertNull(location.getResourceProjectPath());
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/ThreadDumpTest.java");
+    assertNull(location.getExternalResourceId());
+    assertEquals(location.getResourceProjectPath(), "/test");
 
     Method method = location.getMethod();
     assertEquals(method.getName(), "main");

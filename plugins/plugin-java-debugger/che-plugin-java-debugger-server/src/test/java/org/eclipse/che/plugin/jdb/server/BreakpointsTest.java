@@ -101,7 +101,7 @@ public class BreakpointsTest {
     Breakpoint actualBreakpoint = ((BreakpointActivatedEvent) debuggerEvent).getBreakpoint();
     Location actualLocation = actualBreakpoint.getLocation();
     assertEquals(actualLocation.getLineNumber(), 21);
-    assertEquals(actualLocation.getTarget(), "org.eclipse.BreakpointsTest");
+    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
     assertEquals(actualLocation.getResourceProjectPath(), "/test");
     assertTrue(actualBreakpoint.isEnabled());
 
@@ -110,7 +110,7 @@ public class BreakpointsTest {
 
     Location suspendLocation = ((SuspendEvent) debuggerEvent).getLocation();
     assertEquals(suspendLocation.getLineNumber(), 21);
-    assertEquals(actualLocation.getTarget(), "org.eclipse.BreakpointsTest");
+    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
     assertEquals(actualLocation.getResourceProjectPath(), "/test");
   }
 
