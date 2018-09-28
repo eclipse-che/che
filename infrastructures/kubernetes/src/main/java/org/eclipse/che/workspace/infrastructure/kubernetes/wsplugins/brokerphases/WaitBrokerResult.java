@@ -37,7 +37,6 @@ public class WaitBrokerResult extends BrokerPhase {
 
   public WaitBrokerResult(
       CompletableFuture<List<ChePlugin>> toolingFuture, int resultWaitingTimeout) {
-
     this.toolingFuture = toolingFuture;
     this.resultWaitingTimeout = resultWaitingTimeout;
   }
