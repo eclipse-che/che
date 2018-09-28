@@ -14,6 +14,7 @@
 
 javac -g org/eclipse/BreakpointsTest.java
 javac -g org/eclipse/BreakpointsByConditionTest.java
+javac -g org/eclipse/SuspendPolicyTest.java
 javac -g org/eclipse/ThreadDumpTest.java
 javac -g org/eclipse/StackFrameDumpTest.java
 javac -g org/eclipse/GetValueTest.java
@@ -24,8 +25,8 @@ DEBUG_OPT="-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y
 
 java ${DEBUG_OPT} org.eclipse.BreakpointsTest
 java ${DEBUG_OPT} org.eclipse.BreakpointsByConditionTest
-
 java ${DEBUG_OPT} org.eclipse.ThreadDumpTest
+java ${DEBUG_OPT} org.eclipse.SuspendPolicyTest
 java ${DEBUG_OPT} org.eclipse.StackFrameDumpTest
 java ${DEBUG_OPT} org.eclipse.GetValueTest
 java ${DEBUG_OPT} org.eclipse.EvaluateExpressionTest
