@@ -541,10 +541,14 @@ public class ProjectExplorer {
    */
   public void openItemByPath(String path) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    waitAndSelectItem(path);
 
     seleniumWebDriverHelper.waitNoExceptions(
-        () -> waitItemIsSelected(path), LOAD_PAGE_TIMEOUT_SEC, NoSuchElementException.class);
+        () -> {
+          waitAndSelectItem(path);
+          waitItemIsSelected(path);
+        },
+        LOAD_PAGE_TIMEOUT_SEC,
+        NoSuchElementException.class);
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> {
