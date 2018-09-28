@@ -61,6 +61,13 @@
             "folder": "che-theia-task-extension",
             "checkoutTo": "master",
             "type": "git"
+        },
+        {
+            "name": "@eclipse-che/theia-activity-tracker",
+            "source": "https://github.com/eclipse/che-theia-activity-tracker.git",
+            "folder": "che-theia-activity-tracker",
+            "checkoutTo": "master",
+            "type": "git"
         }
     ]
 }
