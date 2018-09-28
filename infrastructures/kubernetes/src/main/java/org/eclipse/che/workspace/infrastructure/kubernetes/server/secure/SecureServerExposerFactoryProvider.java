@@ -11,12 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure;
 
-import static java.util.stream.Collectors.joining;
+import static java.lang.String.format;
 
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
@@ -25,39 +24,32 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * with name `che.server.secure_exposer`.
  *
  * @author Sergii Leshchenko
+ * @author Oleksandr Garagatyi
  */
-public class SecureServerExposerFactoryProvider<T extends KubernetesEnvironment>
-    implements Provider<SecureServerExposerFactory<T>> {
+public class SecureServerExposerFactoryProvider<T extends KubernetesEnvironment> {
+  private static final String SECURE_EXPOSER_IMPL_PROPERTY = "che.server.secure_exposer";
 
-  private final String serverExposer;
-
-  private final Map<String, SecureServerExposerFactory<T>> factories;
+  private final SecureServerExposerFactory<T> serverExposerFactory;
 
   @Inject
   public SecureServerExposerFactoryProvider(
-      @Named("che.server.secure_exposer") String serverExposer,
+      @Named(SECURE_EXPOSER_IMPL_PROPERTY) String serverExposer,
       Map<String, SecureServerExposerFactory<T>> factories) {
-    this.serverExposer = serverExposer;
-    this.factories = factories;
+    String knownExposers = String.join(", ", factories.keySet());
+    serverExposerFactory = factories.get(serverExposer);
+    if (serverExposerFactory == null) {
+      throw new ConfigurationException(
+          format(
+              "Unknown secure servers exposer '%s' is configured. Currently supported: %s.",
+              serverExposer, knownExposers));
+    }
   }
 
   /**
-   * Creates instance of {@link SecureServerExposerFactory} that will expose secure servers for
-   * runtime with the specified runtime identity.
+   * Creates instance of {@link SecureServerExposerFactory} that will expose secure servers of
+   * Kubernetes environment for runtime with the specified runtime identity.
    */
-  @Override
   public SecureServerExposerFactory<T> get() {
-    SecureServerExposerFactory<T> serverExposerFactory = factories.get(serverExposer);
-    if (serverExposerFactory == null) {
-      throw new ConfigurationException(
-          "Unknown secure servers exposer is configured '"
-              + serverExposer
-              + "'. "
-              + "Currently supported: "
-              + factories.keySet().stream().collect(joining(", "))
-              + ".");
-    }
-
-    return serverExposerFactory;
+    return this.serverExposerFactory;
   }
 }

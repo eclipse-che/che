@@ -111,8 +111,8 @@ public class OpenShiftInfraModule extends AbstractModule {
         MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
     pluginsAppliers.addBinding(OpenShiftEnvironment.TYPE).to(KubernetesPluginsToolingApplier.class);
 
-    bind(new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {})
-        .toProvider(new TypeLiteral<SecureServerExposerFactoryProvider<OpenShiftEnvironment>>() {});
+    bind(SecureServerExposerFactoryProvider.class)
+        .to(new TypeLiteral<SecureServerExposerFactoryProvider<OpenShiftEnvironment>>() {});
 
     MapBinder<String, SecureServerExposerFactory<OpenShiftEnvironment>>
         secureServerExposerFactories =

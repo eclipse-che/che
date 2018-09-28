@@ -54,13 +54,9 @@ public class SecureServerExposerFactoryProviderTest {
   @Test(
       expectedExceptions = ConfigurationException.class,
       expectedExceptionsMessageRegExp =
-          "Unknown secure servers exposer is configured 'non-existing'. Currently supported: exposer1, exposer2.")
+          "Unknown secure servers exposer 'non-existing' is configured. Currently supported: exposer1, exposer2.")
   public void shouldThrowAnExceptionIfConfiguredSecureServerWasNotFound() {
     // given
-    SecureServerExposerFactoryProvider<KubernetesEnvironment> factoryProvider =
-        new SecureServerExposerFactoryProvider<>("non-existing", factories);
-
-    // when
-    factoryProvider.get();
+    new SecureServerExposerFactoryProvider<>("non-existing", factories);
   }
 }

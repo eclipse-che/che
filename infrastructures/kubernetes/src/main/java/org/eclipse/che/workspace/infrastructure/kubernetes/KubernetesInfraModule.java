@@ -131,15 +131,14 @@ public class KubernetesInfraModule extends AbstractModule {
 
     install(new JpaKubernetesRuntimeCacheModule());
 
+    bind(SecureServerExposerFactoryProvider.class)
+        .to(new TypeLiteral<SecureServerExposerFactoryProvider<KubernetesEnvironment>>() {});
+
     MapBinder<String, ChePluginsApplier> chePluginsAppliers =
         MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
     chePluginsAppliers
         .addBinding(KubernetesEnvironment.TYPE)
         .to(KubernetesPluginsToolingApplier.class);
-
-    bind(new TypeLiteral<SecureServerExposerFactory<KubernetesEnvironment>>() {})
-        .toProvider(
-            new TypeLiteral<SecureServerExposerFactoryProvider<KubernetesEnvironment>>() {});
 
     MapBinder<String, SecureServerExposerFactory<KubernetesEnvironment>>
         secureServerExposerFactories =
