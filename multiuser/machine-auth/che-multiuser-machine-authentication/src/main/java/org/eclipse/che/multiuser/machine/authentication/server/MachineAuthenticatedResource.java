@@ -18,7 +18,7 @@ import java.util.Set;
 
 /**
  * Describes resource which can be accessible using machine token. Consists of rest service path
- * with preliminary slash and set of method names,
+ * with preliminary slash and set of method names.
  *
  * @author Max Shaposhnyk
  */
