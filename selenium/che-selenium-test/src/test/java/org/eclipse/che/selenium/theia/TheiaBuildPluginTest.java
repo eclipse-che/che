@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -28,12 +29,15 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
+import org.openqa.selenium.Keys;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
+  private static final String PROJECT_NAME = "che-dummy-plugin";
   private static final String GIT_CLONE_COMMAND =
       "git clone https://github.com/ws-skeleton/che-dummy-plugin.git";
   private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
@@ -98,5 +102,16 @@ public class TheiaBuildPluginTest {
     theiaTerminal.clickOnTerminal();
     theiaTerminal.performCommand(BUILD_COMMAND);
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT);
+  }
+
+  @Test(priority = 1)
+  public void hostedModeShouldWork() {
+    theiaProjectTree.waitItem(PROJECT_NAME);
+    WaitUtils.sleepQuietly(5);
+
+    seleniumWebDriverHelper.sendKeys(Keys.chord(Keys.CONTROL, Keys.SHIFT, "p"));
+
+    WaitUtils.sleepQuietly(10);
+    Assert.fail();
   }
 }

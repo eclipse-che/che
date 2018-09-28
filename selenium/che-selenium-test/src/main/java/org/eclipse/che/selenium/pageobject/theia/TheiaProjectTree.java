@@ -58,6 +58,11 @@ public class TheiaProjectTree {
     return String.format(EXPAND_ITEM_ICON_XPATH_TEMPLATE, itemPath);
   }
 
+  public void waitItem(String itemPath) {
+    String itemId = getProjectItemId(itemPath);
+    seleniumWebDriverHelper.waitVisibility(By.id(itemId));
+  }
+
   public void waitItemDisappearance(String itemPath) {
     String itemId = getProjectItemId(itemPath);
     seleniumWebDriverHelper.waitInvisibility(By.id(itemId));
