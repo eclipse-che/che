@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
@@ -54,12 +55,14 @@ public class WorkspacePVCCleaner {
     if (pvcEnabled && !namespaceFactory.isPredefined())
       eventService.subscribe(
           event -> {
-            final String workspaceId = event.getWorkspace().getId();
+            final Workspace workspace = event.getWorkspace();
             try {
-              strategy.cleanup(workspaceId);
+              strategy.cleanup(workspace);
             } catch (InfrastructureException ex) {
               LOG.error(
-                  "Failed to cleanup workspace '{}' data. Cause: {}", workspaceId, ex.getMessage());
+                  "Failed to cleanup workspace '{}' data. Cause: {}",
+                  workspace.getId(),
+                  ex.getMessage());
             }
           },
           WorkspaceRemovedEvent.class);

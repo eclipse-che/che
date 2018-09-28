@@ -27,6 +27,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.DeployBroker;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.ListenBrokerEvents;
@@ -48,8 +49,9 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   private final KubernetesNamespaceFactory factory;
   private final EventService eventService;
   private final WorkspaceVolumesStrategy volumesStrategy;
-  private final BrokerEnvironmentFactory<E> brokerEnvironmentConfig;
+  private final BrokerEnvironmentFactory<E> brokerEnvironmentFactory;
   private final KubernetesEnvironmentProvisioner<E> environmentProvisioner;
+  private final UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
 
   @Inject
   public PluginBrokerManager(
@@ -57,14 +59,16 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       EventService eventService,
       KubernetesEnvironmentProvisioner<E> environmentProvisioner,
       WorkspaceVolumesStrategy volumesStrategy,
-      BrokerEnvironmentFactory<E> brokerEnvironmentConfig,
+      BrokerEnvironmentFactory<E> brokerEnvironmentFactory,
+      UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory,
       @Named("che.workspace.plugin_broker.wait_timeout_min") int pluginBrokerWaitingTimeout) {
     this.factory = factory;
     this.eventService = eventService;
     this.volumesStrategy = volumesStrategy;
-    this.brokerEnvironmentConfig = brokerEnvironmentConfig;
+    this.brokerEnvironmentFactory = brokerEnvironmentFactory;
     this.environmentProvisioner = environmentProvisioner;
     this.pluginBrokerWaitingTimeout = pluginBrokerWaitingTimeout;
+    this.unrecoverablePodEventListenerFactory = unrecoverablePodEventListenerFactory;
   }
 
   /**
@@ -80,16 +84,19 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     String workspaceId = runtimeID.getWorkspaceId();
     CompletableFuture<List<ChePlugin>> toolingFuture = new CompletableFuture<>();
     KubernetesNamespace kubernetesNamespace = factory.create(workspaceId);
-    E brokerEnvironment = brokerEnvironmentConfig.create(pluginsMeta, runtimeID);
 
+    E brokerEnvironment = brokerEnvironmentFactory.create(pluginsMeta, runtimeID);
     environmentProvisioner.provision(brokerEnvironment, runtimeID);
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, toolingFuture);
     PrepareStorage prepareStorage = getPrepareStoragePhase(workspaceId, brokerEnvironment);
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(toolingFuture);
-    DeployBroker deployBroker = getDeployBrokerPhase(kubernetesNamespace, brokerEnvironment);
+    DeployBroker deployBroker =
+        getDeployBrokerPhase(
+            runtimeID.getWorkspaceId(), kubernetesNamespace, brokerEnvironment, toolingFuture);
 
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
+
     return listenBrokerEvents.execute();
   }
 
@@ -104,8 +111,16 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   }
 
   private DeployBroker getDeployBrokerPhase(
-      KubernetesNamespace kubernetesNamespace, KubernetesEnvironment brokerEnvironment) {
-    return new DeployBroker(kubernetesNamespace, brokerEnvironment);
+      String workspaceId,
+      KubernetesNamespace kubernetesNamespace,
+      KubernetesEnvironment brokerEnvironment,
+      CompletableFuture<List<ChePlugin>> toolingFuture) {
+    return new DeployBroker(
+        workspaceId,
+        kubernetesNamespace,
+        brokerEnvironment,
+        toolingFuture,
+        unrecoverablePodEventListenerFactory);
   }
 
   private WaitBrokerResult getWaitBrokerPhase(CompletableFuture<List<ChePlugin>> toolingFuture) {

@@ -45,8 +45,8 @@ public abstract class AbstractBootstrapper {
       EventService eventService) {
     this.machineName = machineName;
     this.eventService = eventService;
-    this.installerEndpoint = outputEndpoint;
-    this.outputEndpoint = installerEndpoint;
+    this.installerEndpoint = installerEndpoint;
+    this.outputEndpoint = outputEndpoint;
     this.bootstrapperStatusListener =
         event -> {
           BootstrapperStatus status = event.getStatus();
