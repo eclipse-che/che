@@ -23,7 +23,7 @@
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
        <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/SuspendPolicyTest.java</source>
+            <source>${project.build.testOutputDirectory}/testclasses/SuspendPolicyTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
