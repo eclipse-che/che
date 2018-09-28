@@ -1,6 +1,6 @@
 How to run Selenium tests
 ------------------
-
+#this row added only for running CI tests iteration and should be removed
 #### 1. Register OAuth application 
 
 Go to [OAuth application page](https://github.com/settings/applications/new) and register a new application:
