@@ -92,28 +92,26 @@ public class TheiaTerminal {
 
     seleniumWebDriverHelper.moveCursorTo(getTerminalTextLayer());
 
-    // WaitUtils.sleepQuietly(3);
-
+    // shift to top left corner
     seleniumWebDriverHelper
         .getAction()
         .moveByOffset(xBeginCoordinateShift, yBeginCoordinateShift)
         .perform();
 
-    // WaitUtils.sleepQuietly(3);
-
+    // select all terminal area by mouse
     action.clickAndHold().perform();
     seleniumWebDriverHelper
         .getAction()
         .moveByOffset(textLayerSize.getWidth(), textLayerSize.getHeight())
         .perform();
 
-    // WaitUtils.sleepQuietly(3);
-
     action.release().perform();
 
+    // copy terminal output to clipboard
     String keysCombination = Keys.chord(CONTROL, INSERT);
     seleniumWebDriverHelper.sendKeys(keysCombination);
 
+    // cancel terminal area selection
     clickOnTerminal();
   }
 
@@ -121,11 +119,7 @@ public class TheiaTerminal {
     final int timeout = LOADER_TIMEOUT_SEC;
 
     seleniumWebDriverHelper.waitSuccessCondition(
-        driver -> {
-          copyTerminalTextToClipboard();
-          return getTerminalOutput().contains(expectedText);
-        },
-        timeout);
+        driver -> getTerminalOutput().contains(expectedText), timeout);
   }
 
   public String getTerminalOutput() {
@@ -134,6 +128,8 @@ public class TheiaTerminal {
 
     final String expectedTextFileName = "Untitled.txt";
     String terminalOutput = "";
+
+    copyTerminalTextToClipboard();
 
     // create text file
     theiaProjectTree.clickOnProjectsRootItem();

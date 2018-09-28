@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.selenium.theia;
 
+import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
@@ -81,7 +83,7 @@ public class TheiaBuildPluginTest {
     workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
-  @Test
+  @Test(groups = OPENSHIFT)
   public void pluginShouldBeBuilt() {
     theiaProjectTree.clickOnFilesTab();
     theiaIde.runMenuCommand("File", "Open New Terminal");
