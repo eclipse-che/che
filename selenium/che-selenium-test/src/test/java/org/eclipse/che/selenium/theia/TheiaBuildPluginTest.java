@@ -31,7 +31,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class TheiaStackTest {
+public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
   private static final String GIT_CLONE_COMMAND =
       "git clone https://github.com/ws-skeleton/che-dummy-plugin.git";
@@ -82,19 +82,19 @@ public class TheiaStackTest {
   }
 
   @Test
-  public void testing() {
+  public void pluginShouldBeBuilt() {
     theiaProjectTree.clickOnFilesTab();
     theiaIde.runMenuCommand("File", "Open New Terminal");
 
-    theiaTerminal.clickOnTerminalTextArea();
+    theiaTerminal.clickOnTerminal();
     theiaTerminal.performCommand(GIT_CLONE_COMMAND);
     theiaTerminal.waitTerminalOutput(EXPECTED_CLONE_OUTPUT);
 
-    theiaTerminal.clickOnTerminalTextArea();
+    theiaTerminal.clickOnTerminal();
     theiaTerminal.performCommand(GO_TO_DIRECTORY_COMMAND);
     theiaTerminal.waitTerminalOutput(GO_TO_DIRECTORY_COMMAND);
 
-    theiaTerminal.clickOnTerminalTextArea();
+    theiaTerminal.clickOnTerminal();
     theiaTerminal.performCommand(BUILD_COMMAND);
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT);
   }

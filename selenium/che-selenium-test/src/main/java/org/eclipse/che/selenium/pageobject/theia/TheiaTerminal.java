@@ -12,8 +12,8 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_CURSOR_LAYER;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_TEXT_LAYER;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_UPPEST_LAYER;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.INSERT;
@@ -59,7 +59,7 @@ public class TheiaTerminal {
   public interface Locators {
     String TERMINAL_BODY_ID_TEMPLATE = "terminal-%s";
     String TERMINAL_TEXT_LAYER = "//canvas[@class='xterm-text-layer']";
-    String TERMINAL_UPPEST_LAYER = "//canvas[@class='xterm-cursor-layer']";
+    String TERMINAL_CURSOR_LAYER = "//canvas[@class='xterm-cursor-layer']";
   }
 
   private WebElement getTerminalTextLayer() {
@@ -70,16 +70,16 @@ public class TheiaTerminal {
     seleniumWebDriverHelper.waitVisibility(By.xpath(TERMINAL_TEXT_LAYER));
   }
 
-  public void clickOnTerminalTextArea() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(TERMINAL_UPPEST_LAYER));
+  public void clickOnTerminal() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(TERMINAL_CURSOR_LAYER));
   }
 
-  public void type(String expectedText) {
-    seleniumWebDriverHelper.sendKeys(expectedText);
+  public void enterText(String text) {
+    seleniumWebDriverHelper.sendKeys(text);
   }
 
   public void performCommand(String command) {
-    type(command);
+    enterText(command);
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
@@ -114,7 +114,7 @@ public class TheiaTerminal {
     String keysCombination = Keys.chord(CONTROL, INSERT);
     seleniumWebDriverHelper.sendKeys(keysCombination);
 
-    clickOnTerminalTextArea();
+    clickOnTerminal();
   }
 
   public void waitTerminalOutput(String expectedText) {
@@ -129,19 +129,19 @@ public class TheiaTerminal {
   }
 
   public String getTerminalOutput() {
-    // this is workaround and should be resolved by issue:
+    // TODO this is workaround and should be resolved by issue:
     // https://github.com/eclipse/che/issues/11387
 
     final String expectedTextFileName = "Untitled.txt";
     String terminalOutput = "";
 
     // create text file
-    theiaProjectTree.clickOnProjectRootFolder();
+    theiaProjectTree.clickOnProjectsRootItem();
     theiaIde.runMenuCommand("File", "New File");
     theiaNewFileDialog.waitDialog();
-    theiaNewFileDialog.waitInputFieldValue(expectedTextFileName);
+    theiaNewFileDialog.waitNewFileNameValue(expectedTextFileName);
     theiaNewFileDialog.clickOkButton();
-    theiaNewFileDialog.waitDialogClossing();
+    theiaNewFileDialog.waitDialogClosed();
 
     // check text file availability
     theiaEditor.waitEditorTab(expectedTextFileName);
@@ -153,12 +153,12 @@ public class TheiaTerminal {
 
     // delete text file
     theiaProjectTree.clickOnItem(expectedTextFileName);
-    theiaProjectTree.waitItemSelecting(expectedTextFileName);
+    theiaProjectTree.waitItemSelected(expectedTextFileName);
     seleniumWebDriverHelper.sendKeys(Keys.DELETE.toString());
     theiaDeleteFileDialog.waitDialog();
     theiaDeleteFileDialog.clickOkButton();
     theiaDeleteFileDialog.waitDialogDesapearance();
-    theiaProjectTree.waitItemDesapearance(expectedTextFileName);
+    theiaProjectTree.waitItemDisappearance(expectedTextFileName);
     theiaEditor.waitEditorTabDesapearance(expectedTextFileName);
 
     return terminalOutput;

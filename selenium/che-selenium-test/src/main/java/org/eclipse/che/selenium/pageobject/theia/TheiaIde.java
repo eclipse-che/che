@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPA
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
@@ -27,10 +28,12 @@ import org.openqa.selenium.support.PageFactory;
 public class TheiaIde {
 
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
   TheiaIde(SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -120,5 +123,10 @@ public class TheiaIde {
   public void switchToIdeFrame() {
     seleniumWebDriverHelper.waitAndSwitchToFrame(
         By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+  }
+
+  @PreDestroy
+  public void close() {
+    seleniumWebDriver.quit();
   }
 }

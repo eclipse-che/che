@@ -12,7 +12,7 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog.Locators.CLOSE_ICON_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog.Locators.INPUT_FIELD_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog.Locators.FILE_NAME_FIELD_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog.Locators.OK_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog.Locators.TITLE_XPATH;
 
@@ -32,7 +32,7 @@ public class TheiaNewFileDialog {
 
   public interface Locators {
     String TITLE_XPATH = "//div[@class='dialogBlock']//div[text()='New File']";
-    String INPUT_FIELD_XPATH = "//div[@class='dialogBlock']//div[@class='dialogContent']/input";
+    String FILE_NAME_FIELD_XPATH = "//div[@class='dialogBlock']//div[@class='dialogContent']/input";
     String OK_BUTTON_XPATH =
         "//div[@class='dialogBlock']//div[@class='dialogControl']//button[text()='OK']";
     String CLOSE_ICON_XPATH =
@@ -41,11 +41,11 @@ public class TheiaNewFileDialog {
 
   public void waitDialog() {
     waitTitle();
-    waitInputField();
+    waitNewFileNameField();
     waitOkButton();
   }
 
-  public void waitDialogClossing() {
+  public void waitDialogClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(TITLE_XPATH));
   }
 
@@ -53,16 +53,16 @@ public class TheiaNewFileDialog {
     seleniumWebDriverHelper.waitVisibility(By.xpath(TITLE_XPATH));
   }
 
-  public void waitInputField() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(INPUT_FIELD_XPATH));
+  public void waitNewFileNameField() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(FILE_NAME_FIELD_XPATH));
   }
 
-  public void typeToInputField(String text) {
-    seleniumWebDriverHelper.setValue(By.xpath(INPUT_FIELD_XPATH), text);
+  public void enterNewFileName(String fileName) {
+    seleniumWebDriverHelper.setValue(By.xpath(FILE_NAME_FIELD_XPATH), fileName);
   }
 
-  public void waitInputFieldValue(String expectedText) {
-    seleniumWebDriverHelper.waitValueEqualsTo(By.xpath(INPUT_FIELD_XPATH), expectedText);
+  public void waitNewFileNameValue(String expectedFileName) {
+    seleniumWebDriverHelper.waitValueEqualsTo(By.xpath(FILE_NAME_FIELD_XPATH), expectedFileName);
   }
 
   public void waitOkButton() {

@@ -54,20 +54,20 @@ public class TheiaProjectTree {
     return format(TREE_ITEM_ID_TEMPLATE, itemPath);
   }
 
-  private String getExpandNodeIconXpath(String itemPath) {
+  private String getExpandItemIconXpath(String itemPath) {
     return String.format(EXPAND_ITEM_ICON_XPATH_TEMPLATE, itemPath);
   }
 
-  public void waitItemDesapearance(String itemPath) {
+  public void waitItemDisappearance(String itemPath) {
     String itemId = getProjectItemId(itemPath);
     seleniumWebDriverHelper.waitInvisibility(By.id(itemId));
   }
 
-  public void waitProjectsRootFolder() {
+  public void waitProjectsRootItem() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(ROOT_PROJECTS_FOLDER_ID));
   }
 
-  public void clickOnProjectRootFolder() {
+  public void clickOnProjectsRootItem() {
     seleniumWebDriverHelper.waitAndClick(By.id(ROOT_PROJECTS_FOLDER_ID));
   }
 
@@ -82,7 +82,7 @@ public class TheiaProjectTree {
   }
 
   public boolean isItemExpanded(String itemPath) {
-    final String itemXpath = getExpandNodeIconXpath(itemPath);
+    final String itemXpath = getExpandItemIconXpath(itemPath);
     final String collapsedNodeClassName = "theia-mod-collapsed";
 
     return !seleniumWebDriverHelper
@@ -90,23 +90,26 @@ public class TheiaProjectTree {
         .contains(collapsedNodeClassName);
   }
 
-  public void waitItemExpanding(String itemPath) {
+  public void waitItemExpanded(String itemPath) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isItemExpanded(itemPath));
   }
 
-  public void waitItemCollapsing(String itemPath) {
+  public void waitItemCollapsed(String itemPath) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isItemExpanded(itemPath));
   }
 
-  public void waitItemSelecting(String itemPath) {
+  public void waitItemSelected(String itemPath) {
     String itemXpath = format(SELECTED_ITEM_XPATH_TEMPLATE, itemPath);
     seleniumWebDriverHelper.waitVisibility(By.xpath(itemXpath));
+
+    // Selection doesn't fully complete after the display. Have to wait for the end of the selection
+    // logic.
     WaitUtils.sleepQuietly(2);
   }
 
   public void openItem(String itemPath) {
     clickOnItem(itemPath);
-    waitItemSelecting(itemPath);
+    waitItemSelected(itemPath);
     doubleClickOnItem(itemPath);
   }
 }
