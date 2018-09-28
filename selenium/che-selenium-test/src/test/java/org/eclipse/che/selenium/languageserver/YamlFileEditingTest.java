@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -54,7 +53,7 @@ public class YamlFileEditingTest {
   private static final String YAML_FILE_NAME = "openshift.yaml";
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_YAML_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.yaml.server.languageserver'";
   private static final List<String> EXPECTED_GO_TO_SYMBOL_ALTERNATIVES =
       Arrays.asList("apiVersionsymbols (194)", "kind", "metadata");
 
