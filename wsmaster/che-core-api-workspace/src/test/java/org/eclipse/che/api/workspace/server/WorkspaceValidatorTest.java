@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -330,7 +331,7 @@ public class WorkspaceValidatorTest {
   public void shouldFailValidationIfBothPluginsAndInstallersPresent() throws Exception {
     // createConfig creates config with one installer by default
     final WorkspaceConfigDto config = createConfig();
-    config.getAttributes().put(WorkspaceValidator.PLUGINS_ATTRIBUTE, "plugin1");
+    config.getAttributes().put(Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, "plugin1");
 
     wsValidator.validateConfig(config);
   }
@@ -341,7 +342,7 @@ public class WorkspaceValidatorTest {
   public void shouldFailValidationIfBothEditorAndInstallersPresent() throws Exception {
     // createConfig creates config with one installer by default
     final WorkspaceConfigDto config = createConfig();
-    config.getAttributes().put(WorkspaceValidator.EDITOR_ATTRIBUTE, "editor1");
+    config.getAttributes().put(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "editor1");
 
     wsValidator.validateConfig(config);
   }
