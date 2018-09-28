@@ -11,19 +11,26 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
+import static java.util.Arrays.asList;
+
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+/**
+ * Describes resource which can be accessible using machine token. Consists of rest service path
+ * with preliminary slash and set of method names,
+ *
+ * @author Max Shaposhnyk
+ */
 public class MachineAuthenticatedResource {
 
   private final String servicePath;
 
   private final Set<String> methodNames;
 
-  public MachineAuthenticatedResource(String servicePath, List<String> methodNames) {
+  public MachineAuthenticatedResource(String servicePath, String... methodNames) {
     this.servicePath = servicePath;
-    this.methodNames = new HashSet<>(methodNames);
+    this.methodNames = new HashSet(asList(methodNames));
   }
 
   public String getServicePath() {
