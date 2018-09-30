@@ -28,7 +28,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityCon
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.mockito.InOrder;
@@ -54,7 +54,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter<KubernetesEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
-  @Mock private RamLimitProvisioner ramLimitProvisioner;
+  @Mock private RamLimitRequestProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   @Mock private SecurityContextProvisioner securityContextProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;

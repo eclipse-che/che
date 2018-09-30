@@ -154,4 +154,16 @@ public class ContainersTest {
       {"10G", null},
     };
   }
+
+  @Test(dataProvider = "k8sNotionRamLimitProvider")
+  public void testAddContainerRamRequestInK8sNotion(
+      String ramRequest, ResourceRequirements resources) {
+    when(container.getResources()).thenReturn(resources);
+
+    Containers.addRamRequest(container, ramRequest);
+
+    verify(container).setResources(resourceCaptor.capture());
+    ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getRequests().get("memory").getAmount(), ramRequest);
+  }
 }

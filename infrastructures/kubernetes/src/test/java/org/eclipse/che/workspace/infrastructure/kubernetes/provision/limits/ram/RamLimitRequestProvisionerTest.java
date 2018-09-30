@@ -11,21 +11,21 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram;
 
+import static com.google.common.collect.ImmutableMap.of;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Collections;
-import java.util.HashMap;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -38,36 +38,43 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link RamLimitProvisioner}.
+ * Tests {@link RamLimitRequestProvisioner}.
  *
  * @author Anton Korneta
  */
 @Listeners(MockitoTestNGListener.class)
-public class RamLimitProvisionerTest {
+public class RamLimitRequestProvisionerTest {
 
   public static final String POD_NAME = "web";
   public static final String CONTAINER_NAME = "app";
   public static final String MACHINE_NAME = POD_NAME + '/' + CONTAINER_NAME;
   public static final String RAM_LIMIT_ATTRIBUTE = "2147483648";
+  public static final String RAM_REQUEST_ATTRIBUTE = "1234567890";
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity identity;
   @Mock private Pod pod;
-  @Mock private Container container;
   @Mock private InternalMachineConfig internalMachineConfig;
 
   @Captor private ArgumentCaptor<ResourceRequirements> resourceCaptor;
 
-  private RamLimitProvisioner ramLimitProvisioner;
+  private Container container;
+  private RamLimitRequestProvisioner ramProvisioner;
 
   @BeforeMethod
   public void setup() {
-    ramLimitProvisioner = new RamLimitProvisioner();
-    when(k8sEnv.getPods()).thenReturn(ImmutableMap.of(POD_NAME, pod));
-    when(k8sEnv.getMachines()).thenReturn(ImmutableMap.of(MACHINE_NAME, internalMachineConfig));
+    ramProvisioner = new RamLimitRequestProvisioner();
+    container = new Container();
+    container.setName(CONTAINER_NAME);
+    when(k8sEnv.getPods()).thenReturn(of(POD_NAME, pod));
+    when(k8sEnv.getMachines()).thenReturn(of(MACHINE_NAME, internalMachineConfig));
     when(internalMachineConfig.getAttributes())
-        .thenReturn(ImmutableMap.of(MachineConfig.MEMORY_LIMIT_ATTRIBUTE, RAM_LIMIT_ATTRIBUTE));
-    when(container.getName()).thenReturn(CONTAINER_NAME);
+        .thenReturn(
+            of(
+                MEMORY_LIMIT_ATTRIBUTE,
+                RAM_LIMIT_ATTRIBUTE,
+                MEMORY_REQUEST_ATTRIBUTE,
+                RAM_REQUEST_ATTRIBUTE));
     final ObjectMeta podMetadata = mock(ObjectMeta.class);
     when(podMetadata.getName()).thenReturn(POD_NAME);
     when(pod.getMetadata()).thenReturn(podMetadata);
@@ -78,25 +85,45 @@ public class RamLimitProvisionerTest {
 
   @Test
   public void testProvisionRamLimitAttributeToContainer() throws Exception {
-    ramLimitProvisioner.provision(k8sEnv, identity);
+    ramProvisioner.provision(k8sEnv, identity);
 
-    verify(container).setResources(resourceCaptor.capture());
-    final ResourceRequirements captured = resourceCaptor.getValue();
-    assertEquals(captured.getLimits().get("memory").getAmount(), RAM_LIMIT_ATTRIBUTE);
+    assertEquals(
+        container.getResources().getLimits().get("memory").getAmount(), RAM_LIMIT_ATTRIBUTE);
   }
 
   @Test
   public void testOverridesContainerRamLimitFromMachineAttribute() throws Exception {
-    final ResourceRequirements containerResource = mock(ResourceRequirements.class);
-    final HashMap<String, Quantity> limits = new HashMap<>();
-    limits.put("memory", new Quantity("3221225472"));
-    when(containerResource.getLimits()).thenReturn(limits);
-    when(container.getResources()).thenReturn(containerResource);
+    ResourceRequirements resourceRequirements =
+        new ResourceRequirementsBuilder()
+            .addToLimits(of("memory", new Quantity("3221225472")))
+            .build();
+    container.setResources(resourceRequirements);
 
-    ramLimitProvisioner.provision(k8sEnv, identity);
+    ramProvisioner.provision(k8sEnv, identity);
 
-    verify(container).setResources(resourceCaptor.capture());
-    final ResourceRequirements captured = resourceCaptor.getValue();
-    assertEquals(captured.getLimits().get("memory").getAmount(), RAM_LIMIT_ATTRIBUTE);
+    assertEquals(
+        container.getResources().getLimits().get("memory").getAmount(), RAM_LIMIT_ATTRIBUTE);
+  }
+
+  @Test
+  public void testProvisionRamRequestAttributeToContainer() throws Exception {
+    ramProvisioner.provision(k8sEnv, identity);
+
+    assertEquals(
+        container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_ATTRIBUTE);
+  }
+
+  @Test
+  public void testOverridesContainerRamRequestFromMachineAttribute() throws Exception {
+    ResourceRequirements resourceRequirements =
+        new ResourceRequirementsBuilder()
+            .addToRequests(of("memory", new Quantity("3221225472")))
+            .build();
+    container.setResources(resourceRequirements);
+
+    ramProvisioner.provision(k8sEnv, identity);
+
+    assertEquals(
+        container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_ATTRIBUTE);
   }
 }

@@ -25,7 +25,6 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
-import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import java.util.Arrays;
@@ -44,6 +43,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
  * Creates {@link KubernetesEnvironment} with everything needed to deploy Plugin broker.
@@ -143,9 +143,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
             .withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", BROKER_VOLUME, true, null))
             .withEnv(envVars.stream().map(this::asEnvVar).collect(toList()))
             .withNewResources()
-            .withLimits(singletonMap("memory", new Quantity("250Mi")))
             .endResources()
             .build();
+    Containers.addRamLimit(container, "250Mi");
+    Containers.addRamRequest(container, "250Mi");
     return new PodBuilder()
         .withNewMetadata()
         .withName(podName)

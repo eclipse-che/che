@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PVCSubPathHelper.JOB_MOUNT_PATH;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PVCSubPathHelper.MKDIR_COMMAND_BASE;
@@ -28,6 +29,9 @@ import static org.testng.Assert.assertEquals;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -109,6 +113,27 @@ public class PVCSubPathHelperTest {
                 Arrays.stream(MKDIR_COMMAND_BASE),
                 Stream.of(JOB_MOUNT_PATH + '/' + WORKSPACE_ID + PROJECTS_PATH))
             .collect(toList());
+    assertEquals(actual, expected);
+    verify(osDeployments).wait(anyString(), anyInt(), any());
+    verify(podStatus).getPhase();
+    verify(osDeployments).delete(anyString());
+    verify(securityContextProvisioner).provision(any());
+  }
+
+  @Test
+  public void testSetMemoryLimitAndRequest() throws Exception {
+    when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
+
+    pvcSubPathHelper.createDirs(WORKSPACE_ID, WORKSPACE_ID + PROJECTS_PATH);
+
+    verify(osDeployments).create(podCaptor.capture());
+    ResourceRequirements actual =
+        podCaptor.getValue().getSpec().getContainers().get(0).getResources();
+    ResourceRequirements expected =
+        new ResourceRequirementsBuilder()
+            .addToLimits(of("memory", new Quantity(jobMemoryLimit)))
+            .addToRequests(of("memory", new Quantity(jobMemoryLimit)))
+            .build();
     assertEquals(actual, expected);
     verify(osDeployments).wait(anyString(), anyInt(), any());
     verify(podStatus).getPhase();

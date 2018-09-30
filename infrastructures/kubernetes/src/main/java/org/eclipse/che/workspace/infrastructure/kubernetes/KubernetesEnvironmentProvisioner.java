@@ -28,7 +28,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityCon
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 
@@ -53,7 +53,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private ServersConverter<KubernetesEnvironment> serversConverter;
     private EnvVarsConverter envVarsConverter;
     private RestartPolicyRewriter restartPolicyRewriter;
-    private RamLimitProvisioner ramLimitProvisioner;
+    private RamLimitRequestProvisioner ramLimitProvisioner;
     private InstallerServersPortProvisioner installerServersPortProvisioner;
     private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
     private SecurityContextProvisioner securityContextProvisioner;
@@ -71,7 +71,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         EnvVarsConverter envVarsConverter,
         RestartPolicyRewriter restartPolicyRewriter,
         WorkspaceVolumesStrategy volumesStrategy,
-        RamLimitProvisioner ramLimitProvisioner,
+        RamLimitRequestProvisioner ramLimitProvisioner,
         InstallerServersPortProvisioner installerServersPortProvisioner,
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,

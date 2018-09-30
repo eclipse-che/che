@@ -23,7 +23,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminat
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -53,7 +53,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter<OpenShiftEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
-  @Mock private RamLimitProvisioner ramLimitProvisioner;
+  @Mock private RamLimitRequestProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;

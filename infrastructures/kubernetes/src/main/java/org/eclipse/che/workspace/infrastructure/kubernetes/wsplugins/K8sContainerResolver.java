@@ -78,6 +78,7 @@ public class K8sContainerResolver {
               memoryLimit, e.getMessage()));
     }
     Containers.addRamLimit(container, memoryLimit);
+    Containers.addRamRequest(container, memoryLimit);
   }
 
   private List<ContainerPort> getContainerPorts() {
