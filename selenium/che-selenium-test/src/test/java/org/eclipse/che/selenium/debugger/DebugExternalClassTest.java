@@ -95,12 +95,6 @@ public class DebugExternalClassTest {
     debugConfig.createConfig(PROJECT);
 
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_CLASS);
-
-    // perform command "Maven > Reimport" to avoid "Type with fully qualified name:
-    // ch.qos.logback.classic.Logger was not found" error
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT);
-    projectExplorer.clickOnItemInContextMenu(MAVEN);
-    projectExplorer.clickOnNewContextMenuItem(REIMPORT);
   }
 
   @BeforeMethod
