@@ -77,6 +77,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
 
     toastLoader.clickOnToastLoaderButton("Start");
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSStartedMessage();
 
     // check state of the project
     checkFilesAreOpened();
