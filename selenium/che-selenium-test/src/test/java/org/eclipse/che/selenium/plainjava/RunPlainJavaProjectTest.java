@@ -101,7 +101,6 @@ public class RunPlainJavaProjectTest {
     // import the project and configure
     projectExplorer.waitProjectExplorer();
     importPlainJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     // check library into configure classpath form
     projectExplorer.quickExpandWithJavaScript();
@@ -211,6 +210,8 @@ public class RunPlainJavaProjectTest {
     projectWizard.clickSaveButton();
     projectWizard.waitCloseProjectConfigForm();
     projectExplorer.waitVisibilityByName(nameApp);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
 
     // check that srs folder has been set properly
     menu.runCommand(PROJECT, CONFIGURATION);
