@@ -69,6 +69,7 @@ public class RunToCursorTest {
 
     ide.open(ws);
     projectExplorer.waitItem(PROJECT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick("build");
     projectExplorer.quickExpandWithJavaScript();
