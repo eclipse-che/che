@@ -212,7 +212,6 @@ public class RunPlainJavaProjectTest {
     projectExplorer.waitVisibilityByName(nameApp);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
-
     // check that srs folder has been set properly
     menu.runCommand(PROJECT, CONFIGURATION);
     projectWizard.waitCreateProjectWizardForm();
