@@ -172,52 +172,46 @@ public class FileStructureNodesTest {
     fileStructure.type("i");
     fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_I);
     fileStructure.type(ESCAPE.toString());
+
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
   }
 
   @Test(priority = 1)
   public void checkFileStructureNodes() {
-    // check work nodes in the File Structure form by double click
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-
-    // open and close nodes in the File Structure form by click
+    // close nodes in the File Structure form by click
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
 
+    // open nodes in the File Structure form by click
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
 
-    // open and close nodes in the File Structure form by double click
+    // close nodes in the File Structure form by double click
     fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+
+    // open nodes in the File Structure form by double click
+    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
 
-    // close and open root node
+    // close and open root node in the File Structure form
     fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
-
-    fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
 
     // close File Structure form by ESC button
     fileStructure.closeFileStructureFormByEscape();

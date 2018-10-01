@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
-import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -188,7 +187,7 @@ public class FileStructure {
                 "//div[@id='gwt-debug-file-structure-mainPanel']//div[@id[contains(.,'gwt-uid-')]]//div[text()]"));
 
     for (int i = 0; i < items.size(); i++) {
-      seleniumWebDriverHelper.getAction().sendKeys(ARROW_DOWN).perform();
+      seleniumWebDriverHelper.pressArrowDown();
       WaitUtils.sleepQuietly(1);
       items =
           seleniumWebDriverHelper.waitPresenceOfAllElements(
