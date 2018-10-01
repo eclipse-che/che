@@ -154,7 +154,7 @@ export PLUGIN_REGISTRY_IMAGE=${PLUGIN_REGISTRY_IMAGE:-${DEFAULT_PLUGIN_REGISTRY_
 DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY="Always"
 export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY}}
 
-DEFAULT_PLUGIN__REGISTRY__URL="NULL"
+DEFAULT_PLUGIN__REGISTRY__URL="https://che-plugin-registry.openshift.io"
 export PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL:-${DEFAULT_PLUGIN__REGISTRY__URL}}
 
 if [ "${ENABLE_SSL}" == "true" ]; then
@@ -336,6 +336,8 @@ if [ "${CHE_DEBUG_SERVER}" == "true" ]; then
   ${OC_BINARY}  expose service che-debug
   NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
   printInfo "Remote wsmaster debugging URL: ${CLUSTER_IP}:${NodePort}"
+  printInfo "Removing liveness and readiness probes from Che deployment"
+  oc set probe dc/che --remove --readiness --liveness
 fi
 }
 

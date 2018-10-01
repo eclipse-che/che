@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -39,6 +38,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
@@ -51,14 +52,14 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftEnvironment> {
 
   private final OpenShiftProject project;
-  private final Set<String> unrecoverableEvents;
+  private final UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
 
   @Inject
   public OpenShiftInternalRuntime(
       @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
       @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
-      @Named("che.infra.kubernetes.workspace_unrecoverable_events") String[] unrecoverableEvents,
       NoOpURLRewriter urlRewriter,
+      UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory,
       KubernetesBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
       WorkspaceVolumesStrategy volumesStrategy,
@@ -71,15 +72,15 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       StartSynchronizerFactory startSynchronizerFactory,
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
-      SidecarToolingProvisioner toolingProvisioner,
+      SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
     super(
         workspaceStartTimeout,
         ingressStartTimeout,
-        unrecoverableEvents,
         urlRewriter,
+        unrecoverablePodEventListenerFactory,
         bootstrapperFactory,
         serverCheckerFactory,
         volumesStrategy,
@@ -97,7 +98,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         project,
         warnings);
     this.project = project;
-    this.unrecoverableEvents = ImmutableSet.copyOf(unrecoverableEvents);
+    this.unrecoverablePodEventListenerFactory = unrecoverablePodEventListenerFactory;
   }
 
   @Override
@@ -125,9 +126,12 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     // project.pods().watch(new AbnormalStopHandler());
 
     project.deployments().watchEvents(new MachineLogsPublisher());
-    if (!unrecoverableEvents.isEmpty()) {
+    if (unrecoverablePodEventListenerFactory.isConfigured()) {
       Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      project.deployments().watchEvents(new UnrecoverablePodEventHandler(pods));
+      UnrecoverablePodEventListener handler =
+          unrecoverablePodEventListenerFactory.create(
+              pods.keySet(), this::handleUnrecoverableEvent);
+      project.deployments().watchEvents(handler);
     }
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));

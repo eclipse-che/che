@@ -358,6 +358,18 @@ public class CodenvyEditor {
   private WebElement languageServerRenameField;
 
   /**
+   * Waits until specified {@code editorTab} is presented, selected, focused and editor activated.
+   *
+   * @param editorTab title of the editor tab
+   */
+  public void waitEditorReadiness(String editorTab) {
+    waitTabIsPresent(editorTab);
+    waitTabSelection(0, editorTab);
+    waitTabFocusing(0, editorTab);
+    waitActive();
+  }
+
+  /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
    *
    * @param timeout waiting time in seconds
@@ -519,6 +531,10 @@ public class CodenvyEditor {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10117", ex);
     }
+  }
+
+  public void waitHoverPopupAppearance() {
+    seleniumWebDriverHelper.waitVisibility(hoverPopup);
   }
 
   /**
@@ -909,13 +925,14 @@ public class CodenvyEditor {
    * @param line line's number where the marker should be displayed
    */
   public void waitGitDeletionMarkerInPosition(int line) {
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
                 webDriver ->
                     "git-change-marker deletion"
-                        .equals(getListGitMarkers().get(line).getAttribute("class")));
+                        .equals(getListGitMarkers().get(line).getAttribute("class")),
+                REDRAW_UI_ELEMENTS_TIMEOUT_SEC),
+        StaleElementReferenceException.class);
   }
 
   /**

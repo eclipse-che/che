@@ -1479,11 +1479,11 @@ public class SeleniumWebDriverHelper {
    * {@code DEFAULT_TIMEOUT}.
    *
    * @param action action which should stop throwing of certain exception during timeout
-   * @param ignoredExceptionType exception which should be ignored when action is performed
+   * @param ignoredExceptionTypes exceptions which should be ignored when action is performed
    */
   public void waitNoExceptions(
-      Runnable action, Class<? extends WebDriverException> ignoredExceptionType) {
-    waitNoExceptions(action, ignoredExceptionType, DEFAULT_TIMEOUT);
+      Runnable action, Class<? extends WebDriverException>... ignoredExceptionTypes) {
+    waitNoExceptions(action, DEFAULT_TIMEOUT, ignoredExceptionTypes);
   }
 
   /**
@@ -1491,13 +1491,15 @@ public class SeleniumWebDriverHelper {
    * {@code timeoutInSec}.
    *
    * @param action action which should stop throwing of certain exception during timeout
-   * @param ignoredExceptionType exception which should be ignored when action is being performed
    * @param timeoutInSec waiting time in seconds
+   * @param ignoredExceptionTypes exceptions which should be ignored when action is being performed
    */
   public void waitNoExceptions(
-      Runnable action, Class<? extends WebDriverException> ignoredExceptionType, int timeoutInSec) {
+      Runnable action,
+      int timeoutInSec,
+      Class<? extends WebDriverException>... ignoredExceptionTypes) {
     webDriverWaitFactory
-        .get(timeoutInSec, ignoredExceptionType)
+        .get(timeoutInSec, asList(ignoredExceptionTypes))
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {

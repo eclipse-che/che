@@ -280,7 +280,7 @@ public class GolangFileEditingTest {
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.waitAllNodes(GO_TO_SYMBOL_EXPECTED_TEXT);
-    assistantFindPanel.clickOnActionNodeWithText("count");
+    assistantFindPanel.clickOnActionNodeWithTextContains("count");
     assistantFindPanel.waitFormIsClosed();
     editor.waitCursorPosition(19, 5);
 
@@ -301,7 +301,7 @@ public class GolangFileEditingTest {
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField("ha");
     assistantFindPanel.waitNode("hanoi");
-    assistantFindPanel.clickOnActionNodeWithText("hanoi");
+    assistantFindPanel.clickOnActionNodeWithTextContains("hanoi");
     assistantFindPanel.waitFormIsClosed();
     editor.waitCursorPosition(21, 1);
   }
@@ -321,7 +321,7 @@ public class GolangFileEditingTest {
     assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT);
 
     // select item in the find panel by clicking on node
-    assistantFindPanel.clickOnActionNodeWithText("print/desktop-go-simple/format.go");
+    assistantFindPanel.clickOnActionNodeWithTextContains("print/desktop-go-simple/format.go");
     assistantFindPanel.waitFormIsClosed();
     editor.waitTabVisibilityAndCheckFocus("format.go");
     editor.waitCursorPosition(23, 1);

@@ -91,6 +91,21 @@ public final class Constants {
   public static final String WORKSPACE_TOOLING_EDITOR_ATTRIBUTE = "editor";
 
   /**
+   * The attribute allows to configure workspace to be ephemeral with no PVC attached on K8S /
+   * OpenShift infrastructure. Should be set/read from {@link WorkspaceConfig#getAttributes}.
+   *
+   * <p>Value is expected to be boolean, and if set to 'false' regardless of the PVC strategy,
+   * workspace volumes would be created as `emptyDir`. When a workspace Pod is removed for any
+   * reason, the data in the `emptyDir` volume is deleted forever
+   *
+   * @see <a
+   *     href="https://www.eclipse.org/che/docs/kubernetes-admin-guide.html#che-workspaces-storage">Che
+   *     PVC strategies</a>
+   * @see <a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a>
+   */
+  public static final String PERSIST_VOLUMES_ATTRIBUTE = "persistVolumes";
+
+  /**
    * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
    * set/read from {@link WorkspaceConfig#getAttributes}.
    *

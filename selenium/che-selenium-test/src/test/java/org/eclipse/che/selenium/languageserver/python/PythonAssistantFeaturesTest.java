@@ -152,7 +152,7 @@ public class PythonAssistantFeaturesTest {
 
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_NODES);
-    assistantFindPanel.clickOnActionNodeWithText(EXPECTED_GO_TO_SYMBOL_NODES.get(0));
+    assistantFindPanel.clickOnActionNodeWithTextContains(EXPECTED_GO_TO_SYMBOL_NODES.get(0));
     editor.waitCursorPosition(14, 1);
     editor.waitVisibleTextEqualsTo(14, EXPECTED_LINE_TEXT);
   }

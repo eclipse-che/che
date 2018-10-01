@@ -37,6 +37,7 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -90,13 +91,16 @@ public class UniqueWorkspacePVCStrategyTest {
   @Mock private Container container;
   @Mock private Container container2;
   @Mock private Container container3;
+  @Mock private Workspace workspace;
+  @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   private UniqueWorkspacePVCStrategy strategy;
 
   @BeforeMethod
   public void setup() throws Exception {
     strategy =
-        new UniqueWorkspacePVCStrategy(PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, factory);
+        new UniqueWorkspacePVCStrategy(
+            PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, factory, ephemeralWorkspaceAdapter);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
@@ -140,6 +144,8 @@ public class UniqueWorkspacePVCStrategyTest {
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
+
+    when(workspace.getId()).thenReturn(WORKSPACE_ID);
   }
 
   @Test
@@ -228,7 +234,7 @@ public class UniqueWorkspacePVCStrategyTest {
 
   @Test
   public void testRemovesPVCWhenCleanupCalled() throws Exception {
-    strategy.cleanup(WORKSPACE_ID);
+    strategy.cleanup(workspace);
 
     verify(pvcs).delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID));
   }
