@@ -11,7 +11,7 @@
             "name": "che-theia-ssh-extension",
             "source": "https://github.com/eclipse/che-theia-ssh-plugin",
             "folder": "ssh-extension",
-            "checkoutTo": "0.0.0",
+            "checkoutTo": "0.0.1",
             "type": "git"
         },
         {
