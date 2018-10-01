@@ -16,8 +16,10 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 
+import com.google.common.base.Strings;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
@@ -29,6 +31,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
+import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
  * Validator for {@link Workspace}.
@@ -100,6 +103,9 @@ public class WorkspaceValidator {
 
     // projects
     // TODO
+
+    // ensure using either plugins or installers but not both
+    validatePlugins(config);
   }
 
   /**
@@ -163,6 +169,34 @@ public class WorkspaceValidator {
                 "Value '%s' of attribute '%s' in machine '%s' is illegal",
                 attributeValue, attributeName, machineName));
       }
+    }
+  }
+
+  /**
+   * Check that workspace has either plugins defined in attributes (Che 7) or installers defined in
+   * machines (Che 6).
+   *
+   * @throws ValidationException if workspace config contains both installers section and nonempty
+   *     plugins or editor field in attributes.
+   */
+  private void validatePlugins(WorkspaceConfig config) throws ValidationException {
+    Optional<String> installers =
+        config
+            .getEnvironments()
+            .values()
+            .stream()
+            .flatMap(env -> env.getMachines().values().stream())
+            .flatMap(machine -> machine.getInstallers().stream())
+            .findAny();
+    Map<String, String> attributes = config.getAttributes();
+    boolean hasPlugins =
+        !Strings.isNullOrEmpty(
+            attributes.getOrDefault(Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, null));
+    boolean hasEditor =
+        !Strings.isNullOrEmpty(
+            attributes.getOrDefault(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, null));
+    if ((hasPlugins || hasEditor) && installers.isPresent()) {
+      throw new ValidationException("Workspace config cannot have both plugins and installers.");
     }
   }
 

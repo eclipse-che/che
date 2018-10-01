@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -320,6 +321,28 @@ public class WorkspaceValidatorTest {
     EnvironmentDto env = config.getEnvironments().values().iterator().next();
     MachineConfigDto machine = env.getMachines().values().iterator().next();
     machine.getVolumes().put("volume1", newDto(VolumeDto.class).withPath("not/absolute/path"));
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = ".*([pP]lugin.*[iI]nstaller|[iI]nstaller.*[pP]lugin).*")
+  public void shouldFailValidationIfBothPluginsAndInstallersPresent() throws Exception {
+    // createConfig creates config with one installer by default
+    final WorkspaceConfigDto config = createConfig();
+    config.getAttributes().put(Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, "plugin1");
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = ".*([pP]lugin.*[iI]nstaller|[iI]nstaller.*[pP]lugin).*")
+  public void shouldFailValidationIfBothEditorAndInstallersPresent() throws Exception {
+    // createConfig creates config with one installer by default
+    final WorkspaceConfigDto config = createConfig();
+    config.getAttributes().put(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "editor1");
 
     wsValidator.validateConfig(config);
   }
