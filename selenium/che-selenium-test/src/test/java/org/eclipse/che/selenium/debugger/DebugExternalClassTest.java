@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
