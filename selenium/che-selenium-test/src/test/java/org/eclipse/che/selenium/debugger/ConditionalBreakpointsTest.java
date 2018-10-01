@@ -79,10 +79,10 @@ public class ConditionalBreakpointsTest {
 
     ide.open(ws);
     projectExplorer.waitItem(PROJECT);
-    commandsPalette.openCommandPalette();
-    commandsPalette.startCommandByDoubleClick("build");
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
     projectExplorer.quickExpandWithJavaScript();
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick("build");
   }
 
   @Test
