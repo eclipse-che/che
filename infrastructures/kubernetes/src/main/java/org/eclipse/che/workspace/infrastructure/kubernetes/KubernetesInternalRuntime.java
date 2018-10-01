@@ -772,7 +772,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             machines.getMachines(getContext().getIdentity()).entrySet()) {
           final KubernetesMachineImpl machine = entry.getValue();
           if (machine.getPodName().equals(podName)) {
-            eventPublisher.sendMachineLogEnvent(
+            eventPublisher.sendMachineLogEvent(
                 entry.getKey(),
                 event.getMessage(),
                 event.getCreationTimeStamp(),

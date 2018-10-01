@@ -133,7 +133,16 @@ public final class Constants {
   public static final String WORKSPACE_STATUS_CHANGED_METHOD = "workspace/statusChanged";
   public static final String MACHINE_STATUS_CHANGED_METHOD = "machine/statusChanged";
   public static final String SERVER_STATUS_CHANGED_METHOD = "server/statusChanged";
-  public static final String MACHINE_LOG_METHOD = "machine/log";
+
+  public static final String RUNTIME_LOG_METHOD = "runtime/log";
+
+  /**
+   * JSON RPC methods for listening to machine logs.
+   *
+   * @deprecated use {@link #RUNTIME_LOG_METHOD} instead
+   */
+  @Deprecated public static final String MACHINE_LOG_METHOD = "machine/log";
+
   public static final String INSTALLER_LOG_METHOD = "installer/log";
   public static final String INSTALLER_STATUS_CHANGED_METHOD = "installer/statusChanged";
   public static final String BOOTSTRAPPER_STATUS_CHANGED_METHOD = "bootstrapper/statusChanged";
