@@ -46,7 +46,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -692,7 +691,6 @@ public class Preferences {
   }
 
   public void clickOnShowArtifactCheckBox() {
-    Actions actions = new Actions(seleniumWebDriver);
-    actions.click(showArtifactCheckBox).perform();
+    seleniumWebDriverHelper.getAction().click(showArtifactCheckBox).perform();
   }
 }
