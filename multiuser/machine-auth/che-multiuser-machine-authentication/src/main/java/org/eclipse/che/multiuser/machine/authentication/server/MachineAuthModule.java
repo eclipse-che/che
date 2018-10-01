@@ -45,6 +45,33 @@ public class MachineAuthModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
     envVarProviders.addBinding().to(SignaturePublicKeyEnvProvider.class);
     envVarProviders.addBinding().to(SignatureAlgorithmEnvProvider.class);
+
+    final Multibinder<MachineAuthenticatedResource> machineAuthenticatedResources =
+        Multibinder.newSetBinder(binder(), MachineAuthenticatedResource.class);
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "/workspace", "getByKey", "addProject", "updateProject", "deleteProject"));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/ssh", "getPair", "generatePair"));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "/factory",
+                "getFactoryJson",
+                "getFactory",
+                "getFactoryByAttribute",
+                "resolveFactory"));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/preferences", "find"));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/activity", "active"));
+
     bindConstant().annotatedWith(Names.named("che.auth.signature_key_size")).to(2048);
     bindConstant().annotatedWith(Names.named("che.auth.signature_key_algorithm")).to("RSA");
   }
