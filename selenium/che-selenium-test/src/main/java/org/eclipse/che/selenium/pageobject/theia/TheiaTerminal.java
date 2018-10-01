@@ -21,6 +21,7 @@ import static org.openqa.selenium.Keys.INSERT;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -75,12 +76,15 @@ public class TheiaTerminal {
   }
 
   public void enterText(String text) {
+    // performs wait for terminal readiness
+    WaitUtils.sleepQuietly(2);
+
     seleniumWebDriverHelper.sendKeys(text);
   }
 
   public void performCommand(String command) {
     enterText(command);
-    seleniumWebDriverHelper.sendKeys(ENTER.toString());
+    enterText(ENTER.toString());
   }
 
   private void copyTerminalTextToClipboard() {
