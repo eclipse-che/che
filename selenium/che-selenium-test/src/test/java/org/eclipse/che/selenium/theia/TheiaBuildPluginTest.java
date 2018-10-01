@@ -85,6 +85,7 @@ public class TheiaBuildPluginTest {
   @Test(groups = OPENSHIFT)
   public void pluginShouldBeBuilt() {
     theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectsRootItem();
     theiaIde.runMenuCommand("File", "Open New Terminal");
 
     theiaTerminal.clickOnTerminal();
