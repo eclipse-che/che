@@ -47,7 +47,7 @@ public final class Constants {
   /**
    * Property name for Che plugin registry url. Key name of api workspace/settings method results.
    */
-  public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR =
+  public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
       "che.workspace.plugin_registry_url";
 
   /** Name for environment variable of machine name */

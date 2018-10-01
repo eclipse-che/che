@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,19 +56,24 @@ public class PluginMetaRetriever {
   private static final Logger LOG = LoggerFactory.getLogger(PluginMetaRetriever.class);
   private static final String CHE_PLUGIN_OBJECT_ERROR =
       "Che plugin '%s:%s' configuration is invalid. %s";
-  private static final String PLUGIN_REGISTRY_PROPERTY = "che.workspace.plugin_registry_url";
+  private static final String CHE_REGISTRY_MISSING_ERROR =
+      String.format(
+          "Workspace requested ws.next plugins/editor but plugin registry is not configured. "
+              + "Property %s should be set for ws.next workspaces",
+          Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY);
 
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 
   private final UriBuilder pluginRegistry;
 
   @Inject
-  public PluginMetaRetriever(@Nullable @Named(PLUGIN_REGISTRY_PROPERTY) String pluginRegistry) {
+  public PluginMetaRetriever(
+      @Nullable @Named(Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) String pluginRegistry) {
     if (pluginRegistry == null) {
       LOG.info(
           format(
               "Che tooling plugins feature is disabled - Che plugin registry API endpoint property '%s' is not configured",
-              PLUGIN_REGISTRY_PROPERTY));
+              Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY));
       this.pluginRegistry = null;
     } else {
       this.pluginRegistry = UriBuilder.fromUri(pluginRegistry).path("plugins");
@@ -87,11 +93,23 @@ public class PluginMetaRetriever {
    */
   @Beta
   public Collection<PluginMeta> get(Map<String, String> attributes) throws InfrastructureException {
-    if (pluginRegistry == null || attributes == null || attributes.isEmpty()) {
+    // Have to check for empty value instead of plain null as it's possible to have empty
+    // plugins attribute
+    String pluginsAttribute =
+        attributes.getOrDefault(Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, null);
+    String editorAttribute =
+        attributes.getOrDefault(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, null);
+
+    // Check if workspace requests ws.next features with no registry configured
+    if (pluginRegistry == null
+        && (!Strings.isNullOrEmpty(pluginsAttribute) || !Strings.isNullOrEmpty(editorAttribute))) {
+      throw new InfrastructureException(CHE_REGISTRY_MISSING_ERROR);
+    }
+
+    // Check if any plugins/editor is in workspace
+    if (Strings.isNullOrEmpty(editorAttribute) && Strings.isNullOrEmpty(pluginsAttribute)) {
       return emptyList();
     }
-    String pluginsAttribute = attributes.get(Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
-    String editorAttribute = attributes.get(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE);
 
     ArrayList<Pair<String, String>> metasIdsVersions = new ArrayList<>();
     if (!isNullOrEmpty(pluginsAttribute)) {
