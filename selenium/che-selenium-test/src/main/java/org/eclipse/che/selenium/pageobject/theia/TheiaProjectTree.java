@@ -69,7 +69,7 @@ public class TheiaProjectTree {
   }
 
   public void waitProjectsRootItem() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(ROOT_PROJECTS_FOLDER_ID));
+    seleniumWebDriverHelper.waitVisibility(By.id(ROOT_PROJECTS_FOLDER_ID));
   }
 
   public void clickOnProjectsRootItem() {
@@ -83,7 +83,7 @@ public class TheiaProjectTree {
 
   public void doubleClickOnItem(String itemPath) {
     String itemId = getProjectItemId(itemPath);
-    seleniumWebDriverHelper.moveCursorToAndDoubleClick(By.xpath(itemId));
+    seleniumWebDriverHelper.moveCursorToAndDoubleClick(By.id(itemId));
   }
 
   public boolean isItemExpanded(String itemPath) {
