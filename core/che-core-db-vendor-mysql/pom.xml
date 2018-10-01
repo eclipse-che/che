@@ -15,24 +15,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-master-parent</artifactId>
+        <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
         <version>6.12.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>integration-tests-parent</artifactId>
-    <packaging>pom</packaging>
-    <name>Integration Tests :: Parent</name>
-    <modules>
-        <module>cascade-removal</module>
-    </modules>
-    <profiles>
-        <profile>
-            <id>integration</id>
-            <modules>
-                <module>postgresql-tck</module>
-                <module>mysql-tck</module>
-            </modules>
-        </profile>
-    </profiles>
+    <artifactId>che-core-db-vendor-mysql</artifactId>
+    <name>Che Core :: DB :: Vendor MySQL</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-db</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
