@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
