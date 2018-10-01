@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_ULR;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -101,7 +101,7 @@ public class WorkspaceService extends Service {
       WorkspaceManager workspaceManager,
       MachineTokenProvider machineTokenProvider,
       WorkspaceLinksGenerator linksGenerator,
-      @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_ULR) @Nullable String pluginRegistryUrl) {
+      @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
