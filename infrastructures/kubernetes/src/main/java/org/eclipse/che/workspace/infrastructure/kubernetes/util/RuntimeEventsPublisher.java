@@ -19,8 +19,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -96,10 +96,10 @@ public class RuntimeEventsPublisher {
             .withServerUrl(serverUrl));
   }
 
-  public void sendMachineLogEnvent(
+  public void sendMachineLogEvent(
       String machineName, String text, String time, RuntimeIdentity runtimeId) {
     eventService.publish(
-        DtoFactory.newDto(MachineLogEvent.class)
+        DtoFactory.newDto(RuntimeLogEvent.class)
             .withMachineName(machineName)
             .withRuntimeId(DtoConverter.asDto(runtimeId))
             .withText(text)

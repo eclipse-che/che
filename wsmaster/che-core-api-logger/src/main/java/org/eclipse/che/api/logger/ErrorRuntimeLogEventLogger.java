@@ -18,31 +18,31 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The goal of this class is to catch all MachineLogEvent events from error stream and dump them to
+ * The goal of this class is to catch all RuntimeLogEvent events from error stream and dump them to
  * slf4j log.
  */
 @Singleton
-public class ErrorMachineLogEventLogger implements EventSubscriber<MachineLogEvent> {
+public class ErrorRuntimeLogEventLogger implements EventSubscriber<RuntimeLogEvent> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ErrorMachineLogEventLogger.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ErrorRuntimeLogEventLogger.class);
 
   @Inject
   public void subscribe(EventService eventService) {
-    eventService.subscribe(this, MachineLogEvent.class);
+    eventService.subscribe(this, RuntimeLogEvent.class);
   }
 
   @Override
-  public void onEvent(MachineLogEvent event) {
+  public void onEvent(RuntimeLogEvent event) {
     if ("stderr".equalsIgnoreCase(event.getStream()) && !isNullOrEmpty(event.getText())) {
       RuntimeIdentityDto identity = event.getRuntimeId();
       LOG.error(
-          "Machine `{}` error from owner=`{}` env=`{}` workspace=`{}` text=`{}` time=`{}`",
-          event.getMachineName(),
+          "{} error from owner=`{}` env=`{}` workspace=`{}` text=`{}` time=`{}`",
+          event.getMachineName() != null ? "Machine `" + event.getMachineName() + "`" : "Runtime",
           identity.getOwnerId(),
           identity.getEnvName(),
           identity.getWorkspaceId(),
