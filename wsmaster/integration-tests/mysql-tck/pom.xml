@@ -15,24 +15,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-master-parent</artifactId>
+        <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
         <version>6.12.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>integration-tests-parent</artifactId>
+    <groupId>org.eclipse.che.core</groupId>
+    <artifactId>mysql-tck</artifactId>
     <packaging>pom</packaging>
-    <name>Integration Tests :: Parent</name>
+    <name>Integration Tests :: MySQL</name>
     <modules>
-        <module>cascade-removal</module>
+        <module>mysql-support</module>
+        <module>mysql-tests</module>
     </modules>
-    <profiles>
-        <profile>
-            <id>integration</id>
-            <modules>
-                <module>postgresql-tck</module>
-                <module>mysql-tck</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>
