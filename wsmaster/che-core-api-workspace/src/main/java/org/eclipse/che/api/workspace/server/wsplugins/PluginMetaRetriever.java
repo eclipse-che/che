@@ -58,8 +58,8 @@ public class PluginMetaRetriever {
       "Che plugin '%s:%s' configuration is invalid. %s";
   private static final String CHE_REGISTRY_MISSING_ERROR =
       String.format(
-          "Workspace requested ws.next plugins/editor but plugin registry is not configured. "
-              + "Property %s should be set for ws.next workspaces",
+          "Workspace requested Che Editor/Plugins but plugin registry is not configured. "
+              + "Property %s should be set for to allow Editors and Plugins",
           Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY);
 
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
@@ -68,7 +68,8 @@ public class PluginMetaRetriever {
 
   @Inject
   public PluginMetaRetriever(
-      @Nullable @Named(Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) String pluginRegistry) {
+      @Nullable @Named(Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY)
+          String pluginRegistry) {
     if (pluginRegistry == null) {
       LOG.info(
           format(
@@ -93,6 +94,10 @@ public class PluginMetaRetriever {
    */
   @Beta
   public Collection<PluginMeta> get(Map<String, String> attributes) throws InfrastructureException {
+    if (attributes == null) {
+      return emptyList();
+    }
+
     // Have to check for empty value instead of plain null as it's possible to have empty
     // plugins attribute
     String pluginsAttribute =
@@ -100,15 +105,14 @@ public class PluginMetaRetriever {
     String editorAttribute =
         attributes.getOrDefault(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, null);
 
-    // Check if workspace requests ws.next features with no registry configured
-    if (pluginRegistry == null
-        && (!Strings.isNullOrEmpty(pluginsAttribute) || !Strings.isNullOrEmpty(editorAttribute))) {
-      throw new InfrastructureException(CHE_REGISTRY_MISSING_ERROR);
-    }
-
     // Check if any plugins/editor is in workspace
     if (Strings.isNullOrEmpty(editorAttribute) && Strings.isNullOrEmpty(pluginsAttribute)) {
       return emptyList();
+    }
+
+    // If workspace plugins or editor are not null, but registry is null, throw error
+    if (pluginRegistry == null) {
+      throw new InfrastructureException(CHE_REGISTRY_MISSING_ERROR);
     }
 
     ArrayList<Pair<String, String>> metasIdsVersions = new ArrayList<>();
