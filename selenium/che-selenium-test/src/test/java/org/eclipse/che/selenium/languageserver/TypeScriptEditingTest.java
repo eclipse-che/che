@@ -121,7 +121,7 @@ public class TypeScriptEditingTest {
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.typeToInputField("testPrint");
     assistantFindPanel.clickOnActionNodeWithTextContains("testPrint");
-    editor.waitCursorPosition(26, 6);
+    editor.waitCursorPosition(23, 5);
   }
 
   @Test(priority = 2, alwaysRun = true)
