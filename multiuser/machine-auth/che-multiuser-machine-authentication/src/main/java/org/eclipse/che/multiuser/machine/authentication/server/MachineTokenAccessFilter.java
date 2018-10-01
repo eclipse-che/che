@@ -15,6 +15,9 @@ import static java.util.Arrays.asList;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.util.StringTokenizer;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -33,15 +36,15 @@ public class MachineTokenAccessFilter extends CheMethodInvokerFilter {
 
   private final SetMultimap<String, String> allowedMethodsByPath = HashMultimap.create();
 
-  public MachineTokenAccessFilter() {
-    allowedMethodsByPath.putAll(
-        "/workspace", asList("getByKey", "addProject", "updateProject", "deleteProject"));
-    allowedMethodsByPath.putAll("/ssh", asList("getPair", "generatePair"));
-    allowedMethodsByPath.putAll(
-        "/factory",
-        asList("getFactoryJson", "getFactory", "getFactoryByAttribute", "resolveFactory"));
-    allowedMethodsByPath.put("/preferences", "find");
-    allowedMethodsByPath.put("/activity", "active");
+  @Inject
+  public MachineTokenAccessFilter(
+      @Named("che.multiuser.machine_authentication_allowed_methods") String methodsString) {
+    StringTokenizer tokenizer = new StringTokenizer(methodsString, ";", false);
+    while (tokenizer.hasMoreTokens()) {
+      String[] serviceToMethodsMapping = tokenizer.nextToken().split("=");
+      allowedMethodsByPath.putAll(
+          serviceToMethodsMapping[0], asList(serviceToMethodsMapping[1].split(",")));
+    }
   }
 
   @Override

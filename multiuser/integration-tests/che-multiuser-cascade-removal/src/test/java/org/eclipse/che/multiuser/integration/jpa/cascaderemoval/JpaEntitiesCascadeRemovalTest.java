@@ -102,7 +102,7 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.api.permission.server.PermissionsManager;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
-import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.jpa.JpaSignatureKeyDao;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationManager;
@@ -237,7 +237,6 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new FactoryJpaModule());
                 install(new OrganizationJpaModule());
                 install(new MultiuserWorkspaceJpaModule());
-                install(new MachineAuthModule());
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
@@ -249,6 +248,9 @@ public class JpaEntitiesCascadeRemovalTest {
                 bind(PermissionsManager.class);
                 bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
                 bind(AccountManager.class);
+                bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
+                bind(JpaSignatureKeyDao.RemoveKeyPairsBeforeWorkspaceRemovedEventSubscriber.class)
+                    .asEagerSingleton();
                 bind(Boolean.class)
                     .annotatedWith(Names.named("che.workspace.auto_snapshot"))
                     .toInstance(false);
