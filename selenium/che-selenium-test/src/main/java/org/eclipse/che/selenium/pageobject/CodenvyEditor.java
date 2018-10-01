@@ -451,6 +451,7 @@ public class CodenvyEditor {
     String[] result = new String[1];
     webDriverWaitFactory
         .get(timeout)
+        .ignoring(StaleElementReferenceException.class)
         .withMessage(
             () ->
                 "Timeout waiting for txt, expected= '"
