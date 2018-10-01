@@ -293,6 +293,7 @@ public class TestProjectServiceClient {
     return requestFactory
         .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
         .useGetMethod()
+        .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
         .request()
         .asDto(ProjectConfigDto.class);
   }

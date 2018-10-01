@@ -11,12 +11,9 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static java.lang.String.*;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.XML_FILE;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.BLANK_PROJECT;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.UNDEFINED_PROJECT;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -26,8 +23,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -38,27 +33,19 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class CheckConvertingToMavenProjectTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
-  private static final String NEW_FOLDER_NAME = "new-folder";
-  private static final String NEW_MODULE_NAME = "new-module";
-  private static final String PATH_TO_POM_FILE = PROJECT_NAME + "/" + NEW_MODULE_NAME;
-  private static final String EXPECTED_TEXT =
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-          + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
-          + "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n"
-          + "<modelVersion>4.0.0</modelVersion>\n"
-          + "<groupId>groupId</groupId>\n"
-          + "<artifactId>new-module</artifactId>\n"
-          + "<packaging>jar</packaging>\n"
-          + "<version>1.0-SNAPSHOT</version>\n"
-          + "<name>new-module</name>\n"
-          + "</project>";
-
+  private static final String WEB_APP_MODULE = "my-webapp";
+  private static final String NONE_MAVEN_PROJECT = NameGenerator.generate("noneMavenProject", 4);
+  private static final String PARENT_INFORMATION =
+      "<parent>\n"
+          + "<groupId>org.eclipse.che.examples</groupId>\n"
+          + "<artifactId>qa-multimodule</artifactId>\n"
+          + "    <version>1.0-SNAPSHOT</version>\n"
+          + "</parent>\n";
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -71,106 +58,73 @@ public class CheckConvertingToMavenProjectTest {
   @Inject private ActionsFactory actionsFactory;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  private String workspaceId;
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = getClass().getResource("/projects/blank_project_with_read_md_file");
+    workspaceId = workspace.getId();
+    URL mavenMultimodule = getClass().getResource("/projects/java-multimodule");
+    URL noneMavenProject = getClass().getResource("/projects/console-cpp-simple");
     testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, BLANK_PROJECT);
+        workspaceId, Paths.get(mavenMultimodule.toURI()), PROJECT_NAME, UNDEFINED_PROJECT);
+    testProjectServiceClient.importProject(
+        workspaceId, Paths.get(noneMavenProject.toURI()), NONE_MAVEN_PROJECT, UNDEFINED_PROJECT);
+
     ide.open(workspace);
-
     ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-  }
-
-  @BeforeMethod
-  public void expandProject() {
-    projectExplorer.quickCollapseJavaScript();
-    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.quickRevealToItemWithJavaScript(format("%s/%s", PROJECT_NAME, WEB_APP_MODULE));
   }
 
   @Test
-  public void checkConvertToProjectWithPomFile() throws Exception {
+  public void shouldConvertToMavenMultimoduleProject() throws Exception {
+    convertPredefinedFolderToMavenProjectWithContextMenu(
+        format("%s/%s", PROJECT_NAME, WEB_APP_MODULE));
+    testProjectServiceClient.checkProjectType(
+        workspaceId, format("%s/%s", PROJECT_NAME, WEB_APP_MODULE), "maven");
+    addParentConfigurationToPredefinedFolder();
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT,
+        TestMenuCommandsConstants.Project.UPDATE_PROJECT_CONFIGURATION);
+    convertToMavenByhWizard("/", PROJECT_NAME);
+    testProjectServiceClient.checkProjectType(
+        workspaceId, format("%s/%s", PROJECT_NAME, WEB_APP_MODULE), "maven");
+  }
 
-    // create a folder and check message if the path is wrong
-    createNewFolder(PROJECT_NAME, NEW_FOLDER_NAME);
-    projectExplorer.waitAndSelectItemByName(NEW_FOLDER_NAME);
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
-    projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
+  @Test
+  public void shouldNotConvertToMavenProject() {
+    projectExplorer.waitAndSelectItem(NONE_MAVEN_PROJECT);
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT,
+        TestMenuCommandsConstants.Project.UPDATE_PROJECT_CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
-    wizard.waitTextParentDirectoryName("/" + PROJECT_NAME);
-    wizard.waitTextProjectNameInput(NEW_FOLDER_NAME);
+    wizard.waitTextParentDirectoryName("/");
+    wizard.waitTextProjectNameInput(NONE_MAVEN_PROJECT);
     wizard.selectSample(Wizard.TypeProject.MAVEN);
     informationDialog.acceptInformDialogWithText("pom.xml does not exist.");
-    wizard.selectSample(Wizard.TypeProject.BLANK);
+    wizard.closeWithIcon();
+  }
+
+  private void convertPredefinedFolderToMavenProjectWithContextMenu(String converPath) {
+    projectExplorer.waitAndSelectItem(converPath);
+    projectExplorer.openContextMenuByPathSelectedItem(converPath);
+    projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
+    convertToMavenByhWizard("/" + PROJECT_NAME, WEB_APP_MODULE);
+  }
+
+  private void convertToMavenByhWizard(String pathToDirectory, String convertedFolder) {
+    wizard.waitOpenProjectConfigForm();
+    wizard.waitTextParentDirectoryName(pathToDirectory);
+    wizard.waitTextProjectNameInput(convertedFolder);
+    wizard.selectSample(Wizard.TypeProject.MAVEN);
     loader.waitOnClosed();
     wizard.clickSaveButton();
     wizard.waitCloseProjectConfigForm();
-
-    // create a folder with pom file
-    createNewFolder(PROJECT_NAME, NEW_MODULE_NAME);
-    createNewFile("pom", PATH_TO_POM_FILE, XML_FILE);
-    editor.waitActive();
-    editor.waitTabIsPresent("pom.xml");
-    editor.selectTabByName("pom.xml");
-    editor.deleteAllContent();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(EXPECTED_TEXT).perform();
-    editor.waitTextIntoEditor(EXPECTED_TEXT);
-
-    // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed
-    WaitUtils.sleepQuietly(5);
-    editor.waitTabIsPresent("pom.xml");
-    projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, SIMPLE_FOLDER);
-
-    editor.closeAllTabs();
-    seleniumWebDriver.navigate().refresh();
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, SIMPLE_FOLDER);
   }
 
-  @Test
-  public void checkEditorTabNameAfterChangingArtifactID() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
-    editor.waitActive();
-    editor.waitTabIsPresent("qa-spring-sample");
-    editor.goToCursorPositionVisible(19, 17);
-    editor.typeTextIntoEditor("new-");
-
-    // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed
-    WaitUtils.sleepQuietly(5);
-    editor.waitTabIsPresent("new-qa-spring-sample");
-
-    seleniumWebDriver.navigate().refresh();
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
-    editor.waitTabIsPresent("new-qa-spring-sample");
-
-    editor.closeAllTabsByContextMenu();
+  private void addParentConfigurationToPredefinedFolder() throws Exception {
+    projectExplorer.openItemByPath(format("%s/%s/pom.xml", PROJECT_NAME, WEB_APP_MODULE));
+    editor.goToPosition(23, 3);
+    editor.typeTextIntoEditor(PARENT_INFORMATION);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
   }
-
-  private void createNewFolder(String path, String folderName) {
-    projectExplorer.waitAndSelectItem(path);
-    menu.runCommand(
-        TestMenuCommandsConstants.Project.PROJECT,
-        TestMenuCommandsConstants.Project.New.NEW,
-        TestMenuCommandsConstants.Project.New.FOLDER);
-    askForValueDialog.waitFormToOpen();
-    askForValueDialog.typeAndWaitText(folderName);
-    askForValueDialog.clickOkBtn();
-    askForValueDialog.waitFormToClose();
-    projectExplorer.waitVisibilityByName(folderName);
-    loader.waitOnClosed();
-  }
-
-  private void createNewFile(String name, String pathToFile, ContextMenuItems type) {
-    projectExplorer.waitAndSelectItem(pathToFile);
-    projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
-    projectExplorer.clickOnItemInContextMenu(NEW);
-    projectExplorer.clickOnItemInContextMenu(type);
-    askForValueDialog.waitFormToOpen();
-    askForValueDialog.typeAndWaitText(name);
-    askForValueDialog.clickOkBtn();
-  }
-
-
 }

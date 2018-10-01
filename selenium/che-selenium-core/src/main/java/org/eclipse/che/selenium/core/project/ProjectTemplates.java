@@ -25,7 +25,7 @@ public class ProjectTemplates {
   public static final String CONSOLE_JAVA_SIMPLE = "console_java_simple.json";
   public static final String GO = "go.json";
   public static final String DOT_NET = "dotNet.json";
-  public static final String BLANK_PROJECT = "blank.json";
+  public static final String UNDEFINED_PROJECT = "undefined.json";
 
   private ProjectTemplates() {}
 }
