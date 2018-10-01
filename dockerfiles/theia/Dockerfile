@@ -14,7 +14,7 @@
 FROM centos as builder
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION=0.3.14
+ARG THEIA_VERSION=plugin-id
 
 ENV THEIA_VERSION=${THEIA_VERSION} \
     HOME=/home/theia
