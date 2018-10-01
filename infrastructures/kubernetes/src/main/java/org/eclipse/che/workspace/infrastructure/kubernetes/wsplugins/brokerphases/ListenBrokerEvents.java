@@ -18,11 +18,11 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerResultListener;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerStatusListener;
 
 /**
  * Subscribes to Che plugin broker events, passes future that should be completed upon broker result
- * received to {@link BrokerResultListener} and calls next {@link BrokerPhase}.
+ * received to {@link BrokerStatusListener} and calls next {@link BrokerPhase}.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
@@ -45,14 +45,14 @@ public class ListenBrokerEvents extends BrokerPhase {
   }
 
   public List<ChePlugin> execute() throws InfrastructureException {
-    BrokerResultListener brokerResultListener =
-        new BrokerResultListener(workspaceId, toolingFuture);
+    BrokerStatusListener brokerStatusListener =
+        new BrokerStatusListener(workspaceId, toolingFuture);
     try {
-      eventService.subscribe(brokerResultListener, BrokerEvent.class);
+      eventService.subscribe(brokerStatusListener, BrokerEvent.class);
 
       return nextPhase.execute();
     } finally {
-      eventService.unsubscribe(brokerResultListener);
+      eventService.unsubscribe(brokerStatusListener);
     }
   }
 }

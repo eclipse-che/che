@@ -430,4 +430,24 @@ public class TestGitHubRepository {
 
     ghRepo.createContent(submoduleConfig, "Add " + gitmodulesFileName, gitmodulesFileName);
   }
+
+  public String getPullRequestTitle(int requestNumber) throws IOException {
+    return ghRepo.getPullRequest(requestNumber).getTitle();
+  }
+
+  public String getPullRequestBaseBranchName(int requestNumber) throws IOException {
+    return ghRepo.getPullRequest(requestNumber).getBase().getRef();
+  }
+
+  public String getPullRequestHeadBranchName(int requestNumber) throws IOException {
+    return ghRepo.getPullRequest(requestNumber).getHead().getRef();
+  }
+
+  public String getPullRequestBody(int requestNumber) throws IOException {
+    return ghRepo.getPullRequest(requestNumber).getBody();
+  }
+
+  public String getPullRequestUserName(int requestNumber) throws IOException {
+    return ghRepo.getPullRequest(requestNumber).getUser().getLogin();
+  }
 }

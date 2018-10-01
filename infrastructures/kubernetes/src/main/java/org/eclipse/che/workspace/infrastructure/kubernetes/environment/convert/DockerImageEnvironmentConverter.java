@@ -59,7 +59,11 @@ public class DockerImageEnvironmentConverter {
             .endMetadata()
             .withNewSpec()
             .withContainers(
-                new ContainerBuilder().withImage(dockerImage).withName(CONTAINER_NAME).build())
+                new ContainerBuilder()
+                    .withImage(dockerImage)
+                    .withName(CONTAINER_NAME)
+                    .withImagePullPolicy("Always")
+                    .build())
             .endSpec()
             .build();
     return KubernetesEnvironment.builder()

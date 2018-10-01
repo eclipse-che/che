@@ -125,7 +125,7 @@ public class ApacheCamelFileEditingTest {
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_ALTERNATIVES);
-    assistantFindPanel.clickOnActionNodeWithText("<no id>symbols (2)");
+    assistantFindPanel.clickOnActionNodeWithTextContains("<no id>symbols (2)");
     assistantFindPanel.waitFormIsClosed();
     editor.waitCursorPosition(49, 12);
 
