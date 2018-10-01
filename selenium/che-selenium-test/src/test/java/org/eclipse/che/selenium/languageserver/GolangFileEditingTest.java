@@ -45,6 +45,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.internal.collections.Pair;
 
 /** @author Skoryk Serhii */
 public class GolangFileEditingTest {
@@ -78,10 +79,11 @@ public class GolangFileEditingTest {
     "mainsymbols (4)", "count", "hanoi", "main"
   };
 
-  private static final Map<String, String> PROJECT_SYMBOL_EXPECTED_TEXT =
+  /** It is Map[node-name, Pair[tab-name, line-number]] */
+  private static final Map<String, Pair<String, Integer>> PROJECT_SYMBOL_EXPECTED_TEXT =
       ImmutableMap.of(
-          "print/desktop-go-simple/format.go", "format.go",
-          "Print/desktop-go-simple/print.go", "print.go");
+          "print/desktop-go-simple/format.go", Pair.of("format.go", 23),
+          "Print/desktop-go-simple/print.go", Pair.of("print.go", 24));
 
   private String textFirstNode;
   private String textSecondNode;
@@ -339,7 +341,8 @@ public class GolangFileEditingTest {
     assistantFindPanel.waitActionNodeSelection(textFirstNode);
     editor.pressEnter();
     assistantFindPanel.waitFormIsClosed();
-    editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textFirstNode));
+    editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textFirstNode).first());
+    editor.waitCursorPosition(PROJECT_SYMBOL_EXPECTED_TEXT.get(textFirstNode).second(), 1);
 
     // go to from second node
     openFindPanelAndPrintInputTetx("print");
@@ -347,7 +350,8 @@ public class GolangFileEditingTest {
     assistantFindPanel.waitActionNodeSelection(textSecondNode);
     editor.pressEnter();
     assistantFindPanel.waitFormIsClosed();
-    editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode));
+    editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).first());
+    editor.waitCursorPosition(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).second(), 1);
   }
 
   private void openFindPanelAndPrintInputTetx(String inputText) {
