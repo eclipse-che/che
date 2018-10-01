@@ -110,7 +110,7 @@ public class TypeScriptEditingTest {
             "greeting");
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitAllNodes(expectedGoToSymbolAlternatives);
-    assistantFindPanel.clickOnActionNodeWithTextContains("greet");
+    assistantFindPanel.clickOnActionNodeWithTextEqualsTo("greet");
     editor.waitCursorPosition(19, 5);
   }
 
@@ -134,14 +134,14 @@ public class TypeScriptEditingTest {
     checkGoToDefinition();
   }
 
-  @Test(priority = 3)
+  @Test(priority = 3, alwaysRun = true)
   public void checkFindReferencesFeature() {
     String referenceInGreeterClass = format("/%s/Greeter.ts\nFrom:24:17 To:24:22", PROJECT_NAME);
     String referenceInTestPrintClass = format("/%s/testPrint.ts\nFrom:14:0 To:14:5", PROJECT_NAME);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     findReferencesConsoleTab.waitAllReferencesWithText(
         referenceInGreeterClass, referenceInTestPrintClass);
-    findReferencesConsoleTab.doubleClickOnReference(referenceInGreeterClass);
+    findReferencesConsoleTab.doubleClickOnReferenceEqualsTo(referenceInGreeterClass);
     editor.waitCursorPosition(25, 23);
   }
 
@@ -156,13 +156,13 @@ public class TypeScriptEditingTest {
   }
 
   @Test(priority = 5, alwaysRun = true)
-  public void checksignatureHelpProvider() {
+  public void checkSignatureHelpProvider() {
     editor.goToCursorPositionVisible(25, 38);
     editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor("printVar.print(");
 
     try {
-      editor.waitExpTextIntoShowHintsPopUp("setVAlue: string");
+      editor.waitExpTextIntoShowHintsPopUp("setValue: string");
     } catch (WebDriverException ex) {
       fail("Known permanent failure https://github.com/eclipse/che/issues/11324", ex);
     }

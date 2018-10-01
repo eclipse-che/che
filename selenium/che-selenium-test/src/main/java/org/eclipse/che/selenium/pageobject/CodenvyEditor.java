@@ -358,6 +358,18 @@ public class CodenvyEditor {
   private WebElement languageServerRenameField;
 
   /**
+   * Waits until specified {@code editorTab} is presented, selected, focused and editor activated.
+   *
+   * @param editorTab title of the editor tab
+   */
+  public void waitEditorReadiness(String editorTab) {
+    waitTabIsPresent(editorTab);
+    waitTabSelection(0, editorTab);
+    waitTabFocusing(0, editorTab);
+    waitActive();
+  }
+
+  /**
    * Waits during {@code timeout} until current editor's tab is ready to work.
    *
    * @param timeout waiting time in seconds
