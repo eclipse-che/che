@@ -42,7 +42,8 @@ public class BrokerStatusListener implements EventSubscriber<BrokerEvent> {
 
   @Override
   public void onEvent(BrokerEvent event) {
-    if (!workspaceId.equals(event.getWorkspaceId())) {
+    if (event.getRuntimeId() == null
+        || !workspaceId.equals(event.getRuntimeId().getWorkspaceId())) {
       return;
     }
 
