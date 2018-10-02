@@ -161,6 +161,12 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
   @Override
   public void waitStatus(String workspaceName, String userName, WorkspaceStatus expectedStatus)
       throws Exception {
+    waitStatus(workspaceName, userName, expectedStatus, 600);
+  }
+
+  public void waitStatus(
+      String workspaceName, String userName, WorkspaceStatus expectedStatus, int timeoutSeconds)
+      throws Exception {
     WaitUtils.waitSuccessCondition(
         () -> {
           try {
@@ -173,7 +179,7 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
 
           return false;
         },
-        600,
+        timeoutSeconds,
         1000,
         TimeUnit.SECONDS);
   }
