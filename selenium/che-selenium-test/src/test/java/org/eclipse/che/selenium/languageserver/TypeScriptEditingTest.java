@@ -121,7 +121,7 @@ public class TypeScriptEditingTest {
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.typeToInputField("testPrint");
     assistantFindPanel.clickOnActionNodeWithTextContains("testPrint");
-    editor.waitCursorPosition(23, 6);
+    editor.waitCursorPosition(26, 6);
   }
 
   @Test(priority = 2, alwaysRun = true)
@@ -249,6 +249,6 @@ public class TypeScriptEditingTest {
     editor.goToPosition(25, 20);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
     editor.waitActiveTabFileName("testPrint.ts");
-    editor.waitCursorPosition(15, 1);
+    editor.waitCursorPosition(15, 6);
   }
 }
