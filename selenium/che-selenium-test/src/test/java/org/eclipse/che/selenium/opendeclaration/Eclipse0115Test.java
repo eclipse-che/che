@@ -62,6 +62,6 @@ public class Eclipse0115Test {
     editor.waitMarkerInPosition(WARNING, 15);
     editor.goToCursorPositionVisible(33, 14);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitSpecifiedValueForLineAndChar(36, 24);
+    editor.waitSpecifiedValueForLineAndChar(36, 29);
   }
 }
