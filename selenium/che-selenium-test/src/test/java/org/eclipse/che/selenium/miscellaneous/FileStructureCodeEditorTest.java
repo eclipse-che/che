@@ -76,23 +76,20 @@ public class FileStructureCodeEditorTest {
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.selectItemInFileStructureByDoubleClick("getInstance():Company");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.waitTextElementsActiveLine("getInstance");
-    editor.waitSpecifiedValueForLineAndChar(41, 27);
+    editor.waitSpecifiedValueForLineAndChar(41, 38);
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.selectItemInFileStructure("INSTANCE");
     fileStructure.selectItemInFileStructureByEnter("INSTANCE");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.waitTextElementsActiveLine("INSTANCE");
-    editor.waitSpecifiedValueForLineAndChar(25, 38);
+    editor.waitSpecifiedValueForLineAndChar(25, 46);
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.selectItemInFileStructureByEnter("getId():double");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.waitTextElementsActiveLine("getId");
-    editor.waitSpecifiedValueForLineAndChar(37, 23);
+    editor.waitSpecifiedValueForLineAndChar(37, 28);
 
     // check new elements in the 'file structure' form
     editor.setCursorToLine(20);
