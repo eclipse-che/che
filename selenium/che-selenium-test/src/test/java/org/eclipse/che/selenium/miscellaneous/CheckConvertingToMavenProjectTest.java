@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.UPDATE_PROJECT_CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.UNDEFINED_PROJECT;
 
@@ -22,7 +24,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -35,31 +36,31 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Aleksandr Shmaraev */
+/** @author Aleksandr Shmaraev, Musienko Maxim */
 public class CheckConvertingToMavenProjectTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
-  private static final String WEB_APP_MODULE = "my-webapp";
-  private static final String NONE_MAVEN_PROJECT = NameGenerator.generate("noneMavenProject", 4);
-  private static final String PARENT_INFORMATION =
+  private static final String       PROJECT_NAME       = NameGenerator.generate("project", 4);
+  private static final String       WEB_APP_MODULE     = "my-webapp";
+  private static final String       NONE_MAVEN_PROJECT = NameGenerator.generate("noneMavenProject", 4);
+  private static final String       PARENT_INFORMATION =
       "<parent>\n"
           + "<groupId>org.eclipse.che.examples</groupId>\n"
           + "<artifactId>qa-multimodule</artifactId>\n"
           + "    <version>1.0-SNAPSHOT</version>\n"
           + "</parent>\n";
-  @Inject private TestWorkspace workspace;
-  @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private CodenvyEditor editor;
-  @Inject private Menu menu;
-  @Inject private Loader loader;
-  @Inject private Wizard wizard;
+  private  static  final String     CONVERT_PATH       = format("%s/%s", PROJECT_NAME, WEB_APP_MODULE);
+  @Inject private TestWorkspace     workspace;
+  @Inject private Ide               ide;
+  @Inject private ProjectExplorer   projectExplorer;
+  @Inject private CodenvyEditor     editor;
+  @Inject private Menu              menu;
+  @Inject private Loader            loader;
+  @Inject private Wizard            wizard;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private InformationDialog informationDialog;
-  @Inject private ActionsFactory actionsFactory;
+  @Inject private ActionsFactory           actionsFactory;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   private String workspaceId;
-
   @BeforeClass
   public void setUp() throws Exception {
     workspaceId = workspace.getId();
@@ -77,25 +78,24 @@ public class CheckConvertingToMavenProjectTest {
 
   @Test
   public void shouldConvertToMavenMultimoduleProject() throws Exception {
-    convertPredefinedFolderToMavenProjectWithContextMenu(
-        format("%s/%s", PROJECT_NAME, WEB_APP_MODULE));
+    convertPredefinedFolderToMavenProjectWithContextMenu(CONVERT_PATH);
     testProjectServiceClient.checkProjectType(
-        workspaceId, format("%s/%s", PROJECT_NAME, WEB_APP_MODULE), "maven");
+            workspaceId, CONVERT_PATH, "maven");
     addParentConfigurationToPredefinedFolder();
     menu.runCommand(
-        TestMenuCommandsConstants.Project.PROJECT,
-        TestMenuCommandsConstants.Project.UPDATE_PROJECT_CONFIGURATION);
+        PROJECT,
+        UPDATE_PROJECT_CONFIGURATION);
     convertToMavenByhWizard("/", PROJECT_NAME);
     testProjectServiceClient.checkProjectType(
-        workspaceId, format("%s/%s", PROJECT_NAME, WEB_APP_MODULE), "maven");
+            workspaceId, CONVERT_PATH, "maven");
   }
 
   @Test
   public void shouldNotConvertToMavenProject() {
     projectExplorer.waitAndSelectItem(NONE_MAVEN_PROJECT);
     menu.runCommand(
-        TestMenuCommandsConstants.Project.PROJECT,
-        TestMenuCommandsConstants.Project.UPDATE_PROJECT_CONFIGURATION);
+        PROJECT,
+        UPDATE_PROJECT_CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName("/");
     wizard.waitTextProjectNameInput(NONE_MAVEN_PROJECT);
@@ -122,7 +122,7 @@ public class CheckConvertingToMavenProjectTest {
   }
 
   private void addParentConfigurationToPredefinedFolder() throws Exception {
-    projectExplorer.openItemByPath(format("%s/%s/pom.xml", PROJECT_NAME, WEB_APP_MODULE));
+    projectExplorer.openItemByPath(CONVERT_PATH);
     editor.goToPosition(23, 3);
     editor.typeTextIntoEditor(PARENT_INFORMATION);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
