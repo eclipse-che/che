@@ -950,7 +950,7 @@
     "id": "php-default",
     "creator": "ide",
     "name": "PHP",
-    "description": "Default PHP Stack with PHP 7.0, most popular extensions.",
+    "description": "Default PHP Stack with PHP 7.2, most popular extensions.",
     "scope": "general",
     "tags": [
       "PHP",
@@ -965,7 +965,7 @@
       },
       {
         "name": "PHP",
-        "version": "7.0.30"
+        "version": "7.2"
       },
       {
         "name": "Composer",
