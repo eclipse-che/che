@@ -523,23 +523,29 @@ public class WorkspaceRuntimes {
       LOG.warn("Recovery of the workspaces is rejected.");
       return;
     }
+    Set<RuntimeIdentity> identities;
     try {
-      for (RuntimeIdentity identity : infrastructure.getIdentities()) {
-        recoverOne(infrastructure, identity);
-      }
-    } catch (UnsupportedOperationException x) {
+      identities = infrastructure.getIdentities();
+    } catch (UnsupportedOperationException e) {
       LOG.warn("Not recoverable infrastructure: '{}'", infrastructure.getName());
-    } catch (InternalInfrastructureException x) {
-      LOG.error(
-          format(
-              "An error occurred while attempted to recover runtimes using infrastructure '%s'",
-              infrastructure.getName()),
-          x);
-    } catch (ConflictException | ServerException | InfrastructureException x) {
+      return;
+    } catch (InfrastructureException e) {
       LOG.error(
           "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
           infrastructure.getName(),
-          x.getMessage());
+          e.getMessage());
+      return;
+    }
+
+    for (RuntimeIdentity identity : identities) {
+      try {
+        recoverOne(infrastructure, identity);
+      } catch (ServerException | ConflictException e) {
+        LOG.error(
+            "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
+            infrastructure.getName(),
+            e.getMessage());
+      }
     }
   }
 
