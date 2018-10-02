@@ -17,14 +17,14 @@ public class ProjectTemplates {
   public static final String CPP = "cpp.json";
   public static final String PHP = "php.json";
   public static final String PYTHON = "python.json";
-  public static final String NODE_JS                   = "node_js.json";
-  public static final String MAVEN_SPRING              = "maven_spring.json";
-  public static final String MAVEN_SIMPLE              = "maven_simple.json";
-  public static final String MAVEN_JAVA_MULTIMODULE    = "maven_java_multimodule.json";
-  public static final String PLAIN_JAVA                = "plain_java.json";
-  public static final String CONSOLE_JAVA_SIMPLE       = "console_java_simple.json";
-  public static final String GO                        = "go.json";
-  public static final String DOT_NET                   = "dotNet.json";
+  public static final String NODE_JS = "node_js.json";
+  public static final String MAVEN_SPRING = "maven_spring.json";
+  public static final String MAVEN_SIMPLE = "maven_simple.json";
+  public static final String MAVEN_JAVA_MULTIMODULE = "maven_java_multimodule.json";
+  public static final String PLAIN_JAVA = "plain_java.json";
+  public static final String CONSOLE_JAVA_SIMPLE = "console_java_simple.json";
+  public static final String GO = "go.json";
+  public static final String DOT_NET = "dotNet.json";
   public static final String PROJECT_OF_UNDEFINED_TYPE = "undefined.json";
 
   private ProjectTemplates() {}

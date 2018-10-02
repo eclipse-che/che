@@ -38,22 +38,22 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev, Musienko Maxim */
 public class ConvertToMavenProjectTest {
-  private static final String     PROJECT_NAME            = NameGenerator.generate("project", 4);
-  private static final String     WEB_APP_MODULE          = "my-webapp";
-  private static final String     NONE_MAVEN_PROJECT      = NameGenerator.generate("noneMavenProject", 4);
-  private static final String     PARENT_ARTIFACT_SECTION =
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final String WEB_APP_MODULE = "my-webapp";
+  private static final String NONE_MAVEN_PROJECT = NameGenerator.generate("noneMavenProject", 4);
+  private static final String PARENT_ARTIFACT_SECTION =
       "<parent>\n"
           + "<groupId>org.eclipse.che.examples</groupId>\n"
           + "<artifactId>qa-multimodule</artifactId>\n"
           + "    <version>1.0-SNAPSHOT</version>\n"
           + "</parent>\n";
-  private static final String     CONVERT_PATH            = format("%s/%s", PROJECT_NAME, WEB_APP_MODULE);
-  @Inject private TestWorkspace   workspace;
-  @Inject private Ide             ide;
+  private static final String CONVERT_PATH = format("%s/%s", PROJECT_NAME, WEB_APP_MODULE);
+  @Inject private TestWorkspace workspace;
+  @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private CodenvyEditor   editor;
-  @Inject private Menu            menu;
-  @Inject private Loader          loader;
+  @Inject private CodenvyEditor editor;
+  @Inject private Menu menu;
+  @Inject private Loader loader;
   @Inject private Wizard wizard;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private InformationDialog informationDialog;
