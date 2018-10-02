@@ -19,6 +19,7 @@ import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.
 import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.TREE_ROW_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.WIDGET_BODY_XPATH;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ public class TheiaQuickTree {
   private final SeleniumWebDriver seleniumWebDriver;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
 
+  @Inject
   private TheiaQuickTree(
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       SeleniumWebDriver seleniumWebDriver,
@@ -60,6 +62,7 @@ public class TheiaQuickTree {
   public void waitForm() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(WIDGET_BODY_XPATH));
     testWebElementRenderChecker.waitElementIsRendered(By.xpath(WIDGET_BODY_XPATH));
+    waitSearchField();
   }
 
   public void waitSearchField() {
@@ -174,5 +177,22 @@ public class TheiaQuickTree {
     final int adoptedProposalIndex = proposalIndex + 1;
     String proposalItemXpath = format(TREE_ROW_XPATH_TEMPLATE, adoptedProposalIndex);
     seleniumWebDriverHelper.waitAndClick(By.xpath(proposalItemXpath));
+  }
+
+  public void clickOnProposal(String proposalDescription) {
+    final int proposalIndex = getProposalIndex(proposalDescription);
+    clickOnProposal(proposalIndex);
+  }
+
+  public void pressEnter() {
+    seleniumWebDriverHelper.pressEnter();
+  }
+
+  public void pressArrowUp() {
+    seleniumWebDriverHelper.pressArrowUp();
+  }
+
+  public void pressArrowDown() {
+    seleniumWebDriverHelper.pressArrowDown();
   }
 }

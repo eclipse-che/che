@@ -12,7 +12,9 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.openqa.selenium.Keys.chord;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -123,6 +125,12 @@ public class TheiaIde {
   public void switchToIdeFrame() {
     seleniumWebDriverHelper.waitAndSwitchToFrame(
         By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+  }
+
+  public void pressKeyCombination(CharSequence... combination) {
+    final String keyCombination = chord(asList(combination));
+
+    seleniumWebDriverHelper.sendKeys(keyCombination);
   }
 
   @PreDestroy

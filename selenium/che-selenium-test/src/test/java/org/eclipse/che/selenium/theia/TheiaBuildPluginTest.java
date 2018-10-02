@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.theia;
 
+import static org.eclipse.che.selenium.core.TestGroup.MULTIUSER;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
 
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.Keys;
 import org.testng.Assert;
@@ -42,6 +44,7 @@ public class TheiaBuildPluginTest {
       "git clone https://github.com/ws-skeleton/che-dummy-plugin.git";
   private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
+  private static final String SEARCH_SEQUENCE = "hosted";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_TERMINAL_OUTPUT =
@@ -70,6 +73,7 @@ public class TheiaBuildPluginTest {
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private TheiaEditor theiaEditor;
   @Inject private TheiaNewFileDialog theiaNewFileDialog;
+  @Inject private TheiaQuickTree theiaQuickTree;
 
   @BeforeClass
   public void prepare() {
@@ -86,7 +90,7 @@ public class TheiaBuildPluginTest {
     workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
-  @Test(groups = OPENSHIFT)
+  @Test(groups = {OPENSHIFT, MULTIUSER})
   public void pluginShouldBeBuilt() {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
@@ -110,7 +114,10 @@ public class TheiaBuildPluginTest {
     theiaProjectTree.waitItem(PROJECT_NAME);
     WaitUtils.sleepQuietly(5);
 
-    seleniumWebDriverHelper.sendKeys(Keys.chord(Keys.CONTROL, Keys.SHIFT, "p"));
+    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
+    theiaQuickTree.waitForm();
+
+    theiaQuickTree.enterTextToSearchField(SEARCH_SEQUENCE);
 
     WaitUtils.sleepQuietly(10);
     Assert.fail();
