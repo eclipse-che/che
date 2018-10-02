@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -47,6 +48,7 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private TestGitHubRepository testRepo;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   private TestFactory testFactory;
 
@@ -68,8 +70,13 @@ public class CheckFactoryWithMultiModuleTest {
   }
 
   @AfterClass
-  public void tearDown() throws Exception {
+  public void deleteTestFactory() throws Exception {
     testFactory.delete();
+  }
+
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
   }
 
   @Test

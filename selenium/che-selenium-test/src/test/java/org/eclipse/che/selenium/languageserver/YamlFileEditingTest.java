@@ -280,7 +280,7 @@ public class YamlFileEditingTest {
     preferences.addSchemaUrl("kubernetes");
     preferences.clickOnOkBtn();
 
-    preferences.closeForm();
+    preferences.close();
   }
 
   private void deleteSchema() {
@@ -293,6 +293,6 @@ public class YamlFileEditingTest {
     preferences.deleteSchema();
     preferences.clickOnOkBtn();
 
-    preferences.closeForm();
+    preferences.close();
   }
 }
