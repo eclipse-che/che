@@ -61,6 +61,6 @@ public class Eclipse0091Test {
     editor.goToCursorPositionVisible(14, 5);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("MyAnnot");
-    editor.waitSpecifiedValueForLineAndChar(14, 19);
+    editor.waitSpecifiedValueForLineAndChar(14, 26);
   }
 }

@@ -63,6 +63,6 @@ public class Eclipse0093Test {
     editor.goToCursorPositionVisible(18, 26);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("MyEnum");
-    editor.waitSpecifiedValueForLineAndChar(15, 3);
+    editor.waitSpecifiedValueForLineAndChar(15, 19);
   }
 }

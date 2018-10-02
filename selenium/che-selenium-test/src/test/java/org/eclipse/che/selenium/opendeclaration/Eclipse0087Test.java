@@ -64,6 +64,6 @@ public class Eclipse0087Test {
     editor.goToCursorPositionVisible(13, 45);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Myclass0087");
-    editor.waitSpecifiedValueForLineAndChar(14, 14);
+    editor.waitSpecifiedValueForLineAndChar(14, 25);
   }
 }
