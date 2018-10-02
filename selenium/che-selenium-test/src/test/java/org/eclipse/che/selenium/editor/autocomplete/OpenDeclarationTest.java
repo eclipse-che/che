@@ -135,8 +135,7 @@ public class OpenDeclarationTest {
     editor.goToCursorPositionVisible(31, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView.class");
-    editor.waitTextElementsActiveLine("ModelAndView");
-    editor.waitSpecifiedValueForLineAndChar(44, 14);
+    editor.waitSpecifiedValueForLineAndChar(44, 26);
     editor.closeFileByNameWithSaving("ModelAndView.class");
 
     // Check go to method
@@ -144,14 +143,12 @@ public class OpenDeclarationTest {
     editor.goToCursorPositionVisible(44, 16);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView.class");
-    editor.waitTextElementsActiveLine("addObject");
-    editor.waitSpecifiedValueForLineAndChar(226, 22);
+    editor.waitSpecifiedValueForLineAndChar(226, 31);
 
     // Check go to inner method
     editor.goToCursorPositionVisible(227, 9);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView.class");
-    editor.waitTextElementsActiveLine("getModelMap()");
-    editor.waitSpecifiedValueForLineAndChar(203, 18);
+    editor.waitSpecifiedValueForLineAndChar(203, 29);
   }
 }
