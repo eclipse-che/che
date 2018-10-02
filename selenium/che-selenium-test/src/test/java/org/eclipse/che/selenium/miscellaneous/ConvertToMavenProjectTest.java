@@ -86,7 +86,7 @@ public class ConvertToMavenProjectTest {
     testProjectServiceClient.checkProjectType(workspaceId, CONVERT_PATH, "maven");
     addParentArticatSectionIntoPomFile();
     menu.runCommand(PROJECT, UPDATE_PROJECT_CONFIGURATION);
-    convertToMavenByhWizard("/", PROJECT_NAME);
+    convertToMavenByWizard("/", PROJECT_NAME);
     testProjectServiceClient.checkProjectType(workspaceId, CONVERT_PATH, "maven");
   }
 
@@ -106,10 +106,10 @@ public class ConvertToMavenProjectTest {
     projectExplorer.waitAndSelectItem(converPath);
     projectExplorer.openContextMenuByPathSelectedItem(converPath);
     projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
-    convertToMavenByhWizard("/" + PROJECT_NAME, WEB_APP_MODULE);
+    convertToMavenByWizard("/" + PROJECT_NAME, WEB_APP_MODULE);
   }
 
-  private void convertToMavenByhWizard(String pathToDirectory, String convertedFolder) {
+  private void convertToMavenByWizard(String pathToDirectory, String convertedFolder) {
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName(pathToDirectory);
     wizard.waitTextProjectNameInput(convertedFolder);
