@@ -310,7 +310,7 @@ public class ContextMenuEditorTest {
     fileStructure.waitFileStructureFormIsClosed();
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("handleRequest");
-    editor.waitSpecifiedValueForLineAndChar(26, 24);
+    editor.waitSpecifiedValueForLineAndChar(26, 3);
   }
 
   @Test(priority = 8)
