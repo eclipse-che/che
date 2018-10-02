@@ -1811,13 +1811,22 @@ public class CodenvyEditor {
    * @param charPosition char's number where cursor is expected
    */
   public void waitSpecifiedValueForLineAndChar(final int linePosition, final int charPosition) {
+    int[] lastPos = new int[] {-1, -1};
     webDriverWaitFactory
         .get()
+        .withMessage(
+            () -> {
+              return String.format(
+                  "Expected (%d, %d), but was (%d, %d)",
+                  linePosition, charPosition, lastPos[0], lastPos[1]);
+            })
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver ->
-                    (getPositionVisible() == linePosition)
-                        && (getPositionOfChar() == charPosition));
+                webDriver -> {
+                  lastPos[0] = getPositionVisible();
+                  lastPos[1] = getPositionOfChar();
+                  return (lastPos[0] == linePosition) && (lastPos[1] == charPosition);
+                });
   }
 
   /**
