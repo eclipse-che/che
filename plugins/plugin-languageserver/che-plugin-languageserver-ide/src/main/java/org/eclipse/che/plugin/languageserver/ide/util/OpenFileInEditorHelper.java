@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.util;
 
-import static org.eclipse.che.ide.api.editor.text.LinearRange.createWithStart;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -94,8 +92,7 @@ public class OpenFileInEditorHelper {
   private Consumer<TextEditor> selectRange(TextRange range) {
     return (editor) -> {
       Document document = editor.getDocument();
-      document.setSelectedRange(
-          createWithStart(document.getIndexFromPosition(range.getFrom())).andLength(0), true);
+      document.setSelectedRange(range, true);
     };
   }
 
