@@ -94,7 +94,7 @@ public class CheckErrorsWarningsTabTest {
     preferences.getItemsFromErrorWarningsWidget();
     Assert.assertEquals(preferences.getItemsFromErrorWarningsWidget(), expectedErrorsWarningsList);
 
-    preferences.closeForm();
+    preferences.close();
     consoles.closeProcessesArea();
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
@@ -120,7 +120,7 @@ public class CheckErrorsWarningsTabTest {
     preferences.selectDroppedMenuByName(Preferences.DropDownJavaCompilerMenu.ERRORS_WARNINGS);
     preferences.setAllSettingsInErrorWaitingWidget(valueOfRadioButton);
     preferences.clickOnOkBtn();
-    preferences.closeForm();
+    preferences.close();
     loader.waitOnClosed();
     projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);

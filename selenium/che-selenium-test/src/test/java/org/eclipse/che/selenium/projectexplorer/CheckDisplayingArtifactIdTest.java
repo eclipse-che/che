@@ -63,7 +63,7 @@ public class CheckDisplayingArtifactIdTest {
     preferences.selectDroppedMenuByName("Maven");
     preferences.clickOnShowArtifactCheckBox();
     preferences.clickOnOkBtn();
-    preferences.closeForm();
+    preferences.close();
     preferences.waitPreferencesFormIsClosed();
     projectExplorer.waitVisibilityByName(PROJECT_NAME + " " + ARTIFACT_ID);
     projectExplorer.quickExpandWithJavaScript();
@@ -84,7 +84,7 @@ public class CheckDisplayingArtifactIdTest {
     preferences.selectDroppedMenuByName("Maven");
     preferences.clickOnShowArtifactCheckBox();
     preferences.clickOnOkBtn();
-    preferences.closeForm();
+    preferences.close();
 
     projectExplorer.waitVisibilityByName(PROJECT_NAME);
   }
