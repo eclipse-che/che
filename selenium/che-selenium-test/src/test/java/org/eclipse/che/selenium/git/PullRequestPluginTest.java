@@ -42,6 +42,7 @@ import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -84,7 +85,7 @@ public class PullRequestPluginTest {
   private static final String PATH_TO_README_FILE_1ST_PROJECT = FIRST_PROJECT_NAME + "/README.md";
   private static final String PATH_TO_README_FILE_2ND_PROJECT = SECOND_PROJECT_NAME + "/README.md";
   private static final String READ_FACTORY_URL_FROM_PR_DESCRIPTION_TEMPLATE =
-      "\\[!\\[Review\\]\\(.*%1$s/factory/resources/factory-review.svg\\)\\]\\((.*%1$s/f\\?id=factory.*)\\).*"
+      "\\[!\\[Review\\]\\(.*%1$sfactory/resources/factory-review.svg\\)\\]\\((.*%1$sf\\?id=factory.*)\\).*"
           + COMMENT;
 
   private String mainBrowserTabHandle;
@@ -99,9 +100,7 @@ public class PullRequestPluginTest {
   @Named("github.password")
   private String gitHubPassword;
 
-  @Inject
-  @Named("che.host")
-  private String cheHost;
+  @Inject private TestIdeUrlProvider testIdeUrlProvider;
 
   @Inject private Ide ide;
   @Inject private Git git;
@@ -288,11 +287,13 @@ public class PullRequestPluginTest {
 
     Matcher matcher =
         compile(
-                format(READ_FACTORY_URL_FROM_PR_DESCRIPTION_TEMPLATE, cheHost),
+                format(
+                    READ_FACTORY_URL_FROM_PR_DESCRIPTION_TEMPLATE,
+                    testIdeUrlProvider.get().toString()),
                 Pattern.MULTILINE | Pattern.DOTALL)
             .matcher(pullRequestDescription);
 
-    assertTrue(matcher.find(), "Actual PR description was " + pullRequestDescription);
+    assertTrue(matcher.find(), format("Actual PR description was '%s'.", pullRequestDescription));
 
     // open factory from URL in pull request description
     String factoryUrlFromPrDescription = matcher.group(1);
