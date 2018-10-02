@@ -23,6 +23,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.selenium.core.provider.OpenShiftWebConsoleUrlProvider;
 import org.eclipse.che.selenium.core.utils.executor.CommandExecutor;
@@ -42,6 +43,8 @@ public class OpenShiftCliCommandExecutor implements CommandExecutor {
   private static final boolean IS_MAC_OS = getProperty("os.name").toLowerCase().startsWith("mac");
   private static final String DEFAULT_OPENSHIFT_USERNAME = "developer";
   private static final String DEFAULT_OPENSHIFT_PASSWORD = "any";
+  private boolean isLoggedIn;
+  private ReentrantLock loginLock = new ReentrantLock();
 
   private static final Path PATH_TO_OPENSHIFT_CLI_DIRECTORY =
       Paths.get(getProperty("java.io.tmpdir"));
@@ -66,8 +69,25 @@ public class OpenShiftCliCommandExecutor implements CommandExecutor {
 
   @Override
   public String execute(String command) throws IOException {
+    return execute(command, true);
+  }
+
+  private String execute(String command, boolean needToLogin) throws IOException {
     if (!PATH_TO_OPENSHIFT_CLI.toFile().exists()) {
       downloadOpenShiftCli();
+    }
+
+    if (needToLogin && !isLoggedIn) {
+      loginLock.lock();
+      try {
+        login();
+        isLoggedIn = true;
+      } catch (IOException e) {
+        isLoggedIn = false;
+        throw e;
+      } finally {
+        loginLock.unlock();
+      }
     }
 
     String openShiftCliCommand = format("%s %s", PATH_TO_OPENSHIFT_CLI, command);
@@ -76,7 +96,7 @@ public class OpenShiftCliCommandExecutor implements CommandExecutor {
   }
 
   /** Logs into OpensShift as a regular user */
-  public void login() throws IOException {
+  private void login() throws IOException {
     String loginToOpenShiftCliCommand;
     if (openShiftToken != null) {
       loginToOpenShiftCliCommand =
@@ -92,7 +112,7 @@ public class OpenShiftCliCommandExecutor implements CommandExecutor {
               openShiftPassword != null ? openShiftPassword : DEFAULT_OPENSHIFT_PASSWORD);
     }
 
-    execute(loginToOpenShiftCliCommand);
+    execute(loginToOpenShiftCliCommand, false);
   }
 
   private void downloadOpenShiftCli() throws IOException {
