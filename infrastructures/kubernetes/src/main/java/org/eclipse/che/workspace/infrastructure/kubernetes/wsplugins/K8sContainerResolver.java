@@ -36,6 +36,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  */
 public class K8sContainerResolver {
 
+
+  private final int maxContainerNameLength = 63; //K8S container name limit
   private final String pluginName;
   private final CheContainer cheContainer;
   private final List<ChePluginEndpoint> containerEndpoints;
@@ -55,7 +57,7 @@ public class K8sContainerResolver {
     Container container =
         new ContainerBuilder()
             .withImage(cheContainer.getImage())
-            .withName((pluginName + "-" + cheContainer.getName()).toLowerCase())
+            .withName(buildContainerName(pluginName, cheContainer.getName()))
             .withEnv(toK8sEnv(cheContainer.getEnv()))
             .withPorts(getContainerPorts())
             .build();
@@ -101,5 +103,13 @@ public class K8sContainerResolver {
     return env.stream()
         .map(e -> new io.fabric8.kubernetes.api.model.EnvVar(e.getName(), e.getValue(), null))
         .collect(Collectors.toList());
+  }
+
+  private String buildContainerName(String pluginName, String cheContainerName) {
+    String preliminaryName = (pluginName + "-" + cheContainerName).toLowerCase();
+    if (preliminaryName.length() <= maxContainerNameLength) {
+      return preliminaryName;
+    }
+    return ("plugin-" + cheContainerName).substring(0, maxContainerNameLength - 1);
   }
 }

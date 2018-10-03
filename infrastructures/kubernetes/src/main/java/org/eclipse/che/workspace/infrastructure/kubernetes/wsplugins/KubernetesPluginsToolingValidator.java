@@ -22,7 +22,8 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.PluginBase;
 @Singleton
 public class KubernetesPluginsToolingValidator {
 
-  private static final Pattern namePattern = Pattern.compile("");
+  // Pattern is from K8S Container class
+  private static final Pattern namePattern = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
 
   public void validatePluginNames(List<? extends PluginBase> plugins)
       throws InternalInfrastructureException {
