@@ -31,11 +31,11 @@ import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 @Singleton
 public class ServerSideRequestProcessor implements RequestProcessor {
   private ExecutorService executorService;
-  private final int poolSize;
+  private final int maxPoolSize;
 
   @Inject
-  public ServerSideRequestProcessor(@Named("che.server.jsonrpc.processor_pool_size") int poolSize) {
-    this.poolSize = poolSize;
+  public ServerSideRequestProcessor(@Named("che.server.jsonrpc.processor_max_pool_size") int maxPoolSize) {
+    this.maxPoolSize = maxPoolSize;
   }
 
   @PostConstruct
@@ -49,7 +49,7 @@ public class ServerSideRequestProcessor implements RequestProcessor {
 
     executorService =
         new ThreadPoolExecutor(
-            0, poolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), factory);
+            0, maxPoolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), factory);
   }
 
   @PreDestroy
