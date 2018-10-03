@@ -13,6 +13,8 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_DASHBOARD;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_IDE;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.GITHUB_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JS_ADAPTER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JWKS_ENDPOINT_SETTING;
@@ -25,10 +27,8 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.TOKEN_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERINFO_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERNAME_CLAIM_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_FIXED_REDIRECT_URLS_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_DASHBOARD;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_IDE;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -144,6 +144,15 @@ public class KeycloakSettings {
 
     if (oidcProvider != null) {
       settings.put(OIDC_PROVIDER_SETTING, oidcProvider);
+      if (useFixedRedirectUrls) {
+        String rootUrl = cheServerEndpoint;
+        if (!rootUrl.endsWith("/")) {
+          rootUrl = rootUrl + "/";
+        }
+        settings.put(
+            FIXED_REDIRECT_URL_FOR_DASHBOARD, rootUrl + "keycloak/oidcCallbackDashboard.html");
+        settings.put(FIXED_REDIRECT_URL_FOR_IDE, rootUrl + "keycloak/oidcCallbackIde.html");
+      }
     }
     settings.put(USE_NONCE_SETTING, Boolean.toString(useNonce));
     if (jsAdapterUrl == null) {
@@ -151,16 +160,7 @@ public class KeycloakSettings {
           (oidcProvider != null) ? "/api/keycloak/OIDCKeycloak.js" : serverURL + "/js/keycloak.js";
     }
     settings.put(JS_ADAPTER_URL_SETTING, jsAdapterUrl);
-    
-    if (useFixedRedirectUrls) {
-        String rootUrl = cheServerEndpoint;
-        if (rootUrl.endsWith("/")) {
-          rootUrl = rootUrl.substring(0, rootUrl.length() - 1);
-        }
-        settings.put(FIXED_REDIRECT_URL_FOR_DASHBOARD, rootUrl + "keycloak/oidcCallbackDashboard.html");
-        settings.put(FIXED_REDIRECT_URL_FOR_IDE, rootUrl + "keycloak/oidcCallbackIde.html");
-    }
-    
+
     this.settings = Collections.unmodifiableMap(settings);
   }
 

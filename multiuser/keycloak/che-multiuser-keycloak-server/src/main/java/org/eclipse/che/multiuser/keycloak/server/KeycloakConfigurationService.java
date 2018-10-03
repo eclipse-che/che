@@ -95,5 +95,4 @@ public class KeycloakConfigurationService extends Service {
   public String dashboardCallback() throws IOException {
     return getKeycloakResource("oidcCallbackDashboard.html");
   }
-
 }

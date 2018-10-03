@@ -46,6 +46,7 @@ public class KeycloakUserManagerTest {
 
   @Mock private UserDao userDao;
   @Mock private ProfileDao profileDao;
+  @Mock private KeycloakProfileRetriever keycloakProfileRetriever;
   @Mock private PreferenceDao preferenceDao;
   @Mock private AccountManager accountManager;
   @Mock private EventService eventService;

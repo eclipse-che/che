@@ -41,7 +41,7 @@ public class KeycloakConstants {
   public static final String GITHUB_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "github.endpoint";
 
   public static final String FIXED_REDIRECT_URL_FOR_DASHBOARD = KEYCLOAK_SETTING_PREFIX + "redirect_url.dashboard";
-  public static final String FIXED_REDIRECT_URL_FOR_IDE = KEYCLOAK_SETTING_PREFIX + "redirect_ur.ide";
+  public static final String FIXED_REDIRECT_URL_FOR_IDE = KEYCLOAK_SETTING_PREFIX + "redirect_url.ide";
   
   public static String getEndpoint(String apiEndpoint) {
     return apiEndpoint + KEYCLOAK_SETTINGS_ENDPOINT_PATH;
