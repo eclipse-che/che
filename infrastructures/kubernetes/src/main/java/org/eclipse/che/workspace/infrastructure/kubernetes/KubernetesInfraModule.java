@@ -56,6 +56,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.Default
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
@@ -153,6 +154,8 @@ public class KubernetesInfraModule extends AbstractModule {
         .to(new TypeLiteral<DefaultSecureServersFactory<KubernetesEnvironment>>() {});
 
     bind(BrokerService.class);
+
+    bind(KubernetesPluginsToolingValidator.class);
 
     bind(new TypeLiteral<BrokerEnvironmentFactory<KubernetesEnvironment>>() {})
         .to(KubernetesBrokerEnvironmentFactory.class);
