@@ -10,9 +10,7 @@
 
 function redirectToInitialPage(ide) {
   var redirectUri = window.sessionStorage.getItem('oidc' + (ide ? 'Ide' : 'Dashboard') + 'RedirectUrl');
-  console.log('redirectUri in oidcCallback.html: ' + redirectUri);
   var fragmentIndex = redirectUri.indexOf('#');
-  debugger;
   if (location.hash) {
     var keycloakParameters;
     if (fragmentIndex == -1) {
