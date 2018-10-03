@@ -47,7 +47,7 @@
                 <include>org.eclipse.che:assembly-wsmaster-war</include>
             </includes>
         </dependencySet>
-        <!-- <dependencySet>
+        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
@@ -55,7 +55,7 @@
             <includes>
                 <include>org.eclipse.che.dashboard:che-dashboard-war</include>
             </includes>
-        </dependencySet> -->
+        </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>

@@ -72,11 +72,6 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.dashboard</groupId>
-            <artifactId>che-dashboard-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.docs</groupId>
             <artifactId>che-docs</artifactId>
             <type>war</type>
@@ -152,4 +147,41 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>dashboard</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${project.basedir}/src/assembly/assembly-with-dashboard.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.che.dashboard</groupId>
+                    <artifactId>che-dashboard-war</artifactId>
+                    <type>war</type>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

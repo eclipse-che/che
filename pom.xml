@@ -36,7 +36,6 @@
         <module>ide/che-ide-core</module>
         <module>ide/che-ide-full</module>
         <module>ide/che-ide-gwt-app</module>
-        <module>dashboard</module>
         <module>workspace-loader</module>
         <module>assembly</module>
         <module>selenium</module>
@@ -2079,6 +2078,15 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>dashboard</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>dashboard</module>
+            </modules>
         </profile>
     </profiles>
 </project>
