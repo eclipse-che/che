@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 @Singleton
 public class TheiaHostedPluginSelectPathForm {
@@ -148,10 +149,20 @@ public class TheiaHostedPluginSelectPathForm {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(By.xpath(ROOT_PROJECTS_FOLDER_XPATH));
   }
 
-  public void waitItem(String itemPath) {
+  public void clickOnItem(String itemPath) {
+    waitItem(itemPath).click();
+  }
+
+  public WebElement waitItem(String itemPath) {
     final String itemId = getProjectsTreeItemId(itemPath);
 
-    seleniumWebDriverHelper.waitVisibility(By.id(itemId));
+    return seleniumWebDriverHelper.waitVisibility(By.id(itemId));
+  }
+
+  public void waitItemDissappearance(String itemPath) {
+    final String itemId = getProjectsTreeItemId(itemPath);
+
+    seleniumWebDriverHelper.waitInvisibility(By.id(itemId));
   }
 
   public void waitItemSelected(String itemPath) {

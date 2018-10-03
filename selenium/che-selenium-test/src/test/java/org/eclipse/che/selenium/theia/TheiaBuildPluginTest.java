@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.W
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -26,13 +27,13 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
+import org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.Keys;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,11 +41,18 @@ import org.testng.annotations.Test;
 public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
   private static final String PROJECT_NAME = "che-dummy-plugin";
+  private static final String HOSTED_PLUGIN_PATH = PROJECT_NAME + "/ui";
   private static final String GIT_CLONE_COMMAND =
       "git clone https://github.com/ws-skeleton/che-dummy-plugin.git";
+  private static final String EXPECTED_PLUGIN_FOLDER_MESSAGE =
+      "Plugin folder is set to: file:///projects/che-dummy-plugin/ui";
+  private static final String EXPECTED_STARTING_SERVER_MESSAGE =
+      "Starting hosted instance server ...";
+  private static final String EXPECTED_INSTANCE_RUNNING_MESSAGE = "Hosted instance is running at:";
   private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
-  private static final String SEARCH_SEQUENCE = "hosted";
+  private static final String SEARCH_SEQUENCE = ">hosted";
+  private static final String SUGGESTION_FOR_SELECTION = "Hosted Plugin: Start Instance";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_TERMINAL_OUTPUT =
@@ -68,12 +76,14 @@ public class TheiaBuildPluginTest {
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TheiaTerminal theiaTerminal;
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private TheiaEditor theiaEditor;
   @Inject private TheiaNewFileDialog theiaNewFileDialog;
   @Inject private TheiaQuickTree theiaQuickTree;
+  @Inject private TheiaHostedPluginSelectPathForm hostedPluginSelectPathForm;
 
   @BeforeClass
   public void prepare() {
@@ -111,15 +121,39 @@ public class TheiaBuildPluginTest {
 
   @Test(priority = 1)
   public void hostedModeShouldWork() {
+    final String parentWindow = seleniumWebDriver.getWindowHandle();
+
     theiaProjectTree.waitItem(PROJECT_NAME);
     WaitUtils.sleepQuietly(5);
 
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaQuickTree.waitForm();
-
+    WaitUtils.sleepQuietly(4);
     theiaQuickTree.enterTextToSearchField(SEARCH_SEQUENCE);
+    WaitUtils.sleepQuietly(4);
 
-    WaitUtils.sleepQuietly(10);
-    Assert.fail();
+    theiaQuickTree.clickOnProposal(SUGGESTION_FOR_SELECTION);
+
+    hostedPluginSelectPathForm.waitForm();
+    hostedPluginSelectPathForm.clickOnItem(PROJECT_NAME);
+    hostedPluginSelectPathForm.clickOnItem(HOSTED_PLUGIN_PATH);
+    hostedPluginSelectPathForm.waitItemSelected(HOSTED_PLUGIN_PATH);
+    hostedPluginSelectPathForm.clickOnOpenButton();
+    hostedPluginSelectPathForm.waitFormClosed();
+
+    waitNewBrowserWindowAndSwitchToParent(parentWindow);
+
+    theiaIde.waitNotificationMessageContains(EXPECTED_INSTANCE_RUNNING_MESSAGE);
+    theiaIde.waitNotificationEqualsTo(EXPECTED_STARTING_SERVER_MESSAGE);
+    theiaIde.waitNotificationEqualsTo(EXPECTED_PLUGIN_FOLDER_MESSAGE);
+
+
+
+  }
+
+  private void waitNewBrowserWindowAndSwitchToParent(String parentWindowHandle) {
+    seleniumWebDriver.waitOpenedSomeWin();
+    seleniumWebDriver.switchTo().window(parentWindowHandle);
+    theiaIde.switchToIdeFrame();
   }
 }
