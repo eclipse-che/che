@@ -19,9 +19,11 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -85,7 +87,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB);
+    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, false);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Container> containers = new ArrayList<>();
@@ -101,6 +103,8 @@ public class KubernetesPluginsToolingApplierTest {
     when(meta.getName()).thenReturn(POD_NAME);
     when(internalEnvironment.getMachines()).thenReturn(machines);
     when(internalEnvironment.getServices()).thenReturn(services);
+    Map<String, String> attributes = new HashMap<>();
+    when(internalEnvironment.getAttributes()).thenReturn(attributes);
   }
 
   @Test
@@ -356,6 +360,34 @@ public class KubernetesPluginsToolingApplierTest {
 
     // when
     applier.apply(internalEnvironment, singletonList(chePlugin));
+  }
+
+  @Test
+  public void shouldSetJWTServerExposerAttributeIfAuthEnabled() throws Exception {
+    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, true);
+
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    assertEquals(internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY), "jwtproxy");
+  }
+
+  @Test
+  public void shouldNotSetJWTServerExposerAttributeIfAuthEnabledButAttributeIsPresent()
+      throws Exception {
+    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, true);
+    internalEnvironment.getAttributes().put(SECURE_EXPOSER_IMPL_PROPERTY, "somethingElse");
+
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    assertEquals(
+        internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY), "somethingElse");
+  }
+
+  @Test
+  public void shouldNotSetJWTServerExposerAttributeIfAuthDisabled() throws Exception {
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    assertNull(internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY));
   }
 
   private ChePlugin createChePlugin() {
