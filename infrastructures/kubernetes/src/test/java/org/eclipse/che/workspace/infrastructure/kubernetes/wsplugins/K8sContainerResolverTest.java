@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 public class K8sContainerResolverTest {
   private static final String IMAGE = "testImage:tag";
+  private static final String PLUGIN_NAME = "test_plugin";
 
   private CheContainer cheContainer;
   private K8sContainerResolver resolver;
@@ -46,7 +47,7 @@ public class K8sContainerResolverTest {
   public void setUp() {
     cheContainer = new CheContainer();
     endpoints = new ArrayList<>();
-    resolver = new K8sContainerResolver(cheContainer, endpoints);
+    resolver = new K8sContainerResolver(cheContainer, PLUGIN_NAME, endpoints);
   }
 
   @Test
@@ -60,9 +61,12 @@ public class K8sContainerResolverTest {
 
   @Test
   public void shouldSetName() throws Exception {
+
+    cheContainer.setName("cheContainerName");
+
     Container container = resolver.resolve();
 
-    assertTrue(container.getName().startsWith("tooling"));
+    assertTrue(container.getName().equals(PLUGIN_NAME + "-" + cheContainer.getName()));
   }
 
   @Test

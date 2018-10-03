@@ -25,7 +25,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
@@ -37,11 +36,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  */
 public class K8sContainerResolver {
 
+  private final String pluginName;
   private final CheContainer cheContainer;
   private final List<ChePluginEndpoint> containerEndpoints;
 
-  public K8sContainerResolver(CheContainer container, List<ChePluginEndpoint> containerEndpoints) {
+  public K8sContainerResolver(
+      CheContainer container, String pluginName, List<ChePluginEndpoint> containerEndpoints) {
     this.cheContainer = container;
+    this.pluginName = pluginName;
     this.containerEndpoints = containerEndpoints;
   }
 
@@ -53,7 +55,7 @@ public class K8sContainerResolver {
     Container container =
         new ContainerBuilder()
             .withImage(cheContainer.getImage())
-            .withName(Names.generateName("tooling"))
+            .withName((pluginName + "-" + cheContainer.getName()).toLowerCase())
             .withEnv(toK8sEnv(cheContainer.getEnv()))
             .withPorts(getContainerPorts())
             .build();
