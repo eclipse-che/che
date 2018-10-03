@@ -31,12 +31,11 @@ import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 @Singleton
 public class ServerSideRequestProcessor implements RequestProcessor {
   private ExecutorService executorService;
-  private final Integer poolSize;
+  private final int poolSize;
 
   @Inject
-  public ServerSideRequestProcessor(
-      @Named("che.server.jsonrpc.processor_pool_size") String poolSize) {
-    this.poolSize = Integer.parseInt(poolSize);
+  public ServerSideRequestProcessor(@Named("che.server.jsonrpc.processor_pool_size") int poolSize) {
+    this.poolSize = poolSize;
   }
 
   @PostConstruct
