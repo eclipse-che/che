@@ -34,7 +34,7 @@ public class ServerSideRequestProcessor implements RequestProcessor {
   private final int maxPoolSize;
 
   @Inject
-  public ServerSideRequestProcessor(@Named("che.server.jsonrpc.processor_max_pool_size") int maxPoolSize) {
+  public ServerSideRequestProcessor(@Named("che.core.jsonrpc.processor_max_pool_size") int maxPoolSize) {
     this.maxPoolSize = maxPoolSize;
   }
 
