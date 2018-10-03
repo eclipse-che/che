@@ -11,15 +11,19 @@
  */
 package org.eclipse.che.api.core.jsonrpc.impl;
 
-import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Named;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
@@ -27,6 +31,13 @@ import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 @Singleton
 public class ServerSideRequestProcessor implements RequestProcessor {
   private ExecutorService executorService;
+  private final Integer poolSize;
+
+  @Inject
+  public ServerSideRequestProcessor(
+      @Named("che.server.jsonrpc.processor_pool_size") String poolSize) {
+    this.poolSize = Integer.parseInt(poolSize);
+  }
 
   @PostConstruct
   private void postConstruct() {
@@ -37,7 +48,9 @@ public class ServerSideRequestProcessor implements RequestProcessor {
             .setDaemon(true)
             .build();
 
-    executorService = newCachedThreadPool(factory);
+    executorService =
+        new ThreadPoolExecutor(
+            0, poolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), factory);
   }
 
   @PreDestroy
