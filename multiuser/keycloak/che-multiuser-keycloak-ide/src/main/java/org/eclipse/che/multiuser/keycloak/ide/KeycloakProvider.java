@@ -17,6 +17,7 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JS_ADA
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.OIDC_PROVIDER_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_IDE;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -86,7 +87,8 @@ public class KeycloakProvider {
                         settings.get(REALM_SETTING),
                         settings.get(CLIENT_ID_SETTING),
                         settings.get(OIDC_PROVIDER_SETTING),
-                        Boolean.valueOf(settings.get(USE_NONCE_SETTING)).booleanValue()));
+                        Boolean.valueOf(settings.get(USE_NONCE_SETTING)).booleanValue(),
+                        settings.get(FIXED_REDIRECT_URL_FOR_IDE)));
     Log.debug(getClass(), "Keycloak init complete: ", this);
   }
 

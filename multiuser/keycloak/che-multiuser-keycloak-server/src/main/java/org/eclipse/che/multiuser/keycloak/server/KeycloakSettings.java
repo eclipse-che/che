@@ -26,6 +26,9 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.TOKEN_
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERINFO_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERNAME_CLAIM_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_FIXED_REDIRECT_URLS_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_DASHBOARD;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_IDE;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -54,6 +57,7 @@ public class KeycloakSettings {
 
   @Inject
   public KeycloakSettings(
+      @Named("che.api") String cheServerEndpoint,
       @Nullable @Named(JS_ADAPTER_URL_SETTING) String jsAdapterUrl,
       @Nullable @Named(AUTH_SERVER_URL_SETTING) String serverURL,
       @Nullable @Named(REALM_SETTING) String realm,
@@ -62,7 +66,8 @@ public class KeycloakSettings {
       @Nullable @Named(USERNAME_CLAIM_SETTING) String usernameClaim,
       @Named(USE_NONCE_SETTING) boolean useNonce,
       @Nullable @Named(OSO_ENDPOINT_SETTING) String osoEndpoint,
-      @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint) {
+      @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint,
+      @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls) {
 
     if (serverURL == null && oidcProvider == null) {
       throw new RuntimeException(
@@ -146,7 +151,16 @@ public class KeycloakSettings {
           (oidcProvider != null) ? "/api/keycloak/OIDCKeycloak.js" : serverURL + "/js/keycloak.js";
     }
     settings.put(JS_ADAPTER_URL_SETTING, jsAdapterUrl);
-
+    
+    if (useFixedRedirectUrls) {
+        String rootUrl = cheServerEndpoint;
+        if (rootUrl.endsWith("/")) {
+          rootUrl = rootUrl.substring(0, rootUrl.length() - 1);
+        }
+        settings.put(FIXED_REDIRECT_URL_FOR_DASHBOARD, rootUrl + "keycloak/oidcCallbackDashboard.html");
+        settings.put(FIXED_REDIRECT_URL_FOR_IDE, rootUrl + "keycloak/oidcCallbackIde.html");
+    }
+    
     this.settings = Collections.unmodifiableMap(settings);
   }
 

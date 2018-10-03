@@ -235,10 +235,8 @@ export class ImportGithubProjectController {
         let token = '&token=' + this.keycloakAuth.keycloak.token;
         this.openGithubPopup(token);
       }).error(() => {
-        storeRedirectUri(true);
-        this.keycloakAuth.keycloak.login({ 
-          scope: 'email profile'
-        });
+        window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
+        this.keycloakAuth.keycloak.login();
       });
     } else {
       this.openGithubPopup('');

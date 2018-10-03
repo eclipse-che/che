@@ -39,21 +39,13 @@ public final class Keycloak extends JavaScriptObject {
     });
   }-*/;
 
-  public static native void storeRedirectUri(boolean encodeHash) /*-{
-      var redirectUri = location.href;
-      if (location.hash && encodeHash) {
-          redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
-          redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
-      }
-      window.sessionStorage.setItem('oidcIdeRedirectUrl', redirectUri);
-  }-*/;
-
   public static native Promise<Keycloak> init(
       String theUrl,
       String theRealm,
       String theClientId,
       String theOidcProvider,
-      boolean theUseNonce) /*-{
+      boolean theUseNonce,
+      String redirectUrl) /*-{
     return new Promise(function (resolve, reject) {
       try {
         console.log('[Keycloak] Initializing');
@@ -72,13 +64,13 @@ public final class Keycloak extends JavaScriptObject {
         }
         var keycloak = $wnd.Keycloak(config);
         $wnd['_keycloak'] = keycloak;
-        storeRedirectUri(true);
+        window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
         keycloak.init({
           onLoad: 'login-required',
           checkLoginIframe: false,
           useNonce: theUseNonce,
           scope: 'email profile',
-          redirectUri: window.location.protocol + '//' + window.location.host + '/api/keycloak/oidcCallbackIde.html'
+          redirectUri: redirectUrl
           })
             .success(function (authenticated) {
               resolve(keycloak);
@@ -106,14 +98,13 @@ public final class Keycloak extends JavaScriptObject {
             .error(function () {
               console.log('[Keycloak] Failed updating Keycloak token');
               reject();
-              storeRedirectUri(true);
-              theKeycloak.login({
-                  scope: 'email profile'
-              });
+              window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
+              theKeycloak.login();
             });
       } catch (ex) {
         console.log('[Keycloak] Failed updating Keycloak token with exception: ', ex);
         reject();
+        window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
         theKeycloak.login();
       }
     });

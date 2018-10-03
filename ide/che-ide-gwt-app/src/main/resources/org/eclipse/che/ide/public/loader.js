@@ -69,15 +69,6 @@ class KeycloakLoader {
      */
     initKeycloak(keycloakSettings) {
         return new Promise((resolve, reject) => {
-            function storeRedirectUri(encodeHash) {
-                var redirectUri = location.href;
-                if (location.hash && encodeHash) {
-                    redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
-                    redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
-                }
-                window.sessionStorage.setItem('oidcIdeRedirectUrl', redirectUri);
-            }
-            
 
             function keycloakConfig() {
                 const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
@@ -102,14 +93,14 @@ class KeycloakLoader {
             if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
                 useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
             }
-            storeRedirectUri(true);
+            window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
             keycloak
                 .init({
                   onLoad: 'login-required',
                   checkLoginIframe: false,
                   useNonce: useNonce,
                   scope: 'email profile',
-                  redirectUri: window.location.protocol + '//' + window.location.host + '/api/keycloak/oidcCallbackIde.html'
+                  redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
                 })
                 .success(() => {
                     resolve(keycloak);
@@ -219,6 +210,7 @@ class Loader {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + window._keycloak.token);
                     resolve(xhr);
                 }).error(() => {
+                    window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
                     window._keycloak.login();
                     reject(new Error('Failed to refresh token'));
                 });

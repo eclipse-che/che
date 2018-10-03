@@ -19,15 +19,6 @@ import { Loader } from './loader/loader'
 
 const WEBSOCKET_CONTEXT = '/api/websocket';
 
-function storeRedirectUri(encodeHash) {
-    var redirectUri = location.href;
-    if (location.hash && encodeHash) {
-        redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
-        redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
-    }
-    window.sessionStorage.setItem('oidcIdeRedirectUrl', redirectUri);
-}
-
 declare const Keycloak: Function;
 export class KeycloakLoader {
     /**
@@ -90,36 +81,36 @@ export class KeycloakLoader {
     private initKeycloak(keycloakSettings: any): Promise<any> {
         return new Promise((resolve, reject) => {
             function keycloakConfig() {
-            	const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
-            	if (!theOidcProvider) {
-            		return {
-            			url: keycloakSettings['che.keycloak.auth_server_url'],
-            			realm: keycloakSettings['che.keycloak.realm'],
-            			clientId: keycloakSettings['che.keycloak.client_id']
-            		};
-            	} else {
-            		return {
-        				oidcProvider: theOidcProvider,
-        				clientId: keycloakSettings['che.keycloak.client_id']
-            		};
-            	}
+                const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
+                if (!theOidcProvider) {
+                    return {
+                        url: keycloakSettings['che.keycloak.auth_server_url'],
+                        realm: keycloakSettings['che.keycloak.realm'],
+                        clientId: keycloakSettings['che.keycloak.client_id']
+                    };
+                } else {
+                    return {
+                        oidcProvider: theOidcProvider,
+                        clientId: keycloakSettings['che.keycloak.client_id']
+                    };
+                }
             }
-            const keycloak = Keycloak(keycloakConfig());        	
+            const keycloak = Keycloak(keycloakConfig());            
 
             window['_keycloak'] = keycloak;
 
             var useNonce;
             if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
-            	useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
+                useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
             }
-            storeRedirectUri(true);
+            window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
             keycloak
                 .init({
                     onLoad: 'login-required',
                     checkLoginIframe: false,
                     useNonce: useNonce,
                     scope: 'email profile',
-                    redirectUri: window.location.protocol + '//' + window.location.host + '/api/keycloak/oidcCallbackIde.html'
+                    redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
                 })
                 .success(() => {
                     resolve(keycloak);
@@ -386,10 +377,8 @@ export class WorkspaceLoader {
                     resolve(xhr);
                 }).error(() => {
                     console.log('Failed to refresh token');
-                    storeRedirectUri(true);
-                    this.keycloak.login({
-                      scope: 'email profile'
-                    });
+                    window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
+                    this.keycloak.login();
                     reject();
                 });
             }

@@ -11,6 +11,16 @@
 function redirectToInitialPage(ide) {
   var redirectUri = window.sessionStorage.getItem('oidc' + (ide ? 'Ide' : 'Dashboard') + 'RedirectUrl');
   console.log('redirectUri in oidcCallback.html: ' + redirectUri);
-  redirectUri += window.location.hash;
+  var fragmentIndex = redirectUri.indexOf('#');
+  debugger;
+  if (location.hash) {
+    var keycloakParameters;
+    if (fragmentIndex == -1) {
+      keycloakParameters = location.hash;
+    } else {
+      keycloakParameters = '&' + location.hash.substring(1);
+    }
+    redirectUri += keycloakParameters;
+  }
   window.location = redirectUri;
 }
