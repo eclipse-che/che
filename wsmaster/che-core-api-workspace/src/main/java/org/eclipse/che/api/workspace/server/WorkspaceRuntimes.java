@@ -531,7 +531,7 @@ public class WorkspaceRuntimes {
       return;
     } catch (InfrastructureException e) {
       LOG.error(
-          "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
+          "An error occurred while attempting to get runtime identities for infrastructure '{}'. Reason: '{}'",
           infrastructure.getName(),
           e.getMessage());
       return;
@@ -542,7 +542,7 @@ public class WorkspaceRuntimes {
         recoverOne(infrastructure, identity);
       } catch (ServerException | ConflictException e) {
         LOG.error(
-            "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
+            "An error occurred while attempting to recover runtimes using infrastructure '{}'. Reason: '{}'",
             infrastructure.getName(),
             e.getMessage());
       }

@@ -188,6 +188,64 @@ public class WorkspaceRuntimesTest {
   }
 
   @Test
+  public void runtimeRecoveryContinuesThroughException() throws Exception {
+    // Given
+    RuntimeIdentityImpl identity1 = new RuntimeIdentityImpl("workspace1", "env1", "owner1");
+    RuntimeIdentityImpl identity2 = new RuntimeIdentityImpl("workspace2", "env2", "owner2");
+    RuntimeIdentityImpl identity3 = new RuntimeIdentityImpl("workspace3", "env3", "owner3");
+    Set<RuntimeIdentity> identities =
+        ImmutableSet.<RuntimeIdentity>builder()
+            .add(identity1)
+            .add(identity2)
+            .add(identity3)
+            .build();
+    doReturn(identities).when(infrastructure).getIdentities();
+
+    mockWorkspace(identity1);
+    mockWorkspace(identity2);
+    mockWorkspace(identity3);
+    when(statuses.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
+
+    RuntimeContext context1 = mockContext(identity1);
+    when(context1.getRuntime())
+        .thenReturn(new TestInternalRuntime(context1, emptyMap(), WorkspaceStatus.STARTING));
+    doReturn(context1).when(infrastructure).prepare(eq(identity1), any());
+    RuntimeContext context2 = mockContext(identity1);
+    when(context2.getRuntime())
+        .thenReturn(new TestInternalRuntime(context2, emptyMap(), WorkspaceStatus.STARTING));
+    doReturn(context2).when(infrastructure).prepare(eq(identity2), any());
+    RuntimeContext context3 = mockContext(identity1);
+    when(context3.getRuntime())
+        .thenReturn(new TestInternalRuntime(context3, emptyMap(), WorkspaceStatus.STARTING));
+    doReturn(context3).when(infrastructure).prepare(eq(identity3), any());
+
+    InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
+    doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
+
+    // Want to fail recovery of identity2
+    doThrow(new InfrastructureException("oops!"))
+        .when(infrastructure)
+        .prepare(eq(identity2), any(InternalEnvironment.class));
+
+    // When
+    runtimes.recover();
+
+    // Then
+    verify(infrastructure).prepare(identity1, internalEnvironment);
+    verify(infrastructure).prepare(identity2, internalEnvironment);
+    verify(infrastructure).prepare(identity3, internalEnvironment);
+
+    WorkspaceImpl workspace1 = new WorkspaceImpl(identity1.getWorkspaceId(), null, null);
+    runtimes.injectRuntime(workspace1);
+    assertNotNull(workspace1.getRuntime());
+    assertEquals(workspace1.getStatus(), WorkspaceStatus.STARTING);
+    WorkspaceImpl workspace3 = new WorkspaceImpl(identity3.getWorkspaceId(), null, null);
+    runtimes.injectRuntime(workspace3);
+    assertNotNull(workspace3.getRuntime());
+    assertEquals(workspace3.getStatus(), WorkspaceStatus.STARTING);
+  }
+
+  @Test
   public void attributesIsSetWhenRuntimeAbnormallyStopped() throws Exception {
     String error = "Some kind of error happened";
     EventService localEventService = new EventService();
