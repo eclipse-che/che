@@ -63,6 +63,7 @@ public class KeycloakProfileDao implements ProfileDao {
           "It's not allowed to get foreign profile on current configured storage.");
     }
 
+    // Retrieving own profile
     Map<String, String> keycloakUserAttributes =
         keycloakProfileRetriever.retrieveKeycloakAttributes();
 

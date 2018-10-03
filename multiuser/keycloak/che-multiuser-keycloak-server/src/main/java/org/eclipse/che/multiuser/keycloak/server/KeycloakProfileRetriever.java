@@ -24,8 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Fetches user profile from Keycloack server.
  *
- * @author Max Shaposhnik (mshaposh@redhat.com)
- * @author Sergii Leshchenko
+ * @author David Festal <dfestal@redhat.com>
  */
 public class KeycloakProfileRetriever {
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakProfileRetriever.class);
@@ -42,15 +41,11 @@ public class KeycloakProfileRetriever {
   }
 
   public Map<String, String> retrieveKeycloakAttributes() throws ServerException {
-    Map<String, String> keycloakUserAttributes;
-    // Retrieving own profile
     try {
-      keycloakUserAttributes =
-          requestFactory.fromUrl(keyclockCurrentUserInfoUrl).request().asProperties();
+      return requestFactory.fromUrl(keyclockCurrentUserInfoUrl).request().asProperties();
     } catch (IOException | ApiException e) {
       LOG.warn("Exception during retrieval of the Keycloak user profile", e);
       throw new ServerException("Exception during retrieval of the Keycloak user profile", e);
     }
-    return keycloakUserAttributes;
   }
 }
