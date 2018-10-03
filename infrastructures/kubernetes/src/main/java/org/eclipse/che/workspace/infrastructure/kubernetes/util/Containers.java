@@ -101,4 +101,19 @@ public class Containers {
     container.setResources(
         resourceBuilder.addToRequests("memory", new Quantity(String.valueOf(ramRequest))).build());
   }
+
+  /**
+   * Sets given RAM request in kubernetes notion to specified container. Note if the container
+   * already contains a RAM request, it will be overridden, other resources won't be affected.
+   */
+  public static void addRamRequest(Container container, String limitInK8sNotion) {
+    final ResourceRequirementsBuilder resourceBuilder;
+    if (container.getResources() != null) {
+      resourceBuilder = new ResourceRequirementsBuilder(container.getResources());
+    } else {
+      resourceBuilder = new ResourceRequirementsBuilder();
+    }
+    container.setResources(
+        resourceBuilder.addToRequests("memory", new Quantity(limitInK8sNotion)).build());
+  }
 }

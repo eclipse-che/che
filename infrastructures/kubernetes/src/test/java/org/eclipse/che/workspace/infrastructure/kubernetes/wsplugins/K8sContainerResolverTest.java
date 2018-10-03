@@ -86,7 +86,7 @@ public class K8sContainerResolverTest {
   }
 
   @Test(dataProvider = "memLimitResourcesProvider")
-  public void shouldProvisionSidecarMemoryLimit(
+  public void shouldProvisionSidecarMemoryLimitAndRequest(
       String sidecarMemLimit, ResourceRequirements resources) throws Exception {
     cheContainer.setMemoryLimit(sidecarMemLimit);
 
@@ -100,9 +100,9 @@ public class K8sContainerResolverTest {
     return new Object[][] {
       {"", null},
       {null, null},
-      {"123456789", toK8sResources("123456789")},
-      {"1Ki", toK8sResources("1Ki")},
-      {"100M", toK8sResources("100M")},
+      {"123456789", toK8sLimitRequestResources("123456789")},
+      {"1Ki", toK8sLimitRequestResources("1Ki")},
+      {"100M", toK8sLimitRequestResources("100M")},
     };
   }
 
@@ -115,8 +115,11 @@ public class K8sContainerResolverTest {
     resolver.resolve();
   }
 
-  private static ResourceRequirements toK8sResources(String memLimit) {
-    return new ResourceRequirementsBuilder().addToLimits("memory", new Quantity(memLimit)).build();
+  private static ResourceRequirements toK8sLimitRequestResources(String memLimit) {
+    return new ResourceRequirementsBuilder()
+        .addToLimits("memory", new Quantity(memLimit))
+        .addToRequests("memory", new Quantity(memLimit))
+        .build();
   }
 
   private List<EnvVar> toSidecarEnvVars(Map<String, String> envVars) {
