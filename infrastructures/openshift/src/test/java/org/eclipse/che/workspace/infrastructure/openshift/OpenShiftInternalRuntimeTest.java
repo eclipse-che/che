@@ -81,6 +81,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
@@ -112,9 +113,6 @@ public class OpenShiftInternalRuntimeTest {
   private static final String ROUTE_HOST = "localhost";
   private static final String M1_NAME = POD_NAME + '/' + CONTAINER_NAME_1;
   private static final String M2_NAME = POD_NAME + '/' + CONTAINER_NAME_2;
-  private static final String[] EMPTY_UNRECOVERABLE_EVENTS = new String[0];
-  private static final String[] UNRECOVERABLE_EVENTS =
-      new String[] {"Failed Mount", "Failed Scheduling", "Failed to pull image"};
 
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
@@ -142,7 +140,8 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private KubernetesMachineCache machinesCache;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
   @Mock private OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner;
-  @Mock private SidecarToolingProvisioner toolingProvisioner;
+  @Mock private SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner;
+  @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -162,8 +161,8 @@ public class OpenShiftInternalRuntimeTest {
         new OpenShiftInternalRuntime(
             13,
             5,
-            UNRECOVERABLE_EVENTS,
             new URLRewriter.NoOpURLRewriter(),
+            unrecoverablePodEventListenerFactory,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
@@ -185,8 +184,8 @@ public class OpenShiftInternalRuntimeTest {
         new OpenShiftInternalRuntime(
             13,
             5,
-            EMPTY_UNRECOVERABLE_EVENTS,
             new URLRewriter.NoOpURLRewriter(),
+            unrecoverablePodEventListenerFactory,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
@@ -245,6 +244,7 @@ public class OpenShiftInternalRuntimeTest {
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(osEnv.getPods()).thenReturn(allPods);
+    when(unrecoverablePodEventListenerFactory.isConfigured()).thenReturn(true);
 
     internalRuntime.startMachines();
 
@@ -261,6 +261,7 @@ public class OpenShiftInternalRuntimeTest {
 
   @Test
   public void shouldStartMachinesWithoutUnrecoverableEventHandler() throws Exception {
+    when(unrecoverablePodEventListenerFactory.isConfigured()).thenReturn(false);
     final Container container1 = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1);
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =

@@ -26,6 +26,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -60,6 +61,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -78,10 +80,15 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   }
 
   @AfterClass
-  public void tearDown() throws Exception {
+  public void deleteTestBranch() throws Exception {
     if (workspaceServiceClient.exists(gitHubAuxiliaryUserName, testUser.getName())) {
       testFactoryWithSpecificBranch.delete();
     }
+  }
+
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
   }
 
   @Test

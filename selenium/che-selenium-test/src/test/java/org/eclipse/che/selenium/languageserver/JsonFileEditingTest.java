@@ -187,7 +187,7 @@ public class JsonFileEditingTest {
     assistantFindPanel.waitAllNodes(symbols);
 
     // open item by mouse click
-    assistantFindPanel.clickOnActionNodeWithText("version");
+    assistantFindPanel.clickOnActionNodeWithTextContains("version");
     editor.waitCursorPosition(3, 3);
 
     // find and open item from Go To Symbol panel
@@ -195,7 +195,7 @@ public class JsonFileEditingTest {
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField("nam");
     assistantFindPanel.waitNode("name");
-    assistantFindPanel.clickOnActionNodeWithText("name");
+    assistantFindPanel.clickOnActionNodeWithTextContains("name");
     editor.waitCursorPosition(2, 3);
 
     // select items by DOWN and UP buttons

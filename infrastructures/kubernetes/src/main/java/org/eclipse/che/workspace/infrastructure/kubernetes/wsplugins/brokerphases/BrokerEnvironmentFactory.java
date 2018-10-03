@@ -25,7 +25,6 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
-import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import java.util.Arrays;
@@ -44,6 +43,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
  * Creates {@link KubernetesEnvironment} with everything needed to deploy Plugin broker.
@@ -68,6 +68,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
   private final String cheWebsocketEndpoint;
   private final String pluginBrokerImage;
+  private final String brokerPullPolicy;
   private final AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
 
@@ -75,10 +76,12 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   public BrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.image") String pluginBrokerImage,
+      @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.pluginBrokerImage = pluginBrokerImage;
+    this.brokerPullPolicy = brokerPullPolicy;
     this.authEnableEnvVarProvider = authEnableEnvVarProvider;
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
   }
@@ -136,13 +139,14 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                 cheWebsocketEndpoint,
                 "-workspace-id",
                 workspaceId)
-            .withImagePullPolicy("Always")
+            .withImagePullPolicy(brokerPullPolicy)
             .withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", BROKER_VOLUME, true, null))
             .withEnv(envVars.stream().map(this::asEnvVar).collect(toList()))
             .withNewResources()
-            .withLimits(singletonMap("memory", new Quantity("250Mi")))
             .endResources()
             .build();
+    Containers.addRamLimit(container, "250Mi");
+    Containers.addRamRequest(container, "250Mi");
     return new PodBuilder()
         .withNewMetadata()
         .withName(podName)

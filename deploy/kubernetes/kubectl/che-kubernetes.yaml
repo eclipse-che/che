@@ -69,7 +69,7 @@ items:
     CHE_LOGS_APPENDERS_IMPL: "plaintext"
     CHE_INFRA_KUBERNETES_INGRESS_DOMAIN: "192.168.99.100.nip.io"
     CHE_INFRA_KUBERNETES_SERVER__STRATEGY: "default-host"
-    CHE_WORKSPACE_PLUGIN__REGISTRY__URL: "NULL"
+    CHE_WORKSPACE_PLUGIN__REGISTRY__URL: "https://che-plugin-registry.openshift.io"
 - apiVersion: extensions/v1beta1
   kind: Ingress
   metadata:

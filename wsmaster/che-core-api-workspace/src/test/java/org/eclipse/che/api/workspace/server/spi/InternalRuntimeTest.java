@@ -480,7 +480,8 @@ public class InternalRuntimeTest {
     List<WarningImpl> expectedWarnings = new ArrayList<>();
     expectedWarnings.add(
         new WarningImpl(
-            101, "Malformed URL for " + badServerName + " : " + badServerRewritingExcMessage));
+            InternalRuntime.MALFORMED_SERVER_URL_FOUND,
+            "Malformed URL for " + badServerName + " : " + badServerRewritingExcMessage));
     doReturn(internalMachines).when(internalRuntime).getInternalMachines();
     doThrow(new InfrastructureException(badServerRewritingExcMessage))
         .when(urlRewriter)

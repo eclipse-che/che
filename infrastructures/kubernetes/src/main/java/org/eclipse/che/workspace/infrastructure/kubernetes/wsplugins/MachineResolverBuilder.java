@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import io.fabric8.kubernetes.api.model.Container;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 
@@ -23,17 +24,23 @@ public class MachineResolverBuilder {
   private CheContainer cheContainer;
   private String defaultSidecarMemorySizeAttribute;
   private List<ChePluginEndpoint> containerEndpoints;
+  private Map<String, String> wsAttributes;
 
   public MachineResolver build() {
     if (container == null
         || cheContainer == null
         || defaultSidecarMemorySizeAttribute == null
+        || wsAttributes == null
         || containerEndpoints == null) {
       throw new IllegalStateException();
     }
 
     return new MachineResolver(
-        container, cheContainer, defaultSidecarMemorySizeAttribute, containerEndpoints);
+        container,
+        cheContainer,
+        defaultSidecarMemorySizeAttribute,
+        containerEndpoints,
+        wsAttributes);
   }
 
   public MachineResolverBuilder setContainer(Container container) {
@@ -54,6 +61,11 @@ public class MachineResolverBuilder {
 
   public MachineResolverBuilder setContainerEndpoints(List<ChePluginEndpoint> containerEndpoints) {
     this.containerEndpoints = containerEndpoints;
+    return this;
+  }
+
+  public MachineResolverBuilder setAttributes(Map<String, String> wsConfigAttributes) {
+    this.wsAttributes = wsConfigAttributes;
     return this;
   }
 }

@@ -99,7 +99,9 @@
                   "port": "3000",
                   "path": "/",
                   "attributes": {
-                    "type": "ide"
+                    "type": "ide",
+                    "cookiesAuthEnabled": "true",
+                    "secure": "true"
                   }
                 },
                 "theia-dev": {
@@ -146,7 +148,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-theia:0.3.14-nightly\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev\n      -\n        image: wsskeleton/che-machine-exec:latest\n        name: machine-exec",
+            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:0.3.14-nightly'\n     name: theia\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     mem_limit: 536870912\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }

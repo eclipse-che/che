@@ -85,7 +85,7 @@ public class CheckRestoringSplitEditorTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
-    setPositionsForSplittedEditor();
+    setPositionsForSplitEditor();
     editor.waitActive();
     if (popupDialogsBrowser.isAlertPresent()) {
       popupDialogsBrowser.acceptAlert();
@@ -117,7 +117,7 @@ public class CheckRestoringSplitEditorTest {
 
     editor.waitActive();
     editor.selectTabByName(nameOfEditorTab);
-    editor.waitCursorPosition(pair.first, pair.second);
+    editor.waitCursorPosition(numOfEditor - 1, pair.first, pair.second);
 
     try {
       editor.waitTextInDefinedSplitEditor(
@@ -145,13 +145,12 @@ public class CheckRestoringSplitEditorTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + namePomFile);
   }
 
-  private void setPositionsForSplittedEditor() {
+  private void setPositionsForSplitEditor() {
     editor.selectTabByIndexEditorWindow(0, javaClassTab);
-    editor.goToCursorPositionVisible(
-        cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
+    editor.goToPosition(0, cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
     editor.selectTabByName(readmeFileName);
-    editor.goToPosition(cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
+    editor.goToPosition(1, cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);
-    editor.goToPosition(cursorPositionForPomFile.first, cursorPositionForPomFile.second);
+    editor.goToPosition(2, cursorPositionForPomFile.first, cursorPositionForPomFile.second);
   }
 }

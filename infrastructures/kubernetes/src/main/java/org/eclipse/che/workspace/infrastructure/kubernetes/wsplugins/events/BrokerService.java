@@ -24,13 +24,13 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
-import org.eclipse.che.api.workspace.shared.dto.BrokerResultEvent;
+import org.eclipse.che.api.workspace.shared.dto.BrokerStatusChangedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 
 /**
- * Configure JSON_RPC consumers of Che plugin broker events. Also converts {@link BrokerResultEvent}
- * to {@link BrokerEvent}.
+ * Configure JSON_RPC consumers of Che plugin broker events. Also converts {@link
+ * BrokerStatusChangedEvent} to {@link BrokerEvent}.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
@@ -58,24 +58,22 @@ public class BrokerService {
     requestHandler
         .newConfiguration()
         .methodName(BROKER_STATUS_CHANGED_METHOD)
-        .paramsAsDto(BrokerResultEvent.class)
+        .paramsAsDto(BrokerStatusChangedEvent.class)
         .noResult()
         .withConsumer(this::handle);
 
     requestHandler
         .newConfiguration()
         .methodName(BROKER_RESULT_METHOD)
-        .paramsAsDto(BrokerResultEvent.class)
+        .paramsAsDto(BrokerStatusChangedEvent.class)
         .noResult()
         .withConsumer(this::handle);
   }
 
-  private void handle(BrokerResultEvent event) {
+  private void handle(BrokerStatusChangedEvent event) {
     // Tooling has fields that can't be parsed by DTO and JSON_RPC framework works with DTO only
     String encodedTooling = event.getTooling();
-    if (event.getStatus() == null
-        || event.getWorkspaceId() == null
-        || (event.getError() == null && event.getTooling() == null)) {
+    if (event.getStatus() == null || event.getWorkspaceId() == null) {
       LOG.error("Broker event skipped due to illegal content: {}", event);
       return;
     }

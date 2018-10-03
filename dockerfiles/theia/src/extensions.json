@@ -52,14 +52,21 @@
             "name": "che-theia-terminal",
             "source": "https://github.com/eclipse/che-theia-terminal-extension.git",
             "folder": "che-theia-terminal",
-            "checkoutTo": "ee583bf4e7956502a2d9a4fab55b06bcbe7b0117",
+            "checkoutTo": "master",
             "type": "git"
         },
         {
             "name": "@eclipse-che/theia-task-extension",
             "source": "https://github.com/eclipse/che-theia-task-plugin.git",
             "folder": "che-theia-task-extension",
-            "checkoutTo": "47450ee167a7d8429550c45be48f93230bf44ebd",
+            "checkoutTo": "master",
+            "type": "git"
+        },
+        {
+            "name": "@eclipse-che/theia-activity-tracker",
+            "source": "https://github.com/eclipse/che-theia-activity-tracker.git",
+            "folder": "che-theia-activity-tracker",
+            "checkoutTo": "master",
             "type": "git"
         }
     ]

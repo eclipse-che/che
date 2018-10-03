@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
-import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
@@ -24,7 +23,6 @@ import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodStatus;
-import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +38,7 @@ import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,9 +213,10 @@ public class PVCSubPathHelper {
             .withCommand(command)
             .withVolumeMounts(newVolumeMount(pvcName, JOB_MOUNT_PATH, null))
             .withNewResources()
-            .withLimits(singletonMap("memory", new Quantity(jobMemoryLimit)))
             .endResources()
             .build();
+    Containers.addRamLimit(container, jobMemoryLimit);
+    Containers.addRamRequest(container, jobMemoryLimit);
     return new PodBuilder()
         .withNewMetadata()
         .withName(podName)

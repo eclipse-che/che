@@ -177,6 +177,7 @@ public class NewWorkspace {
     UBUNTU("ubuntu"),
     ZEND("zend");
 
+    // wsnext-helloworld-openshift
     private final String id;
 
     Stack(String id) {

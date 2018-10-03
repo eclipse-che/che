@@ -128,7 +128,7 @@ public class PhpAssistantFeaturesTest {
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
     try {
-      findReferencesConsoleTab.waitReferenceWithText(EXPECTED_REFERENCE_TEXT);
+      findReferencesConsoleTab.waitAllReferencesWithText(EXPECTED_REFERENCE_TEXT);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
@@ -171,7 +171,7 @@ public class PhpAssistantFeaturesTest {
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField(FIND_PROJECT_SEARCHING_TEXT);
-    assistantFindPanel.waitNode(EXPECTED_FIND_PROJECT_TEXT);
+    assistantFindPanel.waitAllNodes(EXPECTED_FIND_PROJECT_TEXT);
   }
 
   private void performCommentAction() {

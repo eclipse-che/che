@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_ENV_VAR;
-
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +28,6 @@ import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Creates a valid instance of InternalEnvironment.
@@ -48,8 +44,6 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  */
 public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> {
-
-  private static final Logger LOG = LoggerFactory.getLogger(InternalEnvironmentFactory.class);
 
   private final InstallerRegistry installerRegistry;
   private final RecipeRetriever recipeRetriever;
@@ -101,8 +95,6 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
       } catch (InstallerException e) {
         throw new InfrastructureException(e);
       }
-
-      machineConfig.getEnv().put(CHE_MACHINE_NAME_ENV_VAR, machineEntry.getKey());
 
       machines.put(
           machineEntry.getKey(),

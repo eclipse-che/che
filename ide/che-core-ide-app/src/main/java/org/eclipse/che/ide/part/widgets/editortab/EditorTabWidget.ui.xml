@@ -222,9 +222,9 @@
 
     <g:FlowPanel addStyleNames="{style.mainPanel}" debugId="editor-tab">
         <g:SimplePanel ui:field="iconPanel" styleName="{style.iconPanel}" />
-        <g:Label ui:field="title" styleName="{style.titlePanel}" />
+        <g:Label ui:field="title" styleName="{style.titlePanel}" debugId="editor-tab-title"/>
         <g:FlowPanel styleName="{style.closeTabPanel}">
-            <g:FlowPanel ui:field="closeButton" styleName="{style.closeTabButton}">
+            <g:FlowPanel ui:field="closeButton" styleName="{style.closeTabButton}" debugId="editor-tab-close-icon">
                 <svg:SVGImage resource="{resources.closeIcon}"/>
             </g:FlowPanel>
         </g:FlowPanel>

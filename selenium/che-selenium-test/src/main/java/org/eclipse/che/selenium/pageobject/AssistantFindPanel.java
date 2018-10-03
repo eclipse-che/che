@@ -19,6 +19,7 @@ import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.TE
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Collection;
 import java.util.List;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
@@ -53,7 +54,7 @@ public class AssistantFindPanel {
     testWebElementRenderChecker.waitElementIsRendered(findPanelLocator);
   }
 
-  public void waitFormClosing() {
+  public void waitFormIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.id(PANEL_ID));
   }
 
@@ -114,8 +115,8 @@ public class AssistantFindPanel {
     asList(expectedNodesText).forEach(nodeText -> waitNode(nodeText));
   }
 
-  public void waitAllNodes(List<String> expectedNodesText) {
-    expectedNodesText.forEach(nodeText -> waitNode(nodeText));
+  public void waitAllNodes(Collection<String> expectedNodesText) {
+    expectedNodesText.forEach(this::waitNode);
   }
 
   public void waitActionNodeTextEqualsTo(int nodeIndex, String expectedText) {
@@ -126,9 +127,22 @@ public class AssistantFindPanel {
     return getActionNodeText(index).contains(expectedText);
   }
 
-  public void clickOnActionNodeWithText(String visibleText) {
+  public void clickOnActionNodeWithTextContains(String visibleText) {
     for (int i = 0; i < getActionNodesCount(); i++) {
       if (getActionNodeText(i).contains(visibleText)) {
+        getActionNode(i).click();
+        return;
+      }
+    }
+
+    String exceptionMessage =
+        String.format("Item with expected visible text: \"%s\" has not been detected", visibleText);
+    throw new RuntimeException(exceptionMessage);
+  }
+
+  public void clickOnActionNodeWithTextEqualsTo(String visibleText) {
+    for (int i = 0; i < getActionNodesCount(); i++) {
+      if (getActionNodeText(i).equals(visibleText)) {
         getActionNode(i).click();
         return;
       }
