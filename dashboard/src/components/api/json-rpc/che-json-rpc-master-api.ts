@@ -14,7 +14,7 @@ import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import {ICommunicationClient} from './json-rpc-client';
 
 enum MasterChannels {
-  ENVIRONMENT_OUTPUT = <any>'machine/log',
+  ENVIRONMENT_OUTPUT = <any>'runtime/log',
   ENVIRONMENT_STATUS = <any>'machine/statusChanged',
   WS_AGENT_OUTPUT = <any>'installer/log',
   WORKSPACE_STATUS = <any>'workspace/statusChanged',
