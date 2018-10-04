@@ -29,15 +29,19 @@ public class KubernetesPluginsToolingValidator {
   public void validatePluginNames(List<? extends PluginBase> plugins)
       throws InternalInfrastructureException {
     for (PluginBase plugin : plugins) {
-      final String formattedPluginName = plugin.getName().toLowerCase();
-      checkValid(
-          formattedPluginName,
-          "Plugin name `%s` contains unacceptable symbols and cannot be used as part of container naming.");
-      for (CheContainer container : plugin.getContainers()) {
-        final String formattedContainerName = container.getName().toLowerCase();
+      if (plugin.getName() != null) {
+        final String formattedPluginName = plugin.getName().toLowerCase();
         checkValid(
-            formattedContainerName,
-            "Container name `%s` contains unacceptable symbols and cannot be used as part of container naming.");
+            formattedPluginName,
+            "Plugin name `%s` contains unacceptable symbols and cannot be used as part of container naming.");
+      }
+      for (CheContainer container : plugin.getContainers()) {
+        if (container.getName() != null) {
+          final String formattedContainerName = container.getName().toLowerCase();
+          checkValid(
+              formattedContainerName,
+              "Container name `%s` contains unacceptable symbols and cannot be used as part of container naming.");
+        }
       }
     }
   }
