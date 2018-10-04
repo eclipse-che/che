@@ -26,10 +26,6 @@
         "secure": "true",
         "unsecuredPaths": "/api/liveness"
       }
-    },
-    "wsagent-debug": {
-      "port": "4403/tcp",
-      "protocol": "tcp"
     }
   }
 }
