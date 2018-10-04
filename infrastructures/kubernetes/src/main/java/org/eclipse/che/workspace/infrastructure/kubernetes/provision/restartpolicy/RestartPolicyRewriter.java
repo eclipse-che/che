@@ -27,6 +27,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Configurati
  * @author Alexander Garagatyi
  */
 public class RestartPolicyRewriter implements ConfigurationProvisioner {
+  public static final int RESTART_POLICY_SET_TO_NEVER = 4104;
+
   static final String DEFAULT_RESTART_POLICY = "Never";
 
   @Override
@@ -48,7 +50,7 @@ public class RestartPolicyRewriter implements ConfigurationProvisioner {
           format(
               "Restart policy '%s' for pod '%s' is rewritten with %s",
               restartPolicy, podName, DEFAULT_RESTART_POLICY);
-      env.addWarning(new WarningImpl(101, warnMsg));
+      env.addWarning(new WarningImpl(RESTART_POLICY_SET_TO_NEVER, warnMsg));
     }
     podSpec.setRestartPolicy(DEFAULT_RESTART_POLICY);
   }

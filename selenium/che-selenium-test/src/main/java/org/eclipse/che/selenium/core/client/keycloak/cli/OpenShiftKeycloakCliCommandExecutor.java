@@ -49,8 +49,6 @@ public class OpenShiftKeycloakCliCommandExecutor implements KeycloakCliCommandEx
   }
 
   private void obtainKeycloakPodName() throws IOException {
-    openShiftCliCommandExecutor.login();
-
     // obtain name of keycloak pod
     String getKeycloakPodNameCommand =
         format(

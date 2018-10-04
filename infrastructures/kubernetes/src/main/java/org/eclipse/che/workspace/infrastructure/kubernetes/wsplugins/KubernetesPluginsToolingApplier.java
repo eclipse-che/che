@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
+
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -39,11 +41,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
   private final String defaultSidecarMemoryLimitBytes;
+  private final boolean isAuthEnabled;
 
   @Inject
   public KubernetesPluginsToolingApplier(
-      @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB) {
+      @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
+      @Named("che.agents.auth_enabled") boolean isAuthEnabled) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
+    this.isAuthEnabled = isAuthEnabled;
   }
 
   @Override
@@ -66,6 +71,12 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       for (CheContainer container : chePlugin.getContainers()) {
         addSidecar(pod, container, chePlugin, kubernetesEnvironment);
       }
+    }
+
+    if (isAuthEnabled) {
+      // enable per-workspace security with JWT proxy for sidecar based workspaces
+      // because it is the only workspace security implementation supported for now
+      kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
     }
   }
 

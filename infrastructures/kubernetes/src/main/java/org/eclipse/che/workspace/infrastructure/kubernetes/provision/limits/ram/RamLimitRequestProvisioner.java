@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram;
 
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.machineName;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -25,11 +26,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Configurati
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
- * Sets Ram limit to Kubernetes machine.
+ * Sets or overrides Kubernetes container RAM limit and request if corresponding attributes are
+ * present in machine corresponding to the container.
  *
  * @author Anton Korneta
  */
-public class RamLimitProvisioner implements ConfigurationProvisioner {
+public class RamLimitRequestProvisioner implements ConfigurationProvisioner {
 
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
@@ -42,6 +44,10 @@ public class RamLimitProvisioner implements ConfigurationProvisioner {
         String memoryLimitAttribute = attributes.get(MEMORY_LIMIT_ATTRIBUTE);
         if (memoryLimitAttribute != null) {
           Containers.addRamLimit(container, Long.parseLong(memoryLimitAttribute));
+        }
+        String memoryRequestAttribute = attributes.get(MEMORY_REQUEST_ATTRIBUTE);
+        if (memoryRequestAttribute != null) {
+          Containers.addRamRequest(container, Long.parseLong(memoryRequestAttribute));
         }
       }
     }
