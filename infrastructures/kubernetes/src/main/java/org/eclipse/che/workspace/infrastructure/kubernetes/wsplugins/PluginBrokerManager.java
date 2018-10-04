@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import com.google.common.annotations.Beta;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -75,8 +74,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   }
 
   /**
-   * Deploys Che plugin broker in a workspace, receives result of its execution and return resolved
-   * workspace tooling or error of plugin broker execution.
+   * Deploys Che plugin brokers in a workspace, receives result of theirs execution and returns
+   * resolved workspace tooling or error of plugins brokering execution.
    *
    * <p>This API is in <b>Beta</b> and is subject to changes or removal.
    */
@@ -85,27 +84,26 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       throws InfrastructureException {
 
     String workspaceId = runtimeID.getWorkspaceId();
-    CompletableFuture<List<ChePlugin>> toolingFuture = new CompletableFuture<>();
     KubernetesNamespace kubernetesNamespace = factory.create(workspaceId);
+    BrokersResult brokersResult = new BrokersResult();
 
-    E brokerEnvironment = brokerEnvironmentFactory.create(pluginsMeta, runtimeID);
+    E brokerEnvironment = brokerEnvironmentFactory.create(pluginsMeta, runtimeID, brokersResult);
     environmentProvisioner.provision(brokerEnvironment, runtimeID);
 
-    ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, toolingFuture);
+    ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);
     PrepareStorage prepareStorage = getPrepareStoragePhase(workspaceId, brokerEnvironment);
-    WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(toolingFuture);
+    WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(brokersResult);
     DeployBroker deployBroker =
         getDeployBrokerPhase(
-            runtimeID.getWorkspaceId(), kubernetesNamespace, brokerEnvironment, toolingFuture);
+            runtimeID.getWorkspaceId(), kubernetesNamespace, brokerEnvironment, brokersResult);
 
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
 
     return listenBrokerEvents.execute();
   }
 
-  private ListenBrokerEvents getListenEventPhase(
-      String workspaceId, CompletableFuture<List<ChePlugin>> toolingFuture) {
-    return new ListenBrokerEvents(workspaceId, pluginsValidator, toolingFuture, eventService);
+  private ListenBrokerEvents getListenEventPhase(String workspaceId, BrokersResult brokersResult) {
+    return new ListenBrokerEvents(workspaceId, pluginsValidator, brokersResult, eventService);
   }
 
   private PrepareStorage getPrepareStoragePhase(
@@ -117,16 +115,16 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       String workspaceId,
       KubernetesNamespace kubernetesNamespace,
       KubernetesEnvironment brokerEnvironment,
-      CompletableFuture<List<ChePlugin>> toolingFuture) {
+      BrokersResult brokersResult) {
     return new DeployBroker(
         workspaceId,
         kubernetesNamespace,
         brokerEnvironment,
-        toolingFuture,
+        brokersResult,
         unrecoverablePodEventListenerFactory);
   }
 
-  private WaitBrokerResult getWaitBrokerPhase(CompletableFuture<List<ChePlugin>> toolingFuture) {
-    return new WaitBrokerResult(toolingFuture, pluginBrokerWaitingTimeout);
+  private WaitBrokerResult getWaitBrokerPhase(BrokersResult brokersResult) {
+    return new WaitBrokerResult(brokersResult, pluginBrokerWaitingTimeout);
   }
 }

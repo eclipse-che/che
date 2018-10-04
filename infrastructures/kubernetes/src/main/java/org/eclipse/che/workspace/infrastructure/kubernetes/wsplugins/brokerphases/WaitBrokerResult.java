@@ -13,12 +13,12 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphas
 
 import com.google.common.annotations.Beta;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
 
 /**
  * Wait until Che plugin broker future finishes and returns resulting workspace tooling or error.
@@ -31,20 +31,20 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 @Beta
 public class WaitBrokerResult extends BrokerPhase {
 
-  private final CompletableFuture<List<ChePlugin>> toolingFuture;
+  private final BrokersResult brokersResult;
 
   private final int resultWaitingTimeout;
 
   public WaitBrokerResult(
-      CompletableFuture<List<ChePlugin>> toolingFuture, int resultWaitingTimeout) {
-    this.toolingFuture = toolingFuture;
+      BrokersResult brokersResult, int resultWaitingTimeout) {
+    this.brokersResult = brokersResult;
     this.resultWaitingTimeout = resultWaitingTimeout;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     try {
-      return toolingFuture.get(resultWaitingTimeout, TimeUnit.MINUTES);
+      return brokersResult.get(resultWaitingTimeout, TimeUnit.MINUTES);
     } catch (InterruptedException e) {
       throw new InfrastructureException(
           "Plugins installation process was interrupted. Error: " + e.getMessage(), e);

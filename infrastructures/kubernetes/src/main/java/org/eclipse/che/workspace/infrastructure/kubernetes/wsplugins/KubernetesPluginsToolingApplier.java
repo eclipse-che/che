@@ -11,17 +11,20 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -82,12 +85,36 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         addSidecar(pod, container, chePlugin, kubernetesEnvironment);
       }
     }
+    for (ChePlugin chePlugin : chePlugins) {
+      populateWorkspaceEnvVars(chePlugin, kubernetesEnvironment);
+    }
 
     if (isAuthEnabled) {
       // enable per-workspace security with JWT proxy for sidecar based workspaces
       // because it is the only workspace security implementation supported for now
       kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
     }
+  }
+
+  private void populateWorkspaceEnvVars(ChePlugin chePlugin,
+      KubernetesEnvironment kubernetesEnvironment) {
+
+    List<EnvVar> workspaceEnv = toK8sEnvVars(chePlugin.getWorkspaceEnv());
+    kubernetesEnvironment.getPods()
+        .values()
+        .stream()
+        .flatMap(pod -> pod.getSpec().getContainers().stream())
+        .forEach(container -> container.getEnv().addAll(workspaceEnv));
+  }
+
+  private List<EnvVar> toK8sEnvVars(
+      List<org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar> workspaceEnv) {
+    if (workspaceEnv == null) {
+      return emptyList();
+    }
+    return workspaceEnv.stream()
+        .map(e -> new EnvVar(e.getName(), e.getValue(), null))
+        .collect(Collectors.toList());
   }
 
   /**

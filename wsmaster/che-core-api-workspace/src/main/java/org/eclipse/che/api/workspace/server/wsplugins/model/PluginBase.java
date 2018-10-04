@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,9 @@ public class PluginBase {
   private String version = null;
   private List<CheContainer> containers = new ArrayList<>();
   private List<ChePluginEndpoint> endpoints = new ArrayList<>();
+  @JsonProperty("workspace-env")
+  private List<EnvVar> workspaceEnv = new ArrayList<>();
+  private String broker = null;
 
   /** Object name. Name must be unique. */
   public PluginBase name(String name) {
@@ -95,6 +99,36 @@ public class PluginBase {
     this.endpoints = endpoints;
   }
 
+  /** List of environment variables to set in the workspace*/
+  public PluginBase workspaceEnv(List<EnvVar> workspaceEnv) {
+    this.workspaceEnv = workspaceEnv;
+    return this;
+  }
+
+  public List<EnvVar> getWorkspaceEnv() {
+    if (workspaceEnv == null) {
+      workspaceEnv = new ArrayList<>();
+    }
+    return workspaceEnv;
+  }
+
+  public void setWorkspaceEnv(List<EnvVar> workspaceEnv) {
+    this.workspaceEnv = workspaceEnv;
+  }
+
+  public PluginBase broker(String broker) {
+    this.broker = broker;
+    return this;
+  }
+
+  public String getBroker() {
+    return broker;
+  }
+
+  public void setBroker(String broker) {
+    this.broker = broker;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -108,12 +142,21 @@ public class PluginBase {
         && Objects.equals(getId(), chePlugin.getId())
         && Objects.equals(getVersion(), chePlugin.getVersion())
         && Objects.equals(getContainers(), chePlugin.getContainers())
-        && Objects.equals(getEndpoints(), chePlugin.getEndpoints());
+        && Objects.equals(getEndpoints(), chePlugin.getEndpoints())
+        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv())
+        && Objects.equals(getBroker(), chePlugin.getBroker());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getId(), getVersion(), getContainers(), getEndpoints());
+    return Objects.hash(
+        getName(),
+        getId(),
+        getVersion(),
+        getContainers(),
+        getEndpoints(),
+        getWorkspaceEnv(),
+        getBroker());
   }
 
   @Override
@@ -132,6 +175,11 @@ public class PluginBase {
         + containers
         + ", endpoints="
         + endpoints
+        + ", workspaceEnv="
+        + workspaceEnv
+        + ", broker='"
+        + broker
+        + '\''
         + '}';
   }
 }
