@@ -69,8 +69,8 @@ public class WsAgentURLProvider implements Provider<String> {
           }
         }
       } catch (ApiException | IOException ex) {
-        LOG.warn(ex.getLocalizedMessage());
-        throw new RuntimeException("Failed to configure wsagent endpoint");
+        LOG.error(ex.getLocalizedMessage());
+        throw new RuntimeException("Failed to configure wsagent endpoint", ex);
       }
     }
     return cachedAgentUrl;
