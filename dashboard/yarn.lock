@@ -5295,9 +5295,9 @@ jest@^22.2.1:
     import-local "^1.0.0"
     jest-cli "^22.4.4"
 
-jquery@2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-2.1.3.tgz#6ec55204673d505d39432c5bf5cfad10e1dbad2e"
+jquery@3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
 
 js-base64@^2.1.9:
   version "2.4.9"
