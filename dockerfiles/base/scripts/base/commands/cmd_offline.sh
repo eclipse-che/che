@@ -40,8 +40,8 @@ post_cmd_offline() {
 cmd_offline() {
   # Read in optional stack images
   readarray -t STACK_IMAGE_LIST < /version/$CHE_VERSION/images-stacks
-  BOOTSTRAP_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-bootstrap)
-  UTILITY_IMAGE_LIST=$(cat ${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}/images/images-utilities)
+  BOOTSTRAP_IMAGE_LIST=$(cat /version/$CHE_VERSION/images-bootstrap)
+  UTILITY_IMAGE_LIST=$(cat /version/$CHE_VERSION/images-utilities)
 
   # List all images to be saved
   if [[ $# -gt 0 ]] && [[ $1 = "--list" ]]; then
