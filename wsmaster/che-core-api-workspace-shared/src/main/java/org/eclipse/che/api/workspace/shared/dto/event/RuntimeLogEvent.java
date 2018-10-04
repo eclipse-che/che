@@ -12,50 +12,56 @@
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Defines event format for machine logs.
+ * Defines event format for runtime logs.
  *
- * @author Anton Korneta
- * @deprecated use {@link RuntimeLogEvent} instead
+ * @author Sergii Leshchenko
  */
 @DTO
-@Deprecated
-public interface MachineLogEvent {
+public interface RuntimeLogEvent {
 
   /** Returns the contents of the log event. */
   String getText();
 
   void setText(String text);
 
-  MachineLogEvent withText(String text);
-
-  /** Returns the name of the machine that produces the logs. */
-  String getMachineName();
-
-  void setMachineName(String machineName);
-
-  MachineLogEvent withMachineName(String machineName);
+  RuntimeLogEvent withText(String text);
 
   /** Returns runtime identity. */
   RuntimeIdentityDto getRuntimeId();
 
   void setRuntimeId(RuntimeIdentityDto runtimeId);
 
-  MachineLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
+  RuntimeLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
+
+  /**
+   * Returns the name of the machine that produces the logs.
+   *
+   * <p>May return null when log is produced by process which doesn't belong to any particular
+   * machine.
+   */
+  @Nullable
+  String getMachineName();
+
+  void setMachineName(String machineName);
+
+  RuntimeLogEvent withMachineName(String machineName);
 
   /** Returns time in format '2017-06-27T17:11:09.306+03:00' */
   String getTime();
 
   void setTime(String time);
 
-  MachineLogEvent withTime(String time);
+  RuntimeLogEvent withTime(String time);
 
   /** Returns standard streams, if present otherwise, null will be returned. */
+  @Nullable
   String getStream();
 
   void setStream(String stream);
 
-  MachineLogEvent withStream(String stream);
+  RuntimeLogEvent withStream(String stream);
 }

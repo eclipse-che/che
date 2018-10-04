@@ -14,48 +14,28 @@ package org.eclipse.che.api.workspace.shared.dto.event;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * Defines event format for machine logs.
- *
- * @author Anton Korneta
- * @deprecated use {@link RuntimeLogEvent} instead
- */
+/** @author Sergii Leshchenko */
 @DTO
-@Deprecated
-public interface MachineLogEvent {
+public interface BrokerLogEvent {
 
   /** Returns the contents of the log event. */
   String getText();
 
   void setText(String text);
 
-  MachineLogEvent withText(String text);
-
-  /** Returns the name of the machine that produces the logs. */
-  String getMachineName();
-
-  void setMachineName(String machineName);
-
-  MachineLogEvent withMachineName(String machineName);
+  BrokerLogEvent withText(String text);
 
   /** Returns runtime identity. */
   RuntimeIdentityDto getRuntimeId();
 
   void setRuntimeId(RuntimeIdentityDto runtimeId);
 
-  MachineLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
+  BrokerLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
 
   /** Returns time in format '2017-06-27T17:11:09.306+03:00' */
   String getTime();
 
   void setTime(String time);
 
-  MachineLogEvent withTime(String time);
-
-  /** Returns standard streams, if present otherwise, null will be returned. */
-  String getStream();
-
-  void setStream(String stream);
-
-  MachineLogEvent withStream(String stream);
+  BrokerLogEvent withTime(String time);
 }

@@ -18,7 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.workspace.shared.dto.BrokerStatusChangedEvent;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.api.workspace.shared.dto.event.BrokerStatusChangedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.api.permission.server.jsonrpc.JsonRpcPermissionsFilterAdapter;
@@ -44,7 +45,11 @@ public class BrokerServicePermissionFilter extends JsonRpcPermissionsFilterAdapt
     switch (method) {
       case BROKER_STATUS_CHANGED_METHOD:
       case BROKER_RESULT_METHOD:
-        workspaceId = ((BrokerStatusChangedEvent) params[0]).getWorkspaceId();
+        RuntimeIdentityDto runtimeId = ((BrokerStatusChangedEvent) params[0]).getRuntimeId();
+        if (runtimeId == null || runtimeId.getWorkspaceId() == null) {
+          throw new ForbiddenException("Workspace id must be specified");
+        }
+        workspaceId = runtimeId.getWorkspaceId();
         break;
       default:
         throw new ForbiddenException("Unknown method is configured to be filtered.");
