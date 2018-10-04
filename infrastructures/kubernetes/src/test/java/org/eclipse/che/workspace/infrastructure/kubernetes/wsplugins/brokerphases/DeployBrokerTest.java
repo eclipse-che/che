@@ -36,6 +36,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesD
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -75,7 +76,7 @@ public class DeployBrokerTest {
             "workspaceId",
             k8sNamespace,
             k8sEnvironment,
-            pluginsFutures,
+            new BrokersResult(),
             unrecoverableEventListenerFactory);
     deployBrokerPhase.then(nextBrokerPhase);
 
