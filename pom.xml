@@ -49,7 +49,7 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.dashboard.version>6.12.0-SNAPSHOT</che.dashboard.version>
+        <che.dashboard.version>6.12.0</che.dashboard.version>
         <che.docs.version>6.12.0</che.docs.version>
         <che.lib.version>6.12.0</che.lib.version>
         <che.version>6.12.0</che.version>
