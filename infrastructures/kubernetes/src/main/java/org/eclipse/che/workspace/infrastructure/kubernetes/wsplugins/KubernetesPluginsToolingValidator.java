@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginBase;
 
 @Singleton
@@ -29,12 +30,22 @@ public class KubernetesPluginsToolingValidator {
       throws InternalInfrastructureException {
     for (PluginBase plugin : plugins) {
       final String formattedPluginName = plugin.getName().toLowerCase();
-      if (!namePattern.matcher(formattedPluginName).matches()) {
-        throw new InternalInfrastructureException(
-            format(
-                "Plugin named `%s` contains unacceptable symbols and cannot be used as part of container naming.",
-                formattedPluginName));
+      checkValid(
+          formattedPluginName,
+          "Plugin named `%s` contains unacceptable symbols and cannot be used as part of container naming.");
+      for (CheContainer container : plugin.getContainers()) {
+        final String formattedContainerName = container.getName().toLowerCase();
+        checkValid(
+            formattedContainerName,
+            "Container named `%s` contains unacceptable symbols and cannot be used as part of container naming.");
       }
+    }
+  }
+
+  private void checkValid(String input, String errorMessage)
+      throws InternalInfrastructureException {
+    if (!namePattern.matcher(input).matches()) {
+      throw new InternalInfrastructureException(format(errorMessage, input));
     }
   }
 }

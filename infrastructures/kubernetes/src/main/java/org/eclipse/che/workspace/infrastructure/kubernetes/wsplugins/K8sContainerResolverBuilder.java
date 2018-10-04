@@ -46,7 +46,7 @@ public class K8sContainerResolverBuilder {
     }
     List<ChePluginEndpoint> containerEndpoints =
         getContainerEndpoints(container.getPorts(), pluginEndpoints);
-    return new K8sContainerResolver(container, pluginName, containerEndpoints);
+    return new K8sContainerResolver(pluginName, container, containerEndpoints);
   }
 
   private List<ChePluginEndpoint> getContainerEndpoints(

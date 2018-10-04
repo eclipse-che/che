@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -47,7 +46,7 @@ public class K8sContainerResolverTest {
   public void setUp() {
     cheContainer = new CheContainer();
     endpoints = new ArrayList<>();
-    resolver = new K8sContainerResolver(cheContainer, PLUGIN_NAME, endpoints);
+    resolver = new K8sContainerResolver(PLUGIN_NAME, cheContainer, endpoints);
   }
 
   @Test
@@ -66,7 +65,7 @@ public class K8sContainerResolverTest {
 
     Container container = resolver.resolve();
 
-    assertTrue(container.getName().equals(PLUGIN_NAME + "-" + cheContainer.getName()));
+    assertEquals(container.getName(), (PLUGIN_NAME + "-" + cheContainer.getName()).toLowerCase());
   }
 
   @Test
