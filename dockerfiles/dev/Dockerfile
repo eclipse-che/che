@@ -32,7 +32,7 @@ RUN sudo yum -y update && \
 ENV TOMCAT_VERSION=8.5.23
 
 RUN mkdir $HOME/.m2 && \
-   wget -O  /home/user/tomcat8.zip "http://maven.codenvycorp.com/content/groups/public/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.0.0-M1/che-tomcat8-slf4j-logback-6.0.0-M1.zip" ;\
+   wget -O  /home/user/tomcat8.zip "https://oss.sonatype.org/content/repositories/releases/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.11.0/che-tomcat8-slf4j-logback-6.11.0.zip" ;\
    unzip   /home/user/tomcat8.zip -d /home/user/tomcat8;\
    rm /home/user/tomcat8.zip;\
    mkdir /home/user/tomcat8/webapps;\
