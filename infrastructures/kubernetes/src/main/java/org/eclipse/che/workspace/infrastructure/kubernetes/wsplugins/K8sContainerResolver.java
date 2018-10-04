@@ -111,6 +111,9 @@ public class K8sContainerResolver {
     if (preliminaryName.length() <= MAX_CONTAINER_NAME_LENGTH) {
       return preliminaryName;
     }
-    return ("plugin-" + cheContainerName).substring(0, MAX_CONTAINER_NAME_LENGTH - 1).toLowerCase();
+    return (pluginName.substring(0, MAX_CONTAINER_NAME_LENGTH - cheContainerName.length() - 1)
+            + "-"
+            + cheContainerName)
+        .toLowerCase();
   }
 }

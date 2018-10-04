@@ -32,12 +32,12 @@ public class KubernetesPluginsToolingValidator {
       final String formattedPluginName = plugin.getName().toLowerCase();
       checkValid(
           formattedPluginName,
-          "Plugin named `%s` contains unacceptable symbols and cannot be used as part of container naming.");
+          "Plugin name `%s` contains unacceptable symbols and cannot be used as part of container naming.");
       for (CheContainer container : plugin.getContainers()) {
         final String formattedContainerName = container.getName().toLowerCase();
         checkValid(
             formattedContainerName,
-            "Container named `%s` contains unacceptable symbols and cannot be used as part of container naming.");
+            "Container name `%s` contains unacceptable symbols and cannot be used as part of container naming.");
       }
     }
   }
