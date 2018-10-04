@@ -2020,6 +2020,22 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <!-- Use the latest released version:
+                    https://repo1.maven.org/maven2/com/github/eirslett/frontend-maven-plugin/ -->
+                    <version>1.6</version>
+                    <configuration>
+                        <nodeVersion>v5.6.0</nodeVersion>
+                        <!-- optional: with node >4.0.0 will use npm provided by node distribution -->
+                        <!-- <npmVersion>2.15.9</npmVersion> -->
+                        <!-- must use http for NCL builds -->
+                        <downloadRoot>http://nodejs.org/dist/</downloadRoot>
+                        <npmDownloadRoot>http://registry.npmjs.org/npm/-/</npmDownloadRoot>
+                        <npmRegistryURL>http://registry.npmjs.org/</npmRegistryURL>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.eclipse.che.core</groupId>
                     <artifactId>che-core-dynamodule-maven-plugin</artifactId>
                     <version>${che.version}</version>

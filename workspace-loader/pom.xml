@@ -124,6 +124,54 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install node and npm</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install --fetch-retry-mintimeout 60000 --fetch-retries 10 --maxsockets 2</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm install</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install reconnecting-websocket ts-loader typescript uglifyjs-webpack-plugin webpack-dev-server webpack-merge css-loader jest style-loader extract-text-webpack-plugin html-webpack-plugin webpack-merge webpack clean-webpack-plugin --save-dev --fetch-retry-mintimeout 60000 --fetch-retries 10 --maxsockets 2</arguments>
+                                    <npmRegistryURL>http://registry.npmjs.org/</npmRegistryURL>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm run build</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run build</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm run test</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run test</arguments>
+                                    <skip>${skipTests}</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
@@ -135,14 +183,14 @@
                                 <configuration>
                                     <target>
                                         <!-- install node modules -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <!-- <exec dir="${basedir}" executable="npm" failonerror="true">
                                             <arg value="install" />
-                                        </exec>
+                                        </exec> -->
                                         <!-- build workspace loader -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <!-- <exec dir="${basedir}" executable="npm" failonerror="true">
                                             <arg value="run" />
                                             <arg value="build" />
-                                        </exec>
+                                        </exec> -->
                                     </target>
                                 </configuration>
                             </execution>
@@ -155,10 +203,10 @@
                                 <configuration>
                                     <target>
                                         <!-- test workspace loader -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <!-- <exec dir="${basedir}" executable="npm" failonerror="true">
                                             <arg value="run" />
                                             <arg value="test" />
-                                        </exec>
+                                        </exec> -->
                                     </target>
                                 </configuration>
                             </execution>
