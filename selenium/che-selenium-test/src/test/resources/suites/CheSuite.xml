@@ -140,7 +140,7 @@
           <class name="org.eclipse.che.selenium.miscellaneous.CheckMacrosFeatureTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ConvertToProjectFromConfigurationTest"/>
-          <class name="org.eclipse.che.selenium.miscellaneous.ConvertToProjectWithPomFileTest"/>
+          <class name="org.eclipse.che.selenium.miscellaneous.ConvertToMavenProjectTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.DialogAboutTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.FileStructureBaseOperationTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.FileStructureByKeyboardTest"/>

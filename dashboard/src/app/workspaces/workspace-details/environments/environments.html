@@ -75,8 +75,8 @@
                        ng-if="workspaceEnvironmentsController.environment.recipe.content">
     <che-show-area>
       <div flex class="recipe-editor">
-        <ui-codemirror ui-codemirror="workspaceEnvironmentsController.editorOptions"
-                       ng-model="workspaceEnvironmentsController.environment.recipe.content"></ui-codemirror>
+        <textarea ui-codemirror="workspaceEnvironmentsController.editorOptions"
+                  ng-model="workspaceEnvironmentsController.environment.recipe.content"></textarea>
       </div>
     </che-show-area>
   </che-label-container>

@@ -49,6 +49,7 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
+        <che.dashboard.version>6.13.0-SNAPSHOT</che.dashboard.version>
         <che.docs.version>6.13.0-SNAPSHOT</che.docs.version>
         <che.lib.version>6.13.0-SNAPSHOT</che.lib.version>
         <che.version>6.13.0-SNAPSHOT</che.version>
@@ -802,7 +803,7 @@
             <dependency>
                 <groupId>org.eclipse.che.dashboard</groupId>
                 <artifactId>che-dashboard-war</artifactId>
-                <version>${che.version}</version>
+                <version>${che.dashboard.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>

@@ -12,11 +12,11 @@
 package org.eclipse.che.api.workspace.server.hc;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
@@ -41,14 +42,12 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
  * @author Alexander Garagatyi
  */
 public class ServersChecker {
-  // Is used to define servers which will be checked by this server checker class.
-  private static final Set<String> LIVENESS_SERVERS =
-      ImmutableSet.of("wsagent/http", "exec-agent/http", "terminal", "theia");
   private final RuntimeIdentity runtimeIdentity;
   private final String machineName;
   private final Map<String, ? extends Server> servers;
   private final MachineTokenProvider machineTokenProvider;
   private final int serverPingSuccessThreshold;
+  private final Set<String> livenessProbes;
 
   private Timer timer;
   private long resultTimeoutSeconds;
@@ -66,13 +65,16 @@ public class ServersChecker {
       @Assisted String machineName,
       @Assisted Map<String, ? extends Server> servers,
       MachineTokenProvider machineTokenProvider,
-      @Named("che.workspace.server.ping_success_threshold") int serverPingSuccessThreshold) {
+      @Named("che.workspace.server.ping_success_threshold") int serverPingSuccessThreshold,
+      @Named("che.workspace.server.liveness_probes") String[] livenessProbes) {
     this.runtimeIdentity = runtimeIdentity;
     this.machineName = machineName;
     this.servers = servers;
     this.timer = new Timer("ServersChecker", true);
     this.machineTokenProvider = machineTokenProvider;
     this.serverPingSuccessThreshold = serverPingSuccessThreshold;
+    this.livenessProbes =
+        Arrays.stream(livenessProbes).map(String::trim).collect(Collectors.toSet());
   }
 
   /**
@@ -163,7 +165,7 @@ public class ServersChecker {
     for (Map.Entry<String, ? extends Server> serverEntry : servers.entrySet()) {
       // TODO replace with correct behaviour
       // workaround needed because we don't have server readiness check in the model
-      if (LIVENESS_SERVERS.contains(serverEntry.getKey())) {
+      if (livenessProbes.contains(serverEntry.getKey())) {
         checkers.add(getChecker(serverEntry.getKey(), serverEntry.getValue()));
       }
     }

@@ -14,6 +14,8 @@ package org.eclipse.che.workspace.infrastructure.openshift.project;
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.openshift.api.model.PolicyRuleBuilder;
 import io.fabric8.openshift.api.model.Role;
+import io.fabric8.openshift.api.model.RoleBinding;
+import io.fabric8.openshift.api.model.RoleBindingBuilder;
 import io.fabric8.openshift.api.model.RoleBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -29,7 +31,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
 class WorkspaceServiceAccount {
 
   private final String projectName;
-  private final String name;
+  private final String serviceAccountName;
   private final OpenShiftClientFactory clientFactory;
   private final String workspaceId;
 
@@ -40,7 +42,7 @@ class WorkspaceServiceAccount {
       OpenShiftClientFactory clientFactory) {
     this.workspaceId = workspaceId;
     this.projectName = projectName;
-    this.name = serviceAccountName;
+    this.serviceAccountName = serviceAccountName;
     this.clientFactory = clientFactory;
   }
 
@@ -55,7 +57,8 @@ class WorkspaceServiceAccount {
   void prepare() throws InfrastructureException {
     OpenShiftClient osClient = clientFactory.createOC(workspaceId);
 
-    if (osClient.serviceAccounts().inNamespace(projectName).withName(name).get() == null) {
+    if (osClient.serviceAccounts().inNamespace(projectName).withName(serviceAccountName).get()
+        == null) {
       createWorkspaceServiceAccount(osClient);
     }
 
@@ -64,17 +67,8 @@ class WorkspaceServiceAccount {
       createExecRole(osClient, execRoleName);
     }
 
-    String execRoleBindingName = name + "-exec";
-    if (osClient.roleBindings().inNamespace(projectName).withName(execRoleBindingName).get()
-        == null) {
-      createExecRoleBinding(osClient, execRoleBindingName);
-    }
-
-    String viewRoleBindingName = name + "-view";
-    if (osClient.roleBindings().inNamespace(projectName).withName(viewRoleBindingName).get()
-        == null) {
-      createViewRoleBinding(osClient, viewRoleBindingName);
-    }
+    osClient.roleBindings().inNamespace(projectName).createOrReplace(createExecRoleBinding());
+    osClient.roleBindings().inNamespace(projectName).createOrReplace(createViewRoleBinding());
   }
 
   private void createWorkspaceServiceAccount(OpenShiftClient osClient) {
@@ -84,7 +78,7 @@ class WorkspaceServiceAccount {
         .createOrReplaceWithNew()
         .withAutomountServiceAccountToken(true)
         .withNewMetadata()
-        .withName(name)
+        .withName(serviceAccountName)
         .endMetadata()
         .done();
   }
@@ -101,36 +95,38 @@ class WorkspaceServiceAccount {
     osClient.roles().inNamespace(projectName).create(execRole);
   }
 
-  private void createViewRoleBinding(OpenShiftClient osClient, String name) {
-    osClient
-        .roleBindings()
-        .inNamespace(projectName)
-        .createNew()
+  private RoleBinding createViewRoleBinding() {
+    return new RoleBindingBuilder()
         .withNewMetadata()
-        .withName(name)
+        .withName(serviceAccountName + "-view")
+        .withNamespace(projectName)
         .endMetadata()
         .withNewRoleRef()
         .withName("view")
         .endRoleRef()
         .withSubjects(
-            new ObjectReferenceBuilder().withKind("ServiceAccount").withName(name).build())
-        .done();
+            new ObjectReferenceBuilder()
+                .withKind("ServiceAccount")
+                .withName(serviceAccountName)
+                .build())
+        .build();
   }
 
-  private void createExecRoleBinding(OpenShiftClient osClient, String name) {
-    osClient
-        .roleBindings()
-        .inNamespace(projectName)
-        .createNew()
+  private RoleBinding createExecRoleBinding() {
+    return new RoleBindingBuilder()
         .withNewMetadata()
-        .withName(name)
+        .withName(serviceAccountName + "-exec")
+        .withNamespace(projectName)
         .endMetadata()
         .withNewRoleRef()
         .withName("exec")
         .withNamespace(projectName)
         .endRoleRef()
         .withSubjects(
-            new ObjectReferenceBuilder().withKind("ServiceAccount").withName(name).build())
-        .done();
+            new ObjectReferenceBuilder()
+                .withKind("ServiceAccount")
+                .withName(serviceAccountName)
+                .build())
+        .build();
   }
 }
