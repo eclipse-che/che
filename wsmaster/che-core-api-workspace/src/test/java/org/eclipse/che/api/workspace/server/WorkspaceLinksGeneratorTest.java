@@ -15,6 +15,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMEN
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -66,8 +68,8 @@ public class WorkspaceLinksGeneratorTest {
 
     final UriBuilder uriBuilder = new UriBuilderImpl();
     uriBuilder.uri(URI_BASE);
-    when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
-    when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
+    lenient().when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
+    lenient().when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
 
     linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
 
@@ -100,8 +102,7 @@ public class WorkspaceLinksGeneratorTest {
     // given
     UriBuilder uriBuilder = new UriBuilderImpl();
     uriBuilder.uri("https://mydomain:7345/api/workspace");
-    when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
-    when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
+    doReturn(uriBuilder).when(serviceContextMock).getServiceUriBuilder();
 
     linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
     // when

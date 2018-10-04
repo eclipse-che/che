@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -77,7 +78,7 @@ public class SetPermissionsFilterTest {
 
   @BeforeMethod
   public void setUp() {
-    when(subject.getUserId()).thenReturn("user123");
+    lenient().when(subject.getUserId()).thenReturn("user123");
   }
 
   @Test
@@ -205,7 +206,6 @@ public class SetPermissionsFilterTest {
   public void shouldDoChainIfUserDoesNotHavePermissionToSetPermissionsButHasSuperPrivileges()
       throws Exception {
     when(superPrivilegesChecker.isPrivilegedToManagePermissions(anyString())).thenReturn(true);
-    when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
 
     final Response response =
         given()

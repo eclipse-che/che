@@ -82,8 +82,7 @@ public class WorkspaceRemoteSubscriptionPermissionFilterTest {
           "The current user doesn't have permissions to listen to the specified workspace events")
   public void shouldThrowExceptionIfUserDoesNotHaveRunNorUsePermissions() throws Exception {
     // given
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN))
-        .thenReturn(false);
+    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN)).thenReturn(false);
     when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE))
         .thenReturn(false);
 
