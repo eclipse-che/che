@@ -88,6 +88,9 @@ public class ProjectApiUtils {
                 bind(String.class)
                     .annotatedWith(Names.named("project.importer.default_importer_id"))
                     .toInstance("git");
+                bind(String.class)
+                    .annotatedWith(Names.named("che.core.jsonrpc.processor_max_pool_size"))
+                    .toInstance("100");
 
                 install(
                     new FactoryModuleBuilder()
