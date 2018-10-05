@@ -16,8 +16,6 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import javax.inject.Singleton;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
-import org.eclipse.che.ide.factory.json.ImportFromConfigView;
-import org.eclipse.che.ide.factory.json.ImportFromConfigViewImpl;
 import org.eclipse.che.ide.factory.welcome.GreetingPartView;
 import org.eclipse.che.ide.factory.welcome.GreetingPartViewImpl;
 import org.eclipse.che.ide.factory.welcome.preferences.ShowWelcomePreferencePagePresenter;
@@ -32,7 +30,6 @@ public class FactoryGinModule extends AbstractGinModule {
     bind(JsIntervalSetter.class).asEagerSingleton();
 
     bind(GreetingPartView.class).to(GreetingPartViewImpl.class).in(Singleton.class);
-    bind(ImportFromConfigView.class).to(ImportFromConfigViewImpl.class).in(Singleton.class);
     bind(ShowWelcomePreferencePageView.class)
         .to(ShowWelcomePreferencePageViewImpl.class)
         .in(Singleton.class);
