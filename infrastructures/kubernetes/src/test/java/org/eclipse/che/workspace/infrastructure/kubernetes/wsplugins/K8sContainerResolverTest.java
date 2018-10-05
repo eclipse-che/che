@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.K8sContainerResolver.MAX_CONTAINER_NAME_LENGTH;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 
@@ -75,7 +76,7 @@ public class K8sContainerResolverTest {
 
     Container container = resolver.resolve();
 
-    assertEquals(container.getName().length(), 63);
+    assertEquals(container.getName().length(), MAX_CONTAINER_NAME_LENGTH);
   }
 
   @Test

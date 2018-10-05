@@ -37,7 +37,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  */
 public class K8sContainerResolver {
 
-  private static final int MAX_CONTAINER_NAME_LENGTH = 63; // K8S container name limit
+  static final int MAX_CONTAINER_NAME_LENGTH = 63; // K8S container name limit
 
   private final String pluginName;
   private final CheContainer cheContainer;
