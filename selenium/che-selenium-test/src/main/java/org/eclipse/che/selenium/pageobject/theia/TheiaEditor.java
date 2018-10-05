@@ -107,10 +107,10 @@ public class TheiaEditor {
     final int editorLinesCount =
         seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(EDITOR_LINE_XPATH)).size();
 
-    List<Integer> linesCoordinates = getEditorLinesPixelCoordinates(editorLinesCount);
+    List<Integer> linePixelCoordinates = getEditorLinePixelCoordinates(editorLinesCount);
 
     List<String> linesText =
-        linesCoordinates
+        linePixelCoordinates
             .stream()
             .map(
                 linePixelCoordinate -> {
@@ -132,7 +132,7 @@ public class TheiaEditor {
     return format(EDITOR_LINE_BY_INDEX_XPATH_TEMPLATE, lineIndex);
   }
 
-  private List<Integer> getEditorLinesPixelCoordinates(int editorLinesCount) {
+  private List<Integer> getEditorLinePixelCoordinates(int editorLinesCount) {
     List<Integer> result = new ArrayList<>();
 
     for (int i = 1; i <= editorLinesCount; i++) {
