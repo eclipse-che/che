@@ -27,9 +27,14 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ServerSideRequestProcessor implements RequestProcessor {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ServerSideRequestProcessor.class);
+
   private ExecutorService executorService;
   private final int maxPoolSize;
 
@@ -37,6 +42,7 @@ public class ServerSideRequestProcessor implements RequestProcessor {
   public ServerSideRequestProcessor(
       @Named("che.core.jsonrpc.processor_max_pool_size") int maxPoolSize) {
     this.maxPoolSize = maxPoolSize;
+    LOG.info(" che.core.jsonrpc.processor_max_pool_siz {}  ", maxPoolSize);
   }
 
   @PostConstruct
@@ -50,7 +56,10 @@ public class ServerSideRequestProcessor implements RequestProcessor {
 
     executorService =
         new ThreadPoolExecutor(
-            0, maxPoolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), factory);
+            0, maxPoolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), factory);
+    ((ThreadPoolExecutor) executorService)
+        .setRejectedExecutionHandler(
+            (r, executor) -> LOG.warn("Message {} rejected for execution in {}", r, executor));
   }
 
   @PreDestroy
