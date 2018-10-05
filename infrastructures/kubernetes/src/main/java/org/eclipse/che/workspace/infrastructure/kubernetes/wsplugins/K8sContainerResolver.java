@@ -109,15 +109,20 @@ public class K8sContainerResolver {
 
   private String buildContainerName(String pluginName, String cheContainerName) {
     if (pluginName == null) {
-      return cheContainerName
-          .substring(0, min(cheContainerName.length(), MAX_CONTAINER_NAME_LENGTH));
+      return cheContainerName.substring(
+          0, min(cheContainerName.length(), MAX_CONTAINER_NAME_LENGTH));
     }
     String preliminaryName = (pluginName + "-" + cheContainerName).toLowerCase();
     if (preliminaryName.length() <= MAX_CONTAINER_NAME_LENGTH) {
       return preliminaryName;
     }
-    final String limitedContainerName = cheContainerName.substring(0, 49);
-    return (pluginName.substring(0, MAX_CONTAINER_NAME_LENGTH - limitedContainerName.length() - 1)
+    final String limitedContainerName =
+        cheContainerName.substring(0, min(cheContainerName.length(), 49));
+    return (pluginName.substring(
+                0,
+                min(
+                    pluginName.length(),
+                    MAX_CONTAINER_NAME_LENGTH - limitedContainerName.length() - 1))
             + "-"
             + limitedContainerName)
         .toLowerCase();

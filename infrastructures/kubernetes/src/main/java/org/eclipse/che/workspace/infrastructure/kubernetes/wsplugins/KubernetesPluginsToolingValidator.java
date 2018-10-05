@@ -26,8 +26,7 @@ public class KubernetesPluginsToolingValidator {
   // Pattern is from K8S Container class
   private static final Pattern namePattern = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
 
-  public void validatePluginNames(List<? extends PluginBase> plugins)
-      throws ValidationException {
+  public void validatePluginNames(List<? extends PluginBase> plugins) throws ValidationException {
     for (PluginBase plugin : plugins) {
       if (plugin.getName() != null) {
         final String formattedPluginName = plugin.getName().toLowerCase();
@@ -46,8 +45,7 @@ public class KubernetesPluginsToolingValidator {
     }
   }
 
-  private void checkValid(String input, String errorMessage)
-      throws ValidationException {
+  private void checkValid(String input, String errorMessage) throws ValidationException {
     if (!namePattern.matcher(input).matches()) {
       throw new ValidationException(format(errorMessage, input));
     }

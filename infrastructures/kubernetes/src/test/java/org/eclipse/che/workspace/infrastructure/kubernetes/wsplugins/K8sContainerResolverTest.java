@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 public class K8sContainerResolverTest {
   private static final String IMAGE = "testImage:tag";
-  private static final String PLUGIN_NAME = "test_plugin";
+  private static final String PLUGIN_NAME = "test_plugin_name";
 
   private CheContainer cheContainer;
   private K8sContainerResolver resolver;
@@ -68,11 +68,10 @@ public class K8sContainerResolverTest {
     assertEquals(container.getName(), (PLUGIN_NAME + "-" + cheContainer.getName()).toLowerCase());
   }
 
-
   @Test
   public void shouldLimitNameByMaxAllowedLength() throws Exception {
 
-    cheContainer.setName("cheContainerNameWhichIsGreatlySucceedsMaxAllowedLength");
+    cheContainer.setName("cheContainerNameWhichIsGreatlySucceedsMaxAllowedLengthByK8S");
 
     Container container = resolver.resolve();
 
