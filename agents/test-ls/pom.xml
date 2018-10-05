@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.12.0</version>
+        <version>6.12.1-SNAPSHOT</version>
     </parent>
     <artifactId>test-ls-agent</artifactId>
     <name>Test Language Server Agent</name>

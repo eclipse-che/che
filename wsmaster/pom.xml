@@ -17,11 +17,11 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.12.0</version>
+        <version>6.12.1-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <artifactId>che-master-parent</artifactId>
-    <version>6.12.0</version>
+    <version>6.12.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Master Parent</name>
     <modules>
