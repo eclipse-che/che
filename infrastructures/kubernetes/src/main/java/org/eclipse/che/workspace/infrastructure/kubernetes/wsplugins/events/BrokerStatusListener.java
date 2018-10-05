@@ -16,10 +16,12 @@ import static java.lang.String.format;
 import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 
 /**
  * Listens for {@link BrokerEvent} and completes or exceptionally completes a start and done futures
@@ -34,9 +36,14 @@ public class BrokerStatusListener implements EventSubscriber<BrokerEvent> {
 
   private final String workspaceId;
   private final CompletableFuture<List<ChePlugin>> finishFuture;
+  private final KubernetesPluginsToolingValidator pluginsValidator;
 
-  public BrokerStatusListener(String workspaceId, CompletableFuture<List<ChePlugin>> finishFuture) {
+  public BrokerStatusListener(
+      String workspaceId,
+      KubernetesPluginsToolingValidator pluginsValidator,
+      CompletableFuture<List<ChePlugin>> finishFuture) {
     this.workspaceId = workspaceId;
+    this.pluginsValidator = pluginsValidator;
     this.finishFuture = finishFuture;
   }
 
@@ -51,7 +58,12 @@ public class BrokerStatusListener implements EventSubscriber<BrokerEvent> {
       case DONE:
         List<ChePlugin> tooling = event.getTooling();
         if (tooling != null) {
-          finishFuture.complete(tooling);
+          try {
+            pluginsValidator.validatePluginNames(tooling);
+            finishFuture.complete(tooling);
+          } catch (ValidationException e) {
+            finishFuture.completeExceptionally(e);
+          }
         } else {
           finishFuture.completeExceptionally(
               new InternalInfrastructureException(

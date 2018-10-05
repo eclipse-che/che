@@ -98,6 +98,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     K8sContainerResolver k8sContainerResolver =
         new K8sContainerResolverBuilder()
             .setContainer(container)
+            .setPluginName(chePlugin.getName())
             .setPluginEndpoints(chePlugin.getEndpoints())
             .build();
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
