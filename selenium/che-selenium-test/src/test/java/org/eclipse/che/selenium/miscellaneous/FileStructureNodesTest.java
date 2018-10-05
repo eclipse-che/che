@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
 import static org.openqa.selenium.Keys.ESCAPE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -177,6 +178,7 @@ public class FileStructureNodesTest {
     fileStructure.type("i");
     fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_I);
     fileStructure.type(ESCAPE.toString());
+  }
 
   @Test(priority = 1)
   public void checkFileStructureNodes() {
