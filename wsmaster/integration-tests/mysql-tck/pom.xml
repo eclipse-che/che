@@ -24,7 +24,6 @@
     <packaging>pom</packaging>
     <name>Integration Tests :: MySQL</name>
     <modules>
-        <module>mysql-support</module>
         <module>mysql-tests</module>
     </modules>
 </project>
