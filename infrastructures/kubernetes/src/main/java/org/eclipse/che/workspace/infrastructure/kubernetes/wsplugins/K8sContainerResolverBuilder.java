@@ -21,6 +21,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 /** @author Oleksandr Garagatyi */
 public class K8sContainerResolverBuilder {
 
+  private String pluginName;
   private CheContainer container;
   private List<ChePluginEndpoint> pluginEndpoints;
 
@@ -34,13 +35,18 @@ public class K8sContainerResolverBuilder {
     return this;
   }
 
+  public K8sContainerResolverBuilder setPluginName(String pluginName) {
+    this.pluginName = pluginName;
+    return this;
+  }
+
   public K8sContainerResolver build() {
     if (container == null || pluginEndpoints == null) {
       throw new IllegalStateException();
     }
     List<ChePluginEndpoint> containerEndpoints =
         getContainerEndpoints(container.getPorts(), pluginEndpoints);
-    return new K8sContainerResolver(container, containerEndpoints);
+    return new K8sContainerResolver(pluginName, container, containerEndpoints);
   }
 
   private List<ChePluginEndpoint> getContainerEndpoints(
