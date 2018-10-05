@@ -16,6 +16,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHO
 import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.RUNTIME_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
 
@@ -45,6 +46,7 @@ public class WorkspaceRemoteSubscriptionPermissionFilter
         WORKSPACE_STATUS_CHANGED_METHOD,
         MACHINE_STATUS_CHANGED_METHOD,
         SERVER_STATUS_CHANGED_METHOD,
+        RUNTIME_LOG_METHOD,
         MACHINE_LOG_METHOD,
         INSTALLER_LOG_METHOD,
         INSTALLER_STATUS_CHANGED_METHOD,

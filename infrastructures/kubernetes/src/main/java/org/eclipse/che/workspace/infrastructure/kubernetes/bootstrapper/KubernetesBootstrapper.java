@@ -29,7 +29,7 @@ import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.bootstrap.AbstractBootstrapper;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
@@ -143,7 +143,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     final BiConsumer<String, String> outputConsumer =
         (stream, text) ->
             eventService.publish(
-                DtoFactory.newDto(MachineLogEvent.class)
+                DtoFactory.newDto(RuntimeLogEvent.class)
                     .withRuntimeId(runtimeIdentityDto)
                     .withStream(stream)
                     .withText(text)

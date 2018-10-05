@@ -18,7 +18,8 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.workspace.shared.dto.BrokerStatusChangedEvent;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.api.workspace.shared.dto.event.BrokerStatusChangedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -78,7 +79,9 @@ public class BrokerServicePermissionFilterTest {
 
     // when
     permissionFilter.doAccept(
-        method, DtoFactory.newDto(BrokerStatusChangedEvent.class).withWorkspaceId("ws123"));
+        method,
+        DtoFactory.newDto(BrokerStatusChangedEvent.class)
+            .withRuntimeId(DtoFactory.newDto(RuntimeIdentityDto.class).withWorkspaceId("ws123")));
   }
 
   @Test(dataProvider = "coveredMethods")
@@ -89,7 +92,9 @@ public class BrokerServicePermissionFilterTest {
 
     // when
     permissionFilter.doAccept(
-        method, DtoFactory.newDto(BrokerStatusChangedEvent.class).withWorkspaceId("ws123"));
+        method,
+        DtoFactory.newDto(BrokerStatusChangedEvent.class)
+            .withRuntimeId(DtoFactory.newDto(RuntimeIdentityDto.class).withWorkspaceId("ws123")));
   }
 
   @Test(
@@ -98,7 +103,9 @@ public class BrokerServicePermissionFilterTest {
   public void shouldThrowExceptionIfUnknownMethodIsInvoking() throws Exception {
     // when
     permissionFilter.doAccept(
-        "unknown", DtoFactory.newDto(BrokerStatusChangedEvent.class).withWorkspaceId("ws123"));
+        "unknown",
+        DtoFactory.newDto(BrokerStatusChangedEvent.class)
+            .withRuntimeId(DtoFactory.newDto(RuntimeIdentityDto.class).withWorkspaceId("ws123")));
   }
 
   @DataProvider

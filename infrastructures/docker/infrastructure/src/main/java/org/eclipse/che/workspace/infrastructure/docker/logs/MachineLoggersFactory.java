@@ -21,7 +21,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.infrastructure.docker.client.LogMessage;
 import org.eclipse.che.infrastructure.docker.client.MessageProcessor;
@@ -102,7 +102,7 @@ public class MachineLoggersFactory {
     }
   }
 
-  /** Forms new instance of {@link MachineLogEvent} and publish it via {@link EventService}. */
+  /** Forms new instance of {@link RuntimeLogEvent} and publish it via {@link EventService}. */
   private class MachineLogsBiConsumer implements BiConsumer<String, String> {
 
     private final String machineName;
@@ -116,7 +116,7 @@ public class MachineLoggersFactory {
     @Override
     public void accept(String stream, String text) {
       eventService.publish(
-          DtoFactory.newDto(MachineLogEvent.class)
+          DtoFactory.newDto(RuntimeLogEvent.class)
               .withRuntimeId(DtoConverter.asDto(runtime))
               .withStream(stream)
               .withText(text)

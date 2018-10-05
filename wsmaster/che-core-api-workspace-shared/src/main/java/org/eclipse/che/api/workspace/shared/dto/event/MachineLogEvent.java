@@ -18,8 +18,10 @@ import org.eclipse.che.dto.shared.DTO;
  * Defines event format for machine logs.
  *
  * @author Anton Korneta
+ * @deprecated use {@link RuntimeLogEvent} instead
  */
 @DTO
+@Deprecated
 public interface MachineLogEvent {
 
   /** Returns the contents of the log event. */
