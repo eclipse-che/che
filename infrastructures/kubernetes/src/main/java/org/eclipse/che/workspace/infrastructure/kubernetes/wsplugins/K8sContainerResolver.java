@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
@@ -108,7 +109,8 @@ public class K8sContainerResolver {
 
   private String buildContainerName(String pluginName, String cheContainerName) {
     if (pluginName == null) {
-      return cheContainerName;
+      return cheContainerName
+          .substring(0, min(cheContainerName.length(), MAX_CONTAINER_NAME_LENGTH));
     }
     String preliminaryName = (pluginName + "-" + cheContainerName).toLowerCase();
     if (preliminaryName.length() <= MAX_CONTAINER_NAME_LENGTH) {

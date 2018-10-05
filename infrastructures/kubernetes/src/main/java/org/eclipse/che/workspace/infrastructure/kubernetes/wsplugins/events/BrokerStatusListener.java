@@ -16,6 +16,7 @@ import static java.lang.String.format;
 import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -59,7 +60,7 @@ public class BrokerStatusListener implements EventSubscriber<BrokerEvent> {
           try {
             pluginsValidator.validatePluginNames(tooling);
             finishFuture.complete(tooling);
-          } catch (InternalInfrastructureException e) {
+          } catch (ValidationException e) {
             finishFuture.completeExceptionally(e);
           }
         } else {

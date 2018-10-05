@@ -68,6 +68,17 @@ public class K8sContainerResolverTest {
     assertEquals(container.getName(), (PLUGIN_NAME + "-" + cheContainer.getName()).toLowerCase());
   }
 
+
+  @Test
+  public void shouldLimitNameByMaxAllowedLength() throws Exception {
+
+    cheContainer.setName("cheContainerNameWhichIsGreatlySucceedsMaxAllowedLength");
+
+    Container container = resolver.resolve();
+
+    assertEquals(container.getName().length(), 63);
+  }
+
   @Test
   public void shouldSetEnvVarsFromSidecar() throws Exception {
     Map<String, String> env = ImmutableMap.of("name1", "value1", "name2", "value2");

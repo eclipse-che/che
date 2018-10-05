@@ -16,7 +16,7 @@ import static java.lang.String.format;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginBase;
 
@@ -27,7 +27,7 @@ public class KubernetesPluginsToolingValidator {
   private static final Pattern namePattern = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
 
   public void validatePluginNames(List<? extends PluginBase> plugins)
-      throws InternalInfrastructureException {
+      throws ValidationException {
     for (PluginBase plugin : plugins) {
       if (plugin.getName() != null) {
         final String formattedPluginName = plugin.getName().toLowerCase();
@@ -47,9 +47,9 @@ public class KubernetesPluginsToolingValidator {
   }
 
   private void checkValid(String input, String errorMessage)
-      throws InternalInfrastructureException {
+      throws ValidationException {
     if (!namePattern.matcher(input).matches()) {
-      throw new InternalInfrastructureException(format(errorMessage, input));
+      throw new ValidationException(format(errorMessage, input));
     }
   }
 }
