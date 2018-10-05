@@ -109,10 +109,6 @@ public class TheiaEditor {
 
     List<Integer> linesCoordinates = getEditorLinesPixelCoordinates(editorLinesCount);
 
-    // should be sorted by coordinates because found lines may be mixed by indexes
-    // and don't match with their expected places
-    linesCoordinates.sort((first, second) -> first - second);
-
     List<String> linesText =
         linesCoordinates
             .stream()
@@ -147,6 +143,9 @@ public class TheiaEditor {
       result.add(linePixelCoordinate);
     }
 
+    // should be sorted by coordinates because found lines may be mixed by indexes
+    // and don't match with their expected places
+    result.sort((first, second) -> first - second);
     return result;
   }
 
