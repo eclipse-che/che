@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.theia;
 
 import static org.eclipse.che.selenium.core.TestGroup.MULTIUSER;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
 
 import com.google.inject.Inject;
@@ -51,8 +52,12 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_INSTANCE_RUNNING_MESSAGE = "Hosted instance is running at:";
   private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
-  private static final String SEARCH_SEQUENCE = ">hosted";
+  private static final String HOSTED_SEARCH_SEQUENCE = "hosted";
+  private static final String HELLO_WORLD_SEARCH_SEQUENCE = "Hello";
+  private static final String HELLO_WORLD_PROPOSAL = "Hello World";
+  private static final String EXPECTED_HELLO_WORLD_NOTIFICATION = "Hello World!";
   private static final String SUGGESTION_FOR_SELECTION = "Hosted Plugin: Start Instance";
+  private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_TERMINAL_OUTPUT =
@@ -129,7 +134,7 @@ public class TheiaBuildPluginTest {
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaQuickTree.waitForm();
     WaitUtils.sleepQuietly(4);
-    theiaQuickTree.enterTextToSearchField(SEARCH_SEQUENCE);
+    theiaQuickTree.enterTextToSearchField(HOSTED_SEARCH_SEQUENCE);
     WaitUtils.sleepQuietly(4);
 
     theiaQuickTree.clickOnProposal(SUGGESTION_FOR_SELECTION);
@@ -147,13 +152,59 @@ public class TheiaBuildPluginTest {
     theiaIde.waitNotificationEqualsTo(EXPECTED_STARTING_SERVER_MESSAGE);
     theiaIde.waitNotificationEqualsTo(EXPECTED_PLUGIN_FOLDER_MESSAGE);
 
+    switchToNonParentWindow(parentWindow);
+    waitDevelopmentHostTitle();
 
+    theiaProjectTree.clickOnFilesTab();
 
+    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
+    theiaQuickTree.waitSearchField();
+    theiaQuickTree.enterTextToSearchField(HELLO_WORLD_SEARCH_SEQUENCE);
+    theiaQuickTree.clickOnProposal(HELLO_WORLD_PROPOSAL);
+    theiaIde.waitNotificationEqualsTo(EXPECTED_HELLO_WORLD_NOTIFICATION);
+    theiaIde.waitNotificationDissappearance(EXPECTED_HELLO_WORLD_NOTIFICATION);
+
+    switchToParentWindow(parentWindow);
   }
 
   private void waitNewBrowserWindowAndSwitchToParent(String parentWindowHandle) {
     seleniumWebDriver.waitOpenedSomeWin();
+    switchToParentWindow(parentWindowHandle);
+  }
+
+  private void switchToNonParentWindow(String parentWindowHandle) {
+    seleniumWebDriver.switchToNoneCurrentWindow(parentWindowHandle);
+    theiaIde.switchToIdeFrame();
+  }
+
+  private void switchToParentWindow(String parentWindowHandle) {
     seleniumWebDriver.switchTo().window(parentWindowHandle);
     theiaIde.switchToIdeFrame();
+  }
+
+  private void waitTitleHaveNotRouteOccurrence() {
+    final String textForChecking = "route";
+
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> !seleniumWebDriver.getTitle().contains(textForChecking));
+  }
+
+  private void waitDevelopmentHostTitle() {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> {
+          String title = seleniumWebDriver.getTitle();
+
+          if (EXPECTED_DEVELOPMENT_HOST_TITLE.equals(title)) {
+            return true;
+          }
+
+          seleniumWebDriver.navigate().refresh();
+
+          // give a time for refreshing
+          WaitUtils.sleepQuietly(3);
+
+          return false;
+        },
+        ELEMENT_TIMEOUT_SEC);
   }
 }

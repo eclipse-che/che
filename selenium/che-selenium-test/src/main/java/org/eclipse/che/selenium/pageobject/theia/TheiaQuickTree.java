@@ -70,7 +70,8 @@ public class TheiaQuickTree {
   }
 
   public void enterTextToSearchField(String text) {
-    seleniumWebDriverHelper.setValue(By.xpath(SEARCH_FIELD_XPATH), text);
+    final String adoptedText = ">" + text;
+    seleniumWebDriverHelper.setValue(By.xpath(SEARCH_FIELD_XPATH), adoptedText);
   }
 
   public void waitSearchFieldText(String expectedText) {
