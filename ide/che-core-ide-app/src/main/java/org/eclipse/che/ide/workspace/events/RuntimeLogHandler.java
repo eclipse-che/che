@@ -11,24 +11,24 @@
  */
 package org.eclipse.che.ide.workspace.events;
 
-import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.RUNTIME_LOG_METHOD;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.ide.processes.panel.EnvironmentOutputEvent;
 
 @Singleton
-class MachineLogHandler {
+class RuntimeLogHandler {
 
   @Inject
-  MachineLogHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
+  RuntimeLogHandler(RequestHandlerConfigurator configurator, EventBus eventBus) {
     configurator
         .newConfiguration()
-        .methodName(MACHINE_LOG_METHOD)
-        .paramsAsDto(MachineLogEvent.class)
+        .methodName(RUNTIME_LOG_METHOD)
+        .paramsAsDto(RuntimeLogEvent.class)
         .noResult()
         .withBiConsumer(
             (endpointId, log) ->

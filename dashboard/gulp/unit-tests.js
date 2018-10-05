@@ -38,7 +38,7 @@ function runTests (singleRun, done) {
     pathSrcJs.forEach(function(path) {
       preprocessors[path] = ['coverage'];
     });
-    reporters.push('coverage')
+    reporters.push('coverage');
   }
 
   var localConfig = {
@@ -51,7 +51,7 @@ function runTests (singleRun, done) {
 
   var server = new karma.Server(localConfig, function(failCount) {
     done(failCount ? new Error("Failed " + failCount + " tests.") : null);
-  })
+  });
   server.start();
 }
 

@@ -443,7 +443,7 @@ export class LoadFactoryController {
   getDisplayMachineLog(log: any): string {
     log = angular.fromJson(log);
     if (angular.isObject(log)) {
-      return '[' + log.machineName + '] ' + log.text;
+      return (log.machineName ? '[' + log.machineName + '] ' : '') + log.text;
     } else {
       return log;
     }

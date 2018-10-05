@@ -33,7 +33,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceInstallers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
@@ -68,7 +67,6 @@ public class WorkspaceDetailsMachineActionsTest {
   @Inject private WorkspaceInstallers workspaceInstallers;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private WorkspaceServers workspaceServers;
-  @Inject private WorkspaceEnvVariables workspaceEnvVariables;
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -221,7 +219,6 @@ public class WorkspaceDetailsMachineActionsTest {
   public void checkMachineSettings() {
     final String installerName = "Exec";
     final String serverName = "tomcat8";
-    final String envVariable = "CHE_MACHINE_NAME";
 
     // check the "Installers" link
     waitMachineListItemAndClickOnSettingsButton();
@@ -234,13 +231,6 @@ public class WorkspaceDetailsMachineActionsTest {
     waitMachineListItemAndClickOnSettingsButton();
     workspaceDetailsMachines.clickOnServersLink();
     workspaceServers.checkServerName(serverName);
-
-    seleniumWebDriver.navigate().back();
-
-    // Check the "Environment Variables" link
-    waitMachineListItemAndClickOnSettingsButton();
-    workspaceDetailsMachines.clickOnEnvironmentVariablesLink();
-    workspaceEnvVariables.checkEnvVariableExists(envVariable);
 
     seleniumWebDriver.navigate().back();
 

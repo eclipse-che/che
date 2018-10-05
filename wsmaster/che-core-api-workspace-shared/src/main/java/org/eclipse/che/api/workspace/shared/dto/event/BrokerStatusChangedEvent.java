@@ -9,8 +9,10 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.shared.dto;
+package org.eclipse.che.api.workspace.shared.dto.event;
 
+import org.eclipse.che.api.workspace.shared.dto.BrokerStatus;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -29,10 +31,10 @@ public interface BrokerStatusChangedEvent {
 
   BrokerStatusChangedEvent withStatus(BrokerStatus status);
 
-  /** ID of a workspace this event is related to. */
-  String getWorkspaceId();
+  /** Returns identity of runtime to which broker belongs t. */
+  RuntimeIdentityDto getRuntimeId();
 
-  BrokerStatusChangedEvent withWorkspaceId(String workspaceId);
+  BrokerStatusChangedEvent withRuntimeId(RuntimeIdentityDto runtimeId);
 
   /**
    * Error message that explains the reason of the broker process failure.

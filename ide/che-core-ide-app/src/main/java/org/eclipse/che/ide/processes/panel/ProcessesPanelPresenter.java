@@ -1325,6 +1325,11 @@ public class ProcessesPanelPresenter extends BasePresenter
   public void printMachineOutput(final String machineName, final String text) {
     // Create a temporary machine node to display outputs.
 
+    if (machineName == null) {
+      // runtime log. Should not be printed as machine output
+      return;
+    }
+
     if (!consoles.containsKey(machineName)) {
       provideMachineNode(machineName, true, false);
     }

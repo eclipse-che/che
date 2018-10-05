@@ -22,16 +22,10 @@
     <link rel="shortcut icon" ng-href="{{branding.favicon}}">
 
     <!-- build:css({.tmp/serve,src}) styles/app.css -->
-    <link rel="stylesheet" type="text/css" href="../bower_components/codemirror/addon/lint/lint.css">
-    <link rel="stylesheet" type="text/css" href="../bower_components/codemirror/addon/fold/foldgutter.css">
+    <link rel="stylesheet" type="text/css" href="../node_modules/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" type="text/css" href="assets/styles/material-design.css">
-    <link rel="stylesheet" type="text/css" href="assets/styles/font.css">
     <link rel="stylesheet" type="text/css" href="assets/styles/che-font.css">
-
-
-    <!-- bower:css -->
-    <!-- run `gulp inject` to automatically populate bower styles dependencies -->
-    <!-- endbower -->
+    <link rel="stylesheet" type="text/css" href="assets/styles/font.css">
     <!-- inject:css -->
     <!-- css files will be automatically insert here -->
     <!-- endinject -->
@@ -71,26 +65,7 @@
 
     <!-- DO NOT ADD DIRECTLY JS THERE, THIS IS AUTOMATICALLY ADDED -->
     <!-- build:js(src) scripts/vendor.js -->
-    <script src="../bower_components/codemirror/lib/codemirror.js"></script>
-    <script src="../bower_components/jsonlint/lib/jsonlint.js"></script>
-    <script src="../bower_components/codemirror/addon/lint/lint.js"></script>
-    <script src="../bower_components/codemirror/addon/lint/json-lint.js"></script>
-    <script src="../bower_components/codemirror/addon/mode/simple.js"></script>
-    <script src="../bower_components/codemirror/mode/javascript/javascript.js"></script>
-    <script src="../bower_components/codemirror/mode/yaml/yaml.js"></script>
-    <script src="../bower_components/codemirror/mode/dockerfile/dockerfile.js"></script>
-    <script src="../bower_components/codemirror/addon/edit/matchbrackets.js"></script>
-    <script src="../bower_components/codemirror/addon/edit/closebrackets.js"></script>
-    <script src="../bower_components/codemirror/addon/fold/foldcode.js"></script>
-    <script src="../bower_components/codemirror/addon/fold/foldgutter.js"></script>
-    <script src="../bower_components/codemirror/addon/fold/brace-fold.js"></script>
-    <script src="../bower_components/codemirror/addon/selection/active-line.js"></script>
-    <script src="../bower_components/term.js/src/term.js"></script>
-    <!-- bower:js -->
-    <!-- run `gulp inject` to automatically populate bower script dependencies -->
-    <!-- endbower -->
-    <!-- endbuild -->
-
+  <script src="../node_modules/jsonlint/lib/jsonlint.js"></script>
     <!-- build:js({.tmp/serve,.tmp/partials}) scripts/app.js -->
     <!-- inject:js -->
     <!-- js files will be automatically insert here -->
