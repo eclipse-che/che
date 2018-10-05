@@ -400,7 +400,7 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      if (!(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
+      if (!(obj instanceof TestWorkspace)) {
         continue;
       }
 

@@ -51,7 +51,7 @@ public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
   }
 
   @Test
-  public void createWorkspaceFromJavaTheiaOpenshiftStack() {
+  public void createWorkspaceFromJavaTheiaOpenshiftStack() throws Exception {
     createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
         JAVA_THEIA_OPENSHIFT, WORKSPACE_NAME);
 

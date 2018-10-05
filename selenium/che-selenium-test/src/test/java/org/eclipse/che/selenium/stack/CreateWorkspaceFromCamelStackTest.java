@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -23,6 +24,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -53,6 +55,9 @@ public class CreateWorkspaceFromCamelStackTest {
   @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -65,7 +70,9 @@ public class CreateWorkspaceFromCamelStackTest {
 
   @Test
   public void createWorkspaceFromCamelStackTest() throws Exception {
-    createWorkspaceHelper.createWorkspaceFromStackWithoutProject(CAMEL_SPRINGBOOT, WORKSPACE_NAME);
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
+            CAMEL_SPRINGBOOT, WORKSPACE_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

@@ -13,6 +13,9 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 
 import com.google.inject.Inject;
 import java.util.List;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceProvider;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 
 /**
@@ -26,6 +29,8 @@ public class CreateWorkspaceHelper {
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
+  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private CheTestWorkspaceProvider testWorkspaceProvider;
 
   public void createWorkspaceFromStackWithProject(
       NewWorkspace.Stack stack, String workspaceName, String projectName) {
@@ -38,11 +43,13 @@ public class CreateWorkspaceHelper {
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
   }
 
-  public void createWorkspaceFromStackWithoutProject(
-      NewWorkspace.Stack stack, String workspaceName) {
+  public TestWorkspace createWorkspaceFromStackWithoutProject(
+      NewWorkspace.Stack stack, String workspaceName) throws Exception {
     prepareWorkspace(stack, workspaceName);
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+
+    return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
   }
 
   public void createWorkspaceFromStackWithProjects(

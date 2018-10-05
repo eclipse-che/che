@@ -32,10 +32,10 @@ public class CheTestWorkspace implements TestWorkspace {
   private static final Logger LOG = LoggerFactory.getLogger(CheTestWorkspace.class);
 
   private final String name;
-  private final CompletableFuture<Void> future;
   private final TestUser owner;
-  private final AtomicReference<String> id;
-  private final TestWorkspaceServiceClient workspaceServiceClient;
+  private final AtomicReference<String> id = new AtomicReference<>();
+  private final TestWorkspaceServiceClient testWorkspaceServiceClient;
+  private CompletableFuture<Void> future;
 
   public CheTestWorkspace(
       String name,
@@ -52,21 +52,21 @@ public class CheTestWorkspace implements TestWorkspace {
 
     this.name = name;
     this.owner = owner;
-    this.id = new AtomicReference<>();
-    this.workspaceServiceClient = testWorkspaceServiceClient;
+    this.testWorkspaceServiceClient = testWorkspaceServiceClient;
 
     this.future =
         CompletableFuture.runAsync(
             () -> {
               Workspace ws;
               try {
-                ws = workspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
+                ws =
+                    this.testWorkspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
               } catch (Exception e) {
                 String errorMessage = format("Workspace name='%s' creation failed.", name);
                 LOG.error(errorMessage, e);
 
                 try {
-                  workspaceServiceClient.delete(name, owner.getName());
+                  this.testWorkspaceServiceClient.delete(name, owner.getName());
                 } catch (Exception e1) {
                   LOG.warn("Failed to remove workspace name='{}' which creation is failed.", name);
                 }
@@ -80,7 +80,8 @@ public class CheTestWorkspace implements TestWorkspace {
                   format("Workspace with name='%s' id='%s' is starting...", name, workspaceId));
               if (startAfterCreation) {
                 try {
-                  workspaceServiceClient.start(id.updateAndGet((s) -> workspaceId), name, owner);
+                  this.testWorkspaceServiceClient.start(
+                      id.updateAndGet((s) -> workspaceId), name, owner);
                 } catch (Exception e) {
                   String errorMessage =
                       format("Workspace with name='%s' id='%s' start failed.", name, workspaceId);
@@ -92,7 +93,7 @@ public class CheTestWorkspace implements TestWorkspace {
                   testWorkspaceLogsReader.store(workspaceId, pathToWorkspaceLogs, true);
 
                   try {
-                    workspaceServiceClient.delete(name, owner.getName());
+                    this.testWorkspaceServiceClient.delete(name, owner.getName());
                   } catch (Exception e1) {
                     LOG.warn(
                         "Failed to remove workspace with name='{}' id='{}' which start is failed.",
@@ -110,6 +111,24 @@ public class CheTestWorkspace implements TestWorkspace {
                     (System.currentTimeMillis() - start) / 1000);
               }
             });
+  }
+
+  public CheTestWorkspace(
+      String name, TestUser owner, TestWorkspaceServiceClient testWorkspaceServiceClient)
+      throws Exception {
+    this.testWorkspaceServiceClient = testWorkspaceServiceClient;
+
+    if (!testWorkspaceServiceClient.exists(name, owner.getName())) {
+      throw new IllegalArgumentException(
+          format("Workspace name='%s' owner='%s' didn't found.", name, owner.getName()));
+    }
+
+    Workspace wsConfig = testWorkspaceServiceClient.getByName(name, owner.getName());
+    this.id.set(wsConfig.getId());
+
+    this.name = name;
+    this.owner = owner;
+    this.future = CompletableFuture.runAsync(() -> {});
   }
 
   @Override
@@ -137,7 +156,7 @@ public class CheTestWorkspace implements TestWorkspace {
   @SuppressWarnings("FutureReturnValueIgnored")
   public void delete() {
     try {
-      workspaceServiceClient.delete(name, owner.getName());
+      testWorkspaceServiceClient.delete(name, owner.getName());
     } catch (Exception e) {
       throw new RuntimeException(format("Failed to remove workspace '%s'", this), e);
     }

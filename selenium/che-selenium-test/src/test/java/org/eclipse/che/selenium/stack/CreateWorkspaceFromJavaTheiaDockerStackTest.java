@@ -51,7 +51,7 @@ public class CreateWorkspaceFromJavaTheiaDockerStackTest {
   }
 
   @Test
-  public void createWorkspaceFromJavaTheiaDockerStack() {
+  public void createWorkspaceFromJavaTheiaDockerStack() throws Exception {
     createWorkspaceHelper.createWorkspaceFromStackWithoutProject(JAVA_THEIA_DOCKER, WORKSPACE_NAME);
 
     seleniumWebDriverHelper.waitAndSwitchToFrame(
