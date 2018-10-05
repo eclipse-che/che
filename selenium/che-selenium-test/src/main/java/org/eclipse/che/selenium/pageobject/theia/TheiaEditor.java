@@ -103,12 +103,14 @@ public class TheiaEditor {
 
   public List<String> getEditorText() {
     // In this realization each line element will be found exactly before using
-    // This realization allows as to avoid "StaleElementReferenceException"
+    // This realization allows us to avoid "StaleElementReferenceException"
     final int editorLinesCount =
         seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(EDITOR_LINE_XPATH)).size();
 
     List<Integer> linesCoordinates = getEditorLinesPixelCoordinates(editorLinesCount);
 
+    // should be sorted by coordinates because found lines may be mixed by indexes
+    // and don't match with their expected places
     linesCoordinates.sort((first, second) -> first - second);
 
     List<String> linesText =
