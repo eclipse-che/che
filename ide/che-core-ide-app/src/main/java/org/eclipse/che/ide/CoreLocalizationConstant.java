@@ -1075,23 +1075,8 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("create.factory.launch.button.tooltip")
   String createFactoryLaunchTooltip();
 
-  @Key("import.config.view.name")
-  String importFromConfigurationName();
-
-  @Key("import.config.view.description")
-  String importFromConfigurationDescription();
-
   @Key("project.import.configured.cloned")
   String clonedSource(String projectName);
-
-  @Key("import.config.form.button.import")
-  String importButton();
-
-  @Key("import.config.view.title")
-  String importFromConfigurationTitle();
-
-  @Key("import.config.form.prompt")
-  String configFileTitle();
 
   @Key("project.already.imported")
   String projectAlreadyImported(String projectName);
