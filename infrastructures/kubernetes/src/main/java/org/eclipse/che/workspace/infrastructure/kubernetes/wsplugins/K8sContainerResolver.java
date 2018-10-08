@@ -40,11 +40,16 @@ public class K8sContainerResolver {
   static final int MAX_CONTAINER_NAME_LENGTH = 63; // K8S container name limit
 
   private final String pluginName;
+  private final String imagePullPolicy;
   private final CheContainer cheContainer;
   private final List<ChePluginEndpoint> containerEndpoints;
 
   public K8sContainerResolver(
-      String pluginName, CheContainer container, List<ChePluginEndpoint> containerEndpoints) {
+      String pluginName,
+      String imagePullPolicy,
+      CheContainer container,
+      List<ChePluginEndpoint> containerEndpoints) {
+    this.imagePullPolicy = imagePullPolicy;
     this.cheContainer = container;
     this.pluginName = pluginName;
     this.containerEndpoints = containerEndpoints;
@@ -58,6 +63,7 @@ public class K8sContainerResolver {
     Container container =
         new ContainerBuilder()
             .withImage(cheContainer.getImage())
+            .withImagePullPolicy(imagePullPolicy)
             .withName(buildContainerName(pluginName, cheContainer.getName()))
             .withEnv(toK8sEnv(cheContainer.getEnv()))
             .withPorts(getContainerPorts())

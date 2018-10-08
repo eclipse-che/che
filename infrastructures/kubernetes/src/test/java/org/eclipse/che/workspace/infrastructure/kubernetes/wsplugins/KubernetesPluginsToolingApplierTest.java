@@ -68,6 +68,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesPluginsToolingApplierTest {
   private static final String TEST_IMAGE = "testImage/test:test";
+  private static final String TEST_IMAGE_POLICY = "IfNotPresent";
   private static final String ENV_VAR = "PLUGINS_ENV_VAR";
   private static final String ENV_VAR_VALUE = "PLUGINS_ENV_VAR_VALUE";
   private static final String POD_NAME = "pod12";
@@ -88,7 +89,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, false);
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, false);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Container> containers = new ArrayList<>();
@@ -365,7 +366,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void shouldSetJWTServerExposerAttributeIfAuthEnabled() throws Exception {
-    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, true);
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
 
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
@@ -375,7 +376,7 @@ public class KubernetesPluginsToolingApplierTest {
   @Test
   public void shouldNotSetJWTServerExposerAttributeIfAuthEnabledButAttributeIsPresent()
       throws Exception {
-    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, true);
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
     internalEnvironment.getAttributes().put(SECURE_EXPOSER_IMPL_PROPERTY, "somethingElse");
 
     applier.apply(internalEnvironment, singletonList(createChePlugin()));

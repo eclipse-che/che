@@ -41,12 +41,15 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
   private final String defaultSidecarMemoryLimitBytes;
+  private final String sidecarImagePullPolicy;
   private final boolean isAuthEnabled;
 
   @Inject
   public KubernetesPluginsToolingApplier(
+      @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
       @Named("che.agents.auth_enabled") boolean isAuthEnabled) {
+    this.sidecarImagePullPolicy = sidecarImagePullPolicy;
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
     this.isAuthEnabled = isAuthEnabled;
   }
@@ -98,6 +101,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     K8sContainerResolver k8sContainerResolver =
         new K8sContainerResolverBuilder()
             .setContainer(container)
+            .setImagePullPolicy(sidecarImagePullPolicy)
             .setPluginName(chePlugin.getName())
             .setPluginEndpoints(chePlugin.getEndpoints())
             .build();
