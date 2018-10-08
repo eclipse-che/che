@@ -24,9 +24,9 @@ context('Check Extensions are installed', () => {
   // Search that deploying a plugin is there
   it('Command Palette include Plugin', () => {
     cy.theiaCommandPaletteItems('Plugin:').then((value) => {
-      expect(value).to.have.length(5);
+      expect(value).to.have.length(6);
       expect(value).to.have.members([
-        "Hosted Plugin: Restart Instance", "Hosted Plugin: Select Path", "Hosted Plugin: Start Instance", "Hosted Plugin: Stop Instance", "Plugin: Deploy a plugin's id"]);
+        "Hosted Plugin: Restart Instance", "Hosted Plugin: Select Path", "Hosted Plugin: Start Instance", "Hosted Plugin: Stop Instance", "Plugin: Deploy a plugin's id", "Hosted Plugin: Debug Instance"]);
     })
   });
 
