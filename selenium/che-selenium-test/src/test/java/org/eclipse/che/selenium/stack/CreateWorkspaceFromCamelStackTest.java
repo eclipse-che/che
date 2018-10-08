@@ -15,7 +15,6 @@ import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;

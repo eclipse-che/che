@@ -18,8 +18,11 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
@@ -39,6 +42,11 @@ public class CreateWorkspaceWithAndroidStackTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() {
@@ -51,17 +59,8 @@ public class CreateWorkspaceWithAndroidStackTest {
   }
 
   @Test
-  public void createWorkspaceWithAndroidStackTest() {
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnAddWorkspaceBtn();
-
-    newWorkspace.waitToolbar();
-    newWorkspace.typeWorkspaceName(WORKSPACE);
-    newWorkspace.selectStack(ANDROID);
-    newWorkspace.setMachineRAM("dev-machine", 2.0);
-    newWorkspace.clickOnCreateButtonAndOpenInIDE();
+  public void createWorkspaceWithAndroidStackTest() throws Exception {
+    testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(ANDROID, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();

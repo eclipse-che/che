@@ -18,8 +18,10 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
@@ -39,6 +41,10 @@ public class CreateWorkspaceWithNodeStackTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() {
@@ -51,17 +57,8 @@ public class CreateWorkspaceWithNodeStackTest {
   }
 
   @Test
-  public void createWorkspaceWithNodeStackTest() {
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnAddWorkspaceBtn();
-
-    newWorkspace.waitToolbar();
-    newWorkspace.typeWorkspaceName(WORKSPACE);
-    newWorkspace.selectStack(NODE);
-    newWorkspace.setMachineRAM("dev-machine", 2.0);
-    newWorkspace.clickOnCreateButtonAndOpenInIDE();
+  public void createWorkspaceWithNodeStackTest() throws Exception {
+    testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(NODE, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();

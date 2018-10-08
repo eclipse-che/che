@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.B
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -40,6 +41,9 @@ public class CreateWorkspaceFromBlankStackTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -51,8 +55,10 @@ public class CreateWorkspaceFromBlankStackTest {
   }
 
   @Test
-  public void createWorkspaceFromBlankStackTest() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(BLANK, WORKSPACE_NAME, PROJECT_NAME);
+  public void createWorkspaceFromBlankStackTest() throws Exception {
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithProject(
+            BLANK, WORKSPACE_NAME, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

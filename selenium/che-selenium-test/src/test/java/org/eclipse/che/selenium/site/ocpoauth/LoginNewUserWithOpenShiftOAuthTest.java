@@ -26,6 +26,8 @@ import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -87,6 +89,10 @@ public class LoginNewUserWithOpenShiftOAuthTest {
   @Inject private OpenShiftProjectCatalogPage openShiftProjectCatalogPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @AfterClass
   private void removeTestUser() throws ServerException, ConflictException, BadRequestException {
@@ -99,7 +105,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
   }
 
   @Test
-  public void checkNewCheUserOcpProjectCreationAndRemoval() {
+  public void checkNewCheUserOcpProjectCreationAndRemoval() throws Exception {
     // go to login page of Eclipse Che
     // (we can't use dashboard.open() here to login with OAuth)
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
@@ -125,6 +131,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE_NAME, NEW_TEST_USER);
 
     // switch to the Eclipse Che IDE and wait until workspace is ready to use
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();

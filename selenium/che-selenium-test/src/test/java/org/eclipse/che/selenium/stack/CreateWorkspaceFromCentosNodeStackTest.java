@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -52,6 +53,9 @@ public class CreateWorkspaceFromCentosNodeStackTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -63,9 +67,10 @@ public class CreateWorkspaceFromCentosNodeStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromCentosNodeStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProjects(
-        CENTOS_NODEJS, WORKSPACE_NAME, projects);
+  public void checkWorkspaceCreationFromCentosNodeStack() throws Exception {
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithProjects(
+            CENTOS_NODEJS, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

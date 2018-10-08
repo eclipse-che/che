@@ -23,6 +23,8 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -59,6 +61,10 @@ public class CreateAndDeleteProjectsTest {
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
   @Inject private ToastLoader toastLoader;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() {
@@ -71,7 +77,7 @@ public class CreateAndDeleteProjectsTest {
   }
 
   @Test
-  public void createAndDeleteProjectTest() {
+  public void createAndDeleteProjectTest() throws Exception {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
@@ -92,7 +98,9 @@ public class CreateAndDeleteProjectsTest {
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.clickOnAddProjectButton();
+
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     // switch to the IDE and wait for workspace is ready to use
     String dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();

@@ -32,6 +32,15 @@ public interface TestWorkspaceProvider {
       TestUser owner, int memoryGB, WorkspaceTemplate template, boolean startAfterCreation)
       throws Exception;
 
+  /**
+   * Get existed workspace.
+   *
+   * <p>#param workspaceName name of workspace
+   *
+   * @param owner the workspace owner
+   */
+  TestWorkspace getWorkspace(String workspaceName, TestUser owner) throws Exception;
+
   /** Release all allocated resources. */
   void shutdown();
 }

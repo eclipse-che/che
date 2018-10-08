@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -59,6 +60,9 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -70,9 +74,10 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaMySqlCentosStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(
-        JAVA_MYSQL_CENTOS, WORKSPACE_NAME, WEB_JAVA_PROJECT);
+  public void checkWorkspaceCreationFromJavaMySqlCentosStack() throws Exception {
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithProject(
+            JAVA_MYSQL_CENTOS, WORKSPACE_NAME, WEB_JAVA_PROJECT);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
