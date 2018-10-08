@@ -386,6 +386,43 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   @Test
+  public void shouldSetSpecifiedImagePullPolicy() throws Exception {
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
+
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    assertEquals(
+        internalEnvironment
+            .getPods()
+            .values()
+            .iterator()
+            .next()
+            .getSpec()
+            .getContainers()
+            .get(1)
+            .getImagePullPolicy(),
+        TEST_IMAGE_POLICY);
+  }
+
+  @Test
+  public void shouldSetNullImagePullPolicyIfValueIsNotStandard() throws Exception {
+    applier = new KubernetesPluginsToolingApplier("None", MEMORY_LIMIT_MB, true);
+
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    assertNull(
+        internalEnvironment
+            .getPods()
+            .values()
+            .iterator()
+            .next()
+            .getSpec()
+            .getContainers()
+            .get(1)
+            .getImagePullPolicy());
+  }
+
+  @Test
   public void shouldNotSetJWTServerExposerAttributeIfAuthDisabled() throws Exception {
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 

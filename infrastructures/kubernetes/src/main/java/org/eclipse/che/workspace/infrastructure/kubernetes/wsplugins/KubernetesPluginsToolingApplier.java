@@ -17,6 +17,7 @@ import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,11 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
       @Named("che.agents.auth_enabled") boolean isAuthEnabled) {
-    this.sidecarImagePullPolicy = sidecarImagePullPolicy;
+    this.sidecarImagePullPolicy =
+        Arrays.stream(ImagePullPolicies.values())
+                .anyMatch(p -> p.getPolicy().equals(sidecarImagePullPolicy))
+            ? sidecarImagePullPolicy
+            : null;
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
     this.isAuthEnabled = isAuthEnabled;
   }
@@ -127,5 +132,21 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     SidecarServicesProvisioner sidecarServicesProvisioner =
         new SidecarServicesProvisioner(containerEndpoints, pod.getMetadata().getName());
     sidecarServicesProvisioner.provision(kubernetesEnvironment);
+  }
+
+  private enum ImagePullPolicies {
+    ALWAYS("Always"),
+    IF_NOT_PRESENT("IfNotPresent"),
+    NEVER("Never");
+
+    private String policy;
+
+    ImagePullPolicies(String policy) {
+      this.policy = policy;
+    }
+
+    public String getPolicy() {
+      return policy;
+    }
   }
 }
