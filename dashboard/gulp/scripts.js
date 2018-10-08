@@ -28,7 +28,7 @@ function webpackWrapper(watch, test, callback) {
     resolve: {extensions: ['', '.ts', '.js', '.styl']},
     watch: watch,
     module: {
-      noParse: [/angular-websocket/, /jsonlint/],
+      noParse: [/jsonlint/],
       loaders: [
         {
           test: /\.ts$/,
@@ -58,13 +58,13 @@ function webpackWrapper(watch, test, callback) {
           loader: 'file-loader'
         }, {
           test: /\.html$/,
-          loaders: ['html-loader',
+          loaders: [
             {
               loader: 'ngtemplate-loader',
               options: {
                 angular: true
               }
-            }]
+            }, 'html-loader']
         }
       ]
     },
