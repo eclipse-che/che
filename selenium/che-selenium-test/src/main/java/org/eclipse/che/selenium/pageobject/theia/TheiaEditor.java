@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 
 @Singleton
 public class TheiaEditor {
@@ -58,11 +57,11 @@ public class TheiaEditor {
     seleniumWebDriverHelper.waitVisibility(By.xpath(ACTIVE_LINE_XPATH));
   }
 
-  private int getEditorLinePixelCoordinate(WebElement editorLine) {
+  private int getEditorLinePixelCoordinate(String editorLineXpath) {
     String containingCoordinatesAttribute = "style";
     String styleText =
         seleniumWebDriverHelper.waitVisibilityAndGetAttribute(
-            editorLine, containingCoordinatesAttribute);
+            By.xpath(editorLineXpath), containingCoordinatesAttribute);
 
     styleText = styleText.replace("top: ", "");
     styleText = styleText.replace("px; height: ", "\n");
@@ -137,9 +136,7 @@ public class TheiaEditor {
 
     for (int i = 1; i <= editorLinesCount; i++) {
       String editorLineXpath = getEditorLineByIndexXpath(i);
-      int linePixelCoordinate =
-          getEditorLinePixelCoordinate(
-              seleniumWebDriverHelper.waitVisibility(By.xpath(editorLineXpath)));
+      int linePixelCoordinate = getEditorLinePixelCoordinate(editorLineXpath);
       result.add(linePixelCoordinate);
     }
 

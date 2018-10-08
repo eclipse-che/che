@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locator
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.FILES_TAB_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.ROOT_PROJECTS_FOLDER_ID;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.SELECTED_ITEM_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.SELECTED_ROOT_ITEM_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.TREE_ITEM_ID_TEMPLATE;
 
 import com.google.inject.Inject;
@@ -40,6 +41,8 @@ public class TheiaProjectTree {
         "//div[@class='theia-TreeNodeContent']//div[text()='%s']";
     String SELECTED_ITEM_XPATH_TEMPLATE =
         "//div[contains(@class, 'theia-mod-selected theia-mod-focus')]//div[@id='/projects:/projects/%s']";
+    String SELECTED_ROOT_ITEM_XPATH =
+        "//div[contains(@class, 'theia-mod-selected theia-mod-focus')]//div[@id='/projects']";
     String COLLAPSED_ITEM_XPATH_TEMPLATE =
         "//div[@data-node-id='/projects:/projects/%s' and contains(@class, 'theia-mod-collapsed')]";
     String EXPAND_ITEM_ICON_XPATH_TEMPLATE = "//div[@data-node-id='/projects:/projects/%s']";
@@ -105,6 +108,18 @@ public class TheiaProjectTree {
     // Selection doesn't fully complete after the display. Have to wait for the end of the selection
     // logic.
     WaitUtils.sleepQuietly(2);
+  }
+
+  public void waitProjectsRootItemSelected() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(SELECTED_ROOT_ITEM_XPATH));
+
+    // Selection doesn't fully complete after the display. Have to wait for the end of the selection
+    // logic.
+    WaitUtils.sleepQuietly(2);
+  }
+
+  public boolean isRootItemSelected() {
+    return seleniumWebDriverHelper.isVisible(By.xpath(SELECTED_ROOT_ITEM_XPATH));
   }
 
   public void openItem(String itemPath) {
