@@ -483,7 +483,7 @@ public class WorkspaceRuntimesTest {
     when(workspace.getId()).thenReturn(identity.getWorkspaceId());
     when(workspace.getAttributes()).thenReturn(new HashMap<>());
 
-    when(workspaceDao.get(identity.getWorkspaceId())).thenReturn(workspace);
+    lenient().when(workspaceDao.get(identity.getWorkspaceId())).thenReturn(workspace);
 
     return workspace;
   }
