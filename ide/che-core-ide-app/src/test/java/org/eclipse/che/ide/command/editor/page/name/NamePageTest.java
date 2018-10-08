@@ -79,4 +79,18 @@ public class NamePageTest {
 
     verify(commandExecutor).executeCommand(editedCommand);
   }
+
+  @Test
+  public void shouldShowWarningWhenInvalidName() throws Exception {
+    page.onNameChanged("mvn*");
+
+    verify(view).showWarning(true);
+  }
+
+  @Test
+  public void shouldHideWarningWhenValidName() throws Exception {
+    page.onNameChanged("mvn");
+
+    verify(view).showWarning(false);
+  }
 }

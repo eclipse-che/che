@@ -16,6 +16,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='org.eclipse.che.ide.command.editor.EditorMessages'/>
+    <ui:with field='coreMessages' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
     <ui:style>
         .text-field {
             width: literal("calc(100% - 80px)");
@@ -31,6 +32,10 @@
         .button:hover {
             background: #51b200;
         }
+
+        .warning {
+            color: red;
+        }
     </ui:style>
 
     <g:FlowPanel width="100%">
@@ -39,5 +44,6 @@
                   addStyleNames="{style.button}"
                   debugId="command-editor-button-run"/>
         <g:TextBox ui:field="commandName" addStyleNames="{style.text-field}"/>
+        <g:Label ui:field="warningLabel" visible="false" addStyleNames="{style.warning}" text="{coreMessages.invalidName}"/>
     </g:FlowPanel>
 </ui:UiBinder>

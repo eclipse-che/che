@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.ide.command.editor.page.name;
 
+import static org.eclipse.che.ide.util.NameUtils.isValidCommandName;
+
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import org.eclipse.che.ide.api.command.CommandExecutor;
@@ -63,10 +65,17 @@ public class NamePage extends AbstractCommandEditorPage implements NamePageView.
   }
 
   @Override
+  public boolean hasInvalidData() {
+    return !isValidCommandName(editedCommand.getName());
+  }
+
+  @Override
   public void onNameChanged(String name) {
     editedCommand.setName(name);
 
     notifyDirtyStateChanged();
+
+    view.showWarning(!isValidCommandName(name));
   }
 
   @Override
