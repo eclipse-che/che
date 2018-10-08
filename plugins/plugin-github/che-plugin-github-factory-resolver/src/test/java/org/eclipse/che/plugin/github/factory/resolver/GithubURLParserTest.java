@@ -12,6 +12,7 @@
 package org.eclipse.che.plugin.github.factory.resolver;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -46,7 +47,7 @@ public class GithubURLParserTest {
 
   @BeforeMethod
   public void init() {
-    when(urlFetcher.fetch(any(String.class))).thenReturn("");
+    lenient().when(urlFetcher.fetch(any(String.class))).thenReturn("");
   }
 
   /** Check URLs are valid with regexp */

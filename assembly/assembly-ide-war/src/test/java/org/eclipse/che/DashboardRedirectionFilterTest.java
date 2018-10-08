@@ -61,7 +61,6 @@ public class DashboardRedirectionFilterTest {
     // given
     when(request.getMethod()).thenReturn("GET");
     when(request.getRequestURI()).thenReturn(uri);
-    when(request.getRequestURL()).thenReturn(new StringBuffer(url));
     EnvironmentContext context = new EnvironmentContext();
     context.setSubject(new SubjectImpl("id123", "name", "token123", false));
     EnvironmentContext.setCurrent(context);

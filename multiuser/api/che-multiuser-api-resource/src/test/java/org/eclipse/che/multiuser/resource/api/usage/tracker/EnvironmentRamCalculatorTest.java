@@ -12,7 +12,7 @@
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -68,7 +68,8 @@ public class EnvironmentRamCalculatorTest {
                 MACHINE_NAME_1, machineConfig1,
                 MACHINE_NAME_2, machineConfig2));
     when(environment.getRecipe()).thenReturn(recipeMock);
-    doReturn(ImmutableMap.of(MACHINE_NAME_1, machine1, MACHINE_NAME_2, machine2))
+    lenient()
+        .doReturn(ImmutableMap.of(MACHINE_NAME_1, machine1, MACHINE_NAME_2, machine2))
         .when(runtime)
         .getMachines();
   }

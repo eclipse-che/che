@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,14 +61,15 @@ public class LocalProjectsFolderPathProviderTest {
   public void setUp() throws Exception {
     WorkspaceImpl workspace = mock(WorkspaceImpl.class);
     WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
-    when(workspaceDao.get(WS_ID)).thenReturn(workspace);
-    when(workspaceDao.get(WS_NAME, WS_NAMESPACE)).thenReturn(workspace);
-    when(workspaceDao.getWorkspaces(eq(false), anyInt(), anyLong()))
+    lenient().when(workspaceDao.get(WS_ID)).thenReturn(workspace);
+    lenient().when(workspaceDao.get(WS_NAME, WS_NAMESPACE)).thenReturn(workspace);
+    lenient()
+        .when(workspaceDao.getWorkspaces(eq(false), anyInt(), anyLong()))
         .thenReturn(new Page<>(Collections.singletonList(workspace), 0, 1, 1));
-    when(workspace.getConfig()).thenReturn(workspaceConfig);
-    when(workspaceConfig.getName()).thenReturn(WS_NAME);
-    when(workspace.getNamespace()).thenReturn(WS_NAMESPACE);
-    when(workspace.getId()).thenReturn(WS_ID);
+    lenient().when(workspace.getConfig()).thenReturn(workspaceConfig);
+    lenient().when(workspaceConfig.getName()).thenReturn(WS_NAME);
+    lenient().when(workspace.getNamespace()).thenReturn(WS_NAMESPACE);
+    lenient().when(workspace.getId()).thenReturn(WS_ID);
 
     Path tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
     workspacesRoot = tempDirectory.toString();

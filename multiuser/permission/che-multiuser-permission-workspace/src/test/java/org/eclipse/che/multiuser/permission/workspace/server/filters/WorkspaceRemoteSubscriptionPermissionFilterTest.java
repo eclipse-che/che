@@ -18,7 +18,10 @@ import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
@@ -82,9 +85,12 @@ public class WorkspaceRemoteSubscriptionPermissionFilterTest {
           "The current user doesn't have permissions to listen to the specified workspace events")
   public void shouldThrowExceptionIfUserDoesNotHaveRunNorUsePermissions() throws Exception {
     // given
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN)).thenReturn(false);
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE))
-        .thenReturn(false);
+    doReturn(false)
+        .when(subject)
+        .hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN);
+    doReturn(false)
+        .when(subject)
+        .hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE);
 
     // when
     permissionFilter.check("ignored", ImmutableMap.of("workspaceId", "ws123"));
@@ -95,34 +101,42 @@ public class WorkspaceRemoteSubscriptionPermissionFilterTest {
       expectedExceptionsMessageRegExp = "Workspace id must be specified in scope")
   public void shouldThrowExceptionIfWorkspaceIdIsMissing() throws Exception {
     // given
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN))
-        .thenReturn(false);
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE))
-        .thenReturn(false);
+    doReturn(false)
+        .when(subject)
+        .hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN);
+    doReturn(false)
+        .when(subject)
+        .hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE);
 
     // when
     permissionFilter.check("ignored", Collections.emptyMap());
   }
 
   @Test
-  public void shouldDoNothingIfUserDoesNotHaveRunPermissions() throws Exception {
+  public void shouldDoNothingIfUserHasAtLeastRunPermission() throws Exception {
     // given
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN))
-        .thenReturn(true);
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE))
-        .thenReturn(false);
+    lenient()
+        .doReturn(false)
+        .when(subject)
+        .hasPermission(eq(WorkspaceDomain.DOMAIN_ID), any(), any());
+    doReturn(true)
+        .when(subject)
+        .hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN);
 
     // when
     permissionFilter.check("ignored", ImmutableMap.of("workspaceId", "ws123"));
   }
 
   @Test
-  public void shouldDoNothingIfUserDoesNotHaveUsePermissions() throws Exception {
+  public void shouldDoNothingIfUserHasAtLeastUsePermission() throws Exception {
     // given
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.RUN))
-        .thenReturn(false);
-    when(subject.hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE))
-        .thenReturn(true);
+    lenient()
+        .doReturn(false)
+        .when(subject)
+        .hasPermission(eq(WorkspaceDomain.DOMAIN_ID), any(), any());
+    doReturn(true)
+        .when(subject)
+        .hasPermission(WorkspaceDomain.DOMAIN_ID, "ws123", WorkspaceDomain.USE);
 
     // when
     permissionFilter.check("ignored", ImmutableMap.of("workspaceId", "ws123"));

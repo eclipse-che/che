@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -145,8 +145,8 @@ public class DockerAbandonedResourcesCleanerTest {
         .thenReturn(
             ImmutableMap.of(
                 Labels.LABEL_MACHINE_NAME, machineName1, Labels.LABEL_WORKSPACE_ID, workspaceId1));
-    when(container1.getStatus()).thenReturn(RUNNING_STATUS);
-    when(container1.getId()).thenReturn(containerId1);
+    lenient().when(container1.getStatus()).thenReturn(RUNNING_STATUS);
+    lenient().when(container1.getId()).thenReturn(containerId1);
 
     when(container2.getNames()).thenReturn(new String[] {containerName2});
     when(container2.getLabels())
@@ -164,19 +164,19 @@ public class DockerAbandonedResourcesCleanerTest {
     when(container3.getStatus()).thenReturn(RUNNING_STATUS);
     when(container3.getId()).thenReturn(containerId3);
 
-    when(dockerConnector.getNetworks(any())).thenReturn(networks);
+    lenient().when(dockerConnector.getNetworks(any())).thenReturn(networks);
 
-    when(abandonedNetwork.getId()).thenReturn(abandonedNetworkId);
-    when(usedNetwork.getId()).thenReturn(usedNetworkId);
-    when(additionalNetwork.getId()).thenReturn(abandonedNetworkId);
+    lenient().when(abandonedNetwork.getId()).thenReturn(abandonedNetworkId);
+    lenient().when(usedNetwork.getId()).thenReturn(usedNetworkId);
+    lenient().when(additionalNetwork.getId()).thenReturn(abandonedNetworkId);
 
-    when(abandonedNetwork.getName()).thenReturn(abandonedNetworkName);
-    when(usedNetwork.getName()).thenReturn(usedNetworkName);
-    when(additionalNetwork.getName()).thenReturn(abandonedNetworkName);
+    lenient().when(abandonedNetwork.getName()).thenReturn(abandonedNetworkName);
+    lenient().when(usedNetwork.getName()).thenReturn(usedNetworkName);
+    lenient().when(additionalNetwork.getName()).thenReturn(abandonedNetworkName);
 
     //          when(abandonedNetwork.getContainers()).thenReturn(abandonedNetworkContainers);
-    when(usedNetwork.getContainers()).thenReturn(usedNetworkContainers);
-    when(additionalNetwork.getContainers()).thenReturn(additionalNetworkContainers);
+    lenient().when(usedNetwork.getContainers()).thenReturn(usedNetworkContainers);
+    lenient().when(additionalNetwork.getContainers()).thenReturn(additionalNetworkContainers);
   }
 
   @Test
@@ -305,7 +305,8 @@ public class DockerAbandonedResourcesCleanerTest {
   @Test
   public void shouldRemoveAbandonedNetworkEvenIfRemovingOfPreviousOneFailed() throws IOException {
     // given
-    doThrow(new IOException("Failed to remove docker network"))
+    lenient()
+        .doThrow(new IOException("Failed to remove docker network"))
         .when(dockerConnector)
         .removeNetwork(usedNetworkId);
 

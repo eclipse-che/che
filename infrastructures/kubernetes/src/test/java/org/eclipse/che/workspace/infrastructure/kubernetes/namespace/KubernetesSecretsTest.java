@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -70,8 +71,8 @@ public class KubernetesSecretsTest {
     when(clientFactory.create("workspace123")).thenReturn(client);
 
     when(client.secrets()).thenReturn(secretsMixedOperation);
-    when(secretsMixedOperation.inNamespace(any())).thenReturn(nonNamespaceOperation);
-    when(nonNamespaceOperation.withLabel(any(), any())).thenReturn(deletableList);
+    lenient().when(secretsMixedOperation.inNamespace(any())).thenReturn(nonNamespaceOperation);
+    lenient().when(nonNamespaceOperation.withLabel(any(), any())).thenReturn(deletableList);
   }
 
   @Test

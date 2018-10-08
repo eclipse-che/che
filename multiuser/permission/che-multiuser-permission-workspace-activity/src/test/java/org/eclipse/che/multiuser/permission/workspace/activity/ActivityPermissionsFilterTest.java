@@ -61,11 +61,6 @@ public class ActivityPermissionsFilterTest {
 
   @Test
   public void shouldCheckPermissionsOnGettingMachineById() throws Exception {
-
-    when(subject.hasPermission(
-            eq(WorkspaceDomain.DOMAIN_ID), eq("workspace123"), eq(WorkspaceDomain.USE)))
-        .thenReturn(true);
-
     final Response response =
         given()
             .auth()
@@ -80,10 +75,6 @@ public class ActivityPermissionsFilterTest {
 
   @Test
   public void shouldThrowExceptionWhenUpdatingNotOwnedWorkspace() throws Exception {
-
-    when(subject.hasPermission(
-            eq(WorkspaceDomain.DOMAIN_ID), eq("workspace123"), eq(WorkspaceDomain.USE)))
-        .thenReturn(false);
     doThrow(
             new ForbiddenException(
                 "The user does not have permission to "

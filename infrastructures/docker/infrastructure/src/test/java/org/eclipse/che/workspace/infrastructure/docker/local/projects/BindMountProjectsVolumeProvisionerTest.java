@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
 import static java.util.Collections.singletonMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -70,7 +71,8 @@ public class BindMountProjectsVolumeProvisionerTest {
     dockerEnvironment.getContainers().put(MACHINE_2_NAME, new DockerContainerConfig());
     dockerEnvironment.getContainers().put(MACHINE_3_NAME, new DockerContainerConfig());
     // doesn't influence volumes
-    when(machine1.getServers())
+    lenient()
+        .when(machine1.getServers())
         .thenReturn(
             Collections.singletonMap(
                 Constants.SERVER_WS_AGENT_HTTP_REFERENCE,
