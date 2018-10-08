@@ -7,9 +7,9 @@
           </md-tab-label>
           <md-tab-body>
             <div layout="row" flex>
-              <ui-codemirror flex class="workspace-editor"
+              <textarea flex class="workspace-editor"
                              ui-codemirror="exportWorkspaceDialogController.editorOptions"
-                             ng-model="exportWorkspaceDialogController.exportConfigContent"></ui-codemirror>
+                             ng-model="exportWorkspaceDialogController.exportConfigContent"></textarea>
             </div>
             <div layout="row" layout-align="end end">
               <che-button-default che-button-title="download"

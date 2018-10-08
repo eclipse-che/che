@@ -276,10 +276,17 @@ else
 
 fi
 
+DEFAULT_WSAGENT_DEBUG=false
+WSAGENT_DEBUG=${WSAGENT_DEBUG:-${DEFAULT_WSAGENT_DEBUG}}
 
+if [ "${WSAGENT_DEBUG}" = true ]; then
+   export DEFAULT_WSAGENT_DEBUG_PORT="4403"
+   export JPDA_ADDRESS=${WSAGENT_DEBUG_PORT:-${DEFAULT_WSAGENT_DEBUG_PORT}}
 
-###############################################
-### ws-agent run command will be added here ###
-### ~/che/ws-agent/bin/catalina.sh run      ###
-###############################################
-export JPDA_ADDRESS="4403" && ~/che/ws-agent/bin/catalina.sh jpda run
+   export DEFAULT_WSAGENT_DEBUG_SUSPEND="n"
+   export JPDA_SUSPEND=${WSAGENT_DEBUG_SUSPEND:-${DEFAULT_WSAGENT_DEBUG_SUSPEND}}
+
+   ~/che/ws-agent/bin/catalina.sh jpda run
+else
+   ~/che/ws-agent/bin/catalina.sh run
+fi

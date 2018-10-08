@@ -22,10 +22,14 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
-import org.eclipse.che.api.workspace.shared.dto.BrokerStatusChangedEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.BrokerLogEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.BrokerStatusChangedEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 
 /**
@@ -44,6 +48,7 @@ public class BrokerService {
 
   public static final String BROKER_RESULT_METHOD = "broker/result";
   public static final String BROKER_STATUS_CHANGED_METHOD = "broker/statusChanged";
+  public static final String BROKER_LOG_METHOD = "broker/log";
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final EventService eventService;
@@ -68,12 +73,28 @@ public class BrokerService {
         .paramsAsDto(BrokerStatusChangedEvent.class)
         .noResult()
         .withConsumer(this::handle);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(BROKER_LOG_METHOD)
+        .paramsAsDto(BrokerLogEvent.class)
+        .noResult()
+        .withConsumer(this::handle);
+  }
+
+  private void handle(BrokerLogEvent brokerLogEvent) {
+    eventService.publish(
+        DtoFactory.newDto(RuntimeLogEvent.class)
+            .withRuntimeId(brokerLogEvent.getRuntimeId())
+            .withText(brokerLogEvent.getText())
+            .withTime(brokerLogEvent.getTime()));
   }
 
   private void handle(BrokerStatusChangedEvent event) {
     // Tooling has fields that can't be parsed by DTO and JSON_RPC framework works with DTO only
     String encodedTooling = event.getTooling();
-    if (event.getStatus() == null || event.getWorkspaceId() == null) {
+    RuntimeIdentity runtimeId = event.getRuntimeId();
+    if (event.getStatus() == null || runtimeId == null || runtimeId.getWorkspaceId() == null) {
       LOG.error("Broker event skipped due to illegal content: {}", event);
       return;
     }

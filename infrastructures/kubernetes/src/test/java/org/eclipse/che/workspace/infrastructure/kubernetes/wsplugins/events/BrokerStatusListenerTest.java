@@ -18,10 +18,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.shared.dto.BrokerStatus;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -43,13 +45,28 @@ public class BrokerStatusListenerTest {
 
   @BeforeMethod
   public void setUp() {
-    brokerStatusListener = new BrokerStatusListener(WORKSPACE_ID, finishFuture);
+    brokerStatusListener =
+        new BrokerStatusListener(
+            WORKSPACE_ID, new KubernetesPluginsToolingValidator(), finishFuture);
   }
 
   @Test
   public void shouldDoNothingIfEventWithForeignWorkspaceIdIsReceived() {
     // given
-    BrokerEvent event = new BrokerEvent().withWorkspaceId("foreignWorkspace");
+    BrokerEvent event =
+        new BrokerEvent().withRuntimeId(new RuntimeIdentityImpl("foreignWorkspace", null, null));
+
+    // when
+    brokerStatusListener.onEvent(event);
+
+    // then
+    verifyNoMoreInteractions(finishFuture);
+  }
+
+  @Test
+  public void shouldDoNothingIfEventWithoutRuntimeIdentityIsReceived() {
+    // given
+    BrokerEvent event = new BrokerEvent().withRuntimeId(null);
 
     // when
     brokerStatusListener.onEvent(event);
@@ -63,7 +80,7 @@ public class BrokerStatusListenerTest {
     // given
     BrokerEvent event =
         new BrokerEvent()
-            .withWorkspaceId(WORKSPACE_ID)
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
             .withStatus(BrokerStatus.DONE)
             .withTooling(emptyList());
 
@@ -79,7 +96,7 @@ public class BrokerStatusListenerTest {
     // given
     BrokerEvent event =
         new BrokerEvent()
-            .withWorkspaceId(WORKSPACE_ID)
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
             .withStatus(BrokerStatus.DONE)
             .withTooling(null);
 
@@ -95,7 +112,7 @@ public class BrokerStatusListenerTest {
     // given
     BrokerEvent event =
         new BrokerEvent()
-            .withWorkspaceId(WORKSPACE_ID)
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
             .withStatus(BrokerStatus.FAILED)
             .withError("error");
 

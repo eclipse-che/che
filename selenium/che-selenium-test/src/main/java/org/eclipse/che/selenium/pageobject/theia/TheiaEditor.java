@@ -15,11 +15,14 @@ import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.ACTIVE_LINE_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.EDITOR_LINE_BY_INDEX_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.EDITOR_LINE_BY_PIXEL_COORDINATES_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.EDITOR_LINE_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.EDITOR_TAB_XPATH_TEMPLATE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -46,6 +49,9 @@ public class TheiaEditor {
         "//div[@data-mode-id='plaintext']//span[@class='mtk1']/parent::span/parent::div";
     String ACTIVE_LINE_XPATH =
         "//div[@data-mode-id='plaintext']//div[contains(@class, 'monaco-editor') and contains(@class, 'focused')]";
+    String EDITOR_LINE_BY_INDEX_XPATH_TEMPLATE = "(" + EDITOR_LINE_XPATH + ")[%s]";
+    String EDITOR_LINE_BY_PIXEL_COORDINATES_XPATH_TEMPLATE =
+        "//div[@data-mode-id='plaintext']//div[contains(@style, 'top:%spx;')]//span[@class='mtk1']/parent::span/parent::div";
   }
 
   public void waitActiveEditor() {
@@ -96,18 +102,51 @@ public class TheiaEditor {
   }
 
   public List<String> getEditorText() {
-    List<WebElement> editorLinesElements =
-        seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(EDITOR_LINE_XPATH));
+    // In this realization each line element will be found exactly before using
+    // This realization allows us to avoid "StaleElementReferenceException"
+    final int editorLinesCount =
+        seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(EDITOR_LINE_XPATH)).size();
 
-    editorLinesElements.sort(
-        (firstElement, secondElement) ->
-            getEditorLinePixelCoordinate(firstElement)
-                - getEditorLinePixelCoordinate(secondElement));
+    List<Integer> linePixelCoordinates = getEditorLinePixelCoordinates(editorLinesCount);
 
-    return editorLinesElements
-        .stream()
-        .map(element -> seleniumWebDriverHelper.waitVisibilityAndGetText(element))
-        .collect(Collectors.toList());
+    List<String> linesText =
+        linePixelCoordinates
+            .stream()
+            .map(
+                linePixelCoordinate -> {
+                  String lineByPixelCoordinatesXpath =
+                      getEditorLineByPixelCoordinateXpath(linePixelCoordinate);
+                  return seleniumWebDriverHelper.waitVisibilityAndGetText(
+                      By.xpath(lineByPixelCoordinatesXpath));
+                })
+            .collect(Collectors.toList());
+
+    return linesText;
+  }
+
+  private String getEditorLineByPixelCoordinateXpath(int pixelCoordinate) {
+    return format(EDITOR_LINE_BY_PIXEL_COORDINATES_XPATH_TEMPLATE, pixelCoordinate);
+  }
+
+  private String getEditorLineByIndexXpath(int lineIndex) {
+    return format(EDITOR_LINE_BY_INDEX_XPATH_TEMPLATE, lineIndex);
+  }
+
+  private List<Integer> getEditorLinePixelCoordinates(int editorLinesCount) {
+    List<Integer> result = new ArrayList<>();
+
+    for (int i = 1; i <= editorLinesCount; i++) {
+      String editorLineXpath = getEditorLineByIndexXpath(i);
+      int linePixelCoordinate =
+          getEditorLinePixelCoordinate(
+              seleniumWebDriverHelper.waitVisibility(By.xpath(editorLineXpath)));
+      result.add(linePixelCoordinate);
+    }
+
+    // should be sorted by coordinates because found lines may be mixed by indexes
+    // and don't match with their expected places
+    result.sort((first, second) -> first - second);
+    return result;
   }
 
   public String getEditorTextAsString() {

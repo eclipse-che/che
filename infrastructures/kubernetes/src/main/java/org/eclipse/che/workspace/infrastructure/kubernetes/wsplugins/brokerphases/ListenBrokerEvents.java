@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerStatusListener;
 
@@ -34,19 +35,22 @@ public class ListenBrokerEvents extends BrokerPhase {
   private final String workspaceId;
   private final CompletableFuture<List<ChePlugin>> toolingFuture;
   private final EventService eventService;
+  private final KubernetesPluginsToolingValidator pluginsValidator;
 
   public ListenBrokerEvents(
       String workspaceId,
+      KubernetesPluginsToolingValidator pluginsValidator,
       CompletableFuture<List<ChePlugin>> toolingFuture,
       EventService eventService) {
     this.workspaceId = workspaceId;
+    this.pluginsValidator = pluginsValidator;
     this.toolingFuture = toolingFuture;
     this.eventService = eventService;
   }
 
   public List<ChePlugin> execute() throws InfrastructureException {
     BrokerStatusListener brokerStatusListener =
-        new BrokerStatusListener(workspaceId, toolingFuture);
+        new BrokerStatusListener(workspaceId, pluginsValidator, toolingFuture);
     try {
       eventService.subscribe(brokerStatusListener, BrokerEvent.class);
 

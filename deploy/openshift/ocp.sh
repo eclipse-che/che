@@ -318,6 +318,7 @@ parse_args() {
            ;;
            --no-pull)
                export IMAGE_PULL_POLICY=IfNotPresent
+               export CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY=IfNotPresent
                shift
            ;;
            --rolling)

@@ -12,36 +12,44 @@
 package org.eclipse.che.api.workspace.server.event;
 
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.RUNTIME_LOG_METHOD;
 
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 
 /**
- * Register subscriber on {@link MachineLogEvent machine log event} for resending this type of event
+ * Register subscriber on {@link RuntimeLogEvent runtime log event} for resending this type of event
  * via JSON-RPC to clients.
  *
- * @author Anton Korneta
+ * @author Sergii Leshchenko
  */
 @Singleton
-public class MachineLogJsonRpcMessenger {
+public class RuntimeLogJsonRpcMessenger {
 
   private final RemoteSubscriptionManager subscriptionManager;
 
   @Inject
-  public MachineLogJsonRpcMessenger(RemoteSubscriptionManager subscriptionManager) {
+  public RuntimeLogJsonRpcMessenger(RemoteSubscriptionManager subscriptionManager) {
     this.subscriptionManager = subscriptionManager;
   }
 
   @PostConstruct
   private void postConstruct() {
-    subscriptionManager.register(MACHINE_LOG_METHOD, MachineLogEvent.class, this::predicate);
+    subscriptionManager.register(RUNTIME_LOG_METHOD, RuntimeLogEvent.class, this::predicate);
+    subscriptionManager.register(
+        MACHINE_LOG_METHOD, RuntimeLogEvent.class, this::predicateMachineLog);
   }
 
-  private boolean predicate(MachineLogEvent event, Map<String, String> scope) {
+  private boolean predicate(RuntimeLogEvent event, Map<String, String> scope) {
     return event.getRuntimeId().getWorkspaceId().equals(scope.get("workspaceId"));
+  }
+
+  private boolean predicateMachineLog(RuntimeLogEvent event, Map<String, String> scope) {
+    return event.getMachineName() != null
+        && event.getRuntimeId().getWorkspaceId().equals(scope.get("workspaceId"));
   }
 }

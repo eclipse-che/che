@@ -48,6 +48,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   private final int pluginBrokerWaitingTimeout;
   private final KubernetesNamespaceFactory factory;
   private final EventService eventService;
+  private final KubernetesPluginsToolingValidator pluginsValidator;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final BrokerEnvironmentFactory<E> brokerEnvironmentFactory;
   private final KubernetesEnvironmentProvisioner<E> environmentProvisioner;
@@ -57,6 +58,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   public PluginBrokerManager(
       KubernetesNamespaceFactory factory,
       EventService eventService,
+      KubernetesPluginsToolingValidator pluginsValidator,
       KubernetesEnvironmentProvisioner<E> environmentProvisioner,
       WorkspaceVolumesStrategy volumesStrategy,
       BrokerEnvironmentFactory<E> brokerEnvironmentFactory,
@@ -64,6 +66,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       @Named("che.workspace.plugin_broker.wait_timeout_min") int pluginBrokerWaitingTimeout) {
     this.factory = factory;
     this.eventService = eventService;
+    this.pluginsValidator = pluginsValidator;
     this.volumesStrategy = volumesStrategy;
     this.brokerEnvironmentFactory = brokerEnvironmentFactory;
     this.environmentProvisioner = environmentProvisioner;
@@ -102,7 +105,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
 
   private ListenBrokerEvents getListenEventPhase(
       String workspaceId, CompletableFuture<List<ChePlugin>> toolingFuture) {
-    return new ListenBrokerEvents(workspaceId, toolingFuture, eventService);
+    return new ListenBrokerEvents(workspaceId, pluginsValidator, toolingFuture, eventService);
   }
 
   private PrepareStorage getPrepareStoragePhase(

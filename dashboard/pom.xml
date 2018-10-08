@@ -17,12 +17,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.13.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.dashboard</groupId>
     <artifactId>che-dashboard-war</artifactId>
-    <version>6.12.0-SNAPSHOT</version>
+    <version>6.13.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Che Dashboard :: Web App</name>
     <inceptionYear>2015</inceptionYear>
@@ -66,39 +66,6 @@
                         <exclude>src/app/colors/che-output-colors.constant.ts</exclude>
                         <exclude>src/app/proxy/proxy-settings.constant.ts</exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>.</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <configuration>
-                    <includePom>true</includePom>
-                    <includes>
-                        <include>e2e/**/*</include>
-                        <include>gulp/**/*</include>
-                        <include>src/**/*</include>
-                        <include>*.json</include>
-                        <include>*.js</include>
-                        <include>.*</include>
-                    </includes>
                 </configuration>
             </plugin>
         </plugins>
@@ -179,10 +146,6 @@
                         <configuration>
                             <filesets>
                                 <fileset>
-                                    <directory>${basedir}/bower_components</directory>
-                                    <followSymlinks>false</followSymlinks>
-                                </fileset>
-                                <fileset>
                                     <directory>${basedir}/node_modules</directory>
                                     <followSymlinks>false</followSymlinks>
                                 </fileset>
@@ -192,6 +155,22 @@
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
+                          <execution>
+                            <id>install-yarn</id>
+                            <phase>compile</phase>
+                            <goals>
+                              <goal>run</goal>
+                            </goals>
+                            <configuration>
+                              <target>
+                                <!-- install yarn -->
+                                <exec dir="${basedir}" executable="npm" failonerror="true">
+                                  <arg value="install" />
+                                  <arg value="yarn" />
+                                </exec>
+                              </target>
+                            </configuration>
+                          </execution>
                             <execution>
                                 <id>build-dashboard</id>
                                 <phase>compile</phase>
@@ -201,7 +180,7 @@
                                 <configuration>
                                     <target>
                                         <!-- build user dashboard -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <exec dir="${basedir}" executable="node_modules/yarn/bin/yarn" failonerror="true">
                                             <arg value="install" />
                                         </exec>
                                         <!-- Change base HREF of the application that will be hosted on /dashboard -->
@@ -221,7 +200,7 @@
                                 <configuration>
                                     <target unless="skipTests">
                                         <!-- Run unit tests -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <exec dir="${basedir}" executable="node_modules/yarn/bin/yarn" failonerror="true">
                                             <arg value="run" />
                                             <arg value="test" />
                                         </exec>

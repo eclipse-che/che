@@ -16,7 +16,6 @@ import {ApiConfig} from './api/che-api-config';
 import {AttributeConfig} from './attribute/attribute-config';
 import {FilterConfig} from './filter/filter-config';
 import {CheBrandingConfig} from './branding/che-branding-config';
-import {CodeMirrorConstant} from './codemirror/codemirror';
 import {GitHubService} from './github/github-service';
 import {CheIdeFetcherConfig} from './ide-fetcher/che-ide-fetcher-config';
 import {CheNotificationConfig} from './notification/che-notification-config';
@@ -38,7 +37,6 @@ export class ComponentsConfig {
     new AttributeConfig(register);
     new FilterConfig(register);
     new CheBrandingConfig(register);
-    new CodeMirrorConstant(register);
     new GitHubService(register);
     new CheIdeFetcherConfig(register);
     new CheNotificationConfig(register);

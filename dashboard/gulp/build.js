@@ -17,7 +17,7 @@ var gulp = require('gulp');
 var conf = require('./conf');
 
 var $ = require('gulp-load-plugins')({
-  pattern: ['gulp-*', 'main-bower-files', 'uglify-save-license', 'del']
+  pattern: ['gulp-*', 'uglify-save-license', 'del']
 });
 
 var minimist = require('minimist');
@@ -68,7 +68,6 @@ gulp.task('html', ['inject', 'partials'], function () {
     .pipe(jsFilter.restore)
     .pipe(cssFilter)
     .pipe($.sourcemaps.init())
-    .pipe($.replace('../../bower_components/material-design-iconfont/iconfont/', '../fonts/'))
     .pipe($.minifyCss({ processImport: false }))
     .pipe($.sourcemaps.write('maps'))
     .pipe(cssFilter.restore)
@@ -111,7 +110,10 @@ gulp.task('existingfonts', function () {
 });
 
 gulp.task('fonts', ['colors', 'outputcolors', 'proxySettings', 'existingfonts'], function () {
-  return gulp.src($.mainBowerFiles().concat('bower_components/material-design-iconfont/iconfont/*'))
+  return gulp.src([
+    'node_modules/material-design-iconfont/iconfont/*',
+    'node_modules/font-awesome/fonts/*'
+  ])
     .pipe($.filter('**/*.{eot,svg,ttf,woff,woff2}'))
     .pipe($.flatten())
     .pipe(gulp.dest(path.join(conf.paths.dist, '/fonts/')));

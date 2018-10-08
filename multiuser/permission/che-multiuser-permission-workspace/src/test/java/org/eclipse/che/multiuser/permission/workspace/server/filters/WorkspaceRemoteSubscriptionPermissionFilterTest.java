@@ -16,12 +16,14 @@ import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHO
 import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.RUNTIME_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
@@ -68,15 +70,17 @@ public class WorkspaceRemoteSubscriptionPermissionFilterTest {
     permissionFilter.register(permissionManager);
 
     // then
-    permissionManager.registerCheck(
-        permissionFilter,
-        WORKSPACE_STATUS_CHANGED_METHOD,
-        MACHINE_STATUS_CHANGED_METHOD,
-        SERVER_STATUS_CHANGED_METHOD,
-        MACHINE_LOG_METHOD,
-        INSTALLER_LOG_METHOD,
-        INSTALLER_STATUS_CHANGED_METHOD,
-        BOOTSTRAPPER_STATUS_CHANGED_METHOD);
+    verify(permissionManager)
+        .registerCheck(
+            permissionFilter,
+            WORKSPACE_STATUS_CHANGED_METHOD,
+            MACHINE_STATUS_CHANGED_METHOD,
+            SERVER_STATUS_CHANGED_METHOD,
+            RUNTIME_LOG_METHOD,
+            MACHINE_LOG_METHOD,
+            INSTALLER_LOG_METHOD,
+            INSTALLER_STATUS_CHANGED_METHOD,
+            BOOTSTRAPPER_STATUS_CHANGED_METHOD);
   }
 
   @Test(
