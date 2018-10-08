@@ -129,10 +129,7 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.selectNodeInFindUsagesByDoubleClick(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
-    findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
-    findUsages.selectNodeInFindUsagesPanel("AppController");
-    findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
 
     // Check nodes in the Find Usages panel by click on node icon
     findUsages.clickOnIconNodeInFindUsagesPanel(
