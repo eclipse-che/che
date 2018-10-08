@@ -28,6 +28,7 @@ function webpackWrapper(watch, test, callback) {
     resolve: {extensions: ['', '.ts', '.js', '.styl']},
     watch: watch,
     module: {
+      noParse: [/angular-websocket/, /jsonlint/],
       loaders: [
         {
           test: /\.ts$/,
@@ -36,11 +37,11 @@ function webpackWrapper(watch, test, callback) {
         },
         {
           test: /\.css$/,
-          use: ['style-loader', 'css-loader']
+          loaders: ['style-loader', 'css-loader']
         },
         {
           test: /\.styl$/,
-          use: [
+          loaders: [
             'style-loader',
             'css-loader',
             {
@@ -54,25 +55,16 @@ function webpackWrapper(watch, test, callback) {
         },
         {
           test: /\.(svg|woff|woff2|ttf|eot|ico)$/,
-          use: [
-            {
-              loader: 'file-loader'
-            }
-          ]
-        },
-        {
+          loader: 'file-loader'
+        }, {
           test: /\.html$/,
-          use: [
+          loaders: ['html-loader',
             {
               loader: 'ngtemplate-loader',
               options: {
                 angular: true
               }
-            },
-            {
-              loader: 'html-loader'
-            }
-          ]
+            }]
         }
       ]
     },
