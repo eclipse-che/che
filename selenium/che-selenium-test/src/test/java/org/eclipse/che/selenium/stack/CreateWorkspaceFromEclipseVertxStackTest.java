@@ -75,7 +75,7 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromEclipseVertxStack() throws Exception {
+  public void checkWorkspaceCreationFromEclipseVertxStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             ECLIPSE_VERTX, WORKSPACE_NAME, projects);

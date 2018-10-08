@@ -70,7 +70,7 @@ public class CreateWorkspaceFromPHPStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromPHPStack() throws Exception {
+  public void checkWorkspaceCreationFromPHPStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(PHP, WORKSPACE_NAME, projects);
 

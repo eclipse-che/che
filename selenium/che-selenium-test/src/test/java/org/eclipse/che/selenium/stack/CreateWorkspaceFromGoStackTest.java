@@ -65,7 +65,7 @@ public class CreateWorkspaceFromGoStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromGoStack() throws Exception {
+  public void checkWorkspaceCreationFromGoStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(GO, WORKSPACE_NAME, projects);
 

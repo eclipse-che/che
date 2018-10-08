@@ -72,7 +72,7 @@ public class ImportMavenProjectFromGitTest {
   }
 
   @Test
-  public void checkAbilityImportMavenProjectTest() throws Exception {
+  public void checkAbilityImportMavenProjectTest() {
     testProjectName = testRepo.getName();
 
     dashboard.waitDashboardToolbarTitle();

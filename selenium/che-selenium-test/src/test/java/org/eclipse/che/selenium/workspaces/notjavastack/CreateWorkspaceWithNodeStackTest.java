@@ -57,7 +57,7 @@ public class CreateWorkspaceWithNodeStackTest {
   }
 
   @Test
-  public void createWorkspaceWithNodeStackTest() throws Exception {
+  public void createWorkspaceWithNodeStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(NODE, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

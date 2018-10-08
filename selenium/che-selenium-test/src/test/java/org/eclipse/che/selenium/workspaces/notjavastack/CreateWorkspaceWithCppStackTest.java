@@ -57,7 +57,7 @@ public class CreateWorkspaceWithCppStackTest {
   }
 
   @Test
-  public void createWorkspaceWithCppStackTest() throws Exception {
+  public void createWorkspaceWithCppStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(CPP, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

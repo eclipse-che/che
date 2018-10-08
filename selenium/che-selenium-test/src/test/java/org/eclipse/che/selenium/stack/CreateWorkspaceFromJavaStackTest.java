@@ -78,7 +78,7 @@ public class CreateWorkspaceFromJavaStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaStack() throws Exception {
+  public void checkWorkspaceCreationFromJavaStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(JAVA, WORKSPACE_NAME, projects);
 

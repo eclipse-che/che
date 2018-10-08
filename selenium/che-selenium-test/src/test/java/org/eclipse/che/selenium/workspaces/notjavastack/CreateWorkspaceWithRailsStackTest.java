@@ -57,7 +57,7 @@ public class CreateWorkspaceWithRailsStackTest {
   }
 
   @Test
-  public void createWorkspaceWithRailsStackTest() throws Exception {
+  public void createWorkspaceWithRailsStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(RAILS, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

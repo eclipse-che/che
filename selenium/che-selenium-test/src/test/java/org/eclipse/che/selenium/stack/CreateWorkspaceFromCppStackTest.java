@@ -63,7 +63,7 @@ public class CreateWorkspaceFromCppStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromCppStack() throws Exception {
+  public void checkWorkspaceCreationFromCppStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(CPP, WORKSPACE_NAME, projects);
 

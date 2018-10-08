@@ -74,7 +74,7 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaMySqlCentosStack() throws Exception {
+  public void checkWorkspaceCreationFromJavaMySqlCentosStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             JAVA_MYSQL_CENTOS, WORKSPACE_NAME, WEB_JAVA_PROJECT);

@@ -49,7 +49,7 @@ public class CreateWorkspaceFromKotlinStackTest {
   }
 
   @Test
-  public void createWorkspaceFromKotlinStack() throws Exception {
+  public void createWorkspaceFromKotlinStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(KOTLIN, WORKSPACE_NAME);
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();

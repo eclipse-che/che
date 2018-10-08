@@ -81,7 +81,7 @@ public class CreateWorkspaceFromPythonStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromPythonStack() throws Exception {
+  public void checkWorkspaceCreationFromPythonStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             PYTHON, WORKSPACE_NAME, PROJECT_NAME);

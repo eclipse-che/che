@@ -71,7 +71,7 @@ public class CreateWorkspaceFromSpringBootStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromSpringBootStack() throws Exception {
+  public void checkWorkspaceCreationFromSpringBootStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             SPRING_BOOT, WORKSPACE_NAME, projects);

@@ -73,7 +73,7 @@ public class CreateWorkspaceFromJavaMySqlStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaMySqlStack() throws Exception {
+  public void checkWorkspaceCreationFromJavaMySqlStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             JAVA_MYSQL, WORKSPACE_NAME, WEB_JAVA_PROJECT);

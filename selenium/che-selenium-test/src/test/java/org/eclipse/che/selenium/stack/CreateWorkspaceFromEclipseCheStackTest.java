@@ -77,7 +77,7 @@ public class CreateWorkspaceFromEclipseCheStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaStack() throws Exception {
+  public void checkWorkspaceCreationFromJavaStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             ECLIPSE_CHE, WORKSPACE_NAME, projects);

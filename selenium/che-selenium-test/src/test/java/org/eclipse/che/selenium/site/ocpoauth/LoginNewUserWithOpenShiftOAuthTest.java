@@ -105,7 +105,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
   }
 
   @Test
-  public void checkNewCheUserOcpProjectCreationAndRemoval() throws Exception {
+  public void checkNewCheUserOcpProjectCreationAndRemoval() {
     // go to login page of Eclipse Che
     // (we can't use dashboard.open() here to login with OAuth)
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());

@@ -66,7 +66,7 @@ public class CreateWorkspaceFromRailsStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromRailsStack() throws Exception {
+  public void checkWorkspaceCreationFromRailsStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(RAILS, WORKSPACE_NAME, projects);
 

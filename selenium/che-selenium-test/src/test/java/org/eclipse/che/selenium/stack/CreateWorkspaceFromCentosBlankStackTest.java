@@ -55,7 +55,7 @@ public class CreateWorkspaceFromCentosBlankStackTest {
   }
 
   @Test
-  public void createWorkspaceFromCentosBlankStack() throws Exception {
+  public void createWorkspaceFromCentosBlankStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             CENTOS_BLANK, WORKSPACE_NAME, PROJECT_NAME);

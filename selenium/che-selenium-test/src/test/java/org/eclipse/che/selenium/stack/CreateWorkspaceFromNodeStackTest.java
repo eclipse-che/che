@@ -71,7 +71,7 @@ public class CreateWorkspaceFromNodeStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromNodeStack() throws Exception {
+  public void checkWorkspaceCreationFromNodeStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(NODE, WORKSPACE_NAME, projects);
 

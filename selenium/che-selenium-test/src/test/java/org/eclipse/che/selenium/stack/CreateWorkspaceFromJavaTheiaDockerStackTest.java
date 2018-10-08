@@ -55,7 +55,7 @@ public class CreateWorkspaceFromJavaTheiaDockerStackTest {
   }
 
   @Test
-  public void createWorkspaceFromJavaTheiaDockerStack() throws Exception {
+  public void createWorkspaceFromJavaTheiaDockerStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
             JAVA_THEIA_DOCKER, WORKSPACE_NAME);

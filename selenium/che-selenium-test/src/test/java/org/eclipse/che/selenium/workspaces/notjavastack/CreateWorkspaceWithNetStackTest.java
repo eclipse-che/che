@@ -57,7 +57,7 @@ public class CreateWorkspaceWithNetStackTest {
   }
 
   @Test
-  public void createWorkspaceWithNetStackTest() throws Exception {
+  public void createWorkspaceWithNetStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(DOT_NET, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

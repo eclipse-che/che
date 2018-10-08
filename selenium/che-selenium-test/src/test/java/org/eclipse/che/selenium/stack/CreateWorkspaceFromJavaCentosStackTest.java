@@ -78,7 +78,7 @@ public class CreateWorkspaceFromJavaCentosStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromJavaCentosStack() throws Exception {
+  public void checkWorkspaceCreationFromJavaCentosStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             JAVA_CENTOS, WORKSPACE_NAME, projects);

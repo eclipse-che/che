@@ -57,7 +57,7 @@ public class CreateWorkspaceWithPHPStackTest {
   }
 
   @Test
-  public void createWorkspaceWithPHPStackTest() throws Exception {
+  public void createWorkspaceWithPHPStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(PHP, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

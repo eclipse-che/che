@@ -77,7 +77,7 @@ public class CreateAndDeleteProjectsTest {
   }
 
   @Test
-  public void createAndDeleteProjectTest() throws Exception {
+  public void createAndDeleteProjectTest() {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();

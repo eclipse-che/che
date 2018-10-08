@@ -57,7 +57,7 @@ public class CreateWorkspaceWithPythonStackTest {
   }
 
   @Test
-  public void createWorkspaceWithPythonStackTest() throws Exception {
+  public void createWorkspaceWithPythonStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(PYTHON, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

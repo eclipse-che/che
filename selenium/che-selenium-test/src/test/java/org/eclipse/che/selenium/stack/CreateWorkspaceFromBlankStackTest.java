@@ -55,7 +55,7 @@ public class CreateWorkspaceFromBlankStackTest {
   }
 
   @Test
-  public void createWorkspaceFromBlankStackTest() throws Exception {
+  public void createWorkspaceFromBlankStackTest() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             BLANK, WORKSPACE_NAME, PROJECT_NAME);

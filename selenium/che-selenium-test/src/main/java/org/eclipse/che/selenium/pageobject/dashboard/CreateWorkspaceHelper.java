@@ -35,28 +35,30 @@ public class CreateWorkspaceHelper {
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
 
   public TestWorkspace createWorkspaceFromStackWithProject(
-      NewWorkspace.Stack stack, String workspaceName, String projectName) throws Exception {
+      NewWorkspace.Stack stack, String workspaceName, String projectName) {
     return createWorkspaceFromStack(stack, workspaceName, ImmutableList.of(projectName), null);
   }
 
   public TestWorkspace createWorkspaceFromStackWithoutProject(
-      NewWorkspace.Stack stack, String workspaceName) throws Exception {
+      NewWorkspace.Stack stack, String workspaceName) {
     return createWorkspaceFromStack(stack, workspaceName, Collections.emptyList(), null);
   }
 
   public TestWorkspace createWorkspaceFromStack(
-      NewWorkspace.Stack stack, String workspaceName, Double machineRam) throws Exception {
+      NewWorkspace.Stack stack, String workspaceName, Double machineRam) {
     return createWorkspaceFromStack(stack, workspaceName, Collections.emptyList(), machineRam);
   }
 
   public TestWorkspace createWorkspaceFromStackWithProjects(
-      NewWorkspace.Stack stack, String workspaceName, List<String> projectNames) throws Exception {
+      NewWorkspace.Stack stack, String workspaceName, List<String> projectNames) {
     return createWorkspaceFromStack(stack, workspaceName, projectNames, null);
   }
 
   public TestWorkspace createWorkspaceFromStack(
-      NewWorkspace.Stack stack, String workspaceName, List<String> projectNames, Double machineRam)
-      throws Exception {
+      NewWorkspace.Stack stack,
+      String workspaceName,
+      List<String> projectNames,
+      Double machineRam) {
     prepareWorkspace(stack, workspaceName, machineRam);
 
     projectSourcePage.clickOnAddOrImportProjectButton();

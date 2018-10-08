@@ -61,7 +61,7 @@ public class CreateWorkspaceFromCentosWildFlySwarmStackTest {
   }
 
   @Test
-  public void createWorkspaceFromCentosWildFlySwarmStack() throws Exception {
+  public void createWorkspaceFromCentosWildFlySwarmStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             CENTOS_WILDFLY_SWARM, WORKSPACE_NAME, PROJECT_NAME);

@@ -91,7 +91,7 @@ public class ImportProjectFromGitHubTest {
   }
 
   @Test
-  public void checkAbilityImportProjectFromGithub() throws Exception {
+  public void checkAbilityImportProjectFromGithub() {
     testRepoName = testRepo.getName();
     projectName = String.format("%s-%s", gitHubUsername, testRepoName);
 

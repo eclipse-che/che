@@ -114,21 +114,32 @@ public class CheTestWorkspace implements TestWorkspace {
   }
 
   public CheTestWorkspace(
-      String name, TestUser owner, TestWorkspaceServiceClient testWorkspaceServiceClient)
-      throws Exception {
+      String name, TestUser owner, TestWorkspaceServiceClient testWorkspaceServiceClient) {
     this.testWorkspaceServiceClient = testWorkspaceServiceClient;
 
-    if (!testWorkspaceServiceClient.exists(name, owner.getName())) {
-      throw new IllegalArgumentException(
-          format("Workspace name='%s' owner='%s' didn't found.", name, owner.getName()));
+    try {
+      if (!testWorkspaceServiceClient.exists(name, owner.getName())) {
+        LOG.warn(format("Workspace name='%s' owner='%s' didn't found.", name, owner.getName()));
+      }
+    } catch (Exception e) {
+      LOG.warn(
+          "Failed to check existence of workspace name='{}' owner='{}'", name, owner.getName());
     }
 
-    Workspace wsConfig = testWorkspaceServiceClient.getByName(name, owner.getName());
-    this.id.set(wsConfig.getId());
+    this.future =
+        CompletableFuture.runAsync(
+            () -> {
+              try {
+                Workspace wsConfig = testWorkspaceServiceClient.getByName(name, owner.getName());
+                id.set(wsConfig.getId());
+              } catch (Exception e) {
+                LOG.warn(
+                    "Failed to obtain id of workspace name='{}' owner='{}'", name, owner.getName());
+              }
+            });
 
     this.name = name;
     this.owner = owner;
-    this.future = CompletableFuture.runAsync(() -> {});
   }
 
   @Override

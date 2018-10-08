@@ -39,7 +39,7 @@ public interface TestWorkspaceProvider {
    *
    * @param owner the workspace owner
    */
-  TestWorkspace getWorkspace(String workspaceName, TestUser owner) throws Exception;
+  TestWorkspace getWorkspace(String workspaceName, TestUser owner);
 
   /** Release all allocated resources. */
   void shutdown();

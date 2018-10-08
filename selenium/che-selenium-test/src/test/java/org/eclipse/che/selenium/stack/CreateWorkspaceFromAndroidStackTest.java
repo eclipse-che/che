@@ -67,7 +67,7 @@ public class CreateWorkspaceFromAndroidStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromAndroidStack() throws Exception {
+  public void checkWorkspaceCreationFromAndroidStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             ANDROID, WORKSPACE_NAME, projects);

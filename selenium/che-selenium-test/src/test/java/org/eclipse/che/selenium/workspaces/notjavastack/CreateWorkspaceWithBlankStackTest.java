@@ -57,7 +57,7 @@ public class CreateWorkspaceWithBlankStackTest {
   }
 
   @Test
-  public void createWorkspaceWithBlankStackTest() throws Exception {
+  public void createWorkspaceWithBlankStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(BLANK, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

@@ -59,7 +59,7 @@ public class CreateWorkspaceWithAndroidStackTest {
   }
 
   @Test
-  public void createWorkspaceWithAndroidStackTest() throws Exception {
+  public void createWorkspaceWithAndroidStackTest() {
     testWorkspace = createWorkspaceHelper.createWorkspaceFromStack(ANDROID, WORKSPACE, 2.0);
 
     dashboard.waitNotificationIsClosed();

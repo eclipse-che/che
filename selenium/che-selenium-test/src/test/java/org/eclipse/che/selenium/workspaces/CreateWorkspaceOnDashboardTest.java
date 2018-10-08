@@ -71,7 +71,7 @@ public class CreateWorkspaceOnDashboardTest {
   }
 
   @Test
-  public void createWorkspaceOnDashboardTest() throws Exception {
+  public void createWorkspaceOnDashboardTest() {
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();

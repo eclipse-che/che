@@ -62,7 +62,7 @@ public class CreateWorkspaceFromNETStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromNETStack() throws Exception {
+  public void checkWorkspaceCreationFromNETStack() {
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             DOT_NET, WORKSPACE_NAME, PROJECT_NAME);

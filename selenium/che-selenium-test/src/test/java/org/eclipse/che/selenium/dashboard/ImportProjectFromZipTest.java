@@ -72,7 +72,7 @@ public class ImportProjectFromZipTest {
   }
 
   @Test
-  public void importProjectFromZipTest() throws Exception {
+  public void importProjectFromZipTest() {
     String testRepoFullName = testRepo.getFullName();
     String zipUrl =
         String.format("%s/%s/%s", "https://github.com", testRepoFullName, "archive/master.zip");
