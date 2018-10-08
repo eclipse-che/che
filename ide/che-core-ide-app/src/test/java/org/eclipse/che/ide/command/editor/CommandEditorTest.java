@@ -173,7 +173,7 @@ public class CommandEditorTest {
     editor.doSave();
 
     verify(dialogFactory).createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class));
-    verify(commandManager, never()).updateCommand(anyString(), any(CommandImpl.class));
+    verify(commandManager, never()).updateCommand(anyString(), eq(editor.editedCommand));
   }
 
   @Test
