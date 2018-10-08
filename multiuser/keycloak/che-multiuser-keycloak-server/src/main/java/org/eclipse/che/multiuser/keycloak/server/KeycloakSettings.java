@@ -145,10 +145,8 @@ public class KeycloakSettings {
     if (oidcProvider != null) {
       settings.put(OIDC_PROVIDER_SETTING, oidcProvider);
       if (useFixedRedirectUrls) {
-        String rootUrl = cheServerEndpoint;
-        if (!rootUrl.endsWith("/")) {
-          rootUrl = rootUrl + "/";
-        }
+        String rootUrl =
+            cheServerEndpoint.endsWith("/") ? cheServerEndpoint : cheServerEndpoint + "/";
         settings.put(
             FIXED_REDIRECT_URL_FOR_DASHBOARD, rootUrl + "keycloak/oidcCallbackDashboard.html");
         settings.put(FIXED_REDIRECT_URL_FOR_IDE, rootUrl + "keycloak/oidcCallbackIde.html");

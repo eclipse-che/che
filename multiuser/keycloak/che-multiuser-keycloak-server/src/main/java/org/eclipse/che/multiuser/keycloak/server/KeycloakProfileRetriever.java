@@ -14,6 +14,7 @@ package org.eclipse.che.multiuser.keycloak.server;
 import java.io.IOException;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author David Festal <dfestal@redhat.com>
  */
+@Singleton
 public class KeycloakProfileRetriever {
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakProfileRetriever.class);
 
