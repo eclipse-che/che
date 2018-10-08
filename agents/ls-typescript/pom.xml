@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.12.1-SNAPSHOT</version>
+        <version>6.12.1</version>
     </parent>
     <artifactId>ls-typescript-agent</artifactId>
     <name>Language Server typescript Agent</name>
