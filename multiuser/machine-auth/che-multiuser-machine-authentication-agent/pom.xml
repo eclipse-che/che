@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-machine-auth</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.12.1</version>
+        <version>6.12.2-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-machine-authentication-agent</artifactId>
     <name>Che Multiuser :: Machine Authentication Agent</name>
