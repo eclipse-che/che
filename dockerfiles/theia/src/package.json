@@ -15,7 +15,8 @@
         "@theia/plugin-ext-vscode": "latest",
         "@theia/extension-manager": "latest",
         "@theia/textmate-grammars": "latest",
-        "@theia/messages": "latest"
+        "@theia/messages": "latest",
+        "@theia/debug-nodejs": "latest"
     },
     "devDependencies": {
         "@theia/cli": "latest"
