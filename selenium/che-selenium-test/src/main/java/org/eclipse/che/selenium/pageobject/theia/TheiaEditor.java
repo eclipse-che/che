@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 
 @Singleton
 public class TheiaEditor {
@@ -58,11 +57,8 @@ public class TheiaEditor {
     seleniumWebDriverHelper.waitVisibility(By.xpath(ACTIVE_LINE_XPATH));
   }
 
-  private int getEditorLinePixelCoordinate(WebElement editorLine) {
-    String containingCoordinatesAttribute = "style";
-    String styleText =
-        seleniumWebDriverHelper.waitVisibilityAndGetAttribute(
-            editorLine, containingCoordinatesAttribute);
+  private int getEditorLinePixelCoordinate(String editorLineXpath) {
+    String styleText = getEditorLineStyleAttribute(editorLineXpath);
 
     styleText = styleText.replace("top: ", "");
     styleText = styleText.replace("px; height: ", "\n");
@@ -70,6 +66,13 @@ public class TheiaEditor {
 
     int lineCoordinate = Integer.parseInt(asList(styleText.split("\n")).get(0));
     return lineCoordinate;
+  }
+
+  private String getEditorLineStyleAttribute(String editorLineXpath) {
+    final String containingCoordinatesAttribute = "style";
+
+    return seleniumWebDriverHelper.waitVisibilityAndGetAttribute(
+        By.xpath(editorLineXpath), containingCoordinatesAttribute);
   }
 
   private String getEditorTabXpath(String tabTitle) {
@@ -137,9 +140,7 @@ public class TheiaEditor {
 
     for (int i = 1; i <= editorLinesCount; i++) {
       String editorLineXpath = getEditorLineByIndexXpath(i);
-      int linePixelCoordinate =
-          getEditorLinePixelCoordinate(
-              seleniumWebDriverHelper.waitVisibility(By.xpath(editorLineXpath)));
+      int linePixelCoordinate = getEditorLinePixelCoordinate(editorLineXpath);
       result.add(linePixelCoordinate);
     }
 
