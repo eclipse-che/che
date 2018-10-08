@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.DOWN;
 import static org.openqa.selenium.Keys.SHIFT;
@@ -72,11 +70,8 @@ public class TransitiveDependencyTest {
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorer(
-        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples");
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    projectExplorer.clickOnItemInContextMenu(MAVEN);
-    projectExplorer.clickOnNewContextMenuItem(REIMPORT);
+
+    projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
@@ -98,7 +93,7 @@ public class TransitiveDependencyTest {
 
   private void deleteDependency() {
     editor.waitActive();
-    editor.setCursorToLine(36);
+    editor.setCursorToLine(34);
     seleniumWebDriverHelper
         .getAction()
         .keyDown(SHIFT)
