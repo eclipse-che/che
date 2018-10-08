@@ -1,5 +1,18 @@
 # Change Log
 
+## [6.12.1](https://github.com/eclipse/che/tree/6.12.1) (2018-10-08)
+[Full Changelog](https://github.com/eclipse/che/compare/6.12.0...6.12.1)
+
+**Merged pull requests:**
+
+- Returns 'add-source' execution into pom.xml for UD [\#11528](https://github.com/eclipse/che/pull/11528) ([olexii4](https://github.com/olexii4))
+- \[Selenium\] Fix unexpected fail of "TheiaBuildPluginTest" selenium test [\#11523](https://github.com/eclipse/che/pull/11523) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- RELEASE: Update CHANGELOG [\#11522](https://github.com/eclipse/che/pull/11522) ([riuvshin](https://github.com/riuvshin))
+- \[Selenium\] Get rid of "StaleElementReferenceException" in the "TheiaEditor\#getEditorText\(\)" method [\#11518](https://github.com/eclipse/che/pull/11518) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Sidecar container naming using plugin\_name + che\_container\_name [\#11465](https://github.com/eclipse/che/pull/11465) ([mshaposhnik](https://github.com/mshaposhnik))
+- Limit pool size used to process Json/rpc requests [\#11456](https://github.com/eclipse/che/pull/11456) ([skabashnyuk](https://github.com/skabashnyuk))
+
+
 ## [6.12.0](https://github.com/eclipse/che/tree/6.12.0) (2018-10-05)
 [Full Changelog](https://github.com/eclipse/che/compare/6.11.1...6.12.0)
 
