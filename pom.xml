@@ -2001,6 +2001,15 @@
         </dependencies>
     </dependencyManagement>
     <repositories>
+        <!-- TODO Only for CI testing purposes, remove before merging with master-->
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-mockito-maven</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/mockito/maven</url>
+        </repository>
         <repository>
             <id>ossrh</id>
             <name>central public snapshots</name>
