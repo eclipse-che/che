@@ -286,14 +286,16 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         failure.get();
       }
     } catch (TimeoutException ex) {
-      failure.completeExceptionally(ex);
+      InfrastructureException ie =
+          new InfrastructureException(
+              "Waiting for Kubernetes environment '"
+                  + getContext().getIdentity().getEnvName()
+                  + "' of the workspace'"
+                  + getContext().getIdentity().getWorkspaceId()
+                  + "' reached timeout");
+      failure.completeExceptionally(ie);
       cancelAll(toCancelFutures);
-      throw new InfrastructureException(
-          "Waiting for Kubernetes environment '"
-              + getContext().getIdentity().getEnvName()
-              + "' of the workspace'"
-              + getContext().getIdentity().getWorkspaceId()
-              + "' reached timeout");
+      throw ie;
     } catch (InterruptedException ex) {
       RuntimeStartInterruptedException runtimeInterruptedEx =
           new RuntimeStartInterruptedException(getContext().getIdentity());
@@ -301,7 +303,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       cancelAll(toCancelFutures);
       throw runtimeInterruptedEx;
     } catch (ExecutionException ex) {
-      failure.completeExceptionally(ex);
+      failure.completeExceptionally(ex.getCause());
       cancelAll(toCancelFutures);
       wrapAndRethrow(ex.getCause());
     }
