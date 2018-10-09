@@ -28,6 +28,7 @@ import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Collections;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -55,6 +56,7 @@ public class RamLimitRequestProvisionerTest {
   @Mock private RuntimeIdentity identity;
   @Mock private Pod pod;
   @Mock private InternalMachineConfig internalMachineConfig;
+  @Mock private MemoryAttributeProvisioner memoryAttributeProvisioner;
 
   @Captor private ArgumentCaptor<ResourceRequirements> resourceCaptor;
 
@@ -63,7 +65,7 @@ public class RamLimitRequestProvisionerTest {
 
   @BeforeMethod
   public void setup() {
-    ramProvisioner = new RamLimitRequestProvisioner();
+    ramProvisioner = new RamLimitRequestProvisioner(memoryAttributeProvisioner);
     container = new Container();
     container.setName(CONTAINER_NAME);
     when(k8sEnv.getPods()).thenReturn(of(POD_NAME, pod));
