@@ -14,12 +14,6 @@
 FROM centos as builder
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION=plugin-id
-
-ENV THEIA_VERSION=${THEIA_VERSION} \
-    HOME=/home/theia
-
-WORKDIR ${HOME}
 
 # Install basic software used for checking github API rate limit
 RUN yum install -y epel-release && yum -y install curl jq expect
@@ -39,6 +33,12 @@ RUN yum install -y gcc-c++ make python git
 ADD src/config.yaml ${HOME}/.config/verdaccio/
 
 # Build theia from source code and publish artifacts locally
+ARG THEIA_VERSION=plugin-id
+
+ENV THEIA_VERSION=${THEIA_VERSION} \
+    HOME=/home/theia
+WORKDIR ${HOME}
+
 ADD src/patches /home/theia-build/patches
 ADD src/builder/build-and-publish-theia.sh /tmp/builder/scripts/build-and-publish-theia.sh
 RUN /tmp/builder/scripts/build-and-publish-theia.sh
