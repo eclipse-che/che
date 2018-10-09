@@ -104,7 +104,10 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && npm install -g typescript@2.9.2 \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
-COPY --chown=theia:root --from=builder /home/theia /home/theia
+COPY --from=builder /home/theia /home/theia
+
+# change permissions
+RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
 USER theia
 ADD src/entrypoint.sh /entrypoint.sh
