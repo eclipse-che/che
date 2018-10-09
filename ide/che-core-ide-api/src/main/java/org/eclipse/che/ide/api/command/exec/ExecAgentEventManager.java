@@ -70,4 +70,7 @@ public interface ExecAgentEventManager {
    * @param pid process identifier
    */
   void cleanPidConsumer(String endpointId, int pid);
+
+  /** Removes all registered event handler operations. */
+  void cleanAllConsumers();
 }
