@@ -60,15 +60,14 @@ RUN /tmp/builder/scripts/add-extensions.sh
 ADD src/builder/assemble-theia.sh /tmp/builder/scripts/assemble-theia.sh
 RUN /tmp/builder/scripts/assemble-theia.sh
 
-# change permissions
-RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
-
 # Clean
 RUN yarn cache clean
 
 # Restore registry setting
 RUN npm config set registry https://registry.npmjs.org && yarn config set registry https://registry.npmjs.org
 
+# change permissions
+RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
 ###
 # Runtime Image
