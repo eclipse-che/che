@@ -83,6 +83,8 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
             ECLIPSE_VERTX, WORKSPACE_NAME, projects);
 
     currentWindow = ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(
+        HEALTH_CHECKS_BOOSTER_PROJECT, HEALTH_HTTP_BOOSTER_PROJECT);
 
     projectExplorer.waitProjectInitialization(HEALTH_CHECKS_BOOSTER_PROJECT);
     projectExplorer.waitProjectInitialization(HEALTH_HTTP_BOOSTER_PROJECT);
