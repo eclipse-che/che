@@ -41,6 +41,9 @@ class SignatureInfoImpl implements SignatureInfo {
   public Optional<String> getDocumentation() {
     Either<String, MarkupContent> doc = dto.getDocumentation();
     // both markdown and plain text are ok.
+    if (doc == null) {
+      return Optional.absent();
+    }
     return Optional.fromNullable(doc.isLeft() ? doc.getLeft() : doc.getRight().getValue());
   }
 
