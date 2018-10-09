@@ -815,7 +815,7 @@ public class WorkspaceRuntimes {
           publishWorkspaceStatusEvent(
               workspaceId,
               STOPPED,
-              RUNNING,
+              status,
               "Error occurs on workspace runtime stop. Error: " + event.getError());
           setAbnormalStopAttributes(workspaceId, event.getError());
         }
@@ -832,7 +832,8 @@ public class WorkspaceRuntimes {
       } catch (NotFoundException | ServerException | ConflictException e) {
         LOG.warn(
             format(
-                "Cannot set error status of the workspace %s. Error is: %s", workspaceId, error));
+                "Cannot set error status of the workspace %s. Error status is: %s. Cause: %s",
+                workspaceId, error, e.getMessage()));
       }
     }
   }
