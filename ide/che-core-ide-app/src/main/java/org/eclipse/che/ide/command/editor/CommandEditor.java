@@ -169,6 +169,16 @@ public class CommandEditor extends AbstractEditorPresenter
     return false;
   }
 
+  private boolean isInvalidData() {
+    for (CommandEditorPage page : pages) {
+      if (page.hasInvalidData()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public List<CommandEditorPage> getPages() {
     return pages;
   }
@@ -224,6 +234,16 @@ public class CommandEditor extends AbstractEditorPresenter
 
   @Override
   public void doSave(AsyncCallback<EditorInput> callback) {
+    if (isInvalidData()) {
+      dialogFactory
+          .createMessageDialog(
+              coreMessages.save(),
+              coreMessages.messagesInvalidCommand(),
+              () -> callback.onFailure(null))
+          .show();
+      return;
+    }
+
     commandManager
         .updateCommand(initialCommandName, editedCommand)
         .then(

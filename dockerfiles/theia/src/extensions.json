@@ -68,6 +68,12 @@
             "folder": "che-theia-activity-tracker",
             "checkoutTo": "master",
             "type": "git"
+        },
+        {
+            "name": "@eclipse-che/theia-remote-extension",
+            "source": "https://github.com/ws-skeleton/che-theia-remote-extension",
+            "checkoutTo": "master",
+            "type": "git"
         }
     ]
 }

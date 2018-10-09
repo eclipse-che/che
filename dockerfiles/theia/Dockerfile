@@ -14,12 +14,6 @@
 FROM centos as builder
 
 ARG GITHUB_TOKEN
-ARG THEIA_VERSION=0.3.14
-
-ENV THEIA_VERSION=${THEIA_VERSION} \
-    HOME=/home/theia
-
-WORKDIR ${HOME}
 
 # Install basic software used for checking github API rate limit
 RUN yum install -y epel-release && yum -y install curl jq expect
@@ -35,11 +29,20 @@ RUN /tmp/builder/scripts/setup-nodejs.sh
 # Install tools required to build theia
 RUN yum install -y gcc-c++ make python git
 
+# Define upstream version of theia to use
+ARG THEIA_VERSION=plugin-id
+
+ENV THEIA_VERSION=${THEIA_VERSION} \
+    HOME=/home/theia
+WORKDIR ${HOME}
+
 # Add verdaccio config
 ADD src/config.yaml ${HOME}/.config/verdaccio/
 
-# Build theia from source code and publish artifacts locally
+# Add patches
 ADD src/patches /home/theia-build/patches
+
+# Build theia from source code and publish artifacts locally
 ADD src/builder/build-and-publish-theia.sh /tmp/builder/scripts/build-and-publish-theia.sh
 RUN /tmp/builder/scripts/build-and-publish-theia.sh
 
@@ -57,15 +60,14 @@ RUN /tmp/builder/scripts/add-extensions.sh
 ADD src/builder/assemble-theia.sh /tmp/builder/scripts/assemble-theia.sh
 RUN /tmp/builder/scripts/assemble-theia.sh
 
-# change permissions
-RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
-
 # Clean
 RUN yarn cache clean
 
 # Restore registry setting
 RUN npm config set registry https://registry.npmjs.org && yarn config set registry https://registry.npmjs.org
 
+# change permissions
+RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
 ###
 # Runtime Image
