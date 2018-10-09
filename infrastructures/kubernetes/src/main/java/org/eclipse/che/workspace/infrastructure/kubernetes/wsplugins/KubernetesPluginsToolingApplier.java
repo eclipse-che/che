@@ -11,18 +11,20 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
-import static java.util.Arrays.stream;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -39,8 +41,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * @author Oleksander Garagatyi
  */
 @Beta
+@Singleton
 public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
+  private static final Set<String> validImagePullPolicies =
+      Sets.newHashSet("Always", "Never", "IfNotPresent");
   private final String defaultSidecarMemoryLimitBytes;
   private final String sidecarImagePullPolicy;
   private final boolean isAuthEnabled;
@@ -53,10 +58,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
     this.isAuthEnabled = isAuthEnabled;
     this.sidecarImagePullPolicy =
-        stream(ImagePullPolicies.values())
-                .anyMatch(p -> p.getPolicy().equals(sidecarImagePullPolicy))
-            ? sidecarImagePullPolicy
-            : null;
+        validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;
   }
 
   @Override
@@ -132,21 +134,5 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     SidecarServicesProvisioner sidecarServicesProvisioner =
         new SidecarServicesProvisioner(containerEndpoints, pod.getMetadata().getName());
     sidecarServicesProvisioner.provision(kubernetesEnvironment);
-  }
-
-  private enum ImagePullPolicies {
-    ALWAYS("Always"),
-    IF_NOT_PRESENT("IfNotPresent"),
-    NEVER("Never");
-
-    private String policy;
-
-    ImagePullPolicies(String policy) {
-      this.policy = policy;
-    }
-
-    public String getPolicy() {
-      return policy;
-    }
   }
 }
