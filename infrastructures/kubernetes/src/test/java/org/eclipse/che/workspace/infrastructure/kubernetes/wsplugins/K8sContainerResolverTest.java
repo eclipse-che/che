@@ -47,7 +47,7 @@ public class K8sContainerResolverTest {
   public void setUp() {
     cheContainer = new CheContainer();
     endpoints = new ArrayList<>();
-    resolver = new K8sContainerResolver(PLUGIN_NAME, cheContainer, endpoints);
+    resolver = new K8sContainerResolver(PLUGIN_NAME, "Always", cheContainer, endpoints);
   }
 
   @Test
