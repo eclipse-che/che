@@ -82,7 +82,7 @@ public class JavaGinModule extends AbstractGinModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-
+    install(new FormatterGinModule());
     newSetBinder(binder(), LanguageDescription.class)
         .addBinding()
         .toProvider(JavaLanguageDescriptionProvider.class);
