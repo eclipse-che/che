@@ -509,6 +509,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("messages.promptSaveChanges")
   String messagesPromptSaveChanges();
 
+  @Key("messages.command.invalid")
+  String messagesInvalidCommand();
+
   @Key("messages.unableOpenResource")
   String unableOpenResource(String path);
 
