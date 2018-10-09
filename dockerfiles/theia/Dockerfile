@@ -29,17 +29,20 @@ RUN /tmp/builder/scripts/setup-nodejs.sh
 # Install tools required to build theia
 RUN yum install -y gcc-c++ make python git
 
-# Add verdaccio config
-ADD src/config.yaml ${HOME}/.config/verdaccio/
-
-# Build theia from source code and publish artifacts locally
+# Define upstream version of theia to use
 ARG THEIA_VERSION=plugin-id
 
 ENV THEIA_VERSION=${THEIA_VERSION} \
     HOME=/home/theia
 WORKDIR ${HOME}
 
+# Add verdaccio config
+ADD src/config.yaml ${HOME}/.config/verdaccio/
+
+# Add patches
 ADD src/patches /home/theia-build/patches
+
+# Build theia from source code and publish artifacts locally
 ADD src/builder/build-and-publish-theia.sh /tmp/builder/scripts/build-and-publish-theia.sh
 RUN /tmp/builder/scripts/build-and-publish-theia.sh
 
