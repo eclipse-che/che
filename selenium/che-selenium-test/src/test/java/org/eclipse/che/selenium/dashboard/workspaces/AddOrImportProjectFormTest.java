@@ -117,10 +117,10 @@ public class AddOrImportProjectFormTest {
 
   @AfterClass
   public void cleanup() throws Exception {
-    checkWorkspaceStatusAndDelete(WORKSPACE_NAME);
-    checkWorkspaceStatusAndDelete(TEST_BLANK_WORKSPACE_NAME);
-    checkWorkspaceStatusAndDelete(TEST_JAVA_WORKSPACE_NAME);
-    checkWorkspaceStatusAndDelete(TEST_JAVA_WORKSPACE_NAME_EDIT);
+    testWorkspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(TEST_BLANK_WORKSPACE_NAME, defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(TEST_JAVA_WORKSPACE_NAME, defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName());
   }
 
   @BeforeMethod
@@ -510,11 +510,5 @@ public class AddOrImportProjectFormTest {
     // open create dialog
     newWorkspace.clickOnBottomCreateButton();
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
-  }
-
-  private void checkWorkspaceStatusAndDelete(String workspaceName) throws Exception {
-    if (testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName())) {
-      testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
-    }
   }
 }

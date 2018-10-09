@@ -59,14 +59,13 @@ public class CheTestWorkspace implements TestWorkspace {
             () -> {
               Workspace ws;
               try {
-                ws =
-                    this.testWorkspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
+                ws = testWorkspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
               } catch (Exception e) {
                 String errorMessage = format("Workspace name='%s' creation failed.", name);
                 LOG.error(errorMessage, e);
 
                 try {
-                  this.testWorkspaceServiceClient.delete(name, owner.getName());
+                  testWorkspaceServiceClient.delete(name, owner.getName());
                 } catch (Exception e1) {
                   LOG.warn("Failed to remove workspace name='{}' which creation is failed.", name);
                 }
@@ -80,7 +79,7 @@ public class CheTestWorkspace implements TestWorkspace {
                   format("Workspace with name='%s' id='%s' is starting...", name, workspaceId));
               if (startAfterCreation) {
                 try {
-                  this.testWorkspaceServiceClient.start(
+                  testWorkspaceServiceClient.start(
                       id.updateAndGet((s) -> workspaceId), name, owner);
                 } catch (Exception e) {
                   String errorMessage =
@@ -93,7 +92,7 @@ public class CheTestWorkspace implements TestWorkspace {
                   testWorkspaceLogsReader.store(workspaceId, pathToWorkspaceLogs, true);
 
                   try {
-                    this.testWorkspaceServiceClient.delete(name, owner.getName());
+                    testWorkspaceServiceClient.delete(name, owner.getName());
                   } catch (Exception e1) {
                     LOG.warn(
                         "Failed to remove workspace with name='{}' id='{}' which start is failed.",
