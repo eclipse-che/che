@@ -1,0 +1,44 @@
+diff --git a/packages/plugin-ext/src/main/browser/terminal-main.ts b/packages/plugin-ext/src/main/browser/terminal-main.ts
+index f625e0d5..c956fc63 100644
+--- a/packages/plugin-ext/src/main/browser/terminal-main.ts
++++ b/packages/plugin-ext/src/main/browser/terminal-main.ts
+@@ -50,7 +50,8 @@ export class TerminalServiceMainImpl implements TerminalServiceMain {
+             env: options.env,
+             destroyTermOnClose: true,
+             useServerTitle: false,
+-            id: this.TERM_ID_PREFIX + counter
++            id: this.TERM_ID_PREFIX + counter,
++            attributes: options.attributes
+         };
+         let id: number;
+         try {
+diff --git a/packages/plugin/src/theia.d.ts b/packages/plugin/src/theia.d.ts
+index 490f2c6b..1f0afc69 100644
+--- a/packages/plugin/src/theia.d.ts
++++ b/packages/plugin/src/theia.d.ts
+@@ -2015,6 +2015,11 @@ declare module '@theia/plugin' {
+          * Environment variables for terminal in format key - value.
+          */
+         env?: { [key: string]: string | null };
++
++        /**
++         * Terminal attributes. Can be usefull to apply some implementation specific information.
++         */
++        attributes?: { [key: string]: string | null };
+     }
+ 
+     /**
+diff --git a/packages/terminal/src/browser/base/terminal-widget.ts b/packages/terminal/src/browser/base/terminal-widget.ts
+index 57960254..3ef398e6 100644
+--- a/packages/terminal/src/browser/base/terminal-widget.ts
++++ b/packages/terminal/src/browser/base/terminal-widget.ts
+@@ -92,4 +92,9 @@ export interface TerminalWidgetOptions {
+      * Terminal id. Should be unique for all DOM.
+      */
+     readonly id?: string;
++
++    /**
++     * Terminal attributes. Can be usefull to apply some implementation specific information.
++     */
++    readonly attributes?: { [key: string]: string | null };
+ }
