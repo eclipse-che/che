@@ -85,7 +85,7 @@ public class GenerateEffectivePomTest {
     editor.closeAllTabsByContextMenu();
     Assert.assertTrue(
         checkCurrentEffectivePom(
-            WAR_MODULE_PATH, expectedWarEffectivePom, "qa-multimodule [effective pom]"),
+            WAR_MODULE_PATH, expectedWarEffectivePom, "qa-webapp [effective pom]"),
         "Check Effective Pom for war maven module");
   }
 
