@@ -88,7 +88,7 @@ public class CreateWorkspaceFromCeylonWithJavaStackTest {
 
     // clean all created modules
     projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.isItemVisible(PROJECT_NAME + "/modules");
+    projectExplorer.waitVisibleItem(PROJECT_NAME + "/modules");
     projectExplorer.invokeCommandWithContextMenu(BUILD_GOAL, PROJECT_NAME, "clean module");
     projectExplorer.waitItemIsNotPresentVisibleArea(PROJECT_NAME + "/modules");
   }
