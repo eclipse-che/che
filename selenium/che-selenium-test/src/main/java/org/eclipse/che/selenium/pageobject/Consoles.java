@@ -28,10 +28,15 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.core.Response.Status;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -99,8 +104,9 @@ public class Consoles {
   public static final String COMMANDS_MENU_ITEM = "gwt-debug-contextMenu/commandsActionGroup";
   public static final String SERVERS_MENU_ITEM = "contextMenu/Servers";
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
-  public static final String LANGUAGE_SERVER_UPDATE_MESSAGE =
-      "Workspace updated. Result code: '0', message: 'OK'. Added projects: '[file:///projects/%s]', removed projects: '[]'";
+  public static final Pattern LANGUAGE_SERVER_UPDATE_MESSAGE =
+      Pattern.compile(
+          "Workspace updated. Result code: '0', message: 'OK'. Added projects: '\\[([^\\n\\r\\]]*)\\]', removed projects: ");
   public static final String JAVA_LANGUAGE_SERVER_STARTED =
       "Starting: 100% Starting Java Language Server";
 
@@ -423,11 +429,35 @@ public class Consoles {
   }
 
   /** wait JDT LS message about project is updated */
-  public void waitJDTLSProjectResolveFinishedMessage(String project) {
+  public void waitJDTLSProjectResolveFinishedMessage(String... projects) {
+    List<String> projectStrings = new ArrayList<>(projects.length);
+    for (String project : projects) {
+      projectStrings.add("file:///projects/" + project);
+    }
     try {
-      waitExpectedTextIntoConsole(String.format(LANGUAGE_SERVER_UPDATE_MESSAGE, project));
+
+      updateProjDriverWait.until(
+          (Predicate<WebDriver>)
+              webdriver -> {
+                ArrayList<String> projectsCopy = new ArrayList<>(projectStrings);
+                String text = consoleContainer.getText();
+                Matcher matcher = LANGUAGE_SERVER_UPDATE_MESSAGE.matcher(text);
+                while (matcher.find()) {
+                  String addedProjects = matcher.group(1);
+                  Iterator<String> iter = projectsCopy.iterator();
+                  while (iter.hasNext()) {
+                    if (addedProjects.contains(iter.next())) {
+                      iter.remove();
+                    }
+                  }
+                  if (projectsCopy.isEmpty()) {
+                    return true;
+                  }
+                }
+                return false;
+              });
     } catch (TimeoutException e) {
-      LOG.warn("timed out waiting for resolving project {}", project);
+      LOG.warn("timed out waiting for resolving projects {}", (Object[]) projects);
     }
     // once a new project has been added to the workspace, stuff in the project
     // explorer will be updated, for example showing packages instead of folders

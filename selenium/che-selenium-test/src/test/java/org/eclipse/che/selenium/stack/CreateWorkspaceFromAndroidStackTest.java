@@ -78,6 +78,8 @@ public class CreateWorkspaceFromAndroidStackTest {
 
     projectExplorer.waitProjectInitialization(MOBILE_ANDROID_HELLO_WORLD);
     projectExplorer.waitProjectInitialization(MOBILE_ANDROID_SIMPLE);
+    consoles.waitJDTLSProjectResolveFinishedMessage(
+        MOBILE_ANDROID_HELLO_WORLD, MOBILE_ANDROID_SIMPLE);
   }
 
   @Test(priority = 1)

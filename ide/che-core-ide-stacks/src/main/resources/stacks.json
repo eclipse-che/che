@@ -618,7 +618,8 @@
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent"
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "VNC": {
@@ -1307,14 +1308,6 @@
               },
               "attributes": {
                 "memoryLimitBytes": "2147483648"
-              },
-              "volumes": {
-                "m2": {
-                  "path": "/home/user/.m2"
-                },
-                "javadata": {
-                  "path": "/home/user/jdtls/data"
-                }
               }
             }
           },
