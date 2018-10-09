@@ -72,6 +72,8 @@ public class CreateWorkspaceFromSpringBootStackTest {
         SPRING_BOOT, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(
+        SPRING_BOOT_HEALTH_CHECK_PROJECT, SPRING_BOOT_HTTP_PROJECT);
 
     projectExplorer.waitProjectInitialization(SPRING_BOOT_HEALTH_CHECK_PROJECT);
     projectExplorer.waitProjectInitialization(SPRING_BOOT_HTTP_PROJECT);
