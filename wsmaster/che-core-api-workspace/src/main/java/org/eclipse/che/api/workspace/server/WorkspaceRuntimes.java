@@ -54,6 +54,8 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -68,7 +70,6 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
-import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -643,7 +644,8 @@ public class WorkspaceRuntimes {
   }
 
   private void subscribeAbnormalRuntimeStopListener() {
-    eventService.subscribe(new AbnormalRuntimeStopListener());
+    eventService.subscribe(new AbnormalRuntimeStoppingListener());
+    eventService.subscribe(new AbnormalRuntimeStoppedListener());
   }
 
   private void publishWorkspaceStatusEvent(
@@ -798,28 +800,63 @@ public class WorkspaceRuntimes {
     return nameIfNoUser;
   }
 
-  private class AbnormalRuntimeStopListener implements EventSubscriber<RuntimeStatusEvent> {
+  private class AbnormalRuntimeStoppingListener
+      implements EventSubscriber<RuntimeAbnormalStoppingEvent> {
 
     @Override
-    public void onEvent(RuntimeStatusEvent event) {
-      if (event.isFailed()) {
-        String workspaceId = event.getIdentity().getWorkspaceId();
-        // Cancels workspace servers probes if any
-        probeScheduler.cancel(workspaceId);
-        final WorkspaceStatus status;
-        try (Unlocker ignored = lockService.writeLock(workspaceId)) {
-          runtimes.remove(workspaceId);
-          status = statuses.remove(workspaceId);
-        }
-        if (status != null) {
-          publishWorkspaceStatusEvent(
-              workspaceId,
-              STOPPED,
-              status,
-              "Error occurs on workspace runtime stop. Error: " + event.getError());
-          setAbnormalStopAttributes(workspaceId, event.getError());
-        }
+    public void onEvent(RuntimeAbnormalStoppingEvent event) {
+      RuntimeIdentity identity = event.getIdentity();
+      String workspaceId = identity.getWorkspaceId();
+      WorkspaceStatus previousStatus;
+      try (Unlocker ignored = lockService.writeLock(workspaceId)) {
+        previousStatus = statuses.replace(workspaceId, STOPPING);
       }
+
+      if (previousStatus == null) {
+        LOG.error(
+            "Runtime '{}:{}:{}' became abnormally stopping but it was not considered as active before",
+            workspaceId,
+            identity.getEnvName(),
+            identity.getOwnerId());
+      }
+
+      publishWorkspaceStatusEvent(
+          workspaceId,
+          STOPPING,
+          previousStatus,
+          "Workspace is going to be STOPPED. Reason: " + event.getReason());
+    }
+  }
+
+  private class AbnormalRuntimeStoppedListener
+      implements EventSubscriber<RuntimeAbnormalStoppedEvent> {
+
+    @Override
+    public void onEvent(RuntimeAbnormalStoppedEvent event) {
+      RuntimeIdentity identity = event.getIdentity();
+      String workspaceId = identity.getWorkspaceId();
+      // Cancels workspace servers probes if any
+      probeScheduler.cancel(workspaceId);
+      final WorkspaceStatus previousStatus;
+      try (Unlocker ignored = lockService.writeLock(workspaceId)) {
+        runtimes.remove(workspaceId);
+        previousStatus = statuses.remove(workspaceId);
+      }
+
+      if (previousStatus == null) {
+        LOG.error(
+            "Runtime '{}:{}:{}' is abnormally stopped but it was not considered as active before",
+            workspaceId,
+            identity.getEnvName(),
+            identity.getOwnerId());
+      }
+
+      publishWorkspaceStatusEvent(
+          workspaceId,
+          STOPPED,
+          previousStatus,
+          "Workspace is stopped. Reason: " + event.getReason());
+      setAbnormalStopAttributes(workspaceId, event.getReason());
     }
 
     private void setAbnormalStopAttributes(String workspaceId, String error) {
