@@ -244,8 +244,6 @@ public class ResourceAggregatorTest {
     // given
     final ResourceImpl sourceAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
     final ResourceImpl toCompareAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
-    // MOCKITOTESTNG
-    //        when(aResourceType.deduct(any(), any())).thenReturn(deductedAResource);
 
     // when
     List<? extends Resource> excess =
