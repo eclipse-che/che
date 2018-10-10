@@ -57,7 +57,7 @@ public class FileStructure {
     String FILE_STRUCTURE_ITEM =
         "//div[@id='gwt-debug-file-structure-mainPanel']//div[text()='%s']";
     String SELECTED_FILE_STRUCTURE_ITEM_XPATH_TEMPLATE =
-        "//div[contains(@class, 'selected')]" + FILE_STRUCTURE_ITEM;
+        "//div[@id='gwt-debug-file-structure-mainPanel']//div[contains(@class, 'selected')]//div[text()='%s']";
   }
 
   @FindBy(id = Locators.FILE_STRUCTURE_CONTENT)
