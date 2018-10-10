@@ -77,6 +77,9 @@ public class ImportAndValidateEclipseCheProjectTest {
   @BeforeClass
   public void prepare() {
     dashboard.open();
+
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(ECLIPSE_CHE, WORKSPACE_NAME);
 

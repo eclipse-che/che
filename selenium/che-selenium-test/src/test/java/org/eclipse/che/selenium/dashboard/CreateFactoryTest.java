@@ -102,6 +102,9 @@ public class CreateFactoryTest {
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
+
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace1 = createWorkspaceWithProject(PROJECT_WS_NAME);
     testWorkspace2 = createWorkspaceWithoutProject(NO_PROJECT_WS_NAME);
   }

@@ -68,6 +68,8 @@ public class CreateWorkspaceFromCentosNodeStackTest {
 
   @Test
   public void checkWorkspaceCreationFromCentosNodeStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             CENTOS_NODEJS, WORKSPACE_NAME, projects);

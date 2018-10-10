@@ -76,6 +76,8 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
   @Test
   public void checkWorkspaceCreationFromEclipseVertxStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             ECLIPSE_VERTX, WORKSPACE_NAME, projects);

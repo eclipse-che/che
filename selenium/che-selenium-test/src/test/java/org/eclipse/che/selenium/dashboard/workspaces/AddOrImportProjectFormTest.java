@@ -394,6 +394,8 @@ public class AddOrImportProjectFormTest {
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE_NAME, defaultTestUser);
 
     testWorkspaceServiceClient.waitStatus(WORKSPACE_NAME, defaultTestUser.getName(), RUNNING);

@@ -69,6 +69,8 @@ public class CreateWorkspaceFromCamelStackTest {
 
   @Test
   public void createWorkspaceFromCamelStackTest() throws Exception {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
             CAMEL_SPRINGBOOT, WORKSPACE_NAME);

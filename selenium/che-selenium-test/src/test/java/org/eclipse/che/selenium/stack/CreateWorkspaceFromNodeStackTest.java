@@ -72,6 +72,8 @@ public class CreateWorkspaceFromNodeStackTest {
 
   @Test
   public void checkWorkspaceCreationFromNodeStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(NODE, WORKSPACE_NAME, projects);
 

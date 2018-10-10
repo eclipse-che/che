@@ -50,6 +50,8 @@ public class CreateWorkspaceFromKotlinStackTest {
 
   @Test
   public void createWorkspaceFromKotlinStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(KOTLIN, WORKSPACE_NAME);
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();

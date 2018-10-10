@@ -61,7 +61,9 @@ public class CreateWorkspaceFromCeylonWithJavaStackTest {
   }
 
   @Test
-  public void checkWorkspaceCreationFromCeylonWithJavaStack() throws Exception {
+  public void checkWorkspaceCreationFromCeylonWithJavaStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             CEYLON_WITH_JAVA_JAVASCRIPT, WORKSPACE_NAME, PROJECT_NAME);

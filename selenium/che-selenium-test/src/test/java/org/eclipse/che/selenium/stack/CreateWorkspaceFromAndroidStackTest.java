@@ -68,6 +68,8 @@ public class CreateWorkspaceFromAndroidStackTest {
 
   @Test
   public void checkWorkspaceCreationFromAndroidStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(
             ANDROID, WORKSPACE_NAME, projects);

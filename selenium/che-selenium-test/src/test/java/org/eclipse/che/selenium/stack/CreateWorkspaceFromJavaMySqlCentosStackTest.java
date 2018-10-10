@@ -75,6 +75,8 @@ public class CreateWorkspaceFromJavaMySqlCentosStackTest {
 
   @Test
   public void checkWorkspaceCreationFromJavaMySqlCentosStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             JAVA_MYSQL_CENTOS, WORKSPACE_NAME, WEB_JAVA_PROJECT);

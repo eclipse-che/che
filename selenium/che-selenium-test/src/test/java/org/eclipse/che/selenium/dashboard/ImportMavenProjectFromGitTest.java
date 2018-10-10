@@ -93,6 +93,8 @@ public class ImportMavenProjectFromGitTest {
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();

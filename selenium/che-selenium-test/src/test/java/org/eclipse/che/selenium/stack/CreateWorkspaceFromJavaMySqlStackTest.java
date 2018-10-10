@@ -74,6 +74,8 @@ public class CreateWorkspaceFromJavaMySqlStackTest {
 
   @Test
   public void checkWorkspaceCreationFromJavaMySqlStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             JAVA_MYSQL, WORKSPACE_NAME, WEB_JAVA_PROJECT);

@@ -56,6 +56,8 @@ public class CreateWorkspaceFromJavaTheiaDockerStackTest {
 
   @Test
   public void createWorkspaceFromJavaTheiaDockerStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
             JAVA_THEIA_DOCKER, WORKSPACE_NAME);

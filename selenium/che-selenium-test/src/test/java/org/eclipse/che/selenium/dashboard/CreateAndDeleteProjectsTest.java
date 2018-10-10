@@ -100,6 +100,8 @@ public class CreateAndDeleteProjectsTest {
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     // switch to the IDE and wait for workspace is ready to use

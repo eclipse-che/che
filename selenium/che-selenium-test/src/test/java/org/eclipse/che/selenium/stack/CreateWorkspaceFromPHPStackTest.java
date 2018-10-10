@@ -71,6 +71,8 @@ public class CreateWorkspaceFromPHPStackTest {
 
   @Test
   public void checkWorkspaceCreationFromPHPStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(PHP, WORKSPACE_NAME, projects);
 

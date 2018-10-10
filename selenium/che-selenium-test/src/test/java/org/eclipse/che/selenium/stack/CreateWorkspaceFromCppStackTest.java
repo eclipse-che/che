@@ -64,6 +64,8 @@ public class CreateWorkspaceFromCppStackTest {
 
   @Test
   public void checkWorkspaceCreationFromCppStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(CPP, WORKSPACE_NAME, projects);
 

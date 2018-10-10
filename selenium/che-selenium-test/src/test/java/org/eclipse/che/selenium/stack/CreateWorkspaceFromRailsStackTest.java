@@ -67,6 +67,8 @@ public class CreateWorkspaceFromRailsStackTest {
 
   @Test
   public void checkWorkspaceCreationFromRailsStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(RAILS, WORKSPACE_NAME, projects);
 

@@ -62,6 +62,8 @@ public class CreateWorkspaceFromCentosWildFlySwarmStackTest {
 
   @Test
   public void createWorkspaceFromCentosWildFlySwarmStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             CENTOS_WILDFLY_SWARM, WORKSPACE_NAME, PROJECT_NAME);

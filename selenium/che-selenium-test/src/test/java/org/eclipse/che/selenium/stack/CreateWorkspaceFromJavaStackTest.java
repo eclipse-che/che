@@ -79,6 +79,8 @@ public class CreateWorkspaceFromJavaStackTest {
 
   @Test
   public void checkWorkspaceCreationFromJavaStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(JAVA, WORKSPACE_NAME, projects);
 

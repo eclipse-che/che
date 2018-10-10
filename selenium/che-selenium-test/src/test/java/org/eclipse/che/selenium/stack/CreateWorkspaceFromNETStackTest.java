@@ -63,6 +63,8 @@ public class CreateWorkspaceFromNETStackTest {
 
   @Test
   public void checkWorkspaceCreationFromNETStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
             DOT_NET, WORKSPACE_NAME, PROJECT_NAME);

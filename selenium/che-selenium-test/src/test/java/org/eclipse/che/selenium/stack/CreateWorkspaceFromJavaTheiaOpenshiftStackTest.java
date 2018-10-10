@@ -56,6 +56,8 @@ public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
 
   @Test
   public void createWorkspaceFromJavaTheiaOpenshiftStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
             JAVA_THEIA_OPENSHIFT, WORKSPACE_NAME);

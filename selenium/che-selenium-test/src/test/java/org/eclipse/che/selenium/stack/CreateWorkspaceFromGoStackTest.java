@@ -66,6 +66,8 @@ public class CreateWorkspaceFromGoStackTest {
 
   @Test
   public void checkWorkspaceCreationFromGoStack() {
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProjects(GO, WORKSPACE_NAME, projects);
 
