@@ -184,7 +184,8 @@ public class ProjectExplorer {
         "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
     String MAXIMIZE_BUTTON_XPATH = "(//div[@id='gwt-debug-maximizeButton'])[position()=1]";
     String SELECTED_ITEM_BY_NAME_XPATH_TEMPLATE =
-        "//div[@name='%s']//div[contains(@class, 'selected')]";
+        "//div[contains(@class, 'selected')]//div[text()='%s']";
+    // "//div[@name='%s' or @name='%s.class']//div[contains(@class, 'selected')] ";
   }
 
   /**
@@ -579,6 +580,7 @@ public class ProjectExplorer {
   }
 
   private void openItemByVisibleName(String name) {
+
     waitVisibilityByName(name).click();
     waitItemSelectedByName(name);
     actionsFactory
