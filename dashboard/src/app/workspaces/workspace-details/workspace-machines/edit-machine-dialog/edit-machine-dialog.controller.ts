@@ -41,7 +41,9 @@ export class EditMachineDialogController {
   private machineName: string;
   private usedMachinesNames: Array<string>;
   private environment: che.IWorkspaceEnvironment;
-  private copyEnvironment: che.IWorkspaceEnvironment;
+  private previousStateEnvironment: che.IWorkspaceEnvironment;
+  private currentStateEnvironment: che.IWorkspaceEnvironment;
+  private originEnvironment: che.IWorkspaceEnvironment;
   private editorMode: string;
   private isEditorReadOnly: boolean;
 
@@ -65,15 +67,19 @@ export class EditMachineDialogController {
     this.cheRecipeService = cheRecipeService;
 
     this.isAdd = angular.isUndefined(this.machineName);
-    this.copyEnvironment = angular.copy(this.environment);
-    if (!this.copyEnvironment) {
+    if (!this.environment) {
       return;
     }
-    this.usedMachinesNames = Object.keys(this.copyEnvironment.machines).filter((machineName: string) => {
+    this.originEnvironment = angular.copy(this.environment);
+    this.deepFreeze(this.originEnvironment);
+    this.previousStateEnvironment = angular.copy(this.originEnvironment);
+    this.currentStateEnvironment = angular.copy(this.originEnvironment);
+
+    this.usedMachinesNames = Object.keys(this.currentStateEnvironment.machines).filter((machineName: string) => {
       return this.isAdd || machineName !== this.machineName;
     });
 
-    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(cheRecipeService.getRecipeType(this.copyEnvironment.recipe));
+    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(cheRecipeService.getRecipeType(this.currentStateEnvironment.recipe));
     if (!this.environmentManager) {
       return;
     }
@@ -81,14 +87,14 @@ export class EditMachineDialogController {
     this.editorMode = this.environmentManager.editorMode;
 
     if (this.isAdd) {
-      if (!cheRecipeService.isScalable(this.copyEnvironment.recipe)) {
+      if (!cheRecipeService.isScalable(this.currentStateEnvironment.recipe)) {
         // we can add a new machine in case with scalable type of recipes only
         return;
       }
-      this.machine = this.environmentManager.createMachine(this.copyEnvironment);
-      this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
+      this.machine = this.environmentManager.createMachine(this.currentStateEnvironment);
+      this.currentStateEnvironment = this.environmentManager.addMachine(this.currentStateEnvironment, this.machine);
     } else {
-      const machines = this.environmentManager.getMachines(this.copyEnvironment);
+      const machines = this.environmentManager.getMachines(this.currentStateEnvironment);
       this.machine = angular.copy(machines.find((machine: IEnvironmentManagerMachine) => {
         return machine.name === this.machineName;
       }));
@@ -116,10 +122,10 @@ export class EditMachineDialogController {
     }
     this.environmentManager.setMemoryLimit(this.machine, this.machineRAM);
     // update environment's machines
-    const machines = this.environmentManager.getMachines(this.copyEnvironment).map((machine: IEnvironmentManagerMachine) => {
+    const machines = this.environmentManager.getMachines(this.currentStateEnvironment).map((machine: IEnvironmentManagerMachine) => {
       return machine.name === this.machine.name ? this.machine : machine;
     });
-    this.copyEnvironment = this.environmentManager.getEnvironment(this.copyEnvironment, machines);
+    this.currentStateEnvironment = this.environmentManager.getEnvironment(this.currentStateEnvironment, machines);
     this.stringifyMachineRecipe();
   }
 
@@ -149,7 +155,7 @@ export class EditMachineDialogController {
     const oldMachineName = this.isAdd ? this.machine.name : this.machineName;
     this.machineName = name;
     const machineName = this.getFullName(name);
-    const oldEnvironment = this.isAdd ? this.copyEnvironment : this.environment;
+    const oldEnvironment = this.isAdd ? this.currentStateEnvironment : this.previousStateEnvironment;
     const environment = this.environmentManager.renameMachine(oldEnvironment, oldMachineName, machineName);
     const machines = this.environmentManager.getMachines(environment);
     const machineIndex = machines.findIndex((machine: IEnvironmentManagerMachine) => {
@@ -159,7 +165,7 @@ export class EditMachineDialogController {
       return;
     }
     this.machine.recipe = machines[machineIndex].recipe;
-    this.copyEnvironment = this.environmentManager.getEnvironment(environment, machines);
+    this.currentStateEnvironment = this.environmentManager.getEnvironment(environment, machines);
     this.stringifyMachineRecipe();
   }
 
@@ -170,7 +176,7 @@ export class EditMachineDialogController {
   isRecipeValid(): che.IValidation {
     try {
       this.machine.recipe = this.environmentManager.parseMachineRecipe(this.machineRecipeScript);
-      if (this.cheRecipeService.isOpenshift(this.copyEnvironment.recipe)) {
+      if (this.cheRecipeService.isOpenshift(this.currentStateEnvironment.recipe)) {
         const newPod = this.machine.recipe.metadata.name;
         const oldPod = this.originMachine.recipe.metadata.name;
         if (newPod !== oldPod && this.usedMachinesNames.map((name: string) => {
@@ -198,6 +204,9 @@ export class EditMachineDialogController {
    * It will hide the dialog box.
    */
   cancel(): void {
+    if (angular.isFunction(this.onChange) && !angular.equals(this.previousStateEnvironment, this.originEnvironment)) {
+      this.onChange(angular.copy(this.originEnvironment));
+    }
     this.$mdDialog.cancel();
   }
 
@@ -209,7 +218,7 @@ export class EditMachineDialogController {
       return;
     }
     if (angular.isFunction(this.onChange)) {
-      this.onChange(this.copyEnvironment);
+      this.onChange(this.currentStateEnvironment);
     }
     this.$mdDialog.hide();
   }
@@ -230,10 +239,10 @@ export class EditMachineDialogController {
       // checks memory limit changes
       this.checkMemoryLimitChanges();
       // update environment's machines
-      const machines = this.environmentManager.getMachines(this.copyEnvironment).map((machine: IEnvironmentManagerMachine) => {
+      const machines = this.environmentManager.getMachines(this.currentStateEnvironment).map((machine: IEnvironmentManagerMachine) => {
         return machine.name === this.machine.name ? this.machine : machine;
       });
-      this.copyEnvironment = this.environmentManager.getEnvironment(this.copyEnvironment, machines);
+      this.currentStateEnvironment = this.environmentManager.getEnvironment(this.currentStateEnvironment, machines);
     } catch (e) {
       this.$log.error('Cannot stringify machine\'s recipe, error: ', e);
     }
@@ -268,7 +277,7 @@ export class EditMachineDialogController {
    */
   private checkMemoryLimitChanges(): void {
     // check recipe RAM limit
-    if (!this.cheRecipeService.isScalable(this.environment.recipe)) {
+    if (!this.cheRecipeService.isScalable(this.previousStateEnvironment.recipe)) {
       this.machineRAM = this.environmentManager.getMemoryLimit(this.machine);
     } else {
       const copyMachine = angular.copy(this.machine);
@@ -288,18 +297,18 @@ export class EditMachineDialogController {
    * Checks critical recipe changes.
    */
   private checkCriticalRecipeChanges(): void {
-    if (this.cheRecipeService.isOpenshift(this.copyEnvironment.recipe)) {
+    if (this.cheRecipeService.isOpenshift(this.currentStateEnvironment.recipe)) {
       // check critical changes for openshift
       if (this.isAdd) {
-        this.copyEnvironment = angular.copy(this.environment);
-        this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
+        this.currentStateEnvironment = angular.copy(this.previousStateEnvironment);
+        this.currentStateEnvironment = this.environmentManager.addMachine(this.currentStateEnvironment, this.machine);
       } else {
         if (!angular.equals(this.getOpenshiftMachinePod(this.originMachine.recipe), this.getOpenshiftMachinePod(this.machine.recipe))) {
-          this.copyEnvironment = angular.copy(this.environment);
-          this.copyEnvironment = this.environmentManager.deleteMachine(this.copyEnvironment, this.originMachine.name);
-          this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
+          this.currentStateEnvironment = angular.copy(this.previousStateEnvironment);
+          this.currentStateEnvironment = this.environmentManager.deleteMachine(this.currentStateEnvironment, this.originMachine.name);
+          this.currentStateEnvironment = this.environmentManager.addMachine(this.currentStateEnvironment, this.machine);
           const name = this.environmentManager.getMachineName(this.machine);
-          if (!this.copyEnvironment.machines[this.getFullName(name)]) {
+          if (!this.currentStateEnvironment.machines[this.getFullName(name)]) {
             this.onNameChange(name);
           }
         }
@@ -313,7 +322,7 @@ export class EditMachineDialogController {
    * @returns {IPodItem}
    */
   private getOpenshiftMachinePod(machineRecipe: IPodItem): IPodItem {
-    if (!machineRecipe || this.cheRecipeService.isOpenshift(this.environment.recipe) || !machineRecipe.metadata) {
+    if (!machineRecipe || this.cheRecipeService.isOpenshift(this.previousStateEnvironment.recipe) || !machineRecipe.metadata) {
       return machineRecipe;
     }
     const pod = angular.copy(machineRecipe);
@@ -328,5 +337,21 @@ export class EditMachineDialogController {
       }
     });
     return pod;
+  }
+
+  /**
+   * Recursively freeze each property which is of type object.
+   * @param {Object} object
+   * @returns {Object}
+   */
+  private deepFreeze(object: Object): Object {
+    Object.getOwnPropertyNames(object).forEach((name: string) => {
+      if (name.startsWith('__')){
+        return;
+      }
+      let value = object[name];
+      object[name] = value && typeof value === 'object' ? this.deepFreeze(value) : value;
+    });
+    return Object.freeze(object);
   }
 }

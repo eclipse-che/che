@@ -245,6 +245,7 @@ export class WorkspaceMachinesController {
         machineName: machineName,
         environment: this.environment,
         onChange: (environment: che.IWorkspaceEnvironment) => {
+          this.environment = environment;
           this.workspaceDetails.config.environments[this.workspaceDetails.config.defaultEnv] = environment;
           this.updateData(this.workspaceDetails);
           if (angular.isFunction(this.onChange)) {
