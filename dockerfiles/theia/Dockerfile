@@ -42,6 +42,8 @@ ADD src/config.yaml ${HOME}/.config/verdaccio/
 # Add patches
 ADD src/patches /home/theia-build/patches
 
+# Invalidate cache if there is a new commit
+ADD https://api.github.com/repos/theia-ide/theia/git/refs/heads/v${THEIA_VERSION} /tmp/sha1-repository
 # Build theia from source code and publish artifacts locally
 ADD src/builder/build-and-publish-theia.sh /tmp/builder/scripts/build-and-publish-theia.sh
 RUN /tmp/builder/scripts/build-and-publish-theia.sh
