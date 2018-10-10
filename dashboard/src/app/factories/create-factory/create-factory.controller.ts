@@ -151,15 +151,22 @@ export class CreateFactoryCtrl {
     if (!factoryContent) {
       return;
     }
-    if (this.name) {
-      // try to set factory name
-      try {
-        let factoryObject = angular.fromJson(factoryContent);
+
+    try {
+      let factoryObject = angular.fromJson(factoryContent);
+      if (this.name) {
+        // try to set factory name
         factoryObject.name = this.name;
-        factoryContent = angular.toJson(factoryObject);
-      } catch (e) {
-        this.$log.error(e);
       }
+      let projects: Array<che.IProject> = factoryObject.workspace.projects || [];
+      projects.forEach((project: che.IProject) => {
+        if (!project.type) {
+          project.type = 'blank'
+        }
+      });
+      factoryContent = angular.toJson(factoryObject);
+    } catch (e) {
+      this.$log.error(e);
     }
 
     this.isImporting = true;
