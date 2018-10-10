@@ -42,7 +42,8 @@ export class MachineAgents implements ng.IDirective {
     // scope values
     this.scope = {
       machine: '=selectedMachine',
-      onChange: '&'
+      onChange: '&',
+      isPluginsEnabled: '='
     };
   }
 }

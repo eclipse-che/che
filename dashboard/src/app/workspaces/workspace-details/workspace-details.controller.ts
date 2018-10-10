@@ -321,6 +321,10 @@ export class WorkspaceDetailsController {
       return `Current infrastructure doesn't support this workspace recipe type.`;
     }
 
+    if (this.isSwitchToPlugins()) {
+      return 'Installers and plugins are different concepts, which are not compatible between each others. Enabling plugins causes disabling all installers.';
+    } 
+
     if (failedTabs && failedTabs.length > 0) {
       const url = this.$location.absUrl().split('?')[0];
       let message = `<i class="error fa fa-exclamation-circle"
@@ -363,6 +367,7 @@ export class WorkspaceDetailsController {
 
     // message visibility
     this.editOverlayConfig.message.visible = !this.isSupported
+      || this.isSwitchToPlugins()
       || failedTabs.length > 0
       || this.unsavedChangesToApply
       || this.workspaceDetailsService.getRestartToApply(this.workspaceId);
@@ -525,5 +530,23 @@ export class WorkspaceDetailsController {
     });
 
     return tabs.some((tabKey: string) => this.checkFormsNotValid(tabKey));
+  }
+
+  /**
+   * Checks whether "plugins" were disabled in origin workspace config and are enabled now.
+   */
+  isSwitchToPlugins(): boolean {
+    let originEditor = this.originWorkspaceDetails.config.attributes['editor'] || '';
+    let originPlugins = this.originWorkspaceDetails.config.attributes['plugins'] || '';
+    return this.isPluginsEnabled() && (originEditor.length === 0 && originPlugins.length === 0);
+  }
+
+  /**
+   * Checks whether "plugins" are enabled in workspace config.
+   */
+  isPluginsEnabled(): boolean {
+    let editor = this.workspaceDetails.config.attributes['editor'] || '';
+    let plugins = this.workspaceDetails.config.attributes['plugins'] || '';
+    return (editor.length > 0 || plugins.length > 0);
   }
 }
