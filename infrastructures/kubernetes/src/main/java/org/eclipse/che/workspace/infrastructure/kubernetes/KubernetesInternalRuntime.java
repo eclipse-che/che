@@ -796,6 +796,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     @Override
     public void handle(Action action, Pod pod) {
+      eventPublisher.sendAbnormalStoppingEvent(
+          getContext().getIdentity(),
+          format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
       // Cancels workspace servers probes if any
       probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
       if (pod.getStatus() != null && POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
@@ -804,9 +807,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         } catch (InfrastructureException ex) {
           LOG.error("Kubernetes environment stop failed cause '{}'", ex.getMessage());
         } finally {
-          eventPublisher.sendRuntimeStoppedEvent(
-              format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()),
-              getContext().getIdentity());
+          eventPublisher.sendAbnormalStoppedEvent(
+              getContext().getIdentity(),
+              format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
         }
       }
     }

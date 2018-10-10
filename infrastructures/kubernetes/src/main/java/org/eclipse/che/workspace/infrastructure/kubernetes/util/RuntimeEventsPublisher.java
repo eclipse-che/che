@@ -19,18 +19,16 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /** @author Anton Korneta */
 @Singleton
 public class RuntimeEventsPublisher {
-
-  private static final String RUNTIME_STOPPED_STATE = "STOPPED";
-  private static final String RUNTIME_RUNNING_STATE = "RUNNING";
 
   private final EventService eventService;
 
@@ -64,16 +62,6 @@ public class RuntimeEventsPublisher {
             .withError(message));
   }
 
-  public void sendRuntimeStoppedEvent(String errorMsg, RuntimeIdentity runtimeId) {
-    eventService.publish(
-        DtoFactory.newDto(RuntimeStatusEvent.class)
-            .withIdentity(DtoConverter.asDto(runtimeId))
-            .withStatus(RUNTIME_STOPPED_STATE)
-            .withPrevStatus(RUNTIME_RUNNING_STATE)
-            .withFailed(true)
-            .withError(errorMsg));
-  }
-
   public void sendServerStatusEvent(
       String machineName, String serverName, Server server, RuntimeIdentity runtimeId) {
     eventService.publish(
@@ -104,5 +92,13 @@ public class RuntimeEventsPublisher {
             .withRuntimeId(DtoConverter.asDto(runtimeId))
             .withText(text)
             .withTime(time));
+  }
+
+  public void sendAbnormalStoppedEvent(RuntimeIdentity runtimeId, String reason) {
+    eventService.publish(new RuntimeAbnormalStoppedEvent(runtimeId, reason));
+  }
+
+  public void sendAbnormalStoppingEvent(RuntimeIdentity runtimeId, String reason) {
+    eventService.publish(new RuntimeAbnormalStoppingEvent(runtimeId, reason));
   }
 }
