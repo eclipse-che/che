@@ -82,10 +82,11 @@ ADD src/builder/setup-nodejs.sh /tmp/builder/scripts/setup-nodejs.sh
 
 # Install sudo
 # Install Java for java extension
-# Install git
+# Install git (from software collection in order to have a recent version)
 # Install bzip2 to unpack files
 # Install supervisor for running theia
-RUN yum install -y sudo java-1.8.0-openjdk-devel git bzip2 && \
+RUN yum install -y centos-release-scl
+RUN yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk-devel bzip2 && \
     /tmp/builder/scripts/setup-nodejs.sh
 
 RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
@@ -102,6 +103,8 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && chmod -R 777 ${HOME}/.config/ \
     # use typescript globally (to have tsc/typescript working)
     && npm install -g typescript@2.9.2 \
+    # Add software collection git to env
+    && echo 'source scl_source enable rh-git29' >> /home/theia/.bashrc \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 COPY --chown=theia:root --from=builder /home/theia /home/theia
